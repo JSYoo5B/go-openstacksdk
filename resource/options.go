@@ -24,7 +24,7 @@ func (r Ref) Validate() error {
 	if strings.TrimSpace(r.value) == "" {
 		return invalid("reference must not be empty")
 	}
-	if !r.byName && strings.ContainsAny(r.value, "/\\?#% \t\r\n") {
+	if !r.byName && (r.value == "." || r.value == ".." || strings.ContainsAny(r.value, "/\\?#% \t\r\n")) {
 		return invalid("ID must be a single unescaped URL path segment")
 	}
 	return nil
