@@ -1184,17 +1184,21 @@
   },
   {
     "package": "gophercloudsdk/objectstorage/v1/containers",
-    "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "model": "ContainerResource",
+    "upstream_model": "Container",
+    "find": true,
+    "delete": true,
+    "wait": false
   },
   {
     "package": "gophercloudsdk/objectstorage/v1/objects",
-    "find": false,
-    "delete": false,
+    "model": "ObjectResource",
+    "upstream_model": "Object",
+    "find": true,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InContainer",
+    "parent": "gophercloudsdk/objectstorage/v1/containers"
   },
   {
     "package": "gophercloudsdk/objectstorage/v1/swauth",
