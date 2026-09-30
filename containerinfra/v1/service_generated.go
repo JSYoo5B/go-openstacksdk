@@ -16,7 +16,7 @@ type Service struct {
 	Certificates     *resource0.API
 	Clusters         *resource1.API
 	ClusterTemplates *resource2.API
-	Nodegroups       *resource3.API
+	NodeGroups       *resource3.API
 	Quotas           *resource4.API
 }
 
@@ -25,7 +25,7 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Certificates:     resource0.New(client),
 		Clusters:         resource1.New(client),
 		ClusterTemplates: resource2.New(client),
-		Nodegroups:       resource3.New(client),
+		NodeGroups:       resource3.New(client),
 		Quotas:           resource4.New(client),
 	}
 }
