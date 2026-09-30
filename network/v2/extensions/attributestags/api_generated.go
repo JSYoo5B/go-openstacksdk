@@ -65,17 +65,29 @@ type replaceAllOptsBuilder struct {
 }
 
 func (b replaceAllOptsBuilder) ToAttributeTagsReplaceAllMap() (map[string]any, error) {
-	body, err := b.base.ToAttributeTagsReplaceAllMap()
+	value0, err := b.base.ToAttributeTagsReplaceAllMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ReplaceAll invokes the upstream API with library-owned builders and result handling.
 func (a *API) ReplaceAll(ctx context.Context, resourceType string, resourceID string, opts ReplaceAllOpts, options ...ReplaceAllOption) ([]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ReplaceAll", "attributestags", err)
+		var zero0 []string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ReplaceAll", "attributestags", err)
 		var zero0 []string
 		return zero0, err
 	}
