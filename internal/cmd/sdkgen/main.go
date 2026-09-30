@@ -28,13 +28,14 @@ type metadata struct {
 	GoFiles                 []string
 }
 type operation struct {
-	Source       string `json:"source"`
-	Package      string `json:"package"`
-	Name         string `json:"name"`
-	SDKPackage   string `json:"sdk_package"`
-	BuilderFree  bool   `json:"builder_free"`
-	ReturnPolicy string `json:"return_policy"`
-	Issue        string `json:"issue,omitempty"`
+	Source        string `json:"source"`
+	Package       string `json:"package"`
+	Name          string `json:"name"`
+	SDKPackage    string `json:"sdk_package"`
+	BuilderFree   bool   `json:"builder_free"`
+	ReturnPolicy  string `json:"return_policy"`
+	RequestPolicy string `json:"request_policy,omitempty"`
+	Issue         string `json:"issue,omitempty"`
 }
 type inventory struct {
 	Version    string      `json:"gophercloud_version"`
@@ -248,6 +249,9 @@ func (g *generator) generate(path string) error {
 			decls[fn.Name.Name] = fn
 		}
 	}
+	if err := validateAuditedRequestCalls(pkg, decls); err != nil {
+		return err
+	}
 	extractors := extractorsByPage(pkg, decls)
 	plan, err := identifyCollectionBinding(pkg, decls, extractors)
 	if err != nil {
@@ -320,6 +324,9 @@ func (g *generator) generate(path string) error {
 		} else {
 			op.BuilderFree = true
 			op.ReturnPolicy = operationReturnPolicy(fn)
+			if override := requestCallOverride(pkg, name); override != nil {
+				op.RequestPolicy = override.policy
+			}
 		}
 		g.inventory.Operations = append(g.inventory.Operations, op)
 	}
@@ -511,6 +518,12 @@ func returnPolicy(sig *types.Signature) string {
 }
 
 func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors map[string]string) error {
+	override := requestCallOverride(e.pkg, fn.Name())
+	if override != nil {
+		if err := validateAuditedRequestCall(e.pkg, map[string]*ast.FuncDecl{fn.Name(): decl}, *override); err != nil {
+			return err
+		}
+	}
 	sig := fn.Type().(*types.Signature)
 	op := fn.Name()
 	normalizer := normalizerFor(fn)
@@ -765,6 +778,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 	}
 	call := "upstream." + op + "(" + strings.Join(args, ",") + ")"
+	if override != nil {
+		call = override.helper + "(" + strings.Join(args, ",") + ")"
+	}
 	switch policy {
 	case "normalize":
 		e.printf("result:=%s\nvalue,err:=%s\nreturn value,%s.Wrap(%q,%q,err)\n", call, normalizer.call, requestAlias, op, e.pkg.Name())

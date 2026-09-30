@@ -149,5 +149,5 @@ func (a *API) StartIntrospection(ctx context.Context, nodeID string, opts StartO
 		return err
 	}
 	_opts := startIntrospectionOptsBuilder{base: cfg.Options, config: cfg}
-	return request.Wrap("StartIntrospection", "introspection", upstream.StartIntrospection(ctx, a.client, nodeID, _opts).ExtractErr())
+	return request.Wrap("StartIntrospection", "introspection", startIntrospection(ctx, a.client, nodeID, _opts).ExtractErr())
 }
