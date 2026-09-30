@@ -75,6 +75,11 @@ func WithAssignOptions(value AssignOpts) AssignOption { return request.WithOptio
 func (a *API) Assign(ctx context.Context, roleID string, opts AssignOpts, options ...AssignOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Assign", "roles", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Assign", "roles", err)
 		return err
 	}
 	return request.Wrap("Assign", "roles", upstream.Assign(ctx, a.client, roleID, cfg.Options).ExtractErr())
@@ -93,17 +98,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToRoleCreateMap() (map[string]any, error) {
-	body, err := b.base.ToRoleCreateMap()
+	value0, err := b.base.ToRoleCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Role, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "roles", err)
+		var zero0 *Role
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "roles", err)
 		var zero0 *Role
 		return zero0, err
 	}
@@ -159,11 +176,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToRoleListQuery() (string, error) {
-	query, err := b.base.ToRoleListQuery()
+	value0, err := b.base.ToRoleListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -171,6 +194,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Role, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "roles", err)
+		return func(yield func(*Role, error) bool) { var zero *Role; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "roles", err)
 		return func(yield func(*Role, error) bool) { var zero *Role; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -195,11 +223,17 @@ type listAssignmentsOptsBuilder struct {
 }
 
 func (b listAssignmentsOptsBuilder) ToRolesListAssignmentsQuery() (string, error) {
-	query, err := b.base.ToRolesListAssignmentsQuery()
+	value0, err := b.base.ToRolesListAssignmentsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListAssignments invokes the upstream API with library-owned builders and result handling.
@@ -207,6 +241,11 @@ func (a *API) ListAssignments(ctx context.Context, options ...ListAssignmentsOpt
 	var opts ListAssignmentsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListAssignments", "roles", err)
+		return func(yield func(*RoleAssignment, error) bool) { var zero *RoleAssignment; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListAssignments", "roles", err)
 		return func(yield func(*RoleAssignment, error) bool) { var zero *RoleAssignment; yield(zero, err) }
 	}
 	_opts := listAssignmentsOptsBuilder{base: cfg.Options, config: cfg}
@@ -227,6 +266,11 @@ func (a *API) ListAssignmentsOnResource(ctx context.Context, options ...ListAssi
 	var opts ListAssignmentsOnResourceOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListAssignmentsOnResource", "roles", err)
+		return func(yield func(*Role, error) bool) { var zero *Role; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("ListAssignmentsOnResource", "roles", err)
 		return func(yield func(*Role, error) bool) { var zero *Role; yield(zero, err) }
 	}
 	return resource.Stream(ctx, upstream.ListAssignmentsOnResource(a.client, cfg.Options), func(page pagination.Page) ([]Role, error) {
@@ -251,6 +295,11 @@ func WithUnassignOptions(value UnassignOpts) UnassignOption { return request.Wit
 func (a *API) Unassign(ctx context.Context, roleID string, opts UnassignOpts, options ...UnassignOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Unassign", "roles", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Unassign", "roles", err)
 		return err
 	}
 	return request.Wrap("Unassign", "roles", upstream.Unassign(ctx, a.client, roleID, cfg.Options).ExtractErr())
@@ -269,17 +318,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToRoleUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToRoleUpdateMap()
+	value0, err := b.base.ToRoleUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, roleID string, opts UpdateOpts, options ...UpdateOption) (*Role, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "roles", err)
+		var zero0 *Role
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "roles", err)
 		var zero0 *Role
 		return zero0, err
 	}
@@ -298,6 +359,11 @@ func WithValidateOptions(value ValidateOpts) ValidateOption { return request.Wit
 func (a *API) Validate(ctx context.Context, roleID string, opts ValidateOpts, options ...ValidateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Validate", "roles", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Validate", "roles", err)
 		return err
 	}
 	return request.Wrap("Validate", "roles", upstream.Validate(ctx, a.client, roleID, cfg.Options).ExtractErr())
