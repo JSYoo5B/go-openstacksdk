@@ -111,14 +111,28 @@ func (a *API) GetShare(ctx context.Context, zoneID string, shareID string) (*Zon
 
 type ListOption = request.Option[ListOpts]
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption   { return request.WithOptions(value) }
+func WithListQuery(key, value string) ListOption  { return request.WithQuery[ListOpts](key, value) }
+func WithListHeader(key, value string) ListOption { return request.WithHeader[ListOpts](key, value) }
 
 type listOptsBuilder struct {
 	base   ListOpts
 	config request.Config[ListOpts]
 }
 
+func (b listOptsBuilder) ToZoneListHeaders() (map[string]string, error) {
+	value0, err := b.base.ToZoneListHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
+}
 func (b listOptsBuilder) ToZoneListQuery() (string, error) {
 	value0, err := b.base.ToZoneListQuery()
 	if err != nil {
@@ -141,7 +155,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, 
 		err = request.Wrap("List", "zones", err)
 		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
 	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("List", "zones", err)
 		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
 	}
