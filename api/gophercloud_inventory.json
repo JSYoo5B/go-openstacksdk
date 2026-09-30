@@ -479,7 +479,8 @@
       "name": "StartIntrospection",
       "sdk_package": "gophercloudsdk/baremetalintrospection/v1/introspection",
       "builder_free": true,
-      "return_policy": "error"
+      "return_policy": "error",
+      "request_policy": "sdk_query_preserving_start"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/apiversions",

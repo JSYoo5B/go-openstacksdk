@@ -6,6 +6,8 @@ Gophercloud **v2.15.0**에서 서비스 클라이언트를 받는 공개 함수 
 
 [Keystone v2 인증](../identity/v2/tokens/README.md)은 토큰·사용자·catalog를 함께 반환합니다. [Nova 암호 조회](../compute/v2/servers/README.md)는 암호화된 문자열을 기본값으로 반환하고 복호화를 옵션으로 선택합니다. 이처럼 단일 extractor로 해석할 수 없는 응답도 SDK가 처리합니다.
 
+[Inspector 시작](../baremetalintrospection/v1/introspection/README.md)의 `StartIntrospection`은 pinned native 함수가 누락하는 query를 SDK helper로 보정합니다. [연산 목록](gophercloud_inventory.json)의 `request_policy: sdk_query_preserving_start`가 이 요청 실행 예외를 표시합니다. 필드가 없는 연산은 기존 native 요청 함수를 호출합니다. [감사된 규칙](../internal/cmd/sdkgen/audited_requests.go)은 해당 native 선언·signature·입력·결과 타입이 바뀌면 생성 오류로 중단해 재검토를 요구합니다.
+
 ```go
 import (
     "context"

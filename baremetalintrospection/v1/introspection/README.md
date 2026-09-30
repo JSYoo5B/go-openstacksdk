@@ -1,4 +1,4 @@
-# Introspection 조회와 완료 대기
+# Introspection 시작, 조회와 완료 대기
 
 Introspection의 식별자는 bare metal node UUID와 같은 `Introspection.UUID`입니다. SDK는 Gophercloud v2.15.0의 `GetIntrospectionStatus`와 `ListIntrospections`를 공통 Collection에 연결합니다. 별도의 이름, 문자열 `Status`, Delete endpoint는 가정하지 않습니다.
 
@@ -6,6 +6,7 @@ Introspection의 식별자는 bare metal node UUID와 같은 `Introspection.UUID
 |---|---|
 | `conn.baremetal_introspection.get_introspection(uuid)` | `service.Introspection.Resources.Get(ctx, uuid)` |
 | `conn.baremetal_introspection.introspections()` | `service.Introspection.Resources.List(ctx)` |
+| `conn.baremetal_introspection.start_introspection(uuid, manage_boot=False)` | `service.Introspection.StartIntrospection(ctx, uuid, introspection.StartOpts{ManageBoot: &manageBoot})` (`manageBoot := false`) |
 | `conn.baremetal_introspection.wait_for_introspection(record)` | `service.Introspection.WaitUntilFinished(ctx, resource.ID(uuid))` |
 
 ```go
@@ -40,8 +41,25 @@ Python의 pinned [Introspection.wait](https://github.com/openstack/openstacksdk/
 
 `Resources.Wait`는 없는 native Status를 가정하지 않으므로 `resource.ErrUnsupported`입니다. 완료 대기는 `WaitUntilFinished`를 사용합니다. `Resources.Delete`도 미지원이며 진행 중 작업의 취소는 별도 `AbortIntrospection` 연산입니다.
 
-## 확인한 요청 오류
+## Start 요청의 선택 인자
 
-고정 Gophercloud의 `StartIntrospection`은 `ToStartIntrospectionQuery()`를 검사하지만 반환 query를 POST URL에 추가하지 않습니다. 따라서 현재 생성 API에서도 `StartOpts.ManageBoot` 및 `WithStartIntrospectionQuery`가 서버에 전달되지 않습니다. 서버 기본값과 같은 동작이며, 이 옵션을 지원한다고 판단해서는 안 됩니다. SDK의 query-preserving start helper를 별도 수정 단위로 추가할 대상입니다. 이 waiter는 조회 연산만 사용하므로 이 오류의 영향을 받지 않습니다.
+`StartOpts.ManageBoot`의 nil은 query를 생략해 서버 기본값을 사용합니다. `&false`와 `&true`는 각각 `manage_boot=false`와 `manage_boot=true`를 전달합니다. Python의 `manage_boot=None/False/True`와 같은 구분입니다.
 
-구현은 [공통 binding](resources_generated.go)과 [waiter](wait.go), 검증은 [HTTP 계약 테스트](../../../api/introspection_contracts_test.go)에 있습니다. [전체 Introspection 서비스](../README.md)와 [SDK 지원 판정 기준](../../../docs/sdk-support-ledger.md)도 참고하세요.
+```go
+// 위와 같이 service를 얻은 뒤
+manageBoot := false
+err = service.Introspection.StartIntrospection(ctx, "node-uuid",
+    introspection.StartOpts{ManageBoot: &manageBoot},
+    introspection.WithStartIntrospectionQuery("vendor", "a&b"))
+if err != nil { return err }
+```
+
+SDK는 typed 옵션과 확장 query를 함께 URL에 넣고 값을 인코딩합니다. `WithStartIntrospectionOptions`는 기본 typed 옵션을 교체합니다. 다른 query 확장과 같이 `WithStartIntrospectionQuery`는 같은 query key의 앞선 값을 덮어씁니다. 따라서 `manage_boot`를 확장 query로 지정하면 typed 값보다 우선합니다. JSON 본문·헤더 확장과 잘못된 옵션은 요청 전에 거부합니다.
+
+Python의 시작 연산은 Node 또는 문자열을 받고 Introspection Resource를 반환합니다. Go의 `StartIntrospection`은 node UUID를 받고 error만 반환합니다. 서버 상태는 `GetIntrospectionStatus`나 `WaitUntilFinished`로 조회합니다.
+
+고정 [Gophercloud StartIntrospection](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/baremetalintrospection/v1/introspection/requests.go)은 serializer가 반환한 query를 URL에 넣지 않습니다. SDK의 생성 API는 이 연산만 [private helper](start.go)에 연결해 누락을 보정합니다. POST 본문을 추가하지 않으며 202만 성공으로 처리합니다. HTTP 오류의 status·본문·header·URL과 context 취소 원인은 보존합니다. 시작 성공은 작업 완료를 뜻하지 않으므로 완료 확인에는 `WaitUntilFinished`를 사용합니다.
+
+이 예외는 [감사된 요청 규칙](../../../internal/cmd/sdkgen/audited_requests.go)에 등록합니다. 생성기는 pinned 함수 선언의 SHA-256, context/client/nodeID/builder signature, `ManageBoot *bool`과 query tag, `StartResult` 타입을 검사하며 drift가 있으면 재검토를 요구하는 오류로 중단합니다. [연산 목록](../../../api/gophercloud_inventory.json)의 이 연산에는 `request_policy: sdk_query_preserving_start`가 기록됩니다. SDK를 거치지 않고 native 함수를 직접 호출하면 이 보정은 적용되지 않습니다.
+
+구현은 [공통 binding](resources_generated.go), [waiter](wait.go), [start helper](start.go)에 있습니다. 검증은 [조회·완료 대기 HTTP 테스트](../../../api/introspection_contracts_test.go), [Start HTTP 테스트](../../../api/introspection_start_contracts_test.go), [serializer·header 테스트](start_test.go), [생성 규칙 테스트](../../../internal/cmd/sdkgen/audited_requests_test.go)에 있습니다. [전체 Introspection 서비스](../README.md)와 [SDK 지원 판정 기준](../../../docs/sdk-support-ledger.md)도 참고하세요.

@@ -33,6 +33,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `network/floating_ip_test.go`, `connection_floating_ip_test.go` | 외부 네트워크·Compute 참조, 포트·IPv4 선택, 모호성, 생성 후 연결·대기 실패 보존 |
 | `image/upload_test.go`, `image/upload_retry_test.go` | metadata/PUT/대기, 옵션 snapshot, Reader 소유권, 부분 소비·비동기 Close에서 무재전송, decode 부분 성공 보존 |
 | `api/introspection_contracts_test.go` | UUID 조회·목록, Finished/Error 기반 완료 대기, typed 실패·취소·timeout, 고정 조회 대상 |
+| `api/introspection_start_contracts_test.go`, `baremetalintrospection/v1/introspection/start_test.go` | ManageBoot nil/false/true와 확장 query 인코딩, ResourceBase, serializer/옵션 오류 preHTTP, POST202, 오류 status·본문·header·URL과 취소 원인 보존 |
+| `internal/cmd/sdkgen/audited_requests_test.go` | StartIntrospection만 helper 호출, pinned 함수 본문·signature·builder·입력·결과 drift 거부, 주석·공백 변경 허용 |
 | `resource/wait_identity_test.go` | 응답의 ID가 바뀌거나 빠져도 명시 ID의 polling 대상 유지 |
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |

@@ -15,9 +15,12 @@
 | Ironic conductor·driver 공통 조회 (`52ec267`) | [native 식별자 계약](../api/baremetal_named_resources_test.go): Hostname/Name, 정확한 이름·중복·미존재·페이지·취소·1.49 헤더 | read-only 리소스에 없는 Delete/Status를 만들지 않음. conductor Get의 fields 선택은 별도 미지원 |
 | Neutron 새 floating IP 생성·연결 (`8ec5bc3`) | [포트·IPv4·부분 성공 계약](../network/floating_ip_test.go), [Connection의 Compute 해석](../connection_floating_ip_test.go) | 기존 IP 재사용, Nova fallback, clouds.yaml 자동 network 선택과 서버 생성에서 자동 연결은 별도 |
 | Inspector 완료 대기 (`26abc05`) | [UUID·Finished/Error 계약](../api/introspection_contracts_test.go): 요청 ID 고정, typed 메시지, 완료·실패·취소·timeout | Python의 무제한 timeout/ignore_error와 Go의 유한 기본값·실패 반환을 구분 |
+| Inspector Start query 보정 | [시작 HTTP 계약](../api/introspection_start_contracts_test.go), [serializer·header 계약](../baremetalintrospection/v1/introspection/start_test.go), [감사된 호출 생성](../internal/cmd/sdkgen/audited_requests_test.go): ManageBoot nil/false/true, 확장 query, POST202, 원래 오류, native drift 거부 | Python과 같은 선택 인자 구분을 확인. Node/Resource 입력, Resource 반환, 연산별 microversion 선택 등 전체 Python Resource create 계약은 이 테스트의 검증 범위 밖 |
 | Glance metadata·직접 업로드 (`ad9d06e`) | [업로드 계약](../image/upload_test.go), [재전송·Reader 회귀 계약](../image/upload_retry_test.go): 단일 PUT, 실패 시 생성 객체 보존, caller Close 미호출 | 바이너리 자동 재인증·backoff retry, 기존 이미지의 안전한 재업로드, import/task·checksum·중복 제거는 별도 |
 
-이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. 위 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`가 통과했습니다.
+이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. Inspector Start query 보정의 이번 검증은 `go test -race ./api ./baremetalintrospection/... ./internal/cmd/sdkgen` 범위입니다. 그 이전 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`도 통과했습니다.
+
+고정 Gophercloud `baremetalintrospection/v1/introspection.StartIntrospection`은 `ToStartIntrospectionQuery()`의 오류만 검사하고 반환 query를 버립니다. SDK는 [검토한 호출 규칙](../internal/cmd/sdkgen/audited_requests.go)으로 이 연산만 [query를 보존하는 helper](../baremetalintrospection/v1/introspection/start.go)에 연결했습니다. [연산 inventory](../api/gophercloud_inventory.json)의 `request_policy: sdk_query_preserving_start`는 이 보정을 기록하며, 다른 연산의 요청 실행은 바꾸지 않습니다. pinned native 선언의 hash·signature와 입력/결과 shape가 달라지면 생성이 실패하므로 upstream의 실제 수정도 재검토 대상입니다. Python [Proxy.start_introspection](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/baremetal_introspection/v1/_proxy.py#L77)의 `manage_boot=None` 생략과 False/True 전달은 [사용 문서](../baremetalintrospection/v1/introspection/README.md)에 매핑했습니다.
 
 ## 판정 상태
 
