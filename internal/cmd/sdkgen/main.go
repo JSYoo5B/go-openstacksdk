@@ -510,6 +510,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 		builders = append(builders, builder{index: i, name: v.Name(), base: base, iface: iface, adapter: lower(op) + title(v.Name()) + "Builder"})
 	}
+	for i := range builders {
+		builders[i] = withOptionalBuilders(e.pkg, builders[i], decl, e.sourceImports)
+	}
 	contextAlias := e.use("context")
 	requestAlias := e.use("gophercloudsdk/request")
 	params := []string{"ctx " + contextAlias + ".Context"}
