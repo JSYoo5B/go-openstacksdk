@@ -57,6 +57,9 @@ func operationExtractor(fn *types.Func) (string, *types.Signature) {
 }
 
 func operationReturnPolicy(fn *types.Func) string {
+	if normalizerFor(fn) != nil {
+		return "normalize"
+	}
 	policy := returnPolicy(fn.Type().(*types.Signature))
 	if policy == "result" {
 		if _, ex := operationExtractor(fn); ex != nil {

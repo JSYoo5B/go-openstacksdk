@@ -485,6 +485,7 @@ func returnPolicy(sig *types.Signature) string {
 func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors map[string]string) error {
 	sig := fn.Type().(*types.Signature)
 	op := fn.Name()
+	normalizer := normalizerFor(fn)
 	builders := []builder{}
 	for i := 0; i < sig.Params().Len(); i++ {
 		v := sig.Params().At(i)
@@ -597,6 +598,12 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	returnTypes := []types.Type{}
 	policy := operationReturnPolicy(fn)
+	if normalizer != nil && normalizer.options != "" {
+		if len(builders) != 0 || sig.Variadic() {
+			return fmt.Errorf("result options conflict with request options")
+		}
+		params = append(params, "options ..."+normalizer.options)
+	}
 	resultExtractor, resultExtraction := operationExtractor(fn)
 	extractName := ""
 	extractPackage := e.use(e.pkg.Path())
@@ -637,7 +644,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	returns := ""
 	streamText := ""
-	if policy == "stream" {
+	if policy == "normalize" {
+		returns = "(" + normalizer.valueType + ",error)"
+	} else if policy == "stream" {
 		iterAlias := e.use("iter")
 		if streamType != nil {
 			streamText = e.typ(streamType)
@@ -664,6 +673,10 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	e.printf("\n// %s invokes the upstream API with library-owned builders and result handling.\nfunc (a *API) %s(%s) %s {\n", op, op, strings.Join(params, ","), returns)
 	errReturn := func() {
 		e.printf("err=%s.Wrap(%q,%q,err)\n", requestAlias, op, e.pkg.Name())
+		if policy == "normalize" {
+			e.printf("return %s,err\n", normalizer.zero)
+			return
+		}
 		if policy == "download" {
 			e.printf("return nil,err\n")
 			return
@@ -683,6 +696,11 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			}
 		}
 		e.printf("return %s\n", strings.Join(values, ","))
+	}
+	if normalizer != nil && normalizer.prepare != "" {
+		e.printf("%s\nif err!=nil{\n", normalizer.prepare)
+		errReturn()
+		e.printf("}\n")
 	}
 	if len(builders) > 0 {
 		primary := builders[0]
@@ -720,6 +738,8 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	call := "upstream." + op + "(" + strings.Join(args, ",") + ")"
 	switch policy {
+	case "normalize":
+		e.printf("result:=%s\nvalue,err:=%s\nreturn value,%s.Wrap(%q,%q,err)\n", call, normalizer.call, requestAlias, op, e.pkg.Name())
 	case "stream":
 		resourceAlias := e.use("gophercloudsdk/resource")
 		if streamType != nil {
