@@ -29,13 +29,13 @@ gophercloudsdk/
 
 | 서비스 | 리소스 | Get / Find / List / All | Delete | Wait | Create |
 |---|---|---|---|---|---|
-| [Compute](compute/README.md) | 서버 | 지원 | 지원 | 지원 | 이미지 기반 생성, 의존 리소스 이름 해석, 선택적 대기 |
+| [Compute](compute/README.md) | 서버 | 지원 | 지원 | 지원 | 이미지·기존 볼륨·이미지에서 만든 새 볼륨 부팅, 이름 해석, 선택적 대기 |
 | Compute | flavor | 지원 | 미지원 | 미지원 | 미지원 |
 | [Network](network/README.md) | 네트워크 | 지원 | 지원 | 지원 | 미지원 |
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | 미지원 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
-Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. 응답 변경 추적과 자동 commit, floating IP 연결을 포함한 복합 작업, boot-from-volume, 이미지 업로드의 상위 작업 흐름, microversion 자동 협상은 계속 구현할 대상입니다.
+Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, 응답 변경 추적과 자동 commit, floating IP 연결을 포함한 복합 작업, 이미지 업로드의 상위 흐름은 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다.
 
 ## 모든 서비스의 사용 문서
 

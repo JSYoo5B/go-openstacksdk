@@ -18,6 +18,7 @@ flowchart TD
     Compute --> Workflow[서버 생성과 의존성 해석]
     Workflow --> Image
     Workflow --> Network
+    Workflow --> Storage
     Collections --> Gophercloud
     Workflow --> Gophercloud
     Gophercloud --> OpenStack[OpenStack API]
@@ -25,7 +26,7 @@ flowchart TD
 
 | 계층 | 라이브러리가 맡는 책임 |
 |---|---|
-| Connection | 인증 소스 선택, TLS/HTTP, region/interface, endpoint와 서비스 캐시 |
+| Connection | 인증 소스 선택, TLS/HTTP, region/interface, endpoint, 선택적 microversion 협상과 서비스 캐시 |
 | Service | 사용 가능한 리소스 노출, Gophercloud와 공통 collection의 연결 |
 | Collection | 명시 참조, 정확한 이름 검색, 중복·미존재 정책, 페이지네이션, 상태 대기 |
 | Workflow | 서비스 사이의 리소스 해석, 요청 순서, 생성 후 대기, 부분 성공 보존 |
@@ -43,7 +44,7 @@ flowchart TD
 
 일반적인 요청에는 SDK가 concrete options와 내장 builder를 제공합니다. query 확장은 `resource.WithQuery`, 생성 확장은 `compute.WithField`로 처리합니다. 호출자가 `ToServerCreateMap` 등을 구현할 필요가 없습니다.
 
-확장 입력은 JSON snapshot으로 저장하며 보호된 core 필드와 충돌하면 거부합니다. 이 경로는 옵션 구현 부담을 줄이지만 임의의 확장 스키마까지 타입 안전하게 만들지는 않습니다. 자주 쓰이는 확장은 typed 옵션으로 승격해야 합니다. microversion 자동 협상과 확장 capability 확인은 다음 단계입니다.
+확장 입력은 JSON snapshot으로 저장하며 보호된 core 필드와 충돌하면 거부합니다. 이 경로는 옵션 구현 부담을 줄이지만 임의의 확장 스키마까지 타입 안전하게 만들지는 않습니다. 자주 쓰이는 확장은 typed 옵션으로 승격해야 합니다. [microversion 협상](microversions.md)은 서비스 초기화 시 수행하며, 연산별 확장 필드 capability 확인은 계속 구현할 대상입니다.
 
 서비스 구현자는 `resource.Adapter[T]`에 HTTP 연산과 모델 접근 함수를 등록합니다. 이는 라이브러리 확장을 위한 등록 구조이며 애플리케이션마다 구현할 계약이 아닙니다. 이름·페이지·대기 정책은 공유 구현을 사용합니다.
 
@@ -57,19 +58,19 @@ Nova 이름 필터는 정규표현식이므로 정확한 이름 검색에서는 
 
 서비스 구성은 잠금으로 보호하고 성공한 서비스만 캐시합니다. Gophercloud ProviderClient는 전체 연결에서 공유하며 endpoint override 때문에 provider를 복제하지 않습니다. 리소스 조회 결과는 포인터로 반환하지만 연결의 내부 캐시에는 저장하지 않습니다.
 
-HTTP 설정과 서비스 Microversion은 연결 시 정합니다. RawClient의 설정을 요청 중에 바꾸는 것은 지원하지 않습니다. iterator는 페이지 단위로 읽고 `break`로 후속 요청을 중단합니다.
+HTTP 설정과 Microversion 선택 정책은 연결 시 정합니다. 실제 협상은 첫 서비스 접근 시 수행하며 성공한 결과를 캐시합니다. RawClient의 설정을 요청 중에 바꾸는 것은 지원하지 않습니다. iterator는 페이지 단위로 읽고 `break`로 후속 요청을 중단합니다. 반복한 next URL은 추가 요청 전에 `ErrPaginationCycle`로 반환합니다.
 
 생성 POST 이후 대기 실패는 부분 성공입니다. 자동 rollback으로 서버를 지우지 않고 생성 응답을 오류와 함께 반환합니다. Delete는 미존재를 기본적으로 허용하지만 중복 이름·권한 거부·충돌은 반환합니다.
 
-## 현재 모델과 향후 순서
+## 현재 모델과 남은 작업
 
-초기 응답 모델은 Gophercloud alias입니다. 전체 필드 계약을 복제하는 비용을 줄이되, 향후 변경 추적이 필요한 상위 Resource 모델을 도입할 때는 기존 조회·옵션·오류 계약을 유지해야 합니다.
+기본 응답 모델은 Gophercloud alias입니다. 인증·virtual media·Swift처럼 여러 응답 뷰나 metadata를 보관하는 모델은 SDK에서 소유합니다. 변경 추적이 필요한 Resource 모델을 도입할 때는 기존 조회·옵션·오류 계약을 유지해야 합니다.
 
-1. 네트워크·볼륨·이미지의 typed Create/Update와 서버 action을 추가합니다.
-2. subnet/port/router/security group, attachment/snapshot 등의 리소스를 공통 collection에 연결합니다.
-3. floating IP와 boot-from-volume 같은 복합 작업의 부분 성공 계약을 설계합니다.
-4. microversion 자동 협상과 지원 필드/capability 확인을 라이브러리에 통합합니다.
-5. 변경 추적이 실제로 필요한 작업에 한해 Resource update/commit 모델을 검토합니다.
-6. Identity, Object Storage 등 나머지 서비스를 같은 서비스 계약으로 확장합니다.
+1. 생성 목록과 별도로 [지원 판정](sdk-support-ledger.md)을 보존하고 Python의 상속·descriptor·Resource 표면도 추적합니다.
+2. 복합 식별자, 목록과 상세 모델 차이, list-only 자료 등 아직 공통 정책에 연결되지 않은 리소스를 실제 capability에 맞게 연결합니다.
+3. floating IP, 추가 볼륨 연결·snapshot 기반 부팅, 이미지 업로드 등의 복합 작업과 부분 성공 계약을 확장합니다.
+4. 선택한 microversion과 각 연산의 필드/capability 요구를 연결합니다.
+5. 변경 추적 또는 명시적 Update의 Go 대응을 서비스별로 검증합니다.
+6. 고정 Python SDK에만 있는 서비스·버전의 typed API를 추가합니다.
 
 각 단계는 실제 API별 모의 서버 테스트를 함께 추가해야 합니다. 지금의 구현이 openstacksdk와 기능적으로 동등하다고 가정하지 않습니다.
