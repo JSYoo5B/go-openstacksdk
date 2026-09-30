@@ -35,9 +35,12 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Octavia pool member | `loadBalancer.Pools.Members(ctx, pool)` | member ID |
 | Octavia L7 rule | `loadBalancer.L7Policies.Rules(ctx, policy)` | rule ID |
 | Neutron port forwarding | `network.PortForwarding.InFloatingIP(ctx, floatingIP)` | port forwarding ID |
+| Neutron bandwidth limit rule | `network.QoSRules.BandwidthLimitRules(ctx, policy)` | rule ID |
+| Neutron DSCP marking rule | `network.QoSRules.DSCPMarkingRules(ctx, policy)` | rule ID |
+| Neutron minimum bandwidth rule | `network.QoSRules.MinimumBandwidthRules(ctx, policy)` | rule ID |
 
 Compute/Network/Image의 전체 API 객체는 `conn.ComputeV2(ctx)`, `conn.NetworkV2(ctx)`, `conn.ImageV2(ctx)`로 가져오거나 기존 서비스의 `API` 필드를 사용합니다. 표의 부모는 `resource.ID(...)` 또는 `resource.Name(...)`입니다. floating IP처럼 이름 필드가 없는 부모는 ID로 지정합니다.
 
 모든 범위 객체는 Get/Find/List/All/Delete/Wait/WaitDeleted/ResolveID를 공유합니다. 이름이나 상태가 없는 모델은 해당 기능에 `ErrUnsupported`를 반환합니다. Delete는 기본적으로 404를 무시하며 `WithMissingError()`로 엄격한 동작을 선택합니다. Create/Update는 원래 API에 해당 연산이 있는 범위에 제공됩니다.
 
-범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. HTTP 테스트는 [scoped_contracts_test.go](../api/scoped_contracts_test.go)에서 11개 범위의 실제 URL, 이름 해석, 기본 TTL과 JSON Patch를 검증합니다.
+범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. HTTP 테스트는 [scoped_contracts_test.go](../api/scoped_contracts_test.go)와 [qos_contracts_test.go](../api/qos_contracts_test.go)에서 14개 범위의 실제 URL, 이름 해석, 기본 TTL과 JSON Patch를 검증합니다.
