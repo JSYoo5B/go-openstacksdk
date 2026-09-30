@@ -17,7 +17,9 @@
       ],
       "id": "baremetal_introspection/v1/introspections",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {
@@ -42,7 +44,9 @@
       ],
       "id": "baremetal_introspection/v1/start_introspection",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {
@@ -61,7 +65,9 @@
       ],
       "id": "baremetal_introspection/v1/get_introspection",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {
@@ -85,7 +91,9 @@
       ],
       "id": "baremetal_introspection/v1/get_introspection_data",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {
@@ -110,7 +118,9 @@
       ],
       "id": "baremetal_introspection/v1/abort_introspection",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {
@@ -139,7 +149,9 @@
       ],
       "id": "baremetal_introspection/v1/wait_for_introspection",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection"
+      ],
       "review": "pending"
     },
     {

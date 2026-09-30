@@ -43,10 +43,10 @@
   },
   {
     "package": "gophercloudsdk/baremetalintrospection/v1/introspection",
+    "model": "Introspection",
     "find": false,
     "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "wait": false
   },
   {
     "package": "gophercloudsdk/blockstorage/apiversions",
