@@ -34,7 +34,7 @@ func fixture(t *testing.T) string {
 	root := t.TempDir()
 	put(t, root, "go.mod", "module example\n\ngo 1.25\n")
 	put(t, root, "service/api.go", "package service\ntype API struct{}\nfunc (*API) Fetch() {}\nfunc New() *API {return nil}\ntype Collection[T any] struct{}\nfunc (*Collection[T]) Find() {}\nfunc private() {}\n")
-	put(t, root, "service/api_test.go", "package service\nimport test \"testing\"\nfunc TestFetch(t *test.T) {}\nfunc TestNotATest() {}\nfunc TestHelper(value string) {}\n")
+	put(t, root, "service/api_test.go", "package service\nimport test \"testing\"\nfunc TestFetch(t *test.T) {}\nfunc TestNotATest() {}\nfunc TestHelper(value string) {}\nfunc Testlowercase(t *test.T) {}\n")
 	put(t, root, "service/README.md", "# Usage\n")
 	put(t, root, "internal/hidden.go", "package internal\nfunc Public() {}\n")
 	putJSON(t, root, "api/gophercloud_inventory.json", map[string]any{
@@ -141,6 +141,7 @@ func TestReviewRequiresExistingEvidenceAndHonestStatus(t *testing.T) {
 		{"private API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/service.private"} }},
 		{"internal API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/internal.Public"} }},
 		{"test helper", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:TestHelper"} }},
+		{"lowercase test", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:Testlowercase"} }},
 		{"missing test", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:TestMissing"} }},
 		{"missing document", "missing evidence", func(r *supportReview) { r.Docs = []string{"service/missing.md"} }},
 		{"external document", "invalid local evidence", func(r *supportReview) { r.Docs = []string{"../README.md"} }},

@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type symbolIndex struct {
@@ -102,6 +104,10 @@ func receiverName(expr ast.Expr) string {
 
 func isTestFunction(file *ast.File, fn *ast.FuncDecl) bool {
 	if !strings.HasPrefix(fn.Name.Name, "Test") || fn.Name.Name == "Test" || fn.Recv != nil || fn.Body == nil || fn.Type.Params == nil || len(fn.Type.Params.List) != 1 || fn.Type.Results != nil {
+		return false
+	}
+	first, _ := utf8.DecodeRuneInString(strings.TrimPrefix(fn.Name.Name, "Test"))
+	if unicode.IsLower(first) {
 		return false
 	}
 	param := fn.Type.Params.List[0]
