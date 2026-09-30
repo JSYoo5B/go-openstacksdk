@@ -36,17 +36,28 @@ type allTenantsOptsBuilder struct {
 }
 
 func (b allTenantsOptsBuilder) ToUsageAllTenantsQuery() (string, error) {
-	query, err := b.base.ToUsageAllTenantsQuery()
+	value0, err := b.base.ToUsageAllTenantsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AllTenants invokes the upstream API with library-owned builders and result handling.
 func (a *API) AllTenants(ctx context.Context, opts AllTenantsOpts, options ...AllTenantsOption) iter.Seq2[*TenantUsage, error] {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AllTenants", "usage", err)
+		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("AllTenants", "usage", err)
 		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
 	}
 	_opts := allTenantsOptsBuilder{base: cfg.Options, config: cfg}
@@ -71,17 +82,28 @@ type singleTenantOptsBuilder struct {
 }
 
 func (b singleTenantOptsBuilder) ToUsageSingleTenantQuery() (string, error) {
-	query, err := b.base.ToUsageSingleTenantQuery()
+	value0, err := b.base.ToUsageSingleTenantQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SingleTenant invokes the upstream API with library-owned builders and result handling.
 func (a *API) SingleTenant(ctx context.Context, tenantID string, opts SingleTenantOpts, options ...SingleTenantOption) iter.Seq2[*TenantUsage, error] {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SingleTenant", "usage", err)
+		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("SingleTenant", "usage", err)
 		return func(yield func(*TenantUsage, error) bool) { var zero *TenantUsage; yield(zero, err) }
 	}
 	_opts := singleTenantOptsBuilder{base: cfg.Options, config: cfg}
