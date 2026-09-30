@@ -61,17 +61,29 @@ type addSubportsOptsBuilder struct {
 }
 
 func (b addSubportsOptsBuilder) ToTrunkAddSubportsMap() (map[string]any, error) {
-	body, err := b.base.ToTrunkAddSubportsMap()
+	value0, err := b.base.ToTrunkAddSubportsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddSubports invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddSubports(ctx context.Context, id string, opts AddSubportsOpts, options ...AddSubportsOption) (*Trunk, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddSubports", "trunks", err)
+		var zero0 *Trunk
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddSubports", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
 	}
@@ -95,17 +107,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToTrunkCreateMap() (map[string]any, error) {
-	body, err := b.base.ToTrunkCreateMap()
+	value0, err := b.base.ToTrunkCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Trunk, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "trunks", err)
+		var zero0 *Trunk
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
 	}
@@ -148,11 +172,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToTrunkListQuery() (string, error) {
-	query, err := b.base.ToTrunkListQuery()
+	value0, err := b.base.ToTrunkListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -160,6 +190,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Trunk,
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "trunks", err)
+		return func(yield func(*Trunk, error) bool) { var zero *Trunk; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "trunks", err)
 		return func(yield func(*Trunk, error) bool) { var zero *Trunk; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -184,17 +219,29 @@ type removeSubportsOptsBuilder struct {
 }
 
 func (b removeSubportsOptsBuilder) ToTrunkRemoveSubportsMap() (map[string]any, error) {
-	body, err := b.base.ToTrunkRemoveSubportsMap()
+	value0, err := b.base.ToTrunkRemoveSubportsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveSubports invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveSubports(ctx context.Context, id string, opts RemoveSubportsOpts, options ...RemoveSubportsOption) (*Trunk, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveSubports", "trunks", err)
+		var zero0 *Trunk
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveSubports", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
 	}
@@ -218,17 +265,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToTrunkUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToTrunkUpdateMap()
+	value0, err := b.base.ToTrunkUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Trunk, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "trunks", err)
+		var zero0 *Trunk
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "trunks", err)
 		var zero0 *Trunk
 		return zero0, err
 	}
