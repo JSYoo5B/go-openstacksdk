@@ -93,6 +93,9 @@ func main() {
 			fatal(err)
 		}
 	}
+	if err := g.generateServices(); err != nil {
+		fatal(err)
+	}
 	data, err := json.MarshalIndent(g.inventory, "", "  ")
 	if err != nil {
 		fatal(err)
