@@ -2797,7 +2797,8 @@
       "id": "compute/v2/create_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/compute/v2/servers"
+        "gophercloudsdk/compute/v2/servers",
+        "gophercloudsdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2834,7 +2835,8 @@
       "id": "compute/v2/update_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/compute/v2/servers"
+        "gophercloudsdk/compute/v2/servers",
+        "gophercloudsdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2867,7 +2869,8 @@
       "id": "compute/v2/delete_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/compute/v2/servers"
+        "gophercloudsdk/compute/v2/servers",
+        "gophercloudsdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2895,7 +2898,8 @@
       "id": "compute/v2/get_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/compute/v2/servers"
+        "gophercloudsdk/compute/v2/servers",
+        "gophercloudsdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2922,7 +2926,8 @@
       "id": "compute/v2/volume_attachments",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/compute/v2/servers"
+        "gophercloudsdk/compute/v2/servers",
+        "gophercloudsdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
