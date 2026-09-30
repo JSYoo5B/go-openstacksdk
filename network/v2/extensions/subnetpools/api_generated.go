@@ -50,17 +50,29 @@ type addPrefixesOptsBuilder struct {
 }
 
 func (b addPrefixesOptsBuilder) ToSubnetPoolPrefixesOpsMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetPoolPrefixesOpsMap()
+	value0, err := b.base.ToSubnetPoolPrefixesOpsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddPrefixes invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddPrefixes(ctx context.Context, subnetPoolID string, opts PrefixesOpsOpts, options ...AddPrefixesOption) ([]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddPrefixes", "subnetpools", err)
+		var zero0 []string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddPrefixes", "subnetpools", err)
 		var zero0 []string
 		return zero0, err
 	}
@@ -84,17 +96,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSubnetPoolCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetPoolCreateMap()
+	value0, err := b.base.ToSubnetPoolCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*SubnetPool, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "subnetpools", err)
+		var zero0 *SubnetPool
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "subnetpools", err)
 		var zero0 *SubnetPool
 		return zero0, err
 	}
@@ -129,11 +153,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToSubnetPoolListQuery() (string, error) {
-	query, err := b.base.ToSubnetPoolListQuery()
+	value0, err := b.base.ToSubnetPoolListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -141,6 +171,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "subnetpools", err)
+		return func(yield func(*SubnetPool, error) bool) { var zero *SubnetPool; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "subnetpools", err)
 		return func(yield func(*SubnetPool, error) bool) { var zero *SubnetPool; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -165,17 +200,29 @@ type removePrefixesOptsBuilder struct {
 }
 
 func (b removePrefixesOptsBuilder) ToSubnetPoolPrefixesOpsMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetPoolPrefixesOpsMap()
+	value0, err := b.base.ToSubnetPoolPrefixesOpsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemovePrefixes invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemovePrefixes(ctx context.Context, subnetPoolID string, opts PrefixesOpsOpts, options ...RemovePrefixesOption) ([]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemovePrefixes", "subnetpools", err)
+		var zero0 []string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemovePrefixes", "subnetpools", err)
 		var zero0 []string
 		return zero0, err
 	}
@@ -199,17 +246,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSubnetPoolUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetPoolUpdateMap()
+	value0, err := b.base.ToSubnetPoolUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, subnetPoolID string, opts UpdateOpts, options ...UpdateOption) (*SubnetPool, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "subnetpools", err)
+		var zero0 *SubnetPool
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "subnetpools", err)
 		var zero0 *SubnetPool
 		return zero0, err
 	}
