@@ -30,6 +30,9 @@ func WithCreateOptions(value *AuthOptions) CreateOption { return request.WithOpt
 func WithCreateField(key string, value any) CreateOption {
 	return request.WithField[*AuthOptions](key, value)
 }
+func WithCreateHeader(key, value string) CreateOption {
+	return request.WithHeader[*AuthOptions](key, value)
+}
 
 type createOptsBuilder struct {
 	base   *AuthOptions
@@ -40,27 +43,55 @@ func (b createOptsBuilder) CanReauth() bool {
 	return b.base.CanReauth()
 }
 func (b createOptsBuilder) ToTokenV3CreateMap(arg0 map[string]any) (map[string]any, error) {
-	body, err := b.base.ToTokenV3CreateMap(arg0)
+	value0, err := b.base.ToTokenV3CreateMap(arg0)
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b createOptsBuilder) ToTokenV3HeadersMap(arg0 map[string]any) (map[string]string, error) {
-	return b.base.ToTokenV3HeadersMap(arg0)
+	value0, err := b.base.ToTokenV3HeadersMap(arg0)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b createOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
-	body, err := b.base.ToTokenV3ScopeMap()
+	value0, err := b.base.ToTokenV3ScopeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts *AuthOptions, options ...CreateOption) (*tokens.Token, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "ec2tokens", err)
+		var zero0 *tokens.Token
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
+		err = request.Wrap("Create", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err
 	}
@@ -79,6 +110,9 @@ func WithValidateS3TokenOptions(value *AuthOptions) ValidateS3TokenOption {
 func WithValidateS3TokenField(key string, value any) ValidateS3TokenOption {
 	return request.WithField[*AuthOptions](key, value)
 }
+func WithValidateS3TokenHeader(key, value string) ValidateS3TokenOption {
+	return request.WithHeader[*AuthOptions](key, value)
+}
 
 type validateS3TokenOptsBuilder struct {
 	base   *AuthOptions
@@ -89,27 +123,55 @@ func (b validateS3TokenOptsBuilder) CanReauth() bool {
 	return b.base.CanReauth()
 }
 func (b validateS3TokenOptsBuilder) ToTokenV3CreateMap(arg0 map[string]any) (map[string]any, error) {
-	body, err := b.base.ToTokenV3CreateMap(arg0)
+	value0, err := b.base.ToTokenV3CreateMap(arg0)
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b validateS3TokenOptsBuilder) ToTokenV3HeadersMap(arg0 map[string]any) (map[string]string, error) {
-	return b.base.ToTokenV3HeadersMap(arg0)
+	value0, err := b.base.ToTokenV3HeadersMap(arg0)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b validateS3TokenOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
-	body, err := b.base.ToTokenV3ScopeMap()
+	value0, err := b.base.ToTokenV3ScopeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ValidateS3Token invokes the upstream API with library-owned builders and result handling.
 func (a *API) ValidateS3Token(ctx context.Context, opts *AuthOptions, options ...ValidateS3TokenOption) (*tokens.Token, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ValidateS3Token", "ec2tokens", err)
+		var zero0 *tokens.Token
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
+		err = request.Wrap("ValidateS3Token", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err
 	}
