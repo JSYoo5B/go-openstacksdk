@@ -4,6 +4,8 @@
 
 각 항목에는 입력 인자와 기본값, 참조한 Python 리소스, 소스 위치를 보관합니다. `candidates`는 서비스·버전·모델 이름이 일치하는 Go 리소스 패키지 후보이며, 기능 동등성을 판정한 결과가 아닙니다. 현재 모든 `review`는 `pending`입니다. API 파사드 생성 완료와 openstacksdk 수준의 SDK 완성 여부를 별도로 확인하기 위한 비교 자료입니다.
 
+SDK가 Gophercloud 모델에 metadata 등을 추가한 경우 공통 정책 목록의 `upstream_model`도 후보 검색에 사용합니다. `model`은 실제 Go Collection의 응답 타입을 기록합니다.
+
 재생성하려면 해당 커밋의 openstacksdk 체크아웃 경로를 지정합니다. 도구는 소스 커밋을 확인하며 다른 버전은 거부합니다.
 
 ```sh
