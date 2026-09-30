@@ -56,7 +56,8 @@ func (a *API) BulkDelete(ctx context.Context, container string, objects []string
 
 type CopyOption = request.Option[CopyOpts]
 
-func WithCopyOptions(value CopyOpts) CopyOption { return request.WithOptions(value) }
+func WithCopyOptions(value CopyOpts) CopyOption   { return request.WithOptions(value) }
+func WithCopyHeader(key, value string) CopyOption { return request.WithHeader[CopyOpts](key, value) }
 
 type copyOptsBuilder struct {
 	base   CopyOpts
@@ -64,13 +65,29 @@ type copyOptsBuilder struct {
 }
 
 func (b copyOptsBuilder) ToObjectCopyMap() (map[string]string, error) {
-	return b.base.ToObjectCopyMap()
+	value0, err := b.base.ToObjectCopyMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Copy invokes the upstream API with library-owned builders and result handling.
 func (a *API) Copy(ctx context.Context, containerName string, objectName string, opts CopyOpts, options ...CopyOption) (*CopyHeader, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Copy", "objects", err)
+		var zero0 *CopyHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Copy", "objects", err)
 		var zero0 *CopyHeader
 		return zero0, err
 	}
@@ -84,6 +101,12 @@ func (a *API) Copy(ctx context.Context, containerName string, objectName string,
 type CreateOption = request.Option[CreateOpts]
 
 func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
+func WithCreateQuery(key, value string) CreateOption {
+	return request.WithQuery[CreateOpts](key, value)
+}
+func WithCreateHeader(key, value string) CreateOption {
+	return request.WithHeader[CreateOpts](key, value)
+}
 
 type createOptsBuilder struct {
 	base   CreateOpts
@@ -91,13 +114,40 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToObjectCreateParams() (io.Reader, map[string]string, string, error) {
-	return b.base.ToObjectCreateParams()
+	value0, value1, value2, err := b.base.ToObjectCreateParams()
+	if err != nil {
+		var zero0 io.Reader
+		var zero1 map[string]string
+		var zero2 string
+		return zero0, zero1, zero2, err
+	}
+	value1, err = request.MergeHeadersFor(value1, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 io.Reader
+		var zero1 map[string]string
+		var zero2 string
+		return zero0, zero1, zero2, err
+	}
+	value2, err = request.ExtendQuery(value2, b.config.Query)
+	if err != nil {
+		var zero0 io.Reader
+		var zero1 map[string]string
+		var zero2 string
+		return zero0, zero1, zero2, err
+	}
+	return value0, value1, value2, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, containerName string, objectName string, opts CreateOpts, options ...CreateOption) (*CreateHeader, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "objects", err)
+		var zero0 *CreateHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
+		err = request.Wrap("Create", "objects", err)
 		var zero0 *CreateHeader
 		return zero0, err
 	}
@@ -118,6 +168,12 @@ func WithCreateTempURLOptions(value CreateTempURLOpts) CreateTempURLOption {
 func (a *API) CreateTempURL(ctx context.Context, containerName string, objectName string, opts CreateTempURLOpts, options ...CreateTempURLOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateTempURL", "objects", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("CreateTempURL", "objects", err)
 		var zero0 string
 		return zero0, err
 	}
@@ -137,11 +193,17 @@ type deleteOptsBuilder struct {
 }
 
 func (b deleteOptsBuilder) ToObjectDeleteQuery() (string, error) {
-	query, err := b.base.ToObjectDeleteQuery()
+	value0, err := b.base.ToObjectDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -149,6 +211,12 @@ func (a *API) Delete(ctx context.Context, containerName string, objectName strin
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Delete", "objects", err)
+		var zero0 *DeleteHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Delete", "objects", err)
 		var zero0 *DeleteHeader
 		return zero0, err
 	}
@@ -162,6 +230,12 @@ func (a *API) Delete(ctx context.Context, containerName string, objectName strin
 type DownloadOption = request.Option[DownloadOpts]
 
 func WithDownloadOptions(value DownloadOpts) DownloadOption { return request.WithOptions(value) }
+func WithDownloadQuery(key, value string) DownloadOption {
+	return request.WithQuery[DownloadOpts](key, value)
+}
+func WithDownloadHeader(key, value string) DownloadOption {
+	return request.WithHeader[DownloadOpts](key, value)
+}
 
 type downloadOptsBuilder struct {
 	base   DownloadOpts
@@ -169,7 +243,25 @@ type downloadOptsBuilder struct {
 }
 
 func (b downloadOptsBuilder) ToObjectDownloadParams() (map[string]string, string, error) {
-	return b.base.ToObjectDownloadParams()
+	value0, value1, err := b.base.ToObjectDownloadParams()
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value1, err = request.ExtendQuery(value1, b.config.Query)
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // Download invokes the upstream API with library-owned builders and result handling.
@@ -177,6 +269,11 @@ func (a *API) Download(ctx context.Context, containerName string, objectName str
 	var opts DownloadOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Download", "objects", err)
+		return nil, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
+		err = request.Wrap("Download", "objects", err)
 		return nil, err
 	}
 	_opts := downloadOptsBuilder{base: cfg.Options, config: cfg}
@@ -187,7 +284,9 @@ func (a *API) Download(ctx context.Context, containerName string, objectName str
 
 type GetOption = request.Option[GetOpts]
 
-func WithGetOptions(value GetOpts) GetOption { return request.WithOptions(value) }
+func WithGetOptions(value GetOpts) GetOption    { return request.WithOptions(value) }
+func WithGetQuery(key, value string) GetOption  { return request.WithQuery[GetOpts](key, value) }
+func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -195,7 +294,25 @@ type getOptsBuilder struct {
 }
 
 func (b getOptsBuilder) ToObjectGetParams() (map[string]string, string, error) {
-	return b.base.ToObjectGetParams()
+	value0, value1, err := b.base.ToObjectGetParams()
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value1, err = request.ExtendQuery(value1, b.config.Query)
+	if err != nil {
+		var zero0 map[string]string
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -203,6 +320,12 @@ func (a *API) Get(ctx context.Context, containerName string, objectName string, 
 	var opts GetOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Get", "objects", err)
+		var zero0 *GetHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
+		err = request.Wrap("Get", "objects", err)
 		var zero0 *GetHeader
 		return zero0, err
 	}
@@ -224,11 +347,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToObjectListParams() (string, error) {
-	query, err := b.base.ToObjectListParams()
+	value0, err := b.base.ToObjectListParams()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -236,6 +365,11 @@ func (a *API) List(ctx context.Context, containerName string, options ...ListOpt
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "objects", err)
+		return func(yield func(*string, error) bool) { var zero *string; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "objects", err)
 		return func(yield func(*string, error) bool) { var zero *string; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -248,6 +382,9 @@ func (a *API) List(ctx context.Context, containerName string, options ...ListOpt
 type UpdateOption = request.Option[UpdateOpts]
 
 func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateHeader(key, value string) UpdateOption {
+	return request.WithHeader[UpdateOpts](key, value)
+}
 
 type updateOptsBuilder struct {
 	base   UpdateOpts
@@ -255,13 +392,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToObjectUpdateMap() (map[string]string, error) {
-	return b.base.ToObjectUpdateMap()
+	value0, err := b.base.ToObjectUpdateMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, containerName string, objectName string, opts UpdateOpts, options ...UpdateOption) (*UpdateHeader, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "objects", err)
+		var zero0 *UpdateHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Update", "objects", err)
 		var zero0 *UpdateHeader
 		return zero0, err
 	}
