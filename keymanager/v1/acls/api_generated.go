@@ -64,17 +64,29 @@ type setContainerACLOptsBuilder struct {
 }
 
 func (b setContainerACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
-	body, err := b.base.ToACLSetMap()
+	value0, err := b.base.ToACLSetMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetContainerACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetContainerACL(ctx context.Context, containerID string, opts SetOpts, options ...SetContainerACLOption) (*ACLRef, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetContainerACL", "acls", err)
+		var zero0 *ACLRef
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetContainerACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
 	}
@@ -98,17 +110,29 @@ type setSecretACLOptsBuilder struct {
 }
 
 func (b setSecretACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
-	body, err := b.base.ToACLSetMap()
+	value0, err := b.base.ToACLSetMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetSecretACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetSecretACL(ctx context.Context, secretID string, opts SetOpts, options ...SetSecretACLOption) (*ACLRef, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetSecretACL", "acls", err)
+		var zero0 *ACLRef
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetSecretACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
 	}
@@ -134,17 +158,29 @@ type updateContainerACLOptsBuilder struct {
 }
 
 func (b updateContainerACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
-	body, err := b.base.ToACLSetMap()
+	value0, err := b.base.ToACLSetMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateContainerACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateContainerACL(ctx context.Context, containerID string, opts SetOpts, options ...UpdateContainerACLOption) (*ACLRef, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateContainerACL", "acls", err)
+		var zero0 *ACLRef
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateContainerACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
 	}
@@ -170,17 +206,29 @@ type updateSecretACLOptsBuilder struct {
 }
 
 func (b updateSecretACLOptsBuilder) ToACLSetMap() (map[string]any, error) {
-	body, err := b.base.ToACLSetMap()
+	value0, err := b.base.ToACLSetMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateSecretACL invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateSecretACL(ctx context.Context, secretID string, opts SetOpts, options ...UpdateSecretACLOption) (*ACLRef, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateSecretACL", "acls", err)
+		var zero0 *ACLRef
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateSecretACL", "acls", err)
 		var zero0 *ACLRef
 		return zero0, err
 	}
