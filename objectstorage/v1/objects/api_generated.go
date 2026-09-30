@@ -57,6 +57,7 @@ func (a *API) BulkDelete(ctx context.Context, container string, objects []string
 type CopyOption = request.Option[CopyOpts]
 
 func WithCopyOptions(value CopyOpts) CopyOption   { return request.WithOptions(value) }
+func WithCopyQuery(key, value string) CopyOption  { return request.WithQuery[CopyOpts](key, value) }
 func WithCopyHeader(key, value string) CopyOption { return request.WithHeader[CopyOpts](key, value) }
 
 type copyOptsBuilder struct {
@@ -77,6 +78,19 @@ func (b copyOptsBuilder) ToObjectCopyMap() (map[string]string, error) {
 	}
 	return value0, nil
 }
+func (b copyOptsBuilder) ToObjectCopyQuery() (string, error) {
+	value0, err := b.base.ToObjectCopyQuery()
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
+}
 
 // Copy invokes the upstream API with library-owned builders and result handling.
 func (a *API) Copy(ctx context.Context, containerName string, objectName string, opts CopyOpts, options ...CopyOption) (*CopyHeader, error) {
@@ -86,7 +100,7 @@ func (a *API) Copy(ctx context.Context, containerName string, objectName string,
 		var zero0 *CopyHeader
 		return zero0, err
 	}
-	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("Copy", "objects", err)
 		var zero0 *CopyHeader
 		return zero0, err
