@@ -33,6 +33,9 @@ func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptio
 func WithCreateField(key string, value any) CreateOption {
 	return request.WithField[CreateOpts](key, value)
 }
+func WithCreateHeader(key, value string) CreateOption {
+	return request.WithHeader[CreateOpts](key, value)
+}
 
 type createOptsBuilder struct {
 	base   CreateOpts
@@ -52,6 +55,19 @@ func (b createOptsBuilder) ToRecordSetCreateMap() (map[string]any, error) {
 	}
 	return value0, nil
 }
+func (b createOptsBuilder) ToRecordSetRequestHeaders() (map[string]string, error) {
+	value0, err := b.base.ToRecordSetRequestHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
+}
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, zoneID string, opts CreateOpts, options ...CreateOption) (*RecordSet, error) {
@@ -61,7 +77,7 @@ func (a *API) Create(ctx context.Context, zoneID string, opts CreateOpts, option
 		var zero0 *RecordSet
 		return zero0, err
 	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
 		err = request.Wrap("Create", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err
@@ -136,12 +152,28 @@ func WithListAllOptions(value ListOpts) ListAllOption { return request.WithOptio
 func WithListAllQuery(key, value string) ListAllOption {
 	return request.WithQuery[ListOpts](key, value)
 }
+func WithListAllHeader(key, value string) ListAllOption {
+	return request.WithHeader[ListOpts](key, value)
+}
 
 type listAllOptsBuilder struct {
 	base   ListOpts
 	config request.Config[ListOpts]
 }
 
+func (b listAllOptsBuilder) ToRecordSetListHeaders() (map[string]string, error) {
+	value0, err := b.base.ToRecordSetListHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
+}
 func (b listAllOptsBuilder) ToRecordSetListQuery() (string, error) {
 	value0, err := b.base.ToRecordSetListQuery()
 	if err != nil {
@@ -164,7 +196,7 @@ func (a *API) ListAll(ctx context.Context, options ...ListAllOption) iter.Seq2[*
 		err = request.Wrap("ListAll", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("ListAll", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
@@ -181,12 +213,28 @@ func WithListByZoneOptions(value ListOpts) ListByZoneOption { return request.Wit
 func WithListByZoneQuery(key, value string) ListByZoneOption {
 	return request.WithQuery[ListOpts](key, value)
 }
+func WithListByZoneHeader(key, value string) ListByZoneOption {
+	return request.WithHeader[ListOpts](key, value)
+}
 
 type listByZoneOptsBuilder struct {
 	base   ListOpts
 	config request.Config[ListOpts]
 }
 
+func (b listByZoneOptsBuilder) ToRecordSetListHeaders() (map[string]string, error) {
+	value0, err := b.base.ToRecordSetListHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
+}
 func (b listByZoneOptsBuilder) ToRecordSetListQuery() (string, error) {
 	value0, err := b.base.ToRecordSetListQuery()
 	if err != nil {
@@ -209,7 +257,7 @@ func (a *API) ListByZone(ctx context.Context, zoneID string, options ...ListByZo
 		err = request.Wrap("ListByZone", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, false, true, true); err != nil {
 		err = request.Wrap("ListByZone", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
@@ -226,12 +274,28 @@ func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptio
 func WithUpdateField(key string, value any) UpdateOption {
 	return request.WithField[UpdateOpts](key, value)
 }
+func WithUpdateHeader(key, value string) UpdateOption {
+	return request.WithHeader[UpdateOpts](key, value)
+}
 
 type updateOptsBuilder struct {
 	base   UpdateOpts
 	config request.Config[UpdateOpts]
 }
 
+func (b updateOptsBuilder) ToRecordSetRequestHeaders() (map[string]string, error) {
+	value0, err := b.base.ToRecordSetRequestHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
+}
 func (b updateOptsBuilder) ToRecordSetUpdateMap() (map[string]any, error) {
 	value0, err := b.base.ToRecordSetUpdateMap()
 	if err != nil {
@@ -254,7 +318,7 @@ func (a *API) Update(ctx context.Context, zoneID string, rrsetID string, opts Up
 		var zero0 *RecordSet
 		return zero0, err
 	}
-	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
 		err = request.Wrap("Update", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err
