@@ -11,10 +11,17 @@ import (
 	iter "iter"
 )
 
-// API owns the client and provides concrete inputs, optional extensions and normalized results.
-type API struct{ client *gophercloud.ServiceClient }
+// API owns typed operations and their shared resource policies.
+type API struct {
+	client    *gophercloud.ServiceClient
+	Resources *resource.Collection[Endpoint]
+}
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+func New(client *gophercloud.ServiceClient) *API {
+	a := &API{client: client}
+	a.Resources = a.newResources()
+	return a
+}
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 type CreateOpts = upstream.CreateOpts
