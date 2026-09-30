@@ -71,11 +71,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToAgentListQuery() (string, error) {
-	query, err := b.base.ToAgentListQuery()
+	value0, err := b.base.ToAgentListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -83,6 +89,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Agent,
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "agents", err)
+		return func(yield func(*Agent, error) bool) { var zero *Agent; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "agents", err)
 		return func(yield func(*Agent, error) bool) { var zero *Agent; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -154,17 +165,28 @@ type scheduleBGPSpeakerOptsBuilder struct {
 }
 
 func (b scheduleBGPSpeakerOptsBuilder) ToAgentScheduleBGPSpeakerMap() (map[string]any, error) {
-	body, err := b.base.ToAgentScheduleBGPSpeakerMap()
+	value0, err := b.base.ToAgentScheduleBGPSpeakerMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ScheduleBGPSpeaker invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleBGPSpeaker(ctx context.Context, agentID string, opts ScheduleBGPSpeakerOpts, options ...ScheduleBGPSpeakerOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ScheduleBGPSpeaker", "agents", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ScheduleBGPSpeaker", "agents", err)
 		return err
 	}
 	_opts := scheduleBGPSpeakerOptsBuilder{base: cfg.Options, config: cfg}
@@ -186,17 +208,28 @@ type scheduleDHCPNetworkOptsBuilder struct {
 }
 
 func (b scheduleDHCPNetworkOptsBuilder) ToAgentScheduleDHCPNetworkMap() (map[string]any, error) {
-	body, err := b.base.ToAgentScheduleDHCPNetworkMap()
+	value0, err := b.base.ToAgentScheduleDHCPNetworkMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ScheduleDHCPNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleDHCPNetwork(ctx context.Context, id string, opts ScheduleDHCPNetworkOpts, options ...ScheduleDHCPNetworkOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ScheduleDHCPNetwork", "agents", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ScheduleDHCPNetwork", "agents", err)
 		return err
 	}
 	_opts := scheduleDHCPNetworkOptsBuilder{base: cfg.Options, config: cfg}
@@ -218,17 +251,28 @@ type scheduleL3RouterOptsBuilder struct {
 }
 
 func (b scheduleL3RouterOptsBuilder) ToAgentScheduleL3RouterMap() (map[string]any, error) {
-	body, err := b.base.ToAgentScheduleL3RouterMap()
+	value0, err := b.base.ToAgentScheduleL3RouterMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ScheduleL3Router invokes the upstream API with library-owned builders and result handling.
 func (a *API) ScheduleL3Router(ctx context.Context, id string, opts ScheduleL3RouterOpts, options ...ScheduleL3RouterOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ScheduleL3Router", "agents", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ScheduleL3Router", "agents", err)
 		return err
 	}
 	_opts := scheduleL3RouterOptsBuilder{base: cfg.Options, config: cfg}
@@ -248,17 +292,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToAgentUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToAgentUpdateMap()
+	value0, err := b.base.ToAgentUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Agent, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "agents", err)
+		var zero0 *Agent
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "agents", err)
 		var zero0 *Agent
 		return zero0, err
 	}
