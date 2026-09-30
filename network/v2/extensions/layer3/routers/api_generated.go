@@ -60,17 +60,29 @@ type addExternalGatewaysOptsBuilder struct {
 }
 
 func (b addExternalGatewaysOptsBuilder) ToRouterAddExternalGatewaysMap() (map[string]any, error) {
-	body, err := b.base.ToRouterAddExternalGatewaysMap()
+	value0, err := b.base.ToRouterAddExternalGatewaysMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddExternalGateways(ctx context.Context, id string, opts AddExternalGatewaysOpts, options ...AddExternalGatewaysOption) (*Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddExternalGateways", "routers", err)
+		var zero0 *Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err
 	}
@@ -96,17 +108,29 @@ type addInterfaceOptsBuilder struct {
 }
 
 func (b addInterfaceOptsBuilder) ToRouterAddInterfaceMap() (map[string]any, error) {
-	body, err := b.base.ToRouterAddInterfaceMap()
+	value0, err := b.base.ToRouterAddInterfaceMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddInterface invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddInterface(ctx context.Context, id string, opts AddInterfaceOpts, options ...AddInterfaceOption) (*InterfaceInfo, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddInterface", "routers", err)
+		var zero0 *InterfaceInfo
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddInterface", "routers", err)
 		var zero0 *InterfaceInfo
 		return zero0, err
 	}
@@ -130,17 +154,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToRouterCreateMap() (map[string]any, error) {
-	body, err := b.base.ToRouterCreateMap()
+	value0, err := b.base.ToRouterCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "routers", err)
+		var zero0 *Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "routers", err)
 		var zero0 *Router
 		return zero0, err
 	}
@@ -175,11 +211,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToRouterListQuery() (string, error) {
-	query, err := b.base.ToRouterListQuery()
+	value0, err := b.base.ToRouterListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -187,6 +229,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Router
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "routers", err)
+		return func(yield func(*Router, error) bool) { var zero *Router; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "routers", err)
 		return func(yield func(*Router, error) bool) { var zero *Router; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -219,17 +266,29 @@ type removeExternalGatewaysOptsBuilder struct {
 }
 
 func (b removeExternalGatewaysOptsBuilder) ToRouterRemoveExternalGatewaysMap() (map[string]any, error) {
-	body, err := b.base.ToRouterRemoveExternalGatewaysMap()
+	value0, err := b.base.ToRouterRemoveExternalGatewaysMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveExternalGateways(ctx context.Context, id string, opts RemoveExternalGatewaysOpts, options ...RemoveExternalGatewaysOption) (*Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveExternalGateways", "routers", err)
+		var zero0 *Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err
 	}
@@ -255,17 +314,29 @@ type removeInterfaceOptsBuilder struct {
 }
 
 func (b removeInterfaceOptsBuilder) ToRouterRemoveInterfaceMap() (map[string]any, error) {
-	body, err := b.base.ToRouterRemoveInterfaceMap()
+	value0, err := b.base.ToRouterRemoveInterfaceMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveInterface invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveInterface(ctx context.Context, id string, opts RemoveInterfaceOpts, options ...RemoveInterfaceOption) (*InterfaceInfo, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveInterface", "routers", err)
+		var zero0 *InterfaceInfo
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveInterface", "routers", err)
 		var zero0 *InterfaceInfo
 		return zero0, err
 	}
@@ -289,17 +360,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToRouterUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToRouterUpdateMap()
+	value0, err := b.base.ToRouterUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "routers", err)
+		var zero0 *Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "routers", err)
 		var zero0 *Router
 		return zero0, err
 	}
@@ -325,17 +408,29 @@ type updateExternalGatewaysOptsBuilder struct {
 }
 
 func (b updateExternalGatewaysOptsBuilder) ToRouterUpdateExternalGatewaysMap() (map[string]any, error) {
-	body, err := b.base.ToRouterUpdateExternalGatewaysMap()
+	value0, err := b.base.ToRouterUpdateExternalGatewaysMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateExternalGateways invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateExternalGateways(ctx context.Context, id string, opts UpdateExternalGatewaysOpts, options ...UpdateExternalGatewaysOption) (*Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateExternalGateways", "routers", err)
+		var zero0 *Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateExternalGateways", "routers", err)
 		var zero0 *Router
 		return zero0, err
 	}
