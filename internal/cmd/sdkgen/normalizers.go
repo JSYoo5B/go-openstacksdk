@@ -14,6 +14,10 @@ type resultNormalizer struct {
 }
 
 var resultNormalizers = map[string]resultNormalizer{
+	upstreamModule + "/openstack/baremetal/v1/nodes.GetVirtualMedia": {
+		resultType: "VirtualMediaGetResult", valueType: "*VirtualMedia", zero: "nil",
+		call: "extractVirtualMedia(result.Result)",
+	},
 	upstreamModule + "/openstack/identity/v2/tokens.Create": {
 		resultType: "CreateResult", valueType: "*Authentication", zero: "nil",
 		call: "extractAuthentication(result.Result)",

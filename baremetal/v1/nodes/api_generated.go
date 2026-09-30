@@ -680,9 +680,10 @@ func (a *API) GetVendorPassthruMethods(ctx context.Context, id string) (*VendorP
 }
 
 // GetVirtualMedia invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetVirtualMedia(ctx context.Context, id string) (VirtualMediaGetResult, error) {
+func (a *API) GetVirtualMedia(ctx context.Context, id string) (*VirtualMedia, error) {
 	result := upstream.GetVirtualMedia(ctx, a.client, id)
-	return result, request.Wrap("GetVirtualMedia", "nodes", result.Err)
+	value, err := extractVirtualMedia(result.Result)
+	return value, request.Wrap("GetVirtualMedia", "nodes", err)
 }
 
 // InjectNMI invokes the upstream API with library-owned builders and result handling.
