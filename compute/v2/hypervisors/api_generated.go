@@ -57,11 +57,17 @@ type getExtOptsBuilder struct {
 }
 
 func (b getExtOptsBuilder) ToHypervisorGetQuery() (string, error) {
-	query, err := b.base.ToHypervisorGetQuery()
+	value0, err := b.base.ToHypervisorGetQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // GetExt invokes the upstream API with library-owned builders and result handling.
@@ -69,6 +75,12 @@ func (a *API) GetExt(ctx context.Context, hypervisorID string, options ...GetExt
 	var opts GetOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("GetExt", "hypervisors", err)
+		var zero0 *Hypervisor
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("GetExt", "hypervisors", err)
 		var zero0 *Hypervisor
 		return zero0, err
 	}
@@ -106,11 +118,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToHypervisorListQuery() (string, error) {
-	query, err := b.base.ToHypervisorListQuery()
+	value0, err := b.base.ToHypervisorListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -118,6 +136,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Hyperv
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "hypervisors", err)
+		return func(yield func(*Hypervisor, error) bool) { var zero *Hypervisor; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "hypervisors", err)
 		return func(yield func(*Hypervisor, error) bool) { var zero *Hypervisor; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
