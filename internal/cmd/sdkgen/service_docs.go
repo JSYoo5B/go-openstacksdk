@@ -44,6 +44,12 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if parts[0] == "metric" {
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")
 	}
+	switch key {
+	case "identity/v2":
+		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
+	case "compute/v2":
+		out.WriteString("`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.\n\n")
+	}
 	var example *collectionRecord
 	for i := range g.collections {
 		record := &g.collections[i]

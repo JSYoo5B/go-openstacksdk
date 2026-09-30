@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 identity/v2 API를 하나의 인증된 서비스 객체�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답 모델은 Gophercloud 타입이며, 수정한 응답이 자동 저장되지는 않습니다.
 
+`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.
+
 ## Go 사용
 
 ```go

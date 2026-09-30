@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답 모델은 Gophercloud 타입이며, 수정한 응답이 자동 저장되지는 않습니다.
 
+`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.
+
 ## Go 사용
 
 ```go
