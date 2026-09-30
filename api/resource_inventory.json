@@ -1,0 +1,1360 @@
+[
+  {
+    "package": "gophercloudsdk/baremetal/apiversions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/baremetal/v1/allocations",
+    "model": "Allocation",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/baremetal/v1/conductors",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/baremetal/v1/drivers",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/baremetal/v1/nodes",
+    "model": "Node",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/baremetal/v1/ports",
+    "model": "Port",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/baremetalintrospection/v1/introspection",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/apiversions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/noauth",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/availabilityzones",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/backups",
+    "model": "Backup",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/limits",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/quotasets",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/schedulerstats",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/services",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/snapshots",
+    "model": "Snapshot",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/transfers",
+    "model": "Transfer",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v2/volumes",
+    "model": "Volume",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/attachments",
+    "model": "Attachment",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/availabilityzones",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/backups",
+    "model": "Backup",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/limits",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/manageablevolumes",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/qos",
+    "model": "QoS",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/quotasets",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/schedulerstats",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/services",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/snapshots",
+    "model": "Snapshot",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/transfers",
+    "model": "Transfer",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/volumes",
+    "model": "Volume",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/blockstorage/v3/volumetypes",
+    "model": "VolumeType",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/common/extensions",
+    "model": "Extension",
+    "find": true,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/apiversions",
+    "model": "APIVersion",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/aggregates",
+    "model": "Aggregate",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/attachinterfaces",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/availabilityzones",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/diagnostics",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/extensions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/flavors",
+    "model": "Flavor",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/hypervisors",
+    "model": "Hypervisor",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/instanceactions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/keypairs",
+    "model": "KeyPair",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/limits",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/migrations",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/quotasets",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/remoteconsoles",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/secgroups",
+    "model": "SecurityGroup",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/servergroups",
+    "model": "ServerGroup",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/servers",
+    "model": "Server",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/services",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/tags",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/usage",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/compute/v2/volumeattach",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/container/v1/capsules",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/apiversions",
+    "model": "APIVersion",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/v1/certificates",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/v1/clusters",
+    "model": "Cluster",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/v1/clustertemplates",
+    "model": "ClusterTemplate",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/v1/nodegroups",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/containerinfra/v1/quotas",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/db/v1/configurations",
+    "model": "Config",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/db/v1/databases",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/db/v1/datastores",
+    "model": "Datastore",
+    "find": true,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/db/v1/flavors",
+    "model": "Flavor",
+    "find": true,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/db/v1/instances",
+    "model": "Instance",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/db/v1/users",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/quotas",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/recordsets",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/transfer/accept",
+    "model": "TransferAccept",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/transfer/request",
+    "model": "TransferRequest",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/tsigkeys",
+    "model": "TSIGKey",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/dns/v2/zones",
+    "model": "Zone",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/identity/v2/extensions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v2/roles",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v2/tenants",
+    "model": "Tenant",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v2/tokens",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v2/users",
+    "model": "User",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/applicationcredentials",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/catalog",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/credentials",
+    "model": "Credential",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/domains",
+    "model": "Domain",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/ec2credentials",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/ec2tokens",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/endpoints",
+    "model": "Endpoint",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/federation",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/groups",
+    "model": "Group",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/limits",
+    "model": "Limit",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/oauth1",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/osinherit",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/policies",
+    "model": "Policy",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/projectendpoints",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/projects",
+    "model": "Project",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/regions",
+    "model": "Region",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/registeredlimits",
+    "model": "RegisteredLimit",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/roles",
+    "model": "Role",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/services",
+    "model": "Service",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/tokens",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/trusts",
+    "model": "Trust",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/users",
+    "model": "User",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/image/v2/imagedata",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/image/v2/imageimport",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/image/v2/images",
+    "model": "Image",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/image/v2/members",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/image/v2/tasks",
+    "model": "Task",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/keymanager/v1/acls",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/keymanager/v1/containers",
+    "model": "Container",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/keymanager/v1/orders",
+    "model": "Order",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/keymanager/v1/secrets",
+    "model": "Secret",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/amphorae",
+    "model": "Amphora",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/apiversions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/flavorprofiles",
+    "model": "FlavorProfile",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/flavors",
+    "model": "Flavor",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/l7policies",
+    "model": "L7Policy",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/listeners",
+    "model": "Listener",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/loadbalancers",
+    "model": "LoadBalancer",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/monitors",
+    "model": "Monitor",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/pools",
+    "model": "Pool",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/providers",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/quotas",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/messaging/v2/claims",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/messaging/v2/messages",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/messaging/v2/queues",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/metric/v1/metrics",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/apiversions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/agents",
+    "model": "Agent",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/attributestags",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/bgp/peers",
+    "model": "BGPPeer",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/bgp/speakers",
+    "model": "BGPSpeaker",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/bgpvpns",
+    "model": "BGPVPN",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/fwaas_v2/groups",
+    "model": "Group",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/fwaas_v2/policies",
+    "model": "Policy",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/fwaas_v2/rules",
+    "model": "Rule",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/layer3/addressscopes",
+    "model": "AddressScope",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/layer3/extraroutes",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/layer3/floatingips",
+    "model": "FloatingIP",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/layer3/portforwarding",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/layer3/routers",
+    "model": "Router",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/networkipavailabilities",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/qos/policies",
+    "model": "Policy",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/qos/rules",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/qos/ruletypes",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/quotas",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/rbacpolicies",
+    "model": "RBACPolicy",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/security/addressgroups",
+    "model": "AddressGroup",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/security/groups",
+    "model": "SecGroup",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/security/rules",
+    "model": "SecGroupRule",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/segments",
+    "model": "Segment",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/subnetpools",
+    "model": "SubnetPool",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/taas/tapmirrors",
+    "model": "TapMirror",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/trunks",
+    "model": "Trunk",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/vpnaas/endpointgroups",
+    "model": "EndpointGroup",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/vpnaas/ikepolicies",
+    "model": "Policy",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/vpnaas/ipsecpolicies",
+    "model": "Policy",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/vpnaas/services",
+    "model": "Service",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/vpnaas/siteconnections",
+    "model": "Connection",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/networks",
+    "model": "Network",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/ports",
+    "model": "Port",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/network/v2/subnets",
+    "model": "Subnet",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/objectstorage/v1/accounts",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/objectstorage/v1/containers",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/objectstorage/v1/objects",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/objectstorage/v1/swauth",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/apiversions",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/buildinfo",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/resourcetypes",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/stackevents",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/stackresources",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/stacks",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/orchestration/v1/stacktemplates",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/allocationcandidates",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/allocations",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/resourceclasses",
+    "model": "ResourceClass",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/resourceproviders",
+    "model": "ResourceProvider",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/traits",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/placement/v1/usages",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/reservation/v1/hosts",
+    "model": "Host",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/apiversions",
+    "model": "APIVersion",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/availabilityzones",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/messages",
+    "model": "Message",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/replicas",
+    "model": "Replica",
+    "find": false,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/schedulerstats",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/securityservices",
+    "model": "SecurityService",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/services",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/shareaccessrules",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/sharenetworks",
+    "model": "ShareNetwork",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/shares",
+    "model": "Share",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/sharetransfers",
+    "model": "Transfer",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/sharetypes",
+    "model": "ShareType",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/snapshots",
+    "model": "Snapshot",
+    "find": true,
+    "delete": true,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/utils",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "issue": "requires a scoped or specialized resource binding"
+  },
+  {
+    "package": "gophercloudsdk/workflow/v2/crontriggers",
+    "model": "CronTrigger",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/workflow/v2/executions",
+    "model": "Execution",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/workflow/v2/workflows",
+    "model": "Workflow",
+    "find": true,
+    "delete": true,
+    "wait": false
+  }
+]
