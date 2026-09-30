@@ -14,6 +14,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.compute.find_flavor(name, ignore_missing=False)` | `service.Flavors.Find(ctx, resource.Name(name))` |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
+| `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
+| `conn.create_server(..., boot_volume=volume, terminate_volume=True)` | 위 호출에 `compute.WithDeleteBootVolumeOnTermination(true)` 추가 |
 
 마지막 행은 의존 리소스를 해석하는 상위 작업의 대응입니다. Python의 `conn.compute.create_server(**attrs)`는 이미 준비한 API 속성을 전달하는 Proxy 작업이므로 상위 `conn.create_server(...)`와 구분해야 합니다. [공식 Compute API](https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html)
 
@@ -65,7 +67,46 @@ if err != nil {
 
 이미지와 네트워크의 이름은 연결이 제공한 서비스에서, flavor는 Compute에서 찾습니다. 이름이 중복되거나 없으면 POST 전에 실패합니다. ID를 지정한 의존성은 사전 조회하지 않습니다. 기본 네트워크 선택은 Nova에 맡기며, `WithNetworks()`의 빈 선택은 오류입니다.
 
-현재 옵션은 `WithMetadata`, `WithKeyName`, `WithUserData`, `WithConfigDrive`, `WithAvailabilityZone`, `WithSecurityGroups`, `WithNetworks`, `WithWait`, `WithField`입니다. UserData의 인코딩은 Gophercloud가 처리합니다. map/slice/확장 JSON 입력은 옵션 생성 시 복사하여 이후 애플리케이션의 변경으로 요청이 달라지지 않게 합니다.
+현재 옵션은 `WithMetadata`, `WithKeyName`, `WithUserData`, `WithConfigDrive`, `WithAvailabilityZone`, `WithSecurityGroups`, `WithNetworks`, `WithBootVolume`, `WithDeleteBootVolumeOnTermination`, `WithWait`, `WithField`입니다. UserData의 인코딩은 Gophercloud가 처리합니다. map/slice/확장 JSON 입력은 옵션 생성 시 복사하여 이후 애플리케이션의 변경으로 요청이 달라지지 않게 합니다.
+
+## 기존 볼륨으로 부팅
+
+Python:
+
+```python
+server = conn.create_server(
+    name="volume-server",
+    flavor="small",
+    boot_volume="root-volume",
+    terminate_volume=False,
+    network="private",
+    auto_ip=False,
+    wait=True,
+)
+```
+
+Go:
+
+```go
+server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
+    Name: "volume-server",
+    Flavor: resource.Name("small"),
+}, compute.WithBootVolume(resource.Name("root-volume")),
+   compute.WithNetworks(resource.Name("private")),
+   compute.WithWait(resource.WithTimeout(5*time.Minute)))
+if err != nil {
+    if server != nil { fmt.Println("created:", server.ID) }
+    return err
+}
+```
+
+`Image`를 비우고 `WithBootVolume`으로 이미 존재하는 부팅 볼륨을 선택합니다. 연결은 Block Storage의 정확한 이름 조회를 제공하며, 중복 이름이나 누락은 서버 생성 전에 오류로 처리합니다. `resource.ID("volume-id")`는 볼륨 사전 조회를 생략합니다. 볼륨이 bootable이고 사용 가능한지에 대한 검증은 Nova와 Cinder가 수행합니다.
+
+SDK는 `imageRef: ""`와 `source_type: "volume"`, `destination_type: "volume"`, `boot_index: 0`인 `block_device_mapping_v2`를 작성합니다. 별도의 builder나 매핑 구조체 구현은 필요하지 않습니다. 기본 `delete_on_termination`은 `false`이며, 서버 삭제 시 볼륨도 지우려면 `WithDeleteBootVolumeOnTermination(true)`를 추가합니다. `false`도 실제 JSON에 포함됩니다.
+
+이미지와 볼륨을 함께 지정하거나 둘 다 생략하면 조회를 포함한 모든 HTTP 요청 전에 실패합니다. 볼륨 없이 삭제 옵션만 지정하는 것도 오류입니다. Python의 `boot_volume`은 이미지 입력보다 우선하지만 Go는 상충하는 입력을 조기에 알려줍니다. 이 작업은 기존 볼륨을 사용하며, Python의 `boot_from_volume=True, image=..., volume_size=...`처럼 새 볼륨을 만드는 작업은 아직 상위 계층에 없습니다.
+
+생성 후 대기 실패는 생성 응답과 오류를 함께 반환합니다. SDK는 이 경우 서버나 볼륨을 삭제하지 않습니다. 옵션은 이후 서버가 삭제될 때 Nova가 적용하는 정책이며 대기 실패 시의 정리 정책이 아닙니다.
 
 ## 대기와 삭제
 
@@ -86,6 +127,6 @@ if err := service.Servers.Delete(ctx, resource.ID(server.ID)); err != nil {
 
 `compute.WithField("vendor_hint", value)`로 기본 생성 필드와 충돌하지 않는 확장 JSON을 전달할 수 있습니다. 예시 필드는 표준 Nova API가 아닙니다. builder는 SDK 내부에서 구현합니다. 필드 스키마·지원 여부·microversion은 실제 API가 검증합니다.
 
-flavor는 조회만 지원합니다. 서버 Update, reboot/resize 등의 action, keypair 관리, floating IP 연결, boot-from-volume은 아직 상위 계층에 없습니다. `service.RawClient()`를 이용한 Gophercloud 호출은 가능합니다.
+flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/resize 등의 action, keypair 관리에는 `service.API`의 [전체 Compute API](v2/README.md)를 사용할 수 있습니다. floating IP 연결과 이미지에서 새 부팅 볼륨을 만드는 작업은 아직 상위 계층에 없습니다. `service.RawClient()`를 이용한 Gophercloud 호출도 가능합니다.
 
-테스트는 [compute_test.go](compute_test.go), 전체 생성 흐름은 [server_create_test.go](../server_create_test.go), 페이지·이름·대기 정책은 [collections_test.go](../collections_test.go)에 있습니다.
+테스트는 [compute_test.go](compute_test.go), 기존 볼륨 부팅의 요청·검증·실패 정책은 [boot_volume_test.go](boot_volume_test.go), 연결을 통한 전체 생성 흐름은 [server_create_test.go](../server_create_test.go), 페이지·이름·대기 정책은 [collections_test.go](../collections_test.go)에 있습니다.
