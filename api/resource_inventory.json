@@ -15,17 +15,17 @@
   },
   {
     "package": "gophercloudsdk/baremetal/v1/conductors",
-    "find": false,
+    "model": "Conductor",
+    "find": true,
     "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "wait": false
   },
   {
     "package": "gophercloudsdk/baremetal/v1/drivers",
-    "find": false,
+    "model": "Driver",
+    "find": true,
     "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "wait": false
   },
   {
     "package": "gophercloudsdk/baremetal/v1/nodes",

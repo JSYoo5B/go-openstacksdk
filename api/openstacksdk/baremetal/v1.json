@@ -189,7 +189,9 @@
       ],
       "id": "baremetal/v1/drivers",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/drivers"
+      ],
       "review": "pending"
     },
     {
@@ -208,7 +210,9 @@
       ],
       "id": "baremetal/v1/get_driver",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/drivers"
+      ],
       "review": "pending"
     },
     {
@@ -227,7 +231,9 @@
       ],
       "id": "baremetal/v1/list_driver_vendor_passthru",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/drivers"
+      ],
       "review": "pending"
     },
     {
@@ -259,7 +265,9 @@
       ],
       "id": "baremetal/v1/call_driver_vendor_passthru",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/drivers"
+      ],
       "review": "pending"
     },
     {
@@ -2513,7 +2521,9 @@
       ],
       "id": "baremetal/v1/conductors",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/conductors"
+      ],
       "review": "pending"
     },
     {
@@ -2537,7 +2547,9 @@
       ],
       "id": "baremetal/v1/get_conductor",
       "kind": "proxy",
-      "candidates": [],
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/conductors"
+      ],
       "review": "pending"
     },
     {
