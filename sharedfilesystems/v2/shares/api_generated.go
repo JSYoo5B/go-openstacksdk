@@ -71,17 +71,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToShareCreateMap() (map[string]any, error) {
-	body, err := b.base.ToShareCreateMap()
+	value0, err := b.base.ToShareCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Share, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "shares", err)
+		var zero0 *Share
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "shares", err)
 		var zero0 *Share
 		return zero0, err
 	}
@@ -115,17 +127,28 @@ type extendOptsBuilder struct {
 }
 
 func (b extendOptsBuilder) ToShareExtendMap() (map[string]any, error) {
-	body, err := b.base.ToShareExtendMap()
+	value0, err := b.base.ToShareExtendMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Extend invokes the upstream API with library-owned builders and result handling.
 func (a *API) Extend(ctx context.Context, id string, opts ExtendOpts, options ...ExtendOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Extend", "shares", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Extend", "shares", err)
 		return err
 	}
 	_opts := extendOptsBuilder{base: cfg.Options, config: cfg}
@@ -184,17 +207,29 @@ type grantAccessOptsBuilder struct {
 }
 
 func (b grantAccessOptsBuilder) ToGrantAccessMap() (map[string]any, error) {
-	body, err := b.base.ToGrantAccessMap()
+	value0, err := b.base.ToGrantAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // GrantAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) GrantAccess(ctx context.Context, id string, opts GrantAccessOpts, options ...GrantAccessOption) (*AccessRight, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("GrantAccess", "shares", err)
+		var zero0 *AccessRight
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("GrantAccess", "shares", err)
 		var zero0 *AccessRight
 		return zero0, err
 	}
@@ -226,11 +261,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToShareListQuery() (string, error) {
-	query, err := b.base.ToShareListQuery()
+	value0, err := b.base.ToShareListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -238,6 +279,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "shares", err)
+		return func(yield func(*Share, error) bool) { var zero *Share; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "shares", err)
 		return func(yield func(*Share, error) bool) { var zero *Share; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -270,17 +316,28 @@ type resetStatusOptsBuilder struct {
 }
 
 func (b resetStatusOptsBuilder) ToShareResetStatusMap() (map[string]any, error) {
-	body, err := b.base.ToShareResetStatusMap()
+	value0, err := b.base.ToShareResetStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetStatus", "shares", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetStatus", "shares", err)
 		return err
 	}
 	_opts := resetStatusOptsBuilder{base: cfg.Options, config: cfg}
@@ -300,17 +357,28 @@ type revertOptsBuilder struct {
 }
 
 func (b revertOptsBuilder) ToShareRevertMap() (map[string]any, error) {
-	body, err := b.base.ToShareRevertMap()
+	value0, err := b.base.ToShareRevertMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Revert invokes the upstream API with library-owned builders and result handling.
 func (a *API) Revert(ctx context.Context, id string, opts RevertOpts, options ...RevertOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Revert", "shares", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Revert", "shares", err)
 		return err
 	}
 	_opts := revertOptsBuilder{base: cfg.Options, config: cfg}
@@ -332,17 +400,28 @@ type revokeAccessOptsBuilder struct {
 }
 
 func (b revokeAccessOptsBuilder) ToRevokeAccessMap() (map[string]any, error) {
-	body, err := b.base.ToRevokeAccessMap()
+	value0, err := b.base.ToRevokeAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RevokeAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RevokeAccess(ctx context.Context, id string, opts RevokeAccessOpts, options ...RevokeAccessOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RevokeAccess", "shares", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RevokeAccess", "shares", err)
 		return err
 	}
 	_opts := revokeAccessOptsBuilder{base: cfg.Options, config: cfg}
@@ -364,17 +443,29 @@ type setMetadataOptsBuilder struct {
 }
 
 func (b setMetadataOptsBuilder) ToSetMetadataMap() (map[string]any, error) {
-	body, err := b.base.ToSetMetadataMap()
+	value0, err := b.base.ToSetMetadataMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetMetadata(ctx context.Context, id string, opts SetMetadataOpts, options ...SetMetadataOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetMetadata", "shares", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetMetadata", "shares", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -398,17 +489,28 @@ type shrinkOptsBuilder struct {
 }
 
 func (b shrinkOptsBuilder) ToShareShrinkMap() (map[string]any, error) {
-	body, err := b.base.ToShareShrinkMap()
+	value0, err := b.base.ToShareShrinkMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Shrink invokes the upstream API with library-owned builders and result handling.
 func (a *API) Shrink(ctx context.Context, id string, opts ShrinkOpts, options ...ShrinkOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Shrink", "shares", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Shrink", "shares", err)
 		return err
 	}
 	_opts := shrinkOptsBuilder{base: cfg.Options, config: cfg}
@@ -433,17 +535,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToShareUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToShareUpdateMap()
+	value0, err := b.base.ToShareUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Share, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "shares", err)
+		var zero0 *Share
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "shares", err)
 		var zero0 *Share
 		return zero0, err
 	}
@@ -469,17 +583,29 @@ type updateMetadataOptsBuilder struct {
 }
 
 func (b updateMetadataOptsBuilder) ToUpdateMetadataMap() (map[string]any, error) {
-	body, err := b.base.ToUpdateMetadataMap()
+	value0, err := b.base.ToUpdateMetadataMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMetadata", "shares", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMetadata", "shares", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
