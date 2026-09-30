@@ -81,17 +81,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToL7PolicyCreateMap() (map[string]any, error) {
-	body, err := b.base.ToL7PolicyCreateMap()
+	value0, err := b.base.ToL7PolicyCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*L7Policy, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "l7policies", err)
+		var zero0 *L7Policy
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "l7policies", err)
 		var zero0 *L7Policy
 		return zero0, err
 	}
@@ -115,17 +127,29 @@ type createRuleOptsBuilder struct {
 }
 
 func (b createRuleOptsBuilder) ToRuleCreateMap() (map[string]any, error) {
-	body, err := b.base.ToRuleCreateMap()
+	value0, err := b.base.ToRuleCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateRule invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateRule(ctx context.Context, policyID string, opts CreateRuleOpts, options ...CreateRuleOption) (*Rule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateRule", "l7policies", err)
+		var zero0 *Rule
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateRule", "l7policies", err)
 		var zero0 *Rule
 		return zero0, err
 	}
@@ -173,11 +197,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToL7PolicyListQuery() (string, error) {
-	query, err := b.base.ToL7PolicyListQuery()
+	value0, err := b.base.ToL7PolicyListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -185,6 +215,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*L7Poli
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "l7policies", err)
+		return func(yield func(*L7Policy, error) bool) { var zero *L7Policy; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "l7policies", err)
 		return func(yield func(*L7Policy, error) bool) { var zero *L7Policy; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -207,11 +242,17 @@ type listRulesOptsBuilder struct {
 }
 
 func (b listRulesOptsBuilder) ToRulesListQuery() (string, error) {
-	query, err := b.base.ToRulesListQuery()
+	value0, err := b.base.ToRulesListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListRules invokes the upstream API with library-owned builders and result handling.
@@ -219,6 +260,11 @@ func (a *API) ListRules(ctx context.Context, policyID string, options ...ListRul
 	var opts ListRulesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListRules", "l7policies", err)
+		return func(yield func(*Rule, error) bool) { var zero *Rule; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListRules", "l7policies", err)
 		return func(yield func(*Rule, error) bool) { var zero *Rule; yield(zero, err) }
 	}
 	_opts := listRulesOptsBuilder{base: cfg.Options, config: cfg}
@@ -241,17 +287,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToL7PolicyUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToL7PolicyUpdateMap()
+	value0, err := b.base.ToL7PolicyUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*L7Policy, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "l7policies", err)
+		var zero0 *L7Policy
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "l7policies", err)
 		var zero0 *L7Policy
 		return zero0, err
 	}
@@ -275,17 +333,29 @@ type updateRuleOptsBuilder struct {
 }
 
 func (b updateRuleOptsBuilder) ToRuleUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToRuleUpdateMap()
+	value0, err := b.base.ToRuleUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateRule invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateRule(ctx context.Context, policyID string, ruleID string, opts UpdateRuleOpts, options ...UpdateRuleOption) (*Rule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateRule", "l7policies", err)
+		var zero0 *Rule
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateRule", "l7policies", err)
 		var zero0 *Rule
 		return zero0, err
 	}
