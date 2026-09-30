@@ -191,7 +191,15 @@ func (c *Connection) Network(ctx context.Context) (*network.Service, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.network = network.New(client)
+		c.network = network.NewWithDependencies(client, network.Dependencies{
+			Server: func(ctx context.Context, ref resource.Ref) (string, error) {
+				service, err := c.Compute(ctx)
+				if err != nil {
+					return "", err
+				}
+				return service.Servers.ResolveID(ctx, ref)
+			},
+		})
 	}
 	return c.network, nil
 }

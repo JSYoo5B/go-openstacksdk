@@ -17,15 +17,29 @@ import (
 type Network = networks.Network
 
 type Service struct {
-	API      *networkapi.Service
-	Networks *resource.Collection[Network]
-	client   *gophercloud.ServiceClient
+	API         *networkapi.Service
+	Networks    *resource.Collection[Network]
+	Ports       *resource.Collection[Port]
+	FloatingIPs *FloatingIPs
+	client      *gophercloud.ServiceClient
 }
 
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
+	return NewWithDependencies(client, Dependencies{})
+}
+
+// Dependencies connects named server references to Compute. Connection
+// supplies this resolver; explicit server IDs need no Compute lookup.
+type Dependencies struct {
+	Server func(context.Context, resource.Ref) (string, error)
+}
+
+// NewWithDependencies adds cross-service references while preserving New's
+// standalone constructor. All collections share the supplied Neutron client.
+func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
+	s := &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
 		Kind:    "network",
 		Get:     func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
 		List:    func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) },
@@ -36,4 +50,7 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Status:    func(n *Network) string { return n.Status },
 		Failed:    func(status string) bool { return strings.EqualFold(status, "ERROR") },
 	})}
+	s.Ports = s.API.Ports.Resources
+	s.FloatingIPs = newFloatingIPs(s, dependencies)
+	return s
 }
