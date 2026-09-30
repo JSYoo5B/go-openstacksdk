@@ -166,21 +166,21 @@ func (b listOptsBuilder) ToContainerListParams() (string, error) {
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
-func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*string, error] {
+func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Container, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("List", "containers", err)
-		return func(yield func(*string, error) bool) { var zero *string; yield(zero, err) }
+		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
 	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "containers", err)
-		return func(yield func(*string, error) bool) { var zero *string; yield(zero, err) }
+		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]string, error) {
-		values, err := upstream.ExtractNames(page)
-		return []string(values), err
+	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Container, error) {
+		values, err := upstream.ExtractInfo(page)
+		return []Container(values), err
 	})
 }
 
