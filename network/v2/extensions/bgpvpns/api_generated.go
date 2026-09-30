@@ -72,17 +72,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToBGPVPNCreateMap() (map[string]any, error) {
-	body, err := b.base.ToBGPVPNCreateMap()
+	value0, err := b.base.ToBGPVPNCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*BGPVPN, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "bgpvpns", err)
+		var zero0 *BGPVPN
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "bgpvpns", err)
 		var zero0 *BGPVPN
 		return zero0, err
 	}
@@ -108,17 +120,29 @@ type createNetworkAssociationOptsBuilder struct {
 }
 
 func (b createNetworkAssociationOptsBuilder) ToNetworkAssociationCreateMap() (map[string]interface{}, error) {
-	body, err := b.base.ToNetworkAssociationCreateMap()
+	value0, err := b.base.ToNetworkAssociationCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateNetworkAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateNetworkAssociation(ctx context.Context, id string, opts CreateNetworkAssociationOpts, options ...CreateNetworkAssociationOption) (*NetworkAssociation, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateNetworkAssociation", "bgpvpns", err)
+		var zero0 *NetworkAssociation
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateNetworkAssociation", "bgpvpns", err)
 		var zero0 *NetworkAssociation
 		return zero0, err
 	}
@@ -144,17 +168,29 @@ type createPortAssociationOptsBuilder struct {
 }
 
 func (b createPortAssociationOptsBuilder) ToPortAssociationCreateMap() (map[string]interface{}, error) {
-	body, err := b.base.ToPortAssociationCreateMap()
+	value0, err := b.base.ToPortAssociationCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreatePortAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreatePortAssociation(ctx context.Context, id string, opts CreatePortAssociationOpts, options ...CreatePortAssociationOption) (*PortAssociation, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreatePortAssociation", "bgpvpns", err)
+		var zero0 *PortAssociation
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreatePortAssociation", "bgpvpns", err)
 		var zero0 *PortAssociation
 		return zero0, err
 	}
@@ -180,17 +216,29 @@ type createRouterAssociationOptsBuilder struct {
 }
 
 func (b createRouterAssociationOptsBuilder) ToRouterAssociationCreateMap() (map[string]interface{}, error) {
-	body, err := b.base.ToRouterAssociationCreateMap()
+	value0, err := b.base.ToRouterAssociationCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateRouterAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateRouterAssociation(ctx context.Context, id string, opts CreateRouterAssociationOpts, options ...CreateRouterAssociationOption) (*RouterAssociation, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateRouterAssociation", "bgpvpns", err)
+		var zero0 *RouterAssociation
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateRouterAssociation", "bgpvpns", err)
 		var zero0 *RouterAssociation
 		return zero0, err
 	}
@@ -264,11 +312,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToBGPVPNListQuery() (string, error) {
-	query, err := b.base.ToBGPVPNListQuery()
+	value0, err := b.base.ToBGPVPNListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -276,6 +330,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*BGPVPN
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "bgpvpns", err)
+		return func(yield func(*BGPVPN, error) bool) { var zero *BGPVPN; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "bgpvpns", err)
 		return func(yield func(*BGPVPN, error) bool) { var zero *BGPVPN; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -300,11 +359,17 @@ type listNetworkAssociationsOptsBuilder struct {
 }
 
 func (b listNetworkAssociationsOptsBuilder) ToNetworkAssociationsListQuery() (string, error) {
-	query, err := b.base.ToNetworkAssociationsListQuery()
+	value0, err := b.base.ToNetworkAssociationsListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListNetworkAssociations invokes the upstream API with library-owned builders and result handling.
@@ -312,6 +377,11 @@ func (a *API) ListNetworkAssociations(ctx context.Context, id string, options ..
 	var opts ListNetworkAssociationsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListNetworkAssociations", "bgpvpns", err)
+		return func(yield func(*NetworkAssociation, error) bool) { var zero *NetworkAssociation; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListNetworkAssociations", "bgpvpns", err)
 		return func(yield func(*NetworkAssociation, error) bool) { var zero *NetworkAssociation; yield(zero, err) }
 	}
 	_opts := listNetworkAssociationsOptsBuilder{base: cfg.Options, config: cfg}
@@ -336,11 +406,17 @@ type listPortAssociationsOptsBuilder struct {
 }
 
 func (b listPortAssociationsOptsBuilder) ToPortAssociationsListQuery() (string, error) {
-	query, err := b.base.ToPortAssociationsListQuery()
+	value0, err := b.base.ToPortAssociationsListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListPortAssociations invokes the upstream API with library-owned builders and result handling.
@@ -348,6 +424,11 @@ func (a *API) ListPortAssociations(ctx context.Context, id string, options ...Li
 	var opts ListPortAssociationsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListPortAssociations", "bgpvpns", err)
+		return func(yield func(*PortAssociation, error) bool) { var zero *PortAssociation; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListPortAssociations", "bgpvpns", err)
 		return func(yield func(*PortAssociation, error) bool) { var zero *PortAssociation; yield(zero, err) }
 	}
 	_opts := listPortAssociationsOptsBuilder{base: cfg.Options, config: cfg}
@@ -372,11 +453,17 @@ type listRouterAssociationsOptsBuilder struct {
 }
 
 func (b listRouterAssociationsOptsBuilder) ToRouterAssociationsListQuery() (string, error) {
-	query, err := b.base.ToRouterAssociationsListQuery()
+	value0, err := b.base.ToRouterAssociationsListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListRouterAssociations invokes the upstream API with library-owned builders and result handling.
@@ -384,6 +471,11 @@ func (a *API) ListRouterAssociations(ctx context.Context, id string, options ...
 	var opts ListRouterAssociationsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListRouterAssociations", "bgpvpns", err)
+		return func(yield func(*RouterAssociation, error) bool) { var zero *RouterAssociation; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListRouterAssociations", "bgpvpns", err)
 		return func(yield func(*RouterAssociation, error) bool) { var zero *RouterAssociation; yield(zero, err) }
 	}
 	_opts := listRouterAssociationsOptsBuilder{base: cfg.Options, config: cfg}
@@ -406,17 +498,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToBGPVPNUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToBGPVPNUpdateMap()
+	value0, err := b.base.ToBGPVPNUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*BGPVPN, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "bgpvpns", err)
+		var zero0 *BGPVPN
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "bgpvpns", err)
 		var zero0 *BGPVPN
 		return zero0, err
 	}
@@ -442,17 +546,29 @@ type updatePortAssociationOptsBuilder struct {
 }
 
 func (b updatePortAssociationOptsBuilder) ToPortAssociationUpdateMap() (map[string]interface{}, error) {
-	body, err := b.base.ToPortAssociationUpdateMap()
+	value0, err := b.base.ToPortAssociationUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdatePortAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdatePortAssociation(ctx context.Context, bgpVpnID string, id string, opts UpdatePortAssociationOpts, options ...UpdatePortAssociationOption) (*PortAssociation, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdatePortAssociation", "bgpvpns", err)
+		var zero0 *PortAssociation
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdatePortAssociation", "bgpvpns", err)
 		var zero0 *PortAssociation
 		return zero0, err
 	}
@@ -478,17 +594,29 @@ type updateRouterAssociationOptsBuilder struct {
 }
 
 func (b updateRouterAssociationOptsBuilder) ToRouterAssociationUpdateMap() (map[string]interface{}, error) {
-	body, err := b.base.ToRouterAssociationUpdateMap()
+	value0, err := b.base.ToRouterAssociationUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateRouterAssociation invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateRouterAssociation(ctx context.Context, bgpVpnID string, id string, opts UpdateRouterAssociationOpts, options ...UpdateRouterAssociationOption) (*RouterAssociation, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateRouterAssociation", "bgpvpns", err)
+		var zero0 *RouterAssociation
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateRouterAssociation", "bgpvpns", err)
 		var zero0 *RouterAssociation
 		return zero0, err
 	}
