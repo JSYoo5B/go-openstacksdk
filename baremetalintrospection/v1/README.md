@@ -11,7 +11,7 @@ Gophercloud v2.15.0의 baremetalintrospection/v1 API를 하나의 인증된 서�
 | 확장 입력 | `**attrs`, `**query` | 가능한 연산의 `With...Field/Query/Header` |
 | 결과 | Resource 또는 generator | typed 값과 error 또는 `iter.Seq2` |
 
-전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답 모델은 Gophercloud 타입이며, 수정한 응답이 자동 저장되지는 않습니다.
+전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
 ## Go 사용
 
