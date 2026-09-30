@@ -1,0 +1,2832 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "extensions",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 49,
+      "parameters": [],
+      "resources": [
+        "openstack.block_storage.v2.extension.Extension"
+      ],
+      "id": "block_storage/v2/extensions",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_image",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 59,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "allow_duplicates",
+          "required": true
+        },
+        {
+          "name": "container_format",
+          "required": true
+        },
+        {
+          "name": "disk_format",
+          "required": true
+        },
+        {
+          "name": "wait",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "block_storage/v2/create_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 91,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/get_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 126,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/find_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "snapshots",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 170,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/snapshots",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 201,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/create_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 212,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/update_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 225,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/delete_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_snapshot_status",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 255,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/reset_snapshot_status",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 269,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/reset_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "manage_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 279,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/manage_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unmanage_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 291,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/unmanage_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_type",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 304,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/get_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_type",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 330,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/find_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "types",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 354,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/types",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_type",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 361,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/create_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_type",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 372,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/delete_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_type",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 389,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/update_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_type_extra_specs",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 404,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/update_type_extra_specs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_type_extra_specs",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 422,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/delete_type_extra_specs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_type_access",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 440,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type"
+      ],
+      "id": "block_storage/v2/get_type_access",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "add_type_access",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 453,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/add_type_access",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "remove_type_access",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 471,
+      "parameters": [
+        {
+          "name": "type",
+          "required": true
+        },
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/remove_type_access",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_type_encryption",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 488,
+      "parameters": [
+        {
+          "name": "volume_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.block_storage.v2.type.TypeEncryption",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/get_type_encryption",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_type_encryption",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 508,
+      "parameters": [
+        {
+          "name": "volume_type",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.block_storage.v2.type.TypeEncryption",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/create_type_encryption",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_type_encryption",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 528,
+      "parameters": [
+        {
+          "name": "encryption",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "volume_type",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.block_storage.v2.type.TypeEncryption",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/delete_type_encryption",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_type_encryption",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 562,
+      "parameters": [
+        {
+          "name": "encryption",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "volume_type",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.block_storage.v2.type.TypeEncryption",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/update_type_encryption",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 594,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/get_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 626,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/find_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "volumes",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 666,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/volumes",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 694,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/create_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 705,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/update_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 720,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "cascade",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume",
+        "openstack.exceptions.NotFoundException"
+      ],
+      "id": "block_storage/v2/delete_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "extend_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 761,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "size",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/extend_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_volume_readonly",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 773,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "readonly",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/set_volume_readonly",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "retype_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 788,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "new_type",
+          "required": true
+        },
+        {
+          "name": "migration_policy",
+          "required": false,
+          "default": "'never'"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.type.Type",
+        "openstack.block_storage.v2.volume.Volume",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/retype_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_volume_bootable_status",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 811,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "bootable",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/set_volume_bootable_status",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_volume_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 826,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/set_volume_image_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 841,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/delete_volume_image_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_volume_status",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 861,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attach_status",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "migration_status",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/reset_volume_status",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "attach_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 882,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "mountpoint",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "host_name",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/attach_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "detach_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 902,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "attachment",
+          "required": true
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "connector",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/detach_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unmanage_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 923,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/unmanage_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "migrate_volume",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 935,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "force_host_copy",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "lock_volume",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/migrate_volume",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "complete_volume_migration",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 961,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "new_volume",
+          "required": true
+        },
+        {
+          "name": "error",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/complete_volume_migration",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "upload_volume_to_image",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 980,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "image_name",
+          "required": true
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "disk_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "container_format",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/upload_volume_to_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "backend_pools",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1011,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.stats.Pools"
+      ],
+      "id": "block_storage/v2/backend_pools",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "backups",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1026,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/backups",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1055,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/get_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1084,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/find_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1115,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/create_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1126,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/delete_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "import_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1152,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "url",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/import_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "export_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1162,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/export_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "export_record",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1175,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/export_record",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "restore_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1184,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "name",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup",
+        "openstack.block_storage.v2.volume.Volume",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/restore_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups",
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_backup_status",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1206,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup"
+      ],
+      "id": "block_storage/v2/reset_backup_status",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_backup",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1220,
+      "parameters": [
+        {
+          "name": "backup",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.backup.Backup",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/reset_backup",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/backups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_limits",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1230,
+      "parameters": [
+        {
+          "name": "project",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.limits.Limits",
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/get_limits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_capabilities",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1252,
+      "parameters": [
+        {
+          "name": "host",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.capabilities.Capabilities"
+      ],
+      "id": "block_storage/v2/get_capabilities",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1266,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/create_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1278,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec",
+        "openstack.exceptions.NotFoundException"
+      ],
+      "id": "block_storage/v2/delete_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1305,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/update_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1321,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/get_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1349,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/find_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "qos_specs",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1378,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/qos_specs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "associate_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1390,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        },
+        {
+          "name": "vol_type_id",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/associate_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disassociate_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1406,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        },
+        {
+          "name": "vol_type_id",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/disassociate_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disassociate_all_qos_spec",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1422,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/disassociate_all_qos_spec",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_qos_spec_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1436,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec"
+      ],
+      "id": "block_storage/v2/delete_qos_spec_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "qos_spec_associations",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1452,
+      "parameters": [
+        {
+          "name": "qos_spec",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.qos_spec.QoSSpec",
+        "openstack.block_storage.v2.qos_spec.QoSSpecAssociation",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/qos_spec_associations",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1472,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": false,
+          "default": "'default'"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "block_storage/v2/get_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1492,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "block_storage/v2/update_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_set",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1516,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "usage",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "block_storage/v2/get_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_set_defaults",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1541,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "block_storage/v2/get_quota_set_defaults",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "revert_quota_set",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1560,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "block_storage/v2/revert_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_set",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1582,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/update_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1642,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/find_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "services",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1671,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/services",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "enable_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1683,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/enable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disable_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1697,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "reason",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/disable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "thaw_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1714,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/thaw_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "freeze_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1728,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/freeze_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "failover_service",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1742,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "backend_id",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.service.Service"
+      ],
+      "id": "block_storage/v2/failover_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_volume_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1762,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/fetch_volume_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_volume_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1777,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/get_volume_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_volume_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1792,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/set_volume_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1809,
+      "parameters": [
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.volume.Volume"
+      ],
+      "id": "block_storage/v2/delete_volume_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/volumes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1831,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/fetch_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1847,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "block_storage/v2/get_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1862,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/set_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1880,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.snapshot.Snapshot"
+      ],
+      "id": "block_storage/v2/delete_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/snapshots"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_transfer",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1902,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/create_transfer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_transfer",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1915,
+      "parameters": [
+        {
+          "name": "transfer",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/delete_transfer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_transfer",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1950,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/find_transfer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_transfer",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1974,
+      "parameters": [
+        {
+          "name": "transfer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/get_transfer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "transfers",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 1989,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/transfers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "accept_transfer",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2016,
+      "parameters": [
+        {
+          "name": "transfer",
+          "required": true
+        },
+        {
+          "name": "auth_key",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.transfer.Transfer"
+      ],
+      "id": "block_storage/v2/accept_transfer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/blockstorage/v2/transfers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_consistency_group",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2033,
+      "parameters": [
+        {
+          "name": "consistency_group",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/get_consistency_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_consistency_group",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2069,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/find_consistency_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "consistency_groups",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2102,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/consistency_groups",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_consistency_group",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2128,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/create_consistency_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_consistency_group_from_source",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2141,
+      "parameters": [
+        {
+          "name": "consistency_group_snapshot",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "consistency_group",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "name",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "description",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup",
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot",
+        "openstack.resource.Resource"
+      ],
+      "id": "block_storage/v2/create_consistency_group_from_source",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_consistency_group",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2186,
+      "parameters": [
+        {
+          "name": "consistency_group",
+          "required": true
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/delete_consistency_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_consistency_group",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2207,
+      "parameters": [
+        {
+          "name": "consistency_group",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group.ConsistencyGroup"
+      ],
+      "id": "block_storage/v2/update_consistency_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_consistency_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2231,
+      "parameters": [
+        {
+          "name": "consistency_group_snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot"
+      ],
+      "id": "block_storage/v2/get_consistency_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_consistency_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2270,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot"
+      ],
+      "id": "block_storage/v2/find_consistency_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "consistency_group_snapshots",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2303,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot"
+      ],
+      "id": "block_storage/v2/consistency_group_snapshots",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_consistency_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2330,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot"
+      ],
+      "id": "block_storage/v2/create_consistency_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_consistency_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2346,
+      "parameters": [
+        {
+          "name": "consistency_group_snapshot",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v2.consistency_group_snapshot.ConsistencyGroupSnapshot"
+      ],
+      "id": "block_storage/v2/delete_consistency_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2373,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": false,
+          "default": "'available'"
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "block_storage/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/block_storage/v2/_proxy.py",
+      "line": 2415,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "block_storage/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
