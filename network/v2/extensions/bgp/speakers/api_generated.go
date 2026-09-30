@@ -55,17 +55,29 @@ type addBGPPeerOptsBuilder struct {
 }
 
 func (b addBGPPeerOptsBuilder) ToBGPSpeakerAddBGPPeerMap() (map[string]any, error) {
-	body, err := b.base.ToBGPSpeakerAddBGPPeerMap()
+	value0, err := b.base.ToBGPSpeakerAddBGPPeerMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddBGPPeer invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddBGPPeer(ctx context.Context, bgpSpeakerID string, opts AddBGPPeerOpts, options ...AddBGPPeerOption) (*AddBGPPeerOpts, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddBGPPeer", "speakers", err)
+		var zero0 *AddBGPPeerOpts
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddBGPPeer", "speakers", err)
 		var zero0 *AddBGPPeerOpts
 		return zero0, err
 	}
@@ -91,17 +103,29 @@ type addGatewayNetworkOptsBuilder struct {
 }
 
 func (b addGatewayNetworkOptsBuilder) ToBGPSpeakerAddGatewayNetworkMap() (map[string]any, error) {
-	body, err := b.base.ToBGPSpeakerAddGatewayNetworkMap()
+	value0, err := b.base.ToBGPSpeakerAddGatewayNetworkMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddGatewayNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts AddGatewayNetworkOpts, options ...AddGatewayNetworkOption) (*AddGatewayNetworkOpts, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddGatewayNetwork", "speakers", err)
+		var zero0 *AddGatewayNetworkOpts
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddGatewayNetwork", "speakers", err)
 		var zero0 *AddGatewayNetworkOpts
 		return zero0, err
 	}
@@ -125,17 +149,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSpeakerCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSpeakerCreateMap()
+	value0, err := b.base.ToSpeakerCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*BGPSpeaker, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "speakers", err)
+		var zero0 *BGPSpeaker
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "speakers", err)
 		var zero0 *BGPSpeaker
 		return zero0, err
 	}
@@ -190,17 +226,28 @@ type removeBGPPeerOptsBuilder struct {
 }
 
 func (b removeBGPPeerOptsBuilder) ToBGPSpeakerRemoveBGPPeerMap() (map[string]any, error) {
-	body, err := b.base.ToBGPSpeakerRemoveBGPPeerMap()
+	value0, err := b.base.ToBGPSpeakerRemoveBGPPeerMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveBGPPeer invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveBGPPeer(ctx context.Context, bgpSpeakerID string, opts RemoveBGPPeerOpts, options ...RemoveBGPPeerOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveBGPPeer", "speakers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveBGPPeer", "speakers", err)
 		return err
 	}
 	_opts := removeBGPPeerOptsBuilder{base: cfg.Options, config: cfg}
@@ -222,17 +269,28 @@ type removeGatewayNetworkOptsBuilder struct {
 }
 
 func (b removeGatewayNetworkOptsBuilder) ToBGPSpeakerRemoveGatewayNetworkMap() (map[string]any, error) {
-	body, err := b.base.ToBGPSpeakerRemoveGatewayNetworkMap()
+	value0, err := b.base.ToBGPSpeakerRemoveGatewayNetworkMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveGatewayNetwork invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts RemoveGatewayNetworkOpts, options ...RemoveGatewayNetworkOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveGatewayNetwork", "speakers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveGatewayNetwork", "speakers", err)
 		return err
 	}
 	_opts := removeGatewayNetworkOptsBuilder{base: cfg.Options, config: cfg}
@@ -252,17 +310,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSpeakerUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToSpeakerUpdateMap()
+	value0, err := b.base.ToSpeakerUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, speakerID string, opts UpdateOpts, options ...UpdateOption) (*BGPSpeaker, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "speakers", err)
+		var zero0 *BGPSpeaker
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "speakers", err)
 		var zero0 *BGPSpeaker
 		return zero0, err
 	}
