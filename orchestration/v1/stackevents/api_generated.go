@@ -55,11 +55,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToStackEventListQuery() (string, error) {
-	query, err := b.base.ToStackEventListQuery()
+	value0, err := b.base.ToStackEventListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -67,6 +73,11 @@ func (a *API) List(ctx context.Context, stackName string, stackID string, option
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "stackevents", err)
+		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "stackevents", err)
 		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -91,11 +102,17 @@ type listResourceEventsOptsBuilder struct {
 }
 
 func (b listResourceEventsOptsBuilder) ToResourceEventListQuery() (string, error) {
-	query, err := b.base.ToResourceEventListQuery()
+	value0, err := b.base.ToResourceEventListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListResourceEvents invokes the upstream API with library-owned builders and result handling.
@@ -103,6 +120,11 @@ func (a *API) ListResourceEvents(ctx context.Context, stackName string, stackID 
 	var opts ListResourceEventsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListResourceEvents", "stackevents", err)
+		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListResourceEvents", "stackevents", err)
 		return func(yield func(*Event, error) bool) { var zero *Event; yield(zero, err) }
 	}
 	_opts := listResourceEventsOptsBuilder{base: cfg.Options, config: cfg}
