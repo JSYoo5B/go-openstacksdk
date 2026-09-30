@@ -52,17 +52,29 @@ type addSecurityServiceOptsBuilder struct {
 }
 
 func (b addSecurityServiceOptsBuilder) ToShareNetworkAddSecurityServiceMap() (map[string]any, error) {
-	body, err := b.base.ToShareNetworkAddSecurityServiceMap()
+	value0, err := b.base.ToShareNetworkAddSecurityServiceMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddSecurityService invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddSecurityService(ctx context.Context, id string, opts AddSecurityServiceOpts, options ...AddSecurityServiceOption) (*ShareNetwork, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddSecurityService", "sharenetworks", err)
+		var zero0 *ShareNetwork
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddSecurityService", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
 	}
@@ -86,17 +98,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToShareNetworkCreateMap() (map[string]any, error) {
-	body, err := b.base.ToShareNetworkCreateMap()
+	value0, err := b.base.ToShareNetworkCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ShareNetwork, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "sharenetworks", err)
+		var zero0 *ShareNetwork
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
 	}
@@ -133,11 +157,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToShareNetworkListQuery() (string, error) {
-	query, err := b.base.ToShareNetworkListQuery()
+	value0, err := b.base.ToShareNetworkListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -145,6 +175,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "sharenetworks", err)
+		return func(yield func(*ShareNetwork, error) bool) { var zero *ShareNetwork; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "sharenetworks", err)
 		return func(yield func(*ShareNetwork, error) bool) { var zero *ShareNetwork; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -169,17 +204,29 @@ type removeSecurityServiceOptsBuilder struct {
 }
 
 func (b removeSecurityServiceOptsBuilder) ToShareNetworkRemoveSecurityServiceMap() (map[string]any, error) {
-	body, err := b.base.ToShareNetworkRemoveSecurityServiceMap()
+	value0, err := b.base.ToShareNetworkRemoveSecurityServiceMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveSecurityService invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveSecurityService(ctx context.Context, id string, opts RemoveSecurityServiceOpts, options ...RemoveSecurityServiceOption) (*ShareNetwork, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveSecurityService", "sharenetworks", err)
+		var zero0 *ShareNetwork
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveSecurityService", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
 	}
@@ -203,17 +250,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToShareNetworkUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToShareNetworkUpdateMap()
+	value0, err := b.base.ToShareNetworkUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*ShareNetwork, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "sharenetworks", err)
+		var zero0 *ShareNetwork
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "sharenetworks", err)
 		var zero0 *ShareNetwork
 		return zero0, err
 	}
