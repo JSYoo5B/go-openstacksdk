@@ -57,10 +57,10 @@ if err := service.Volumes.Delete(ctx, resource.ID(volume.ID)); err != nil {
 
 `error`, `error_deleting`처럼 `error`로 시작하는 상태는 즉시 실패로 처리합니다. Delete는 삭제 요청의 성공을 반환하고 실제 삭제 완료까지 기다리지 않습니다.
 
-microversion이 필요하면 연결 시 `sdk.WithMicroversion(sdk.BlockStorage, "3.60")`을 지정합니다. 명시 버전을 전송하며 서버 지원 범위를 자동 협상하지는 않습니다. 직접 endpoint를 설정한다면 `/v3/<project-id>/`가 포함된 URL을 사용합니다.
+microversion이 필요하면 연결 시 `sdk.WithMicroversion(sdk.BlockStorage, "3.60")`으로 정확한 버전을 지정하거나, `sdk.WithMicroversionRange(sdk.BlockStorage, "3.0", "3.60")`으로 클라우드와 겹치는 가장 높은 버전을 선택합니다. [협상과 캐시 정책](../docs/microversions.md)을 참고하세요. 직접 endpoint를 설정한다면 `/v3/<project-id>/`가 포함된 URL을 사용합니다.
 
-## 미지원 범위와 테스트
+## 전체 API와 서버 부팅
 
-볼륨 생성·수정·크기 변경·attachment·snapshot·backup·volume type 관리와 서버와 볼륨을 연결하는 상위 작업은 아직 없습니다.
+볼륨 생성·수정·크기 변경·attachment·snapshot·backup·volume type 관리는 `service.API`의 [Block Storage v3 API](v3/README.md)에서 제공합니다. 기존 볼륨으로 서버를 부팅할 때는 [Compute의 `WithBootVolume`](../compute/README.md)을 사용하며, 볼륨 이름은 이 패키지의 `Volumes.ResolveID`로 해석합니다. 별도의 데이터 볼륨 생성·연결·분리와 상태 대기를 묶는 상위 작업은 계속 구현할 대상입니다.
 
 [blockstorage_test.go](blockstorage_test.go)는 Cinder의 실패 상태 패턴과 microversion 헤더를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.

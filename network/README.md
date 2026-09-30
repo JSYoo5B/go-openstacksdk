@@ -59,8 +59,10 @@ if err := service.Networks.Delete(ctx, resource.Name("private"),
 
 endpoint를 직접 지정할 때는 `sdk.WithEndpoint(sdk.Network, "https://network.example/")`처럼 Neutron의 base URL을 전달합니다. 연결 계층이 `/v2.0/`를 추가하므로 중복으로 붙이지 않습니다.
 
-## 미지원 범위와 테스트
+## 전체 API와 남은 복합 작업
 
-네트워크 생성·수정, subnet, port, router, security group, floating IP 관리와 revision 기반 변경은 아직 없습니다. `RawClient()`를 통한 Gophercloud 호출과 현재 상위 SDK 지원 범위를 구분해야 합니다.
+네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `gophercloudsdk/network/v2/networks`, `gophercloudsdk/network/v2/extensions/layer3/floatingips`를 import합니다.
+
+서버의 포트 선택부터 floating IP 선택·재사용·연결·대기까지 묶는 복합 작업은 아직 없습니다. 개별 FloatingIP API가 이 전체 작업을 수행하는 것으로 간주하지 않습니다.
 
 [network_test.go](network_test.go)는 추가 query의 URL 인코딩과 이름을 통한 삭제를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.

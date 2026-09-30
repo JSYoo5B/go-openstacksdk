@@ -54,8 +54,10 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 `Wait`는 모든 서비스에서 같은 형태를 사용하는 이 프로젝트의 공통 기능입니다. 상태 비교는 대소문자를 구분하지 않으며 `killed`·`deleted`를 실패로 처리합니다. 삭제된 ID 조회가 404면 `ErrNotFound`로 반환합니다.
 
-## 미지원 범위와 테스트
+## 전체 API와 남은 업로드 작업
 
-생성·업로드·다운로드·import task·멤버 관리·속성 수정은 아직 상위 API에 없습니다. 서버 생성의 이미지 이름 해석은 이 패키지의 Find를 사용합니다.
+생성·속성 수정, 데이터 업로드·다운로드, import, task, 멤버 관리는 `service.API`의 [Image v2 API](v2/README.md)에서 제공합니다. `service.API.Images`, `ImageData`, `ImageImport`, `Tasks`, `Members`에서 각 호출을 사용하며, 멤버는 `Members.InImage(ctx, ref)`로 부모 이미지를 고정할 수 있습니다. 서버 생성의 이미지 이름 해석은 이 패키지의 Find를 사용합니다.
+
+이미지 메타데이터 생성, 데이터 업로드 또는 import, 상태 대기, 실패 정리를 묶는 상위 작업은 아직 없습니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
 
 [image_test.go](image_test.go)는 Glance의 envelope 없는 응답, 추가 Properties, 실패 상태를 검증합니다. [서버 생성 통합 테스트](../server_create_test.go)는 Compute에서 이미지 이름을 해석하는 과정을 검증합니다.
