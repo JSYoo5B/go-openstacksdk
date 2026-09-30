@@ -1,0 +1,954 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "allocation_candidates",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 47,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.allocation_candidate.AllocationCandidate"
+      ],
+      "id": "placement/v1/allocation_candidates",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_allocation",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 87,
+      "parameters": [
+        {
+          "name": "consumer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.allocation.Allocation"
+      ],
+      "id": "placement/v1/get_allocation",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_allocation",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 104,
+      "parameters": [
+        {
+          "name": "consumer",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.allocation.Allocation"
+      ],
+      "id": "placement/v1/update_allocation",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_allocations",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 128,
+      "parameters": [
+        {
+          "name": "allocations",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.allocation.Allocation"
+      ],
+      "id": "placement/v1/create_allocations",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_allocation",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 147,
+      "parameters": [
+        {
+          "name": "consumer",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.allocation.Allocation"
+      ],
+      "id": "placement/v1/delete_allocation",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_resource_class",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 172,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass"
+      ],
+      "id": "placement/v1/create_resource_class",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_class",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 185,
+      "parameters": [
+        {
+          "name": "resource_class",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass"
+      ],
+      "id": "placement/v1/delete_resource_class",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_resource_class",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 210,
+      "parameters": [
+        {
+          "name": "resource_class",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass"
+      ],
+      "id": "placement/v1/update_resource_class",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_class",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 230,
+      "parameters": [
+        {
+          "name": "resource_class",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass"
+      ],
+      "id": "placement/v1/get_resource_class",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resource_classes",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 251,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass"
+      ],
+      "id": "placement/v1/resource_classes",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_resource_provider",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 266,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/create_resource_provider",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_provider",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 279,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/delete_resource_provider",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_resource_provider",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 304,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/update_resource_provider",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_provider",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 326,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/get_resource_provider",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_resource_provider",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 361,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/find_resource_provider",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resource_providers",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 385,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/resource_providers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_resource_provider_aggregates",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 400,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/fetch_resource_provider_aggregates",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_provider_aggregates",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 424,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "placement/v1/get_resource_provider_aggregates",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_resource_provider_aggregates",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 440,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "aggregates",
+          "variadic": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/set_resource_provider_aggregates",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_resource_provider_inventory",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 468,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "resource_class",
+          "required": true
+        },
+        {
+          "name": "total",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_class.ResourceClass",
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_inventory.ResourceProviderInventory",
+        "openstack.resource.Resource"
+      ],
+      "id": "placement/v1/create_resource_provider_inventory",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceclasses",
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_provider_inventory",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 503,
+      "parameters": [
+        {
+          "name": "resource_provider_inventory",
+          "required": true
+        },
+        {
+          "name": "resource_provider",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_inventory.ResourceProviderInventory"
+      ],
+      "id": "placement/v1/delete_resource_provider_inventory",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_resource_provider_inventory",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 542,
+      "parameters": [
+        {
+          "name": "resource_provider_inventory",
+          "required": true
+        },
+        {
+          "name": "resource_provider",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "resource_provider_generation",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_inventory.ResourceProviderInventory"
+      ],
+      "id": "placement/v1/update_resource_provider_inventory",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_provider_inventory",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 581,
+      "parameters": [
+        {
+          "name": "resource_provider_inventory",
+          "required": true
+        },
+        {
+          "name": "resource_provider",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_inventory.ResourceProviderInventory"
+      ],
+      "id": "placement/v1/get_resource_provider_inventory",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resource_provider_inventories",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 617,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_inventory.ResourceProviderInventory",
+        "openstack.resource.Resource"
+      ],
+      "id": "placement/v1/resource_provider_inventories",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_resource_provider_inventories",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 641,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "inventories",
+          "required": true
+        },
+        {
+          "name": "resource_provider_generation",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/set_resource_provider_inventories",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_provider_inventories",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 675,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/delete_resource_provider_inventories",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_resource_provider_usages",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 698,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider"
+      ],
+      "id": "placement/v1/fetch_resource_provider_usages",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resource_provider_allocations",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 722,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_allocation.ResourceProviderAllocation",
+        "openstack.resource.Resource"
+      ],
+      "id": "placement/v1/resource_provider_allocations",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 748,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.trait.Trait"
+      ],
+      "id": "placement/v1/create_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 757,
+      "parameters": [
+        {
+          "name": "trait",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.trait.Trait"
+      ],
+      "id": "placement/v1/delete_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 774,
+      "parameters": [
+        {
+          "name": "trait",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.trait.Trait"
+      ],
+      "id": "placement/v1/get_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "traits",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 787,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.trait.Trait"
+      ],
+      "id": "placement/v1/traits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_provider_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 797,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_trait.ResourceProviderTrait",
+        "openstack.resource.Resource"
+      ],
+      "id": "placement/v1/get_resource_provider_trait",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_resource_provider_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 816,
+      "parameters": [
+        {
+          "name": "resource_provider_trait",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider_trait.ResourceProviderTrait"
+      ],
+      "id": "placement/v1/set_resource_provider_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_provider_trait",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 836,
+      "parameters": [
+        {
+          "name": "resource_provider",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.resource_provider.ResourceProvider",
+        "openstack.placement.v1.resource_provider_trait.ResourceProviderTrait",
+        "openstack.resource.Resource"
+      ],
+      "id": "placement/v1/delete_resource_provider_trait",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/placement/v1/resourceproviders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "usages",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 865,
+      "parameters": [
+        {
+          "name": "project_id",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "consumer_type",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.placement.v1.usage.Usage"
+      ],
+      "id": "placement/v1/usages",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 894,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "placement/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/placement/v1/_proxy.py",
+      "line": 933,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "placement/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
