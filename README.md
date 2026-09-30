@@ -2,24 +2,30 @@
 
 Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사용 방식을 제공하는 Go SDK 프로젝트입니다. 애플리케이션이 기본값, 이름 조회, 페이지네이션, 상태 대기, 요청 builder를 반복해서 구현하지 않도록 하는 것이 목적입니다.
 
-현재는 **초기 구현**입니다. openstacksdk와 같은 수준의 일관성을 목표로 하지만 API 지원 범위가 동등한 것은 아닙니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 이름 `gophercloudsdk`는 로컬 개발용이며, 저장소 공개 시 실제 모듈 경로로 변경해야 합니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
+현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 이름 `gophercloudsdk`는 로컬 개발용이며, 저장소 공개 시 실제 모듈 경로로 변경해야 합니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
 
 ## 디렉토리와 지원 범위
 
 ```text
 gophercloudsdk/
-├── connection.go            # 인증, 설정, 서비스 접근과 캐시
-├── connection_options.go    # 연결의 typed functional options
+├── connection*.go           # 인증, 설정, 21개 서비스 접근과 캐시
 ├── compute/                 # 서버, flavor, 서버 생성 흐름
 ├── network/                 # Neutron 네트워크
 ├── image/                   # Glance 이미지
 ├── blockstorage/            # Cinder v3 볼륨
+├── identity/, dns/, ...     # 서비스별 버전 패키지와 전체 API
 ├── resource/                # 공통 조회, iterator, 대기, 옵션, 오류
-├── internal/query/          # SDK 내부의 Gophercloud builder 어댑터
+├── request/                 # SDK 소유 옵션, 확장 필드·query·header
+├── api/                     # API/리소스 지원 목록과 HTTP 계약 테스트
+├── internal/cmd/sdkgen/     # API, 공통 정책, 참조 문서 생성
 ├── internal/testcloud/      # HTTP 테스트 fixture
 ├── examples/create-server/  # 빌드 가능한 실행 예제
 └── docs/                    # 설계와 테스트 설명
 ```
+
+전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 104개 일반 Collection과 11개 부모 범위에 적용합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+
+아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
 | 서비스 | 리소스 | Get / Find / List / All | Delete | Wait | Create |
 |---|---|---|---|---|---|
@@ -29,7 +35,35 @@ gophercloudsdk/
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | 미지원 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
-Update, 리소스의 변경 추적/commit, floating IP 연결, boot-from-volume, 이미지 업로드, microversion 자동 협상은 아직 구현하지 않았습니다. Identity 인증은 연결 계층에서 사용하지만 별도의 Identity 리소스 서비스는 없습니다. 그 밖의 서비스도 아직 제공하지 않습니다.
+Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. 응답 변경 추적과 자동 commit, floating IP 연결을 포함한 복합 작업, boot-from-volume, 이미지 업로드의 상위 작업 흐름, microversion 자동 협상은 계속 구현할 대상입니다.
+
+## 모든 서비스의 사용 문서
+
+| 서비스 | API 버전 문서 | Connection |
+|---|---|---|
+| Bare Metal | [v1](baremetal/v1/README.md) | `BareMetal(ctx)` |
+| Bare Metal Introspection | [v1](baremetalintrospection/v1/README.md) | `BareMetalIntrospection(ctx)` |
+| Block Storage | [v2](blockstorage/v2/README.md), [v3](blockstorage/v3/README.md) | `BlockStorageV2(ctx)`, `BlockStorageV3(ctx)` |
+| Compute | [v2](compute/v2/README.md) | `ComputeV2(ctx)` |
+| Container | [v1](container/v1/README.md) | `Container(ctx)` |
+| Container Infra | [v1](containerinfra/v1/README.md) | `ContainerInfra(ctx)` |
+| Database | [v1](db/v1/README.md) | `Database(ctx)` |
+| DNS | [v2](dns/v2/README.md) | `DNS(ctx)` |
+| Identity | [v2](identity/v2/README.md), [v3](identity/v3/README.md) | `IdentityV2(ctx)`, `Identity(ctx)` |
+| Image | [v2](image/v2/README.md) | `ImageV2(ctx)` |
+| Key Manager | [v1](keymanager/v1/README.md) | `KeyManager(ctx)` |
+| Load Balancer | [v2](loadbalancer/v2/README.md) | `LoadBalancer(ctx)` |
+| Messaging | [v2](messaging/v2/README.md) | `Messaging(ctx)` |
+| Metric (Aetos) | [v1](metric/v1/README.md) | `Metric(ctx)` |
+| Object Storage | [v1](objectstorage/v1/README.md) | `ObjectStorage(ctx)` |
+| Orchestration | [v1](orchestration/v1/README.md) | `Orchestration(ctx)` |
+| Placement | [v1](placement/v1/README.md) | `Placement(ctx)` |
+| Network | [v2](network/v2/README.md) | `NetworkV2(ctx)` |
+| Reservation | [v1](reservation/v1/README.md) | `Reservation(ctx)` |
+| Shared File System | [v2](sharedfilesystems/v2/README.md) | `SharedFileSystem(ctx)` |
+| Workflow | [v2](workflow/v2/README.md) | `Workflow(ctx)` |
+
+각 문서에는 openstacksdk와의 입력·결과 형식 비교, 실제 서비스 필드, API 패키지 링크, 이름 조회·삭제·대기가 적용되는 리소스를 기록합니다. DNS zone이나 Octavia pool의 자식 리소스는 [부모 범위를 지정](docs/scoped-resources.md)해서 사용합니다.
 
 ## openstacksdk와 전체 사용 방식 비교
 
