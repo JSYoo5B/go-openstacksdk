@@ -9,7 +9,7 @@ import (
 // WaitDeleted resolves a name once and polls its ID until Get returns 404.
 // An already missing resource succeeds; authorization and transport errors fail.
 func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOption) error {
-	if err := ref.Validate(); err != nil {
+	if err := c.validateRef(ref); err != nil {
 		return err
 	}
 	o, err := parseWait(opts)

@@ -9,7 +9,7 @@ func (c *Collection[T]) ResolveID(ctx context.Context, ref Ref) (string, error) 
 	if err := ctx.Err(); err != nil {
 		return "", c.wrap("resolve", err)
 	}
-	if err := ref.Validate(); err != nil {
+	if err := c.validateRef(ref); err != nil {
 		return "", err
 	}
 	if !ref.IsName() {
@@ -26,7 +26,7 @@ func (c *Collection[T]) ResolveID(ctx context.Context, ref Ref) (string, error) 
 		return "", &NotFoundError{Resource: c.binding.Kind, Reference: ref.String()}
 	}
 	id := c.binding.ID(value)
-	if err := ID(id).Validate(); err != nil {
+	if err := c.validateID(id); err != nil {
 		return "", c.wrap("resolve", err)
 	}
 	return id, nil

@@ -10,7 +10,7 @@ resource.Name("web-01")  // 정확한 이름으로만 조회
 resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 ```
 
-빈 참조는 오류입니다. ID는 URL path 한 구간으로 사용할 수 있는 값이어야 하며 UUID 형식으로 제한하지는 않습니다. 이름은 query로 인코딩하므로 이름에 포함된 구두점도 그대로 사용할 수 있습니다.
+빈 참조는 오류입니다. ID의 기본 검증은 URL path 한 구간이며 UUID 형식으로 제한하지는 않습니다. 서비스에 따라 식별자 문법이 다르면 SDK의 binding이 검증과 URL 인코딩을 함께 맡습니다. 이름은 query로 인코딩하므로 이름에 포함된 구두점도 그대로 사용할 수 있습니다.
 
 | 메서드 | 동작 |
 |---|---|
@@ -59,8 +59,10 @@ Wait는 없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 �
 
 `Adapter[T]`는 getter, pager, extractor, ID/name/status 접근 함수를 등록하는 concrete descriptor입니다. 새 서비스 구현은 원래 Gophercloud의 API 호출과 모델 매핑에 집중하고 이름 조회·중복 검사·대기 알고리즘을 재작성하지 않습니다.
 
+`ValidateID`를 지정한 binding은 모든 조회·해석·삭제·대기에 같은 서비스 식별자 문법을 적용합니다. 생략하면 단일 URL path segment 검증을 사용합니다. `NameQueryKey`는 이름 검색의 서버 query 이름을 지정하며 기본값은 `name`입니다. `prefix` 검색을 쓰더라도 공통 계층은 정확한 이름 비교를 추가합니다. 애플리케이션이 이 설정을 구성하지는 않습니다.
+
 Collection과 서비스 객체의 zero value는 사용하지 않습니다. `Connection`이 구성한 서비스에서 가져오는 것이 일반적인 사용 경로입니다. 응답 객체를 수정해도 자동으로 서버에 반영되지 않습니다. 변경은 서비스 API의 typed Update, 또는 부모 범위 객체의 Update에 전달합니다.
 
-부모가 필요한 리소스는 [범위 객체](../docs/scoped-resources.md)를 사용합니다. `dns.RecordSets.InZone(ctx, resource.Name("example.org."))`처럼 부모를 한 번 해석하고, 반환된 객체의 Find/List/Delete/Wait와 Create/Update가 같은 부모를 사용합니다. 빈 ID, `.`, `..`와 URL 경로·query 문자가 들어간 ID는 요청 전에 거부합니다.
+부모가 필요한 리소스는 [범위 객체](../docs/scoped-resources.md)를 사용합니다. `dns.RecordSets.InZone(ctx, resource.Name("example.org."))`처럼 부모를 한 번 해석하고, 반환된 객체의 Find/List/Delete/Wait와 Create/Update가 같은 부모를 사용합니다. 기본 식별자 검증은 빈 ID, `.`, `..`와 URL 경로·query 문자가 들어간 ID를 요청 전에 거부합니다.
 
 테스트는 [collection_test.go](collection_test.go)와 [서비스 공통 통합 테스트](../collections_test.go)에 있습니다.

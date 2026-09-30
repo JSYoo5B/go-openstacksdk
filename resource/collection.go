@@ -16,17 +16,21 @@ import (
 // Adapter supplies service operations to the shared collection implementation.
 // SDK service packages construct it; normal SDK callers do not implement adapters.
 type Adapter[T any] struct {
-	Kind      string
-	Get       func(context.Context, string) (*T, error)
-	List      func(url.Values) pagination.Pager
-	Iterate   func(context.Context, url.Values) iter.Seq2[*T, error]
-	Extract   func(pagination.Page) ([]T, error)
-	Delete    func(context.Context, string) error
-	ID        func(*T) string
-	Name      func(*T) string
-	NameQuery func(string) string
-	Status    func(*T) string
-	Failed    func(string) bool
+	Kind string
+	// ValidateID is supplied by SDK bindings whose identifiers are not ordinary
+	// URL segments, such as Swift object keys. Such bindings also own URL escaping.
+	ValidateID   func(string) error
+	Get          func(context.Context, string) (*T, error)
+	List         func(url.Values) pagination.Pager
+	Iterate      func(context.Context, url.Values) iter.Seq2[*T, error]
+	Extract      func(pagination.Page) ([]T, error)
+	Delete       func(context.Context, string) error
+	ID           func(*T) string
+	Name         func(*T) string
+	NameQuery    func(string) string
+	NameQueryKey string
+	Status       func(*T) string
+	Failed       func(string) bool
 }
 
 // Collection shares lookup, streaming, deletion and wait policies across services.
@@ -37,13 +41,27 @@ func NewCollection[T any](adapter Adapter[T]) *Collection[T] {
 	return &Collection[T]{binding: adapter}
 }
 
+func (c *Collection[T]) validateID(id string) error {
+	if c.binding.ValidateID != nil {
+		return c.binding.ValidateID(id)
+	}
+	return ID(id).Validate()
+}
+
+func (c *Collection[T]) validateRef(ref Ref) error {
+	if ref.IsName() {
+		return ref.Validate()
+	}
+	return c.validateID(ref.String())
+}
+
 func (c *Collection[T]) wrap(op string, err error) error {
 	return &OperationError{Operation: op, Resource: c.binding.Kind, Cause: err}
 }
 
 // Get fetches by ID. Use Find with Name for an exact name lookup.
 func (c *Collection[T]) Get(ctx context.Context, id string) (*T, error) {
-	if err := ID(id).Validate(); err != nil {
+	if err := c.validateID(id); err != nil {
 		return nil, err
 	}
 	if c.binding.Get == nil {
@@ -83,7 +101,11 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			return
 		}
 		if o.name != nil && c.binding.NameQuery != nil {
-			o.query.Set("name", c.binding.NameQuery(*o.name))
+			key := c.binding.NameQueryKey
+			if key == "" {
+				key = "name"
+			}
+			o.query.Set(key, c.binding.NameQuery(*o.name))
 		}
 		if c.binding.Iterate != nil {
 			for value, err := range c.binding.Iterate(ctx, o.query) {
@@ -147,7 +169,7 @@ func (c *Collection[T]) All(ctx context.Context, opts ...ListOption) ([]*T, erro
 
 // Find resolves an explicit ID or exact name. Duplicate names always fail.
 func (c *Collection[T]) Find(ctx context.Context, ref Ref, opts ...LookupOption) (*T, error) {
-	if err := ref.Validate(); err != nil {
+	if err := c.validateRef(ref); err != nil {
 		return nil, err
 	}
 	o, err := parseLookup(false, opts)
@@ -180,7 +202,7 @@ func (c *Collection[T]) Find(ctx context.Context, ref Ref, opts ...LookupOption)
 // Delete ignores missing resources by default, but never hides other errors.
 // ID references are deleted directly; names are resolved first.
 func (c *Collection[T]) Delete(ctx context.Context, ref Ref, opts ...LookupOption) error {
-	if err := ref.Validate(); err != nil {
+	if err := c.validateRef(ref); err != nil {
 		return err
 	}
 	o, err := parseLookup(true, opts)
@@ -220,7 +242,7 @@ func (c *Collection[T]) Delete(ctx context.Context, ref Ref, opts ...LookupOptio
 // Wait resolves the reference once, then polls the same ID. It defaults to a
 // five-minute timeout and two-second interval; parent cancellation takes priority.
 func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts ...WaitOption) (*T, error) {
-	if err := ref.Validate(); err != nil {
+	if err := c.validateRef(ref); err != nil {
 		return nil, err
 	}
 	if strings.TrimSpace(status) == "" {
