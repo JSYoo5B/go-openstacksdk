@@ -1,0 +1,118 @@
+# SDK 지원 판정대장
+
+이 문서는 생성된 API 호출과 SDK 수준의 지원을 구분하기 위한 판정 기준과 확인한 구현 과제를 기록합니다. 고정 기준은 Gophercloud **v2.15.0**, openstacksdk **ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe**입니다. 아래 초기 조사 결과는 SDK 커밋 **6c4ac1e**를 기준으로 합니다. 이후 추가한 구현은 해당 연산의 증거를 갱신해야 합니다.
+
+[Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
+
+## 초기 조사 이후 검증한 계약
+
+| 구현 단위 | 검증 증거 | 남은 비교 범위 |
+|---|---|---|
+| 페이지 순환 중단 (`b5af42b`) | [네 가지 공통 iterator 테스트](../resource/pagination_test.go), [Swift marker 테스트](../api/pagination_contracts_test.go): 자기 링크·A→B→A·query 순서·반복 marker, 오류 한 번 전달, break 이후 링크 검사 생략 | 서버가 계속 다른 URL로 중복 데이터를 반환하는 경우를 일반적으로 deduplicate하지 않음 |
+| 선택적 microversion 교집합 협상 (`ba63bde`) | [HTTP discovery 테스트](../microversion_test.go): 인증, project/reverse-proxy 경로, 숫자 비교, 명시 버전 우선, 헤더, 동시 캐시, 취소·재시도 | [문서화한 Go 선택 정책](microversions.md)은 Python의 자동 기본값과 다름. 모든 연산의 필드 capability를 자동 판정하지 않음 |
+| 기존 볼륨 부팅 (`350e511`) | [Compute 계약](../compute/boot_volume_test.go), [Connection과 Cinder 연결](../connection_boot_volume_test.go): ID 조회 생략, 정확 이름, 모호성, 삭제 기본값, 실패 시 생성 서버 보존 | cloud `create_server` 전체의 floating IP·추가 볼륨·snapshot 부팅은 별도 |
+| 이미지에서 새 볼륨 부팅 (`4c92f74`) | [Nova mapping 계약](../compute/new_boot_volume_test.go): 크기·타입, 2.67 요구, 숫자 minor 비교, 실패 시 무삭제 | Python의 기본 50 GiB 대신 Go는 `WithBootVolumeSize`로 양의 용량을 명시. snapshot source는 별도 |
+
+이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. 위 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`가 통과했습니다.
+
+## 판정 상태
+
+| 상태 | 의미 | 완료로 인정할 증거 |
+|---|---|---|
+| `supported` | 고정 소스의 동작을 Go API로 제공 | 입력·기본값·결과·오류·해당 리소스의 공통 정책을 구현하고 동작을 검증한 테스트와 사용 문서 |
+| `go_mapping` | Go의 타입·context·오류·옵션에 맞게 형태나 기본값을 의도적으로 변경 | 실제 사용 가능한 대체 API, Python과 달라지는 의미의 명시, 동일 기능을 검증한 테스트와 사용 문서 |
+| `unsupported` | 필요한 기능이 구현되지 않았음을 확인 | 빠진 동작과 이유, 구현할 대상 또는 의존 API. 지원 완료 상태가 아님 |
+| `unresolved` | 동작 또는 근거를 아직 판정하지 못함 | 비교할 소스와 다음 확인 작업. 이름 기반 후보 매칭도 이 상태에 해당 |
+
+`unsupported`는 검토를 마쳤다는 뜻이지 프로젝트 목표를 달성했다는 뜻이 아닙니다. 사용자에게 필요한 기능을 제외하는 결정이나 Go에서 제공하기 어려운 구현을 회피하는 데 `go_mapping`을 사용하지 않습니다. 일부 기능만 지원한 연산은 전체 연산을 `supported`로 표시하지 않고 세부 동작을 나눕니다.
+
+## 생성 목록이 포함하지 않는 표면
+
+현재 [inventory.py](../internal/cmd/parity/inventory.py)는 클래스 본문에 직접 선언된 공개 함수만 읽습니다. `methods_in`은 부모 클래스나 descriptor를 탐색하지 않습니다. 직접 선언 집계는 Proxy 1,834개, cloud 397개, Connection 5개이며 전체 공개 API 수를 의미하지 않습니다.
+
+| 종류 | 현재 집계 | 추가로 추적할 표면과 소스 근거 |
+|---|---|---|
+| 서비스 Proxy 직접 선언 | 서비스 버전별 JSON에 포함 | [compute/v2/_proxy.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py)의 공개 연산 등 |
+| Proxy 상속 | 제외 | [proxy.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/proxy.py)의 `request`, `should_skip_resource_cleanup`과 외부 `keystoneauth1.adapter.Adapter`의 공개 기능. 외부 의존성 버전까지 확인해야 전체 표면을 확정할 수 있음 |
+| Connection 상속 | 직접 선언 5개와 분리 | [connection.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/connection.py)의 cloud mixin 상속. cloud 목록은 모듈별 클래스의 함수 목록이므로 실제 Connection MRO에서 노출되는 연산과 중복·override 관계를 추가로 판정해야 함 |
+| 서비스 descriptor와 별칭 | 제외 | [_services_mixin.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/_services_mixin.py)의 `compute`, `block_storage` 등의 서비스 속성과 `volume`, `block_store` 등의 별칭 |
+| 런타임 서비스 등록 | `add_service` 함수만 포함 | [Connection.add_service](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/connection.py#L524)의 `setattr`와 `service.all_types`로 추가되는 서비스 속성. field/query/header 확장과 서비스 등록은 다른 기능임 |
+| Resource 기본 동작 | 제외 | [resource.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py)의 `create`, `fetch`, `commit`, `delete`, `list`, `find`, 변경 추적, microversion 선택과 capability 검사 |
+| Resource mixin과 action | 제외 | [Server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/server.py#L41)의 `MetadataMixin`, `TagMixin`; [common/metadata.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/metadata.py), [common/tag.py](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/tag.py)의 공개 동작 |
+
+상속과 descriptor는 소스 AST의 import·부모 클래스·alias를 따라 별도로 조사해야 합니다. SDK 초기화에 실제 인증이나 서비스 호출이 필요할 수 있으므로 Python 모듈 import만으로 표면을 확인하는 방식에 의존하지 않습니다. 외부 의존 클래스나 런타임에 사용자가 추가한 서비스처럼 고정 소스만으로 확정할 수 없는 표면은 조사 범위와 미확정 이유를 기록합니다.
+
+## 대장의 보존과 검증
+
+생성 도구는 모든 `review`를 `pending`으로 설정합니다. 생성 JSON을 직접 수정해 지원 판정을 저장하면 재생성 시 사라집니다. 수작업 판정은 생성 목록과 별도 파일로 보관하고 안정적인 연산 ID로 연결해야 합니다. 다음 정보가 있어야 판정을 재검토할 수 있습니다.
+
+- Python 또는 Gophercloud 연산 ID, 종류, 고정 소스 버전과 파일·함수 위치
+- 직접 선언·상속·descriptor·Resource 동작 중 출처와 실제 노출 클래스
+- Go 패키지와 공개 API, 필요한 기능을 나눈 세부 계약
+- 기본값 차이, 옵션, 결과 모델, 오류와 부분 성공 처리
+- 테스트 파일·테스트명과 실제 검증한 경로; 단순 빌드 검사는 HTTP 의미의 증거로 사용하지 않음
+- 사용 문서와 남은 동작; `go_mapping`이면 사용자에게 관찰되는 변경과 이유
+
+예를 들어 `compute/v2/get_server_password`의 Go 매핑은 아래처럼 판정할 수 있습니다. 이 예시는 대장 구조와 근거를 보여주며 자동 판정 결과가 아닙니다.
+
+```json
+{
+  "operation": "compute/v2/get_server_password",
+  "kind": "proxy",
+  "status": "go_mapping",
+  "go_api": "compute/v2/servers.API.GetPassword",
+  "contracts": ["encrypted password by default", "HTTP and decode errors retained"],
+  "differences": ["empty or missing password maps to empty Go string", "optional RSA decryption is a Go SDK extension"],
+  "tests": [
+    "api/password_contracts_test.go:TestServerPasswordDefaultAndOptionalDecryption",
+    "api/password_contracts_test.go:TestServerPasswordHandlesEmptyResponsesAndErrors"
+  ],
+  "documentation": "compute/v2/servers/README.md"
+}
+```
+
+판정 검증기는 존재하지 않는 연산·Go API·테스트·문서, 중복 ID, 근거 없는 `supported`/`go_mapping`, 누락된 현재 연산, 고정 버전 불일치를 거부해야 합니다. 목록 재생성은 판정을 보존하고 새 연산은 `unresolved`로 추가합니다. 소스 계약이 바뀌었으면 기존 판정을 그대로 재사용하지 않고 다시 검토합니다. 상속된 같은 구현을 23개 서비스마다 다시 구현된 것으로 세지 않고 공유 계약과 노출 위치를 연결합니다.
+
+## 증거를 연결할 수 있는 기존 구현
+
+아래 기능은 구현과 의미 있는 HTTP 계약 테스트가 있어 첫 판정 후보로 사용할 수 있습니다. 표는 테스트 소스를 확인한 결과이며, 최종 지원 판정 전에는 해당 테스트 실행 결과와 Python의 전체 연산 계약을 함께 확인해야 합니다.
+
+| 대상 | Go 구현과 테스트 | 판정에서 구분할 의미 |
+|---|---|---|
+| Nova 관리자 암호 읽기 | [servers/password.go](../compute/v2/servers/password.go), [password 계약 테스트](../api/password_contracts_test.go) | Python은 암호 누락 시 `None`, Go는 빈 string. RSA 복호화는 선택 기능이며 기본값은 암호화된 값 |
+| QoS bandwidth limit·DSCP marking·minimum bandwidth의 Get/Create/Update/Delete/List | [rules API](../network/v2/extensions/qos/rules/api_generated.go), [부모 scope](../network/v2/extensions/qos/rules/scopes_generated.go), [QoS 계약 테스트](../api/qos_contracts_test.go), [공통 scope 테스트](../api/scoped_contracts_test.go) | policy를 먼저 고정하는 Go API, concrete opts, 공통 Delete의 미존재 허용. Python Find의 기본 미존재 허용과 추가 query 인자는 별도 비교 필요 |
+| Swift 이름·opaque object key·metadata HEAD | [container Collection](../objectstorage/v1/containers/resources.go), [object scope](../objectstorage/v1/objects/resources.go), [Swift 리소스 계약 테스트](../api/swift_resources_contracts_test.go), [Swift 목록 계약 테스트](../api/swift_listing_contracts_test.go) | slash를 포함한 object key와 URL escape, HEAD metadata와 헤더, 명시 Name/ID 정책. Python metadata 갱신의 기본 refresh까지 지원한 것으로 확대하지 않음 |
+| DNS optional headers와 Swift versioned COPY query | [optional builder 테스트](../api/optional_builders_test.go), [optional trait 생성기](../internal/cmd/sdkgen/optional.go) | native 함수가 선택 interface로 읽는 header/query를 SDK builder가 보존. 이것만으로 모든 확장 및 microversion 지원이 증명되지는 않음 |
+
+Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic virtual media의 typed body·추가 JSON·header 보존도 [인증 테스트](../api/authentication_contracts_test.go)와 [virtual media 테스트](../api/virtual_media_contracts_test.go)에서 확인할 수 있습니다. Python Proxy 목록에 직접 대응하지 않는 Gophercloud 연산도 원본 API ID를 가진 별도 항목으로 추적해야 합니다.
+
+## 우선 구현할 차이
+
+초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
+
+| 우선 과제 | 확인한 코드 근거 | 필요한 구현과 검증 |
+|---|---|---|
+| 공통 페이지네이션의 cycle 중단 | [Stream](../resource/stream.go)과 [Collection.List](../resource/collection.go)가 `pagination.Pager.EachPage`에 위임. Gophercloud v2.15.0 `pagination/pager.go`는 `NextPageURL`을 다음 요청 URL로 대입하며 반복 URL을 검사하지 않음 | nonempty page가 자기 URL 또는 A→B→A를 반환할 때 `All`/`Find`가 중복 데이터를 계속 읽지 않도록 공유 guard 적용. linked URL·marker 페이지, break, 취소, 빈 페이지, 원래 오류 보존 테스트 필요 |
+| 이름이 다른 Ironic 조회/목록의 공통 정책 | [conductors API](../baremetal/v1/conductors/api_generated.go)의 `Get/List`와 `Conductor.Hostname`; [drivers API](../baremetal/v1/drivers/api_generated.go)의 `GetDriverDetails/ListDrivers`, `Driver.Name`; [introspection API](../baremetalintrospection/v1/introspection/api_generated.go)의 `GetIntrospectionStatus/ListIntrospections` | SDK 소유의 검토된 binding으로 alternate getter/lister와 Hostname 식별자를 연결. introspection은 `Finished bool`/`Error string`을 이용하므로 문자열 Status 기반 Wait와 별도 waiter가 필요. 없는 Delete를 만들지 않음 |
+| Heat stack과 복합 부모 식별자 | [stacks API](../orchestration/v1/stacks/api_generated.go): Get/Delete에 `stackName, stackID`, 목록 `ListedStack`과 조회 `RetrievedStack`이 다름. [stackresources](../orchestration/v1/stackresources/api_generated.go), [stackevents](../orchestration/v1/stackevents/api_generated.go)에 추가 부모·자식 인자 | 공통 stack 모델과 library-owned identity/name 해석, 이름 중복, canonical ID 보존, 부모 범위. `*_FAILED` 상태와 deletion waiter를 검증. Python `get_stack`의 `resolve_outputs=True`도 별도 계약으로 추적 |
+| Trove database/user의 instance 범위 | [databases API](../db/v1/databases/api_generated.go), [users API](../db/v1/users/api_generated.go)는 parent+name List/Delete와 batch Create만 제공. Python [Database](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/database/v1/database.py)는 name이 alternate ID이며 `allow_fetch`를 켜지 않음 | instance를 고정하는 scope, exact name lookup, batch/single 생성의 명확한 Go 매핑, missing Delete 정책. Python Proxy에 `get_database`가 있어도 실제 Resource capability가 없으므로 존재하지 않는 GET endpoint를 추정해 만들지 않음 |
+| Nova instance action/tag의 서버 범위 | [instanceactions API](../compute/v2/instanceactions/api_generated.go)는 `Get(serverID, requestID)`의 `InstanceActionDetail`과 List의 `InstanceAction`이 다름. [tags API](../compute/v2/tags/api_generated.go)는 모든 호출에서 serverID를 요구 | 서버를 먼저 해석하는 scope, requestID 식별자, detail/list 변환의 정보 보존, tags의 Add/Check/Replace/Remove 정책. tag나 requestID를 일반 리소스 이름으로 잘못 추측하지 않음 |
+| Manila access rule의 조회 범위 | [shareaccessrules API](../sharedfilesystems/v2/shareaccessrules/api_generated.go)는 `Get(accessID)`와 `List(shareID)`의 스코프가 다르고 List가 slice를 반환. 생성·해제는 share action과 연결해야 함 | share parent scope와 typed iterator, 전역 accessID 조회의 부모 확인 정책, share의 allow/deny action 연결, access 상태 대기. 잘못된 부모에 대한 오류를 숨기지 않음 |
+| quotas·limits 등 singleton/read-only 자료 | [compute quotasets](../compute/v2/quotasets/api_generated.go)는 tenant ID별 Get/Detail/Update/Delete이며 List가 없음. Cinder·Neutron·Manila quota와 각 서비스 limits도 일반 CRUD 목록과 다름 | project Ref를 해석하는 typed singleton API, Get/Reset/Update와 기본 current-project 정책. 조회가 없는 리소스에 Find/List/Wait를 추가하지 않고 실제 capability를 문서화 |
+| Resource 상태와 응답 확장 정책 | 대다수 [생성 API](../image/v2/images/api_generated.go)는 Gophercloud 모델 alias와 Extract 결과만 반환. Python [Resource.commit](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1881)은 dirty 필드와 patch 정책을 처리 | 변경 추적·commit 또는 동일 작업을 제공하는 명시적 Go update API의 계약을 결정하고 검증. header/추가 JSON 보존 정책도 서비스별 확인. Glance `Image.Properties`는 Gophercloud에서도 추가 필드를 보존하므로 모든 alias가 확장 응답을 버린다고 가정하지 않음 |
+| Python에만 존재하는 서비스/버전 | Python manifest에는 accelerator, clustering, instance_ha, image v1 등이 있으나 [Connection 서비스 registry](../connection_services_generated.go)와 Gophercloud v2.15.0 호출 목록에 대응 구현이 없음 | 고정 Python Resource/endpoint 계약에서 typed API와 서비스 연결을 구현. 다른 서비스의 RawClient나 generic HTTP 요청을 해당 서비스 SDK 지원으로 판정하지 않음 |
+
+복합 작업에서는 floating IP의 선택·재사용·연결, 추가 볼륨·snapshot 부팅, 이미지 upload/import의 전체 흐름이 별도 남은 계약입니다. Python [cloud create_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L915)는 `auto_ip=True`, `reuse_ips=True`, boot volume·추가 volume 등을 처리합니다. Go의 기존 이미지 기반 생성과 선택적 ACTIVE 대기, 또는 기존 boot volume 한 가지를 지원하는 것으로 전체 `create_server`를 완료 처리하지 않습니다.
+
+## 완료 판정
+
+프로젝트 완료를 주장하려면 다음 근거가 함께 필요합니다.
+
+1. 두 고정 소스의 연산뿐 아니라 확인한 상속·descriptor·Resource 표면을 빠짐없이 추적하고, 미확정 범위를 공개합니다.
+2. 각 API의 필수 입력, 생략/false/빈 값/zero 구분, library-owned builder, 기본값, query/header/body 확장, 결과와 오류를 실제 계약 테스트로 확인합니다.
+3. 이름 조회, 중복, 미존재, pagination, cancellation, 삭제·상태 대기는 해당 리소스가 지원하는 동작에 맞게 검증합니다. 표면이 비슷한 단일 서비스의 테스트를 전체 서비스의 증거로 사용하지 않습니다.
+4. 서비스 간 작업은 정상 흐름과 각 단계의 실패·부분 성공·재시도·대기·정리 정책을 검증합니다. 자동 삭제나 rollback은 문서화한 정책을 따라야 합니다.
+5. 모든 서비스와 전체 사용 문서가 구현된 공개 API를 사용하고, 예제 빌드와 문서 링크를 확인합니다.
+6. `supported`/`go_mapping` 항목마다 실제 증거가 있고, 요청 범위의 `unsupported`/`unresolved` 항목이 남아 있으면 전체 목표를 완료로 표시하지 않습니다.
+
+microversion 자동 선택·협상과 요청 필드 capability 검증 역시 공통 SDK 계약입니다. [WithMicroversion](../connection_options.go)의 명시 선택 기능만으로 자동 협상까지 지원한다고 판정하지 않습니다. 이 대장의 각 조사 항목은 구현과 검증이 추가될 때 갱신해야 하며, 생성된 transport 함수 수는 완료율의 대체 지표로 사용하지 않습니다.
