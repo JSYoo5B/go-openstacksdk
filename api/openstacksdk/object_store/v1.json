@@ -1,0 +1,835 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "get_account_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 119,
+      "parameters": [],
+      "resources": [
+        "openstack.object_store.v1.account.Account"
+      ],
+      "id": "object_store/v1/get_account_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_account_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 123,
+      "parameters": [
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.account.Account"
+      ],
+      "id": "object_store/v1/set_account_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_account_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 133,
+      "parameters": [
+        {
+          "name": "keys",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.account.Account"
+      ],
+      "id": "object_store/v1/delete_account_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "containers",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 143,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/containers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_container",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 154,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/create_container",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_container",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 168,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/delete_container",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_container_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 189,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/get_container_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_container_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 203,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "refresh",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/set_container_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_container_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 233,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/delete_container_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "objects",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 249,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/objects",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 288,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "resp_chunk_size",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "outfile",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remember_content",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/get_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "download_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 352,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/download_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "stream_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 374,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "chunk_size",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/stream_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 398,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "filename",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "md5",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "sha256",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "segment_size",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "use_slo",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "metadata",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "generate_checksums",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "data",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "headers",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/create_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "copy_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 531,
+      "parameters": [],
+      "resources": [],
+      "id": "object_store/v1/copy_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_object",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 535,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/delete_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_object_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 563,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/get_object_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_object_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 583,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/set_object_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_object_metadata",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 615,
+      "parameters": [
+        {
+          "name": "obj",
+          "required": true
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container",
+        "openstack.object_store.v1.obj.Object"
+      ],
+      "id": "object_store/v1/delete_object_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "is_object_stale",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 634,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "filename",
+          "required": true
+        },
+        {
+          "name": "file_md5",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "file_sha256",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException"
+      ],
+      "id": "object_store/v1/is_object_stale",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_object_segment_size",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 860,
+      "parameters": [
+        {
+          "name": "segment_size",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException",
+        "openstack.exceptions.PreconditionFailedException",
+        "openstack.exceptions.SDKException"
+      ],
+      "id": "object_store/v1/get_object_segment_size",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_info",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 913,
+      "parameters": [],
+      "resources": [
+        "openstack.object_store.v1.info.Info"
+      ],
+      "id": "object_store/v1/get_info",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_account_temp_url_key",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 923,
+      "parameters": [
+        {
+          "name": "key",
+          "required": true
+        },
+        {
+          "name": "secondary",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.account.Account"
+      ],
+      "id": "object_store/v1/set_account_temp_url_key",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_container_temp_url_key",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 935,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "key",
+          "required": true
+        },
+        {
+          "name": "secondary",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/set_container_temp_url_key",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_temp_url_key",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 952,
+      "parameters": [
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/get_temp_url_key",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "generate_form_signature",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 998,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "object_prefix",
+          "required": true
+        },
+        {
+          "name": "redirect_url",
+          "required": true
+        },
+        {
+          "name": "max_file_size",
+          "required": true
+        },
+        {
+          "name": "max_upload_count",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": true
+        },
+        {
+          "name": "temp_url_key",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.SDKException",
+        "openstack.object_store.v1.container.Container"
+      ],
+      "id": "object_store/v1/generate_form_signature",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "generate_temp_url",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 1059,
+      "parameters": [
+        {
+          "name": "path",
+          "required": true
+        },
+        {
+          "name": "seconds",
+          "required": true
+        },
+        {
+          "name": "method",
+          "required": true
+        },
+        {
+          "name": "absolute",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "prefix",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "iso8601",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "ip_range",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "temp_url_key",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [],
+      "id": "object_store/v1/generate_temp_url",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 1247,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "object_store/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/object_store/v1/_proxy.py",
+      "line": 1286,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "object_store/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
