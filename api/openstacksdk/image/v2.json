@@ -820,7 +820,8 @@
       "id": "image/v2/add_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -853,7 +854,8 @@
       "id": "image/v2/remove_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -885,7 +887,8 @@
       "id": "image/v2/find_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -912,7 +915,8 @@
       "id": "image/v2/get_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -939,7 +943,8 @@
       "id": "image/v2/members",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -970,7 +975,8 @@
       "id": "image/v2/update_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/image/v2/images"
+        "gophercloudsdk/image/v2/images",
+        "gophercloudsdk/image/v2/members"
       ],
       "review": "pending"
     },
