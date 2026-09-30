@@ -7,7 +7,7 @@
   "reviews": [
     {
       "operation": "gophercloud:compute/v2/servers.GetPassword",
-      "source_fingerprint": "bfc1b64462cae4180a9962a555e3ad881c20bd1b99d62d51e5cb527629e33c97",
+      "source_fingerprint": "6898af458222dab0c25561c3f138a599659d85a739976d6f861abee52913af67",
       "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/compute/v2/servers.API.GetPassword",
@@ -36,7 +36,7 @@
     },
     {
       "operation": "gophercloud:baremetalintrospection/v1/introspection.StartIntrospection",
-      "source_fingerprint": "f9dd395b29a00e20425b839213032c6f1174ec421790a28fc925b72a83033cdf",
+      "source_fingerprint": "519fff8408a390adbea0077a9c491935fff20736f5fe06990541bb8e8bc861f9",
       "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection",
@@ -67,7 +67,7 @@
     },
     {
       "operation": "python:compute/v2/get_server_password",
-      "source_fingerprint": "1e2dad1f9140a947c2282e56c2e07e46e59b816cc18b355ad7e3ca22fd5f278c",
+      "source_fingerprint": "584a1b0270d924bdc9c35580ad72be091fa7ccd32499d016dd49a6756ac616b5",
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/compute/v2/servers.API.GetPassword"
@@ -99,7 +99,7 @@
     },
     {
       "operation": "python:baremetal_introspection/v1/start_introspection",
-      "source_fingerprint": "fb10635f01f11c338f267188115509c4cadc76d1de9a33a1a31fa45319f23f3b",
+      "source_fingerprint": "d17d61c24b9e38f5cc30035cd85f8abcf7a32ae4e6795d2436f4b24335a8f1c4",
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection"

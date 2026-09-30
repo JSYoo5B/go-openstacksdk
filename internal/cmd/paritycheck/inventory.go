@@ -43,11 +43,15 @@ func loadInventory(root string) (operationCatalog, error) {
 		delete(value, "return_policy")
 		delete(value, "request_policy")
 		delete(value, "issue")
-		data, err := json.Marshal(value)
+		pin := pythonPin
+		if strings.HasPrefix(id, "gophercloud:") {
+			pin = gophercloudPin
+		}
+		fingerprint, err := sourceFingerprint(pin, value)
 		if err != nil {
 			return err
 		}
-		result.Operations[id] = fmt.Sprintf("%x", sha256.Sum256(data))
+		result.Operations[id] = fingerprint
 		return nil
 	}
 	var native struct {
@@ -137,9 +141,25 @@ func loadInventory(root string) (operationCatalog, error) {
 	return result, nil
 }
 
+func sourceFingerprint(pin string, declaration map[string]any) (string, error) {
+	data, err := json.Marshal(map[string]any{"source_pin": pin, "declaration": declaration})
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", sha256.Sum256(data)), nil
+}
+
 // Reject duplicate JSON keys rather than accepting encoding/json's last value.
 // Otherwise a duplicated review or catalog ID could hide contradictory evidence.
 func readJSON(path string, target any) error {
+	return readJSONPolicy(path, target, false)
+}
+
+func readStrictJSON(path string, target any) error {
+	return readJSONPolicy(path, target, true)
+}
+
+func readJSONPolicy(path string, target any, strict bool) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -190,7 +210,11 @@ func readJSON(path string, target any) error {
 	if _, err := decoder.Token(); err != io.EOF {
 		return fmt.Errorf("%s: trailing JSON content", path)
 	}
-	if err := json.Unmarshal(data, target); err != nil {
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if strict {
+		decoder.DisallowUnknownFields()
+	}
+	if err := decoder.Decode(target); err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
 	return nil

@@ -56,12 +56,12 @@
 [paritycheck](../internal/cmd/paritycheck/README.md)는 다음 계약을 검사합니다.
 
 - catalog의 현재 연산 누락·추가·fingerprint 불일치와 source pin 불일치
-- 중복 연산 ID·판정·JSON key, 존재하지 않는 연산
+- 중복 연산 ID·판정·JSON key, 모르는 판정 필드, 존재하지 않는 연산
 - 공개 Go 함수·명시적 receiver method, 실제 `Test` 함수와 사용 문서의 존재
 - `supported`/`go_mapping`의 API·계약별 테스트·문서 근거, `go_mapping`의 관찰 가능한 차이
 - 남은 기능이 있는 연산을 전체 지원으로 판정하는 경우
 
-fingerprint는 생성 목록의 소스 위치·선언 입력 등 metadata를 고정 revision과 함께 확인합니다. Go 후보 패키지나 transport 반환 정책만 바뀌면 원본 판정은 유지합니다. 테스트 이름의 존재를 검사하는 것으로 HTTP 의미까지 증명하지는 않으므로 판정자는 원본 계약·테스트 내용을 확인하고 관련 검증을 실행해야 합니다. 상속 구현과 런타임 surface는 별도 조사 범위로 남습니다.
+fingerprint에는 고정 source pin과 생성 목록의 소스 위치·선언 입력 등 metadata를 포함합니다. Go 후보 패키지나 transport 반환 정책만 바뀌면 원본 판정은 유지합니다. 테스트 이름의 존재를 검사하는 것으로 HTTP 의미까지 증명하지는 않으므로 판정자는 원본 계약·테스트 내용을 확인하고 관련 검증을 실행해야 합니다. 상속 구현과 런타임 surface는 별도 조사 범위로 남습니다.
 
 ```sh
 go run ./internal/cmd/paritycheck
@@ -69,7 +69,7 @@ go run ./internal/cmd/paritycheck
 go run ./internal/cmd/paritycheck -sync
 ```
 
-`-sync`는 수작업 판정을 다시 쓰지 않습니다. 검토한 원본의 fingerprint가 달라지거나 연산이 없어지면 catalog 저장 전에 실패하여 기존 근거를 보존합니다. 새 소스를 다시 검토하고 판정 상태와 근거를 함께 갱신해야 합니다. `make check`도 이 검증을 실행합니다.
+`-sync`는 수작업 판정을 다시 쓰지 않습니다. 검토한 원본의 fingerprint가 달라지거나 기존 연산이 없어지면 catalog 저장 전에 실패하여 기존 근거를 보존합니다. 미검토 연산도 삭제하지 않으며 저장 중 write 실패에도 기존 catalog가 남습니다. 새 소스를 다시 검토하고 판정 상태와 근거를 함께 갱신해야 합니다. `make check`도 이 검증을 실행합니다.
 
 현재 durable 판정은 native 암호 조회와 보정한 Inspector 시작의 Go 매핑 두 항목부터 연결했습니다. 대응 Python 연산은 확인한 세부 계약을 기록하고 전체 상속·리소스 의미 비교가 남아 `unresolved`로 유지합니다. 다른 구현의 증거도 같은 방식으로 점진적으로 연결하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
 

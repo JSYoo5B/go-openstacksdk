@@ -43,18 +43,30 @@ func check(root string, sync bool) (supportCounts, error) {
 		return counts, err
 	}
 	var ledger reviewLedger
-	if err := readJSON(filepath.Join(root, "api/sdk_reviews.json"), &ledger); err != nil {
+	if err := readStrictJSON(filepath.Join(root, "api/sdk_reviews.json"), &ledger); err != nil {
 		return counts, err
 	}
 	if ledger.Schema != 1 || ledger.Pins != pins {
 		return counts, fmt.Errorf("review schema or source pins do not match the current inventory")
 	}
-	if !sync {
-		var catalog operationCatalog
-		if err := readJSON(filepath.Join(root, "api/sdk_support_catalog.json"), &catalog); err != nil {
-			return counts, err
+	var catalog operationCatalog
+	catalogPath := filepath.Join(root, "api/sdk_support_catalog.json")
+	err = readStrictJSON(catalogPath, &catalog)
+	if err != nil && (!sync || !os.IsNotExist(err)) {
+		return counts, err
+	}
+	if err == nil {
+		if catalog.Schema != 1 || catalog.Pins != pins {
+			return counts, fmt.Errorf("catalog schema or source pins do not match the current inventory")
 		}
-		if catalog.Schema != 1 || catalog.Pins != pins || !reflect.DeepEqual(catalog.Operations, current.Operations) {
+		// Missing unreviewed operations are still unfinished work. Never silently
+		// drop them during sync, for example after a truncated generation output.
+		for id := range catalog.Operations {
+			if _, exists := current.Operations[id]; !exists {
+				return counts, fmt.Errorf("catalog operation %q disappeared from the inventory; reassess the source before removing tracked work", id)
+			}
+		}
+		if !sync && !reflect.DeepEqual(catalog.Operations, current.Operations) {
 			return counts, fmt.Errorf("operation catalog is stale or incomplete; review source changes and run paritycheck -sync")
 		}
 	}
@@ -82,11 +94,35 @@ func check(root string, sync bool) (supportCounts, error) {
 		}
 		// Reviews are deliberately not rewritten. A changed source fingerprint
 		// fails above even during sync, leaving both files available for review.
-		if err := os.WriteFile(filepath.Join(root, "api/sdk_support_catalog.json"), append(data, '\n'), 0644); err != nil {
+		if err := writeAtomic(catalogPath, append(data, '\n')); err != nil {
 			return counts, err
 		}
 	}
 	return counts, nil
+}
+
+func writeAtomic(path string, data []byte) error {
+	file, err := os.CreateTemp(filepath.Dir(path), ".sdk-support-catalog-*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(file.Name())
+	if err := file.Chmod(0644); err != nil {
+		file.Close()
+		return err
+	}
+	if _, err := file.Write(data); err != nil {
+		file.Close()
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		file.Close()
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+	return os.Rename(file.Name(), path)
 }
 
 func validateReview(root string, catalog operationCatalog, symbols symbolIndex, review supportReview) error {
@@ -95,7 +131,7 @@ func validateReview(root string, catalog operationCatalog, symbols symbolIndex, 
 		return fmt.Errorf("operation does not exist in the pinned declared inventory")
 	}
 	if review.Fingerprint != fingerprint {
-		return fmt.Errorf("source fingerprint changed or is missing; reassess the contract before keeping its status")
+		return fmt.Errorf("source fingerprint changed or is missing (current %s); reassess the contract before keeping its status", fingerprint)
 	}
 	switch review.Status {
 	case "supported":

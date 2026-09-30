@@ -52,8 +52,14 @@ func goSymbols(root string) (symbolIndex, error) {
 			return err
 		}
 		pkg := modulePath
+		internal := false
 		if dir := filepath.Dir(rel); dir != "." {
 			pkg += "/" + filepath.ToSlash(dir)
+			for _, component := range strings.Split(filepath.ToSlash(dir), "/") {
+				if component == "internal" {
+					internal = true
+				}
+			}
 		}
 		testFile := strings.HasSuffix(entry.Name(), "_test.go")
 		for _, decl := range file.Decls {
@@ -67,7 +73,7 @@ func goSymbols(root string) (symbolIndex, error) {
 				}
 				continue
 			}
-			if !ast.IsExported(fn.Name.Name) || strings.HasPrefix(filepath.ToSlash(rel), "internal/") || file.Name.Name == "main" {
+			if !ast.IsExported(fn.Name.Name) || internal || file.Name.Name == "main" {
 				continue
 			}
 			name := pkg + "." + fn.Name.Name

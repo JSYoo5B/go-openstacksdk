@@ -37,6 +37,7 @@ func fixture(t *testing.T) string {
 	put(t, root, "service/api_test.go", "package service\nimport test \"testing\"\nfunc TestFetch(t *test.T) {}\nfunc TestNotATest() {}\nfunc TestHelper(value string) {}\nfunc Testlowercase(t *test.T) {}\n")
 	put(t, root, "service/README.md", "# Usage\n")
 	put(t, root, "internal/hidden.go", "package internal\nfunc Public() {}\n")
+	put(t, root, "service/internal/hidden/api.go", "package hidden\nfunc Public() {}\n")
 	putJSON(t, root, "api/gophercloud_inventory.json", map[string]any{
 		"gophercloud_version": gophercloudPin,
 		"operations":          []map[string]any{{"package": "service/v1/resources", "name": "Fetch", "source": "upstream/service"}},
@@ -140,6 +141,7 @@ func TestReviewRequiresExistingEvidenceAndHonestStatus(t *testing.T) {
 		{"missing API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/service.API.Absent"} }},
 		{"private API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/service.private"} }},
 		{"internal API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/internal.Public"} }},
+		{"nested internal API", "not an exported declaration", func(r *supportReview) { r.GoAPI = []string{"example/service/internal/hidden.Public"} }},
 		{"test helper", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:TestHelper"} }},
 		{"lowercase test", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:Testlowercase"} }},
 		{"missing test", "not a declared Test", func(r *supportReview) { r.Contracts[0].Tests = []string{"service/api_test.go:TestMissing"} }},
@@ -216,5 +218,87 @@ func TestSDKDiscoveryHintsDoNotInvalidateSourceReviews(t *testing.T) {
 	after, err := loadInventory(root)
 	if err != nil || !reflect.DeepEqual(before, after) {
 		t.Fatalf("catalog changed for candidate-only update: %v", err)
+	}
+}
+
+func TestUnknownReviewFieldsCannotHideRemainingContracts(t *testing.T) {
+	for _, tc := range []struct{ name, key string }{
+		{"review", "remainng"}, {"contract", "test"}, {"pins", "gopherclod"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := fixture(t)
+			writeReviews(t, root, validReview(t, root))
+			var ledger map[string]any
+			if err := readJSON(filepath.Join(root, "api/sdk_reviews.json"), &ledger); err != nil {
+				t.Fatal(err)
+			}
+			review := ledger["reviews"].([]any)[0].(map[string]any)
+			switch tc.name {
+			case "review":
+				review[tc.key] = []any{"not fully implemented"}
+			case "contract":
+				review["contracts"].([]any)[0].(map[string]any)[tc.key] = "typo"
+			case "pins":
+				ledger["source_pins"].(map[string]any)[tc.key] = gophercloudPin
+			}
+			putJSON(t, root, "api/sdk_reviews.json", ledger)
+			if _, err := check(root, true); err == nil || !strings.Contains(err.Error(), "unknown field") {
+				t.Fatalf("unknown field accepted: %v", err)
+			}
+		})
+	}
+}
+
+func TestSyncDoesNotDropUnreviewedOperations(t *testing.T) {
+	root := fixture(t)
+	if _, err := check(root, true); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := os.ReadFile(filepath.Join(root, "api/sdk_support_catalog.json"))
+	putJSON(t, root, "api/gophercloud_inventory.json", map[string]any{"gophercloud_version": gophercloudPin, "operations": []any{}})
+	if _, err := check(root, true); err == nil || !strings.Contains(err.Error(), "disappeared") {
+		t.Fatalf("unreviewed operation was dropped: %v", err)
+	}
+	after, _ := os.ReadFile(filepath.Join(root, "api/sdk_support_catalog.json"))
+	if !reflect.DeepEqual(before, after) {
+		t.Fatal("failed sync lost tracked work")
+	}
+}
+
+func TestAtomicCatalogRenameFailureKeepsExistingData(t *testing.T) {
+	root := t.TempDir()
+	// A directory cannot be replaced by the catalog file. Its existing evidence
+	// must survive the failed rename, and the temporary file must be removed.
+	put(t, root, "catalog/existing.json", "old evidence")
+	if err := writeAtomic(filepath.Join(root, "catalog"), []byte("new evidence")); err == nil {
+		t.Fatal("expected rename error")
+	}
+	value, err := os.ReadFile(filepath.Join(root, "catalog/existing.json"))
+	if err != nil || string(value) != "old evidence" {
+		t.Fatalf("value=%q err=%v", value, err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil || len(entries) != 1 {
+		t.Fatalf("temporary file leaked: entries=%v err=%v", entries, err)
+	}
+	put(t, root, "current.json", "old")
+	if err := writeAtomic(filepath.Join(root, "current.json"), []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	value, _ = os.ReadFile(filepath.Join(root, "current.json"))
+	if string(value) != "new" {
+		t.Fatalf("value=%q", value)
+	}
+}
+
+func TestSourceFingerprintIncludesRevisionEvenWhenDeclarationIsUnchanged(t *testing.T) {
+	declaration := map[string]any{"package": "service/v1/resources", "name": "Fetch"}
+	old, err := sourceFingerprint("v2.15.0", declaration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed, err := sourceFingerprint("v2.16.0", declaration)
+	if err != nil || old == changed {
+		t.Fatalf("old=%s changed=%s err=%v", old, changed, err)
 	}
 }
