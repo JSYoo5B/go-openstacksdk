@@ -56,21 +56,20 @@ func (b createAuthBuilder) ToTokenV2CreateMap() (map[string]any, error) {
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
-func (a *API) Create(ctx context.Context, auth AuthOptions, options ...CreateOption) (CreateResult, error) {
+func (a *API) Create(ctx context.Context, auth AuthOptions, options ...CreateOption) (*Authentication, error) {
 	cfg, err := request.Apply(auth, options...)
 	if err != nil {
 		err = request.Wrap("Create", "tokens", err)
-		var zero0 CreateResult
-		return zero0, err
+		return nil, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "tokens", err)
-		var zero0 CreateResult
-		return zero0, err
+		return nil, err
 	}
 	_auth := createAuthBuilder{base: cfg.Options, config: cfg}
 	result := upstream.Create(ctx, a.client, _auth)
-	return result, request.Wrap("Create", "tokens", result.Err)
+	value, err := extractAuthentication(result.Result)
+	return value, request.Wrap("Create", "tokens", err)
 }
 
 // CreateURL invokes the upstream API with library-owned builders and result handling.
@@ -79,9 +78,10 @@ func (a *API) CreateURL(ctx context.Context) string {
 }
 
 // Get invokes the upstream API with library-owned builders and result handling.
-func (a *API) Get(ctx context.Context, token string) (GetResult, error) {
+func (a *API) Get(ctx context.Context, token string) (*Authentication, error) {
 	result := upstream.Get(ctx, a.client, token)
-	return result, request.Wrap("Get", "tokens", result.Err)
+	value, err := extractAuthentication(result.Result)
+	return value, request.Wrap("Get", "tokens", err)
 }
 
 // GetURL invokes the upstream API with library-owned builders and result handling.
