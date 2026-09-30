@@ -34,8 +34,8 @@ type Service struct {
 	Catalog                *resource1.API
 	Credentials            *resource2.API
 	Domains                *resource3.API
-	Ec2credentials         *resource4.API
-	Ec2tokens              *resource5.API
+	EC2Credentials         *resource4.API
+	EC2Tokens              *resource5.API
 	Endpoints              *resource6.API
 	Federation             *resource7.API
 	Groups                 *resource8.API
@@ -60,8 +60,8 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Catalog:                resource1.New(client),
 		Credentials:            resource2.New(client),
 		Domains:                resource3.New(client),
-		Ec2credentials:         resource4.New(client),
-		Ec2tokens:              resource5.New(client),
+		EC2Credentials:         resource4.New(client),
+		EC2Tokens:              resource5.New(client),
 		Endpoints:              resource6.New(client),
 		Federation:             resource7.New(client),
 		Groups:                 resource8.New(client),
