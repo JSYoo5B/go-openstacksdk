@@ -68,7 +68,7 @@ HTTP 설정과 Microversion 선택 정책은 연결 시 정합니다. 실제 협
 
 1. 생성 목록과 별도로 [지원 판정](sdk-support-ledger.md)을 보존하고 Python의 상속·descriptor·Resource 표면도 추적합니다.
 2. 복합 식별자, 목록과 상세 모델 차이, list-only 자료 등 아직 공통 정책에 연결되지 않은 리소스를 실제 capability에 맞게 연결합니다.
-3. floating IP, 추가 볼륨 연결·snapshot 기반 부팅, 이미지 업로드 등의 복합 작업과 부분 성공 계약을 확장합니다.
+3. floating IP 재사용·서버 생성과의 자동 연결, 추가 볼륨·snapshot 기반 부팅, 이미지 import와 안전한 스트림 재시도를 확장합니다.
 4. 선택한 microversion과 각 연산의 필드/capability 요구를 연결합니다.
 5. 변경 추적 또는 명시적 Update의 Go 대응을 서비스별로 검증합니다.
 6. 고정 Python SDK에만 있는 서비스·버전의 typed API를 추가합니다.

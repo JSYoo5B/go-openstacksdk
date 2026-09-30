@@ -30,6 +30,10 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `network/network_test.go` | 확장 query 인코딩, 정확한 이름으로 삭제 대상 선택 |
 | `image/image_test.go` | Glance의 flat response와 Properties, killed 상태 |
 | `blockstorage/blockstorage_test.go` | Cinder microversion 전송과 error 상태 패턴 |
+| `network/floating_ip_test.go`, `connection_floating_ip_test.go` | 외부 네트워크·Compute 참조, 포트·IPv4 선택, 모호성, 생성 후 연결·대기 실패 보존 |
+| `image/upload_test.go`, `image/upload_retry_test.go` | metadata/PUT/대기, 옵션 snapshot, Reader 소유권, 부분 소비·비동기 Close에서 무재전송, decode 부분 성공 보존 |
+| `api/introspection_contracts_test.go` | UUID 조회·목록, Finished/Error 기반 완료 대기, typed 실패·취소·timeout, 고정 조회 대상 |
+| `resource/wait_identity_test.go` | 응답의 ID가 바뀌거나 빠져도 명시 ID의 polling 대상 유지 |
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |
 

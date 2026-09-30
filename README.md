@@ -19,11 +19,11 @@ gophercloudsdk/
 ├── api/                     # API/리소스 지원 목록과 HTTP 계약 테스트
 ├── internal/cmd/sdkgen/     # API, 공통 정책, 참조 문서 생성
 ├── internal/testcloud/      # HTTP 테스트 fixture
-├── examples/create-server/  # 빌드 가능한 실행 예제
+├── examples/                # 서버 생성과 floating IP 연결 실행 예제
 └── docs/                    # 설계와 테스트 설명
 ```
 
-전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 107개 일반 Collection과 15개 부모 범위에 적용합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 108개 일반 Collection과 15개 부모 범위에 적용합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
@@ -32,10 +32,12 @@ gophercloudsdk/
 | [Compute](compute/README.md) | 서버 | 지원 | 지원 | 지원 | 이미지·기존 볼륨·이미지에서 만든 새 볼륨 부팅, 이름 해석, 선택적 대기 |
 | Compute | flavor | 지원 | 미지원 | 미지원 | 미지원 |
 | [Network](network/README.md) | 네트워크 | 지원 | 지원 | 지원 | 미지원 |
-| [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | 미지원 |
+| Network | 포트 | 지원 | 지원 | 지원 | 개별 API |
+| Network | floating IP | ID 조회·Find·목록 | 지원 | 지원 | 네트워크·서버·포트 해석, IPv4 선택, 선택적 대기 |
+| [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | metadata 생성·직접 업로드·선택적 대기 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
-Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, 응답 변경 추적과 자동 commit, floating IP 연결을 포함한 복합 작업, 이미지 업로드의 상위 흐름은 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다.
+Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, [floating IP 생성·연결](network/README.md)과 [이미지 직접 업로드](image/README.md)를 제공합니다. 응답 변경 추적과 자동 commit, floating IP 재사용·서버 생성과 자동 연결, 이미지 import 흐름과 안전한 바이너리 자동 재시도는 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다.
 
 ## 모든 서비스의 사용 문서
 
@@ -209,13 +211,15 @@ vendorOption := compute.WithField("vendor_hint", map[string]any{"pool": "fast"})
 
 현재 미지원 API는 서비스의 `RawClient()`로 Gophercloud concrete options를 사용할 수 있습니다. 이를 상위 SDK의 지원 기능으로 간주하지 않습니다. 공유 클라이언트 설정은 요청을 동시에 실행하기 시작한 뒤 변경하지 마세요.
 
+서버 생성 뒤 새 floating IP를 연결하는 전체 실행 예제는 [create-server-and-ip](examples/create-server-and-ip/main.go)에 있습니다. `-name`, `-image`, `-flavor`, `-network`, `-external-network`를 지정하며, 포트의 IPv4가 여러 개면 `-fixed-address`로 선택합니다. 실패한 단계에서 앞서 생성한 리소스를 자동 삭제하지 않습니다.
+
 ## 개발과 검증
 
 ```sh
 go mod download
 make check
 go test -coverpkg=./... ./...
-go build ./examples/create-server
+go build ./examples/...
 ```
 
 테스트는 로컬 `httptest.Server`를 사용합니다. 실클라우드 자격 증명이 필요하지 않으며 OpenStack 리소스를 생성하지 않습니다. 테스트 환경은 localhost 포트 바인딩을 허용해야 합니다. [테스트 구성](docs/testing.md), [설계 및 확장 계획](docs/design.md)을 참고하세요.

@@ -13,6 +13,9 @@
 | 기존 볼륨 부팅 (`350e511`) | [Compute 계약](../compute/boot_volume_test.go), [Connection과 Cinder 연결](../connection_boot_volume_test.go): ID 조회 생략, 정확 이름, 모호성, 삭제 기본값, 실패 시 생성 서버 보존 | cloud `create_server` 전체의 floating IP·추가 볼륨·snapshot 부팅은 별도 |
 | 이미지에서 새 볼륨 부팅 (`4c92f74`) | [Nova mapping 계약](../compute/new_boot_volume_test.go): 크기·타입, 2.67 요구, 숫자 minor 비교, 실패 시 무삭제 | Python의 기본 50 GiB 대신 Go는 `WithBootVolumeSize`로 양의 용량을 명시. snapshot source는 별도 |
 | Ironic conductor·driver 공통 조회 (`52ec267`) | [native 식별자 계약](../api/baremetal_named_resources_test.go): Hostname/Name, 정확한 이름·중복·미존재·페이지·취소·1.49 헤더 | read-only 리소스에 없는 Delete/Status를 만들지 않음. conductor Get의 fields 선택은 별도 미지원 |
+| Neutron 새 floating IP 생성·연결 (`8ec5bc3`) | [포트·IPv4·부분 성공 계약](../network/floating_ip_test.go), [Connection의 Compute 해석](../connection_floating_ip_test.go) | 기존 IP 재사용, Nova fallback, clouds.yaml 자동 network 선택과 서버 생성에서 자동 연결은 별도 |
+| Inspector 완료 대기 (`26abc05`) | [UUID·Finished/Error 계약](../api/introspection_contracts_test.go): 요청 ID 고정, typed 메시지, 완료·실패·취소·timeout | Python의 무제한 timeout/ignore_error와 Go의 유한 기본값·실패 반환을 구분 |
+| Glance metadata·직접 업로드 (`ad9d06e`) | [업로드 계약](../image/upload_test.go), [재전송·Reader 회귀 계약](../image/upload_retry_test.go): 단일 PUT, 실패 시 생성 객체 보존, caller Close 미호출 | 바이너리 자동 재인증·backoff retry, 기존 이미지의 안전한 재업로드, import/task·checksum·중복 제거는 별도 |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. 위 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`가 통과했습니다.
 
@@ -103,7 +106,7 @@ Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic vir
 | Resource 상태와 응답 확장 정책 | 대다수 [생성 API](../image/v2/images/api_generated.go)는 Gophercloud 모델 alias와 Extract 결과만 반환. Python [Resource.commit](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1881)은 dirty 필드와 patch 정책을 처리 | 변경 추적·commit 또는 동일 작업을 제공하는 명시적 Go update API의 계약을 결정하고 검증. header/추가 JSON 보존 정책도 서비스별 확인. Glance `Image.Properties`는 Gophercloud에서도 추가 필드를 보존하므로 모든 alias가 확장 응답을 버린다고 가정하지 않음 |
 | Python에만 존재하는 서비스/버전 | Python manifest에는 accelerator, clustering, instance_ha, image v1 등이 있으나 [Connection 서비스 registry](../connection_services_generated.go)와 Gophercloud v2.15.0 호출 목록에 대응 구현이 없음 | 고정 Python Resource/endpoint 계약에서 typed API와 서비스 연결을 구현. 다른 서비스의 RawClient나 generic HTTP 요청을 해당 서비스 SDK 지원으로 판정하지 않음 |
 
-복합 작업에서는 floating IP의 선택·재사용·연결, 추가 볼륨·snapshot 부팅, 이미지 upload/import의 전체 흐름이 별도 남은 계약입니다. Python [cloud create_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L915)는 `auto_ip=True`, `reuse_ips=True`, boot volume·추가 volume 등을 처리합니다. Go의 기존 이미지 기반 생성과 선택적 ACTIVE 대기, 또는 기존 boot volume 한 가지를 지원하는 것으로 전체 `create_server`를 완료 처리하지 않습니다.
+복합 작업에서는 floating IP 재사용·서버 생성 시 자동 연결, 추가 볼륨·snapshot 부팅, 이미지 import·checksum 및 안전한 바이너리 자동 재시도가 별도 남은 계약입니다. Python [cloud create_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L915)는 `auto_ip=True`, `reuse_ips=True`, boot volume·추가 volume 등을 처리합니다. Go의 기존 이미지 기반 생성과 선택적 ACTIVE 대기, 또는 기존 boot volume 한 가지를 지원하는 것으로 전체 `create_server`를 완료 처리하지 않습니다.
 
 ## 완료 판정
 
