@@ -49,6 +49,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Nodes.GetVirtualMedia`는 SDK의 `VirtualMedia` 모델에 연결한 이미지, 삽입 상태, 매체 종류를 반환합니다. [virtual media 조회 사용법](nodes/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Conductors.Resources`는 `Conductor.Hostname`을 ID와 이름으로 사용합니다. `resource.ID(\"conductor-01\")`는 직접 조회하고 `resource.Name(\"conductor-01\")`는 전체 목록에서 정확히 찾습니다. `Drivers.Resources`의 ID와 이름은 `Driver.Name`입니다. 두 리소스는 조회·목록·이름 검색만 제공하며 삭제와 상태 대기는 `ErrUnsupported`입니다. [conductor](conductors/README.md), [driver](drivers/README.md) 사용법을 참고합니다.\n\n")
 		out.WriteString("Conductor endpoint는 microversion 1.49 이상을 요구합니다. 연결에 `sdk.WithMicroversion(sdk.BareMetal, \"1.49\")` 또는 `sdk.WithMicroversionRange(sdk.BareMetal, \"1.49\", \"latest\")`를 지정합니다. SDK는 이 연산을 호출한다고 연결 버전을 자동으로 올리지 않습니다. [Conductor 버전 요구와 API 근거](conductors/README.md)를 참고합니다.\n\n")
+	case "baremetalintrospection/v1":
+		out.WriteString("`Introspection.Resources`는 node와 같은 UUID로 조회하고 목록을 순회합니다. 이름·Status·Delete는 가정하지 않습니다. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)`는 `Finished`를 기다리고 실제 `Error`를 `IntrospectionFailureError`에 보존합니다. [조회·완료 대기와 현재 Start 요청 query 오류](introspection/README.md)를 참고합니다.\n\n")
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
 	case "compute/v2":

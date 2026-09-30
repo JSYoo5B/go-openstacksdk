@@ -13,13 +13,15 @@ Gophercloud v2.15.0의 baremetalintrospection/v1 API를 하나의 인증된 서�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Introspection.Resources`는 node와 같은 UUID로 조회하고 목록을 순회합니다. 이름·Status·Delete는 가정하지 않습니다. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)`는 `Finished`를 기다리고 실제 `Error`를 `IntrospectionFailureError`에 보존합니다. [조회·완료 대기와 현재 Start 요청 query 오류](introspection/README.md)를 참고합니다.
+
 ## Go 사용
 
 ```go
 // context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서
 service, err := conn.BareMetalIntrospectionV1(ctx)
 if err != nil { return err }
-for value, err := range service.Introspection.ListIntrospections(ctx) {
+for value, err := range service.Introspection.Resources.List(ctx) {
     if err != nil { return err }
     fmt.Println(value)
 }
@@ -31,7 +33,7 @@ for value, err := range service.Introspection.ListIntrospections(ctx) {
 
 | 서비스 필드 | API 패키지 | 공통 Collection |
 |---|---|---|
-| `Introspection` | [introspection](introspection/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Introspection` | [introspection](introspection/api_generated.go) | `Resources`: ID 조회, 목록 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 
