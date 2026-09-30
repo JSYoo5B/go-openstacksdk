@@ -52,17 +52,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToZoneCreateMap() (map[string]any, error) {
-	body, err := b.base.ToZoneCreateMap()
+	value0, err := b.base.ToZoneCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Zone, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "zones", err)
+		var zero0 *Zone
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "zones", err)
 		var zero0 *Zone
 		return zero0, err
 	}
@@ -108,11 +120,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToZoneListQuery() (string, error) {
-	query, err := b.base.ToZoneListQuery()
+	value0, err := b.base.ToZoneListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -120,6 +138,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "zones", err)
+		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "zones", err)
 		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -132,6 +155,9 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, 
 type ListSharesOption = request.Option[ListSharesOpts]
 
 func WithListSharesOptions(value ListSharesOpts) ListSharesOption { return request.WithOptions(value) }
+func WithListSharesHeader(key, value string) ListSharesOption {
+	return request.WithHeader[ListSharesOpts](key, value)
+}
 
 type listSharesOptsBuilder struct {
 	base   ListSharesOpts
@@ -139,7 +165,17 @@ type listSharesOptsBuilder struct {
 }
 
 func (b listSharesOptsBuilder) ToZoneListSharesHeadersMap() (map[string]string, error) {
-	return b.base.ToZoneListSharesHeadersMap()
+	value0, err := b.base.ToZoneListSharesHeadersMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListShares invokes the upstream API with library-owned builders and result handling.
@@ -147,6 +183,11 @@ func (a *API) ListShares(ctx context.Context, zoneID string, options ...ListShar
 	var opts ListSharesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListShares", "zones", err)
+		return func(yield func(*ZoneShare, error) bool) { var zero *ZoneShare; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("ListShares", "zones", err)
 		return func(yield func(*ZoneShare, error) bool) { var zero *ZoneShare; yield(zero, err) }
 	}
 	_opts := listSharesOptsBuilder{base: cfg.Options, config: cfg}
@@ -169,17 +210,29 @@ type shareOptsBuilder struct {
 }
 
 func (b shareOptsBuilder) ToShareMap() (map[string]interface{}, error) {
-	body, err := b.base.ToShareMap()
+	value0, err := b.base.ToShareMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]interface{}
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]interface{}
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Share invokes the upstream API with library-owned builders and result handling.
 func (a *API) Share(ctx context.Context, zoneID string, opts ShareZoneOpts, options ...ShareOption) (*ZoneShare, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Share", "zones", err)
+		var zero0 *ZoneShare
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Share", "zones", err)
 		var zero0 *ZoneShare
 		return zero0, err
 	}
@@ -208,17 +261,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToZoneUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToZoneUpdateMap()
+	value0, err := b.base.ToZoneUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, zoneID string, opts UpdateOpts, options ...UpdateOption) (*Zone, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "zones", err)
+		var zero0 *Zone
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "zones", err)
 		var zero0 *Zone
 		return zero0, err
 	}
