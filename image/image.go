@@ -2,6 +2,7 @@ package image
 
 import (
 	"context"
+	imageapi "gophercloudsdk/image/v2"
 	"net/url"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 type Image = images.Image
 
 type Service struct {
+	API    *imageapi.Service
 	Images *resource.Collection[Image]
 	client *gophercloud.ServiceClient
 }
@@ -23,7 +25,7 @@ type Service struct {
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, Images: resource.NewCollection[Image](resource.Adapter[Image]{
+	return &Service{client: client, API: imageapi.New(client), Images: resource.NewCollection[Image](resource.Adapter[Image]{
 		Kind:    "image",
 		Get:     func(ctx context.Context, id string) (*Image, error) { return images.Get(ctx, client, id).Extract() },
 		List:    func(q url.Values) pagination.Pager { return images.List(client, query.Adapter(q)) },
