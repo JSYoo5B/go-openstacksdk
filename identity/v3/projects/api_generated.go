@@ -57,17 +57,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToProjectCreateMap() (map[string]any, error) {
-	body, err := b.base.ToProjectCreateMap()
+	value0, err := b.base.ToProjectCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Project, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "projects", err)
+		var zero0 *Project
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "projects", err)
 		var zero0 *Project
 		return zero0, err
 	}
@@ -107,11 +119,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToProjectListQuery() (string, error) {
-	query, err := b.base.ToProjectListQuery()
+	value0, err := b.base.ToProjectListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -119,6 +137,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Projec
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "projects", err)
+		return func(yield func(*Project, error) bool) { var zero *Project; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "projects", err)
 		return func(yield func(*Project, error) bool) { var zero *Project; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -157,17 +180,29 @@ type modifyTagsOptsBuilder struct {
 }
 
 func (b modifyTagsOptsBuilder) ToModifyTagsCreateMap() (map[string]any, error) {
-	body, err := b.base.ToModifyTagsCreateMap()
+	value0, err := b.base.ToModifyTagsCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ModifyTags invokes the upstream API with library-owned builders and result handling.
 func (a *API) ModifyTags(ctx context.Context, projectID string, opts ModifyTagsOpts, options ...ModifyTagsOption) (*ProjectTags, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ModifyTags", "projects", err)
+		var zero0 *ProjectTags
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ModifyTags", "projects", err)
 		var zero0 *ProjectTags
 		return zero0, err
 	}
@@ -191,17 +226,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToProjectUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToProjectUpdateMap()
+	value0, err := b.base.ToProjectUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Project, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "projects", err)
+		var zero0 *Project
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "projects", err)
 		var zero0 *Project
 		return zero0, err
 	}
