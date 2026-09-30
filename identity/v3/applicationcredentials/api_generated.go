@@ -41,17 +41,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToApplicationCredentialCreateMap() (map[string]any, error) {
-	body, err := b.base.ToApplicationCredentialCreateMap()
+	value0, err := b.base.ToApplicationCredentialCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, userID string, opts CreateOpts, options ...CreateOption) (*ApplicationCredential, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "applicationcredentials", err)
+		var zero0 *ApplicationCredential
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "applicationcredentials", err)
 		var zero0 *ApplicationCredential
 		return zero0, err
 	}
@@ -99,11 +111,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToApplicationCredentialListQuery() (string, error) {
-	query, err := b.base.ToApplicationCredentialListQuery()
+	value0, err := b.base.ToApplicationCredentialListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -111,6 +129,14 @@ func (a *API) List(ctx context.Context, userID string, options ...ListOption) it
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "applicationcredentials", err)
+		return func(yield func(*ApplicationCredential, error) bool) {
+			var zero *ApplicationCredential
+			yield(zero, err)
+		}
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "applicationcredentials", err)
 		return func(yield func(*ApplicationCredential, error) bool) {
 			var zero *ApplicationCredential
 			yield(zero, err)
