@@ -1,4 +1,7 @@
-.PHONY: test vet fmt check
+.PHONY: test vet fmt check generate
+
+generate:
+	sh internal/cmd/sdkgen/generate.sh
 
 test:
 	go test -race ./...
