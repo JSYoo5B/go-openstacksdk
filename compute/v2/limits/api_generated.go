@@ -29,11 +29,17 @@ type getOptsBuilder struct {
 }
 
 func (b getOptsBuilder) ToLimitsQuery() (string, error) {
-	query, err := b.base.ToLimitsQuery()
+	value0, err := b.base.ToLimitsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -41,6 +47,12 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*Limits, error) {
 	var opts GetOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Get", "limits", err)
+		var zero0 *Limits
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Get", "limits", err)
 		var zero0 *Limits
 		return zero0, err
 	}
