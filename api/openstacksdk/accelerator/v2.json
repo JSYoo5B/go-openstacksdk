@@ -1,0 +1,568 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "deployables",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 32,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.deployable.Deployable"
+      ],
+      "id": "accelerator/v2/deployables",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_deployable",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 44,
+      "parameters": [
+        {
+          "name": "deployable",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.deployable.Deployable",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/get_deployable",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_deployable",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 66,
+      "parameters": [
+        {
+          "name": "deployable",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.deployable.Deployable"
+      ],
+      "id": "accelerator/v2/patch_deployable",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_deployable",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 81,
+      "parameters": [
+        {
+          "name": "uuid",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.deployable.Deployable",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/update_deployable",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "devices",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 101,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device.Device"
+      ],
+      "id": "accelerator/v2/devices",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_device",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 124,
+      "parameters": [
+        {
+          "name": "device",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device.Device",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/get_device",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "enable_device",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 144,
+      "parameters": [
+        {
+          "name": "device",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device.Device"
+      ],
+      "id": "accelerator/v2/enable_device",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disable_device",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 154,
+      "parameters": [
+        {
+          "name": "device",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device.Device"
+      ],
+      "id": "accelerator/v2/disable_device",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "device_profiles",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 166,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device_profile.DeviceProfile"
+      ],
+      "id": "accelerator/v2/device_profiles",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_device_profile",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 178,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device_profile.DeviceProfile"
+      ],
+      "id": "accelerator/v2/create_device_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_device_profile",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 189,
+      "parameters": [
+        {
+          "name": "device_profile",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device_profile.DeviceProfile"
+      ],
+      "id": "accelerator/v2/delete_device_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_device_profile",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 213,
+      "parameters": [
+        {
+          "name": "device_profile",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.device_profile.DeviceProfile",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/get_device_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "accelerator_requests",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 238,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest"
+      ],
+      "id": "accelerator/v2/accelerator_requests",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_accelerator_request",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 250,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest"
+      ],
+      "id": "accelerator/v2/create_accelerator_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_accelerator_request",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 260,
+      "parameters": [
+        {
+          "name": "accelerator_request",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest"
+      ],
+      "id": "accelerator/v2/delete_accelerator_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_accelerator_request",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 284,
+      "parameters": [
+        {
+          "name": "accelerator_request",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/get_accelerator_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_accelerator_request",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 309,
+      "parameters": [
+        {
+          "name": "accelerator_request",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest"
+      ],
+      "id": "accelerator/v2/patch_accelerator_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_accelerator_request",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 326,
+      "parameters": [
+        {
+          "name": "uuid",
+          "required": true
+        },
+        {
+          "name": "properties",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.accelerator_request.AcceleratorRequest",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/update_accelerator_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "attributes",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 347,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.attribute.Attribute"
+      ],
+      "id": "accelerator/v2/attributes",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_attribute",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 359,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.attribute.Attribute"
+      ],
+      "id": "accelerator/v2/create_attribute",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_attribute",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 368,
+      "parameters": [
+        {
+          "name": "attribute",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.attribute.Attribute"
+      ],
+      "id": "accelerator/v2/delete_attribute",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_attribute",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 391,
+      "parameters": [
+        {
+          "name": "attribute",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.accelerator.v2.attribute.Attribute",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "accelerator/v2/get_attribute",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 416,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "accelerator/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/accelerator/v2/_proxy.py",
+      "line": 455,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "accelerator/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
