@@ -13,8 +13,9 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )
 
-// CreateServerRequest holds required inputs for the image-backed create workflow.
+// CreateServerRequest holds required inputs for the server creation workflow.
 // Names are resolved by the SDK; explicit IDs bypass lookup requests.
+// Image is required unless WithBootVolume selects an existing boot volume.
 type CreateServerRequest struct {
 	Name   string
 	Image  resource.Ref
@@ -22,14 +23,40 @@ type CreateServerRequest struct {
 }
 
 type createServerOptions struct {
-	base        servers.CreateOpts
-	networks    []resource.Ref
-	fields      map[string]any
-	wait        bool
-	waitOptions []resource.WaitOption
+	base                          servers.CreateOpts
+	networks                      []resource.Ref
+	fields                        map[string]any
+	wait                          bool
+	waitOptions                   []resource.WaitOption
+	bootVolume                    *resource.Ref
+	deleteBootVolumeOnTermination *bool
 }
 
 type CreateServerOption func(*createServerOptions) error
+
+// WithBootVolume boots from an existing volume. Leave CreateServerRequest.Image
+// empty when using this option. Names are resolved through Block Storage; IDs
+// bypass lookup requests. Nova validates whether the volume is bootable and
+// available. The volume is preserved when the server is deleted by default.
+func WithBootVolume(ref resource.Ref) CreateServerOption {
+	return func(o *createServerOptions) error {
+		if err := ref.Validate(); err != nil {
+			return fmt.Errorf("boot volume: %w", err)
+		}
+		o.bootVolume = &ref
+		return nil
+	}
+}
+
+// WithDeleteBootVolumeOnTermination controls Nova's deletion of the existing
+// boot volume when the server is deleted. It requires WithBootVolume. The
+// default is false; this option does not delete a volume on creation failure.
+func WithDeleteBootVolumeOnTermination(enabled bool) CreateServerOption {
+	return func(o *createServerOptions) error {
+		o.deleteBootVolumeOnTermination = &enabled
+		return nil
+	}
+}
 
 func WithMetadata(metadata map[string]string) CreateServerOption {
 	metadata = maps.Clone(metadata)
@@ -116,7 +143,7 @@ func WithField(key string, value any) CreateServerOption {
 }
 
 var reservedServerFields = func() map[string]bool {
-	reserved := map[string]bool{"security_groups": true, "user_data": true, "networks": true, "key_name": true}
+	reserved := map[string]bool{"security_groups": true, "user_data": true, "networks": true, "key_name": true, "block_device_mapping": true}
 	t := reflect.TypeOf(servers.CreateOpts{})
 	for i := 0; i < t.NumField(); i++ {
 		key := strings.Split(t.Field(i).Tag.Get("json"), ",")[0]
@@ -147,16 +174,17 @@ func (b serverBody) ToServerCreateMap() (map[string]any, error) {
 	return body, nil
 }
 
-// Create resolves named dependencies, creates an image-backed server and
+// Create resolves named dependencies, creates an image- or volume-backed server and
 // optionally waits for ACTIVE. It does not roll back a server after wait failure:
 // the created resource is returned alongside the error so it can be inspected.
-// This initial workflow does not support boot-from-volume or floating IP setup.
+// WithBootVolume supports an existing volume; creating a new boot volume from
+// an image and floating IP setup are separate workflows.
 func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts ...CreateServerOption) (*Server, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if strings.TrimSpace(request.Name) == "" {
 		return nil, invalid("server name must not be empty")
-	}
-	if err := request.Image.Validate(); err != nil {
-		return nil, fmt.Errorf("image: %w", err)
 	}
 	if err := request.Flavor.Validate(); err != nil {
 		return nil, fmt.Errorf("flavor: %w", err)
@@ -169,6 +197,38 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 		if err := apply(&o); err != nil {
 			return nil, err
 		}
+	}
+	hasImage := request.Image != (resource.Ref{})
+	if hasImage == (o.bootVolume != nil) {
+		return nil, invalid("exactly one of image or boot volume is required")
+	}
+	if o.bootVolume == nil && o.deleteBootVolumeOnTermination != nil {
+		return nil, invalid("boot volume deletion policy requires WithBootVolume")
+	}
+	if hasImage {
+		if err := request.Image.Validate(); err != nil {
+			return nil, fmt.Errorf("image: %w", err)
+		}
+	} else {
+		volumeID := o.bootVolume.String()
+		if o.bootVolume.IsName() {
+			if s.dependencies.Volume == nil {
+				return nil, fmt.Errorf("%w: volume resolver is unavailable", resource.ErrUnsupported)
+			}
+			id, err := s.dependencies.Volume(ctx, *o.bootVolume)
+			if err != nil {
+				return nil, s.wrap("resolve boot volume", err)
+			}
+			if err := resource.ID(id).Validate(); err != nil {
+				return nil, s.wrap("resolve boot volume", err)
+			}
+			volumeID = id
+		}
+		deleteOnTermination := o.deleteBootVolumeOnTermination != nil && *o.deleteBootVolumeOnTermination
+		o.base.BlockDevice = []servers.BlockDevice{{
+			SourceType: servers.SourceVolume, DestinationType: servers.DestinationVolume,
+			UUID: volumeID, BootIndex: 0, DeleteOnTermination: deleteOnTermination,
+		}}
 	}
 	o.base.ImageRef = request.Image.String()
 	if request.Image.IsName() {

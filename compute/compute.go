@@ -36,6 +36,7 @@ func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 type Dependencies struct {
 	Image   func(context.Context, resource.Ref) (string, error)
 	Network func(context.Context, resource.Ref) (string, error)
+	Volume  func(context.Context, resource.Ref) (string, error)
 }
 
 type Servers struct {
