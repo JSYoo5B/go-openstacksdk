@@ -58,17 +58,28 @@ type addAccessOptsBuilder struct {
 }
 
 func (b addAccessOptsBuilder) ToAddAccessMap() (map[string]any, error) {
-	body, err := b.base.ToAddAccessMap()
+	value0, err := b.base.ToAddAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AccessOpts, options ...AddAccessOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddAccess", "sharetypes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddAccess", "sharetypes", err)
 		return err
 	}
 	_opts := addAccessOptsBuilder{base: cfg.Options, config: cfg}
@@ -88,17 +99,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToShareTypeCreateMap() (map[string]any, error) {
-	body, err := b.base.ToShareTypeCreateMap()
+	value0, err := b.base.ToShareTypeCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ShareType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "sharetypes", err)
+		var zero0 *ShareType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "sharetypes", err)
 		var zero0 *ShareType
 		return zero0, err
 	}
@@ -149,11 +172,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToShareTypeListQuery() (string, error) {
-	query, err := b.base.ToShareTypeListQuery()
+	value0, err := b.base.ToShareTypeListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -161,6 +190,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ShareT
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "sharetypes", err)
+		return func(yield func(*ShareType, error) bool) { var zero *ShareType; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "sharetypes", err)
 		return func(yield func(*ShareType, error) bool) { var zero *ShareType; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -183,17 +217,28 @@ type removeAccessOptsBuilder struct {
 }
 
 func (b removeAccessOptsBuilder) ToRemoveAccessMap() (map[string]any, error) {
-	body, err := b.base.ToRemoveAccessMap()
+	value0, err := b.base.ToRemoveAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts AccessOpts, options ...RemoveAccessOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveAccess", "sharetypes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveAccess", "sharetypes", err)
 		return err
 	}
 	_opts := removeAccessOptsBuilder{base: cfg.Options, config: cfg}
@@ -215,17 +260,29 @@ type setExtraSpecsOptsBuilder struct {
 }
 
 func (b setExtraSpecsOptsBuilder) ToShareTypeSetExtraSpecsMap() (map[string]any, error) {
-	body, err := b.base.ToShareTypeSetExtraSpecsMap()
+	value0, err := b.base.ToShareTypeSetExtraSpecsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetExtraSpecs(ctx context.Context, id string, opts SetExtraSpecsOpts, options ...SetExtraSpecsOption) (ExtraSpecs, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetExtraSpecs", "sharetypes", err)
+		var zero0 ExtraSpecs
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetExtraSpecs", "sharetypes", err)
 		var zero0 ExtraSpecs
 		return zero0, err
 	}
@@ -262,17 +319,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToShareTypeUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToShareTypeUpdateMap()
+	value0, err := b.base.ToShareTypeUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*ShareType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "sharetypes", err)
+		var zero0 *ShareType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "sharetypes", err)
 		var zero0 *ShareType
 		return zero0, err
 	}
