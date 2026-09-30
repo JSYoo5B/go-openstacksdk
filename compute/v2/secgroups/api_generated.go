@@ -59,17 +59,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSecGroupCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSecGroupCreateMap()
+	value0, err := b.base.ToSecGroupCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*SecurityGroup, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "secgroups", err)
+		var zero0 *SecurityGroup
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "secgroups", err)
 		var zero0 *SecurityGroup
 		return zero0, err
 	}
@@ -93,17 +105,29 @@ type createRuleOptsBuilder struct {
 }
 
 func (b createRuleOptsBuilder) ToRuleCreateMap() (map[string]any, error) {
-	body, err := b.base.ToRuleCreateMap()
+	value0, err := b.base.ToRuleCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateRule invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateRule(ctx context.Context, opts CreateRuleOpts, options ...CreateRuleOption) (*Rule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateRule", "secgroups", err)
+		var zero0 *Rule
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateRule", "secgroups", err)
 		var zero0 *Rule
 		return zero0, err
 	}
@@ -166,17 +190,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSecGroupUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToSecGroupUpdateMap()
+	value0, err := b.base.ToSecGroupUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*SecurityGroup, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "secgroups", err)
+		var zero0 *SecurityGroup
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "secgroups", err)
 		var zero0 *SecurityGroup
 		return zero0, err
 	}
