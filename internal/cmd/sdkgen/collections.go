@@ -143,7 +143,7 @@ func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl,
 	if getSig.Results().Len() != 1 {
 		return nil
 	}
-	extract := extraction(getSig.Results().At(0).Type())
+	_, extract := operationExtractor(get)
 	if extract == nil || extract.Results().Len() != 2 {
 		return nil
 	}

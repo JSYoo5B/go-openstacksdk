@@ -305,7 +305,7 @@ func (g *generator) generate(path string) error {
 			op.Issue = err.Error()
 		} else {
 			op.BuilderFree = true
-			op.ReturnPolicy = returnPolicy(fn.Type().(*types.Signature))
+			op.ReturnPolicy = operationReturnPolicy(fn)
 		}
 		g.inventory.Operations = append(g.inventory.Operations, op)
 	}
@@ -596,7 +596,8 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 	}
 	returnTypes := []types.Type{}
-	policy := returnPolicy(sig)
+	policy := operationReturnPolicy(fn)
+	resultExtractor, resultExtraction := operationExtractor(fn)
 	extractName := ""
 	extractPackage := e.use(e.pkg.Path())
 	var streamType types.Type
@@ -618,7 +619,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			}
 		}
 	} else if policy == "extract" || policy == "download" {
-		ex := extraction(sig.Results().At(0).Type())
+		ex := resultExtraction
 		for i := 0; i < ex.Results().Len(); i++ {
 			returnTypes = append(returnTypes, ex.Results().At(i).Type())
 		}
@@ -741,7 +742,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				vals = append(vals, fmt.Sprintf("value%d", i))
 			}
 		}
-		e.printf("%s:=result.Extract()\nerr=%s.Wrap(%q,%q,err)\nreturn %s\n", strings.Join(vals, ","), requestAlias, op, e.pkg.Name(), strings.Join(vals, ","))
+		e.printf("%s:=result.%s()\nerr=%s.Wrap(%q,%q,err)\nreturn %s\n", strings.Join(vals, ","), resultExtractor, requestAlias, op, e.pkg.Name(), strings.Join(vals, ","))
 	case "download":
 		e.printf("result:=%s\nheader,err:=result.Extract()\nreturn %s.OpenDownload(result.Body,header,%s.Wrap(%q,%q,err))\n", call, requestAlias, requestAlias, op, e.pkg.Name())
 	case "error":
