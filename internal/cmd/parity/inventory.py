@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Record the complete pinned Python public proxy and cloud workflow inventory.
+"""Record declared public methods in the pinned Python proxies and cloud modules.
 
-Candidates are discovery hints, never proof of equivalent behavior. Reviews live
-separately so regenerating an inventory cannot silently promote implementation.
+Candidates are discovery hints, never proof of equivalent behavior. Generating
+an inventory always leaves reviews pending and never marks a method implemented.
 """
 import argparse
 import ast
