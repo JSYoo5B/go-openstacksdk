@@ -261,7 +261,13 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 	if err != nil {
 		return nil, c.wrap("wait", err)
 	}
-	id := c.binding.ID(v)
+	id := ref.String()
+	if ref.IsName() {
+		id = c.binding.ID(v)
+	}
+	if err := c.validateID(id); err != nil {
+		return nil, c.wrap("wait", err)
+	}
 	for {
 		current := c.binding.Status(v)
 		if strings.EqualFold(current, status) {
