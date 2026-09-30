@@ -408,9 +408,15 @@ func (a *API) Get(ctx context.Context, id string) (*Server, error) {
 }
 
 // GetPassword invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetPassword(ctx context.Context, serverId string) (GetPasswordResult, error) {
+func (a *API) GetPassword(ctx context.Context, serverId string, options ...GetPasswordOption) (string, error) {
+	password, err := applyGetPasswordOptions(options...)
+	if err != nil {
+		err = request.Wrap("GetPassword", "servers", err)
+		return "", err
+	}
 	result := upstream.GetPassword(ctx, a.client, serverId)
-	return result, request.Wrap("GetPassword", "servers", result.Err)
+	value, err := result.ExtractPassword(password.privateKey)
+	return value, request.Wrap("GetPassword", "servers", err)
 }
 
 // InjectNetworkInfo invokes the upstream API with library-owned builders and result handling.
