@@ -49,6 +49,9 @@ type WorkflowPage = upstream.WorkflowPage
 type CreateOption = request.Option[CreateOpts]
 
 func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
+func WithCreateQuery(key, value string) CreateOption {
+	return request.WithQuery[CreateOpts](key, value)
+}
 
 type createOptsBuilder struct {
 	base   CreateOpts
@@ -56,13 +59,31 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToWorkflowCreateParams() (io.Reader, string, error) {
-	return b.base.ToWorkflowCreateParams()
+	value0, value1, err := b.base.ToWorkflowCreateParams()
+	if err != nil {
+		var zero0 io.Reader
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value1, err = request.ExtendQuery(value1, b.config.Query)
+	if err != nil {
+		var zero0 io.Reader
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) ([]Workflow, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "workflows", err)
+		var zero0 []Workflow
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Create", "workflows", err)
 		var zero0 []Workflow
 		return zero0, err
 	}
@@ -97,11 +118,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToWorkflowListQuery() (string, error) {
-	query, err := b.base.ToWorkflowListQuery()
+	value0, err := b.base.ToWorkflowListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -109,6 +136,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Workfl
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "workflows", err)
+		return func(yield func(*Workflow, error) bool) { var zero *Workflow; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "workflows", err)
 		return func(yield func(*Workflow, error) bool) { var zero *Workflow; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
