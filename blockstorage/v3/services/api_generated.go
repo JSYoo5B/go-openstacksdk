@@ -31,11 +31,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToServiceListQuery() (string, error) {
-	query, err := b.base.ToServiceListQuery()
+	value0, err := b.base.ToServiceListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -43,6 +49,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Servic
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "services", err)
+		return func(yield func(*Service, error) bool) { var zero *Service; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "services", err)
 		return func(yield func(*Service, error) bool) { var zero *Service; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
