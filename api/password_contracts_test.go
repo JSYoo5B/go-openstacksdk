@@ -69,6 +69,8 @@ func TestServerPasswordHandlesEmptyResponsesAndErrors(t *testing.T) {
 		decrypt, fails bool
 	}{
 		{"empty", `{"password":""}`, 200, true, false},
+		{"missing", `{}`, 200, true, false},
+		{"null", `{"password":null}`, 200, true, false},
 		{"opaque-default", `{"password":"not-base64"}`, 200, false, false},
 		{"invalid-ciphertext", `{"password":"not-base64"}`, 200, true, true},
 		{"invalid-type", `{"password":false}`, 200, false, true},
