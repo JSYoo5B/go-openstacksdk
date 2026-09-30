@@ -2,6 +2,7 @@ package compute
 
 import (
 	"context"
+	computeapi "gophercloudsdk/compute/v2"
 	"net/url"
 	"regexp"
 	"strings"
@@ -20,6 +21,7 @@ type Server = servers.Server
 type Flavor = flavors.Flavor
 
 type Service struct {
+	API     *computeapi.Service
 	Servers *Servers
 	Flavors *resource.Collection[Flavor]
 	client  *gophercloud.ServiceClient
@@ -45,6 +47,7 @@ type Servers struct {
 
 func New(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
 	service := &Service{
+		API:    computeapi.New(client),
 		client: client,
 		Servers: &Servers{
 			dependencies: dependencies, client: client,
