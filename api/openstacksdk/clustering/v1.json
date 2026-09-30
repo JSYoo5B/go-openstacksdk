@@ -1,0 +1,1564 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "get_build_info",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 56,
+      "parameters": [],
+      "resources": [
+        "openstack.clustering.v1.build_info.BuildInfo"
+      ],
+      "id": "clustering/v1/get_build_info",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "profile_types",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 65,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile_type.ProfileType"
+      ],
+      "id": "clustering/v1/profile_types",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_profile_type",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 76,
+      "parameters": [
+        {
+          "name": "profile_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile_type.ProfileType"
+      ],
+      "id": "clustering/v1/get_profile_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "policy_types",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 94,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy_type.PolicyType"
+      ],
+      "id": "clustering/v1/policy_types",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_policy_type",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 105,
+      "parameters": [
+        {
+          "name": "policy_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy_type.PolicyType"
+      ],
+      "id": "clustering/v1/get_policy_type",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 122,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/create_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 133,
+      "parameters": [
+        {
+          "name": "profile",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/delete_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 164,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/find_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 184,
+      "parameters": [
+        {
+          "name": "profile",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/get_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "profiles",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 196,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/profiles",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 226,
+      "parameters": [
+        {
+          "name": "profile",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.Profile"
+      ],
+      "id": "clustering/v1/update_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "validate_profile",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 242,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile.ProfileValidate"
+      ],
+      "id": "clustering/v1/validate_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 255,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/create_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 267,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force_delete",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.action.Action",
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/delete_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 308,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/find_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 328,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/get_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "clusters",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 340,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/clusters",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 368,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/update_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_cluster_metadata",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 384,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/fetch_cluster_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster_metadata",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 399,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "clustering/v1/get_cluster_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_cluster_metadata",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 414,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/set_cluster_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_cluster_metadata",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 434,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/delete_cluster_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "add_nodes_to_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 453,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "nodes",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/add_nodes_to_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "remove_nodes_from_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 471,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "nodes",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/remove_nodes_from_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "replace_nodes_in_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 495,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "nodes",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/replace_nodes_in_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "scale_out_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 513,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "count",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/scale_out_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "scale_in_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 532,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "count",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/scale_in_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "resize_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 551,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/resize_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "attach_policy_to_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 570,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "policy",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/attach_policy_to_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "detach_policy_from_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 591,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "policy",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/detach_policy_from_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_cluster_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 609,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "policy",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/update_cluster_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "collect_cluster_attrs",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 630,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "path",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster",
+        "openstack.clustering.v1.cluster_attr.ClusterAttr"
+      ],
+      "id": "clustering/v1/collect_cluster_attrs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "check_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 650,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/check_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "recover_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 667,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/recover_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "perform_operation_on_cluster",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 684,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "operation",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster"
+      ],
+      "id": "clustering/v1/perform_operation_on_cluster",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 705,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/create_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 717,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force_delete",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.action.Action",
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/delete_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 756,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/find_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 776,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node",
+        "openstack.clustering.v1.node.NodeDetail"
+      ],
+      "id": "clustering/v1/get_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "nodes",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 800,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/nodes",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 826,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/update_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "check_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 842,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/check_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "recover_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 859,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/recover_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "adopt_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 875,
+      "parameters": [
+        {
+          "name": "preview",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/adopt_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "perform_operation_on_node",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 911,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "operation",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.node.Node"
+      ],
+      "id": "clustering/v1/perform_operation_on_node",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 932,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/create_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 943,
+      "parameters": [
+        {
+          "name": "policy",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/delete_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 974,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/find_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 993,
+      "parameters": [
+        {
+          "name": "policy",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/get_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "policies",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1005,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/policies",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1030,
+      "parameters": [
+        {
+          "name": "policy",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.Policy"
+      ],
+      "id": "clustering/v1/update_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "validate_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1046,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.policy.PolicyValidate"
+      ],
+      "id": "clustering/v1/validate_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "cluster_policies",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1059,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster",
+        "openstack.clustering.v1.cluster_policy.ClusterPolicy",
+        "openstack.resource.Resource"
+      ],
+      "id": "clustering/v1/cluster_policies",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster_policy",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1080,
+      "parameters": [
+        {
+          "name": "cluster_policy",
+          "required": true
+        },
+        {
+          "name": "cluster",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.cluster.Cluster",
+        "openstack.clustering.v1.cluster_policy.ClusterPolicy"
+      ],
+      "id": "clustering/v1/get_cluster_policy",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_receiver",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1103,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/create_receiver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_receiver",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1114,
+      "parameters": [
+        {
+          "name": "receiver",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/update_receiver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_receiver",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1129,
+      "parameters": [
+        {
+          "name": "receiver",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/delete_receiver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_receiver",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1162,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/find_receiver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_receiver",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1181,
+      "parameters": [
+        {
+          "name": "receiver",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/get_receiver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "receivers",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1195,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.receiver.Receiver"
+      ],
+      "id": "clustering/v1/receivers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_action",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1220,
+      "parameters": [
+        {
+          "name": "action",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.action.Action"
+      ],
+      "id": "clustering/v1/get_action",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "actions",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1232,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.action.Action"
+      ],
+      "id": "clustering/v1/actions",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_action",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1257,
+      "parameters": [
+        {
+          "name": "action",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.action.Action"
+      ],
+      "id": "clustering/v1/update_action",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_event",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1275,
+      "parameters": [
+        {
+          "name": "event",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.event.Event"
+      ],
+      "id": "clustering/v1/get_event",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "events",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1287,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.event.Event"
+      ],
+      "id": "clustering/v1/events",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "services",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1319,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.service.Service"
+      ],
+      "id": "clustering/v1/services",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "list_profile_type_operations",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1330,
+      "parameters": [
+        {
+          "name": "profile_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.clustering.v1.profile_type.ProfileType"
+      ],
+      "id": "clustering/v1/list_profile_type_operations",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1350,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "clustering/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/clustering/v1/_proxy.py",
+      "line": 1389,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "clustering/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
