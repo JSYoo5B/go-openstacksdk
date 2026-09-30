@@ -69,6 +69,9 @@ func cachedService[T any](ctx context.Context, c *Connection, service Service, v
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	key := serviceKey(service, version)
 	if proxy, ok := c.services[key]; ok {
 		return proxy.(*T), nil
@@ -105,7 +108,8 @@ func (c *Connection) serviceClientVersion(ctx context.Context, service Service, 
 	if client := c.clients[key]; client != nil {
 		return client, nil
 	}
-	if c.options.microversions[service] != "" && version != definition.version {
+	_, negotiate := c.options.microversionRanges[service]
+	if (c.options.microversions[service] != "" || negotiate) && version != definition.version {
 		return nil, invalid("microversion configured for %s %s cannot be used with %s", service, definition.version, version)
 	}
 	endpoint := c.options.versionedEndpoints[key]
@@ -132,7 +136,15 @@ func (c *Connection) serviceClientVersion(ctx context.Context, service Service, 
 		return nil, fmt.Errorf("connect %s %s: %w", service, version, err)
 	}
 	client.ProviderClient = c.provider
-	client.Microversion = c.options.microversions[service]
+	selection, err := c.selectMicroversion(ctx, service, client)
+	if err != nil {
+		return nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	client.Microversion = selection.Selected
+	c.options.microversionSelections[key] = selection
 	c.clients[key] = client
 	return client, nil
 }

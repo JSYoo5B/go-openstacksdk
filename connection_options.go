@@ -20,18 +20,20 @@ const (
 )
 
 type connectionOptions struct {
-	auth               *gophercloud.AuthOptions
-	cloud              string
-	cloudFiles         []string
-	region             *string
-	availability       *gophercloud.Availability
-	httpClient         http.Client
-	httpConfigured     bool
-	tlsConfig          *tls.Config
-	endpoints          map[Service]string
-	microversions      map[Service]string
-	versionedEndpoints map[string]string
-	messagingClientID  string
+	auth                   *gophercloud.AuthOptions
+	cloud                  string
+	cloudFiles             []string
+	region                 *string
+	availability           *gophercloud.Availability
+	httpClient             http.Client
+	httpConfigured         bool
+	tlsConfig              *tls.Config
+	endpoints              map[Service]string
+	microversions          map[Service]string
+	microversionRanges     map[Service]microversionRange
+	microversionSelections map[string]MicroversionSelection
+	versionedEndpoints     map[string]string
+	messagingClientID      string
 }
 
 type ConnectionOption func(*connectionOptions) error
@@ -141,15 +143,16 @@ func WithMessagingClientID(id string) ConnectionOption {
 
 var microversionPattern = regexp.MustCompile(`^[1-9][0-9]*\.[0-9]+$`)
 
-// WithMicroversion selects a version explicitly. Automatic negotiation is not
-// implemented yet; extension compatibility remains subject to the cloud API.
+// WithMicroversion selects an exact version without discovery. It takes
+// precedence over WithMicroversionRange and WithLatestMicroversion regardless
+// of option order. Extension compatibility remains subject to the cloud API.
 func WithMicroversion(service Service, version string) ConnectionOption {
 	return func(o *connectionOptions) error {
 		major := serviceDefinitions[service].microversionMajor
 		if major == "" {
 			return unsupported(string(service), "microversions")
 		}
-		if !microversionPattern.MatchString(version) {
+		if _, err := parseMicroversion(version); err != nil {
 			return invalid("invalid microversion %q", version)
 		}
 		if !strings.HasPrefix(version, major+".") {
@@ -168,6 +171,7 @@ func validService(service Service) bool {
 func parseConnection(opts []ConnectionOption) (connectionOptions, error) {
 	o := connectionOptions{
 		endpoints: make(map[Service]string), microversions: make(map[Service]string),
+		microversionRanges: make(map[Service]microversionRange), microversionSelections: make(map[string]MicroversionSelection),
 		versionedEndpoints: make(map[string]string),
 	}
 	for _, apply := range opts {
