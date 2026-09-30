@@ -19,7 +19,8 @@ type AuthResult = upstream.AuthResult
 type GetAuthResult = upstream.GetAuthResult
 type AuthOption = request.Option[AuthOpts]
 
-func WithAuthOptions(value AuthOpts) AuthOption { return request.WithOptions(value) }
+func WithAuthOptions(value AuthOpts) AuthOption   { return request.WithOptions(value) }
+func WithAuthHeader(key, value string) AuthOption { return request.WithHeader[AuthOpts](key, value) }
 
 type authOptsBuilder struct {
 	base   AuthOpts
@@ -27,13 +28,29 @@ type authOptsBuilder struct {
 }
 
 func (b authOptsBuilder) ToAuthOptsMap() (map[string]string, error) {
-	return b.base.ToAuthOptsMap()
+	value0, err := b.base.ToAuthOptsMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Auth invokes the upstream API with library-owned builders and result handling.
 func (a *API) Auth(ctx context.Context, opts AuthOpts, options ...AuthOption) (*AuthResult, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Auth", "swauth", err)
+		var zero0 *AuthResult
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Auth", "swauth", err)
 		var zero0 *AuthResult
 		return zero0, err
 	}
@@ -54,6 +71,12 @@ func WithNewObjectStorageV1Options(value AuthOpts) NewObjectStorageV1Option {
 func (a *API) NewObjectStorageV1(ctx context.Context, authOpts AuthOpts, options ...NewObjectStorageV1Option) (*gophercloud.ServiceClient, error) {
 	cfg, err := request.Apply(authOpts, options...)
 	if err != nil {
+		err = request.Wrap("NewObjectStorageV1", "swauth", err)
+		var zero0 *gophercloud.ServiceClient
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("NewObjectStorageV1", "swauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err
 	}
