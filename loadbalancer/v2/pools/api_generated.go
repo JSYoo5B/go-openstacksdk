@@ -91,17 +91,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToPoolCreateMap() (map[string]any, error) {
-	body, err := b.base.ToPoolCreateMap()
+	value0, err := b.base.ToPoolCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Pool, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "pools", err)
+		var zero0 *Pool
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "pools", err)
 		var zero0 *Pool
 		return zero0, err
 	}
@@ -127,17 +139,29 @@ type createMemberOptsBuilder struct {
 }
 
 func (b createMemberOptsBuilder) ToMemberCreateMap() (map[string]any, error) {
-	body, err := b.base.ToMemberCreateMap()
+	value0, err := b.base.ToMemberCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateMember invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMember(ctx context.Context, poolID string, opts CreateMemberOpts, options ...CreateMemberOption) (*Member, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateMember", "pools", err)
+		var zero0 *Member
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateMember", "pools", err)
 		var zero0 *Member
 		return zero0, err
 	}
@@ -185,11 +209,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToPoolListQuery() (string, error) {
-	query, err := b.base.ToPoolListQuery()
+	value0, err := b.base.ToPoolListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -197,6 +227,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "pools", err)
+		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "pools", err)
 		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -221,11 +256,17 @@ type listMembersOptsBuilder struct {
 }
 
 func (b listMembersOptsBuilder) ToMembersListQuery() (string, error) {
-	query, err := b.base.ToMembersListQuery()
+	value0, err := b.base.ToMembersListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListMembers invokes the upstream API with library-owned builders and result handling.
@@ -233,6 +274,11 @@ func (a *API) ListMembers(ctx context.Context, poolID string, options ...ListMem
 	var opts ListMembersOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListMembers", "pools", err)
+		return func(yield func(*Member, error) bool) { var zero *Member; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListMembers", "pools", err)
 		return func(yield func(*Member, error) bool) { var zero *Member; yield(zero, err) }
 	}
 	_opts := listMembersOptsBuilder{base: cfg.Options, config: cfg}
@@ -255,17 +301,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToPoolUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToPoolUpdateMap()
+	value0, err := b.base.ToPoolUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Pool, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "pools", err)
+		var zero0 *Pool
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "pools", err)
 		var zero0 *Pool
 		return zero0, err
 	}
@@ -291,17 +349,29 @@ type updateMemberOptsBuilder struct {
 }
 
 func (b updateMemberOptsBuilder) ToMemberUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToMemberUpdateMap()
+	value0, err := b.base.ToMemberUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateMember invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMember(ctx context.Context, poolID string, memberID string, opts UpdateMemberOpts, options ...UpdateMemberOption) (*Member, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMember", "pools", err)
+		var zero0 *Member
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMember", "pools", err)
 		var zero0 *Member
 		return zero0, err
 	}
