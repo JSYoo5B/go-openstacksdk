@@ -78,17 +78,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSecretCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSecretCreateMap()
+	value0, err := b.base.ToSecretCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Secret, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "secrets", err)
+		var zero0 *Secret
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "secrets", err)
 		var zero0 *Secret
 		return zero0, err
 	}
@@ -114,17 +126,29 @@ type createMetadataOptsBuilder struct {
 }
 
 func (b createMetadataOptsBuilder) ToMetadataCreateMap() (map[string]any, error) {
-	body, err := b.base.ToMetadataCreateMap()
+	value0, err := b.base.ToMetadataCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadata(ctx context.Context, secretID string, opts MetadataOpts, options ...CreateMetadataOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateMetadata", "secrets", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateMetadata", "secrets", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -150,17 +174,28 @@ type createMetadatumOptsBuilder struct {
 }
 
 func (b createMetadatumOptsBuilder) ToMetadatumCreateMap() (map[string]any, error) {
-	body, err := b.base.ToMetadatumCreateMap()
+	value0, err := b.base.ToMetadatumCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadatum(ctx context.Context, secretID string, opts MetadatumOpts, options ...CreateMetadatumOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateMetadatum", "secrets", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateMetadatum", "secrets", err)
 		return err
 	}
 	_opts := createMetadatumOptsBuilder{base: cfg.Options, config: cfg}
@@ -204,6 +239,9 @@ func (a *API) GetMetadatum(ctx context.Context, secretID string, key string) (*M
 type GetPayloadOption = request.Option[GetPayloadOpts]
 
 func WithGetPayloadOptions(value GetPayloadOpts) GetPayloadOption { return request.WithOptions(value) }
+func WithGetPayloadHeader(key, value string) GetPayloadOption {
+	return request.WithHeader[GetPayloadOpts](key, value)
+}
 
 type getPayloadOptsBuilder struct {
 	base   GetPayloadOpts
@@ -211,7 +249,17 @@ type getPayloadOptsBuilder struct {
 }
 
 func (b getPayloadOptsBuilder) ToSecretPayloadGetParams() (map[string]string, error) {
-	return b.base.ToSecretPayloadGetParams()
+	value0, err := b.base.ToSecretPayloadGetParams()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // GetPayload invokes the upstream API with library-owned builders and result handling.
@@ -219,6 +267,11 @@ func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOp
 	var opts GetPayloadOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("GetPayload", "secrets", err)
+		return nil, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("GetPayload", "secrets", err)
 		return nil, err
 	}
 	_opts := getPayloadOptsBuilder{base: cfg.Options, config: cfg}
@@ -238,11 +291,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToSecretListQuery() (string, error) {
-	query, err := b.base.ToSecretListQuery()
+	value0, err := b.base.ToSecretListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -250,6 +309,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Secret
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "secrets", err)
+		return func(yield func(*Secret, error) bool) { var zero *Secret; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "secrets", err)
 		return func(yield func(*Secret, error) bool) { var zero *Secret; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -262,6 +326,9 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Secret
 type UpdateOption = request.Option[UpdateOpts]
 
 func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateHeader(key, value string) UpdateOption {
+	return request.WithHeader[UpdateOpts](key, value)
+}
 
 type updateOptsBuilder struct {
 	base   UpdateOpts
@@ -269,13 +336,30 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSecretUpdateRequest() (string, map[string]string, error) {
-	return b.base.ToSecretUpdateRequest()
+	value0, value1, err := b.base.ToSecretUpdateRequest()
+	if err != nil {
+		var zero0 string
+		var zero1 map[string]string
+		return zero0, zero1, err
+	}
+	value1, err = request.MergeHeadersFor(value1, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 string
+		var zero1 map[string]string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "secrets", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Update", "secrets", err)
 		return err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
@@ -287,6 +371,9 @@ type UpdateMetadatumOption = request.Option[MetadatumOpts]
 func WithUpdateMetadatumOptions(value MetadatumOpts) UpdateMetadatumOption {
 	return request.WithOptions(value)
 }
+func WithUpdateMetadatumField(key string, value any) UpdateMetadatumOption {
+	return request.WithField[MetadatumOpts](key, value)
+}
 
 type updateMetadatumOptsBuilder struct {
 	base   MetadatumOpts
@@ -294,13 +381,31 @@ type updateMetadatumOptsBuilder struct {
 }
 
 func (b updateMetadatumOptsBuilder) ToMetadatumUpdateMap() (map[string]any, string, error) {
-	return b.base.ToMetadatumUpdateMap()
+	value0, value1, err := b.base.ToMetadatumUpdateMap()
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // UpdateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadatum(ctx context.Context, secretID string, opts MetadatumOpts, options ...UpdateMetadatumOption) (*Metadatum, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMetadatum", "secrets", err)
+		var zero0 *Metadatum
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMetadatum", "secrets", err)
 		var zero0 *Metadatum
 		return zero0, err
 	}
