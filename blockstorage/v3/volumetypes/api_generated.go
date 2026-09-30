@@ -72,17 +72,28 @@ type addAccessOptsBuilder struct {
 }
 
 func (b addAccessOptsBuilder) ToVolumeTypeAddAccessMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTypeAddAccessMap()
+	value0, err := b.base.ToVolumeTypeAddAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, options ...AddAccessOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddAccess", "volumetypes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddAccess", "volumetypes", err)
 		return err
 	}
 	_opts := addAccessOptsBuilder{base: cfg.Options, config: cfg}
@@ -102,17 +113,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToVolumeTypeCreateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTypeCreateMap()
+	value0, err := b.base.ToVolumeTypeCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*VolumeType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "volumetypes", err)
+		var zero0 *VolumeType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "volumetypes", err)
 		var zero0 *VolumeType
 		return zero0, err
 	}
@@ -138,17 +161,29 @@ type createEncryptionOptsBuilder struct {
 }
 
 func (b createEncryptionOptsBuilder) ToEncryptionCreateMap() (map[string]any, error) {
-	body, err := b.base.ToEncryptionCreateMap()
+	value0, err := b.base.ToEncryptionCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateEncryption invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateEncryption(ctx context.Context, id string, opts CreateEncryptionOpts, options ...CreateEncryptionOption) (*EncryptionType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateEncryption", "volumetypes", err)
+		var zero0 *EncryptionType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateEncryption", "volumetypes", err)
 		var zero0 *EncryptionType
 		return zero0, err
 	}
@@ -174,17 +209,29 @@ type createExtraSpecsOptsBuilder struct {
 }
 
 func (b createExtraSpecsOptsBuilder) ToVolumeTypeExtraSpecsCreateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTypeExtraSpecsCreateMap()
+	value0, err := b.base.ToVolumeTypeExtraSpecsCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateExtraSpecs(ctx context.Context, volumeTypeID string, opts ExtraSpecsOpts, options ...CreateExtraSpecsOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateExtraSpecs", "volumetypes", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateExtraSpecs", "volumetypes", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -253,11 +300,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToVolumeTypeListQuery() (string, error) {
-	query, err := b.base.ToVolumeTypeListQuery()
+	value0, err := b.base.ToVolumeTypeListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -265,6 +318,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "volumetypes", err)
+		return func(yield func(*VolumeType, error) bool) { var zero *VolumeType; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "volumetypes", err)
 		return func(yield func(*VolumeType, error) bool) { var zero *VolumeType; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -305,17 +363,28 @@ type removeAccessOptsBuilder struct {
 }
 
 func (b removeAccessOptsBuilder) ToVolumeTypeRemoveAccessMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTypeRemoveAccessMap()
+	value0, err := b.base.ToVolumeTypeRemoveAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts, options ...RemoveAccessOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveAccess", "volumetypes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveAccess", "volumetypes", err)
 		return err
 	}
 	_opts := removeAccessOptsBuilder{base: cfg.Options, config: cfg}
@@ -335,17 +404,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToVolumeTypeUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTypeUpdateMap()
+	value0, err := b.base.ToVolumeTypeUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*VolumeType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "volumetypes", err)
+		var zero0 *VolumeType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "volumetypes", err)
 		var zero0 *VolumeType
 		return zero0, err
 	}
@@ -371,17 +452,29 @@ type updateEncryptionOptsBuilder struct {
 }
 
 func (b updateEncryptionOptsBuilder) ToUpdateEncryptionMap() (map[string]any, error) {
-	body, err := b.base.ToUpdateEncryptionMap()
+	value0, err := b.base.ToUpdateEncryptionMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateEncryption invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateEncryption(ctx context.Context, id string, encryptionID string, opts UpdateEncryptionOpts, options ...UpdateEncryptionOption) (*EncryptionType, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateEncryption", "volumetypes", err)
+		var zero0 *EncryptionType
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateEncryption", "volumetypes", err)
 		var zero0 *EncryptionType
 		return zero0, err
 	}
@@ -411,6 +504,12 @@ func (b updateExtraSpecOptsBuilder) ToVolumeTypeExtraSpecUpdateMap() (map[string
 func (a *API) UpdateExtraSpec(ctx context.Context, volumeTypeID string, opts ExtraSpecsOpts, options ...UpdateExtraSpecOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateExtraSpec", "volumetypes", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("UpdateExtraSpec", "volumetypes", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
