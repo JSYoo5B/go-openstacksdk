@@ -39,6 +39,12 @@ func WithCallVendorPassthruOptions(value VendorPassthruCallOpts) CallVendorPasst
 func (a *API) CallVendorPassthru(ctx context.Context, driverName string, httpMethod string, opts VendorPassthruCallOpts, options ...CallVendorPassthruOption) (map[string]any, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CallVendorPassthru", "drivers", err)
+		var zero0 map[string]any
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("CallVendorPassthru", "drivers", err)
 		var zero0 map[string]any
 		return zero0, err
 	}
@@ -87,11 +93,17 @@ type listDriversOptsBuilder struct {
 }
 
 func (b listDriversOptsBuilder) ToListDriversOptsQuery() (string, error) {
-	query, err := b.base.ToListDriversOptsQuery()
+	value0, err := b.base.ToListDriversOptsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDrivers invokes the upstream API with library-owned builders and result handling.
@@ -99,6 +111,11 @@ func (a *API) ListDrivers(ctx context.Context, options ...ListDriversOption) ite
 	var opts ListDriversOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDrivers", "drivers", err)
+		return func(yield func(*Driver, error) bool) { var zero *Driver; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDrivers", "drivers", err)
 		return func(yield func(*Driver, error) bool) { var zero *Driver; yield(zero, err) }
 	}
 	_opts := listDriversOptsBuilder{base: cfg.Options, config: cfg}
