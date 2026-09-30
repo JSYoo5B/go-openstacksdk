@@ -44,6 +44,12 @@ func WithAddHostOptions(value AddHostOpts) AddHostOption { return request.WithOp
 func (a *API) AddHost(ctx context.Context, aggregateID int, opts AddHostOpts, options ...AddHostOption) (*Aggregate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddHost", "aggregates", err)
+		var zero0 *Aggregate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("AddHost", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
 	}
@@ -66,17 +72,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToAggregatesCreateMap() (map[string]any, error) {
-	body, err := b.base.ToAggregatesCreateMap()
+	value0, err := b.base.ToAggregatesCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Aggregate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "aggregates", err)
+		var zero0 *Aggregate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
 	}
@@ -116,6 +134,12 @@ func WithRemoveHostOptions(value RemoveHostOpts) RemoveHostOption { return reque
 func (a *API) RemoveHost(ctx context.Context, aggregateID int, opts RemoveHostOpts, options ...RemoveHostOption) (*Aggregate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveHost", "aggregates", err)
+		var zero0 *Aggregate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("RemoveHost", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
 	}
@@ -135,6 +159,12 @@ func WithSetMetadataOptions(value SetMetadataOpts) SetMetadataOption {
 func (a *API) SetMetadata(ctx context.Context, aggregateID int, opts SetMetadataOpts, options ...SetMetadataOption) (*Aggregate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetMetadata", "aggregates", err)
+		var zero0 *Aggregate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("SetMetadata", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
 	}
@@ -157,17 +187,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToAggregatesUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToAggregatesUpdateMap()
+	value0, err := b.base.ToAggregatesUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, aggregateID int, opts UpdateOpts, options ...UpdateOption) (*Aggregate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "aggregates", err)
+		var zero0 *Aggregate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "aggregates", err)
 		var zero0 *Aggregate
 		return zero0, err
 	}
