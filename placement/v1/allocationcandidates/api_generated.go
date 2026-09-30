@@ -40,11 +40,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToAllocationCandidatesListQuery() (string, error) {
-	query, err := b.base.ToAllocationCandidatesListQuery()
+	value0, err := b.base.ToAllocationCandidatesListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -52,6 +58,14 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Alloca
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "allocationcandidates", err)
+		return func(yield func(*AllocationCandidates110, error) bool) {
+			var zero *AllocationCandidates110
+			yield(zero, err)
+		}
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "allocationcandidates", err)
 		return func(yield func(*AllocationCandidates110, error) bool) {
 			var zero *AllocationCandidates110
 			yield(zero, err)
