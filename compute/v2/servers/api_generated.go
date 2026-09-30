@@ -176,11 +176,17 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToServerCreateMap() (map[string]any, error) {
-	body, err := b.base.ToServerCreateMap()
+	value0, err := b.base.ToServerCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 type createHintOptsBuilder struct {
@@ -189,25 +195,44 @@ type createHintOptsBuilder struct {
 }
 
 func (b createHintOptsBuilder) ToSchedulerHintsMap() (map[string]any, error) {
-	body, err := b.base.ToSchedulerHintsMap()
+	value0, err := b.base.ToSchedulerHintsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Server, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "servers", err)
+		var zero0 *Server
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false, "hintOpts"); err != nil {
+		err = request.Wrap("Create", "servers", err)
 		var zero0 *Server
 		return zero0, err
 	}
 	_opts := createOptsBuilder{base: cfg.Options, config: cfg}
 	var _hintOpts upstream.SchedulerHintOptsBuilder
-	if value, ok := cfg.Arguments["hintOpts"]; ok {
-		base := value.(SchedulerHintOpts)
-		_hintOpts = createHintOptsBuilder{base: base, config: request.Config[SchedulerHintOpts]{Options: base}}
+	{
+		base, provided, err := request.Argument[SchedulerHintOpts](cfg, "hintOpts")
+		if err != nil {
+			err = request.Wrap("Create", "servers", err)
+			var zero0 *Server
+			return zero0, err
+		}
+		if provided {
+			_hintOpts = createHintOptsBuilder{base: base, config: request.Config[SchedulerHintOpts]{Options: base}}
+		}
 	}
 	result := upstream.Create(ctx, a.client, _opts, _hintOpts)
 	value0, err := result.Extract()
@@ -230,17 +255,29 @@ type createImageOptsBuilder struct {
 }
 
 func (b createImageOptsBuilder) ToServerCreateImageMap() (map[string]any, error) {
-	body, err := b.base.ToServerCreateImageMap()
+	value0, err := b.base.ToServerCreateImageMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, options ...CreateImageOption) (CreateImageResult, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateImage", "servers", err)
+		var zero0 CreateImageResult
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateImage", "servers", err)
 		var zero0 CreateImageResult
 		return zero0, err
 	}
@@ -254,6 +291,9 @@ type CreateMetadatumOption = request.Option[MetadatumOpts]
 func WithCreateMetadatumOptions(value MetadatumOpts) CreateMetadatumOption {
 	return request.WithOptions(value)
 }
+func WithCreateMetadatumField(key string, value any) CreateMetadatumOption {
+	return request.WithField[MetadatumOpts](key, value)
+}
 
 type createMetadatumOptsBuilder struct {
 	base   MetadatumOpts
@@ -261,13 +301,31 @@ type createMetadatumOptsBuilder struct {
 }
 
 func (b createMetadatumOptsBuilder) ToMetadatumCreateMap() (map[string]any, string, error) {
-	return b.base.ToMetadatumCreateMap()
+	value0, value1, err := b.base.ToMetadatumCreateMap()
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // CreateMetadatum invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMetadatum(ctx context.Context, id string, opts MetadatumOpts, options ...CreateMetadatumOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateMetadatum", "servers", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateMetadatum", "servers", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -301,17 +359,29 @@ type evacuateOptsBuilder struct {
 }
 
 func (b evacuateOptsBuilder) ToEvacuateMap() (map[string]any, error) {
-	body, err := b.base.ToEvacuateMap()
+	value0, err := b.base.ToEvacuateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Evacuate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Evacuate(ctx context.Context, id string, opts EvacuateOpts, options ...EvacuateOption) (EvacuateResult, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Evacuate", "servers", err)
+		var zero0 EvacuateResult
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Evacuate", "servers", err)
 		var zero0 EvacuateResult
 		return zero0, err
 	}
@@ -355,11 +425,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToServerListQuery() (string, error) {
-	query, err := b.base.ToServerListQuery()
+	value0, err := b.base.ToServerListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -367,6 +443,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Server
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "servers", err)
+		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "servers", err)
 		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -402,11 +483,17 @@ type listSimpleOptsBuilder struct {
 }
 
 func (b listSimpleOptsBuilder) ToServerListQuery() (string, error) {
-	query, err := b.base.ToServerListQuery()
+	value0, err := b.base.ToServerListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListSimple invokes the upstream API with library-owned builders and result handling.
@@ -414,6 +501,11 @@ func (a *API) ListSimple(ctx context.Context, options ...ListSimpleOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListSimple", "servers", err)
+		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListSimple", "servers", err)
 		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
 	}
 	_opts := listSimpleOptsBuilder{base: cfg.Options, config: cfg}
@@ -438,17 +530,28 @@ type liveMigrateOptsBuilder struct {
 }
 
 func (b liveMigrateOptsBuilder) ToLiveMigrateMap() (map[string]any, error) {
-	body, err := b.base.ToLiveMigrateMap()
+	value0, err := b.base.ToLiveMigrateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // LiveMigrate invokes the upstream API with library-owned builders and result handling.
 func (a *API) LiveMigrate(ctx context.Context, id string, opts LiveMigrateOpts, options ...LiveMigrateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("LiveMigrate", "servers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("LiveMigrate", "servers", err)
 		return err
 	}
 	_opts := liveMigrateOptsBuilder{base: cfg.Options, config: cfg}
@@ -499,17 +602,28 @@ type rebootOptsBuilder struct {
 }
 
 func (b rebootOptsBuilder) ToServerRebootMap() (map[string]any, error) {
-	body, err := b.base.ToServerRebootMap()
+	value0, err := b.base.ToServerRebootMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Reboot invokes the upstream API with library-owned builders and result handling.
 func (a *API) Reboot(ctx context.Context, id string, opts RebootOpts, options ...RebootOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Reboot", "servers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Reboot", "servers", err)
 		return err
 	}
 	_opts := rebootOptsBuilder{base: cfg.Options, config: cfg}
@@ -529,17 +643,29 @@ type rebuildOptsBuilder struct {
 }
 
 func (b rebuildOptsBuilder) ToServerRebuildMap() (map[string]any, error) {
-	body, err := b.base.ToServerRebuildMap()
+	value0, err := b.base.ToServerRebuildMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Rebuild invokes the upstream API with library-owned builders and result handling.
 func (a *API) Rebuild(ctx context.Context, id string, opts RebuildOpts, options ...RebuildOption) (*Server, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Rebuild", "servers", err)
+		var zero0 *Server
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Rebuild", "servers", err)
 		var zero0 *Server
 		return zero0, err
 	}
@@ -563,17 +689,29 @@ type rescueOptsBuilder struct {
 }
 
 func (b rescueOptsBuilder) ToServerRescueMap() (map[string]any, error) {
-	body, err := b.base.ToServerRescueMap()
+	value0, err := b.base.ToServerRescueMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Rescue invokes the upstream API with library-owned builders and result handling.
 func (a *API) Rescue(ctx context.Context, id string, opts RescueOpts, options ...RescueOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Rescue", "servers", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Rescue", "servers", err)
 		var zero0 string
 		return zero0, err
 	}
@@ -599,17 +737,29 @@ type resetMetadataOptsBuilder struct {
 }
 
 func (b resetMetadataOptsBuilder) ToMetadataResetMap() (map[string]any, error) {
-	body, err := b.base.ToMetadataResetMap()
+	value0, err := b.base.ToMetadataResetMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetMetadata(ctx context.Context, id string, opts MetadataOpts, options ...ResetMetadataOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetMetadata", "servers", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetMetadata", "servers", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -643,17 +793,28 @@ type resizeOptsBuilder struct {
 }
 
 func (b resizeOptsBuilder) ToServerResizeMap() (map[string]any, error) {
-	body, err := b.base.ToServerResizeMap()
+	value0, err := b.base.ToServerResizeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Resize invokes the upstream API with library-owned builders and result handling.
 func (a *API) Resize(ctx context.Context, id string, opts ResizeOpts, options ...ResizeOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Resize", "servers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Resize", "servers", err)
 		return err
 	}
 	_opts := resizeOptsBuilder{base: cfg.Options, config: cfg}
@@ -695,17 +856,29 @@ type showConsoleOutputOptsBuilder struct {
 }
 
 func (b showConsoleOutputOptsBuilder) ToServerShowConsoleOutputMap() (map[string]any, error) {
-	body, err := b.base.ToServerShowConsoleOutputMap()
+	value0, err := b.base.ToServerShowConsoleOutputMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ShowConsoleOutput invokes the upstream API with library-owned builders and result handling.
 func (a *API) ShowConsoleOutput(ctx context.Context, id string, opts ShowConsoleOutputOpts, options ...ShowConsoleOutputOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ShowConsoleOutput", "servers", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ShowConsoleOutput", "servers", err)
 		var zero0 string
 		return zero0, err
 	}
@@ -759,17 +932,28 @@ type unshelveOptsBuilder struct {
 }
 
 func (b unshelveOptsBuilder) ToUnshelveMap() (map[string]any, error) {
-	body, err := b.base.ToUnshelveMap()
+	value0, err := b.base.ToUnshelveMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Unshelve invokes the upstream API with library-owned builders and result handling.
 func (a *API) Unshelve(ctx context.Context, id string, opts UnshelveOpts, options ...UnshelveOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Unshelve", "servers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Unshelve", "servers", err)
 		return err
 	}
 	_opts := unshelveOptsBuilder{base: cfg.Options, config: cfg}
@@ -789,17 +973,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToServerUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToServerUpdateMap()
+	value0, err := b.base.ToServerUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Server, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "servers", err)
+		var zero0 *Server
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "servers", err)
 		var zero0 *Server
 		return zero0, err
 	}
@@ -825,17 +1021,29 @@ type updateMetadataOptsBuilder struct {
 }
 
 func (b updateMetadataOptsBuilder) ToMetadataUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToMetadataUpdateMap()
+	value0, err := b.base.ToMetadataUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts MetadataOpts, options ...UpdateMetadataOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMetadata", "servers", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMetadata", "servers", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
