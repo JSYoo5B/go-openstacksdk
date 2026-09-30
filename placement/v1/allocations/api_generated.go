@@ -50,17 +50,28 @@ type manageOptsBuilder struct {
 }
 
 func (b manageOptsBuilder) ToAllocationManageMap() (map[string]any, error) {
-	body, err := b.base.ToAllocationManageMap()
+	value0, err := b.base.ToAllocationManageMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Manage invokes the upstream API with library-owned builders and result handling.
 func (a *API) Manage(ctx context.Context, opts ManageOpts, options ...ManageOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Manage", "allocations", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Manage", "allocations", err)
 		return err
 	}
 	_opts := manageOptsBuilder{base: cfg.Options, config: cfg}
@@ -80,17 +91,28 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToAllocationUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToAllocationUpdateMap()
+	value0, err := b.base.ToAllocationUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, consumerUUID string, opts UpdateOpts, options ...UpdateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "allocations", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "allocations", err)
 		return err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
