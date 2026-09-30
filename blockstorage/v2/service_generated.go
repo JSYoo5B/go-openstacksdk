@@ -21,7 +21,7 @@ type Service struct {
 	Backups           *resource1.API
 	Limits            *resource2.API
 	QuotaSets         *resource3.API
-	Schedulerstats    *resource4.API
+	SchedulerStats    *resource4.API
 	Services          *resource5.API
 	Snapshots         *resource6.API
 	Transfers         *resource7.API
@@ -34,7 +34,7 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Backups:           resource1.New(client),
 		Limits:            resource2.New(client),
 		QuotaSets:         resource3.New(client),
-		Schedulerstats:    resource4.New(client),
+		SchedulerStats:    resource4.New(client),
 		Services:          resource5.New(client),
 		Snapshots:         resource6.New(client),
 		Transfers:         resource7.New(client),
