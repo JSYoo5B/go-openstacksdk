@@ -55,17 +55,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToPortCreateMap() (map[string]any, error) {
-	body, err := b.base.ToPortCreateMap()
+	value0, err := b.base.ToPortCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Port, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "ports", err)
+		var zero0 *Port
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "ports", err)
 		var zero0 *Port
 		return zero0, err
 	}
@@ -100,18 +112,30 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToPortListDetailQuery() (string, error) {
-	query, err := b.base.ToPortListDetailQuery()
+	value0, err := b.base.ToPortListDetailQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b listOptsBuilder) ToPortListQuery() (string, error) {
-	query, err := b.base.ToPortListQuery()
+	value0, err := b.base.ToPortListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -119,6 +143,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Port, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "ports", err)
+		return func(yield func(*Port, error) bool) { var zero *Port; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "ports", err)
 		return func(yield func(*Port, error) bool) { var zero *Port; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -141,18 +170,30 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToPortListDetailQuery() (string, error) {
-	query, err := b.base.ToPortListDetailQuery()
+	value0, err := b.base.ToPortListDetailQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b listDetailOptsBuilder) ToPortListQuery() (string, error) {
-	query, err := b.base.ToPortListQuery()
+	value0, err := b.base.ToPortListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -160,6 +201,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "ports", err)
+		return func(yield func(*Port, error) bool) { var zero *Port; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "ports", err)
 		return func(yield func(*Port, error) bool) { var zero *Port; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -177,6 +223,12 @@ func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptio
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Port, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "ports", err)
+		var zero0 *Port
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Update", "ports", err)
 		var zero0 *Port
 		return zero0, err
 	}
