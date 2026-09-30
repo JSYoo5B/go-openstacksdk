@@ -271,9 +271,20 @@ func (g *generator) generate(path string) error {
 	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports}
 	e.use(pkg.Path())
 	e.use(upstreamModule)
+	specialized, hasSpecialized := specializedCollections[path]
+	if hasSpecialized && (plan != nil || len(scopes) != 0) {
+		return fmt.Errorf("specialized collection conflicts with inferred policies for %s", path)
+	}
 	if plan == nil {
-		e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
-		if len(scopes) == 0 {
+		if hasSpecialized && specialized.Scope == "" {
+			e.use("gophercloudsdk/resource")
+			e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", specialized.Model)
+		} else {
+			e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
+		}
+		if hasSpecialized {
+			g.collections = append(g.collections, specialized)
+		} else if len(scopes) == 0 {
 			g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
 		}
 	} else {

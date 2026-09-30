@@ -11,14 +11,15 @@ import (
 )
 
 type collectionRecord struct {
-	Package string `json:"package"`
-	Model   string `json:"model,omitempty"`
-	Find    bool   `json:"find"`
-	Delete  bool   `json:"delete"`
-	Wait    bool   `json:"wait"`
-	Scope   string `json:"scope,omitempty"`
-	Parent  string `json:"parent,omitempty"`
-	Issue   string `json:"issue,omitempty"`
+	Package       string `json:"package"`
+	Model         string `json:"model,omitempty"`
+	UpstreamModel string `json:"upstream_model,omitempty"`
+	Find          bool   `json:"find"`
+	Delete        bool   `json:"delete"`
+	Wait          bool   `json:"wait"`
+	Scope         string `json:"scope,omitempty"`
+	Parent        string `json:"parent,omitempty"`
+	Issue         string `json:"issue,omitempty"`
 }
 
 type collectionPlan struct {
