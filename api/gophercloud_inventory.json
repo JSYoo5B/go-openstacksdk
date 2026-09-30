@@ -271,7 +271,7 @@
       "name": "GetVirtualMedia",
       "sdk_package": "gophercloudsdk/baremetal/v1/nodes",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "normalize"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/baremetal/v1/nodes",
