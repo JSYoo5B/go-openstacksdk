@@ -46,17 +46,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToTSIGKeyCreateMap() (map[string]any, error) {
-	body, err := b.base.ToTSIGKeyCreateMap()
+	value0, err := b.base.ToTSIGKeyCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*TSIGKey, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "tsigkeys", err)
+		var zero0 *TSIGKey
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "tsigkeys", err)
 		var zero0 *TSIGKey
 		return zero0, err
 	}
@@ -91,11 +103,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToTSIGKeyListQuery() (string, error) {
-	query, err := b.base.ToTSIGKeyListQuery()
+	value0, err := b.base.ToTSIGKeyListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -103,6 +121,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*TSIGKe
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "tsigkeys", err)
+		return func(yield func(*TSIGKey, error) bool) { var zero *TSIGKey; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "tsigkeys", err)
 		return func(yield func(*TSIGKey, error) bool) { var zero *TSIGKey; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -125,17 +148,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToTSIGKeyUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToTSIGKeyUpdateMap()
+	value0, err := b.base.ToTSIGKeyUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, tsigkeyID string, opts UpdateOpts, options ...UpdateOption) (*TSIGKey, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "tsigkeys", err)
+		var zero0 *TSIGKey
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "tsigkeys", err)
 		var zero0 *TSIGKey
 		return zero0, err
 	}
