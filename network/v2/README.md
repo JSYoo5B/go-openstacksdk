@@ -51,7 +51,7 @@ _ = value
 | `Routers` | [extensions/layer3/routers](extensions/layer3/routers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `NetworkIPAvailabilities` | [extensions/networkipavailabilities](extensions/networkipavailabilities/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QoSPolicies` | [extensions/qos/policies](extensions/qos/policies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
-| `QoSRules` | [extensions/qos/rules](extensions/qos/rules/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `QoSRules` | [extensions/qos/rules](extensions/qos/rules/api_generated.go) | `BandwidthLimitRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `DSCPMarkingRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `MinimumBandwidthRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `QoSRuleTypes` | [extensions/qos/ruletypes](extensions/qos/ruletypes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Quotas` | [extensions/quotas](extensions/quotas/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `RBACPolicies` | [extensions/rbacpolicies](extensions/rbacpolicies/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
