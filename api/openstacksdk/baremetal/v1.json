@@ -1,0 +1,2763 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 94,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 133,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/create_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 163,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "baremetal/v1/find_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 196,
+      "parameters": [
+        {
+          "name": "chassis",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/get_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 213,
+      "parameters": [
+        {
+          "name": "chassis",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/update_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 227,
+      "parameters": [
+        {
+          "name": "chassis",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/patch_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_chassis",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 241,
+      "parameters": [
+        {
+          "name": "chassis",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.chassis.Chassis"
+      ],
+      "id": "baremetal/v1/delete_chassis",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "drivers",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 262,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.driver.Driver"
+      ],
+      "id": "baremetal/v1/drivers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_driver",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 281,
+      "parameters": [
+        {
+          "name": "driver",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.driver.Driver"
+      ],
+      "id": "baremetal/v1/get_driver",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "list_driver_vendor_passthru",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 293,
+      "parameters": [
+        {
+          "name": "driver",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.driver.Driver"
+      ],
+      "id": "baremetal/v1/list_driver_vendor_passthru",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "call_driver_vendor_passthru",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 308,
+      "parameters": [
+        {
+          "name": "driver",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "required": true
+        },
+        {
+          "name": "method",
+          "required": true
+        },
+        {
+          "name": "body",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.driver.Driver"
+      ],
+      "id": "baremetal/v1/call_driver_vendor_passthru",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "nodes",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 332,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/nodes",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 386,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/create_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 417,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/find_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 443,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/get_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_node_inventory",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 460,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/get_node_inventory",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 473,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "retry_on_conflict",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/update_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "patch_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 495,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        },
+        {
+          "name": "reset_interfaces",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "retry_on_conflict",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/patch_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_provision_state",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 529,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "target",
+          "required": true
+        },
+        {
+          "name": "config_drive",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "clean_steps",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "rescue_password",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "deploy_steps",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_provision_state",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_node_boot_device",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 582,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/get_node_boot_device",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_boot_device",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 594,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "boot_device",
+          "required": true
+        },
+        {
+          "name": "persistent",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_boot_device",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_node_supported_boot_devices",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 612,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/get_node_supported_boot_devices",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_boot_mode",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 624,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_boot_mode",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_secure_boot",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 634,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "target",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_secure_boot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "inject_nmi_to_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 647,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/inject_nmi_to_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_nodes_provision_state",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 682,
+      "parameters": [
+        {
+          "name": "nodes",
+          "required": true
+        },
+        {
+          "name": "expected_state",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "abort_on_failed_state",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "fail",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node",
+        "openstack.baremetal.v1.node.WaitResult",
+        "openstack.exceptions.ResourceFailure",
+        "openstack.exceptions.ResourceTimeout"
+      ],
+      "id": "baremetal/v1/wait_for_nodes_provision_state",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_power_state",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 767,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "target",
+          "required": true
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node",
+        "openstack.baremetal.v1.node.PowerAction"
+      ],
+      "id": "baremetal/v1/set_node_power_state",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_node_power_state",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 793,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "expected_state",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/wait_for_node_power_state",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_node_reservation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 812,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/wait_for_node_reservation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "validate_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 842,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "required",
+          "required": false,
+          "default": "('boot', 'deploy', 'power')"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node",
+        "openstack.baremetal.v1.node.ValidationResult"
+      ],
+      "id": "baremetal/v1/validate_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_maintenance",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 863,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "reason",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_maintenance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unset_node_maintenance",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 876,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/unset_node_maintenance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 887,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/delete_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_node_trait",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 906,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "trait",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/add_node_trait",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_node_trait",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 917,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "trait",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/remove_node_trait",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "call_node_vendor_passthru",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 938,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "required": true
+        },
+        {
+          "name": "method",
+          "required": true
+        },
+        {
+          "name": "body",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/call_node_vendor_passthru",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "list_node_vendor_passthru",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 957,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/list_node_vendor_passthru",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_node_console",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 969,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/get_node_console",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "enable_node_console",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 979,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/enable_node_console",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "disable_node_console",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 989,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/disable_node_console",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_node_traits",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 999,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "traits",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/set_node_traits",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "list_node_firmware",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1015,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/list_node_firmware",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "ports",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1029,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/ports",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1080,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/create_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1110,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "baremetal/v1/find_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1141,
+      "parameters": [
+        {
+          "name": "port",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/get_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1158,
+      "parameters": [
+        {
+          "name": "port",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/update_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "patch_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1170,
+      "parameters": [
+        {
+          "name": "port",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/patch_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_port",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1184,
+      "parameters": [
+        {
+          "name": "port",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port.Port"
+      ],
+      "id": "baremetal/v1/delete_port",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "port_groups",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1203,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/port_groups",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1246,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/create_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1274,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/find_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1300,
+      "parameters": [
+        {
+          "name": "port_group",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/get_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1319,
+      "parameters": [
+        {
+          "name": "port_group",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/update_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1334,
+      "parameters": [
+        {
+          "name": "port_group",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/patch_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_port_group",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1348,
+      "parameters": [
+        {
+          "name": "port_group",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.port_group.PortGroup"
+      ],
+      "id": "baremetal/v1/delete_port_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "attach_vmedia_to_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1372,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "device_type",
+          "required": true
+        },
+        {
+          "name": "image_url",
+          "required": true
+        },
+        {
+          "name": "image_download_source",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "retry_on_conflict",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/attach_vmedia_to_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "detach_vmedia_from_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1404,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "device_types",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/detach_vmedia_from_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "attach_vif_to_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1427,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "vif_id",
+          "required": true
+        },
+        {
+          "name": "retry_on_conflict",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "port_group",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node",
+        "openstack.baremetal.v1.port.Port",
+        "openstack.baremetal.v1.port_group.PortGroup",
+        "openstack.resource.Resource"
+      ],
+      "id": "baremetal/v1/attach_vif_to_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes",
+        "gophercloudsdk/baremetal/v1/ports"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "detach_vif_from_node",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1475,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "vif_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/detach_vif_from_node",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "list_node_vifs",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1501,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node"
+      ],
+      "id": "baremetal/v1/list_node_vifs",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/nodes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "allocations",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1519,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/allocations",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1555,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/create_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1565,
+      "parameters": [
+        {
+          "name": "allocation",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/get_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1584,
+      "parameters": [
+        {
+          "name": "allocation",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/update_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "patch_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1598,
+      "parameters": [
+        {
+          "name": "allocation",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/patch_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1612,
+      "parameters": [
+        {
+          "name": "allocation",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/delete_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_allocation",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1633,
+      "parameters": [
+        {
+          "name": "allocation",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_error",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.allocation.Allocation"
+      ],
+      "id": "baremetal/v1/wait_for_allocation",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/baremetal/v1/allocations"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "volume_connectors",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1659,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/volume_connectors",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1702,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/create_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1734,
+      "parameters": [
+        {
+          "name": "vc_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "baremetal/v1/find_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1769,
+      "parameters": [
+        {
+          "name": "volume_connector",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/get_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1791,
+      "parameters": [
+        {
+          "name": "volume_connector",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/update_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1811,
+      "parameters": [
+        {
+          "name": "volume_connector",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/patch_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume_connector",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1831,
+      "parameters": [
+        {
+          "name": "volume_connector",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_connector.VolumeConnector"
+      ],
+      "id": "baremetal/v1/delete_volume_connector",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "volume_targets",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1858,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/volume_targets",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1901,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/create_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1931,
+      "parameters": [
+        {
+          "name": "vt_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "baremetal/v1/find_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1966,
+      "parameters": [
+        {
+          "name": "volume_target",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/get_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 1988,
+      "parameters": [
+        {
+          "name": "volume_target",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/update_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2003,
+      "parameters": [
+        {
+          "name": "volume_target",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/patch_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume_target",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2021,
+      "parameters": [
+        {
+          "name": "volume_target",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.volume_target.VolumeTarget"
+      ],
+      "id": "baremetal/v1/delete_volume_target",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "deploy_templates",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2048,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/deploy_templates",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2066,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/create_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2078,
+      "parameters": [
+        {
+          "name": "deploy_template",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/update_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2098,
+      "parameters": [
+        {
+          "name": "deploy_template",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/delete_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2127,
+      "parameters": [
+        {
+          "name": "deploy_template",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/get_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2169,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/find_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_deploy_template",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2198,
+      "parameters": [
+        {
+          "name": "deploy_template",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.deploy_templates.DeployTemplate"
+      ],
+      "id": "baremetal/v1/patch_deploy_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "runbooks",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2220,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/runbooks",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_runbook",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2238,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/create_runbook",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_runbook",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2248,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/update_runbook",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_runbook",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2264,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/delete_runbook",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_runbook",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2287,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/get_runbook",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_runbook",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2308,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/patch_runbook",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "add_runbook_trait",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2322,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "trait",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/add_runbook_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "remove_runbook_trait",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2335,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "trait",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/remove_runbook_trait",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_runbook_traits",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2351,
+      "parameters": [
+        {
+          "name": "runbook",
+          "required": true
+        },
+        {
+          "name": "traits",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.runbooks.Runbook"
+      ],
+      "id": "baremetal/v1/set_runbook_traits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "conductors",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2369,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.conductor.Conductor"
+      ],
+      "id": "baremetal/v1/conductors",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_conductor",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2389,
+      "parameters": [
+        {
+          "name": "conductor",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.conductor.Conductor"
+      ],
+      "id": "baremetal/v1/get_conductor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2410,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "baremetal/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2449,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "baremetal/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "inspection_rules",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2473,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/inspection_rules",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_inspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2489,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/create_inspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_inspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2501,
+      "parameters": [
+        {
+          "name": "inspection_rule",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/get_inspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_inspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2523,
+      "parameters": [
+        {
+          "name": "inspection_rule",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/update_inspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_inspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2543,
+      "parameters": [
+        {
+          "name": "inspection_rule",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/delete_inspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "patch_inspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal/v1/_proxy.py",
+      "line": 2568,
+      "parameters": [
+        {
+          "name": "inspection_rule",
+          "required": true
+        },
+        {
+          "name": "patch",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.inspection_rules.InspectionRule"
+      ],
+      "id": "baremetal/v1/patch_inspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
