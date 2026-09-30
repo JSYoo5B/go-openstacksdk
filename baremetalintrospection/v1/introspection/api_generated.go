@@ -65,11 +65,17 @@ type listIntrospectionsOptsBuilder struct {
 }
 
 func (b listIntrospectionsOptsBuilder) ToIntrospectionsListQuery() (string, error) {
-	query, err := b.base.ToIntrospectionsListQuery()
+	value0, err := b.base.ToIntrospectionsListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListIntrospections invokes the upstream API with library-owned builders and result handling.
@@ -77,6 +83,11 @@ func (a *API) ListIntrospections(ctx context.Context, options ...ListIntrospecti
 	var opts ListIntrospectionsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListIntrospections", "introspection", err)
+		return func(yield func(*Introspection, error) bool) { var zero *Introspection; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListIntrospections", "introspection", err)
 		return func(yield func(*Introspection, error) bool) { var zero *Introspection; yield(zero, err) }
 	}
 	_opts := listIntrospectionsOptsBuilder{base: cfg.Options, config: cfg}
@@ -106,17 +117,28 @@ type startIntrospectionOptsBuilder struct {
 }
 
 func (b startIntrospectionOptsBuilder) ToStartIntrospectionQuery() (string, error) {
-	query, err := b.base.ToStartIntrospectionQuery()
+	value0, err := b.base.ToStartIntrospectionQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // StartIntrospection invokes the upstream API with library-owned builders and result handling.
 func (a *API) StartIntrospection(ctx context.Context, nodeID string, opts StartOpts, options ...StartIntrospectionOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("StartIntrospection", "introspection", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("StartIntrospection", "introspection", err)
 		return err
 	}
 	_opts := startIntrospectionOptsBuilder{base: cfg.Options, config: cfg}
