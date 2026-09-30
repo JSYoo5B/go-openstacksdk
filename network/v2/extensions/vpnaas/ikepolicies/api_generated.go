@@ -123,17 +123,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToPolicyCreateMap() (map[string]any, error) {
-	body, err := b.base.ToPolicyCreateMap()
+	value0, err := b.base.ToPolicyCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Policy, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "ikepolicies", err)
+		var zero0 *Policy
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "ikepolicies", err)
 		var zero0 *Policy
 		return zero0, err
 	}
@@ -168,11 +180,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToPolicyListQuery() (string, error) {
-	query, err := b.base.ToPolicyListQuery()
+	value0, err := b.base.ToPolicyListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -180,6 +198,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Policy
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "ikepolicies", err)
+		return func(yield func(*Policy, error) bool) { var zero *Policy; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "ikepolicies", err)
 		return func(yield func(*Policy, error) bool) { var zero *Policy; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -202,17 +225,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToPolicyUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToPolicyUpdateMap()
+	value0, err := b.base.ToPolicyUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Policy, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "ikepolicies", err)
+		var zero0 *Policy
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "ikepolicies", err)
 		var zero0 *Policy
 		return zero0, err
 	}
