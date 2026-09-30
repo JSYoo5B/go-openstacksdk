@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답 모델은 Gophercloud 타입이며, 수정한 응답이 자동 저장되지는 않습니다.
 
+Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.
+
 ## Go 사용
 
 ```go

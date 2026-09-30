@@ -51,6 +51,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.\n\n")
+	case "objectstorage/v1":
+		out.WriteString("Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.\n\n")
 	}
 	var example *collectionRecord
 	for i := range g.collections {
