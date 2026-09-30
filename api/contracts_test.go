@@ -14,6 +14,7 @@ import (
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/network/v2/ports"
 	"gophercloudsdk/objectstorage/v1/objects"
+	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -111,6 +112,9 @@ func TestServerSecondaryBuilderAndTypedList(t *testing.T) {
 	if err != nil || server.ID != "server-id" {
 		t.Fatalf("server=%v err=%v", server, err)
 	}
+	if _, err := api.Create(context.Background(), servers.CreateOpts{Name: "vm", ImageRef: "image-id", FlavorRef: "flavor-id"}, request.WithArgument[servers.CreateOpts]("hintOpts", 123)); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(err)
+	}
 	count := 0
 	for server, err := range api.List(context.Background()) {
 		if err != nil {
@@ -160,6 +164,9 @@ func TestSwiftUploadAndDownloadPreserveContent(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain")
+		if r.Header.Get("X-Vendor-Setting") != "false" || r.URL.Query().Get("vendor") != "a&b" {
+			t.Errorf("headers=%v query=%v", r.Header, r.URL.Query())
+		}
 		w.Header().Set("Content-Length", "5")
 		w.Header().Set("ETag", "etag")
 		_, _ = io.WriteString(w, "hello")
@@ -169,7 +176,10 @@ func TestSwiftUploadAndDownloadPreserveContent(t *testing.T) {
 	if err != nil || header.ETag != "etag" {
 		t.Fatalf("header=%v err=%v", header, err)
 	}
-	download, err := api.Download(context.Background(), "container", "hello.txt")
+	if _, err := api.Download(context.Background(), "container", "hello.txt", request.WithField[objects.DownloadOpts]("ignored", true)); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(err)
+	}
+	download, err := api.Download(context.Background(), "container", "hello.txt", objects.WithDownloadHeader("X-Vendor-Setting", "false"), objects.WithDownloadQuery("vendor", "a&b"))
 	if err != nil {
 		t.Fatal(err)
 	}
