@@ -1,0 +1,2780 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "access_rules",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 97,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_access_rule.ShareAccessRule"
+      ],
+      "id": "shared_file_system/v2/access_rules",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_access_rule",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 112,
+      "parameters": [
+        {
+          "name": "access_rule",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_access_rule.ShareAccessRule"
+      ],
+      "id": "shared_file_system/v2/get_access_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_access_rule",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 125,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_access_rule.ShareAccessRule"
+      ],
+      "id": "shared_file_system/v2/create_access_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_access_rule",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 147,
+      "parameters": [
+        {
+          "name": "access_rule",
+          "required": true
+        },
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "unrestrict",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException",
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_access_rule.ShareAccessRule"
+      ],
+      "id": "shared_file_system/v2/delete_access_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "availability_zones",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 191,
+      "parameters": [],
+      "resources": [
+        "openstack.shared_file_system.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "shared_file_system/v2/availability_zones",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "export_locations",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 203,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_export_locations.ShareExportLocation"
+      ],
+      "id": "shared_file_system/v2/export_locations",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_export_location",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 218,
+      "parameters": [
+        {
+          "name": "export_location",
+          "required": true
+        },
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_export_locations.ShareExportLocation"
+      ],
+      "id": "shared_file_system/v2/get_export_location",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "limits",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 239,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.limit.Limit"
+      ],
+      "id": "shared_file_system/v2/limits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 252,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "shared_file_system/v2/get_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 266,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "shared_file_system/v2/update_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_set",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 283,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.quota_set.QuotaSet"
+      ],
+      "id": "shared_file_system/v2/get_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_set",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 297,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.quota_set.QuotaSet"
+      ],
+      "id": "shared_file_system/v2/update_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "revert_quota_set",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 314,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.quota_set.QuotaSet"
+      ],
+      "id": "shared_file_system/v2/revert_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "services",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 331,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.service.Service"
+      ],
+      "id": "shared_file_system/v2/services",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disable_service",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 350,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": true
+        },
+        {
+          "name": "binary",
+          "required": true
+        },
+        {
+          "name": "disable_reason",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.service.Service"
+      ],
+      "id": "shared_file_system/v2/disable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "enable_service",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 372,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": true
+        },
+        {
+          "name": "binary",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.service.Service"
+      ],
+      "id": "shared_file_system/v2/enable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "ensure_shares_service",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 391,
+      "parameters": [
+        {
+          "name": "host",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.service.Service"
+      ],
+      "id": "shared_file_system/v2/ensure_shares_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "shares",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 405,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/shares",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 472,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/find_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 498,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/get_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 507,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.ResourceNotFound",
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/delete_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 540,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/update_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 551,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/create_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "revert_share_to_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 564,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/revert_share_to_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "manage_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 580,
+      "parameters": [
+        {
+          "name": "protocol",
+          "required": true
+        },
+        {
+          "name": "export_path",
+          "required": true
+        },
+        {
+          "name": "service_host",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/manage_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unmanage_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 613,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/unmanage_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resize_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 623,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "new_size",
+          "required": true
+        },
+        {
+          "name": "no_shrink",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "no_extend",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/resize_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "soft_delete_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 658,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/soft_delete_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "restore_share",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 668,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/restore_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 678,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/reset_share_status",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 692,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/fetch_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 706,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "shared_file_system/v2/get_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_metadata_item",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 719,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "key",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/fetch_share_metadata_item",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_metadata_item",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 736,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "key",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "shared_file_system/v2/get_share_metadata_item",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 751,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/set_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 772,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "shared_file_system/v2/create_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 788,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "shared_file_system/v2/update_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 807,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.ForbiddenException",
+        "openstack.exceptions.NotFoundException",
+        "openstack.exceptions.SDKException",
+        "openstack.shared_file_system.v2.share.Share"
+      ],
+      "id": "shared_file_system/v2/delete_share_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "share_groups",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 846,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/share_groups",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_group",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 888,
+      "parameters": [
+        {
+          "name": "share_group",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/get_share_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_share_group",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 914,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/find_share_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_group",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 935,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/create_share_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_group",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 943,
+      "parameters": [
+        {
+          "name": "share_group",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/update_share_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_group",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 954,
+      "parameters": [
+        {
+          "name": "share_group",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group.ShareGroup"
+      ],
+      "id": "shared_file_system/v2/delete_share_group",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_group_snapshots",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 980,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/share_group_snapshots",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_group_snapshot_members",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1015,
+      "parameters": [
+        {
+          "name": "group_snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/share_group_snapshot_members",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1032,
+      "parameters": [
+        {
+          "name": "group_snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/get_share_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1049,
+      "parameters": [
+        {
+          "name": "share_group",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_group.ShareGroup",
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/create_share_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_group_snapshot_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1069,
+      "parameters": [
+        {
+          "name": "group_snapshot",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/reset_share_group_snapshot_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1087,
+      "parameters": [
+        {
+          "name": "group_snapshot",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/update_share_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_group_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1105,
+      "parameters": [
+        {
+          "name": "group_snapshot",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_group_snapshot.ShareGroupSnapshot"
+      ],
+      "id": "shared_file_system/v2/delete_share_group_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_instances",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1132,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_instance.ShareInstance"
+      ],
+      "id": "shared_file_system/v2/share_instances",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_instance",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1151,
+      "parameters": [
+        {
+          "name": "share_instance",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_instance.ShareInstance"
+      ],
+      "id": "shared_file_system/v2/get_share_instance",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_instance_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1166,
+      "parameters": [
+        {
+          "name": "share_instance",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_instance.ShareInstance"
+      ],
+      "id": "shared_file_system/v2/reset_share_instance_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_instance",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1182,
+      "parameters": [
+        {
+          "name": "share_instance",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException",
+        "openstack.shared_file_system.v2.share_instance.ShareInstance"
+      ],
+      "id": "shared_file_system/v2/delete_share_instance",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_networks",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1210,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_network.ShareNetwork"
+      ],
+      "id": "shared_file_system/v2/share_networks",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_network",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1236,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_network.ShareNetwork"
+      ],
+      "id": "shared_file_system/v2/get_share_network",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_network",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1249,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_network.ShareNetwork"
+      ],
+      "id": "shared_file_system/v2/delete_share_network",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_network",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1275,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_network.ShareNetwork"
+      ],
+      "id": "shared_file_system/v2/update_share_network",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_network",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1288,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_network.ShareNetwork"
+      ],
+      "id": "shared_file_system/v2/create_share_network",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "share_network_subnets",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1304,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/share_network_subnets",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_network_subnet",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1322,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/get_share_network_subnet",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_network_subnet",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1346,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/create_share_network_subnet",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_network_subnet",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1365,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/delete_share_network_subnet",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_network_subnet_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1397,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/fetch_share_network_subnet_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_network_subnet_metadata_item",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1425,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        },
+        {
+          "name": "key",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/fetch_share_network_subnet_metadata_item",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_share_network_subnet_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1454,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/set_share_network_subnet_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_network_subnet_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1485,
+      "parameters": [
+        {
+          "name": "share_network",
+          "required": true
+        },
+        {
+          "name": "share_network_subnet",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share_network.ShareNetwork",
+        "openstack.shared_file_system.v2.share_network_subnet.ShareNetworkSubnet"
+      ],
+      "id": "shared_file_system/v2/delete_share_network_subnet_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_replica",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1521,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/create_share_replica",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "share_replicas",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1541,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/share_replicas",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_replica",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1556,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/get_share_replica",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_replica",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1567,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/delete_share_replica",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_replica_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1592,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/reset_share_replica_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_replica_state",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1608,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        },
+        {
+          "name": "replica_state",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/reset_share_replica_state",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "promote_share_replica",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1626,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/promote_share_replica",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "resync_share_replica",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1639,
+      "parameters": [
+        {
+          "name": "share_replica",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_replica.ShareReplica"
+      ],
+      "id": "shared_file_system/v2/resync_share_replica",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_snapshots",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1654,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/share_snapshots",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1674,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/get_share_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1686,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/create_share_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1696,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/update_share_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1708,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.ResourceNotFound",
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/delete_share_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "reset_share_snapshot_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1747,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/reset_share_snapshot_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "manage_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1759,
+      "parameters": [
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "provider_location",
+          "required": true
+        },
+        {
+          "name": "params",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.resource.Resource",
+        "openstack.shared_file_system.v2.share.Share",
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/manage_share_snapshot",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/shares"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unmanage_share_snapshot",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1791,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/unmanage_share_snapshot",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1802,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/fetch_share_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_share_snapshot_metadata_item",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1817,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "key",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/fetch_share_snapshot_metadata_item",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_share_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1834,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/set_share_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_snapshot_metadata",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1855,
+      "parameters": [
+        {
+          "name": "snapshot",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot.ShareSnapshot"
+      ],
+      "id": "shared_file_system/v2/delete_share_snapshot_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_snapshot_instances",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1874,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot_instance.ShareSnapshotInstance"
+      ],
+      "id": "shared_file_system/v2/share_snapshot_instances",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_snapshot_instance",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1902,
+      "parameters": [
+        {
+          "name": "share_snapshot_instance",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_snapshot_instance.ShareSnapshotInstance"
+      ],
+      "id": "shared_file_system/v2/get_share_snapshot_instance",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "resource_locks",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1923,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.resource_locks.ResourceLock"
+      ],
+      "id": "shared_file_system/v2/resource_locks",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_resource_lock",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1972,
+      "parameters": [
+        {
+          "name": "resource_lock",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.resource_locks.ResourceLock"
+      ],
+      "id": "shared_file_system/v2/get_resource_lock",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_resource_lock",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 1984,
+      "parameters": [
+        {
+          "name": "resource_lock",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.resource_locks.ResourceLock"
+      ],
+      "id": "shared_file_system/v2/update_resource_lock",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_resource_lock",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2000,
+      "parameters": [
+        {
+          "name": "resource_lock",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.resource_locks.ResourceLock"
+      ],
+      "id": "shared_file_system/v2/delete_resource_lock",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_resource_lock",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2024,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.resource_locks.ResourceLock"
+      ],
+      "id": "shared_file_system/v2/create_resource_lock",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_transfer",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2054,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/create_share_transfer",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "accept_share_transfer",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2071,
+      "parameters": [
+        {
+          "name": "share_transfer",
+          "required": true
+        },
+        {
+          "name": "auth_key",
+          "required": true
+        },
+        {
+          "name": "clear_access_rules",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/accept_share_transfer",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_transfers",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2092,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/share_transfers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_transfer",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2125,
+      "parameters": [
+        {
+          "name": "share_transfer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/get_share_transfer",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_share_transfer",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2146,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/find_share_transfer",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_transfers",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2166,
+      "parameters": [
+        {
+          "name": "share_transfer",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_transfer.ShareTransfer"
+      ],
+      "id": "shared_file_system/v2/delete_share_transfers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "share_types",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2184,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/share_types",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_type",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2204,
+      "parameters": [
+        {
+          "name": "share_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/get_share_type",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_type",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2214,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/create_share_type",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_type",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2228,
+      "parameters": [
+        {
+          "name": "share_type",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/delete_share_type",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_type",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2242,
+      "parameters": [
+        {
+          "name": "share_type",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/update_share_type",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_share_type_extra_specs",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2253,
+      "parameters": [
+        {
+          "name": "share_type",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/update_share_type_extra_specs",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_type_extra_spec_property",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2265,
+      "parameters": [
+        {
+          "name": "share_type",
+          "required": true
+        },
+        {
+          "name": "prop",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException",
+        "openstack.shared_file_system.v2.share_type.ShareType"
+      ],
+      "id": "shared_file_system/v2/delete_share_type_extra_spec_property",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "storage_pools",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2291,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.storage_pool.StoragePool"
+      ],
+      "id": "shared_file_system/v2/storage_pools",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "user_messages",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2315,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.user_message.UserMessage"
+      ],
+      "id": "shared_file_system/v2/user_messages",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_user_message",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2347,
+      "parameters": [
+        {
+          "name": "message",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.user_message.UserMessage"
+      ],
+      "id": "shared_file_system/v2/get_user_message",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_user_message",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2361,
+      "parameters": [
+        {
+          "name": "message",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.shared_file_system.v2.user_message.UserMessage"
+      ],
+      "id": "shared_file_system/v2/delete_user_message",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2387,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "shared_file_system/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/shared_file_system/v2/_proxy.py",
+      "line": 2426,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "shared_file_system/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
