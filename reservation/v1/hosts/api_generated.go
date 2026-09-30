@@ -46,17 +46,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToHostCreateMap() (map[string]any, error) {
-	body, err := b.base.ToHostCreateMap()
+	value0, err := b.base.ToHostCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Host, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "hosts", err)
+		var zero0 *Host
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "hosts", err)
 		var zero0 *Host
 		return zero0, err
 	}
@@ -91,11 +103,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToHostListQuery() (string, error) {
-	query, err := b.base.ToHostListQuery()
+	value0, err := b.base.ToHostListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -103,6 +121,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Host, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "hosts", err)
+		return func(yield func(*Host, error) bool) { var zero *Host; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "hosts", err)
 		return func(yield func(*Host, error) bool) { var zero *Host; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -125,17 +148,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToHostUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToHostUpdateMap()
+	value0, err := b.base.ToHostUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Host, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "hosts", err)
+		var zero0 *Host
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "hosts", err)
 		var zero0 *Host
 		return zero0, err
 	}
