@@ -1,13 +1,12 @@
 package main
 
 import (
-	"go/ast"
 	"go/types"
 	"testing"
 )
 
 func TestOptionalBuildersFollowNativeAssertionsAndConcreteInputs(t *testing.T) {
-	pkg, file := fixture(t, `package fixture
+	pkg, decls := fixture(t, `package fixture
 type Options struct{}
 type OptionsBuilder interface { ToBody() (map[string]any,error) }
 type HeadersBuilder interface { ToHeaders() (map[string]string,error) }
@@ -22,15 +21,9 @@ func Request(opts OptionsBuilder, other OptionsBuilder){
  if q,ok:=other.(QueryBuilder);ok{q.ToQuery()}
 }
 `)
-	var declaration *ast.FuncDecl
-	for _, decl := range file.Decls {
-		if fn, ok := decl.(*ast.FuncDecl); ok && fn.Name.Name == "Request" {
-			declaration = fn
-		}
-	}
 	iface, _ := ifaceOf(pkg.Scope().Lookup("OptionsBuilder").Type())
 	base := pkg.Scope().Lookup("Options").Type()
-	b := withOptionalBuilders(pkg, builder{name: "opts", base: base, iface: iface}, declaration, nil)
+	b := withOptionalBuilders(pkg, builder{name: "opts", base: base, iface: iface}, decls["Request"], nil)
 	caps := capabilities(pkg, b)
 	if b.iface.NumMethods() != 2 || !caps.body || !caps.headers || caps.query {
 		t.Fatalf("methods=%d caps=%+v", b.iface.NumMethods(), caps)
