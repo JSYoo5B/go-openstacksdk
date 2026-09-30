@@ -53,17 +53,29 @@ type createMappingOptsBuilder struct {
 }
 
 func (b createMappingOptsBuilder) ToMappingCreateMap() (map[string]any, error) {
-	body, err := b.base.ToMappingCreateMap()
+	value0, err := b.base.ToMappingCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateMapping invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateMapping(ctx context.Context, mappingID string, opts CreateMappingOpts, options ...CreateMappingOption) (*Mapping, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateMapping", "federation", err)
+		var zero0 *Mapping
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateMapping", "federation", err)
 		var zero0 *Mapping
 		return zero0, err
 	}
@@ -110,17 +122,29 @@ type updateMappingOptsBuilder struct {
 }
 
 func (b updateMappingOptsBuilder) ToMappingUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToMappingUpdateMap()
+	value0, err := b.base.ToMappingUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateMapping invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMapping(ctx context.Context, mappingID string, opts UpdateMappingOpts, options ...UpdateMappingOption) (*Mapping, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMapping", "federation", err)
+		var zero0 *Mapping
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMapping", "federation", err)
 		var zero0 *Mapping
 		return zero0, err
 	}
