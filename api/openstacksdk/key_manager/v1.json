@@ -1,0 +1,832 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_container",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 47,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/create_container",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_container",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 58,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/delete_container",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_container",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 94,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/find_container",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_container",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 114,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/get_container",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "containers",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 129,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/containers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_container",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 142,
+      "parameters": [
+        {
+          "name": "container",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.container.Container"
+      ],
+      "id": "key_manager/v1/update_container",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/containers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_order",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 158,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/create_order",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_order",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 169,
+      "parameters": [
+        {
+          "name": "order",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/delete_order",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_order",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 201,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/find_order",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_order",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 220,
+      "parameters": [
+        {
+          "name": "order",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/get_order",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "orders",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 233,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/orders",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_order",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 243,
+      "parameters": [
+        {
+          "name": "order",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.order.Order"
+      ],
+      "id": "key_manager/v1/update_order",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/orders"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_secret",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 259,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/create_secret",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_secret",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 270,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/delete_secret",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_secret",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 302,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/find_secret",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_secret",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 322,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/get_secret",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "secrets",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 335,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/secrets",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_secret",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 345,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret"
+      ],
+      "id": "key_manager/v1/update_secret",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "secret_stores",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 361,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret_store.SecretStore"
+      ],
+      "id": "key_manager/v1/secret_stores",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_global_default_secret_store",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 374,
+      "parameters": [],
+      "resources": [
+        "openstack.key_manager.v1.secret_store.SecretStore"
+      ],
+      "id": "key_manager/v1/get_global_default_secret_store",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_preferred_secret_store",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 384,
+      "parameters": [],
+      "resources": [
+        "openstack.key_manager.v1.secret_store.SecretStore"
+      ],
+      "id": "key_manager/v1/get_preferred_secret_store",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_project_quota",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 397,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.key_manager.v1.project_quota.ProjectQuota",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/delete_project_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_project_quota",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 421,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.key_manager.v1.project_quota.ProjectQuota",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/get_project_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_project_quota",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 439,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v3.project.Project",
+        "openstack.key_manager.v1.project_quota.ProjectQuota",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/update_project_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 457,
+      "parameters": [],
+      "resources": [
+        "openstack.key_manager.v1.quota.Quota"
+      ],
+      "id": "key_manager/v1/get_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_secret_acl",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 468,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_acl.SecretACL",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/get_secret_acl",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_secret_acl",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 488,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_acl.SecretACL",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/set_secret_acl",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_secret_acl",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 506,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_acl.SecretACL",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/update_secret_acl",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_secret_acl",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 524,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_acl.SecretACL",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/delete_secret_acl",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_secret_consumer",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 544,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_consumer.SecretConsumer",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/create_secret_consumer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_secret_consumer",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 566,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.NotFoundException",
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_consumer.SecretConsumer",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/delete_secret_consumer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "secret_consumers",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 598,
+      "parameters": [
+        {
+          "name": "secret",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.key_manager.v1.secret.Secret",
+        "openstack.key_manager.v1.secret_consumer.SecretConsumer",
+        "openstack.resource.Resource"
+      ],
+      "id": "key_manager/v1/secret_consumers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/keymanager/v1/secrets"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 615,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "key_manager/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/key_manager/v1/_proxy.py",
+      "line": 654,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "key_manager/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
