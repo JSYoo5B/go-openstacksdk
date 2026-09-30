@@ -42,11 +42,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToNetworkIPAvailabilityListQuery() (string, error) {
-	query, err := b.base.ToNetworkIPAvailabilityListQuery()
+	value0, err := b.base.ToNetworkIPAvailabilityListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -54,6 +60,14 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Networ
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "networkipavailabilities", err)
+		return func(yield func(*NetworkIPAvailability, error) bool) {
+			var zero *NetworkIPAvailability
+			yield(zero, err)
+		}
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "networkipavailabilities", err)
 		return func(yield func(*NetworkIPAvailability, error) bool) {
 			var zero *NetworkIPAvailability
 			yield(zero, err)
