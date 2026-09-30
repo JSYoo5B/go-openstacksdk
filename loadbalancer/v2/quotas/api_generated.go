@@ -46,17 +46,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToQuotaUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToQuotaUpdateMap()
+	value0, err := b.base.ToQuotaUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, projectID string, opts UpdateOpts, options ...UpdateOption) (*Quota, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "quotas", err)
+		var zero0 *Quota
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "quotas", err)
 		var zero0 *Quota
 		return zero0, err
 	}
