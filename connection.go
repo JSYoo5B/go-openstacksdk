@@ -129,8 +129,14 @@ func (c *Connection) serviceClient(ctx context.Context, service Service) (*gophe
 }
 
 func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if c.compute == nil {
 		client, err := c.serviceClient(ctx, Compute)
 		if err != nil {
@@ -172,8 +178,14 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 }
 
 func (c *Connection) Network(ctx context.Context) (*network.Service, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if c.network == nil {
 		client, err := c.serviceClient(ctx, Network)
 		if err != nil {
@@ -185,8 +197,14 @@ func (c *Connection) Network(ctx context.Context) (*network.Service, error) {
 }
 
 func (c *Connection) Image(ctx context.Context) (*image.Service, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if c.image == nil {
 		client, err := c.serviceClient(ctx, Image)
 		if err != nil {
@@ -198,8 +216,14 @@ func (c *Connection) Image(ctx context.Context) (*image.Service, error) {
 }
 
 func (c *Connection) BlockStorage(ctx context.Context) (*blockstorage.Service, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if c.blockStorage == nil {
 		client, err := c.serviceClient(ctx, BlockStorage)
 		if err != nil {
