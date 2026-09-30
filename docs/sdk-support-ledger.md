@@ -12,6 +12,7 @@
 | 선택적 microversion 교집합 협상 (`ba63bde`) | [HTTP discovery 테스트](../microversion_test.go): 인증, project/reverse-proxy 경로, 숫자 비교, 명시 버전 우선, 헤더, 동시 캐시, 취소·재시도 | [문서화한 Go 선택 정책](microversions.md)은 Python의 자동 기본값과 다름. 모든 연산의 필드 capability를 자동 판정하지 않음 |
 | 기존 볼륨 부팅 (`350e511`) | [Compute 계약](../compute/boot_volume_test.go), [Connection과 Cinder 연결](../connection_boot_volume_test.go): ID 조회 생략, 정확 이름, 모호성, 삭제 기본값, 실패 시 생성 서버 보존 | cloud `create_server` 전체의 floating IP·추가 볼륨·snapshot 부팅은 별도 |
 | 이미지에서 새 볼륨 부팅 (`4c92f74`) | [Nova mapping 계약](../compute/new_boot_volume_test.go): 크기·타입, 2.67 요구, 숫자 minor 비교, 실패 시 무삭제 | Python의 기본 50 GiB 대신 Go는 `WithBootVolumeSize`로 양의 용량을 명시. snapshot source는 별도 |
+| Ironic conductor·driver 공통 조회 (`52ec267`) | [native 식별자 계약](../api/baremetal_named_resources_test.go): Hostname/Name, 정확한 이름·중복·미존재·페이지·취소·1.49 헤더 | read-only 리소스에 없는 Delete/Status를 만들지 않음. conductor Get의 fields 선택은 별도 미지원 |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. 위 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`가 통과했습니다.
 
