@@ -5,6 +5,7 @@ package request
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"maps"
 	"net/url"
 	"reflect"
@@ -12,6 +13,28 @@ import (
 
 	"gophercloudsdk/resource"
 )
+
+// Download retains a streaming response body and its parsed metadata. The caller
+// must close it after reading, just as with an HTTP response body.
+type Download[T any] struct {
+	Body   io.ReadCloser
+	Header T
+}
+
+func (d *Download[T]) Read(p []byte) (int, error) { return d.Body.Read(p) }
+func (d *Download[T]) Close() error               { return d.Body.Close() }
+
+// OpenDownload closes the response on metadata errors, preventing leaks before
+// a caller receives ownership of the stream.
+func OpenDownload[T any](body io.ReadCloser, header T, err error) (*Download[T], error) {
+	if err != nil {
+		if body != nil {
+			_ = body.Close()
+		}
+		return nil, err
+	}
+	return &Download[T]{Body: body, Header: header}, nil
+}
 
 // Config holds an operation's typed options and optional extension inputs.
 type Config[T any] struct {

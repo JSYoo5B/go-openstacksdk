@@ -3,11 +3,40 @@ package request_test
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
 )
+
+type trackedBody struct {
+	io.Reader
+	closed bool
+}
+
+func (b *trackedBody) Close() error { b.closed = true; return nil }
+
+func TestDownloadsRetainBodiesAndCloseOnErrors(t *testing.T) {
+	body := &trackedBody{Reader: strings.NewReader("payload")}
+	download, err := request.OpenDownload(body, "metadata", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := io.ReadAll(download)
+	if err != nil || string(data) != "payload" || download.Header != "metadata" || body.closed {
+		t.Fatalf("data=%s header=%s err=%v closed=%v", data, download.Header, err, body.closed)
+	}
+	if err := download.Close(); err != nil || !body.closed {
+		t.Fatal(err)
+	}
+	failure := errors.New("invalid header")
+	body = &trackedBody{Reader: strings.NewReader("payload")}
+	if download, err := request.OpenDownload(body, "", failure); download != nil || !errors.Is(err, failure) || !body.closed {
+		t.Fatalf("download=%v err=%v closed=%v", download, err, body.closed)
+	}
+}
 
 type input struct {
 	Name string `json:"name,omitempty"`
