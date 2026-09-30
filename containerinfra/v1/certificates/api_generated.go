@@ -32,17 +32,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToCertificateCreateMap() (map[string]any, error) {
-	body, err := b.base.ToCertificateCreateMap()
+	value0, err := b.base.ToCertificateCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Certificate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "certificates", err)
+		var zero0 *Certificate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "certificates", err)
 		var zero0 *Certificate
 		return zero0, err
 	}
