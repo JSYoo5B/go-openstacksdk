@@ -16,10 +16,10 @@ import (
 type Service struct {
 	client         *gophercloud.ServiceClient
 	APIVersions    *resource0.API
-	Buildinfo      *resource1.API
+	BuildInfo      *resource1.API
 	Resourcetypes  *resource2.API
-	Stackevents    *resource3.API
-	Stackresources *resource4.API
+	StackEvents    *resource3.API
+	StackResources *resource4.API
 	Stacks         *resource5.API
 	StackTemplates *resource6.API
 }
@@ -27,10 +27,10 @@ type Service struct {
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
 		APIVersions:    resource0.New(client),
-		Buildinfo:      resource1.New(client),
+		BuildInfo:      resource1.New(client),
 		Resourcetypes:  resource2.New(client),
-		Stackevents:    resource3.New(client),
-		Stackresources: resource4.New(client),
+		StackEvents:    resource3.New(client),
+		StackResources: resource4.New(client),
 		Stacks:         resource5.New(client),
 		StackTemplates: resource6.New(client),
 	}
