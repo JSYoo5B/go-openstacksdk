@@ -76,17 +76,29 @@ type adoptOptsBuilder struct {
 }
 
 func (b adoptOptsBuilder) ToStackAdoptMap() (map[string]any, error) {
-	body, err := b.base.ToStackAdoptMap()
+	value0, err := b.base.ToStackAdoptMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Adopt invokes the upstream API with library-owned builders and result handling.
 func (a *API) Adopt(ctx context.Context, opts AdoptOpts, options ...AdoptOption) (*CreatedStack, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Adopt", "stacks", err)
+		var zero0 *CreatedStack
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Adopt", "stacks", err)
 		var zero0 *CreatedStack
 		return zero0, err
 	}
@@ -110,17 +122,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToStackCreateMap() (map[string]any, error) {
-	body, err := b.base.ToStackCreateMap()
+	value0, err := b.base.ToStackCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*CreatedStack, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "stacks", err)
+		var zero0 *CreatedStack
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "stacks", err)
 		var zero0 *CreatedStack
 		return zero0, err
 	}
@@ -163,11 +187,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToStackListQuery() (string, error) {
-	query, err := b.base.ToStackListQuery()
+	value0, err := b.base.ToStackListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -175,6 +205,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Listed
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "stacks", err)
+		return func(yield func(*ListedStack, error) bool) { var zero *ListedStack; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "stacks", err)
 		return func(yield func(*ListedStack, error) bool) { var zero *ListedStack; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -197,17 +232,29 @@ type previewOptsBuilder struct {
 }
 
 func (b previewOptsBuilder) ToStackPreviewMap() (map[string]any, error) {
-	body, err := b.base.ToStackPreviewMap()
+	value0, err := b.base.ToStackPreviewMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Preview invokes the upstream API with library-owned builders and result handling.
 func (a *API) Preview(ctx context.Context, opts PreviewOpts, options ...PreviewOption) (*PreviewedStack, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Preview", "stacks", err)
+		var zero0 *PreviewedStack
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Preview", "stacks", err)
 		var zero0 *PreviewedStack
 		return zero0, err
 	}
@@ -231,17 +278,28 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToStackUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToStackUpdateMap()
+	value0, err := b.base.ToStackUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, stackName string, stackID string, opts UpdateOpts, options ...UpdateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "stacks", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "stacks", err)
 		return err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
@@ -261,17 +319,28 @@ type updatePatchOptsBuilder struct {
 }
 
 func (b updatePatchOptsBuilder) ToStackUpdatePatchMap() (map[string]any, error) {
-	body, err := b.base.ToStackUpdatePatchMap()
+	value0, err := b.base.ToStackUpdatePatchMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdatePatch invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdatePatch(ctx context.Context, stackName string, stackID string, opts UpdateOpts, options ...UpdatePatchOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdatePatch", "stacks", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdatePatch", "stacks", err)
 		return err
 	}
 	_opts := updatePatchOptsBuilder{base: cfg.Options, config: cfg}
