@@ -64,17 +64,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToContainerCreateMap() (map[string]any, error) {
-	body, err := b.base.ToContainerCreateMap()
+	value0, err := b.base.ToContainerCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Container, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "containers", err)
+		var zero0 *Container
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "containers", err)
 		var zero0 *Container
 		return zero0, err
 	}
@@ -100,17 +112,29 @@ type createConsumerOptsBuilder struct {
 }
 
 func (b createConsumerOptsBuilder) ToContainerConsumerCreateMap() (map[string]any, error) {
-	body, err := b.base.ToContainerConsumerCreateMap()
+	value0, err := b.base.ToContainerConsumerCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateConsumer(ctx context.Context, containerID string, opts CreateConsumerOpts, options ...CreateConsumerOption) (*Container, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateConsumer", "containers", err)
+		var zero0 *Container
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateConsumer", "containers", err)
 		var zero0 *Container
 		return zero0, err
 	}
@@ -136,17 +160,29 @@ type createSecretRefOptsBuilder struct {
 }
 
 func (b createSecretRefOptsBuilder) ToContainerSecretRefMap() (map[string]any, error) {
-	body, err := b.base.ToContainerSecretRefMap()
+	value0, err := b.base.ToContainerSecretRefMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateSecretRef invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateSecretRef(ctx context.Context, containerID string, opts SecretRef, options ...CreateSecretRefOption) (*Container, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateSecretRef", "containers", err)
+		var zero0 *Container
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateSecretRef", "containers", err)
 		var zero0 *Container
 		return zero0, err
 	}
@@ -177,11 +213,17 @@ type deleteConsumerOptsBuilder struct {
 }
 
 func (b deleteConsumerOptsBuilder) ToContainerConsumerDeleteMap() (map[string]any, error) {
-	body, err := b.base.ToContainerConsumerDeleteMap()
+	value0, err := b.base.ToContainerConsumerDeleteMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteConsumer invokes the upstream API with library-owned builders and result handling.
@@ -189,6 +231,12 @@ func (a *API) DeleteConsumer(ctx context.Context, containerID string, options ..
 	var opts DeleteConsumerOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteConsumer", "containers", err)
+		var zero0 *Container
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("DeleteConsumer", "containers", err)
 		var zero0 *Container
 		return zero0, err
 	}
@@ -214,11 +262,17 @@ type deleteSecretRefOptsBuilder struct {
 }
 
 func (b deleteSecretRefOptsBuilder) ToContainerSecretRefMap() (map[string]any, error) {
-	body, err := b.base.ToContainerSecretRefMap()
+	value0, err := b.base.ToContainerSecretRefMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteSecretRef invokes the upstream API with library-owned builders and result handling.
@@ -226,6 +280,11 @@ func (a *API) DeleteSecretRef(ctx context.Context, containerID string, options .
 	var opts SecretRef
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteSecretRef", "containers", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("DeleteSecretRef", "containers", err)
 		return err
 	}
 	_opts := deleteSecretRefOptsBuilder{base: cfg.Options, config: cfg}
@@ -251,11 +310,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToContainerListQuery() (string, error) {
-	query, err := b.base.ToContainerListQuery()
+	value0, err := b.base.ToContainerListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -263,6 +328,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Contai
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "containers", err)
+		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "containers", err)
 		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -285,11 +355,17 @@ type listConsumersOptsBuilder struct {
 }
 
 func (b listConsumersOptsBuilder) ToContainerListConsumersQuery() (string, error) {
-	query, err := b.base.ToContainerListConsumersQuery()
+	value0, err := b.base.ToContainerListConsumersQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListConsumers invokes the upstream API with library-owned builders and result handling.
@@ -297,6 +373,11 @@ func (a *API) ListConsumers(ctx context.Context, containerID string, options ...
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListConsumers", "containers", err)
+		return func(yield func(*Consumer, error) bool) { var zero *Consumer; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListConsumers", "containers", err)
 		return func(yield func(*Consumer, error) bool) { var zero *Consumer; yield(zero, err) }
 	}
 	_opts := listConsumersOptsBuilder{base: cfg.Options, config: cfg}
