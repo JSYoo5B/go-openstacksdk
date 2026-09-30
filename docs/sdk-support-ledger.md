@@ -51,34 +51,27 @@
 
 ## 대장의 보존과 검증
 
-생성 도구는 모든 `review`를 `pending`으로 설정합니다. 생성 JSON을 직접 수정해 지원 판정을 저장하면 재생성 시 사라집니다. 수작업 판정은 생성 목록과 별도 파일로 보관하고 안정적인 연산 ID로 연결해야 합니다. 다음 정보가 있어야 판정을 재검토할 수 있습니다.
+[판정 JSON](../api/sdk_reviews.json)은 생성 목록과 별도로 보관합니다. [전체 catalog](../api/sdk_support_catalog.json)는 두 고정 소스의 직접 선언 연산 ID와 fingerprint를 기록하며, 판정 JSON에 없는 연산은 `unresolved`입니다. `gophercloud:`와 `python:` 접두사로 같은 이름의 연산도 구분합니다. catalog에는 직접 선언 연산 3,362개가 포함됩니다. 이는 상속·descriptor·Resource 표면까지 포함한 전체 API 수나 SDK 완성도를 의미하지 않습니다.
 
-- Python 또는 Gophercloud 연산 ID, 종류, 고정 소스 버전과 파일·함수 위치
-- 직접 선언·상속·descriptor·Resource 동작 중 출처와 실제 노출 클래스
-- Go 패키지와 공개 API, 필요한 기능을 나눈 세부 계약
-- 기본값 차이, 옵션, 결과 모델, 오류와 부분 성공 처리
-- 테스트 파일·테스트명과 실제 검증한 경로; 단순 빌드 검사는 HTTP 의미의 증거로 사용하지 않음
-- 사용 문서와 남은 동작; `go_mapping`이면 사용자에게 관찰되는 변경과 이유
+[paritycheck](../internal/cmd/paritycheck/README.md)는 다음 계약을 검사합니다.
 
-예를 들어 `compute/v2/get_server_password`의 Go 매핑은 아래처럼 판정할 수 있습니다. 이 예시는 대장 구조와 근거를 보여주며 자동 판정 결과가 아닙니다.
+- catalog의 현재 연산 누락·추가·fingerprint 불일치와 source pin 불일치
+- 중복 연산 ID·판정·JSON key, 존재하지 않는 연산
+- 공개 Go 함수·명시적 receiver method, 실제 `Test` 함수와 사용 문서의 존재
+- `supported`/`go_mapping`의 API·계약별 테스트·문서 근거, `go_mapping`의 관찰 가능한 차이
+- 남은 기능이 있는 연산을 전체 지원으로 판정하는 경우
 
-```json
-{
-  "operation": "compute/v2/get_server_password",
-  "kind": "proxy",
-  "status": "go_mapping",
-  "go_api": "compute/v2/servers.API.GetPassword",
-  "contracts": ["encrypted password by default", "HTTP and decode errors retained"],
-  "differences": ["empty or missing password maps to empty Go string", "optional RSA decryption is a Go SDK extension"],
-  "tests": [
-    "api/password_contracts_test.go:TestServerPasswordDefaultAndOptionalDecryption",
-    "api/password_contracts_test.go:TestServerPasswordHandlesEmptyResponsesAndErrors"
-  ],
-  "documentation": "compute/v2/servers/README.md"
-}
+fingerprint는 생성 목록의 소스 위치·선언 입력 등 metadata를 고정 revision과 함께 확인합니다. Go 후보 패키지나 transport 반환 정책만 바뀌면 원본 판정은 유지합니다. 테스트 이름의 존재를 검사하는 것으로 HTTP 의미까지 증명하지는 않으므로 판정자는 원본 계약·테스트 내용을 확인하고 관련 검증을 실행해야 합니다. 상속 구현과 런타임 surface는 별도 조사 범위로 남습니다.
+
+```sh
+go run ./internal/cmd/paritycheck
+# 두 소스 inventory를 재생성한 뒤 새 연산을 unresolved로 catalog에 추가:
+go run ./internal/cmd/paritycheck -sync
 ```
 
-판정 검증기는 존재하지 않는 연산·Go API·테스트·문서, 중복 ID, 근거 없는 `supported`/`go_mapping`, 누락된 현재 연산, 고정 버전 불일치를 거부해야 합니다. 목록 재생성은 판정을 보존하고 새 연산은 `unresolved`로 추가합니다. 소스 계약이 바뀌었으면 기존 판정을 그대로 재사용하지 않고 다시 검토합니다. 상속된 같은 구현을 23개 서비스마다 다시 구현된 것으로 세지 않고 공유 계약과 노출 위치를 연결합니다.
+`-sync`는 수작업 판정을 다시 쓰지 않습니다. 검토한 원본의 fingerprint가 달라지거나 연산이 없어지면 catalog 저장 전에 실패하여 기존 근거를 보존합니다. 새 소스를 다시 검토하고 판정 상태와 근거를 함께 갱신해야 합니다. `make check`도 이 검증을 실행합니다.
+
+현재 durable 판정은 native 암호 조회와 보정한 Inspector 시작의 Go 매핑 두 항목부터 연결했습니다. 대응 Python 연산은 확인한 세부 계약을 기록하고 전체 상속·리소스 의미 비교가 남아 `unresolved`로 유지합니다. 다른 구현의 증거도 같은 방식으로 점진적으로 연결하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
 
 ## 증거를 연결할 수 있는 기존 구현
 

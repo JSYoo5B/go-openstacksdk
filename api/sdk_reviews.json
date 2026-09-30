@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "source_pins": {
+    "gophercloud": "v2.15.0",
+    "openstacksdk": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe"
+  },
+  "reviews": [
+    {
+      "operation": "gophercloud:compute/v2/servers.GetPassword",
+      "source_fingerprint": "bfc1b64462cae4180a9962a555e3ad881c20bd1b99d62d51e5cb527629e33c97",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/servers.API.GetPassword",
+        "gophercloudsdk/compute/v2/servers.WithGetPasswordPrivateKey"
+      ],
+      "contracts": [
+        {
+          "behavior": "Default returns the encrypted password; optional RSA decryption and nil-key reset use SDK-owned options.",
+          "tests": [
+            "api/password_contracts_test.go:TestServerPasswordDefaultAndOptionalDecryption"
+          ]
+        },
+        {
+          "behavior": "Empty, missing and null passwords become an empty string; typed decoding and HTTP errors retain the original cause.",
+          "tests": [
+            "api/password_contracts_test.go:TestServerPasswordHandlesEmptyResponsesAndErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Go returns a string and wrapped error directly instead of PasswordResult; optional RSA decryption is selected with a concrete function option."
+      ]
+    },
+    {
+      "operation": "gophercloud:baremetalintrospection/v1/introspection.StartIntrospection",
+      "source_fingerprint": "f9dd395b29a00e20425b839213032c6f1174ec421790a28fc925b72a83033cdf",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection",
+        "gophercloudsdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted, false and true manage_boot and escaped extension query values reach the POST URL.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions"
+          ]
+        },
+        {
+          "behavior": "Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext"
+          ]
+        }
+      ],
+      "documentation": [
+        "baremetalintrospection/v1/introspection/README.md"
+      ],
+      "differences": [
+        "The SDK fixes the pinned native function that discards its serialized query; a private helper preserves that query and the original 202/error policy."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_server_password",
+      "source_fingerprint": "1e2dad1f9140a947c2282e56c2e07e46e59b816cc18b355ad7e3ca22fd5f278c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/servers.API.GetPassword"
+      ],
+      "contracts": [
+        {
+          "behavior": "Default returns the encrypted password; optional RSA decryption and nil-key reset use SDK-owned options.",
+          "tests": [
+            "api/password_contracts_test.go:TestServerPasswordDefaultAndOptionalDecryption"
+          ]
+        },
+        {
+          "behavior": "Empty, missing and null passwords become an empty string; typed decoding and HTTP errors retain the original cause.",
+          "tests": [
+            "api/password_contracts_test.go:TestServerPasswordHandlesEmptyResponsesAndErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Python missing/null responses return None; Go returns an empty string.",
+        "Go accepts an explicit server ID and exposes optional RSA decryption."
+      ],
+      "remaining": [
+        "Audit the inherited Server Resource microversion selection and response/error classification before claiming the whole Python operation equivalent."
+      ]
+    },
+    {
+      "operation": "python:baremetal_introspection/v1/start_introspection",
+      "source_fingerprint": "fb10635f01f11c338f267188115509c4cadc76d1de9a33a1a31fa45319f23f3b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted, false and true manage_boot and escaped extension query values reach the POST URL.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions"
+          ]
+        },
+        {
+          "behavior": "Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext"
+          ]
+        }
+      ],
+      "documentation": [
+        "baremetalintrospection/v1/introspection/README.md"
+      ],
+      "differences": [
+        "Python returns an Introspection Resource after accepting the request; the Go API returns an error and exposes Resources for later lookup."
+      ],
+      "remaining": [
+        "Audit the Python node-object/name input and Introspection create/response state against a consistent Go node-reference operation."
+      ]
+    }
+  ]
+}

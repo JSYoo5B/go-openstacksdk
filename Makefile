@@ -1,10 +1,10 @@
-.PHONY: test vet fmt check generate
+.PHONY: test vet fmt check generate parity
 
 generate:
 	sh internal/cmd/sdkgen/generate.sh
 
 test:
-	go test -race ./...
+	go test -race -timeout 60s ./...
 
 vet:
 	go vet ./...
@@ -12,5 +12,8 @@ vet:
 fmt:
 	gofmt -w .
 
-check: vet test
+parity:
+	go run ./internal/cmd/paritycheck
+
+check: vet test parity
 	test -z "$$(gofmt -l .)"

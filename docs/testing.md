@@ -13,7 +13,7 @@ go test -coverpkg=./... ./...
 go test -run TestCreate ./...
 ```
 
-Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필요합니다. `make check`는 vet, race test, gofmt 상태를 확인합니다. `go test`는 실행 예제를 빌드하지만 예제의 main을 실행하지 않습니다.
+Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필요합니다. `make check`는 vet, 60초 package timeout을 적용한 race test, 지원 판정 근거와 gofmt 상태를 확인합니다. `go test`는 실행 예제를 빌드하지만 예제의 main을 실행하지 않습니다.
 
 ## 검증 범위
 
@@ -38,6 +38,7 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `resource/wait_identity_test.go` | 응답의 ID가 바뀌거나 빠져도 명시 ID의 polling 대상 유지 |
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |
+| `internal/cmd/paritycheck/reviews_test.go` | catalog 추가 시 기존 판정 보존, 원본 입력 drift 거부, API·테스트·문서 근거, 중복 ID/JSON key와 불완전 지원 판정 거부 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
