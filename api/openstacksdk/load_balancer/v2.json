@@ -1,0 +1,2013 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 60,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/create_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 72,
+      "parameters": [
+        {
+          "name": "load_balancer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/get_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_load_balancer_statistics",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 86,
+      "parameters": [
+        {
+          "name": "load_balancer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer",
+        "openstack.load_balancer.v2.load_balancer.LoadBalancerStats"
+      ],
+      "id": "load_balancer/v2/get_load_balancer_statistics",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "load_balancers",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 102,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/load_balancers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 112,
+      "parameters": [
+        {
+          "name": "load_balancer",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "cascade",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/delete_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 155,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/find_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 175,
+      "parameters": [
+        {
+          "name": "load_balancer",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/update_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 192,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": false,
+          "default": "'ACTIVE'"
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "['ERROR']"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "300"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/wait_for_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "failover_load_balancer",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 232,
+      "parameters": [
+        {
+          "name": "load_balancer",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.load_balancer.LoadBalancer"
+      ],
+      "id": "load_balancer/v2/failover_load_balancer",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_listener",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 249,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/create_listener",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_listener",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 260,
+      "parameters": [
+        {
+          "name": "listener",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/delete_listener",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_listener",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 293,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/find_listener",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_listener",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 314,
+      "parameters": [
+        {
+          "name": "listener",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/get_listener",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_listener_statistics",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 329,
+      "parameters": [
+        {
+          "name": "listener",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener",
+        "openstack.load_balancer.v2.listener.ListenerStats"
+      ],
+      "id": "load_balancer/v2/get_listener_statistics",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "listeners",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 347,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/listeners",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_listener",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 359,
+      "parameters": [
+        {
+          "name": "listener",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.listener.Listener"
+      ],
+      "id": "load_balancer/v2/update_listener",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/listeners"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_pool",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 378,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/create_pool",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_pool",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 389,
+      "parameters": [
+        {
+          "name": "pool",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/get_pool",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "pools",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 401,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/pools",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_pool",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 409,
+      "parameters": [
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/delete_pool",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_pool",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 440,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/find_pool",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_pool",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 460,
+      "parameters": [
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/update_pool",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_member",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 479,
+      "parameters": [
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/create_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_member",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 496,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/delete_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_member",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 542,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/find_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_member",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 571,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "pool",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/get_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "members",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 592,
+      "parameters": [
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/members",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_member",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 610,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "pool",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.member.Member",
+        "openstack.load_balancer.v2.pool.Pool"
+      ],
+      "id": "load_balancer/v2/update_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_health_monitor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 650,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/find_health_monitor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_health_monitor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 677,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/create_health_monitor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_health_monitor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 689,
+      "parameters": [
+        {
+          "name": "healthmonitor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/get_health_monitor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "health_monitors",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 702,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/health_monitors",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_health_monitor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 722,
+      "parameters": [
+        {
+          "name": "healthmonitor",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/delete_health_monitor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_health_monitor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 745,
+      "parameters": [
+        {
+          "name": "healthmonitor",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.health_monitor.HealthMonitor"
+      ],
+      "id": "load_balancer/v2/update_health_monitor",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_l7_policy",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 765,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/create_l7_policy",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_l7_policy",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 776,
+      "parameters": [
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/delete_l7_policy",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_l7_policy",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 809,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/find_l7_policy",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_l7_policy",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 830,
+      "parameters": [
+        {
+          "name": "l7_policy",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/get_l7_policy",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "l7_policies",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 845,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/l7_policies",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_l7_policy",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 858,
+      "parameters": [
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy"
+      ],
+      "id": "load_balancer/v2/update_l7_policy",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_l7_rule",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 877,
+      "parameters": [
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/create_l7_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_l7_rule",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 896,
+      "parameters": [
+        {
+          "name": "l7rule",
+          "required": true
+        },
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/delete_l7_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_l7_rule",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 941,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/find_l7_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_l7_rule",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 970,
+      "parameters": [
+        {
+          "name": "l7rule",
+          "required": true
+        },
+        {
+          "name": "l7_policy",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/get_l7_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "l7_rules",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 991,
+      "parameters": [
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/l7_rules",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_l7_rule",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1009,
+      "parameters": [
+        {
+          "name": "l7rule",
+          "required": true
+        },
+        {
+          "name": "l7_policy",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.l7_policy.L7Policy",
+        "openstack.load_balancer.v2.l7_rule.L7Rule"
+      ],
+      "id": "load_balancer/v2/update_l7_rule",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/l7policies"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "quotas",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1035,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.quota.Quota"
+      ],
+      "id": "load_balancer/v2/quotas",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1046,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.quota.Quota"
+      ],
+      "id": "load_balancer/v2/get_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1060,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.quota.Quota"
+      ],
+      "id": "load_balancer/v2/update_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_default",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1078,
+      "parameters": [],
+      "resources": [
+        "openstack.load_balancer.v2.quota.QuotaDefault"
+      ],
+      "id": "load_balancer/v2/get_quota_default",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_quota",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1085,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.quota.Quota"
+      ],
+      "id": "load_balancer/v2/delete_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "providers",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1106,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.provider.Provider"
+      ],
+      "id": "load_balancer/v2/providers",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "provider_flavor_capabilities",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1116,
+      "parameters": [
+        {
+          "name": "provider",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.provider.ProviderFlavorCapabilities"
+      ],
+      "id": "load_balancer/v2/provider_flavor_capabilities",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_flavor_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1131,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/create_flavor_profile",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1144,
+      "parameters": [
+        {
+          "name": "flavor_profile",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/get_flavor_profile",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavor_profiles",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1158,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/flavor_profiles",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_flavor_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1168,
+      "parameters": [
+        {
+          "name": "flavor_profile",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/delete_flavor_profile",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_flavor_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1206,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/find_flavor_profile",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_flavor_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1228,
+      "parameters": [
+        {
+          "name": "flavor_profile",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor_profile.FlavorProfile"
+      ],
+      "id": "load_balancer/v2/update_flavor_profile",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_flavor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1249,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/create_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1260,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/get_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavors",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1271,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/flavors",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_flavor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1278,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/delete_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_flavor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1308,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/find_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_flavor",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1328,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.flavor.Flavor"
+      ],
+      "id": "load_balancer/v2/update_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "amphorae",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1346,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.amphora.Amphora"
+      ],
+      "id": "load_balancer/v2/amphorae",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/amphorae"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_amphora",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1356,
+      "parameters": [
+        {
+          "name": "amphora",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.amphora.Amphora"
+      ],
+      "id": "load_balancer/v2/get_amphora",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/amphorae"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_amphora",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1382,
+      "parameters": [
+        {
+          "name": "amphora",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.amphora.Amphora"
+      ],
+      "id": "load_balancer/v2/find_amphora",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/amphorae"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "configure_amphora",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1404,
+      "parameters": [
+        {
+          "name": "amphora",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.amphora.Amphora"
+      ],
+      "id": "load_balancer/v2/configure_amphora",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/amphorae"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "failover_amphora",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1419,
+      "parameters": [
+        {
+          "name": "amphora",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.amphora.Amphora"
+      ],
+      "id": "load_balancer/v2/failover_amphora",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/loadbalancer/v2/amphorae"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_availability_zone_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1435,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/create_availability_zone_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_availability_zone_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1451,
+      "parameters": [
+        {
+          "name": "availability_zone_profile",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/get_availability_zone_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "availability_zone_profiles",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1471,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/availability_zone_profiles",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_availability_zone_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1485,
+      "parameters": [
+        {
+          "name": "availability_zone_profile",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/delete_availability_zone_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_availability_zone_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1525,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/find_availability_zone_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_availability_zone_profile",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1547,
+      "parameters": [
+        {
+          "name": "availability_zone_profile",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone_profile.AvailabilityZoneProfile"
+      ],
+      "id": "load_balancer/v2/update_availability_zone_profile",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_availability_zone",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1572,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/create_availability_zone",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_availability_zone",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1585,
+      "parameters": [
+        {
+          "name": "availability_zone",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/get_availability_zone",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "availability_zones",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1603,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/availability_zones",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_availability_zone",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1613,
+      "parameters": [
+        {
+          "name": "availability_zone",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/delete_availability_zone",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_availability_zone",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1652,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/find_availability_zone",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_availability_zone",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1674,
+      "parameters": [
+        {
+          "name": "availability_zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.load_balancer.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "load_balancer/v2/update_availability_zone",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1696,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "load_balancer/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/load_balancer/v2/_proxy.py",
+      "line": 1735,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "load_balancer/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
