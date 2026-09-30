@@ -32,6 +32,9 @@ var scopeSpecs = []scopeSpec{
 	{"loadbalancer/v2/l7policies", "Rules", "loadbalancer/v2/l7policies", "GetRule", "ListRules", "DeleteRule", "ID"},
 	{"loadbalancer/v2/pools", "Members", "loadbalancer/v2/pools", "GetMember", "ListMembers", "DeleteMember", "ID"},
 	{"network/v2/extensions/layer3/portforwarding", "InFloatingIP", "network/v2/extensions/layer3/floatingips", "Get", "List", "Delete", "ID"},
+	{"network/v2/extensions/qos/rules", "BandwidthLimitRules", "network/v2/extensions/qos/policies", "GetBandwidthLimitRule", "ListBandwidthLimitRules", "DeleteBandwidthLimitRule", "ID"},
+	{"network/v2/extensions/qos/rules", "DSCPMarkingRules", "network/v2/extensions/qos/policies", "GetDSCPMarkingRule", "ListDSCPMarkingRules", "DeleteDSCPMarkingRule", "ID"},
+	{"network/v2/extensions/qos/rules", "MinimumBandwidthRules", "network/v2/extensions/qos/policies", "GetMinimumBandwidthRule", "ListMinimumBandwidthRules", "DeleteMinimumBandwidthRule", "ID"},
 }
 
 type scopePlan struct {
