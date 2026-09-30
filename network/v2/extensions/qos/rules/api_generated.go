@@ -73,21 +73,23 @@ func (b createBandwidthLimitRuleOptsBuilder) ToBandwidthLimitRuleCreateMap() (ma
 }
 
 // CreateBandwidthLimitRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) CreateBandwidthLimitRule(ctx context.Context, policyID string, opts CreateBandwidthLimitRuleOpts, options ...CreateBandwidthLimitRuleOption) (CreateBandwidthLimitRuleResult, error) {
+func (a *API) CreateBandwidthLimitRule(ctx context.Context, policyID string, opts CreateBandwidthLimitRuleOpts, options ...CreateBandwidthLimitRuleOption) (*BandwidthLimitRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("CreateBandwidthLimitRule", "rules", err)
-		var zero0 CreateBandwidthLimitRuleResult
+		var zero0 *BandwidthLimitRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateBandwidthLimitRule", "rules", err)
-		var zero0 CreateBandwidthLimitRuleResult
+		var zero0 *BandwidthLimitRule
 		return zero0, err
 	}
 	_opts := createBandwidthLimitRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.CreateBandwidthLimitRule(ctx, a.client, policyID, _opts)
-	return result, request.Wrap("CreateBandwidthLimitRule", "rules", result.Err)
+	value0, err := result.ExtractBandwidthLimitRule()
+	err = request.Wrap("CreateBandwidthLimitRule", "rules", err)
+	return value0, err
 }
 
 type CreateDSCPMarkingRuleOption = request.Option[CreateDSCPMarkingRuleOpts]
@@ -119,21 +121,23 @@ func (b createDSCPMarkingRuleOptsBuilder) ToDSCPMarkingRuleCreateMap() (map[stri
 }
 
 // CreateDSCPMarkingRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) CreateDSCPMarkingRule(ctx context.Context, policyID string, opts CreateDSCPMarkingRuleOpts, options ...CreateDSCPMarkingRuleOption) (CreateDSCPMarkingRuleResult, error) {
+func (a *API) CreateDSCPMarkingRule(ctx context.Context, policyID string, opts CreateDSCPMarkingRuleOpts, options ...CreateDSCPMarkingRuleOption) (*DSCPMarkingRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("CreateDSCPMarkingRule", "rules", err)
-		var zero0 CreateDSCPMarkingRuleResult
+		var zero0 *DSCPMarkingRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateDSCPMarkingRule", "rules", err)
-		var zero0 CreateDSCPMarkingRuleResult
+		var zero0 *DSCPMarkingRule
 		return zero0, err
 	}
 	_opts := createDSCPMarkingRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.CreateDSCPMarkingRule(ctx, a.client, policyID, _opts)
-	return result, request.Wrap("CreateDSCPMarkingRule", "rules", result.Err)
+	value0, err := result.ExtractDSCPMarkingRule()
+	err = request.Wrap("CreateDSCPMarkingRule", "rules", err)
+	return value0, err
 }
 
 type CreateMinimumBandwidthRuleOption = request.Option[CreateMinimumBandwidthRuleOpts]
@@ -165,21 +169,23 @@ func (b createMinimumBandwidthRuleOptsBuilder) ToMinimumBandwidthRuleCreateMap()
 }
 
 // CreateMinimumBandwidthRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) CreateMinimumBandwidthRule(ctx context.Context, policyID string, opts CreateMinimumBandwidthRuleOpts, options ...CreateMinimumBandwidthRuleOption) (CreateMinimumBandwidthRuleResult, error) {
+func (a *API) CreateMinimumBandwidthRule(ctx context.Context, policyID string, opts CreateMinimumBandwidthRuleOpts, options ...CreateMinimumBandwidthRuleOption) (*MinimumBandwidthRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("CreateMinimumBandwidthRule", "rules", err)
-		var zero0 CreateMinimumBandwidthRuleResult
+		var zero0 *MinimumBandwidthRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateMinimumBandwidthRule", "rules", err)
-		var zero0 CreateMinimumBandwidthRuleResult
+		var zero0 *MinimumBandwidthRule
 		return zero0, err
 	}
 	_opts := createMinimumBandwidthRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.CreateMinimumBandwidthRule(ctx, a.client, policyID, _opts)
-	return result, request.Wrap("CreateMinimumBandwidthRule", "rules", result.Err)
+	value0, err := result.ExtractMinimumBandwidthRule()
+	err = request.Wrap("CreateMinimumBandwidthRule", "rules", err)
+	return value0, err
 }
 
 // DeleteBandwidthLimitRule invokes the upstream API with library-owned builders and result handling.
@@ -198,21 +204,27 @@ func (a *API) DeleteMinimumBandwidthRule(ctx context.Context, policyID string, r
 }
 
 // GetBandwidthLimitRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetBandwidthLimitRule(ctx context.Context, policyID string, ruleID string) (GetBandwidthLimitRuleResult, error) {
+func (a *API) GetBandwidthLimitRule(ctx context.Context, policyID string, ruleID string) (*BandwidthLimitRule, error) {
 	result := upstream.GetBandwidthLimitRule(ctx, a.client, policyID, ruleID)
-	return result, request.Wrap("GetBandwidthLimitRule", "rules", result.Err)
+	value0, err := result.ExtractBandwidthLimitRule()
+	err = request.Wrap("GetBandwidthLimitRule", "rules", err)
+	return value0, err
 }
 
 // GetDSCPMarkingRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetDSCPMarkingRule(ctx context.Context, policyID string, ruleID string) (GetDSCPMarkingRuleResult, error) {
+func (a *API) GetDSCPMarkingRule(ctx context.Context, policyID string, ruleID string) (*DSCPMarkingRule, error) {
 	result := upstream.GetDSCPMarkingRule(ctx, a.client, policyID, ruleID)
-	return result, request.Wrap("GetDSCPMarkingRule", "rules", result.Err)
+	value0, err := result.ExtractDSCPMarkingRule()
+	err = request.Wrap("GetDSCPMarkingRule", "rules", err)
+	return value0, err
 }
 
 // GetMinimumBandwidthRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetMinimumBandwidthRule(ctx context.Context, policyID string, ruleID string) (GetMinimumBandwidthRuleResult, error) {
+func (a *API) GetMinimumBandwidthRule(ctx context.Context, policyID string, ruleID string) (*MinimumBandwidthRule, error) {
 	result := upstream.GetMinimumBandwidthRule(ctx, a.client, policyID, ruleID)
-	return result, request.Wrap("GetMinimumBandwidthRule", "rules", result.Err)
+	value0, err := result.ExtractMinimumBandwidthRule()
+	err = request.Wrap("GetMinimumBandwidthRule", "rules", err)
+	return value0, err
 }
 
 type ListBandwidthLimitRulesOption = request.Option[BandwidthLimitRulesListOpts]
@@ -385,21 +397,23 @@ func (b updateBandwidthLimitRuleOptsBuilder) ToBandwidthLimitRuleUpdateMap() (ma
 }
 
 // UpdateBandwidthLimitRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) UpdateBandwidthLimitRule(ctx context.Context, policyID string, ruleID string, opts UpdateBandwidthLimitRuleOpts, options ...UpdateBandwidthLimitRuleOption) (UpdateBandwidthLimitRuleResult, error) {
+func (a *API) UpdateBandwidthLimitRule(ctx context.Context, policyID string, ruleID string, opts UpdateBandwidthLimitRuleOpts, options ...UpdateBandwidthLimitRuleOption) (*BandwidthLimitRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("UpdateBandwidthLimitRule", "rules", err)
-		var zero0 UpdateBandwidthLimitRuleResult
+		var zero0 *BandwidthLimitRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateBandwidthLimitRule", "rules", err)
-		var zero0 UpdateBandwidthLimitRuleResult
+		var zero0 *BandwidthLimitRule
 		return zero0, err
 	}
 	_opts := updateBandwidthLimitRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.UpdateBandwidthLimitRule(ctx, a.client, policyID, ruleID, _opts)
-	return result, request.Wrap("UpdateBandwidthLimitRule", "rules", result.Err)
+	value0, err := result.ExtractBandwidthLimitRule()
+	err = request.Wrap("UpdateBandwidthLimitRule", "rules", err)
+	return value0, err
 }
 
 type UpdateDSCPMarkingRuleOption = request.Option[UpdateDSCPMarkingRuleOpts]
@@ -431,21 +445,23 @@ func (b updateDSCPMarkingRuleOptsBuilder) ToDSCPMarkingRuleUpdateMap() (map[stri
 }
 
 // UpdateDSCPMarkingRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) UpdateDSCPMarkingRule(ctx context.Context, policyID string, ruleID string, opts UpdateDSCPMarkingRuleOpts, options ...UpdateDSCPMarkingRuleOption) (UpdateDSCPMarkingRuleResult, error) {
+func (a *API) UpdateDSCPMarkingRule(ctx context.Context, policyID string, ruleID string, opts UpdateDSCPMarkingRuleOpts, options ...UpdateDSCPMarkingRuleOption) (*DSCPMarkingRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("UpdateDSCPMarkingRule", "rules", err)
-		var zero0 UpdateDSCPMarkingRuleResult
+		var zero0 *DSCPMarkingRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateDSCPMarkingRule", "rules", err)
-		var zero0 UpdateDSCPMarkingRuleResult
+		var zero0 *DSCPMarkingRule
 		return zero0, err
 	}
 	_opts := updateDSCPMarkingRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.UpdateDSCPMarkingRule(ctx, a.client, policyID, ruleID, _opts)
-	return result, request.Wrap("UpdateDSCPMarkingRule", "rules", result.Err)
+	value0, err := result.ExtractDSCPMarkingRule()
+	err = request.Wrap("UpdateDSCPMarkingRule", "rules", err)
+	return value0, err
 }
 
 type UpdateMinimumBandwidthRuleOption = request.Option[UpdateMinimumBandwidthRuleOpts]
@@ -477,19 +493,21 @@ func (b updateMinimumBandwidthRuleOptsBuilder) ToMinimumBandwidthRuleUpdateMap()
 }
 
 // UpdateMinimumBandwidthRule invokes the upstream API with library-owned builders and result handling.
-func (a *API) UpdateMinimumBandwidthRule(ctx context.Context, policyID string, ruleID string, opts UpdateMinimumBandwidthRuleOpts, options ...UpdateMinimumBandwidthRuleOption) (UpdateMinimumBandwidthRuleResult, error) {
+func (a *API) UpdateMinimumBandwidthRule(ctx context.Context, policyID string, ruleID string, opts UpdateMinimumBandwidthRuleOpts, options ...UpdateMinimumBandwidthRuleOption) (*MinimumBandwidthRule, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("UpdateMinimumBandwidthRule", "rules", err)
-		var zero0 UpdateMinimumBandwidthRuleResult
+		var zero0 *MinimumBandwidthRule
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMinimumBandwidthRule", "rules", err)
-		var zero0 UpdateMinimumBandwidthRuleResult
+		var zero0 *MinimumBandwidthRule
 		return zero0, err
 	}
 	_opts := updateMinimumBandwidthRuleOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.UpdateMinimumBandwidthRule(ctx, a.client, policyID, ruleID, _opts)
-	return result, request.Wrap("UpdateMinimumBandwidthRule", "rules", result.Err)
+	value0, err := result.ExtractMinimumBandwidthRule()
+	err = request.Wrap("UpdateMinimumBandwidthRule", "rules", err)
+	return value0, err
 }
