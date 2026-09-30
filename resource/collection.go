@@ -19,6 +19,7 @@ type Adapter[T any] struct {
 	Kind      string
 	Get       func(context.Context, string) (*T, error)
 	List      func(url.Values) pagination.Pager
+	Iterate   func(context.Context, url.Values) iter.Seq2[*T, error]
 	Extract   func(pagination.Page) ([]T, error)
 	Delete    func(context.Context, string) error
 	ID        func(*T) string
@@ -44,6 +45,9 @@ func (c *Collection[T]) wrap(op string, err error) error {
 func (c *Collection[T]) Get(ctx context.Context, id string) (*T, error) {
 	if err := ID(id).Validate(); err != nil {
 		return nil, err
+	}
+	if c.binding.Get == nil {
+		return nil, c.wrap("get", ErrUnsupported)
 	}
 	v, err := c.binding.Get(ctx, id)
 	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
@@ -74,8 +78,34 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			yield(nil, c.wrap("list", ErrUnsupported))
 			return
 		}
+		if o.name != nil && c.binding.Name == nil {
+			yield(nil, c.wrap("list", ErrUnsupported))
+			return
+		}
 		if o.name != nil && c.binding.NameQuery != nil {
 			o.query.Set("name", c.binding.NameQuery(*o.name))
+		}
+		if c.binding.Iterate != nil {
+			for value, err := range c.binding.Iterate(ctx, o.query) {
+				if err != nil {
+					yield(nil, c.wrap("list", err))
+					return
+				}
+				if o.name != nil && c.binding.Name(value) != *o.name {
+					continue
+				}
+				if o.status && !strings.EqualFold(c.binding.Status(value), o.query.Get("status")) {
+					continue
+				}
+				if !yield(value, nil) {
+					return
+				}
+			}
+			return
+		}
+		if c.binding.List == nil || c.binding.Extract == nil {
+			yield(nil, c.wrap("list", ErrUnsupported))
+			return
 		}
 		stopped := false
 		err := c.binding.List(o.query).EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
@@ -85,6 +115,9 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			}
 			for i := range items {
 				if o.name != nil && c.binding.Name(&items[i]) != *o.name {
+					continue
+				}
+				if o.status && !strings.EqualFold(c.binding.Status(&items[i]), o.query.Get("status")) {
 					continue
 				}
 				if !yield(&items[i], nil) {
