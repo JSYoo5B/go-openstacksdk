@@ -57,17 +57,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToClusterCreateMap() (map[string]any, error) {
-	body, err := b.base.ToClusterCreateMap()
+	value0, err := b.base.ToClusterCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "clusters", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "clusters", err)
 		var zero0 string
 		return zero0, err
 	}
@@ -102,11 +114,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToClustersListQuery() (string, error) {
-	query, err := b.base.ToClustersListQuery()
+	value0, err := b.base.ToClustersListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -114,6 +132,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluste
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "clusters", err)
+		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "clusters", err)
 		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -136,11 +159,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToClustersListQuery() (string, error) {
-	query, err := b.base.ToClustersListQuery()
+	value0, err := b.base.ToClustersListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -148,6 +177,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "clusters", err)
+		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "clusters", err)
 		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -170,17 +204,29 @@ type resizeOptsBuilder struct {
 }
 
 func (b resizeOptsBuilder) ToClusterResizeMap() (map[string]any, error) {
-	body, err := b.base.ToClusterResizeMap()
+	value0, err := b.base.ToClusterResizeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Resize invokes the upstream API with library-owned builders and result handling.
 func (a *API) Resize(ctx context.Context, id string, opts ResizeOpts, options ...ResizeOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Resize", "clusters", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Resize", "clusters", err)
 		var zero0 string
 		return zero0, err
 	}
@@ -212,17 +258,29 @@ type upgradeOptsBuilder struct {
 }
 
 func (b upgradeOptsBuilder) ToClustersUpgradeMap() (map[string]any, error) {
-	body, err := b.base.ToClustersUpgradeMap()
+	value0, err := b.base.ToClustersUpgradeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Upgrade invokes the upstream API with library-owned builders and result handling.
 func (a *API) Upgrade(ctx context.Context, id string, opts UpgradeOpts, options ...UpgradeOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Upgrade", "clusters", err)
+		var zero0 string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Upgrade", "clusters", err)
 		var zero0 string
 		return zero0, err
 	}
