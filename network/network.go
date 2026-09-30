@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	networkapi "gophercloudsdk/network/v2"
 	"net/url"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 type Network = networks.Network
 
 type Service struct {
+	API      *networkapi.Service
 	Networks *resource.Collection[Network]
 	client   *gophercloud.ServiceClient
 }
@@ -23,7 +25,7 @@ type Service struct {
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, Networks: resource.NewCollection[Network](resource.Adapter[Network]{
+	return &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
 		Kind:    "network",
 		Get:     func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
 		List:    func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) },
