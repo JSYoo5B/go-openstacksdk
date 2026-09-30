@@ -16,10 +16,12 @@ resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 |---|---|
 | `Get(ctx, id)` | 단일 ID 조회, 404면 `ErrNotFound` |
 | `Find(ctx, ref, ...LookupOption)` | 명시 ID 조회 또는 정확한 이름 검색, 중복 검사 |
+| `ResolveID(ctx, ref)` | ID는 요청 없이 검증, 이름은 정확히 찾아 안정적인 ID 반환 |
 | `List(ctx, ...ListOption)` | lazy `iter.Seq2[*T, error]`, 모든 페이지 순회 |
 | `All(ctx, ...ListOption)` | iterator를 slice로 수집 |
 | `Delete(ctx, ref, ...LookupOption)` | 이름이면 ID 해석 후 삭제, 기본 미존재 무시 |
 | `Wait(ctx, ref, status, ...WaitOption)` | 참조를 한 번 해석하고 동일 ID의 상태 확인 |
+| `WaitDeleted(ctx, ref, ...WaitOption)` | 동일 ID를 조회하다가 404가 오면 삭제 완료 |
 
 Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에서 수행합니다. Find에 별도 tenant/project 필터를 전달하는 기능은 아직 없습니다. 중복 오류의 IDs는 중복을 확인한 첫 두 리소스입니다.
 
@@ -51,12 +53,14 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 
 Wait의 기본 timeout은 5분, 간격은 2초입니다. 부모 context가 더 먼저 종료되면 취소됩니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다.
 
-없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 오류를 반환합니다. 삭제 완료를 기다리는 WaitForDelete는 아직 없습니다. flavor처럼 상태가 없는 리소스는 Wait/WithStatus를 요청하면 `ErrUnsupported`를 반환합니다.
+Wait는 없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 오류를 반환합니다. WaitDeleted는 이미 없는 리소스에도 성공하며, 인증 오류나 서버 오류를 삭제 완료로 처리하지 않습니다. flavor처럼 상태가 없는 리소스는 Wait/WithStatus를 요청하면 `ErrUnsupported`를 반환합니다.
 
 ## SDK 내부 어댑터
 
 `Adapter[T]`는 getter, pager, extractor, ID/name/status 접근 함수를 등록하는 concrete descriptor입니다. 새 서비스 구현은 원래 Gophercloud의 API 호출과 모델 매핑에 집중하고 이름 조회·중복 검사·대기 알고리즘을 재작성하지 않습니다.
 
-Collection과 서비스 객체의 zero value는 사용하지 않습니다. `Connection`이 구성한 서비스에서 가져오는 것이 일반적인 사용 경로입니다. 응답 객체를 수정해도 자동으로 서버에 반영되지 않으며, 현재 Update/commit 계층은 없습니다.
+Collection과 서비스 객체의 zero value는 사용하지 않습니다. `Connection`이 구성한 서비스에서 가져오는 것이 일반적인 사용 경로입니다. 응답 객체를 수정해도 자동으로 서버에 반영되지 않습니다. 변경은 서비스 API의 typed Update, 또는 부모 범위 객체의 Update에 전달합니다.
+
+부모가 필요한 리소스는 [범위 객체](../docs/scoped-resources.md)를 사용합니다. `dns.RecordSets.InZone(ctx, resource.Name("example.org."))`처럼 부모를 한 번 해석하고, 반환된 객체의 Find/List/Delete/Wait와 Create/Update가 같은 부모를 사용합니다. 빈 ID, `.`, `..`와 URL 경로·query 문자가 들어간 ID는 요청 전에 거부합니다.
 
 테스트는 [collection_test.go](collection_test.go)와 [서비스 공통 통합 테스트](../collections_test.go)에 있습니다.
