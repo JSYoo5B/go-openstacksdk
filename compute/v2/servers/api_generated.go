@@ -269,21 +269,23 @@ func (b createImageOptsBuilder) ToServerCreateImageMap() (map[string]any, error)
 }
 
 // CreateImage invokes the upstream API with library-owned builders and result handling.
-func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, options ...CreateImageOption) (CreateImageResult, error) {
+func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, options ...CreateImageOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("CreateImage", "servers", err)
-		var zero0 CreateImageResult
+		var zero0 string
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("CreateImage", "servers", err)
-		var zero0 CreateImageResult
+		var zero0 string
 		return zero0, err
 	}
 	_opts := createImageOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.CreateImage(ctx, a.client, id, _opts)
-	return result, request.Wrap("CreateImage", "servers", result.Err)
+	value0, err := result.ExtractImageID()
+	err = request.Wrap("CreateImage", "servers", err)
+	return value0, err
 }
 
 type CreateMetadatumOption = request.Option[MetadatumOpts]
@@ -373,21 +375,23 @@ func (b evacuateOptsBuilder) ToEvacuateMap() (map[string]any, error) {
 }
 
 // Evacuate invokes the upstream API with library-owned builders and result handling.
-func (a *API) Evacuate(ctx context.Context, id string, opts EvacuateOpts, options ...EvacuateOption) (EvacuateResult, error) {
+func (a *API) Evacuate(ctx context.Context, id string, opts EvacuateOpts, options ...EvacuateOption) (string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("Evacuate", "servers", err)
-		var zero0 EvacuateResult
+		var zero0 string
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Evacuate", "servers", err)
-		var zero0 EvacuateResult
+		var zero0 string
 		return zero0, err
 	}
 	_opts := evacuateOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.Evacuate(ctx, a.client, id, _opts)
-	return result, request.Wrap("Evacuate", "servers", result.Err)
+	value0, err := result.ExtractAdminPass()
+	err = request.Wrap("Evacuate", "servers", err)
+	return value0, err
 }
 
 // ForceDelete invokes the upstream API with library-owned builders and result handling.
