@@ -41,10 +41,11 @@ type inventory struct {
 	Operations []operation `json:"operations"`
 }
 type generator struct {
-	meta      map[string]metadata
-	importer  types.Importer
-	root      string
-	inventory inventory
+	meta        map[string]metadata
+	importer    types.Importer
+	root        string
+	inventory   inventory
+	collections []collectionRecord
 }
 
 func main() {
@@ -104,6 +105,9 @@ func main() {
 		fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(*output, "api", "gophercloud_inventory.json"), append(data, '\n'), 0644); err != nil {
+		fatal(err)
+	}
+	if err := g.writeCollectionInventory(); err != nil {
 		fatal(err)
 	}
 	issues := 0
@@ -245,6 +249,7 @@ func (g *generator) generate(path string) error {
 		}
 	}
 	extractors := extractorsByPage(pkg, decls)
+	plan := identifyCollection(pkg, decls, extractors)
 	names := []string{}
 	for _, name := range pkg.Scope().Names() {
 		fn, ok := pkg.Scope().Lookup(name).(*types.Func)
@@ -262,7 +267,15 @@ func (g *generator) generate(path string) error {
 	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports}
 	e.use(pkg.Path())
 	e.use(upstreamModule)
-	e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\nfunc (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
+	if plan == nil {
+		e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
+	} else {
+		e.use("gophercloudsdk/resource")
+		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", Delete: plan.deleter != nil, Wait: plan.status != ""})
+	}
+	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {
 		obj := pkg.Scope().Lookup(name)
 		if !obj.Exported() {
@@ -298,7 +311,13 @@ func (g *generator) generate(path string) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, "api_generated.go"), source, 0644)
+	if err := os.WriteFile(filepath.Join(dir, "api_generated.go"), source, 0644); err != nil {
+		return err
+	}
+	if plan != nil {
+		return g.emitCollection(pkg, plan)
+	}
+	return nil
 }
 
 // Typed extractors often delegate to ExtractInto helpers. Follow those calls
