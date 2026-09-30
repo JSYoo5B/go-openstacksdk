@@ -25,6 +25,12 @@ type UpdateResult = upstream.UpdateResult
 type CreateOption = request.Option[CreateOpts]
 
 func WithCreateOptions(value CreateOpts) CreateOption { return request.WithOptions(value) }
+func WithCreateField(key string, value any) CreateOption {
+	return request.WithField[CreateOpts](key, value)
+}
+func WithCreateQuery(key, value string) CreateOption {
+	return request.WithQuery[CreateOpts](key, value)
+}
 
 type createOptsBuilder struct {
 	base   CreateOpts
@@ -32,13 +38,37 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToClaimCreateRequest() (map[string]any, string, error) {
-	return b.base.ToClaimCreateRequest()
+	value0, value1, err := b.base.ToClaimCreateRequest()
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	value1, err = request.ExtendQuery(value1, b.config.Query)
+	if err != nil {
+		var zero0 map[string]any
+		var zero1 string
+		return zero0, zero1, err
+	}
+	return value0, value1, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, queueName string, opts CreateOpts, options ...CreateOption) ([]Messages, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "claims", err)
+		var zero0 []Messages
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, true, false); err != nil {
+		err = request.Wrap("Create", "claims", err)
 		var zero0 []Messages
 		return zero0, err
 	}
@@ -75,17 +105,28 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToClaimUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToClaimUpdateMap()
+	value0, err := b.base.ToClaimUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, queueName string, claimID string, opts UpdateOpts, options ...UpdateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "claims", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "claims", err)
 		return err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
