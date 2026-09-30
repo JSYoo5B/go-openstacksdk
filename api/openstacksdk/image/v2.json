@@ -1,0 +1,2001 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "get_image_cache",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 97,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.cache.Cache"
+      ],
+      "id": "image/v2/get_image_cache",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "cache_delete_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 100,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.cache.Cache",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/cache_delete_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "queue_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 117,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.cache.Cache",
+        "openstack.image.v2.image.Image",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/queue_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "clear_cache",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 122,
+      "parameters": [
+        {
+          "name": "target",
+          "required": false,
+          "default": "'both'"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.cache.Cache"
+      ],
+      "id": "image/v2/clear_cache",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "cached_image_nodes",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 131,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.cache.Cache",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/cached_image_nodes",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "clean_cache",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 146,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.cache.Cache"
+      ],
+      "id": "image/v2/clean_cache",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "prune_cache",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 150,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.cache.Cache"
+      ],
+      "id": "image/v2/prune_cache",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 178,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "filename",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "data",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "md5",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "sha256",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disk_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "container_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disable_vendor_agent",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "allow_duplicates",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "meta",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "3600"
+        },
+        {
+          "name": "validate_checksum",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "use_import",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "import_method",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "uri",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_region",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_image_id",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_service_interface",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "stores",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "all_stores",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "all_stores_must_succeed",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "size",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.SDKException",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/create_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "import_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 440,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "method",
+          "required": false,
+          "default": "'glance-direct'"
+        },
+        {
+          "name": "uri",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_region",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_image_id",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "remote_service_interface",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "store",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "stores",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "all_stores",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "all_stores_must_succeed",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.service_info.Store"
+      ],
+      "id": "image/v2/import_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "stage_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 538,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "filename",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "data",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "size",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.SDKException",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/stage_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "upload_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 583,
+      "parameters": [
+        {
+          "name": "container_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disk_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "data",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "size",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.image.v2.image.Image",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "image/v2/upload_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "download_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 919,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "stream",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "output",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "chunk_size",
+          "required": false,
+          "default": "1024 * 1024"
+        },
+        {
+          "name": "store_preferences",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/download_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 970,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "store",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.service_info.Store"
+      ],
+      "id": "image/v2/delete_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1013,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/find_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1034,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/get_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "images",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1046,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/images",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1056,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/update_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_image_location",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1070,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "url",
+          "required": true
+        },
+        {
+          "name": "validation_data",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.image_location.ImageLocation",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/add_image_location",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "image_locations",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1103,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.image_location.ImageLocation",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/image_locations",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "deactivate_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1117,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/deactivate_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reactivate_image",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1128,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/reactivate_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_image_properties",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1139,
+      "parameters": [
+        {
+          "name": "image",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "meta",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/update_image_properties",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "image_tasks",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1181,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.image_tasks.ImageTasks",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/image_tasks",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_tag",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1196,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/add_tag",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_tag",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1208,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "image/v2/remove_tag",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_member",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1222,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/add_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_member",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1243,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/remove_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_member",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1289,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/find_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_member",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1316,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/get_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "members",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1338,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/members",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_member",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1356,
+      "parameters": [
+        {
+          "name": "member",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.image.Image",
+        "openstack.image.v2.member.Member",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/update_member",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/images"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1390,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/create_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1403,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/delete_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1429,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/get_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "metadef_namespaces",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1449,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/metadef_namespaces",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1461,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/update_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "add_tag_to_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1487,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/add_tag_to_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "remove_tag_from_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1506,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/remove_tag_from_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "remove_tags_from_metadef_namespace",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1525,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/remove_tags_from_metadef_namespace",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_metadef_object",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1543,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_object.MetadefObject",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/create_metadef_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_object",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1567,
+      "parameters": [
+        {
+          "name": "metadef_object",
+          "required": true
+        },
+        {
+          "name": "namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_object.MetadefObject",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/get_metadef_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "metadef_objects",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1594,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_object.MetadefObject",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/metadef_objects",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_metadef_object",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1615,
+      "parameters": [
+        {
+          "name": "metadef_object",
+          "required": true
+        },
+        {
+          "name": "namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_object.MetadefObject",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/update_metadef_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_metadef_object",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1646,
+      "parameters": [
+        {
+          "name": "metadef_object",
+          "required": true
+        },
+        {
+          "name": "namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_object.MetadefObject",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/delete_metadef_object",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_all_metadef_objects",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1676,
+      "parameters": [
+        {
+          "name": "namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/delete_all_metadef_objects",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "metadef_resource_types",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1696,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_resource_type.MetadefResourceType"
+      ],
+      "id": "image/v2/metadef_resource_types",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_metadef_resource_type_association",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1711,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_resource_type.MetadefResourceTypeAssociation",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/create_metadef_resource_type_association",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_metadef_resource_type_association",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1733,
+      "parameters": [
+        {
+          "name": "metadef_resource_type",
+          "required": true
+        },
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_resource_type.MetadefResourceTypeAssociation",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/delete_metadef_resource_type_association",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "metadef_resource_type_associations",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1763,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_resource_type.MetadefResourceTypeAssociation",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/metadef_resource_type_associations",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_metadef_property",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1790,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_property.MetadefProperty",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/create_metadef_property",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_metadef_property",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1813,
+      "parameters": [
+        {
+          "name": "metadef_property",
+          "required": true
+        },
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_property.MetadefProperty",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/update_metadef_property",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_metadef_property",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1843,
+      "parameters": [
+        {
+          "name": "metadef_property",
+          "required": true
+        },
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_property.MetadefProperty",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/delete_metadef_property",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "metadef_properties",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1876,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_property.MetadefProperty",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/metadef_properties",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_property",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1900,
+      "parameters": [
+        {
+          "name": "metadef_property",
+          "required": true
+        },
+        {
+          "name": "metadef_namespace",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace",
+        "openstack.image.v2.metadef_property.MetadefProperty",
+        "openstack.resource.Resource"
+      ],
+      "id": "image/v2/get_metadef_property",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_all_metadef_properties",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1930,
+      "parameters": [
+        {
+          "name": "metadef_namespace",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.metadef_namespace.MetadefNamespace"
+      ],
+      "id": "image/v2/delete_all_metadef_properties",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_images_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1951,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_images_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_image_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1964,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_image_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_members_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1977,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_members_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_member_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 1990,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_member_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_tasks_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2003,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_tasks_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_task_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2016,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.schema.Schema"
+      ],
+      "id": "image/v2/get_task_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_namespace_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2029,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_namespace_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_namespaces_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2042,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_namespaces_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_resource_type_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2055,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_resource_type_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_resource_types_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2070,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_resource_types_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_object_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2085,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_object_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_objects_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2098,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_objects_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_property_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2111,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_property_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_properties_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2124,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_properties_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_tag_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2137,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_tag_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_metadef_tags_schema",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2150,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.metadef_schema.MetadefSchema"
+      ],
+      "id": "image/v2/get_metadef_tags_schema",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "tasks",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2165,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.task.Task"
+      ],
+      "id": "image/v2/tasks",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/tasks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_task",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2175,
+      "parameters": [
+        {
+          "name": "task",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.task.Task"
+      ],
+      "id": "image/v2/get_task",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/tasks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_task",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2187,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.task.Task"
+      ],
+      "id": "image/v2/create_task",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/tasks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_task",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2198,
+      "parameters": [
+        {
+          "name": "task",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": false,
+          "default": "'success'"
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.ResourceFailure",
+        "openstack.image.v2.task.Task"
+      ],
+      "id": "image/v2/wait_for_task",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/image/v2/tasks"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "stores",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2273,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v2.service_info.Store"
+      ],
+      "id": "image/v2/stores",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_import_info",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2288,
+      "parameters": [],
+      "resources": [
+        "openstack.image.v2.service_info.Import"
+      ],
+      "id": "image/v2/get_import_info",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2299,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "image/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/image/v2/_proxy.py",
+      "line": 2338,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "image/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
