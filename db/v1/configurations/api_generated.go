@@ -51,17 +51,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToConfigCreateMap() (map[string]any, error) {
-	body, err := b.base.ToConfigCreateMap()
+	value0, err := b.base.ToConfigCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Config, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "configurations", err)
+		var zero0 *Config
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "configurations", err)
 		var zero0 *Config
 		return zero0, err
 	}
@@ -146,17 +158,28 @@ type replaceOptsBuilder struct {
 }
 
 func (b replaceOptsBuilder) ToConfigUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToConfigUpdateMap()
+	value0, err := b.base.ToConfigUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Replace invokes the upstream API with library-owned builders and result handling.
 func (a *API) Replace(ctx context.Context, configID string, opts UpdateOpts, options ...ReplaceOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Replace", "configurations", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Replace", "configurations", err)
 		return err
 	}
 	_opts := replaceOptsBuilder{base: cfg.Options, config: cfg}
@@ -176,17 +199,28 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToConfigUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToConfigUpdateMap()
+	value0, err := b.base.ToConfigUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, configID string, opts UpdateOpts, options ...UpdateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "configurations", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "configurations", err)
 		return err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
