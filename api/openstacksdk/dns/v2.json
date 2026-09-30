@@ -1,0 +1,1539 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "zones",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 57,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/zones",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 75,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/create_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 88,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/get_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 98,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "delete_shares",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/delete_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 124,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/update_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 149,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/find_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "abandon_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 169,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/abandon_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "xfr_zone",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 181,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/xfr_zone",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "zone_nameservers",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 194,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_nameserver.ZoneNameserver",
+        "openstack.resource.Resource"
+      ],
+      "id": "dns/v2/zone_nameservers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "recordsets",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 214,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset",
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/recordsets",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_recordset",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 245,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset",
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/create_recordset",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_recordset",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 263,
+      "parameters": [
+        {
+          "name": "recordset",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset"
+      ],
+      "id": "dns/v2/update_recordset",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_recordset",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 275,
+      "parameters": [
+        {
+          "name": "recordset",
+          "required": true
+        },
+        {
+          "name": "zone",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset",
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/get_recordset",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_recordset",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 292,
+      "parameters": [
+        {
+          "name": "recordset",
+          "required": true
+        },
+        {
+          "name": "zone",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset",
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/delete_recordset",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_recordset",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 337,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.recordset.Recordset",
+        "openstack.dns.v2.zone.Zone"
+      ],
+      "id": "dns/v2/find_recordset",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "zone_imports",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 368,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_import.ZoneImport"
+      ],
+      "id": "dns/v2/zone_imports",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone_import",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 386,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_import.ZoneImport"
+      ],
+      "id": "dns/v2/create_zone_import",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_import",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 398,
+      "parameters": [
+        {
+          "name": "zone_import",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_import.ZoneImport"
+      ],
+      "id": "dns/v2/get_zone_import",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_zone_import",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 410,
+      "parameters": [
+        {
+          "name": "zone_import",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_import.ZoneImport"
+      ],
+      "id": "dns/v2/delete_zone_import",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "zone_exports",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 432,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_export.ZoneExport"
+      ],
+      "id": "dns/v2/zone_exports",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone_export",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 450,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_export.ZoneExport"
+      ],
+      "id": "dns/v2/create_zone_export",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_export",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 473,
+      "parameters": [
+        {
+          "name": "zone_export",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_export.ZoneExport"
+      ],
+      "id": "dns/v2/get_zone_export",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_export_text",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 484,
+      "parameters": [
+        {
+          "name": "zone_export",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_export.ZoneExport"
+      ],
+      "id": "dns/v2/get_zone_export_text",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_zone_export",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 500,
+      "parameters": [
+        {
+          "name": "zone_export",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_export.ZoneExport"
+      ],
+      "id": "dns/v2/delete_zone_export",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "floating_ips",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 522,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.floating_ip.FloatingIP"
+      ],
+      "id": "dns/v2/floating_ips",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_floating_ip",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 542,
+      "parameters": [
+        {
+          "name": "floating_ip",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.floating_ip.FloatingIP"
+      ],
+      "id": "dns/v2/get_floating_ip",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_floating_ip",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 554,
+      "parameters": [
+        {
+          "name": "floating_ip",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.floating_ip.FloatingIP"
+      ],
+      "id": "dns/v2/update_floating_ip",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "unset_floating_ip",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 567,
+      "parameters": [
+        {
+          "name": "floating_ip",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.floating_ip.FloatingIP"
+      ],
+      "id": "dns/v2/unset_floating_ip",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "zone_transfer_requests",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 581,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferRequest"
+      ],
+      "id": "dns/v2/zone_transfer_requests",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_transfer_request",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 598,
+      "parameters": [
+        {
+          "name": "request",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferRequest"
+      ],
+      "id": "dns/v2/get_zone_transfer_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone_transfer_request",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 610,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_transfer.ZoneTransferRequest"
+      ],
+      "id": "dns/v2/create_zone_transfer_request",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_zone_transfer_request",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 633,
+      "parameters": [
+        {
+          "name": "request",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferRequest"
+      ],
+      "id": "dns/v2/update_zone_transfer_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_zone_transfer_request",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 649,
+      "parameters": [
+        {
+          "name": "request",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferRequest"
+      ],
+      "id": "dns/v2/delete_zone_transfer_request",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "zone_transfer_accepts",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 672,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferAccept"
+      ],
+      "id": "dns/v2/zone_transfer_accepts",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_transfer_accept",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 689,
+      "parameters": [
+        {
+          "name": "accept",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferAccept"
+      ],
+      "id": "dns/v2/get_zone_transfer_accept",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone_transfer_accept",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 701,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone_transfer.ZoneTransferAccept"
+      ],
+      "id": "dns/v2/create_zone_transfer_accept",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "zone_shares",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 715,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_share.ZoneShare"
+      ],
+      "id": "dns/v2/zone_shares",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_zone_share",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 735,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "zone_share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_share.ZoneShare"
+      ],
+      "id": "dns/v2/get_zone_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_zone_share",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 771,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "zone_share_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_share.ZoneShare"
+      ],
+      "id": "dns/v2/find_zone_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_zone_share",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 798,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_share.ZoneShare"
+      ],
+      "id": "dns/v2/create_zone_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_zone_share",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 818,
+      "parameters": [
+        {
+          "name": "zone",
+          "required": true
+        },
+        {
+          "name": "zone_share",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.zone.Zone",
+        "openstack.dns.v2.zone_share.ZoneShare"
+      ],
+      "id": "dns/v2/delete_zone_share",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/zones"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "limits",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 849,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.limit.Limit"
+      ],
+      "id": "dns/v2/limits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "quotas",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 859,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.quota.Quota"
+      ],
+      "id": "dns/v2/quotas",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 869,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.quota.Quota"
+      ],
+      "id": "dns/v2/get_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 881,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.quota.Quota"
+      ],
+      "id": "dns/v2/update_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_quota",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 897,
+      "parameters": [
+        {
+          "name": "quota",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.quota.Quota"
+      ],
+      "id": "dns/v2/delete_quota",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "service_statuses",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 917,
+      "parameters": [],
+      "resources": [
+        "openstack.dns.v2.service_status.ServiceStatus"
+      ],
+      "id": "dns/v2/service_statuses",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_service_status",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 927,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.service_status.ServiceStatus"
+      ],
+      "id": "dns/v2/get_service_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "tlds",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 942,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/tlds",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_tld",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 955,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/create_tld",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_tld",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 965,
+      "parameters": [
+        {
+          "name": "tld",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/get_tld",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_tld",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 975,
+      "parameters": [
+        {
+          "name": "tld",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/delete_tld",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_tld",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 995,
+      "parameters": [
+        {
+          "name": "tld",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/update_tld",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_tld",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1020,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tld.TLD"
+      ],
+      "id": "dns/v2/find_tld",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "tsigkeys",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1040,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tsigkey.TSIGKey"
+      ],
+      "id": "dns/v2/tsigkeys",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/tsigkeys"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_tsigkey",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1054,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tsigkey.TSIGKey"
+      ],
+      "id": "dns/v2/create_tsigkey",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/tsigkeys"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_tsigkey",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1064,
+      "parameters": [
+        {
+          "name": "tsigkey",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tsigkey.TSIGKey"
+      ],
+      "id": "dns/v2/get_tsigkey",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/tsigkeys"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_tsigkey",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1074,
+      "parameters": [
+        {
+          "name": "tsigkey",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "delete_shares",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tsigkey.TSIGKey"
+      ],
+      "id": "dns/v2/delete_tsigkey",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/tsigkeys"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_tsigkey",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1115,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.tsigkey.TSIGKey"
+      ],
+      "id": "dns/v2/find_tsigkey",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/dns/v2/tsigkeys"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "blacklists",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1137,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.blacklist.Blacklist"
+      ],
+      "id": "dns/v2/blacklists",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_blacklist",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1148,
+      "parameters": [
+        {
+          "name": "blacklist",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.blacklist.Blacklist"
+      ],
+      "id": "dns/v2/get_blacklist",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_blacklist",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1160,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.blacklist.Blacklist"
+      ],
+      "id": "dns/v2/create_blacklist",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_blacklist",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1171,
+      "parameters": [
+        {
+          "name": "blacklist",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.blacklist.Blacklist"
+      ],
+      "id": "dns/v2/update_blacklist",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_blacklist",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1186,
+      "parameters": [
+        {
+          "name": "blacklist",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.dns.v2.blacklist.Blacklist"
+      ],
+      "id": "dns/v2/delete_blacklist",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1209,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "dns/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/dns/v2/_proxy.py",
+      "line": 1248,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "dns/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
