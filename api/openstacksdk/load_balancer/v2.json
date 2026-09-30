@@ -554,6 +554,7 @@
       "id": "load_balancer/v2/create_member",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
@@ -585,6 +586,7 @@
       "id": "load_balancer/v2/delete_member",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
@@ -616,6 +618,7 @@
       "id": "load_balancer/v2/find_member",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
@@ -642,6 +645,7 @@
       "id": "load_balancer/v2/get_member",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
@@ -668,6 +672,7 @@
       "id": "load_balancer/v2/members",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
@@ -698,6 +703,7 @@
       "id": "load_balancer/v2/update_member",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/loadbalancer/v2/pools",
         "gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
