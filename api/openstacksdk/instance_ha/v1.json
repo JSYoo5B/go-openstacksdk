@@ -1,0 +1,434 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "notifications",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 40,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.notification.Notification"
+      ],
+      "id": "instance_ha/v1/notifications",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_notification",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 52,
+      "parameters": [
+        {
+          "name": "notification",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.notification.Notification"
+      ],
+      "id": "instance_ha/v1/get_notification",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_notification",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 67,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.notification.Notification"
+      ],
+      "id": "instance_ha/v1/create_notification",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "segments",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 79,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.segment.Segment"
+      ],
+      "id": "instance_ha/v1/segments",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_segment",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 91,
+      "parameters": [
+        {
+          "name": "segment",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.segment.Segment"
+      ],
+      "id": "instance_ha/v1/get_segment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_segment",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 102,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.segment.Segment"
+      ],
+      "id": "instance_ha/v1/create_segment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_segment",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 112,
+      "parameters": [
+        {
+          "name": "segment",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.segment.Segment"
+      ],
+      "id": "instance_ha/v1/update_segment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_segment",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 129,
+      "parameters": [
+        {
+          "name": "segment",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.segment.Segment"
+      ],
+      "id": "instance_ha/v1/delete_segment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "hosts",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 151,
+      "parameters": [
+        {
+          "name": "segment",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.host.Host",
+        "openstack.instance_ha.v1.segment.Segment",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/hosts",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_host",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 171,
+      "parameters": [
+        {
+          "name": "segment",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.host.Host",
+        "openstack.instance_ha.v1.segment.Segment",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/create_host",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_host",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 190,
+      "parameters": [
+        {
+          "name": "host",
+          "required": true
+        },
+        {
+          "name": "segment",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.instance_ha.v1.host.Host",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/get_host",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_host",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 218,
+      "parameters": [
+        {
+          "name": "host",
+          "required": true
+        },
+        {
+          "name": "segment",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.host.Host",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/update_host",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_host",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 246,
+      "parameters": [
+        {
+          "name": "host",
+          "required": true
+        },
+        {
+          "name": "segment",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.instance_ha.v1.host.Host",
+        "openstack.instance_ha.v1.segment.Segment",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/delete_host",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "vmoves",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 285,
+      "parameters": [
+        {
+          "name": "notification",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.notification.Notification",
+        "openstack.instance_ha.v1.vmove.VMove",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/vmoves",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_vmove",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 307,
+      "parameters": [
+        {
+          "name": "vmove",
+          "required": true
+        },
+        {
+          "name": "notification",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.instance_ha.v1.notification.Notification",
+        "openstack.instance_ha.v1.vmove.VMove",
+        "openstack.resource.Resource"
+      ],
+      "id": "instance_ha/v1/get_vmove",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 335,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "instance_ha/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/instance_ha/v1/_proxy.py",
+      "line": 374,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "instance_ha/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
