@@ -2255,7 +2255,7 @@
       "name": "CreateImage",
       "sdk_package": "gophercloudsdk/compute/v2/servers",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers",
@@ -2287,7 +2287,7 @@
       "name": "Evacuate",
       "sdk_package": "gophercloudsdk/compute/v2/servers",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers",
@@ -6695,7 +6695,7 @@
       "name": "CreateBandwidthLimitRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6703,7 +6703,7 @@
       "name": "CreateDSCPMarkingRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6711,7 +6711,7 @@
       "name": "CreateMinimumBandwidthRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6743,7 +6743,7 @@
       "name": "GetBandwidthLimitRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6751,7 +6751,7 @@
       "name": "GetDSCPMarkingRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6759,7 +6759,7 @@
       "name": "GetMinimumBandwidthRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6791,7 +6791,7 @@
       "name": "UpdateBandwidthLimitRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6799,7 +6799,7 @@
       "name": "UpdateDSCPMarkingRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/rules",
@@ -6807,7 +6807,7 @@
       "name": "UpdateMinimumBandwidthRule",
       "sdk_package": "gophercloudsdk/network/v2/extensions/qos/rules",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "extract"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/ruletypes",

@@ -1024,10 +1024,30 @@
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/qos/rules",
+    "model": "BandwidthLimitRule",
     "find": false,
-    "delete": false,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "BandwidthLimitRules",
+    "parent": "gophercloudsdk/network/v2/extensions/qos/policies"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/qos/rules",
+    "model": "DSCPMarkingRule",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "DSCPMarkingRules",
+    "parent": "gophercloudsdk/network/v2/extensions/qos/policies"
+  },
+  {
+    "package": "gophercloudsdk/network/v2/extensions/qos/rules",
+    "model": "MinimumBandwidthRule",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "MinimumBandwidthRules",
+    "parent": "gophercloudsdk/network/v2/extensions/qos/policies"
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/qos/ruletypes",
