@@ -42,12 +42,13 @@ type Config[T any] struct {
 	Fields    map[string]json.RawMessage
 	Query     url.Values
 	Arguments map[string]any
+	Headers   map[string]string
 }
 
 type Option[T any] func(*Config[T]) error
 
 func Apply[T any](base T, options ...Option[T]) (Config[T], error) {
-	c := Config[T]{Options: base, Fields: make(map[string]json.RawMessage), Query: make(url.Values), Arguments: make(map[string]any)}
+	c := Config[T]{Options: base, Fields: make(map[string]json.RawMessage), Query: make(url.Values), Arguments: make(map[string]any), Headers: make(map[string]string)}
 	for _, apply := range options {
 		if apply == nil {
 			return c, fmt.Errorf("%w: nil request option", resource.ErrInvalidOption)
