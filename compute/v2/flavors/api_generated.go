@@ -66,17 +66,29 @@ type addAccessOptsBuilder struct {
 }
 
 func (b addAccessOptsBuilder) ToFlavorAddAccessMap() (map[string]any, error) {
-	body, err := b.base.ToFlavorAddAccessMap()
+	value0, err := b.base.ToFlavorAddAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AddAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, options ...AddAccessOption) ([]FlavorAccess, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AddAccess", "flavors", err)
+		var zero0 []FlavorAccess
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AddAccess", "flavors", err)
 		var zero0 []FlavorAccess
 		return zero0, err
 	}
@@ -100,17 +112,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToFlavorCreateMap() (map[string]any, error) {
-	body, err := b.base.ToFlavorCreateMap()
+	value0, err := b.base.ToFlavorCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Flavor, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "flavors", err)
+		var zero0 *Flavor
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "flavors", err)
 		var zero0 *Flavor
 		return zero0, err
 	}
@@ -136,17 +160,29 @@ type createExtraSpecsOptsBuilder struct {
 }
 
 func (b createExtraSpecsOptsBuilder) ToFlavorExtraSpecsCreateMap() (map[string]any, error) {
-	body, err := b.base.ToFlavorExtraSpecsCreateMap()
+	value0, err := b.base.ToFlavorExtraSpecsCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateExtraSpecs invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateExtraSpecs(ctx context.Context, flavorID string, opts ExtraSpecsOpts, options ...CreateExtraSpecsOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateExtraSpecs", "flavors", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateExtraSpecs", "flavors", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
@@ -204,11 +240,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToFlavorListQuery() (string, error) {
-	query, err := b.base.ToFlavorListQuery()
+	value0, err := b.base.ToFlavorListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -216,6 +258,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "flavors", err)
+		return func(yield func(*Flavor, error) bool) { var zero *Flavor; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "flavors", err)
 		return func(yield func(*Flavor, error) bool) { var zero *Flavor; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -248,17 +295,29 @@ type removeAccessOptsBuilder struct {
 }
 
 func (b removeAccessOptsBuilder) ToFlavorRemoveAccessMap() (map[string]any, error) {
-	body, err := b.base.ToFlavorRemoveAccessMap()
+	value0, err := b.base.ToFlavorRemoveAccessMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RemoveAccess invokes the upstream API with library-owned builders and result handling.
 func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts, options ...RemoveAccessOption) ([]FlavorAccess, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RemoveAccess", "flavors", err)
+		var zero0 []FlavorAccess
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RemoveAccess", "flavors", err)
 		var zero0 []FlavorAccess
 		return zero0, err
 	}
@@ -282,17 +341,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToFlavorUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToFlavorUpdateMap()
+	value0, err := b.base.ToFlavorUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Flavor, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "flavors", err)
+		var zero0 *Flavor
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "flavors", err)
 		var zero0 *Flavor
 		return zero0, err
 	}
@@ -322,6 +393,12 @@ func (b updateExtraSpecOptsBuilder) ToFlavorExtraSpecUpdateMap() (map[string]str
 func (a *API) UpdateExtraSpec(ctx context.Context, flavorID string, opts ExtraSpecsOpts, options ...UpdateExtraSpecOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateExtraSpec", "flavors", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("UpdateExtraSpec", "flavors", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
