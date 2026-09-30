@@ -356,7 +356,10 @@ func extractorsByPage(pkg *types.Package, decls map[string]*ast.FuncDecl) map[st
 				switch node := node.(type) {
 				case *ast.TypeAssertExpr:
 					if id, ok := node.Type.(*ast.Ident); ok {
-						result[id.Name] = name
+						previous := result[id.Name]
+						if previous == "" || pageExtractorDetail(sig.Results().At(0).Type()) >= pageExtractorDetail(pkg.Scope().Lookup(previous).Type().(*types.Signature).Results().At(0).Type()) {
+							result[id.Name] = name
+						}
 					}
 				case *ast.CallExpr:
 					if id, ok := node.Fun.(*ast.Ident); ok {
@@ -369,6 +372,17 @@ func extractorsByPage(pkg *types.Package, decls map[string]*ast.FuncDecl) map[st
 		visit(name)
 	}
 	return result
+}
+
+// Swift exposes both full resource records and names from the same page. Do
+// not let an ExtractNames helper discard fields from an available typed model.
+func pageExtractorDetail(result types.Type) int {
+	if slice, ok := result.Underlying().(*types.Slice); ok {
+		if _, primitive := slice.Elem().Underlying().(*types.Basic); primitive {
+			return 0
+		}
+	}
+	return 1
 }
 
 func clientParam(sig *types.Signature) int {

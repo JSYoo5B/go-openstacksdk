@@ -80,6 +80,22 @@ func URL() string { return "" }
 	}
 }
 
+func TestPageExtractorPreservesResourceFieldsWhenNamesAreAlsoAvailable(t *testing.T) {
+	pkg, decls := fixture(t, `package fixture
+type Page interface{}
+type ObjectPage struct{}
+type Object struct{ Name string; Bytes int64 }
+func ExtractInfo(page Page)([]Object,error){_ = page.(ObjectPage);return nil,nil}
+func ExtractNames(page Page)([]string,error){_,err:=ExtractInfo(page);return nil,err}
+func List()Page{return ObjectPage{}}
+`)
+	byPage := extractorsByPage(pkg, decls)
+	name, model := findExtractor(pkg, "List", decls["List"], byPage)
+	if name != "ExtractInfo" || model.String() != "[]fixture.Object" {
+		t.Fatalf("extractor=%s model=%v", name, model)
+	}
+}
+
 func TestGenericBatchUsesConcreteInputsAndNamedSliceRemainsTyped(t *testing.T) {
 	pkg, _ := fixture(t, `package fixture
 type UpdateOptsBuilder interface{ ToUpdateMap() (map[string]any,error) }
