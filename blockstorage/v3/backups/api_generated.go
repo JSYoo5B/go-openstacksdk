@@ -59,17 +59,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToBackupCreateMap() (map[string]any, error) {
-	body, err := b.base.ToBackupCreateMap()
+	value0, err := b.base.ToBackupCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Backup, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "backups", err)
+		var zero0 *Backup
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "backups", err)
 		var zero0 *Backup
 		return zero0, err
 	}
@@ -119,17 +131,29 @@ type importOptsBuilder struct {
 }
 
 func (b importOptsBuilder) ToBackupImportMap() (map[string]any, error) {
-	body, err := b.base.ToBackupImportMap()
+	value0, err := b.base.ToBackupImportMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Import invokes the upstream API with library-owned builders and result handling.
 func (a *API) Import(ctx context.Context, opts ImportOpts, options ...ImportOption) (*ImportResponse, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Import", "backups", err)
+		var zero0 *ImportResponse
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Import", "backups", err)
 		var zero0 *ImportResponse
 		return zero0, err
 	}
@@ -151,11 +175,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToBackupListQuery() (string, error) {
-	query, err := b.base.ToBackupListQuery()
+	value0, err := b.base.ToBackupListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -163,6 +193,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Backup
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "backups", err)
+		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "backups", err)
 		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -185,11 +220,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToBackupListDetailQuery() (string, error) {
-	query, err := b.base.ToBackupListDetailQuery()
+	value0, err := b.base.ToBackupListDetailQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -197,6 +238,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListDetailOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "backups", err)
+		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "backups", err)
 		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -221,17 +267,28 @@ type resetStatusOptsBuilder struct {
 }
 
 func (b resetStatusOptsBuilder) ToBackupResetStatusMap() (map[string]any, error) {
-	body, err := b.base.ToBackupResetStatusMap()
+	value0, err := b.base.ToBackupResetStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetStatus", "backups", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetStatus", "backups", err)
 		return err
 	}
 	_opts := resetStatusOptsBuilder{base: cfg.Options, config: cfg}
@@ -253,17 +310,29 @@ type restoreFromBackupOptsBuilder struct {
 }
 
 func (b restoreFromBackupOptsBuilder) ToRestoreMap() (map[string]any, error) {
-	body, err := b.base.ToRestoreMap()
+	value0, err := b.base.ToRestoreMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RestoreFromBackup invokes the upstream API with library-owned builders and result handling.
 func (a *API) RestoreFromBackup(ctx context.Context, id string, opts RestoreOpts, options ...RestoreFromBackupOption) (*Restore, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RestoreFromBackup", "backups", err)
+		var zero0 *Restore
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("RestoreFromBackup", "backups", err)
 		var zero0 *Restore
 		return zero0, err
 	}
@@ -287,17 +356,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToBackupUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToBackupUpdateMap()
+	value0, err := b.base.ToBackupUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Backup, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "backups", err)
+		var zero0 *Backup
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "backups", err)
 		var zero0 *Backup
 		return zero0, err
 	}
