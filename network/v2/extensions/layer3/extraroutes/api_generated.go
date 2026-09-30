@@ -29,17 +29,29 @@ type addOptsBuilder struct {
 }
 
 func (b addOptsBuilder) ToExtraRoutesUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToExtraRoutesUpdateMap()
+	value0, err := b.base.ToExtraRoutesUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Add invokes the upstream API with library-owned builders and result handling.
 func (a *API) Add(ctx context.Context, id string, opts Opts, options ...AddOption) (*routers.Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Add", "extraroutes", err)
+		var zero0 *routers.Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Add", "extraroutes", err)
 		var zero0 *routers.Router
 		return zero0, err
 	}
@@ -61,17 +73,29 @@ type removeOptsBuilder struct {
 }
 
 func (b removeOptsBuilder) ToExtraRoutesUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToExtraRoutesUpdateMap()
+	value0, err := b.base.ToExtraRoutesUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Remove invokes the upstream API with library-owned builders and result handling.
 func (a *API) Remove(ctx context.Context, id string, opts Opts, options ...RemoveOption) (*routers.Router, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Remove", "extraroutes", err)
+		var zero0 *routers.Router
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Remove", "extraroutes", err)
 		var zero0 *routers.Router
 		return zero0, err
 	}
