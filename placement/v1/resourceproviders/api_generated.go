@@ -67,17 +67,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToResourceProviderCreateMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderCreateMap()
+	value0, err := b.base.ToResourceProviderCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*ResourceProvider, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "resourceproviders", err)
+		var zero0 *ResourceProvider
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "resourceproviders", err)
 		var zero0 *ResourceProvider
 		return zero0, err
 	}
@@ -175,11 +187,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToResourceProviderListQuery() (string, error) {
-	query, err := b.base.ToResourceProviderListQuery()
+	value0, err := b.base.ToResourceProviderListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -187,6 +205,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Resour
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "resourceproviders", err)
+		return func(yield func(*ResourceProvider, error) bool) { var zero *ResourceProvider; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "resourceproviders", err)
 		return func(yield func(*ResourceProvider, error) bool) { var zero *ResourceProvider; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -209,17 +232,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToResourceProviderUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderUpdateMap()
+	value0, err := b.base.ToResourceProviderUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, resourceProviderID string, opts UpdateOpts, options ...UpdateOption) (*ResourceProvider, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "resourceproviders", err)
+		var zero0 *ResourceProvider
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "resourceproviders", err)
 		var zero0 *ResourceProvider
 		return zero0, err
 	}
@@ -245,17 +280,29 @@ type updateAggregatesOptsBuilder struct {
 }
 
 func (b updateAggregatesOptsBuilder) ToResourceProviderUpdateAggregatesMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderUpdateAggregatesMap()
+	value0, err := b.base.ToResourceProviderUpdateAggregatesMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateAggregates invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateAggregates(ctx context.Context, resourceProviderID string, opts UpdateAggregatesOpts, options ...UpdateAggregatesOption) (*ResourceProviderAggregates, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateAggregates", "resourceproviders", err)
+		var zero0 *ResourceProviderAggregates
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateAggregates", "resourceproviders", err)
 		var zero0 *ResourceProviderAggregates
 		return zero0, err
 	}
@@ -281,17 +328,29 @@ type updateInventoriesOptsBuilder struct {
 }
 
 func (b updateInventoriesOptsBuilder) ToResourceProviderUpdateInventoriesMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderUpdateInventoriesMap()
+	value0, err := b.base.ToResourceProviderUpdateInventoriesMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateInventories invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateInventories(ctx context.Context, resourceProviderID string, opts UpdateInventoriesOpts, options ...UpdateInventoriesOption) (*ResourceProviderInventories, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateInventories", "resourceproviders", err)
+		var zero0 *ResourceProviderInventories
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateInventories", "resourceproviders", err)
 		var zero0 *ResourceProviderInventories
 		return zero0, err
 	}
@@ -317,17 +376,29 @@ type updateInventoryOptsBuilder struct {
 }
 
 func (b updateInventoryOptsBuilder) ToResourceProviderUpdateInventoryMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderUpdateInventoryMap()
+	value0, err := b.base.ToResourceProviderUpdateInventoryMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateInventory invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateInventory(ctx context.Context, resourceProviderID string, resourceClass string, opts UpdateInventoryOpts, options ...UpdateInventoryOption) (*ResourceProviderInventory, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateInventory", "resourceproviders", err)
+		var zero0 *ResourceProviderInventory
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateInventory", "resourceproviders", err)
 		var zero0 *ResourceProviderInventory
 		return zero0, err
 	}
@@ -353,17 +424,29 @@ type updateTraitsOptsBuilder struct {
 }
 
 func (b updateTraitsOptsBuilder) ToResourceProviderUpdateTraitsMap() (map[string]any, error) {
-	body, err := b.base.ToResourceProviderUpdateTraitsMap()
+	value0, err := b.base.ToResourceProviderUpdateTraitsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateTraits invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateTraits(ctx context.Context, resourceProviderID string, opts UpdateTraitsOpts, options ...UpdateTraitsOption) (*ResourceProviderTraits, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateTraits", "resourceproviders", err)
+		var zero0 *ResourceProviderTraits
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateTraits", "resourceproviders", err)
 		var zero0 *ResourceProviderTraits
 		return zero0, err
 	}
