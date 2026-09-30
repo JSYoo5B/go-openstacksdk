@@ -30,6 +30,8 @@ type Connection struct {
 	network         *network.Service
 	image           *image.Service
 	blockStorage    *blockstorage.Service
+	services        map[string]any
+	clients         map[string]*gophercloud.ServiceClient
 }
 
 // Connect authenticates once. It uses OS_CLOUD/clouds.yaml when OS_CLOUD is set,
@@ -116,42 +118,14 @@ func newConnection(provider *gophercloud.ProviderClient, o connectionOptions, eo
 	default:
 		return nil, invalid("invalid endpoint interface %q", eo.Availability)
 	}
-	return &Connection{provider: provider, options: o, endpointOptions: eo}, nil
+	if o.messagingClientID == "" {
+		o.messagingClientID = newMessagingClientID()
+	}
+	return &Connection{provider: provider, options: o, endpointOptions: eo, services: make(map[string]any), clients: make(map[string]*gophercloud.ServiceClient)}, nil
 }
 
 func (c *Connection) serviceClient(ctx context.Context, service Service) (*gophercloud.ServiceClient, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	if endpoint, ok := c.options.endpoints[service]; ok {
-		client := &gophercloud.ServiceClient{ProviderClient: c.provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: string(service)}
-		if service == Network {
-			client.ResourceBase = client.Endpoint + "v2.0/"
-		}
-		client.Microversion = c.options.microversions[service]
-		return client, nil
-	} else if c.provider.EndpointLocator == nil {
-		return nil, invalid("provider has no endpoint locator; supply WithEndpoint(%q, ...)", service)
-	}
-	var client *gophercloud.ServiceClient
-	var err error
-	switch service {
-	case Compute:
-		client, err = openstack.NewComputeV2(c.provider, c.endpointOptions)
-	case Network:
-		client, err = openstack.NewNetworkV2(c.provider, c.endpointOptions)
-	case Image:
-		client, err = openstack.NewImageV2(c.provider, c.endpointOptions)
-	case BlockStorage:
-		client, err = openstack.NewBlockStorageV3(c.provider, c.endpointOptions)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("connect %s: %w", service, err)
-	}
-	// Ensure all service clients share the actual provider, including reauth.
-	client.ProviderClient = c.provider
-	client.Microversion = c.options.microversions[service]
-	return client, nil
+	return c.serviceClientVersion(ctx, service, serviceDefinitions[service].version)
 }
 
 func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {

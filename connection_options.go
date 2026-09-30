@@ -20,16 +20,18 @@ const (
 )
 
 type connectionOptions struct {
-	auth           *gophercloud.AuthOptions
-	cloud          string
-	cloudFiles     []string
-	region         *string
-	availability   *gophercloud.Availability
-	httpClient     http.Client
-	httpConfigured bool
-	tlsConfig      *tls.Config
-	endpoints      map[Service]string
-	microversions  map[Service]string
+	auth               *gophercloud.AuthOptions
+	cloud              string
+	cloudFiles         []string
+	region             *string
+	availability       *gophercloud.Availability
+	httpClient         http.Client
+	httpConfigured     bool
+	tlsConfig          *tls.Config
+	endpoints          map[Service]string
+	microversions      map[Service]string
+	versionedEndpoints map[string]string
+	messagingClientID  string
 }
 
 type ConnectionOption func(*connectionOptions) error
@@ -106,23 +108,51 @@ func WithEndpoint(service Service, endpoint string) ConnectionOption {
 	}
 }
 
+// WithEndpointFor configures a particular major API version independently.
+func WithEndpointFor(service Service, version, endpoint string) ConnectionOption {
+	return func(o *connectionOptions) error {
+		definition, ok := serviceDefinitions[service]
+		if !ok {
+			return invalid("unknown service %q", service)
+		}
+		if _, ok := definition.factories[version]; !ok && !(service == Messaging && version == "v2") {
+			return unsupported(string(service), version)
+		}
+		temporary := connectionOptions{endpoints: make(map[Service]string)}
+		if err := WithEndpoint(service, endpoint)(&temporary); err != nil {
+			return err
+		}
+		o.versionedEndpoints[serviceKey(service, version)] = endpoint
+		return nil
+	}
+}
+
+// WithMessagingClientID selects the stable Zaqar client UUID. By default a
+// connection creates one UUID and shares it across all messaging operations.
+func WithMessagingClientID(id string) ConnectionOption {
+	return func(o *connectionOptions) error {
+		if !regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(id) {
+			return invalid("messaging client ID must be a UUID")
+		}
+		o.messagingClientID = id
+		return nil
+	}
+}
+
 var microversionPattern = regexp.MustCompile(`^[1-9][0-9]*\.[0-9]+$`)
 
 // WithMicroversion selects a version explicitly. Automatic negotiation is not
 // implemented yet; extension compatibility remains subject to the cloud API.
 func WithMicroversion(service Service, version string) ConnectionOption {
 	return func(o *connectionOptions) error {
-		if service != Compute && service != BlockStorage {
+		major := serviceDefinitions[service].microversionMajor
+		if major == "" {
 			return unsupported(string(service), "microversions")
 		}
 		if !microversionPattern.MatchString(version) {
 			return invalid("invalid microversion %q", version)
 		}
-		major := "2."
-		if service == BlockStorage {
-			major = "3."
-		}
-		if !strings.HasPrefix(version, major) {
+		if !strings.HasPrefix(version, major+".") {
 			return invalid("microversion %q does not belong to %s", version, service)
 		}
 		o.microversions[service] = version
@@ -131,12 +161,14 @@ func WithMicroversion(service Service, version string) ConnectionOption {
 }
 
 func validService(service Service) bool {
-	return service == Compute || service == Network || service == Image || service == BlockStorage
+	_, ok := serviceDefinitions[service]
+	return ok
 }
 
 func parseConnection(opts []ConnectionOption) (connectionOptions, error) {
 	o := connectionOptions{
 		endpoints: make(map[Service]string), microversions: make(map[Service]string),
+		versionedEndpoints: make(map[string]string),
 	}
 	for _, apply := range opts {
 		if apply == nil {
