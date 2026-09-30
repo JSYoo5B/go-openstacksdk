@@ -38,6 +38,7 @@ var serviceSpecs = map[string]serviceSpec{
 
 func registryField(path string) string {
 	words := map[string]string{
+		"nodegroups": "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo",
 		"apiversions": "APIVersions", "servergroups": "ServerGroups", "keypairs": "KeyPairs", "secgroups": "SecurityGroups", "instanceactions": "InstanceActions", "remoteconsoles": "RemoteConsoles", "attachinterfaces": "AttachInterfaces", "volumeattach": "VolumeAttachments", "availabilityzones": "AvailabilityZones", "quotasets": "QuotaSets",
 		"extensions": "", "layer3": "", "bgp": "BGP", "qos": "QoS", "fwaas_v2": "Firewall", "vpnaas": "VPN", "taas": "TaaS", "networkipavailabilities": "NetworkIPAvailabilities", "rbacpolicies": "RBACPolicies", "subnetpools": "SubnetPools", "addressscopes": "AddressScopes", "floatingips": "FloatingIPs", "extraroutes": "ExtraRoutes", "portforwarding": "PortForwarding", "bgpvpns": "BGPVPNs", "attributestags": "AttributeTags", "tapmirrors": "TapMirrors", "addressgroups": "AddressGroups", "endpointgroups": "EndpointGroups", "siteconnections": "SiteConnections", "ipsecpolicies": "IPsecPolicies", "ikepolicies": "IKEPolicies", "ruletypes": "RuleTypes",
 		"flavorprofiles": "FlavorProfiles", "l7policies": "L7Policies", "l7rules": "L7Rules", "loadbalancers": "LoadBalancers", "volumetypes": "VolumeTypes", "volumetransfers": "VolumeTransfers", "volumegroups": "VolumeGroups", "group_types": "GroupTypes", "recordsets": "RecordSets", "imagedata": "ImageData", "imageimport": "ImageImport", "roleassignments": "RoleAssignments", "registeredlimits": "RegisteredLimits", "applicationcredentials": "ApplicationCredentials", "domainconfigs": "DomainConfigs", "domainroles": "DomainRoles", "projectroles": "ProjectRoles", "userpassword": "UserPassword", "trusts": "Trusts", "portgroups": "PortGroups", "bulkdelete": "BulkDelete", "softwareconfigs": "SoftwareConfigs", "softwaredeployments": "SoftwareDeployments", "stacktemplates": "StackTemplates", "sharetypes": "ShareTypes", "sharenetworks": "ShareNetworks", "shareinstances": "ShareInstances", "sharereplicas": "ShareReplicas", "sharesnapshots": "ShareSnapshots", "sharegroups": "ShareGroups", "sharegroup_types": "ShareGroupTypes", "sharegroup_snapshots": "ShareGroupSnapshots", "securityservices": "SecurityServices", "shareaccessrules": "ShareAccessRules", "resourceproviders": "ResourceProviders", "resourceclasses": "ResourceClasses", "allocationcandidates": "AllocationCandidates", "crontriggers": "CronTriggers", "clustertemplates": "ClusterTemplates", "clusterstacks": "ClusterStacks",
@@ -119,6 +120,9 @@ func (g *generator) generateServices() error {
 		}
 		registry.WriteString("}}\nfunc(s *Service)RawClient()*gophercloud.ServiceClient{return s.client}\n")
 		if err := writeGo(g.root, key+"/service_generated.go", registry.Bytes()); err != nil {
+			return err
+		}
+		if err := g.writeServiceREADME(key, spec, paths); err != nil {
 			return err
 		}
 		method := spec.name + strings.ToUpper(parts[1][:1]) + parts[1][1:]
