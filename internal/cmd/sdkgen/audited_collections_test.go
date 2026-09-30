@@ -7,12 +7,16 @@ import (
 )
 
 func auditedFixtureSource(spec auditedCollectionSpec) string {
+	fields := spec.identifier + " string"
+	if spec.completion != "" {
+		fields += ";" + spec.completion + " bool;" + spec.failure + " string;State string"
+	}
 	return fmt.Sprintf(`package fixture
 import "context"
 import gophercloud "github.com/gophercloud/gophercloud/v2"
 import "github.com/gophercloud/gophercloud/v2/pagination"
 var _ context.Context
-type %s struct{%s string}
+type %s struct{%s}
 type Other struct{Name string}
 type GetResult struct{}
 func(GetResult)Extract()(*%s,error){return nil,nil}
@@ -23,7 +27,7 @@ type ModelPage struct{}
 func %s(ctx context.Context,client *gophercloud.ServiceClient,id string)GetResult{return GetResult{}}
 func %s(client *gophercloud.ServiceClient,opts ListOptsBuilder)pagination.Pager{_ = ModelPage{};return pagination.Pager{}}
 func ExtractModels(p pagination.Page)([]%s,error){_ = p.(ModelPage);return nil,nil}
-`, spec.model, spec.identifier, spec.model, spec.getter, spec.lister, spec.model)
+`, spec.model, fields, spec.model, spec.getter, spec.lister, spec.model)
 }
 
 func TestAuditedNamedCollectionsUseInspectedIdentityAndReadOnlyPolicies(t *testing.T) {
@@ -71,7 +75,7 @@ func TestAuditedCollectionsRejectUpstreamShapeChanges(t *testing.T) {
 				return strings.Replace(source, "([]"+spec.model+",error)", "([]Other,error)", 1)
 			},
 			"new inferred wait": func(source string) string {
-				return strings.Replace(source, spec.identifier+" string}", spec.identifier+" string;Status string}", 1)
+				return strings.Replace(source, spec.identifier+" string", spec.identifier+" string;Status string", 1)
 			},
 		} {
 			t.Run(spec.path+"/"+name, func(t *testing.T) {
@@ -82,5 +86,20 @@ func TestAuditedCollectionsRejectUpstreamShapeChanges(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestAuditedIntrospectionRequiresBooleanCompletionAndStringFailure(t *testing.T) {
+	spec := auditedCollections[2]
+	for name, source := range map[string]string{
+		"string completion": strings.Replace(auditedFixtureSource(spec), "Finished bool", "Finished string", 1),
+		"boolean error":     strings.Replace(auditedFixtureSource(spec), "Error string", "Error bool", 1),
+	} {
+		t.Run(name, func(t *testing.T) {
+			pkg, decls := typedCollectionFixture(t, upstreamModule+"/openstack/"+spec.path, source)
+			if plan, err := identifyCollectionBinding(pkg, decls, extractorsByPage(pkg, decls)); plan != nil || err == nil {
+				t.Fatalf("plan=%v err=%v", plan, err)
+			}
+		})
 	}
 }

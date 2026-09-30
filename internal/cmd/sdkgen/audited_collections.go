@@ -11,11 +11,13 @@ import (
 // shape change must fail generation rather than silently remove SDK policies.
 type auditedCollectionSpec struct {
 	path, model, getter, lister, identifier, name string
+	completion, failure                           string
 }
 
 var auditedCollections = []auditedCollectionSpec{
-	{"baremetal/v1/conductors", "Conductor", "Get", "List", "Hostname", "Hostname"},
-	{"baremetal/v1/drivers", "Driver", "GetDriverDetails", "ListDrivers", "Name", "Name"},
+	{path: "baremetal/v1/conductors", model: "Conductor", getter: "Get", lister: "List", identifier: "Hostname", name: "Hostname"},
+	{path: "baremetal/v1/drivers", model: "Driver", getter: "GetDriverDetails", lister: "ListDrivers", identifier: "Name", name: "Name"},
+	{path: "baremetalintrospection/v1/introspection", model: "Introspection", getter: "GetIntrospectionStatus", lister: "ListIntrospections", identifier: "UUID", completion: "Finished", failure: "Error"},
 }
 
 func identifyCollectionBinding(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string) (*collectionPlan, error) {
@@ -38,6 +40,13 @@ func identifyAuditedCollection(pkg *types.Package, decls map[string]*ast.FuncDec
 	identifier, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.id)
 	if identifier == nil || !isString(identifier.Type()) {
 		return mismatch()
+	}
+	if spec.completion != "" {
+		completion, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, spec.completion)
+		failure, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, spec.failure)
+		if completion == nil || !types.Identical(completion.Type().Underlying(), types.Typ[types.Bool]) || failure == nil || !isString(failure.Type()) {
+			return mismatch()
+		}
 	}
 	get := plan.getter.Type().(*types.Signature)
 	list := plan.lister.Type().(*types.Signature)
