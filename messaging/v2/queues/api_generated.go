@@ -69,17 +69,28 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToQueueCreateMap() (map[string]any, error) {
-	body, err := b.base.ToQueueCreateMap()
+	value0, err := b.base.ToQueueCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "queues", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "queues", err)
 		return err
 	}
 	_opts := createOptsBuilder{base: cfg.Options, config: cfg}
@@ -118,11 +129,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToQueueListQuery() (string, error) {
-	query, err := b.base.ToQueueListQuery()
+	value0, err := b.base.ToQueueListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -130,6 +147,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Queue,
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "queues", err)
+		return func(yield func(*Queue, error) bool) { var zero *Queue; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "queues", err)
 		return func(yield func(*Queue, error) bool) { var zero *Queue; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -152,17 +174,28 @@ type purgeOptsBuilder struct {
 }
 
 func (b purgeOptsBuilder) ToQueuePurgeMap() (map[string]any, error) {
-	body, err := b.base.ToQueuePurgeMap()
+	value0, err := b.base.ToQueuePurgeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Purge invokes the upstream API with library-owned builders and result handling.
 func (a *API) Purge(ctx context.Context, queueName string, opts PurgeOpts, options ...PurgeOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Purge", "queues", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Purge", "queues", err)
 		return err
 	}
 	_opts := purgeOptsBuilder{base: cfg.Options, config: cfg}
@@ -182,17 +215,29 @@ type shareOptsBuilder struct {
 }
 
 func (b shareOptsBuilder) ToQueueShareMap() (map[string]any, error) {
-	body, err := b.base.ToQueueShareMap()
+	value0, err := b.base.ToQueueShareMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Share invokes the upstream API with library-owned builders and result handling.
 func (a *API) Share(ctx context.Context, queueName string, opts ShareOpts, options ...ShareOption) (QueueShare, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Share", "queues", err)
+		var zero0 QueueShare
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Share", "queues", err)
 		var zero0 QueueShare
 		return zero0, err
 	}
@@ -220,6 +265,12 @@ func (b updateOptsBuilder) ToQueueUpdateMap() ([]map[string]any, error) {
 func (a *API) Update(ctx context.Context, queueName string, opts BatchUpdateOpts, options ...UpdateOption) (QueueDetails, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "queues", err)
+		var zero0 QueueDetails
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Update", "queues", err)
 		var zero0 QueueDetails
 		return zero0, err
 	}
