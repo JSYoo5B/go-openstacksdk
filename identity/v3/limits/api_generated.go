@@ -53,17 +53,29 @@ type batchCreateOptsBuilder struct {
 }
 
 func (b batchCreateOptsBuilder) ToLimitsCreateMap() (map[string]any, error) {
-	body, err := b.base.ToLimitsCreateMap()
+	value0, err := b.base.ToLimitsCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // BatchCreate invokes the upstream API with library-owned builders and result handling.
 func (a *API) BatchCreate(ctx context.Context, opts BatchCreateOpts, options ...BatchCreateOption) ([]Limit, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("BatchCreate", "limits", err)
+		var zero0 []Limit
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("BatchCreate", "limits", err)
 		var zero0 []Limit
 		return zero0, err
 	}
@@ -106,11 +118,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToLimitListQuery() (string, error) {
-	query, err := b.base.ToLimitListQuery()
+	value0, err := b.base.ToLimitListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -118,6 +136,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Limit,
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "limits", err)
+		return func(yield func(*Limit, error) bool) { var zero *Limit; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "limits", err)
 		return func(yield func(*Limit, error) bool) { var zero *Limit; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -140,17 +163,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToLimitUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToLimitUpdateMap()
+	value0, err := b.base.ToLimitUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Limit, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "limits", err)
+		var zero0 *Limit
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "limits", err)
 		var zero0 *Limit
 		return zero0, err
 	}
