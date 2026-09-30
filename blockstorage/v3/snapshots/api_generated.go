@@ -53,17 +53,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSnapshotCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSnapshotCreateMap()
+	value0, err := b.base.ToSnapshotCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Snapshot, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "snapshots", err)
+		var zero0 *Snapshot
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "snapshots", err)
 		var zero0 *Snapshot
 		return zero0, err
 	}
@@ -103,11 +115,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToSnapshotListQuery() (string, error) {
-	query, err := b.base.ToSnapshotListQuery()
+	value0, err := b.base.ToSnapshotListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -115,6 +133,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Snapsh
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "snapshots", err)
+		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "snapshots", err)
 		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -137,11 +160,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToSnapshotListQuery() (string, error) {
-	query, err := b.base.ToSnapshotListQuery()
+	value0, err := b.base.ToSnapshotListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -149,6 +178,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "snapshots", err)
+		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "snapshots", err)
 		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -173,17 +207,28 @@ type resetStatusOptsBuilder struct {
 }
 
 func (b resetStatusOptsBuilder) ToSnapshotResetStatusMap() (map[string]any, error) {
-	body, err := b.base.ToSnapshotResetStatusMap()
+	value0, err := b.base.ToSnapshotResetStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetStatus", "snapshots", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetStatus", "snapshots", err)
 		return err
 	}
 	_opts := resetStatusOptsBuilder{base: cfg.Options, config: cfg}
@@ -203,17 +248,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSnapshotUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToSnapshotUpdateMap()
+	value0, err := b.base.ToSnapshotUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Snapshot, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "snapshots", err)
+		var zero0 *Snapshot
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "snapshots", err)
 		var zero0 *Snapshot
 		return zero0, err
 	}
@@ -239,17 +296,29 @@ type updateMetadataOptsBuilder struct {
 }
 
 func (b updateMetadataOptsBuilder) ToSnapshotUpdateMetadataMap() (map[string]any, error) {
-	body, err := b.base.ToSnapshotUpdateMetadataMap()
+	value0, err := b.base.ToSnapshotUpdateMetadataMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (*Snapshot, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateMetadata", "snapshots", err)
+		var zero0 *Snapshot
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateMetadata", "snapshots", err)
 		var zero0 *Snapshot
 		return zero0, err
 	}
@@ -275,17 +344,28 @@ type updateStatusOptsBuilder struct {
 }
 
 func (b updateStatusOptsBuilder) ToSnapshotUpdateStatusMap() (map[string]any, error) {
-	body, err := b.base.ToSnapshotUpdateStatusMap()
+	value0, err := b.base.ToSnapshotUpdateStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateStatus(ctx context.Context, id string, opts UpdateStatusOpts, options ...UpdateStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateStatus", "snapshots", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateStatus", "snapshots", err)
 		return err
 	}
 	_opts := updateStatusOptsBuilder{base: cfg.Options, config: cfg}
