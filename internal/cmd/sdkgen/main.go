@@ -250,6 +250,10 @@ func (g *generator) generate(path string) error {
 	}
 	extractors := extractorsByPage(pkg, decls)
 	plan := identifyCollection(pkg, decls, extractors)
+	scopes, err := identifyScopes(pkg, decls, extractors)
+	if err != nil {
+		return err
+	}
 	names := []string{}
 	for _, name := range pkg.Scope().Names() {
 		fn, ok := pkg.Scope().Lookup(name).(*types.Func)
@@ -269,7 +273,9 @@ func (g *generator) generate(path string) error {
 	e.use(upstreamModule)
 	if plan == nil {
 		e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
+		if len(scopes) == 0 {
+			g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
+		}
 	} else {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
@@ -315,9 +321,15 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if plan != nil {
-		return g.emitCollection(pkg, plan)
+		if err := g.emitCollection(pkg, plan); err != nil {
+			return err
+		}
 	}
-	return nil
+	for _, scope := range scopes {
+		p := scope.collection
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
+	}
+	return g.emitScopes(pkg, scopes, source)
 }
 
 // Typed extractors often delegate to ExtractInto helpers. Follow those calls
