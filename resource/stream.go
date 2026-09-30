@@ -12,7 +12,7 @@ import (
 func Stream[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) ([]T, error)) iter.Seq2[*T, error] {
 	return func(yield func(*T, error) bool) {
 		stopped := false
-		err := pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
 			values, err := extract(page)
 			if err != nil {
 				return false, err
@@ -36,7 +36,7 @@ func Stream[T any](ctx context.Context, pager pagination.Pager, extract func(pag
 func StreamValues[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) (T, error)) iter.Seq2[T, error] {
 	return func(yield func(T, error) bool) {
 		stopped := false
-		err := pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
 			value, err := extract(page)
 			if err != nil {
 				return false, err
@@ -58,7 +58,7 @@ func StreamValues[T any](ctx context.Context, pager pagination.Pager, extract fu
 func Pages(ctx context.Context, pager pagination.Pager) iter.Seq2[pagination.Page, error] {
 	return func(yield func(pagination.Page, error) bool) {
 		stopped := false
-		err := pager.EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
 			if !yield(page, nil) {
 				stopped = true
 				return false, nil

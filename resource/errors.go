@@ -6,12 +6,21 @@ import (
 )
 
 var (
-	ErrNotFound      = errors.New("resource not found")
-	ErrAmbiguous     = errors.New("resource name is ambiguous")
-	ErrUnsupported   = errors.New("operation is unsupported")
-	ErrInvalidOption = errors.New("invalid option")
-	ErrFailedState   = errors.New("resource entered a failed state")
+	ErrNotFound        = errors.New("resource not found")
+	ErrAmbiguous       = errors.New("resource name is ambiguous")
+	ErrUnsupported     = errors.New("operation is unsupported")
+	ErrInvalidOption   = errors.New("invalid option")
+	ErrFailedState     = errors.New("resource entered a failed state")
+	ErrPaginationCycle = errors.New("pagination link repeats a previous page")
 )
+
+// PaginationCycleError reports a repeated next link without fetching it again.
+type PaginationCycleError struct{ URL string }
+
+func (e *PaginationCycleError) Error() string {
+	return fmt.Sprintf("%v: %s", ErrPaginationCycle, e.URL)
+}
+func (e *PaginationCycleError) Unwrap() error { return ErrPaginationCycle }
 
 // NotFoundError preserves a Gophercloud error when one is available.
 type NotFoundError struct {

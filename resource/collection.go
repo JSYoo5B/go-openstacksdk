@@ -130,7 +130,7 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			return
 		}
 		stopped := false
-		err := c.binding.List(o.query).EachPage(ctx, func(_ context.Context, page pagination.Page) (bool, error) {
+		err := eachPage(ctx, c.binding.List(o.query), func(_ context.Context, page pagination.Page) (bool, error) {
 			items, err := c.binding.Extract(page)
 			if err != nil {
 				return false, err
