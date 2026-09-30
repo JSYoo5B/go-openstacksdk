@@ -46,17 +46,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToMessageCreateMap() (map[string]any, error) {
-	body, err := b.base.ToMessageCreateMap()
+	value0, err := b.base.ToMessageCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, queueName string, opts BatchCreateOpts, options ...CreateOption) (ResourceList, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "messages", err)
+		var zero0 ResourceList
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "messages", err)
 		var zero0 ResourceList
 		return zero0, err
 	}
@@ -80,11 +92,17 @@ type deleteOptsBuilder struct {
 }
 
 func (b deleteOptsBuilder) ToMessageDeleteQuery() (string, error) {
-	query, err := b.base.ToMessageDeleteQuery()
+	value0, err := b.base.ToMessageDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -92,6 +110,11 @@ func (a *API) Delete(ctx context.Context, queueName string, messageID string, op
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Delete", "messages", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Delete", "messages", err)
 		return err
 	}
 	_opts := deleteOptsBuilder{base: cfg.Options, config: cfg}
@@ -118,11 +141,17 @@ type deleteMessagesOptsBuilder struct {
 }
 
 func (b deleteMessagesOptsBuilder) ToMessagesDeleteQuery() (string, error) {
-	query, err := b.base.ToMessagesDeleteQuery()
+	value0, err := b.base.ToMessagesDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteMessages invokes the upstream API with library-owned builders and result handling.
@@ -130,6 +159,11 @@ func (a *API) DeleteMessages(ctx context.Context, queueName string, options ...D
 	var opts DeleteMessagesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteMessages", "messages", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("DeleteMessages", "messages", err)
 		return err
 	}
 	_opts := deleteMessagesOptsBuilder{base: cfg.Options, config: cfg}
@@ -159,11 +193,17 @@ type getMessagesOptsBuilder struct {
 }
 
 func (b getMessagesOptsBuilder) ToGetMessagesListQuery() (string, error) {
-	query, err := b.base.ToGetMessagesListQuery()
+	value0, err := b.base.ToGetMessagesListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // GetMessages invokes the upstream API with library-owned builders and result handling.
@@ -171,6 +211,12 @@ func (a *API) GetMessages(ctx context.Context, queueName string, options ...GetM
 	var opts GetMessagesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("GetMessages", "messages", err)
+		var zero0 []Message
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("GetMessages", "messages", err)
 		var zero0 []Message
 		return zero0, err
 	}
@@ -192,11 +238,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToMessageListQuery() (string, error) {
-	query, err := b.base.ToMessageListQuery()
+	value0, err := b.base.ToMessageListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -204,6 +256,11 @@ func (a *API) List(ctx context.Context, queueName string, options ...ListOption)
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "messages", err)
+		return func(yield func(*Message, error) bool) { var zero *Message; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "messages", err)
 		return func(yield func(*Message, error) bool) { var zero *Message; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -228,17 +285,29 @@ type popMessagesOptsBuilder struct {
 }
 
 func (b popMessagesOptsBuilder) ToMessagesPopQuery() (string, error) {
-	query, err := b.base.ToMessagesPopQuery()
+	value0, err := b.base.ToMessagesPopQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // PopMessages invokes the upstream API with library-owned builders and result handling.
 func (a *API) PopMessages(ctx context.Context, queueName string, opts PopMessagesOpts, options ...PopMessagesOption) ([]PopMessage, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("PopMessages", "messages", err)
+		var zero0 []PopMessage
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("PopMessages", "messages", err)
 		var zero0 []PopMessage
 		return zero0, err
 	}
