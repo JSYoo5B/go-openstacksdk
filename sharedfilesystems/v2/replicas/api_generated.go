@@ -55,17 +55,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToReplicaCreateMap() (map[string]any, error) {
-	body, err := b.base.ToReplicaCreateMap()
+	value0, err := b.base.ToReplicaCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Replica, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "replicas", err)
+		var zero0 *Replica
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "replicas", err)
 		var zero0 *Replica
 		return zero0, err
 	}
@@ -113,11 +125,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToReplicaListQuery() (string, error) {
-	query, err := b.base.ToReplicaListQuery()
+	value0, err := b.base.ToReplicaListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -125,6 +143,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Replic
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "replicas", err)
+		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "replicas", err)
 		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -147,11 +170,17 @@ type listDetailOptsBuilder struct {
 }
 
 func (b listDetailOptsBuilder) ToReplicaListQuery() (string, error) {
-	query, err := b.base.ToReplicaListQuery()
+	value0, err := b.base.ToReplicaListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
@@ -159,6 +188,11 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListDetail", "replicas", err)
+		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListDetail", "replicas", err)
 		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
@@ -189,17 +223,28 @@ type promoteOptsBuilder struct {
 }
 
 func (b promoteOptsBuilder) ToReplicaPromoteMap() (map[string]any, error) {
-	body, err := b.base.ToReplicaPromoteMap()
+	value0, err := b.base.ToReplicaPromoteMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Promote invokes the upstream API with library-owned builders and result handling.
 func (a *API) Promote(ctx context.Context, id string, opts PromoteOpts, options ...PromoteOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Promote", "replicas", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Promote", "replicas", err)
 		return err
 	}
 	_opts := promoteOptsBuilder{base: cfg.Options, config: cfg}
@@ -219,17 +264,28 @@ type resetStateOptsBuilder struct {
 }
 
 func (b resetStateOptsBuilder) ToReplicaResetStateMap() (map[string]any, error) {
-	body, err := b.base.ToReplicaResetStateMap()
+	value0, err := b.base.ToReplicaResetStateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetState invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetState(ctx context.Context, id string, opts ResetStateOpts, options ...ResetStateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetState", "replicas", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetState", "replicas", err)
 		return err
 	}
 	_opts := resetStateOptsBuilder{base: cfg.Options, config: cfg}
@@ -251,17 +307,28 @@ type resetStatusOptsBuilder struct {
 }
 
 func (b resetStatusOptsBuilder) ToReplicaResetStatusMap() (map[string]any, error) {
-	body, err := b.base.ToReplicaResetStatusMap()
+	value0, err := b.base.ToReplicaResetStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetStatus", "replicas", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetStatus", "replicas", err)
 		return err
 	}
 	_opts := resetStatusOptsBuilder{base: cfg.Options, config: cfg}
