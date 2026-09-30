@@ -25,6 +25,12 @@ func WithNewBlockStorageNoAuthV2Options(value EndpointOpts) NewBlockStorageNoAut
 func (a *API) NewBlockStorageNoAuthV2(ctx context.Context, eo EndpointOpts, options ...NewBlockStorageNoAuthV2Option) (*gophercloud.ServiceClient, error) {
 	cfg, err := request.Apply(eo, options...)
 	if err != nil {
+		err = request.Wrap("NewBlockStorageNoAuthV2", "noauth", err)
+		var zero0 *gophercloud.ServiceClient
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("NewBlockStorageNoAuthV2", "noauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err
 	}
@@ -41,6 +47,12 @@ func WithNewBlockStorageNoAuthV3Options(value EndpointOpts) NewBlockStorageNoAut
 func (a *API) NewBlockStorageNoAuthV3(ctx context.Context, eo EndpointOpts, options ...NewBlockStorageNoAuthV3Option) (*gophercloud.ServiceClient, error) {
 	cfg, err := request.Apply(eo, options...)
 	if err != nil {
+		err = request.Wrap("NewBlockStorageNoAuthV3", "noauth", err)
+		var zero0 *gophercloud.ServiceClient
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("NewBlockStorageNoAuthV3", "noauth", err)
 		var zero0 *gophercloud.ServiceClient
 		return zero0, err
 	}
