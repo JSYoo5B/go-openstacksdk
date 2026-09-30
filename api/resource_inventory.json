@@ -239,10 +239,12 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/attachinterfaces",
+    "model": "Interface",
     "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "delete": true,
+    "wait": true,
+    "scope": "InServer",
+    "parent": "gophercloudsdk/compute/v2/servers"
   },
   {
     "package": "gophercloudsdk/compute/v2/availabilityzones",
@@ -365,10 +367,12 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/volumeattach",
+    "model": "VolumeAttachment",
     "find": false,
-    "delete": false,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InServer",
+    "parent": "gophercloudsdk/compute/v2/servers"
   },
   {
     "package": "gophercloudsdk/container/v1/capsules",
@@ -407,10 +411,12 @@
   },
   {
     "package": "gophercloudsdk/containerinfra/v1/nodegroups",
-    "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "model": "NodeGroup",
+    "find": true,
+    "delete": true,
+    "wait": true,
+    "scope": "InCluster",
+    "parent": "gophercloudsdk/containerinfra/v1/clusters"
   },
   {
     "package": "gophercloudsdk/containerinfra/v1/quotas",
@@ -470,10 +476,12 @@
   },
   {
     "package": "gophercloudsdk/dns/v2/recordsets",
-    "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "model": "RecordSet",
+    "find": true,
+    "delete": true,
+    "wait": true,
+    "scope": "InZone",
+    "parent": "gophercloudsdk/dns/v2/zones"
   },
   {
     "package": "gophercloudsdk/dns/v2/transfer/accept",
@@ -540,10 +548,21 @@
   },
   {
     "package": "gophercloudsdk/identity/v3/applicationcredentials",
-    "find": false,
-    "delete": false,
+    "model": "ApplicationCredential",
+    "find": true,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InUser",
+    "parent": "gophercloudsdk/identity/v3/users"
+  },
+  {
+    "package": "gophercloudsdk/identity/v3/applicationcredentials",
+    "model": "AccessRule",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "AccessRules",
+    "parent": "gophercloudsdk/identity/v3/users"
   },
   {
     "package": "gophercloudsdk/identity/v3/catalog",
@@ -568,10 +587,12 @@
   },
   {
     "package": "gophercloudsdk/identity/v3/ec2credentials",
+    "model": "Credential",
     "find": false,
-    "delete": false,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InUser",
+    "parent": "gophercloudsdk/identity/v3/users"
   },
   {
     "package": "gophercloudsdk/identity/v3/ec2tokens",
@@ -715,10 +736,12 @@
   },
   {
     "package": "gophercloudsdk/image/v2/members",
+    "model": "Member",
     "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "delete": true,
+    "wait": true,
+    "scope": "InImage",
+    "parent": "gophercloudsdk/image/v2/images"
   },
   {
     "package": "gophercloudsdk/image/v2/tasks",
@@ -791,6 +814,15 @@
     "wait": true
   },
   {
+    "package": "gophercloudsdk/loadbalancer/v2/l7policies",
+    "model": "Rule",
+    "find": false,
+    "delete": true,
+    "wait": true,
+    "scope": "Rules",
+    "parent": "gophercloudsdk/loadbalancer/v2/l7policies"
+  },
+  {
     "package": "gophercloudsdk/loadbalancer/v2/listeners",
     "model": "Listener",
     "find": true,
@@ -817,6 +849,15 @@
     "find": true,
     "delete": true,
     "wait": true
+  },
+  {
+    "package": "gophercloudsdk/loadbalancer/v2/pools",
+    "model": "Member",
+    "find": true,
+    "delete": true,
+    "wait": true,
+    "scope": "Members",
+    "parent": "gophercloudsdk/loadbalancer/v2/pools"
   },
   {
     "package": "gophercloudsdk/loadbalancer/v2/providers",
@@ -953,10 +994,12 @@
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/layer3/portforwarding",
+    "model": "PortForwarding",
     "find": false,
-    "delete": false,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InFloatingIP",
+    "parent": "gophercloudsdk/network/v2/extensions/layer3/floatingips"
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/layer3/routers",
