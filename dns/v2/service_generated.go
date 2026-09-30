@@ -18,7 +18,7 @@ type Service struct {
 	RecordSets      *resource1.API
 	TransferAccept  *resource2.API
 	TransferRequest *resource3.API
-	Tsigkeys        *resource4.API
+	TSIGKeys        *resource4.API
 	Zones           *resource5.API
 }
 
@@ -28,7 +28,7 @@ func New(client *gophercloud.ServiceClient) *Service {
 		RecordSets:      resource1.New(client),
 		TransferAccept:  resource2.New(client),
 		TransferRequest: resource3.New(client),
-		Tsigkeys:        resource4.New(client),
+		TSIGKeys:        resource4.New(client),
 		Zones:           resource5.New(client),
 	}
 }
