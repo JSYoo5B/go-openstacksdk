@@ -18,7 +18,8 @@
       "id": "identity/v3/create_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -44,7 +45,8 @@
       "id": "identity/v3/delete_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -70,7 +72,8 @@
       "id": "identity/v3/find_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -91,7 +94,8 @@
       "id": "identity/v3/get_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -112,7 +116,8 @@
       "id": "identity/v3/credentials",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -137,7 +142,8 @@
       "id": "identity/v3/update_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials"
+        "gophercloudsdk/identity/v3/credentials",
+        "gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -3230,6 +3236,7 @@
       "id": "identity/v3/application_credentials",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3256,6 +3263,7 @@
       "id": "identity/v3/get_application_credential",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3286,6 +3294,7 @@
       "id": "identity/v3/create_application_credential",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3321,6 +3330,7 @@
       "id": "identity/v3/find_application_credential",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3352,6 +3362,7 @@
       "id": "identity/v3/delete_application_credential",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3799,6 +3810,7 @@
       "id": "identity/v3/access_rules",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3825,6 +3837,7 @@
       "id": "identity/v3/get_access_rule",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
@@ -3856,6 +3869,7 @@
       "id": "identity/v3/delete_access_rule",
       "kind": "proxy",
       "candidates": [
+        "gophercloudsdk/identity/v3/applicationcredentials",
         "gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
