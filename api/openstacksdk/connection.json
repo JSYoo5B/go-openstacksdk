@@ -1,0 +1,94 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "add_service",
+      "class": "Connection",
+      "source": "openstack/connection.py",
+      "line": 524,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.service_description.ServiceDescription"
+      ],
+      "id": "connection/add_service",
+      "kind": "connection",
+      "review": "pending"
+    },
+    {
+      "name": "authorize",
+      "class": "Connection",
+      "source": "openstack/connection.py",
+      "line": 564,
+      "parameters": [],
+      "resources": [
+        "openstack.exceptions.SDKException"
+      ],
+      "id": "connection/authorize",
+      "kind": "connection",
+      "review": "pending"
+    },
+    {
+      "name": "connect_as",
+      "class": "Connection",
+      "source": "openstack/connection.py",
+      "line": 584,
+      "parameters": [
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [],
+      "id": "connection/connect_as",
+      "kind": "connection",
+      "review": "pending"
+    },
+    {
+      "name": "connect_as_project",
+      "class": "Connection",
+      "source": "openstack/connection.py",
+      "line": 661,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [],
+      "id": "connection/connect_as_project",
+      "kind": "connection",
+      "review": "pending"
+    },
+    {
+      "name": "endpoint_for",
+      "class": "Connection",
+      "source": "openstack/connection.py",
+      "line": 691,
+      "parameters": [
+        {
+          "name": "service_type",
+          "required": true
+        },
+        {
+          "name": "interface",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "region_name",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [],
+      "id": "connection/endpoint_for",
+      "kind": "connection",
+      "review": "pending"
+    }
+  ]
+}
