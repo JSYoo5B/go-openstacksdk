@@ -132,7 +132,7 @@ func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extr
 	return identifyNamedCollection(pkg, decls, extractors, "Get", []string{"ListDetail", "List"}, "Delete", 0)
 }
 
-func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string, getter string, listers []string, deleter string, parents int) *collectionPlan {
+func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string, getter string, listers []string, deleter string, parents int, identifiers ...string) *collectionPlan {
 	get, ok := pkg.Scope().Lookup(getter).(*types.Func)
 	if !ok {
 		return nil
@@ -163,7 +163,10 @@ func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl,
 	if modelName == "" {
 		return nil
 	}
-	id := field(model, "ID", "UUID", "SecretRef", "OrderRef", "ContainerRef", "MemberID", "PortID", "Access", "Name")
+	if len(identifiers) == 0 {
+		identifiers = []string{"ID", "UUID", "SecretRef", "OrderRef", "ContainerRef", "MemberID", "PortID", "Access", "Name"}
+	}
+	id := field(model, identifiers...)
 	if id == "ID" && isString(identifierType(get)) && field(model, "UUID") != "" {
 		member, _, _ := types.LookupFieldOrMethod(model, true, nil, "ID")
 		if isInteger(member.Type()) {

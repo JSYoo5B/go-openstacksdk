@@ -19,13 +19,6 @@ func collectionFixture(t *testing.T, scoped bool) *collectionPlan {
 
 func collectionFixturePackage(t *testing.T, scoped bool) (*types.Package, map[string]*ast.FuncDecl) {
 	t.Helper()
-	cloud := types.NewPackage(upstreamModule, "gophercloud")
-	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "ServiceClient", types.NewNamed(types.NewTypeName(token.NoPos, cloud, "ServiceClient", nil), types.NewStruct(nil, nil), nil)))
-	page := types.NewPackage(upstreamModule+"/pagination", "pagination")
-	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Page", types.NewInterfaceType(nil, nil).Complete()))
-	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Pager", types.NewNamed(types.NewTypeName(token.NoPos, page, "Pager", nil), types.NewStruct(nil, nil), nil)))
-	cloud.MarkComplete()
-	page.MarkComplete()
 	getArgs := "id string"
 	listArgs := "opts ListOptsBuilder"
 	if scoped {
@@ -46,13 +39,28 @@ func Get(client *gophercloud.ServiceClient,` + getArgs + `)GetResult{return GetR
 func List(client *gophercloud.ServiceClient,` + listArgs + `)pagination.Pager{_ = ThingPage{};return pagination.Pager{}}
 func ExtractThings(p pagination.Page)([]Thing,error){_ = p.(ThingPage);return nil,nil}
 `
+	return typedCollectionFixture(t, "fixture", source)
+}
+
+func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Package, map[string]*ast.FuncDecl) {
+	t.Helper()
+	cloud := types.NewPackage(upstreamModule, "gophercloud")
+	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "ServiceClient", types.NewNamed(types.NewTypeName(token.NoPos, cloud, "ServiceClient", nil), types.NewStruct(nil, nil), nil)))
+	page := types.NewPackage(upstreamModule+"/pagination", "pagination")
+	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Page", types.NewInterfaceType(nil, nil).Complete()))
+	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Pager", types.NewNamed(types.NewTypeName(token.NoPos, page, "Pager", nil), types.NewStruct(nil, nil), nil)))
+	cloud.MarkComplete()
+	page.MarkComplete()
+	contexts := types.NewPackage("context", "context")
+	contexts.Scope().Insert(types.NewTypeName(token.NoPos, contexts, "Context", types.NewNamed(types.NewTypeName(token.NoPos, contexts, "Context", nil), types.NewInterfaceType(nil, nil).Complete(), nil)))
+	contexts.MarkComplete()
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "fixture.go", source, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page}}
-	pkg, err := config.Check("fixture", fset, []*ast.File{file}, nil)
+	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page, "context": contexts}}
+	pkg, err := config.Check(packagePath, fset, []*ast.File{file}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

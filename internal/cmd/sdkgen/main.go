@@ -249,7 +249,10 @@ func (g *generator) generate(path string) error {
 		}
 	}
 	extractors := extractorsByPage(pkg, decls)
-	plan := identifyCollection(pkg, decls, extractors)
+	plan, err := identifyCollectionBinding(pkg, decls, extractors)
+	if err != nil {
+		return err
+	}
 	scopes, err := identifyScopes(pkg, decls, extractors)
 	if err != nil {
 		return err
