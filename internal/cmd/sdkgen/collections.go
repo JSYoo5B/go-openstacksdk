@@ -191,12 +191,7 @@ func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extr
 					continue
 				}
 				plan.listInput = base
-				for j := 0; j < iface.NumMethods(); j++ {
-					s := iface.Method(j).Type().(*types.Signature)
-					if s.Results().Len() == 2 && isString(s.Results().At(0).Type()) {
-						plan.listQueryBuilder = true
-					}
-				}
+				plan.listQueryBuilder = capabilities(pkg, builder{iface: iface}).query
 			} else {
 				plan.listInput = options
 			}

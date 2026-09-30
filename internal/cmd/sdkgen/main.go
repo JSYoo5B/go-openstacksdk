@@ -560,25 +560,15 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		base := e.typ(primary.base)
 		e.printf("type %sOption = %s.Option[%s]\n", op, requestAlias, base)
 		e.printf("func With%sOptions(value %s) %sOption { return %s.WithOptions(value) }\n", op, base, op, requestAlias)
-		mapCap, queryCap := false, false
-		for j := 0; primary.iface != nil && j < primary.iface.NumMethods(); j++ {
-			method := primary.iface.Method(j)
-			s := method.Type().(*types.Signature)
-			if s.Results().Len() == 2 {
-				r := s.Results().At(0).Type()
-				if isString(r) {
-					queryCap = true
-				}
-				if isAnyMap(r) {
-					mapCap = true
-				}
-			}
-		}
-		if mapCap {
+		caps := capabilities(e.pkg, primary)
+		if caps.body {
 			e.printf("func With%sField(key string,value any) %sOption { return %s.WithField[%s](key,value) }\n", op, op, requestAlias, base)
 		}
-		if queryCap {
+		if caps.query {
 			e.printf("func With%sQuery(key,value string) %sOption { return %s.WithQuery[%s](key,value) }\n", op, op, requestAlias, base)
+		}
+		if caps.headers {
+			e.printf("func With%sHeader(key,value string) %sOption {return %s.WithHeader[%s](key,value)}\n", op, op, requestAlias, base)
 		}
 		for _, b := range builders[1:] {
 			e.printf("func With%s%s(value %s) %sOption { return %s.WithArgument[%s](%q,value) }\n", op, title(b.name), e.typ(b.base), op, requestAlias, base, b.name)
@@ -657,6 +647,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	e.printf("\n// %s invokes the upstream API with library-owned builders and result handling.\nfunc (a *API) %s(%s) %s {\n", op, op, strings.Join(params, ","), returns)
 	errReturn := func() {
+		e.printf("err=%s.Wrap(%q,%q,err)\n", requestAlias, op, e.pkg.Name())
 		if policy == "download" {
 			e.printf("return nil,err\n")
 			return
@@ -689,12 +680,26 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		e.printf("cfg,err:=%s.Apply(%s,options...)\nif err!=nil {\n", requestAlias, primary.name)
 		errReturn()
 		e.printf("}\n")
+		caps := capabilities(e.pkg, primary)
+		allowed := []string{}
+		for _, b := range builders[1:] {
+			allowed = append(allowed, strconv.Quote(b.name))
+		}
+		arguments := ""
+		if len(allowed) > 0 {
+			arguments = "," + strings.Join(allowed, ",")
+		}
+		e.printf("if err=%s.ValidateCapabilities(cfg,%t,%t,%t%s);err!=nil{\n", requestAlias, caps.body, caps.query, caps.headers, arguments)
+		errReturn()
+		e.printf("}\n")
 		if primary.iface != nil {
 			e.printf("_%s := %s{base:cfg.Options,config:cfg}\n", primary.name, primary.adapter)
 		}
 		for _, b := range builders[1:] {
 			e.printf("var _%s %s\n", b.name, e.typ(sig.Params().At(b.index).Type()))
-			e.printf("if value,ok:=cfg.Arguments[%q];ok{base:=value.(%s);_%s=%s{base:base,config:%s.Config[%s]{Options:base}}}\n", b.name, e.typ(b.base), b.name, b.adapter, requestAlias, e.typ(b.base))
+			e.printf("{base,provided,err:=%s.Argument[%s](cfg,%q)\nif err!=nil{\n", requestAlias, e.typ(b.base), b.name)
+			errReturn()
+			e.printf("}\nif provided{_%s=%s{base:base,config:%s.Config[%s]{Options:base}}}}\n", b.name, b.adapter, requestAlias, e.typ(b.base))
 		}
 	}
 	call := "upstream." + op + "(" + strings.Join(args, ",") + ")"
@@ -793,11 +798,7 @@ func emitBuilder(e *emitter, b builder) {
 		}
 		e.printf("func (b %s) %s(%s) %s {\n", b.adapter, method.Name(), strings.Join(params, ","), r)
 		call := "b.base." + method.Name() + "(" + strings.Join(args, ",") + ")"
-		if sig.Results().Len() == 2 && isError(sig.Results().At(1).Type()) && isAnyMap(sig.Results().At(0).Type()) {
-			e.printf("body,err:=%s\nif err!=nil{return nil,err}\nreturn %s.MergeFieldsFor(body,b.config.Fields,b.base)\n", call, req)
-		} else if sig.Results().Len() == 2 && isError(sig.Results().At(1).Type()) && isString(sig.Results().At(0).Type()) {
-			e.printf("query,err:=%s\nif err!=nil{return \"\",err}\nreturn %s.ExtendQuery(query,b.config.Query)\n", call, req)
-		} else {
+		if !emitConfiguredBuilderMethod(e, b, method, call) {
 			e.printf("return %s\n", call)
 		}
 		e.printf("}\n")
