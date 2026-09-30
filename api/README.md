@@ -4,6 +4,8 @@ Gophercloud **v2.15.0**에서 서비스 클라이언트를 받는 공개 함수 
 
 각 패키지의 `New(client)`는 클라이언트를 보관하는 API 객체를 만듭니다. builder 입력은 SDK가 concrete options로 대체하고, 단순 조회의 선택 옵션은 `WithListOptions` 등의 함수로 제공합니다. 목록은 `iter.Seq2`, 일반 응답은 값과 `error`, 다운로드는 닫을 수 있는 스트림을 반환합니다. 여러 입력 builder가 필요한 Nova scheduler hints도 `WithCreateHintOpts`로 전달합니다.
 
+[Keystone v2 인증](../identity/v2/tokens/README.md)은 토큰·사용자·catalog를 함께 반환합니다. [Nova 암호 조회](../compute/v2/servers/README.md)는 암호화된 문자열을 기본값으로 반환하고 복호화를 옵션으로 선택합니다. 이처럼 단일 extractor로 해석할 수 없는 응답도 SDK가 처리합니다.
+
 ```go
 import (
     "context"

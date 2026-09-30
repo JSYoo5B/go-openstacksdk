@@ -2311,7 +2311,7 @@
       "name": "GetPassword",
       "sdk_package": "gophercloudsdk/compute/v2/servers",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "normalize"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers",
@@ -3535,7 +3535,7 @@
       "name": "Create",
       "sdk_package": "gophercloudsdk/identity/v2/tokens",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "normalize"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens",
@@ -3551,7 +3551,7 @@
       "name": "Get",
       "sdk_package": "gophercloudsdk/identity/v2/tokens",
       "builder_free": true,
-      "return_policy": "result"
+      "return_policy": "normalize"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens",
