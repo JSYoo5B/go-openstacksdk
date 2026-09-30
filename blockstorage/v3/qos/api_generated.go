@@ -60,17 +60,28 @@ type associateOptsBuilder struct {
 }
 
 func (b associateOptsBuilder) ToQosAssociateQuery() (string, error) {
-	query, err := b.base.ToQosAssociateQuery()
+	value0, err := b.base.ToQosAssociateQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Associate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Associate(ctx context.Context, qosID string, opts AssociateOpts, options ...AssociateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Associate", "qos", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Associate", "qos", err)
 		return err
 	}
 	_opts := associateOptsBuilder{base: cfg.Options, config: cfg}
@@ -90,17 +101,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToQoSCreateMap() (map[string]any, error) {
-	body, err := b.base.ToQoSCreateMap()
+	value0, err := b.base.ToQoSCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*QoS, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "qos", err)
+		var zero0 *QoS
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "qos", err)
 		var zero0 *QoS
 		return zero0, err
 	}
@@ -124,11 +147,17 @@ type deleteOptsBuilder struct {
 }
 
 func (b deleteOptsBuilder) ToQoSDeleteQuery() (string, error) {
-	query, err := b.base.ToQoSDeleteQuery()
+	value0, err := b.base.ToQoSDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -136,6 +165,11 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) er
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Delete", "qos", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Delete", "qos", err)
 		return err
 	}
 	_opts := deleteOptsBuilder{base: cfg.Options, config: cfg}
@@ -155,11 +189,17 @@ type deleteKeysOptsBuilder struct {
 }
 
 func (b deleteKeysOptsBuilder) ToDeleteKeysCreateMap() (map[string]any, error) {
-	body, err := b.base.ToDeleteKeysCreateMap()
+	value0, err := b.base.ToDeleteKeysCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteKeys invokes the upstream API with library-owned builders and result handling.
@@ -167,6 +207,11 @@ func (a *API) DeleteKeys(ctx context.Context, qosID string, options ...DeleteKey
 	var opts DeleteKeysOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteKeys", "qos", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("DeleteKeys", "qos", err)
 		return err
 	}
 	_opts := deleteKeysOptsBuilder{base: cfg.Options, config: cfg}
@@ -188,17 +233,28 @@ type disassociateOptsBuilder struct {
 }
 
 func (b disassociateOptsBuilder) ToQosDisassociateQuery() (string, error) {
-	query, err := b.base.ToQosDisassociateQuery()
+	value0, err := b.base.ToQosDisassociateQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Disassociate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Disassociate(ctx context.Context, qosID string, opts DisassociateOpts, options ...DisassociateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Disassociate", "qos", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Disassociate", "qos", err)
 		return err
 	}
 	_opts := disassociateOptsBuilder{base: cfg.Options, config: cfg}
@@ -229,11 +285,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToQoSListQuery() (string, error) {
-	query, err := b.base.ToQoSListQuery()
+	value0, err := b.base.ToQoSListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -241,6 +303,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*QoS, e
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "qos", err)
+		return func(yield func(*QoS, error) bool) { var zero *QoS; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "qos", err)
 		return func(yield func(*QoS, error) bool) { var zero *QoS; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -271,17 +338,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToQoSUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToQoSUpdateMap()
+	value0, err := b.base.ToQoSUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "qos", err)
+		var zero0 map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "qos", err)
 		var zero0 map[string]string
 		return zero0, err
 	}
