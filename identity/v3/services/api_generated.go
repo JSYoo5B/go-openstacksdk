@@ -46,17 +46,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToServiceCreateMap() (map[string]any, error) {
-	body, err := b.base.ToServiceCreateMap()
+	value0, err := b.base.ToServiceCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Service, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "services", err)
+		var zero0 *Service
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "services", err)
 		var zero0 *Service
 		return zero0, err
 	}
@@ -91,11 +103,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToServiceListMap() (string, error) {
-	query, err := b.base.ToServiceListMap()
+	value0, err := b.base.ToServiceListMap()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -103,6 +121,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Servic
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "services", err)
+		return func(yield func(*Service, error) bool) { var zero *Service; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "services", err)
 		return func(yield func(*Service, error) bool) { var zero *Service; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -125,17 +148,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToServiceUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToServiceUpdateMap()
+	value0, err := b.base.ToServiceUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, serviceID string, opts UpdateOpts, options ...UpdateOption) (*Service, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "services", err)
+		var zero0 *Service
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "services", err)
 		var zero0 *Service
 		return zero0, err
 	}
