@@ -57,11 +57,17 @@ type deleteSeriesOptsBuilder struct {
 }
 
 func (b deleteSeriesOptsBuilder) ToMetricDeleteSeriesQuery() (string, error) {
-	query, err := b.base.ToMetricDeleteSeriesQuery()
+	value0, err := b.base.ToMetricDeleteSeriesQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteSeries invokes the upstream API with library-owned builders and result handling.
@@ -69,6 +75,11 @@ func (a *API) DeleteSeries(ctx context.Context, options ...DeleteSeriesOption) e
 	var opts DeleteSeriesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteSeries", "metrics", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("DeleteSeries", "metrics", err)
 		return err
 	}
 	_opts := deleteSeriesOptsBuilder{base: cfg.Options, config: cfg}
@@ -90,17 +101,29 @@ type labelValuesOptsBuilder struct {
 }
 
 func (b labelValuesOptsBuilder) ToMetricLabelValuesQuery() (string, error) {
-	query, err := b.base.ToMetricLabelValuesQuery()
+	value0, err := b.base.ToMetricLabelValuesQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // LabelValues invokes the upstream API with library-owned builders and result handling.
 func (a *API) LabelValues(ctx context.Context, name string, opts LabelValuesOpts, options ...LabelValuesOption) ([]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("LabelValues", "metrics", err)
+		var zero0 []string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("LabelValues", "metrics", err)
 		var zero0 []string
 		return zero0, err
 	}
@@ -124,17 +147,29 @@ type labelsOptsBuilder struct {
 }
 
 func (b labelsOptsBuilder) ToMetricLabelsQuery() (string, error) {
-	query, err := b.base.ToMetricLabelsQuery()
+	value0, err := b.base.ToMetricLabelsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Labels invokes the upstream API with library-owned builders and result handling.
 func (a *API) Labels(ctx context.Context, opts LabelsOpts, options ...LabelsOption) ([]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Labels", "metrics", err)
+		var zero0 []string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Labels", "metrics", err)
 		var zero0 []string
 		return zero0, err
 	}
@@ -156,17 +191,29 @@ type queryOptsBuilder struct {
 }
 
 func (b queryOptsBuilder) ToMetricQueryQuery() (string, error) {
-	query, err := b.base.ToMetricQueryQuery()
+	value0, err := b.base.ToMetricQueryQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Query invokes the upstream API with library-owned builders and result handling.
 func (a *API) Query(ctx context.Context, opts QueryOpts, options ...QueryOption) (*QueryData, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Query", "metrics", err)
+		var zero0 *QueryData
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Query", "metrics", err)
 		var zero0 *QueryData
 		return zero0, err
 	}
@@ -198,17 +245,29 @@ type seriesOptsBuilder struct {
 }
 
 func (b seriesOptsBuilder) ToMetricSeriesQuery() (string, error) {
-	query, err := b.base.ToMetricSeriesQuery()
+	value0, err := b.base.ToMetricSeriesQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Series invokes the upstream API with library-owned builders and result handling.
 func (a *API) Series(ctx context.Context, opts SeriesOpts, options ...SeriesOption) ([]map[string]string, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Series", "metrics", err)
+		var zero0 []map[string]string
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Series", "metrics", err)
 		var zero0 []map[string]string
 		return zero0, err
 	}
@@ -240,17 +299,29 @@ type targetsOptsBuilder struct {
 }
 
 func (b targetsOptsBuilder) ToMetricTargetsQuery() (string, error) {
-	query, err := b.base.ToMetricTargetsQuery()
+	value0, err := b.base.ToMetricTargetsQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Targets invokes the upstream API with library-owned builders and result handling.
 func (a *API) Targets(ctx context.Context, opts TargetsOpts, options ...TargetsOption) (*TargetsData, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Targets", "metrics", err)
+		var zero0 *TargetsData
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Targets", "metrics", err)
 		var zero0 *TargetsData
 		return zero0, err
 	}
