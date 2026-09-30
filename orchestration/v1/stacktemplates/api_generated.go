@@ -40,17 +40,29 @@ type validateOptsBuilder struct {
 }
 
 func (b validateOptsBuilder) ToStackTemplateValidateMap() (map[string]any, error) {
-	body, err := b.base.ToStackTemplateValidateMap()
+	value0, err := b.base.ToStackTemplateValidateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Validate invokes the upstream API with library-owned builders and result handling.
 func (a *API) Validate(ctx context.Context, opts ValidateOpts, options ...ValidateOption) (*ValidatedTemplate, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Validate", "stacktemplates", err)
+		var zero0 *ValidatedTemplate
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Validate", "stacktemplates", err)
 		var zero0 *ValidatedTemplate
 		return zero0, err
 	}
