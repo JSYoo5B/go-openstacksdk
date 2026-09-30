@@ -70,17 +70,28 @@ type changePasswordOptsBuilder struct {
 }
 
 func (b changePasswordOptsBuilder) ToUserChangePasswordMap() (map[string]any, error) {
-	body, err := b.base.ToUserChangePasswordMap()
+	value0, err := b.base.ToUserChangePasswordMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ChangePassword invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangePassword(ctx context.Context, userID string, opts ChangePasswordOpts, options ...ChangePasswordOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ChangePassword", "users", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ChangePassword", "users", err)
 		return err
 	}
 	_opts := changePasswordOptsBuilder{base: cfg.Options, config: cfg}
@@ -100,17 +111,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToUserCreateMap() (map[string]any, error) {
-	body, err := b.base.ToUserCreateMap()
+	value0, err := b.base.ToUserCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*User, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "users", err)
+		var zero0 *User
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "users", err)
 		var zero0 *User
 		return zero0, err
 	}
@@ -153,11 +176,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToUserListQuery() (string, error) {
-	query, err := b.base.ToUserListQuery()
+	value0, err := b.base.ToUserListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -165,6 +194,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*User, 
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "users", err)
+		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "users", err)
 		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -195,11 +229,17 @@ type listInGroupOptsBuilder struct {
 }
 
 func (b listInGroupOptsBuilder) ToUserListQuery() (string, error) {
-	query, err := b.base.ToUserListQuery()
+	value0, err := b.base.ToUserListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListInGroup invokes the upstream API with library-owned builders and result handling.
@@ -207,6 +247,11 @@ func (a *API) ListInGroup(ctx context.Context, groupID string, options ...ListIn
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListInGroup", "users", err)
+		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListInGroup", "users", err)
 		return func(yield func(*User, error) bool) { var zero *User; yield(zero, err) }
 	}
 	_opts := listInGroupOptsBuilder{base: cfg.Options, config: cfg}
@@ -242,17 +287,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToUserUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToUserUpdateMap()
+	value0, err := b.base.ToUserUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, userID string, opts UpdateOpts, options ...UpdateOption) (*User, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "users", err)
+		var zero0 *User
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "users", err)
 		var zero0 *User
 		return zero0, err
 	}
