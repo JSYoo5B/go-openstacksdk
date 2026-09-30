@@ -48,17 +48,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToSubnetCreateMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetCreateMap()
+	value0, err := b.base.ToSubnetCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Subnet, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "subnets", err)
+		var zero0 *Subnet
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "subnets", err)
 		var zero0 *Subnet
 		return zero0, err
 	}
@@ -93,11 +105,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToSubnetListQuery() (string, error) {
-	query, err := b.base.ToSubnetListQuery()
+	value0, err := b.base.ToSubnetListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -105,6 +123,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "subnets", err)
+		return func(yield func(*Subnet, error) bool) { var zero *Subnet; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "subnets", err)
 		return func(yield func(*Subnet, error) bool) { var zero *Subnet; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -127,17 +150,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToSubnetUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToSubnetUpdateMap()
+	value0, err := b.base.ToSubnetUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Subnet, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "subnets", err)
+		var zero0 *Subnet
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "subnets", err)
 		var zero0 *Subnet
 		return zero0, err
 	}
