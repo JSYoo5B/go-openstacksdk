@@ -1,0 +1,309 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "introspections",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 40,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection.Introspection"
+      ],
+      "id": "baremetal_introspection/v1/introspections",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "start_introspection",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 77,
+      "parameters": [
+        {
+          "name": "node",
+          "required": true
+        },
+        {
+          "name": "manage_boot",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal.v1.node.Node",
+        "openstack.baremetal_introspection.v1.introspection.Introspection"
+      ],
+      "id": "baremetal_introspection/v1/start_introspection",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_introspection",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 97,
+      "parameters": [
+        {
+          "name": "introspection",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection.Introspection"
+      ],
+      "id": "baremetal_introspection/v1/get_introspection",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_introspection_data",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 112,
+      "parameters": [
+        {
+          "name": "introspection",
+          "required": true
+        },
+        {
+          "name": "processed",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection.Introspection"
+      ],
+      "id": "baremetal_introspection/v1/get_introspection_data",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "abort_introspection",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 129,
+      "parameters": [
+        {
+          "name": "introspection",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection.Introspection",
+        "openstack.exceptions.NotFoundException"
+      ],
+      "id": "baremetal_introspection/v1/abort_introspection",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_introspection",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 156,
+      "parameters": [
+        {
+          "name": "introspection",
+          "required": true
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_error",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection.Introspection"
+      ],
+      "id": "baremetal_introspection/v1/wait_for_introspection",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_introspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 182,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection_rule.IntrospectionRule"
+      ],
+      "id": "baremetal_introspection/v1/create_introspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_introspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 195,
+      "parameters": [
+        {
+          "name": "introspection_rule",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection_rule.IntrospectionRule"
+      ],
+      "id": "baremetal_introspection/v1/delete_introspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_introspection_rule",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 219,
+      "parameters": [
+        {
+          "name": "introspection_rule",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection_rule.IntrospectionRule"
+      ],
+      "id": "baremetal_introspection/v1/get_introspection_rule",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "introspection_rules",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 238,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.baremetal_introspection.v1.introspection_rule.IntrospectionRule"
+      ],
+      "id": "baremetal_introspection/v1/introspection_rules",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 265,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "baremetal_introspection/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/baremetal_introspection/v1/_proxy.py",
+      "line": 304,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "baremetal_introspection/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
