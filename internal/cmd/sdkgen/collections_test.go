@@ -13,6 +13,11 @@ type packageImports map[string]*types.Package
 func (i packageImports) Import(path string) (*types.Package, error) { return i[path], nil }
 
 func collectionFixture(t *testing.T, scoped bool) *collectionPlan {
+	pkg, decls := collectionFixturePackage(t, scoped)
+	return identifyCollection(pkg, decls, extractorsByPage(pkg, decls))
+}
+
+func collectionFixturePackage(t *testing.T, scoped bool) (*types.Package, map[string]*ast.FuncDecl) {
 	t.Helper()
 	cloud := types.NewPackage(upstreamModule, "gophercloud")
 	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "ServiceClient", types.NewNamed(types.NewTypeName(token.NoPos, cloud, "ServiceClient", nil), types.NewStruct(nil, nil), nil)))
@@ -22,8 +27,10 @@ func collectionFixture(t *testing.T, scoped bool) *collectionPlan {
 	cloud.MarkComplete()
 	page.MarkComplete()
 	getArgs := "id string"
+	listArgs := "opts ListOptsBuilder"
 	if scoped {
 		getArgs = "parentID,id string"
+		listArgs = "parentID string,opts ListOptsBuilder"
 	}
 	source := `package fixture
 import gophercloud "github.com/gophercloud/gophercloud/v2"
@@ -36,7 +43,7 @@ type ListOptsBuilder interface{ToListQuery()(string,error)}
 func(ListOpts)ToListQuery()(string,error){return "",nil}
 type ThingPage struct{}
 func Get(client *gophercloud.ServiceClient,` + getArgs + `)GetResult{return GetResult{}}
-func List(client *gophercloud.ServiceClient,opts ListOptsBuilder)pagination.Pager{_ = ThingPage{};return pagination.Pager{}}
+func List(client *gophercloud.ServiceClient,` + listArgs + `)pagination.Pager{_ = ThingPage{};return pagination.Pager{}}
 func ExtractThings(p pagination.Page)([]Thing,error){_ = p.(ThingPage);return nil,nil}
 `
 	fset := token.NewFileSet()
@@ -55,7 +62,21 @@ func ExtractThings(p pagination.Page)([]Thing,error){_ = p.(ThingPage);return ni
 			decls[fn.Name.Name] = fn
 		}
 	}
-	return identifyCollection(pkg, decls, extractorsByPage(pkg, decls))
+	return pkg, decls
+}
+
+func TestScopedCollectionRequiresMatchingParentArity(t *testing.T) {
+	pkg, decls := collectionFixturePackage(t, true)
+	plan := identifyNamedCollection(pkg, decls, extractorsByPage(pkg, decls), "Get", []string{"List"}, "Delete", 1)
+	if plan == nil || plan.modelName != "Thing" || !plan.listQueryBuilder {
+		t.Fatalf("scoped plan=%+v", plan)
+	}
+	if _, ok := simpleInput(plan.getter, 2); !ok {
+		t.Fatal("parent and target identifiers were lost")
+	}
+	if wrong := identifyNamedCollection(pkg, decls, extractorsByPage(pkg, decls), "Get", []string{"List"}, "Delete", 2); wrong != nil {
+		t.Fatalf("binding with the wrong parent arity: %+v", wrong)
+	}
 }
 
 func TestCollectionBindingRequiresMatchingTypedScope(t *testing.T) {

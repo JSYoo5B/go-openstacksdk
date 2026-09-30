@@ -16,6 +16,8 @@ type collectionRecord struct {
 	Find    bool   `json:"find"`
 	Delete  bool   `json:"delete"`
 	Wait    bool   `json:"wait"`
+	Scope   string `json:"scope,omitempty"`
+	Parent  string `json:"parent,omitempty"`
 	Issue   string `json:"issue,omitempty"`
 }
 
@@ -81,7 +83,7 @@ func isInteger(t types.Type) bool {
 }
 func identifierType(fn *types.Func) types.Type {
 	sig := fn.Type().(*types.Signature)
-	for i := 0; i < sig.Params().Len(); i++ {
+	for i := sig.Params().Len() - 1; i >= 0; i-- {
 		t := sig.Params().At(i).Type()
 		if isString(t) || isInteger(t) {
 			return t
@@ -126,11 +128,15 @@ func queryTag(t types.Type, name string) string {
 }
 
 func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string) *collectionPlan {
-	get, ok := pkg.Scope().Lookup("Get").(*types.Func)
+	return identifyNamedCollection(pkg, decls, extractors, "Get", []string{"ListDetail", "List"}, "Delete", 0)
+}
+
+func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string, getter string, listers []string, deleter string, parents int) *collectionPlan {
+	get, ok := pkg.Scope().Lookup(getter).(*types.Func)
 	if !ok {
 		return nil
 	}
-	if _, ok := simpleInput(get, 1); !ok {
+	if _, ok := simpleInput(get, parents+1); !ok {
 		return nil
 	}
 	getSig := get.Type().(*types.Signature)
@@ -156,18 +162,24 @@ func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extr
 	if modelName == "" {
 		return nil
 	}
-	id := field(model, "ID", "UUID", "SecretRef", "OrderRef", "ContainerRef", "Name")
+	id := field(model, "ID", "UUID", "SecretRef", "OrderRef", "ContainerRef", "MemberID", "PortID", "Access", "Name")
+	if id == "ID" && isString(identifierType(get)) && field(model, "UUID") != "" {
+		member, _, _ := types.LookupFieldOrMethod(model, true, nil, "ID")
+		if isInteger(member.Type()) {
+			id = "UUID"
+		}
+	}
 	if id == "" {
 		return nil
 	}
-	plan := &collectionPlan{model: model, modelName: modelName, id: id, name: field(model, "Name", "Hostname"), status: field(model, "ProvisioningStatus", "Status", "ProvisionState"), getter: get, idIsURL: strings.HasSuffix(id, "Ref")}
+	plan := &collectionPlan{model: model, modelName: modelName, id: id, name: field(model, "Name", "Hostname"), status: field(model, "ProvisioningStatus", "Status", "ProvisionState", "PortState"), getter: get, idIsURL: strings.HasSuffix(id, "Ref")}
 	plan.getIDType = identifierType(get)
-	for _, name := range []string{"ListDetail", "List"} {
+	for _, name := range listers {
 		list, ok := pkg.Scope().Lookup(name).(*types.Func)
 		if !ok {
 			continue
 		}
-		options, ok := simpleInput(list, 0)
+		options, ok := simpleInput(list, parents)
 		if !ok {
 			continue
 		}
@@ -206,8 +218,8 @@ func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extr
 	if plan.lister == nil {
 		return nil
 	}
-	if del, ok := pkg.Scope().Lookup("Delete").(*types.Func); ok {
-		if _, ok := simpleInput(del, 1); ok {
+	if del, ok := pkg.Scope().Lookup(deleter).(*types.Func); ok {
+		if _, ok := simpleInput(del, parents+1); ok {
 			policy := returnPolicy(del.Type().(*types.Signature))
 			if policy == "error" || policy == "extract" || policy == "direct-error" {
 				plan.deleter = del
@@ -220,6 +232,23 @@ func identifyCollection(pkg *types.Package, decls map[string]*ast.FuncDecl, extr
 
 func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) error {
 	e := emitter{pkg: pkg, imports: map[string]string{}}
+	e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
+	emitCollectionAdapter(&e, plan, "a", nil)
+	e.printf("}\n")
+	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
+	e.printf("func(a *API)All(ctx context.Context,options ...resource.ListOption)([]*%s,error){return a.Resources.All(ctx,options...)}\n", plan.modelName)
+	e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
+	e.printf("func(a *API)WaitFor(ctx context.Context,ref resource.Ref,status string,options ...resource.WaitOption)(*%s,error){return a.Resources.Wait(ctx,ref,status,options...)}\n", plan.modelName)
+	e.printf("func(a *API)WaitForDeletion(ctx context.Context,ref resource.Ref,options ...resource.WaitOption)error{return a.Resources.WaitDeleted(ctx,ref,options...)}\n")
+	source, err := e.source()
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(g.root, sdkPath(pkg.Path()), "resources_generated.go"), source, 0644)
+}
+
+// Both global and parent-bound resources use exactly the same adapter policies.
+func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, parents []string) {
 	e.use("context")
 	e.use("net/url")
 	e.use("iter")
@@ -228,12 +257,13 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 	if plan.status != "" {
 		e.use("strings")
 	}
-	e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\nGet:func(ctx context.Context,id string)(*%s,error){", plan.modelName, plan.modelName, pkg.Name(), plan.modelName)
+	arguments := func(id string) string { return strings.Join(append(append([]string{"ctx"}, parents...), id), ",") }
+	e.printf("resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\nGet:func(ctx context.Context,id string)(*%s,error){", plan.modelName, e.pkg.Name(), plan.modelName)
 	if isInteger(plan.getIDType) {
 		e.use("gophercloudsdk/request")
-		e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return nil,err};return a.Get(ctx,parsed)},\n", e.typ(plan.getIDType))
+		e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return nil,err};return %s.%s(%s)},\n", e.typ(plan.getIDType), receiver, plan.getter.Name(), arguments("parsed"))
 	} else {
-		e.printf("return a.Get(ctx,%s(id))},\n", e.typ(plan.getIDType))
+		e.printf("return %s.%s(%s)},\n", receiver, plan.getter.Name(), arguments(e.typ(plan.getIDType)+"(id)"))
 	}
 	if plan.idIsURL {
 		e.use("path")
@@ -244,7 +274,7 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 	if plan.name != "" {
 		e.printf("Name:func(v *%s)string{return fmt.Sprint(v.%s)},\n", plan.modelName, plan.name)
 		if plan.nameQuery != "" {
-			if strings.HasSuffix(pkg.Path(), "/compute/v2/servers") {
+			if strings.HasSuffix(e.pkg.Path(), "/compute/v2/servers") {
 				e.use("regexp")
 				e.printf("NameQuery:func(name string)string{return \"^\"+regexp.QuoteMeta(name)+\"$\"},\n")
 			} else {
@@ -265,9 +295,9 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 			idArg = "parsed"
 		}
 		if policy == "extract" {
-			e.printf("_,err:=a.Delete(ctx,%s);return err},\n", idArg)
+			e.printf("_,err:=%s.%s(%s);return err},\n", receiver, plan.deleter.Name(), arguments(idArg))
 		} else {
-			e.printf("return a.Delete(ctx,%s)},\n", idArg)
+			e.printf("return %s.%s(%s)},\n", receiver, plan.deleter.Name(), arguments(idArg))
 		}
 	}
 	e.printf("Iterate:func(ctx context.Context,q url.Values)iter.Seq2[*%s,error]{\n", plan.modelName)
@@ -282,25 +312,16 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 		e.printf("if value:=q.Get(\"status\");value!=\"\"{q.Set(%q,value);q.Del(\"status\")}\n", plan.statusQuery)
 	}
 	list := plan.lister.Name()
+	listArgs := strings.Join(append([]string{"ctx"}, parents...), ",")
 	if plan.listInput == nil {
-		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn a.%s(ctx)\n", plan.modelName, list)
+		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, list, listArgs)
 	} else if plan.listQueryBuilder {
-		e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn a.%s(ctx,options...)\n", list, list, list)
+		e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, list, listArgs)
 	} else {
 		e.use("gophercloudsdk/request")
-		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn a.%s(ctx,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, list, list)
+		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, list, listArgs, list)
 	}
-	e.printf("},})}\n")
-	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
-	e.printf("func(a *API)All(ctx context.Context,options ...resource.ListOption)([]*%s,error){return a.Resources.All(ctx,options...)}\n", plan.modelName)
-	e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
-	e.printf("func(a *API)WaitFor(ctx context.Context,ref resource.Ref,status string,options ...resource.WaitOption)(*%s,error){return a.Resources.Wait(ctx,ref,status,options...)}\n", plan.modelName)
-	e.printf("func(a *API)WaitForDeletion(ctx context.Context,ref resource.Ref,options ...resource.WaitOption)error{return a.Resources.WaitDeleted(ctx,ref,options...)}\n")
-	source, err := e.source()
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(g.root, sdkPath(pkg.Path()), "resources_generated.go"), source, 0644)
+	e.printf("},})")
 }
 
 func (g *generator) writeCollectionInventory() error {
