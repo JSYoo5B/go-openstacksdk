@@ -37,17 +37,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToVolumeAttachmentCreateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeAttachmentCreateMap()
+	value0, err := b.base.ToVolumeAttachmentCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, serverID string, opts CreateOpts, options ...CreateOption) (*VolumeAttachment, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "volumeattach", err)
+		var zero0 *VolumeAttachment
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "volumeattach", err)
 		var zero0 *VolumeAttachment
 		return zero0, err
 	}
