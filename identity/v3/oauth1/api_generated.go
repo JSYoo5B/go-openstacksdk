@@ -67,17 +67,29 @@ type authorizeTokenOptsBuilder struct {
 }
 
 func (b authorizeTokenOptsBuilder) ToOAuth1AuthorizeTokenMap() (map[string]any, error) {
-	body, err := b.base.ToOAuth1AuthorizeTokenMap()
+	value0, err := b.base.ToOAuth1AuthorizeTokenMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // AuthorizeToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) AuthorizeToken(ctx context.Context, id string, opts AuthorizeTokenOpts, options ...AuthorizeTokenOption) (*AuthorizedToken, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("AuthorizeToken", "oauth1", err)
+		var zero0 *AuthorizedToken
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("AuthorizeToken", "oauth1", err)
 		var zero0 *AuthorizedToken
 		return zero0, err
 	}
@@ -94,6 +106,9 @@ func WithCreateOptions(value AuthOptions) CreateOption { return request.WithOpti
 func WithCreateField(key string, value any) CreateOption {
 	return request.WithField[AuthOptions](key, value)
 }
+func WithCreateHeader(key, value string) CreateOption {
+	return request.WithHeader[AuthOptions](key, value)
+}
 
 type createOptsBuilder struct {
 	base   AuthOptions
@@ -104,27 +119,55 @@ func (b createOptsBuilder) CanReauth() bool {
 	return b.base.CanReauth()
 }
 func (b createOptsBuilder) ToTokenV3CreateMap(arg0 map[string]any) (map[string]any, error) {
-	body, err := b.base.ToTokenV3CreateMap(arg0)
+	value0, err := b.base.ToTokenV3CreateMap(arg0)
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b createOptsBuilder) ToTokenV3HeadersMap(arg0 map[string]any) (map[string]string, error) {
-	return b.base.ToTokenV3HeadersMap(arg0)
+	value0, err := b.base.ToTokenV3HeadersMap(arg0)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 func (b createOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
-	body, err := b.base.ToTokenV3ScopeMap()
+	value0, err := b.base.ToTokenV3ScopeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts AuthOptions, options ...CreateOption) (*tokens.Token, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "oauth1", err)
+		var zero0 *tokens.Token
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
+		err = request.Wrap("Create", "oauth1", err)
 		var zero0 *tokens.Token
 		return zero0, err
 	}
@@ -140,6 +183,9 @@ type CreateAccessTokenOption = request.Option[CreateAccessTokenOpts]
 func WithCreateAccessTokenOptions(value CreateAccessTokenOpts) CreateAccessTokenOption {
 	return request.WithOptions(value)
 }
+func WithCreateAccessTokenHeader(key, value string) CreateAccessTokenOption {
+	return request.WithHeader[CreateAccessTokenOpts](key, value)
+}
 
 type createAccessTokenOptsBuilder struct {
 	base   CreateAccessTokenOpts
@@ -147,13 +193,29 @@ type createAccessTokenOptsBuilder struct {
 }
 
 func (b createAccessTokenOptsBuilder) ToOAuth1CreateAccessTokenHeaders(arg0 string, arg1 string) (map[string]string, error) {
-	return b.base.ToOAuth1CreateAccessTokenHeaders(arg0, arg1)
+	value0, err := b.base.ToOAuth1CreateAccessTokenHeaders(arg0, arg1)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateAccessToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateAccessToken(ctx context.Context, opts CreateAccessTokenOpts, options ...CreateAccessTokenOption) (*Token, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateAccessToken", "oauth1", err)
+		var zero0 *Token
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("CreateAccessToken", "oauth1", err)
 		var zero0 *Token
 		return zero0, err
 	}
@@ -179,17 +241,29 @@ type createConsumerOptsBuilder struct {
 }
 
 func (b createConsumerOptsBuilder) ToOAuth1CreateConsumerMap() (map[string]any, error) {
-	body, err := b.base.ToOAuth1CreateConsumerMap()
+	value0, err := b.base.ToOAuth1CreateConsumerMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // CreateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) CreateConsumer(ctx context.Context, opts CreateConsumerOpts, options ...CreateConsumerOption) (*Consumer, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("CreateConsumer", "oauth1", err)
+		var zero0 *Consumer
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("CreateConsumer", "oauth1", err)
 		var zero0 *Consumer
 		return zero0, err
 	}
@@ -258,6 +332,9 @@ type RequestTokenOption = request.Option[RequestTokenOpts]
 func WithRequestTokenOptions(value RequestTokenOpts) RequestTokenOption {
 	return request.WithOptions(value)
 }
+func WithRequestTokenHeader(key, value string) RequestTokenOption {
+	return request.WithHeader[RequestTokenOpts](key, value)
+}
 
 type requestTokenOptsBuilder struct {
 	base   RequestTokenOpts
@@ -265,13 +342,29 @@ type requestTokenOptsBuilder struct {
 }
 
 func (b requestTokenOptsBuilder) ToOAuth1RequestTokenHeaders(arg0 string, arg1 string) (map[string]string, error) {
-	return b.base.ToOAuth1RequestTokenHeaders(arg0, arg1)
+	value0, err := b.base.ToOAuth1RequestTokenHeaders(arg0, arg1)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // RequestToken invokes the upstream API with library-owned builders and result handling.
 func (a *API) RequestToken(ctx context.Context, opts RequestTokenOpts, options ...RequestTokenOption) (*Token, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("RequestToken", "oauth1", err)
+		var zero0 *Token
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("RequestToken", "oauth1", err)
 		var zero0 *Token
 		return zero0, err
 	}
@@ -302,17 +395,29 @@ type updateConsumerOptsBuilder struct {
 }
 
 func (b updateConsumerOptsBuilder) ToOAuth1UpdateConsumerMap() (map[string]any, error) {
-	body, err := b.base.ToOAuth1UpdateConsumerMap()
+	value0, err := b.base.ToOAuth1UpdateConsumerMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UpdateConsumer invokes the upstream API with library-owned builders and result handling.
 func (a *API) UpdateConsumer(ctx context.Context, id string, opts UpdateConsumerOpts, options ...UpdateConsumerOption) (*Consumer, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UpdateConsumer", "oauth1", err)
+		var zero0 *Consumer
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UpdateConsumer", "oauth1", err)
 		var zero0 *Consumer
 		return zero0, err
 	}
