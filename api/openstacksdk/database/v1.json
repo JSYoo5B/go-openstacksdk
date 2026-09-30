@@ -1,0 +1,579 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_database",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 36,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.database.Database",
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/create_database",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_database",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 56,
+      "parameters": [
+        {
+          "name": "database",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.database.Database",
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/delete_database",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_database",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 104,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.database.Database",
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/find_database",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "databases",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 130,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.database.Database",
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/databases",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_database",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 148,
+      "parameters": [
+        {
+          "name": "database",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.database.Database",
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/get_database",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_flavor",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 185,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.flavor.Flavor"
+      ],
+      "id": "database/v1/find_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 204,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.flavor.Flavor"
+      ],
+      "id": "database/v1/get_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavors",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 216,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.flavor.Flavor"
+      ],
+      "id": "database/v1/flavors",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_instance",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 228,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/create_instance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_instance",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 239,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/delete_instance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_instance",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 272,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/find_instance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_instance",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 291,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/get_instance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "instances",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 306,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/instances",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_instance",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 319,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance"
+      ],
+      "id": "database/v1/update_instance",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_user",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 335,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance",
+        "openstack.database.v1.user.User"
+      ],
+      "id": "database/v1/create_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_user",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 353,
+      "parameters": [
+        {
+          "name": "user",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance",
+        "openstack.database.v1.user.User"
+      ],
+      "id": "database/v1/delete_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_user",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 399,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance",
+        "openstack.database.v1.user.User"
+      ],
+      "id": "database/v1/find_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "users",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 425,
+      "parameters": [
+        {
+          "name": "instance",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance",
+        "openstack.database.v1.user.User"
+      ],
+      "id": "database/v1/users",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_user",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 442,
+      "parameters": [
+        {
+          "name": "user",
+          "required": true
+        },
+        {
+          "name": "instance",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.database.v1.instance.Instance",
+        "openstack.database.v1.user.User"
+      ],
+      "id": "database/v1/get_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/db/v1/instances"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 465,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "database/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/database/v1/_proxy.py",
+      "line": 504,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "database/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
