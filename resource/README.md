@@ -47,9 +47,11 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 
 에러는 `(nil, error)`로 한 번 전달하고 순회를 종료합니다. iterator를 다시 순회하면 새로운 API 요청이 시작됩니다. All 도중 오류가 발생하면 부분 결과 대신 `nil, error`를 반환합니다.
 
+서버의 `next` URL 또는 marker가 이전에 요청한 페이지를 반복하면 추가 요청 전에 `ErrPaginationCycle`로 중단합니다. 같은 URL의 query 순서가 바뀌어도 반복으로 판정합니다. `PaginationCycleError.URL`에는 반복한 링크가 들어 있습니다. 이 정책은 서비스의 typed List, 공통 Collection, page 단위 iterator에 함께 적용됩니다. 소비자가 `break`하면 다음 링크 검사와 후속 요청을 하지 않습니다.
+
 ## 오류와 상태 대기
 
-`errors.Is`로 `ErrNotFound`, `ErrAmbiguous`, `ErrUnsupported`, `ErrInvalidOption`, `ErrFailedState`를 구분합니다. `errors.As`로 `NotFoundError`, `AmbiguousError`, `FailedStateError`, `OperationError`의 상세 정보를 확인합니다. HTTP에서 발생한 미존재는 원래 Gophercloud 오류도 보존합니다.
+`errors.Is`로 `ErrNotFound`, `ErrAmbiguous`, `ErrUnsupported`, `ErrInvalidOption`, `ErrFailedState`, `ErrPaginationCycle`을 구분합니다. `errors.As`로 `NotFoundError`, `AmbiguousError`, `FailedStateError`, `PaginationCycleError`, `OperationError`의 상세 정보를 확인합니다. HTTP에서 발생한 미존재는 원래 Gophercloud 오류도 보존합니다.
 
 Wait의 기본 timeout은 5분, 간격은 2초입니다. 부모 context가 더 먼저 종료되면 취소됩니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다.
 
