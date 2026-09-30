@@ -47,17 +47,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToKeyPairCreateMap() (map[string]any, error) {
-	body, err := b.base.ToKeyPairCreateMap()
+	value0, err := b.base.ToKeyPairCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*KeyPair, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "keypairs", err)
+		var zero0 *KeyPair
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "keypairs", err)
 		var zero0 *KeyPair
 		return zero0, err
 	}
@@ -81,11 +93,17 @@ type deleteOptsBuilder struct {
 }
 
 func (b deleteOptsBuilder) ToKeyPairDeleteQuery() (string, error) {
-	query, err := b.base.ToKeyPairDeleteQuery()
+	value0, err := b.base.ToKeyPairDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -93,6 +111,11 @@ func (a *API) Delete(ctx context.Context, name string, options ...DeleteOption) 
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Delete", "keypairs", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Delete", "keypairs", err)
 		return err
 	}
 	_opts := deleteOptsBuilder{base: cfg.Options, config: cfg}
@@ -110,11 +133,17 @@ type getOptsBuilder struct {
 }
 
 func (b getOptsBuilder) ToKeyPairGetQuery() (string, error) {
-	query, err := b.base.ToKeyPairGetQuery()
+	value0, err := b.base.ToKeyPairGetQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -122,6 +151,12 @@ func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*KeyP
 	var opts GetOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Get", "keypairs", err)
+		var zero0 *KeyPair
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Get", "keypairs", err)
 		var zero0 *KeyPair
 		return zero0, err
 	}
@@ -143,11 +178,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToKeyPairListQuery() (string, error) {
-	query, err := b.base.ToKeyPairListQuery()
+	value0, err := b.base.ToKeyPairListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -155,6 +196,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*KeyPai
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "keypairs", err)
+		return func(yield func(*KeyPair, error) bool) { var zero *KeyPair; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "keypairs", err)
 		return func(yield func(*KeyPair, error) bool) { var zero *KeyPair; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
