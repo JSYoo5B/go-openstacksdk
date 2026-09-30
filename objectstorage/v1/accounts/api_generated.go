@@ -22,7 +22,8 @@ type UpdateOpts = upstream.UpdateOpts
 type UpdateResult = upstream.UpdateResult
 type GetOption = request.Option[GetOpts]
 
-func WithGetOptions(value GetOpts) GetOption { return request.WithOptions(value) }
+func WithGetOptions(value GetOpts) GetOption    { return request.WithOptions(value) }
+func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
 
 type getOptsBuilder struct {
 	base   GetOpts
@@ -30,7 +31,17 @@ type getOptsBuilder struct {
 }
 
 func (b getOptsBuilder) ToAccountGetMap() (map[string]string, error) {
-	return b.base.ToAccountGetMap()
+	value0, err := b.base.ToAccountGetMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -38,6 +49,12 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*GetHeader, error)
 	var opts GetOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Get", "accounts", err)
+		var zero0 *GetHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Get", "accounts", err)
 		var zero0 *GetHeader
 		return zero0, err
 	}
@@ -51,6 +68,9 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*GetHeader, error)
 type UpdateOption = request.Option[UpdateOpts]
 
 func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.WithOptions(value) }
+func WithUpdateHeader(key, value string) UpdateOption {
+	return request.WithHeader[UpdateOpts](key, value)
+}
 
 type updateOptsBuilder struct {
 	base   UpdateOpts
@@ -58,13 +78,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToAccountUpdateMap() (map[string]string, error) {
-	return b.base.ToAccountUpdateMap()
+	value0, err := b.base.ToAccountUpdateMap()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, opts UpdateOpts, options ...UpdateOption) (*UpdateHeader, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "accounts", err)
+		var zero0 *UpdateHeader
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("Update", "accounts", err)
 		var zero0 *UpdateHeader
 		return zero0, err
 	}
