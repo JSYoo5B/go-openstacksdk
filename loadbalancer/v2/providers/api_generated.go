@@ -37,11 +37,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToProviderListQuery() (string, error) {
-	query, err := b.base.ToProviderListQuery()
+	value0, err := b.base.ToProviderListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -49,6 +55,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Provid
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "providers", err)
+		return func(yield func(*Provider, error) bool) { var zero *Provider; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "providers", err)
 		return func(yield func(*Provider, error) bool) { var zero *Provider; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -73,11 +84,17 @@ type listAvailabilityZoneCapabilitiesOptsBuilder struct {
 }
 
 func (b listAvailabilityZoneCapabilitiesOptsBuilder) ToAvailabilityZoneCapabilitiesListQuery() (string, error) {
-	query, err := b.base.ToAvailabilityZoneCapabilitiesListQuery()
+	value0, err := b.base.ToAvailabilityZoneCapabilitiesListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListAvailabilityZoneCapabilities invokes the upstream API with library-owned builders and result handling.
@@ -85,6 +102,12 @@ func (a *API) ListAvailabilityZoneCapabilities(ctx context.Context, provider str
 	var opts ListAvailabilityZoneCapabilitiesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListAvailabilityZoneCapabilities", "providers", err)
+		var zero0 []Capability
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListAvailabilityZoneCapabilities", "providers", err)
 		var zero0 []Capability
 		return zero0, err
 	}
@@ -110,11 +133,17 @@ type listFlavorCapabilitiesOptsBuilder struct {
 }
 
 func (b listFlavorCapabilitiesOptsBuilder) ToFlavorCapabilitiesListQuery() (string, error) {
-	query, err := b.base.ToFlavorCapabilitiesListQuery()
+	value0, err := b.base.ToFlavorCapabilitiesListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListFlavorCapabilities invokes the upstream API with library-owned builders and result handling.
@@ -122,6 +151,12 @@ func (a *API) ListFlavorCapabilities(ctx context.Context, provider string, optio
 	var opts ListFlavorCapabilitiesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListFlavorCapabilities", "providers", err)
+		var zero0 []Capability
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListFlavorCapabilities", "providers", err)
 		var zero0 []Capability
 		return zero0, err
 	}
