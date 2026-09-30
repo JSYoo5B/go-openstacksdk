@@ -1,0 +1,528 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "extensions",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 29,
+      "parameters": [],
+      "resources": [
+        "openstack.identity.v2.extension.Extension"
+      ],
+      "id": "identity/v2/extensions",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_extension",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 36,
+      "parameters": [
+        {
+          "name": "extension",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.extension.Extension"
+      ],
+      "id": "identity/v2/get_extension",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_role",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 53,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/create_role",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_role",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 64,
+      "parameters": [
+        {
+          "name": "role",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/delete_role",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_role",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 95,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/find_role",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_role",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 114,
+      "parameters": [
+        {
+          "name": "role",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/get_role",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "roles",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 126,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/roles",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_role",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 136,
+      "parameters": [
+        {
+          "name": "role",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.role.Role"
+      ],
+      "id": "identity/v2/update_role",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_tenant",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 150,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/create_tenant",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_tenant",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 161,
+      "parameters": [
+        {
+          "name": "tenant",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/delete_tenant",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_tenant",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 192,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/find_tenant",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_tenant",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 211,
+      "parameters": [
+        {
+          "name": "tenant",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/get_tenant",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "tenants",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 223,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/tenants",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_tenant",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 233,
+      "parameters": [
+        {
+          "name": "tenant",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.tenant.Tenant"
+      ],
+      "id": "identity/v2/update_tenant",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/tenants"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_user",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 249,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/create_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_user",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 260,
+      "parameters": [
+        {
+          "name": "user",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/delete_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_user",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 291,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/find_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_user",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 310,
+      "parameters": [
+        {
+          "name": "user",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/get_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "users",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 322,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/users",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_user",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 332,
+      "parameters": [
+        {
+          "name": "user",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.identity.v2.user.User"
+      ],
+      "id": "identity/v2/update_user",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/identity/v2/users"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 346,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "identity/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/identity/v2/_proxy.py",
+      "line": 385,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "identity/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
