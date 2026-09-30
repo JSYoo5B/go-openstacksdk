@@ -77,17 +77,29 @@ type generateTemplateOptsBuilder struct {
 }
 
 func (b generateTemplateOptsBuilder) ToGenerateTemplateQuery() (string, error) {
-	query, err := b.base.ToGenerateTemplateQuery()
+	value0, err := b.base.ToGenerateTemplateQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // GenerateTemplate invokes the upstream API with library-owned builders and result handling.
 func (a *API) GenerateTemplate(ctx context.Context, resourceType string, opts GenerateTemplateOpts, options ...GenerateTemplateOption) (map[string]any, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("GenerateTemplate", "resourcetypes", err)
+		var zero0 map[string]any
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("GenerateTemplate", "resourcetypes", err)
 		var zero0 map[string]any
 		return zero0, err
 	}
@@ -117,11 +129,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToResourceTypeListQuery() (string, error) {
-	query, err := b.base.ToResourceTypeListQuery()
+	value0, err := b.base.ToResourceTypeListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -129,6 +147,12 @@ func (a *API) List(ctx context.Context, options ...ListOption) ([]ResourceTypeSu
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "resourcetypes", err)
+		var zero0 []ResourceTypeSummary
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "resourcetypes", err)
 		var zero0 []ResourceTypeSummary
 		return zero0, err
 	}
