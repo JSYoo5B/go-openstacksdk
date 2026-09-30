@@ -1,0 +1,419 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_cluster",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 43,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/create_cluster",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_cluster",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 53,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/delete_cluster",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_cluster",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 83,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/find_cluster",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 106,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/get_cluster",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "clusters",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 120,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/clusters",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_cluster",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 134,
+      "parameters": [
+        {
+          "name": "cluster",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster.Cluster"
+      ],
+      "id": "container_infrastructure_management/v1/update_cluster",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clusters"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_cluster_template",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 151,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/create_cluster_template",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_cluster_template",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 163,
+      "parameters": [
+        {
+          "name": "cluster_template",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/delete_cluster_template",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_cluster_template",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 201,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/find_cluster_template",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster_template",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 224,
+      "parameters": [
+        {
+          "name": "cluster_template",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/get_cluster_template",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "cluster_templates",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 241,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/cluster_templates",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_cluster_template",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 255,
+      "parameters": [
+        {
+          "name": "cluster_template",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_template.ClusterTemplate"
+      ],
+      "id": "container_infrastructure_management/v1/update_cluster_template",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/containerinfra/v1/clustertemplates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_cluster_certificate",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 276,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_certificate.ClusterCertificate"
+      ],
+      "id": "container_infrastructure_management/v1/create_cluster_certificate",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_cluster_certificate",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 288,
+      "parameters": [
+        {
+          "name": "cluster_certificate",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.cluster_certificate.ClusterCertificate"
+      ],
+      "id": "container_infrastructure_management/v1/get_cluster_certificate",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "services",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 308,
+      "parameters": [],
+      "resources": [
+        "openstack.container_infrastructure_management.v1.service.Service"
+      ],
+      "id": "container_infrastructure_management/v1/services",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 318,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "container_infrastructure_management/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/container_infrastructure_management/v1/_proxy.py",
+      "line": 357,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "container_infrastructure_management/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
