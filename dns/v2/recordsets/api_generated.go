@@ -40,17 +40,29 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToRecordSetCreateMap() (map[string]any, error) {
-	body, err := b.base.ToRecordSetCreateMap()
+	value0, err := b.base.ToRecordSetCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, zoneID string, opts CreateOpts, options ...CreateOption) (*RecordSet, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "recordsets", err)
+		var zero0 *RecordSet
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Create", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err
 	}
@@ -71,6 +83,9 @@ type DeleteWithOptsOption = request.Option[DeleteOpts]
 func WithDeleteWithOptsOptions(value DeleteOpts) DeleteWithOptsOption {
 	return request.WithOptions(value)
 }
+func WithDeleteWithOptsHeader(key, value string) DeleteWithOptsOption {
+	return request.WithHeader[DeleteOpts](key, value)
+}
 
 type deleteWithOptsOptsBuilder struct {
 	base   DeleteOpts
@@ -78,7 +93,17 @@ type deleteWithOptsOptsBuilder struct {
 }
 
 func (b deleteWithOptsOptsBuilder) ToRecordSetDeleteHeaders() (map[string]string, error) {
-	return b.base.ToRecordSetDeleteHeaders()
+	value0, err := b.base.ToRecordSetDeleteHeaders()
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	value0, err = request.MergeHeadersFor(value0, b.config.Headers, b.base)
+	if err != nil {
+		var zero0 map[string]string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // DeleteWithOpts invokes the upstream API with library-owned builders and result handling.
@@ -86,6 +111,11 @@ func (a *API) DeleteWithOpts(ctx context.Context, zoneID string, rrsetID string,
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("DeleteWithOpts", "recordsets", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
+		err = request.Wrap("DeleteWithOpts", "recordsets", err)
 		return err
 	}
 	_opts := deleteWithOptsOptsBuilder{base: cfg.Options, config: cfg}
@@ -113,11 +143,17 @@ type listAllOptsBuilder struct {
 }
 
 func (b listAllOptsBuilder) ToRecordSetListQuery() (string, error) {
-	query, err := b.base.ToRecordSetListQuery()
+	value0, err := b.base.ToRecordSetListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListAll invokes the upstream API with library-owned builders and result handling.
@@ -125,6 +161,11 @@ func (a *API) ListAll(ctx context.Context, options ...ListAllOption) iter.Seq2[*
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListAll", "recordsets", err)
+		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListAll", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
 	_opts := listAllOptsBuilder{base: cfg.Options, config: cfg}
@@ -147,11 +188,17 @@ type listByZoneOptsBuilder struct {
 }
 
 func (b listByZoneOptsBuilder) ToRecordSetListQuery() (string, error) {
-	query, err := b.base.ToRecordSetListQuery()
+	value0, err := b.base.ToRecordSetListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ListByZone invokes the upstream API with library-owned builders and result handling.
@@ -159,6 +206,11 @@ func (a *API) ListByZone(ctx context.Context, zoneID string, options ...ListByZo
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ListByZone", "recordsets", err)
+		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("ListByZone", "recordsets", err)
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
 	_opts := listByZoneOptsBuilder{base: cfg.Options, config: cfg}
@@ -181,17 +233,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToRecordSetUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToRecordSetUpdateMap()
+	value0, err := b.base.ToRecordSetUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, zoneID string, rrsetID string, opts UpdateOpts, options ...UpdateOption) (*RecordSet, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "recordsets", err)
+		var zero0 *RecordSet
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "recordsets", err)
 		var zero0 *RecordSet
 		return zero0, err
 	}
