@@ -1,0 +1,3795 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "find_extension",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 108,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.extension.Extension"
+      ],
+      "id": "compute/v2/find_extension",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "extensions",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 135,
+      "parameters": [],
+      "resources": [
+        "openstack.compute.v2.extension.Extension"
+      ],
+      "id": "compute/v2/extensions",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_flavor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 165,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "get_extra_specs",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/find_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_flavor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 202,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/create_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_flavor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 213,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/delete_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_flavor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 230,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/update_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 246,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "get_extra_specs",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/get_flavor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavors",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 268,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "get_extra_specs",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/flavors",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavor_add_tenant_access",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 293,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "tenant",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/flavor_add_tenant_access",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "flavor_remove_tenant_access",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 307,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "tenant",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/flavor_remove_tenant_access",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor_access",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 321,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/get_flavor_access",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_flavor_extra_specs",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 334,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/fetch_flavor_extra_specs",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_flavor_extra_specs",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 347,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "extra_specs",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/create_flavor_extra_specs",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_flavor_extra_specs_property",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 363,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "prop",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/get_flavor_extra_specs_property",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_flavor_extra_specs_property",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 377,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "prop",
+          "required": true
+        },
+        {
+          "name": "val",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor"
+      ],
+      "id": "compute/v2/update_flavor_extra_specs_property",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_flavor_extra_specs_property",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 395,
+      "parameters": [
+        {
+          "name": "flavor",
+          "required": true
+        },
+        {
+          "name": "prop",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor",
+        "openstack.exceptions.NotFoundException"
+      ],
+      "id": "compute/v2/delete_flavor_extra_specs_property",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_server_external_events",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 423,
+      "parameters": [
+        {
+          "name": "events",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_external_event.ServerExternalEvent"
+      ],
+      "id": "compute/v2/create_server_external_events",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "aggregates",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 441,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/aggregates",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 454,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/get_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 482,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/find_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 508,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/create_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 519,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/update_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 535,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/delete_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_host_to_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 559,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/add_host_to_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_host_from_aggregate",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 574,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/remove_host_from_aggregate",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_aggregate_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 590,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "compute/v2/set_aggregate_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "aggregate_precache_images",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 621,
+      "parameters": [
+        {
+          "name": "aggregate",
+          "required": true
+        },
+        {
+          "name": "images",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.aggregate.Aggregate"
+      ],
+      "id": "compute/v2/aggregate_precache_images",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/aggregates"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_image",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 645,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image",
+        "openstack.warnings.OpenStackDeprecationWarning"
+      ],
+      "id": "compute/v2/delete_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_image",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 683,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image",
+        "openstack.warnings.OpenStackDeprecationWarning"
+      ],
+      "id": "compute/v2/find_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_image",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 714,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image",
+        "openstack.warnings.OpenStackDeprecationWarning"
+      ],
+      "id": "compute/v2/get_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "images",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 731,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image",
+        "openstack.warnings.OpenStackDeprecationWarning"
+      ],
+      "id": "compute/v2/images",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 764,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image"
+      ],
+      "id": "compute/v2/fetch_image_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 777,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "compute/v2/get_image_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "set_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 790,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image"
+      ],
+      "id": "compute/v2/set_image_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_image_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 806,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.image.Image"
+      ],
+      "id": "compute/v2/delete_image_metadata",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_keypair",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 831,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.keypair.Keypair"
+      ],
+      "id": "compute/v2/create_keypair",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_keypair",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 842,
+      "parameters": [
+        {
+          "name": "keypair",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "user_id",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.keypair.Keypair"
+      ],
+      "id": "compute/v2/delete_keypair",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_keypair",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 868,
+      "parameters": [
+        {
+          "name": "keypair",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.keypair.Keypair"
+      ],
+      "id": "compute/v2/get_keypair",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_keypair",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 910,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "user_id",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.keypair.Keypair"
+      ],
+      "id": "compute/v2/find_keypair",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "keypairs",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 940,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.keypair.Keypair"
+      ],
+      "id": "compute/v2/keypairs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_limits",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 954,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.limits.Limits"
+      ],
+      "id": "compute/v2/get_limits",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 966,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/create_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 977,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/delete_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1023,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/find_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1063,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/get_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "servers",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1075,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/servers",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1099,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/update_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "change_server_password",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1115,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "new_password",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/change_server_password",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_password",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1129,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/get_server_password",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "clear_server_password",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1140,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/clear_server_password",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reset_server_state",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1151,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "state",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/reset_server_state",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "reboot_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1166,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "reboot_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/reboot_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "rebuild_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1181,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "compute/v2/rebuild_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resize_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1214,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "flavor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.flavor.Flavor",
+        "openstack.compute.v2.server.Server",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/resize_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/flavors",
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "confirm_server_resize",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1230,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/confirm_server_resize",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "revert_server_resize",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1241,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/revert_server_resize",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_server_image",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1252,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "120"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "compute/v2/create_server_image",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "backup_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1284,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "backup_type",
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "required": true
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "default": "120"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "compute/v2/backup_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "pause_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1325,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/pause_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unpause_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1335,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/unpause_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "suspend_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1345,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/suspend_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "resume_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1355,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/resume_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "lock_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1365,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "locked_reason",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/lock_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unlock_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1381,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/unlock_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "rescue_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1392,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "admin_pass",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "image",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.image.v2.image.Image"
+      ],
+      "id": "compute/v2/rescue_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unrescue_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1414,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/unrescue_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "evacuate_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1424,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "admin_pass",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "on_shared_storage",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/evacuate_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "start_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1457,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/start_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "stop_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1467,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/stop_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "restore_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1477,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/restore_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "shelve_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1487,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/shelve_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "shelve_offload_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1502,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/shelve_offload_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "unshelve_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1521,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "availability_zone",
+          "required": false,
+          "default": "types.UNSET"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.types.UNSET",
+        "openstack.types.Unset"
+      ],
+      "id": "compute/v2/unshelve_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "trigger_server_crash_dump",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1543,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/trigger_server_crash_dump",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_tag_to_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1560,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/add_tag_to_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_tag_from_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1573,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/remove_tag_from_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_tags_from_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1586,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/remove_tags_from_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_server_security_groups",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1599,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/fetch_server_security_groups",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_security_group_to_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1612,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "security_group",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.network.v2.security_group.SecurityGroup"
+      ],
+      "id": "compute/v2/add_security_group_to_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/secgroups",
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_security_group_from_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1631,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "security_group",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.network.v2.security_group.SecurityGroup"
+      ],
+      "id": "compute/v2/remove_security_group_from_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/secgroups",
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_fixed_ip_to_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1653,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "network",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.network.v2.network.Network",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/add_fixed_ip_to_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_fixed_ip_from_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1668,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "address",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/remove_fixed_ip_from_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "add_floating_ip_to_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1682,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "address",
+          "required": true
+        },
+        {
+          "name": "fixed_address",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/add_floating_ip_to_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "remove_floating_ip_from_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1701,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "address",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/remove_floating_ip_from_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_server_interface",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1717,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_interface.ServerInterface",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/create_server_interface",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_server_interface",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1740,
+      "parameters": [
+        {
+          "name": "server_interface",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_interface.ServerInterface",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/delete_server_interface",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_interface",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1778,
+      "parameters": [
+        {
+          "name": "server_interface",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_interface.ServerInterface",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/get_server_interface",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "server_interfaces",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1812,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_interface.ServerInterface",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/server_interfaces",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "server_ips",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1833,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "network_label",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_ip.ServerIP",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/server_ips",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "availability_zones",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1854,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.availability_zone.AvailabilityZone"
+      ],
+      "id": "compute/v2/availability_zones",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "fetch_server_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1876,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/fetch_server_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1893,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "compute/v2/get_server_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "set_server_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1908,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "metadata",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/set_server_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_server_metadata",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1924,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "keys",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/delete_server_metadata",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_server_group",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1949,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_group.ServerGroup"
+      ],
+      "id": "compute/v2/create_server_group",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servergroups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_server_group",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 1960,
+      "parameters": [
+        {
+          "name": "server_group",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_group.ServerGroup"
+      ],
+      "id": "compute/v2/delete_server_group",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servergroups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_server_group",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2002,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_group.ServerGroup"
+      ],
+      "id": "compute/v2/find_server_group",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servergroups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_group",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2037,
+      "parameters": [
+        {
+          "name": "server_group",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_group.ServerGroup"
+      ],
+      "id": "compute/v2/get_server_group",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servergroups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "server_groups",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2053,
+      "parameters": [
+        {
+          "name": "all_projects",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server_group.ServerGroup"
+      ],
+      "id": "compute/v2/server_groups",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servergroups"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "hypervisors",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2074,
+      "parameters": [
+        {
+          "name": "details",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.hypervisor.Hypervisor"
+      ],
+      "id": "compute/v2/hypervisors",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/hypervisors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "find_hypervisor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2118,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "details",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.hypervisor.Hypervisor"
+      ],
+      "id": "compute/v2/find_hypervisor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/hypervisors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_hypervisor",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2151,
+      "parameters": [
+        {
+          "name": "hypervisor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.hypervisor.Hypervisor"
+      ],
+      "id": "compute/v2/get_hypervisor",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/hypervisors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_hypervisor_uptime",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2167,
+      "parameters": [
+        {
+          "name": "hypervisor",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.hypervisor.Hypervisor"
+      ],
+      "id": "compute/v2/get_hypervisor_uptime",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/hypervisors"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_service_forced_down",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2227,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "binary",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "forced",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/update_service_forced_down",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "disable_service",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2254,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "binary",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disabled_reason",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/disable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "enable_service",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2280,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "binary",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/enable_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "services",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2301,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/services",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_service",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2327,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/find_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_service",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2356,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service"
+      ],
+      "id": "compute/v2/delete_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_service",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2373,
+      "parameters": [
+        {
+          "name": "service",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.service.Service",
+        "openstack.exceptions.SDKException"
+      ],
+      "id": "compute/v2/update_service",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_volume_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2397,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v3.volume.Volume",
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.volume_attachment.VolumeAttachment",
+        "openstack.resource.Resource",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "compute/v2/create_volume_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "update_volume_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2459,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "volume_id",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v3.volume.Volume",
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.volume_attachment.VolumeAttachment",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/update_volume_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_volume_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2542,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v3.volume.Volume",
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.volume_attachment.VolumeAttachment",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/delete_volume_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_volume_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2580,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.block_storage.v3.volume.Volume",
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.volume_attachment.VolumeAttachment",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/get_volume_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "volume_attachments",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2611,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.volume_attachment.VolumeAttachment",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/volume_attachments",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "migrate_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2634,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/migrate_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "live_migrate_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2647,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "host",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "force",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "block_migration",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disk_over_commit",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/live_migrate_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "abort_server_migration",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2685,
+      "parameters": [
+        {
+          "name": "server_migration",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_migration.ServerMigration",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/abort_server_migration",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "force_complete_server_migration",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2723,
+      "parameters": [
+        {
+          "name": "server_migration",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_migration.ServerMigration"
+      ],
+      "id": "compute/v2/force_complete_server_migration",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_migration",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2753,
+      "parameters": [
+        {
+          "name": "server_migration",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_migration.ServerMigration",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/get_server_migration",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "server_migrations",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2794,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_migration.ServerMigration",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/server_migrations",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "migrations",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2814,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.migration.Migration"
+      ],
+      "id": "compute/v2/migrations",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_diagnostics",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2828,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_diagnostics.ServerDiagnostics"
+      ],
+      "id": "compute/v2/get_server_diagnostics",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "usages",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2852,
+      "parameters": [
+        {
+          "name": "start",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "end",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.usage.Usage"
+      ],
+      "id": "compute/v2/usages",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_usage",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2873,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "start",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "end",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.usage.Usage",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "compute/v2/get_usage",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_server_remote_console",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2903,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_remote_console.ServerRemoteConsole",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/create_server_remote_console",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_console_url",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2922,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "console_type",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/get_server_console_url",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "validate_console_auth_token",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2935,
+      "parameters": [
+        {
+          "name": "console_token",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.console_auth_token.ConsoleAuthToken"
+      ],
+      "id": "compute/v2/validate_console_auth_token",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_console_output",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2946,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "length",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/get_server_console_output",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "create_console",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 2963,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "console_type",
+          "required": true
+        },
+        {
+          "name": "console_protocol",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_remote_console.ServerRemoteConsole"
+      ],
+      "id": "compute/v2/create_console",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3005,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": false,
+          "default": "'default'"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "compute/v2/get_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_class_set",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3025,
+      "parameters": [
+        {
+          "name": "quota_class_set",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_class_set.QuotaClassSet"
+      ],
+      "id": "compute/v2/update_quota_class_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_set",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3049,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "usage",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "compute/v2/get_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_quota_set_defaults",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3077,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "compute/v2/get_quota_set_defaults",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "revert_quota_set",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3100,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_set.QuotaSet",
+        "openstack.identity.v3.project.Project"
+      ],
+      "id": "compute/v2/revert_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_quota_set",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3123,
+      "parameters": [
+        {
+          "name": "project",
+          "required": true
+        },
+        {
+          "name": "user",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.quota_set.QuotaSet",
+        "openstack.exceptions.SDKException",
+        "openstack.identity.v3.project.Project",
+        "openstack.identity.v3.user.User",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "compute/v2/update_quota_set",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_server_action",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3187,
+      "parameters": [
+        {
+          "name": "server_action",
+          "required": true
+        },
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_action.ServerAction",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/get_server_action",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "server_actions",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3221,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_action.ServerAction",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/server_actions",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_server",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3244,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": false,
+          "default": "'ACTIVE'"
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server"
+      ],
+      "id": "compute/v2/wait_for_server",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3290,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "compute/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3329,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "compute/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_share_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3422,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_share.ShareMapping",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/create_share_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "delete_share_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3451,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "share",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_share.ShareMapping",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/delete_share_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "get_share_attachment",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3483,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "share",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_share.ShareMapping",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/get_share_attachment",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    },
+    {
+      "name": "share_attachments",
+      "class": "Proxy",
+      "source": "openstack/compute/v2/_proxy.py",
+      "line": 3510,
+      "parameters": [
+        {
+          "name": "server",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.compute.v2.server.Server",
+        "openstack.compute.v2.server_share.ShareMapping",
+        "openstack.resource.Resource"
+      ],
+      "id": "compute/v2/share_attachments",
+      "kind": "proxy",
+      "candidates": [
+        "gophercloudsdk/compute/v2/servers"
+      ],
+      "review": "pending"
+    }
+  ]
+}
