@@ -28,6 +28,11 @@ func WithAssignOptions(value AssignOpts) AssignOption { return request.WithOptio
 func (a *API) Assign(ctx context.Context, roleID string, opts AssignOpts, options ...AssignOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Assign", "osinherit", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Assign", "osinherit", err)
 		return err
 	}
 	return request.Wrap("Assign", "osinherit", upstream.Assign(ctx, a.client, roleID, cfg.Options).ExtractErr())
@@ -41,6 +46,11 @@ func WithUnassignOptions(value UnassignOpts) UnassignOption { return request.Wit
 func (a *API) Unassign(ctx context.Context, roleID string, opts UnassignOpts, options ...UnassignOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Unassign", "osinherit", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Unassign", "osinherit", err)
 		return err
 	}
 	return request.Wrap("Unassign", "osinherit", upstream.Unassign(ctx, a.client, roleID, cfg.Options).ExtractErr())
@@ -54,6 +64,11 @@ func WithValidateOptions(value ValidateOpts) ValidateOption { return request.Wit
 func (a *API) Validate(ctx context.Context, roleID string, opts ValidateOpts, options ...ValidateOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Validate", "osinherit", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
+		err = request.Wrap("Validate", "osinherit", err)
 		return err
 	}
 	return request.Wrap("Validate", "osinherit", upstream.Validate(ctx, a.client, roleID, cfg.Options).ExtractErr())
