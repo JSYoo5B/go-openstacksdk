@@ -1,0 +1,364 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 63,
+      "parameters": [
+        {
+          "name": "name",
+          "required": true
+        },
+        {
+          "name": "filename",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "container",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "md5",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "sha256",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disk_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "container_format",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "disable_vendor_agent",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "allow_duplicates",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "meta",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "data",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "validate_checksum",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "tags",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.exceptions.SDKException",
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/create_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "upload_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 254,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image",
+        "openstack.warnings.RemovedInSDK50Warning"
+      ],
+      "id": "image/v1/upload_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 328,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/delete_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 359,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/find_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 378,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/get_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "images",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 390,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/images",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 400,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/update_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "download_image",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 414,
+      "parameters": [
+        {
+          "name": "image",
+          "required": true
+        },
+        {
+          "name": "stream",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "output",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "chunk_size",
+          "required": false,
+          "default": "1024 * 1024"
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/download_image",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_image_properties",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 477,
+      "parameters": [
+        {
+          "name": "image",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "meta",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.image.v1.image.Image"
+      ],
+      "id": "image/v1/update_image_properties",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 515,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "image/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/image/v1/_proxy.py",
+      "line": 554,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "image/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}
