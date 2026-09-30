@@ -88,17 +88,28 @@ type attachOptsBuilder struct {
 }
 
 func (b attachOptsBuilder) ToVolumeAttachMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeAttachMap()
+	value0, err := b.base.ToVolumeAttachMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Attach invokes the upstream API with library-owned builders and result handling.
 func (a *API) Attach(ctx context.Context, id string, opts AttachOpts, options ...AttachOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Attach", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Attach", "volumes", err)
 		return err
 	}
 	_opts := attachOptsBuilder{base: cfg.Options, config: cfg}
@@ -123,17 +134,28 @@ type changeTypeOptsBuilder struct {
 }
 
 func (b changeTypeOptsBuilder) ToVolumeChangeTypeMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeChangeTypeMap()
+	value0, err := b.base.ToVolumeChangeTypeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ChangeType invokes the upstream API with library-owned builders and result handling.
 func (a *API) ChangeType(ctx context.Context, id string, opts ChangeTypeOpts, options ...ChangeTypeOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ChangeType", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ChangeType", "volumes", err)
 		return err
 	}
 	_opts := changeTypeOptsBuilder{base: cfg.Options, config: cfg}
@@ -156,11 +178,17 @@ type createOptsBuilder struct {
 }
 
 func (b createOptsBuilder) ToVolumeCreateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeCreateMap()
+	value0, err := b.base.ToVolumeCreateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 type createHintOptsBuilder struct {
@@ -169,25 +197,44 @@ type createHintOptsBuilder struct {
 }
 
 func (b createHintOptsBuilder) ToSchedulerHintsMap() (map[string]any, error) {
-	body, err := b.base.ToSchedulerHintsMap()
+	value0, err := b.base.ToSchedulerHintsMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
 func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOption) (*Volume, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Create", "volumes", err)
+		var zero0 *Volume
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false, "hintOpts"); err != nil {
+		err = request.Wrap("Create", "volumes", err)
 		var zero0 *Volume
 		return zero0, err
 	}
 	_opts := createOptsBuilder{base: cfg.Options, config: cfg}
 	var _hintOpts upstream.SchedulerHintOptsBuilder
-	if value, ok := cfg.Arguments["hintOpts"]; ok {
-		base := value.(SchedulerHintOpts)
-		_hintOpts = createHintOptsBuilder{base: base, config: request.Config[SchedulerHintOpts]{Options: base}}
+	{
+		base, provided, err := request.Argument[SchedulerHintOpts](cfg, "hintOpts")
+		if err != nil {
+			err = request.Wrap("Create", "volumes", err)
+			var zero0 *Volume
+			return zero0, err
+		}
+		if provided {
+			_hintOpts = createHintOptsBuilder{base: base, config: request.Config[SchedulerHintOpts]{Options: base}}
+		}
 	}
 	result := upstream.Create(ctx, a.client, _opts, _hintOpts)
 	value0, err := result.Extract()
@@ -208,11 +255,17 @@ type deleteOptsBuilder struct {
 }
 
 func (b deleteOptsBuilder) ToVolumeDeleteQuery() (string, error) {
-	query, err := b.base.ToVolumeDeleteQuery()
+	value0, err := b.base.ToVolumeDeleteQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -220,6 +273,11 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) er
 	var opts DeleteOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Delete", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("Delete", "volumes", err)
 		return err
 	}
 	_opts := deleteOptsBuilder{base: cfg.Options, config: cfg}
@@ -239,17 +297,28 @@ type detachOptsBuilder struct {
 }
 
 func (b detachOptsBuilder) ToVolumeDetachMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeDetachMap()
+	value0, err := b.base.ToVolumeDetachMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Detach invokes the upstream API with library-owned builders and result handling.
 func (a *API) Detach(ctx context.Context, id string, opts DetachOpts, options ...DetachOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Detach", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Detach", "volumes", err)
 		return err
 	}
 	_opts := detachOptsBuilder{base: cfg.Options, config: cfg}
@@ -269,17 +338,28 @@ type extendSizeOptsBuilder struct {
 }
 
 func (b extendSizeOptsBuilder) ToVolumeExtendSizeMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeExtendSizeMap()
+	value0, err := b.base.ToVolumeExtendSizeMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ExtendSize invokes the upstream API with library-owned builders and result handling.
 func (a *API) ExtendSize(ctx context.Context, id string, opts ExtendSizeOpts, options ...ExtendSizeOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ExtendSize", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ExtendSize", "volumes", err)
 		return err
 	}
 	_opts := extendSizeOptsBuilder{base: cfg.Options, config: cfg}
@@ -314,17 +394,29 @@ type initializeConnectionOptsBuilder struct {
 }
 
 func (b initializeConnectionOptsBuilder) ToVolumeInitializeConnectionMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeInitializeConnectionMap()
+	value0, err := b.base.ToVolumeInitializeConnectionMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // InitializeConnection invokes the upstream API with library-owned builders and result handling.
 func (a *API) InitializeConnection(ctx context.Context, id string, opts InitializeConnectionOpts, options ...InitializeConnectionOption) (map[string]any, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("InitializeConnection", "volumes", err)
+		var zero0 map[string]any
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("InitializeConnection", "volumes", err)
 		var zero0 map[string]any
 		return zero0, err
 	}
@@ -346,11 +438,17 @@ type listOptsBuilder struct {
 }
 
 func (b listOptsBuilder) ToVolumeListQuery() (string, error) {
-	query, err := b.base.ToVolumeListQuery()
+	value0, err := b.base.ToVolumeListQuery()
 	if err != nil {
-		return "", err
+		var zero0 string
+		return zero0, err
 	}
-	return request.ExtendQuery(query, b.config.Query)
+	value0, err = request.ExtendQuery(value0, b.config.Query)
+	if err != nil {
+		var zero0 string
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -358,6 +456,11 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("List", "volumes", err)
+		return func(yield func(*Volume, error) bool) { var zero *Volume; yield(zero, err) }
+	}
+	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+		err = request.Wrap("List", "volumes", err)
 		return func(yield func(*Volume, error) bool) { var zero *Volume; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
@@ -380,17 +483,28 @@ type reImageOptsBuilder struct {
 }
 
 func (b reImageOptsBuilder) ToReImageMap() (map[string]any, error) {
-	body, err := b.base.ToReImageMap()
+	value0, err := b.base.ToReImageMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ReImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) ReImage(ctx context.Context, id string, opts ReImageOpts, options ...ReImageOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ReImage", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ReImage", "volumes", err)
 		return err
 	}
 	_opts := reImageOptsBuilder{base: cfg.Options, config: cfg}
@@ -417,17 +531,28 @@ type resetStatusOptsBuilder struct {
 }
 
 func (b resetStatusOptsBuilder) ToResetStatusMap() (map[string]any, error) {
-	body, err := b.base.ToResetStatusMap()
+	value0, err := b.base.ToResetStatusMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // ResetStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, options ...ResetStatusOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("ResetStatus", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("ResetStatus", "volumes", err)
 		return err
 	}
 	_opts := resetStatusOptsBuilder{base: cfg.Options, config: cfg}
@@ -447,17 +572,28 @@ type setBootableOptsBuilder struct {
 }
 
 func (b setBootableOptsBuilder) ToBootableMap() (map[string]any, error) {
-	body, err := b.base.ToBootableMap()
+	value0, err := b.base.ToBootableMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetBootable invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetBootable(ctx context.Context, id string, opts BootableOpts, options ...SetBootableOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetBootable", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetBootable", "volumes", err)
 		return err
 	}
 	_opts := setBootableOptsBuilder{base: cfg.Options, config: cfg}
@@ -479,17 +615,28 @@ type setImageMetadataOptsBuilder struct {
 }
 
 func (b setImageMetadataOptsBuilder) ToImageMetadataMap() (map[string]any, error) {
-	body, err := b.base.ToImageMetadataMap()
+	value0, err := b.base.ToImageMetadataMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // SetImageMetadata invokes the upstream API with library-owned builders and result handling.
 func (a *API) SetImageMetadata(ctx context.Context, id string, opts ImageMetadataOpts, options ...SetImageMetadataOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("SetImageMetadata", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("SetImageMetadata", "volumes", err)
 		return err
 	}
 	_opts := setImageMetadataOptsBuilder{base: cfg.Options, config: cfg}
@@ -511,17 +658,28 @@ type terminateConnectionOptsBuilder struct {
 }
 
 func (b terminateConnectionOptsBuilder) ToVolumeTerminateConnectionMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeTerminateConnectionMap()
+	value0, err := b.base.ToVolumeTerminateConnectionMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // TerminateConnection invokes the upstream API with library-owned builders and result handling.
 func (a *API) TerminateConnection(ctx context.Context, id string, opts TerminateConnectionOpts, options ...TerminateConnectionOption) error {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("TerminateConnection", "volumes", err)
+		return err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("TerminateConnection", "volumes", err)
 		return err
 	}
 	_opts := terminateConnectionOptsBuilder{base: cfg.Options, config: cfg}
@@ -551,17 +709,29 @@ type updateOptsBuilder struct {
 }
 
 func (b updateOptsBuilder) ToVolumeUpdateMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeUpdateMap()
+	value0, err := b.base.ToVolumeUpdateMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.
 func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ...UpdateOption) (*Volume, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("Update", "volumes", err)
+		var zero0 *Volume
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("Update", "volumes", err)
 		var zero0 *Volume
 		return zero0, err
 	}
@@ -587,17 +757,29 @@ type uploadImageOptsBuilder struct {
 }
 
 func (b uploadImageOptsBuilder) ToVolumeUploadImageMap() (map[string]any, error) {
-	body, err := b.base.ToVolumeUploadImageMap()
+	value0, err := b.base.ToVolumeUploadImageMap()
 	if err != nil {
-		return nil, err
+		var zero0 map[string]any
+		return zero0, err
 	}
-	return request.MergeFieldsFor(body, b.config.Fields, b.base)
+	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
+	if err != nil {
+		var zero0 map[string]any
+		return zero0, err
+	}
+	return value0, nil
 }
 
 // UploadImage invokes the upstream API with library-owned builders and result handling.
 func (a *API) UploadImage(ctx context.Context, id string, opts UploadImageOpts, options ...UploadImageOption) (VolumeImage, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
+		err = request.Wrap("UploadImage", "volumes", err)
+		var zero0 VolumeImage
+		return zero0, err
+	}
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
+		err = request.Wrap("UploadImage", "volumes", err)
 		var zero0 VolumeImage
 		return zero0, err
 	}
