@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"gophercloudsdk/resource"
@@ -16,6 +17,7 @@ import (
 // CreateServerRequest holds required inputs for the server creation workflow.
 // Names are resolved by the SDK; explicit IDs bypass lookup requests.
 // Image is required unless WithBootVolume selects an existing boot volume.
+// WithBootVolumeSize uses Image to create a new volume before booting.
 type CreateServerRequest struct {
 	Name   string
 	Image  resource.Ref
@@ -29,6 +31,8 @@ type createServerOptions struct {
 	wait                          bool
 	waitOptions                   []resource.WaitOption
 	bootVolume                    *resource.Ref
+	bootVolumeSize                int
+	bootVolumeType                string
 	deleteBootVolumeOnTermination *bool
 }
 
@@ -48,9 +52,36 @@ func WithBootVolume(ref resource.Ref) CreateServerOption {
 	}
 }
 
-// WithDeleteBootVolumeOnTermination controls Nova's deletion of the existing
-// boot volume when the server is deleted. It requires WithBootVolume. The
-// default is false; this option does not delete a volume on creation failure.
+// WithBootVolumeSize boots from a new volume created from the request's Image.
+// The positive size is expressed in GiB. It cannot be combined with
+// WithBootVolume, which selects an existing volume. Nova creates the volume
+// as part of the server request; the SDK does not make a separate Cinder POST.
+func WithBootVolumeSize(sizeGiB int) CreateServerOption {
+	return func(o *createServerOptions) error {
+		if sizeGiB <= 0 {
+			return invalid("boot volume size must be positive")
+		}
+		o.bootVolumeSize = sizeGiB
+		return nil
+	}
+}
+
+// WithBootVolumeType chooses the type of a new boot volume. It requires
+// WithBootVolumeSize and Compute microversion 2.67 or later. The configured
+// type name is sent directly; Cinder validates whether the type is available.
+func WithBootVolumeType(name string) CreateServerOption {
+	return func(o *createServerOptions) error {
+		if strings.TrimSpace(name) == "" {
+			return invalid("boot volume type must not be empty")
+		}
+		o.bootVolumeType = name
+		return nil
+	}
+}
+
+// WithDeleteBootVolumeOnTermination controls Nova's deletion of the boot volume
+// when the server is deleted. It requires WithBootVolume or WithBootVolumeSize.
+// The default is false; the SDK does not delete a volume on creation failure.
 func WithDeleteBootVolumeOnTermination(enabled bool) CreateServerOption {
 	return func(o *createServerOptions) error {
 		o.deleteBootVolumeOnTermination = &enabled
@@ -177,8 +208,8 @@ func (b serverBody) ToServerCreateMap() (map[string]any, error) {
 // Create resolves named dependencies, creates an image- or volume-backed server and
 // optionally waits for ACTIVE. It does not roll back a server after wait failure:
 // the created resource is returned alongside the error so it can be inspected.
-// WithBootVolume supports an existing volume; creating a new boot volume from
-// an image and floating IP setup are separate workflows.
+// WithBootVolume uses an existing volume; WithBootVolumeSize creates a new
+// volume from Image. Floating IP setup is a separate workflow.
 func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts ...CreateServerOption) (*Server, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -202,8 +233,19 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 	if hasImage == (o.bootVolume != nil) {
 		return nil, invalid("exactly one of image or boot volume is required")
 	}
-	if o.bootVolume == nil && o.deleteBootVolumeOnTermination != nil {
-		return nil, invalid("boot volume deletion policy requires WithBootVolume")
+	if o.bootVolume != nil && o.bootVolumeSize > 0 {
+		return nil, invalid("existing boot volume and new boot volume size are mutually exclusive")
+	}
+	if o.bootVolume == nil && o.bootVolumeSize == 0 && o.deleteBootVolumeOnTermination != nil {
+		return nil, invalid("boot volume deletion policy requires WithBootVolume or WithBootVolumeSize")
+	}
+	if o.bootVolumeType != "" {
+		if o.bootVolumeSize == 0 {
+			return nil, invalid("boot volume type requires WithBootVolumeSize")
+		}
+		if !microversionAtLeast(s.client.Microversion, 2, 67) {
+			return nil, fmt.Errorf("%w: boot volume type requires Compute microversion 2.67 or later (client uses %q)", resource.ErrUnsupported, s.client.Microversion)
+		}
 	}
 	if hasImage {
 		if err := request.Image.Validate(); err != nil {
@@ -239,7 +281,21 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 		if err != nil {
 			return nil, s.wrap("resolve image", err)
 		}
+		if o.bootVolumeSize > 0 {
+			if err := resource.ID(id).Validate(); err != nil {
+				return nil, s.wrap("resolve image", err)
+			}
+		}
 		o.base.ImageRef = id
+	}
+	if o.bootVolumeSize > 0 {
+		deleteOnTermination := o.deleteBootVolumeOnTermination != nil && *o.deleteBootVolumeOnTermination
+		o.base.BlockDevice = []servers.BlockDevice{{
+			SourceType: servers.SourceImage, DestinationType: servers.DestinationVolume,
+			UUID: o.base.ImageRef, BootIndex: 0, DeleteOnTermination: deleteOnTermination,
+			VolumeSize: o.bootVolumeSize, VolumeType: o.bootVolumeType,
+		}}
+		o.base.ImageRef = ""
 	}
 	o.base.FlavorRef = request.Flavor.String()
 	if request.Flavor.IsName() {
@@ -283,6 +339,24 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 
 // Ensure the extension adapter satisfies the upstream contract inside the SDK.
 var _ servers.CreateOptsBuilder = serverBody{}
+
+// Microversions contain exactly two numeric components, rather than floats:
+// 2.100 is newer than 2.67, while 2.9 is older.
+func microversionAtLeast(value string, major, minor uint64) bool {
+	parts := strings.Split(value, ".")
+	if len(parts) != 2 {
+		return false
+	}
+	gotMajor, err := strconv.ParseUint(parts[0], 10, 64)
+	if err != nil {
+		return false
+	}
+	gotMinor, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return false
+	}
+	return gotMajor > major || gotMajor == major && gotMinor >= minor
+}
 
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
