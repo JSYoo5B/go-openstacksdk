@@ -38,6 +38,8 @@ flowchart TD
 
 기본값은 각 작업을 호출할 때 새로 구성합니다. nil 옵션과 잘못된 값은 오류이며, mutation을 시작하기 전에 생성 옵션을 모두 검사합니다. false/빈 값/생략을 구분해야 하는 필드는 포인터나 명시 옵션으로 전송 여부를 결정합니다.
 
+JSON null까지 구분하는 concrete 필드에는 `request.Optional[T]`와 `json:",omitzero"`를 사용합니다. 이 타입의 zero value는 필드를 생략하고, `request.Null[T]()`은 null을 보내며, `request.Present(value)`는 false·0·빈 문자열도 명시합니다. `IsSet`, `IsNull`, `Get`으로 입력 상태를 확인할 수 있습니다. 서비스의 `With...` 옵션이 이 값을 구성하므로 애플리케이션에서 builder나 serializer를 구현할 필요가 없습니다. 요청 필드의 null 허용 여부와 값 범위는 각 서비스 계약에서 검증합니다.
+
 상태 대기를 선택하는 `compute.WithWait(...)`와 대기 자체의 시간 정책을 별도로 둡니다. context는 모든 네트워크 작업에 필수입니다. Python의 초 단위 숫자와 달리 Go의 `time.Duration`을 사용합니다.
 
 ## builder 책임을 줄이는 방법
