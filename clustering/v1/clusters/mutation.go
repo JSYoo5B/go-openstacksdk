@@ -94,6 +94,12 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 // Update resolves explicit names once and returns the accepted cluster and its
 // action reference. Sizes are creation fields; resizing uses separate actions.
 func (a *API) Update(ctx context.Context, ref resource.Ref, opts UpdateOpts, options ...UpdateOption) (*Cluster, error) {
+	return a.updateAt(ctx, ref, "clusters", opts, options...)
+}
+
+// updateAt receives an SDK-owned escaped collection path from the default API
+// or an UpdateScope. The source client and action collection remain unchanged.
+func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, opts UpdateOpts, options ...UpdateOption) (*Cluster, error) {
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}
@@ -130,14 +136,16 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, opts UpdateOpts, opt
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}
 	headers := maps.Clone(config.Headers)
-	id, err := rest.Collection(spec(a.RawClient())).ResolveID(ctx, ref)
+	lookupSpec := spec(a.RawClient())
+	lookupSpec.Path = path
+	id, err := rest.Collection(lookupSpec).ResolveID(ctx, ref)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}
 	if err := senlin.RequireVersion(ctx, a.RawClient(), minimum); err != nil {
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}
-	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPatch, a.RawClient().ServiceURL("clusters", url.PathEscape(id)), body, headers, http.StatusAccepted)
+	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPatch, a.RawClient().ServiceURL(path, url.PathEscape(id)), body, headers, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.clusters", err)
 	}

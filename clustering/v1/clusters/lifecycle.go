@@ -23,22 +23,23 @@ import (
 // Operation is an asynchronous submission, never proof of applied changes.
 // Each returned model and its HTTP evidence are independent snapshots.
 type TrackedCluster struct {
-	api        *API
-	id         string
-	state      *senlin.TrackedState
-	opMu       sync.Mutex
-	responseMu sync.RWMutex
-	response   *Cluster
+	api            *API
+	id             string
+	collectionPath string
+	state          *senlin.TrackedState
+	opMu           sync.Mutex
+	responseMu     sync.RWMutex
+	response       *Cluster
 }
 
 // Track wraps a cached model without HTTP. Body is authoritative when present;
 // use Edit instead of modifying the input's exported fields. A manually built
 // model has a local seed, with no fabricated HTTP response or action.
 func (a *API) Track(value *Cluster) (*TrackedCluster, error) {
-	return a.trackCluster(value, "")
+	return a.trackCluster(value, "", "clusters")
 }
 
-func (a *API) trackCluster(value *Cluster, routeID string) (*TrackedCluster, error) {
+func (a *API) trackCluster(value *Cluster, routeID, path string) (*TrackedCluster, error) {
 	if value == nil {
 		return nil, request.Wrap("Track", "clustering.clusters", fmt.Errorf("%w: cluster is required", resource.ErrInvalidOption))
 	}
@@ -64,14 +65,19 @@ func (a *API) trackCluster(value *Cluster, routeID string) (*TrackedCluster, err
 	if err := senlin.Identifier(routeID); err != nil {
 		return nil, request.Wrap("Track", "clustering.clusters", err)
 	}
-	return &TrackedCluster{api: a, id: routeID, state: state, response: response}, nil
+	return &TrackedCluster{api: a, id: routeID, collectionPath: path, state: state, response: response}, nil
 }
 
 // Load fetches an explicit ID once or resolves an exact name through one list
 // traversal. An explicit ID remains the route even when the response omits it;
 // a name reference uses only the selected row's canonical lowercase id field.
 func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedCluster, error) {
+	return a.loadAt(ctx, ref, "clusters")
+}
+
+func (a *API) loadAt(ctx context.Context, ref resource.Ref, path string) (*TrackedCluster, error) {
 	loadSpec := spec(a.RawClient())
+	loadSpec.Path = path
 	validateItem := loadSpec.ValidateItem
 	loadSpec.ValidateItem = func(value *Cluster) error {
 		if validateItem != nil {
@@ -97,7 +103,7 @@ func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedCluster, erro
 	if !ref.IsName() {
 		routeID = ref.String()
 	}
-	tracked, err := a.trackCluster(value, routeID)
+	tracked, err := a.trackCluster(value, routeID, path)
 	return tracked, request.Wrap("Load", "clustering.clusters", err)
 }
 
@@ -300,7 +306,7 @@ func (tracked *TrackedCluster) Commit(ctx context.Context, options ...UpdateOpti
 			return nil, request.Wrap("Commit", "clustering.clusters", err)
 		}
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL("clusters", url.PathEscape(tracked.id)), json.RawMessage(body), headers, http.StatusAccepted)
+	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL(tracked.collectionPath, url.PathEscape(tracked.id)), json.RawMessage(body), headers, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap("Commit", "clustering.clusters", err)
 	}
@@ -330,7 +336,7 @@ func (tracked *TrackedCluster) Refresh(ctx context.Context) (*Cluster, error) {
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Refresh", "clustering.clusters", err)
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodGet, client.ServiceURL("clusters", url.PathEscape(tracked.id)), nil, nil, http.StatusOK)
+	response, err := rest.DoJSON(ctx, client, http.MethodGet, client.ServiceURL(tracked.collectionPath, url.PathEscape(tracked.id)), nil, nil, http.StatusOK)
 	if err != nil {
 		if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 			err = &resource.NotFoundError{Resource: "clustering.clusters", Reference: tracked.id, Cause: err}
