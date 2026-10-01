@@ -18,6 +18,7 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 		{Package: "gophercloudsdk/clustering/v1/policies", Source: "sdk_owned", Model: "Policy", Find: true, Delete: true},
 		{Package: "gophercloudsdk/clustering/v1/clusters", Source: "sdk_owned", Model: "Cluster", Kind: "async_resource", Find: true, Wait: true},
 		{Package: "gophercloudsdk/clustering/v1/nodes", Source: "sdk_owned", Model: "Node", Kind: "async_resource", Find: true, Wait: true},
+		{Package: "gophercloudsdk/clustering/v1/receivers", Source: "sdk_owned", Model: "Receiver", Find: true, Delete: true},
 		{Package: "gophercloudsdk/clustering/v1/services", Source: "sdk_owned", Model: "Service", Kind: "list_only"},
 		{Package: "gophercloudsdk/instanceha/v1/segments", Source: "sdk_owned", Model: "Segment", Find: true, Delete: true},
 	}}
@@ -43,11 +44,11 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 		}
 	}
 	registry := read("clustering/v1/service_generated.go")
-	if !strings.Contains(registry, "BuildInfo") || !strings.Contains(registry, "ProfileTypes") || !strings.Contains(registry, "Profiles") || !strings.Contains(registry, "Policies") || !strings.Contains(registry, "Clusters") || !strings.Contains(registry, "Nodes") {
+	if !strings.Contains(registry, "BuildInfo") || !strings.Contains(registry, "ProfileTypes") || !strings.Contains(registry, "Profiles") || !strings.Contains(registry, "Policies") || !strings.Contains(registry, "Clusters") || !strings.Contains(registry, "Nodes") || !strings.Contains(registry, "Receivers") {
 		t.Fatalf("registry field names: %s", registry)
 	}
 	docs := read("clustering/v1/README.md")
-	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "객체 PATCH 갱신", "51개 직접 선언", "Collection.Delete는 미지원"} {
+	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "receivers/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "receivers/README.md", "객체 PATCH 갱신", "60개 직접 선언", "Collection.Delete는 미지원", "policy attach/detach/update", "wire `user`"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing actual SDK capability %q: %s", part, docs)
 		}
