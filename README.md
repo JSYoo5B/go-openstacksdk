@@ -24,7 +24,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2의 다섯 리소스 API를 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 5개, 부모 Collection 범위 19개, Heat stack 복합 식별자·자식 resource·이벤트 범위, Nova project quota singleton과 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2의 다섯 리소스 API를 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 5개, 부모 Collection 범위 19개, Heat stack 복합 식별자·자식 resource·이벤트 범위, Nova·Cinder·Neutron project quota singleton과 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
@@ -69,7 +69,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 각 문서에는 openstacksdk와의 입력·결과 형식 비교, 실제 서비스 필드, API 패키지 링크, 이름 조회·삭제·대기가 적용되는 리소스를 기록합니다. DNS zone이나 Octavia pool의 자식 리소스는 [부모 범위를 지정](docs/scoped-resources.md)해서 사용합니다.
 
-Heat는 `orchestration.Stacks.InStack(ctx, ref)` 또는 이름·ID가 모두 있는 `ForStack(identity)`로 대상을 고정합니다. Manila access rule은 `shared.ShareAccessRules.InShare(ctx, share)`에서 부모를 검증합니다. Nova quota는 `conn.ProjectQuotas(ctx, resource.Name("tenant"))`가 Keystone을 통한 이름 해석을 맡고, `CurrentProjectQuotas(ctx)`는 기록된 Keystone project 인증 결과를 사용합니다. quota에는 List/Find/Wait가 없습니다.
+Heat는 `orchestration.Stacks.InStack(ctx, ref)` 또는 이름·ID가 모두 있는 `ForStack(identity)`로 대상을 고정합니다. Manila access rule은 `shared.ShareAccessRules.InShare(ctx, share)`에서 부모를 검증합니다. Nova quota는 `conn.ProjectQuotas(ctx, resource.Name("tenant"))`, Cinder는 `BlockStorageProjectQuotas`, Neutron은 `NetworkProjectQuotas`가 Keystone을 통한 이름 해석을 맡습니다. 각각의 `Current...ProjectQuotas(ctx)`는 기록된 Keystone project 인증 결과를 사용합니다. quota에는 List/Find/Wait가 없습니다. [범위별 연산과 사용법](docs/scoped-resources.md)을 참고합니다.
 
 ## openstacksdk와 전체 사용 방식 비교
 
@@ -88,8 +88,9 @@ openstacksdk는 `Connection`에서 서비스 Proxy에 접근합니다. 이 프�
 | 확장 입력 | `**attrs`, `**query` | `compute.WithField(...)`, `resource.WithQuery(...)` |
 | 오류 | 예외 | 반환된 `error`, `errors.Is`, `errors.As` |
 | 리소스 재사용 | Resource 인스턴스 전달 가능 | `resource.ID(server.ID)`로 명시적으로 참조 |
+| 상태 대기 선택 인자 | `attribute`, `failures`, `callback`, `wait=None` | `WithStatusAttribute`, `WithFailureStates`, `WithProgressCallback`, `WithUnlimitedWait` |
 
-이름과 ID를 하나의 문자열로 추측하지 않습니다. UUID처럼 생긴 이름도 `resource.Name(...)`이면 이름으로 찾습니다. 기본 응답 모델은 Gophercloud 타입의 alias를 사용합니다. 인증·virtual media·Swift 리소스에는 SDK가 추가 정보를 보관하는 모델을 제공합니다. 응답 변경을 추적하고 자동 저장하는 Resource 객체는 아직 제공하지 않습니다.
+이름과 ID를 하나의 문자열로 추측하지 않습니다. UUID처럼 생긴 이름도 `resource.Name(...)`이면 이름으로 찾습니다. 기본 응답 모델은 Gophercloud 타입의 alias를 사용합니다. 인증·virtual media·Swift 리소스에는 SDK가 추가 정보를 보관하는 모델을 제공합니다. 응답 변경을 추적하고 자동 저장하는 Resource 객체는 아직 제공하지 않습니다. 대기 옵션은 SDK가 모델의 필드와 진행률을 읽으며 호출자가 builder를 구현하지 않습니다. [초기 조회·callback·context의 Go 정책](resource/README.md)은 Python의 캐시된 Resource 대기와 다른 부분을 설명합니다.
 
 ### 서비스 여러 개를 사용하는 서버 생성
 

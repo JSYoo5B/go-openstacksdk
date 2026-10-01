@@ -79,7 +79,7 @@ Get·Defaults·Update의 `QuotaResource`는 native `QuotaSet`과 고정된 `Proj
 
 Native limits 모델은 볼륨 타입별 필드를 `Extra map[string]any`로 읽으며, native Usage 모델에는 Extra가 없습니다. 두 경우 모두 Body가 알려지지 않은 per-type quota·배열·null·중첩 값·큰 정수의 정확한 JSON 값을 보존합니다. Native Extra의 숫자 변환으로 정밀도가 줄어드는 값도 Body에서 읽을 수 있습니다. quota_set envelope가 없거나 null·배열·scalar인 응답과 잘못된 known field 타입은 decode 오류입니다.
 
-Reset은 quota override를 지워 기본값으로 되돌리는 DELETE입니다. Cinder native 계약대로 **200만 성공**으로 처리하며 Nova의 202/204 성공 정책을 적용하지 않습니다. ResetResponse는 project ID와 헤더를 반환하고 자동 후속 GET을 하지 않습니다. 기본 404는 `resource.ErrNotFound`이며 `WithResetIgnoreMissing(true)`는 404만 `nil, nil`로 바꿉니다. 후속 false 옵션으로 다시 엄격하게 설정할 수 있습니다. HTTP status·본문·헤더, JSON decode와 context 취소·timeout 원인은 보존합니다.
+Reset은 quota override를 지워 기본값으로 되돌리는 DELETE입니다. Cinder native 계약대로 **200만 성공**으로 처리하며 다른 서비스의 202/204 성공 정책을 적용하지 않습니다. ResetResponse는 project ID와 헤더를 반환하고 자동 후속 GET을 하지 않습니다. 기본 404는 `resource.ErrNotFound`이며 `WithResetIgnoreMissing(true)`는 404만 `nil, nil`로 바꿉니다. 후속 false 옵션으로 다시 엄격하게 설정할 수 있습니다. HTTP status·본문·헤더, JSON decode와 context 취소·timeout 원인은 보존합니다.
 
 ## 지원 범위와 근거
 

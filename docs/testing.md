@@ -36,6 +36,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/introspection_start_contracts_test.go`, `baremetalintrospection/v1/introspection/start_test.go` | ManageBoot nil/false/true와 확장 query 인코딩, ResourceBase, serializer/옵션 오류 preHTTP, POST202, 오류 status·본문·header·URL과 취소 원인 보존 |
 | `internal/cmd/sdkgen/audited_requests_test.go` | StartIntrospection만 helper 호출, pinned 함수 본문·signature·builder·입력·결과 drift 거부, 주석·공백 변경 허용 |
 | `resource/wait_identity_test.go` | 응답의 ID가 바뀌거나 빠져도 명시 ID의 polling 대상 유지 |
+| `resource/wait_policy_test.go`, `resource/wait_attributes_test.go` | 실패 상태 교체·빈 목록·목표 우선, 무제한/유한 대기와 부모 context, 모델 JSON tag·pointer·null·progress 순서, terminal callback 생략·callback 취소·deleted/nil 결과 |
+| `api/wait_workflow_preflight_test.go`, `api/introspection_wait_options_test.go` | 잘못된 대기 속성을 생성·업로드 전에 차단, Inspector의 Finished 고정 조건과 서비스 오류 보존 |
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |
 | `internal/cmd/paritycheck/reviews_test.go` | catalog 추가 시 기존 판정 보존, 원본 입력 drift 거부, API·테스트·문서 근거, 중복 ID/JSON key와 불완전 지원 판정 거부 |
@@ -45,7 +47,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/accelerator_read_test.go`, `api/accelerator_actions_test.go`, `api/accelerator_boundaries_test.go` | SDK 소유 Cyborg 연결·microversion·UUID, 응답 JSON/헤더, 목록 중단·cycle·origin, enable/disable·program payload, 빈 페이지 continuation, redirect 경계·최신 token·재인증/취소와 사전 검증 |
 | `api/accelerator_profiles_test.go`, `api/accelerator_attributes_test.go`, `api/accelerator_singleton_test.go`, `api/accelerator_status_filter_test.go` | 프로필 exact 이름·UUID 삭제·array-one 생성, attribute key/ID 구별·flat 생성, singleton 응답 cardinality, snapshot·로컬 상태 필터와 명시 query 보존 |
 | `api/accelerator_requests_test.go`, `api/accelerator_request_binding_test.go`, `api/accelerator_request_response_boundary_test.go` | ARQ 전체 batch·부분 해석·raw bytes·오류 보존, state 대기, collection PATCH202·service token·2.1 project gate, single/batch/instance DELETE204 selector, accepted201 body 취소·decode 오류에서 무재시도·body close |
-| `api/project_quotas_contracts_test.go`, `connection_quotas_test.go` | 고정 project quota, 별도 Keystone 이름 조회·auth scope, zero/-1/force false, singleton 결과·오류·Reset |
+| `api/project_quotas_contracts_test.go`, `api/nova_project_quotas_precision_test.go`, `connection_quotas_test.go` | 고정 project quota, 별도 Keystone 이름 조회·auth scope, zero/-1/force false, singleton 결과·오류·Reset |
+| `api/cinder_project_quotas_contracts_test.go`, `api/cinder_project_quotas_responses_test.go` | Cinder defaults·usage query·DELETE200, 별도 Keystone·recorded auth·고정 target, typed/Extra deep snapshot·core 충돌·큰 정수·raw 응답·오류 |
+| `api/neutron_project_quotas_contracts_test.go`, `api/neutron_project_quotas_projects_test.go`, `connection_project_quotas_test.go` | Neutron details.json·check_limit false·DELETE202/204, 서비스별 Connection 연결·이름/인증/취소, 응답 metadata·snapshot·큰 정수·malformed·권한 오류 |
 | `api/heat_stacks_contracts_test.go` | name+ID identity, output query, summary/detail 차이, linked/marker pagination, 고정 대상 waiter·실패/삭제 완료 |
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
