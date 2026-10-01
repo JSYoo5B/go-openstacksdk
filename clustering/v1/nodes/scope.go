@@ -35,8 +35,8 @@ func (a *API) AtBasePath(path string) (*UpdateScope, error) {
 }
 
 func (scope *UpdateScope) validate() error {
-	if scope == nil || scope.path == "" || scope.api.RawClient() == nil || scope.api.RawClient().ProviderClient == nil {
-		return fmt.Errorf("%w: node update scope requires a collection path, service client and provider", resource.ErrInvalidOption)
+	if scope == nil || scope.api == nil || scope.path == "" {
+		return fmt.Errorf("%w: node update scope is required", resource.ErrInvalidOption)
 	}
 	return nil
 }
