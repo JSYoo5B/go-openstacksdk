@@ -77,8 +77,18 @@ func New(client *gophercloud.ServiceClient, dependencies Dependencies) *Service 
 			}),
 		},
 		Flavors: resource.NewCollection[Flavor](resource.Adapter[Flavor]{
-			Kind:    "flavor",
-			Get:     func(ctx context.Context, id string) (*Flavor, error) { return flavors.Get(ctx, client, id).Extract() },
+			Kind:                      "flavor",
+			IdentityFind:              true,
+			IdentityListQueryDefaults: url.Values{"is_public": {"None"}},
+			IdentityExtraSpecs: func(ctx context.Context, value *Flavor) (*Flavor, error) {
+				return nativefind.FlavorExtraSpecs(ctx, client, value)
+			},
+			Get: func(ctx context.Context, id string) (*Flavor, error) { return flavors.Get(ctx, client, id).Extract() },
+			GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Flavor, error) {
+				var result flavors.GetResult
+				result.Header, result.Err = nativefind.Get(ctx, client, []string{"flavors", id}, q, []int{200}, &result.Body)
+				return result.Extract()
+			},
 			List:    func(q url.Values) pagination.Pager { return flavors.ListDetail(client, query.Adapter(q)) },
 			Extract: flavors.ExtractFlavors,
 			ID:      func(f *Flavor) string { return f.ID }, Name: func(f *Flavor) string { return f.Name },

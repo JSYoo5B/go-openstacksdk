@@ -112,7 +112,7 @@ func TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources(t *testing.T
 			}
 		})
 	}
-	if _, err := compute.Flavors.FindIdentity(ctx, "flavor"); !errors.Is(err, resource.ErrUnsupported) {
-		t.Fatalf("unaudited flavor: %v", err)
+	if _, err := compute.Servers.FindIdentity(ctx, "server", resource.WithIdentityFindExtraSpecs(false)); !errors.Is(err, resource.ErrUnsupported) {
+		t.Fatalf("flavor-only extra specs capability on server: %v", err)
 	}
 }
