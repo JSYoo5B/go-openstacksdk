@@ -9,7 +9,12 @@ Magnum quota의 요청 대상은 프로젝트 ID와 리소스 이름의 쌍입�
 | 기록된 인증 프로젝트 선택 | `api.CurrentProject(ctx)` |
 | Cluster quota 선택 | `project.ForResource(quotas.Cluster)` |
 | hard limit 0으로 생성 | `scope.Create(ctx, quotas.WithHardLimit(0))` |
+| 고정 프로젝트·리소스 조회 | `scope.Get(ctx)` |
+| hard limit 2로 갱신 | `scope.Update(ctx, quotas.WithHardLimit(2))` |
+| explicit quota 삭제 | `scope.Delete(ctx)` |
+| 없는 quota의 삭제 허용 | `scope.Delete(ctx, quotas.WithDeleteIgnoreMissing(true))` |
 | concrete 옵션 snapshot | `quotas.WithQuotaCreateOptions(quotas.QuotaCreateOpts{HardLimit: &limit})` |
+| concrete 갱신 옵션 snapshot | `quotas.WithQuotaUpdateOptions(quotas.QuotaUpdateOpts{HardLimit: &limit})` |
 | 추가 서버 필드 | `quotas.WithQuotaCreateField("vendor", value)` |
 
 pinned openstacksdk의 `container_infrastructure_management.v1.Proxy`에는 quota model과 quota proxy method가 없습니다. 따라서 이 표에는 존재하지 않는 Python quota 호출을 대응시키지 않습니다. Python에서 이 서비스의 quota를 사용하려면 REST 호출 또는 별도 Magnum client가 필요합니다. Go의 새 scope는 Gophercloud의 native quota Create 계약을 SDK가 직접 관리합니다.
@@ -27,7 +32,16 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
     if err != nil { return err }
     fmt.Println(quota.RequestProjectID, quota.RequestResource,
         quota.ID, quota.HardLimit, quota.Header.Get("X-Openstack-Request-Id"))
-    return nil
+    current, err := scope.Get(ctx)
+    if err != nil { return err }
+    fmt.Println(current.HardLimit)
+
+    updated, err := scope.Update(ctx, quotas.WithHardLimit(2))
+    if err != nil { return err }
+    fmt.Println(updated.StatusCode)
+
+    _, err = scope.Delete(ctx)
+    return err
 }
 ```
 
@@ -43,11 +57,11 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
 
 ## 값과 응답
 
-Create는 hard limit을 명시적으로 요구합니다. `WithHardLimit(0)`은 0을 생략하지 않으며, `QuotaCreateOpts.HardLimit`이 nil인 상태는 HTTP 전에 `resource.ErrInvalidOption`입니다. SDK는 관리자 limit을 임의의 기본값으로 선택하지 않습니다. limit 값의 서버 유효성 규칙과 권한은 Magnum이 검증하며, 다른 서비스의 `-1=무제한` 규칙을 적용하지 않습니다.
+Create와 Update는 hard limit을 명시적으로 요구합니다. `WithHardLimit(0)`은 0을 생략하지 않으며, `QuotaCreateOpts.HardLimit` 또는 `QuotaUpdateOpts.HardLimit`이 nil인 상태는 HTTP 전에 `resource.ErrInvalidOption`입니다. SDK는 관리자 limit을 임의의 기본값으로 선택하지 않습니다. limit 값의 서버 유효성 규칙과 권한은 Magnum이 검증하며, 다른 서비스의 `-1=무제한` 규칙을 적용하지 않습니다.
 
-`WithQuotaCreateOptions`는 생성 시 pointer 값을 복사하고 매번 새 pointer로 적용합니다. `WithQuotaCreateField`는 생성 시 JSON snapshot을 보관합니다. 옵션은 나중 옵션이 우선하며 `hard_limit`, `project_id`, `resource`, `id`를 extension으로 덮어쓸 수 없습니다. query·header·알 수 없는 argument 옵션도 HTTP 전에 거절합니다.
+`WithQuotaCreateOptions`와 `WithQuotaUpdateOptions`는 생성 시 pointer 값을 복사하고 매번 새 pointer로 적용합니다. `WithQuotaCreateField`와 `WithQuotaUpdateField`는 생성 시 JSON snapshot을 보관합니다. 옵션은 나중 옵션이 우선하며 `hard_limit`, `project_id`, `resource`, `id`를 extension으로 덮어쓸 수 없습니다. query·header·알 수 없는 argument 옵션도 HTTP 전에 거절합니다.
 
-POST body는 최종 JSON을 한 번 직렬화하여 재인증·재시도에서도 같은 snapshot을 보냅니다. 플랫폼 int 범위에서 2^53보다 큰 hard limit을 float64 반올림 없이 보존합니다. scoped 요청은 다른 method·path·query·origin으로의 HTTP redirect를 거절하고 선택한 ServiceClient 설정을 변경하지 않습니다.
+POST·PATCH body는 최종 JSON을 한 번 직렬화하여 재인증·재시도에서도 같은 snapshot을 보냅니다. 플랫폼 int 범위에서 2^53보다 큰 hard limit을 float64 반올림 없이 보존합니다. scoped 요청은 다른 method·path·query·origin으로의 HTTP redirect를 거절하고 선택한 ServiceClient 설정을 변경하지 않습니다.
 
 `QuotaResource`는 native `Quotas`, 고정 요청 대상 `RequestProjectID`·`RequestResource`, 원문 필드 `Body`, 복사된 `Header`, 실제 `StatusCode`를 제공합니다. `ProjectID`와 `Resource`는 서버 응답 값이며 요청 대상을 대체하지 않습니다. native decoder가 float64로 변환하는 숫자 row ID는 원문 JSON에서 다시 읽어 정확한 문자열로 보존합니다. `Body`로 unknown field·null·누락·큰 JSON 정수를 구분할 수 있습니다.
 
@@ -57,6 +71,12 @@ POST body는 최종 JSON을 한 번 직렬화하여 재인증·재시도에서�
 
 Create는 선택한 ResourceBase의 `/quotas`에 flat JSON `{project_id, resource, hard_limit, ...}`를 보내고 native 정책대로 201만 허용합니다. 생성된 `API.Create(ctx, CreateOpts, ...CreateOption)`는 기존 native 계약을 그대로 유지합니다. native convenience와 달리 scope는 고정 대상·생성 시 옵션 snapshot·정확한 정수·응답 metadata를 제공합니다.
 
-현재 scope 구현은 quota 생성까지입니다. 공식 Magnum API의 quota Get·PATCH Update·DELETE·페이지 목록은 별도 구현이 남아 있습니다. quota 이름 Find·상태 Wait는 제공하지 않으며 Python Resource의 dirty-state·자동 commit·cache와 같다고 주장하지 않습니다. pinned Python에 quota 선언이 없다는 사실도 Magnum REST 전체 지원을 의미하지 않습니다.
+Get·Update·Delete는 `/quotas/{project_id}/{resource}`를 사용합니다. Get은 200, flat JSON object를 보내는 PATCH Update는 202, request body가 없는 Delete는 204만 허용합니다. JSON Patch operation 배열을 보내지 않습니다. Delete는 삭제 metadata를 반환하고 후속 GET을 하지 않습니다.
 
-근거: [pinned native Create](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/requests.go), [native quota model](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/results.go), [pinned Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/container_infrastructure_management/v1/_proxy.py), [공식 Magnum quota API](https://docs.openstack.org/api-ref/container-infrastructure-management/#magnum-quota-api). [HTTP·옵션·인증·오류 테스트](../../../api/magnum_quota_create_test.go)가 동작을 검증합니다.
+Magnum은 explicit quota가 없는 프로젝트의 Get에 deployment hard limit을 반환할 수 있습니다. 이 응답에는 row ID 또는 resource가 없을 수 있으며 `Body`와 native 응답 필드에 없는 값을 만들지 않습니다. 조회 요청 대상은 `RequestProjectID`·`RequestResource`로 별도 제공됩니다. Delete는 explicit override를 삭제하며 다음 조회의 기본값 처리는 서버가 결정합니다.
+
+Delete의 기본 404 정책은 엄격합니다. `WithDeleteIgnoreMissing(true)`는 404만 숨기며 뒤의 false 옵션으로 엄격하게 되돌릴 수 있습니다. 403·500 등의 오류는 숨기지 않습니다. 이 정책은 pinned Python의 quota 기본값에 대응한다는 뜻이 아닙니다. 해당 Python quota API가 존재하지 않습니다.
+
+현재 scope는 quota Create·Get·PATCH Update·Delete를 제공합니다. 공식 Magnum API의 페이지 목록은 별도 구현이 남아 있습니다. quota 이름 Find·상태 Wait는 제공하지 않으며 Python Resource의 dirty-state·자동 commit·cache와 같다고 주장하지 않습니다. pinned Python에 quota 선언이 없다는 사실도 Magnum REST 전체 지원을 의미하지 않습니다.
+
+근거: [pinned native Create](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/requests.go), [native quota model](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/results.go), [pinned Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/container_infrastructure_management/v1/_proxy.py), [공식 Magnum quota API](https://docs.openstack.org/api-ref/container-infrastructure-management/#magnum-quota-api), [server controller의 GET fallback·PATCH·DELETE](https://github.com/openstack/magnum/blob/master/magnum/api/controllers/v1/quota.py). 이 추가 REST 계약은 별도 server SHA에 고정한 inventory가 아니며 native·Python 선언의 완전 지원 수치에 포함하지 않습니다. [생성·인증 테스트](../../../api/magnum_quota_create_test.go)와 [조회·갱신·삭제·오류 테스트](../../../api/magnum_quota_operations_test.go)가 동작을 검증합니다.
