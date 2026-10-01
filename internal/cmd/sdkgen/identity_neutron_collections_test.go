@@ -391,7 +391,7 @@ func TestIdentityNeutronEmissionPreservesRawQueriesAndExistingCapabilities(t *te
 			}
 		})
 	}
-	if len(identityCollectionSpecs) != 16 || rawCount != 1 {
+	if len(identityCollectionSpecs) != 18 || rawCount != 1 {
 		t.Fatal("explicit audited scope changed", len(identityCollectionSpecs), rawCount)
 	}
 }

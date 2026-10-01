@@ -278,6 +278,13 @@ func (g *generator) generate(path string) error {
 	if err != nil {
 		return err
 	}
+	dependencyDeclarations, err := g.identityPaginationDeclarations(pkg.Path())
+	if err != nil {
+		return err
+	}
+	for key, decl := range dependencyDeclarations {
+		nativeDecls[key] = decl
+	}
 	if err := validateIdentityCollectionContracts(pkg, nativeDecls, plan, scopes, nativeConstants); err != nil {
 		return err
 	}

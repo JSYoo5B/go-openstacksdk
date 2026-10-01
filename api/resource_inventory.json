@@ -1178,6 +1178,8 @@
     "package": "gophercloudsdk/network/v2/extensions/subnetpools",
     "model": "SubnetPool",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1192,6 +1194,8 @@
     "package": "gophercloudsdk/network/v2/extensions/trunks",
     "model": "Trunk",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },

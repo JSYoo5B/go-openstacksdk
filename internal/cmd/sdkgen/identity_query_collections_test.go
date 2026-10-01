@@ -53,6 +53,22 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		}
 	}
 
+	if spec.path == "network/v2/extensions/subnetpools" || spec.path == "network/v2/extensions/trunks" {
+		page, extract := "SubnetPoolPage", "ExtractSubnetPools"
+		if spec.model == "Trunk" {
+			page, extract = "TrunkPage", "ExtractTrunks"
+		} else {
+			source = strings.Replace(source, "type SubnetPool struct{ID string;Name string}", "type SubnetPool struct{ID string;Name string;DefaultPrefixLen int `json:\"-\"`;MinPrefixLen int `json:\"-\"`;MaxPrefixLen int `json:\"-\"`}", 1)
+		}
+		source = strings.ReplaceAll(source, "ModelPage", page)
+		source = strings.Replace(source, "type "+page+" struct{}", "type "+page+" struct{pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", extract)
+		source += "\nfunc(" + page + ")IsEmpty()(bool,error){return false,nil}\n"
+		if spec.model != "Trunk" {
+			source += "func(" + page + ")NextPageURL()(string,error){return \"\",nil}\n"
+		}
+	}
+
 	// Member uses GetMemberResult upstream; use its actual signature instead of
 	// allowing the emitter to assume every native getter returns GetResult.
 	source = strings.ReplaceAll(source, "GetResult", spec.getter+"Result")
@@ -86,6 +102,8 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 		"compute/v2/flavors":                    `[]string{"flavors", id}, q, []int{200}`,
 		"network/v2/extensions/layer3/routers":  `[]string{"routers", id}, q, []int{200}`,
 		"network/v2/extensions/security/groups": `[]string{"security-groups", id}, q, []int{200}`,
+		"network/v2/extensions/subnetpools":     `[]string{"subnetpools", id}, q, []int{200}`,
+		"network/v2/extensions/trunks":          `[]string{"trunks", id}, q, []int{200}`,
 		"blockstorage/v3/volumes":               `[]string{"volumes", id}, q, []int{200}`,
 		"network/v2/ports":                      `[]string{"ports", id}, q, []int{200}`,
 		"network/v2/networks":                   `[]string{"networks", id}, q, []int{200}`,
@@ -99,7 +117,7 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 		"loadbalancer/v2/pools":                 `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
 		"image/v2/images":                       `[]string{"images", id}, q, []int{200}`,
 	}
-	if len(identityCollectionSpecs) != 16 || len(identityNativeDeclarations) != 16 {
+	if len(identityCollectionSpecs) != 18 || len(identityNativeDeclarations) != 18 {
 		t.Fatal("identity opt-in inventory must remain explicit", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 	for _, spec := range identityCollectionSpecs {
@@ -210,6 +228,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 		return pinnedFlavorIdentityDeclarations(t)
 	case "network/v2/extensions/layer3/routers", "network/v2/extensions/security/groups":
 		return pinnedNeutronExtensionIdentityDeclarations(t, spec)
+	case "network/v2/extensions/subnetpools", "network/v2/extensions/trunks":
+		return pinnedPoolTrunkIdentityDeclarations(t, spec)
 	case "compute/v2/servers":
 		request = strings.Replace(defaultGet, "&r.Body, nil", "&r.Body, &gophercloud.RequestOpts{\n\t\tOkCodes: []int{200, 203},\n\t}", 1)
 		urls = `func getURL(client *gophercloud.ServiceClient, id string) string { return deleteURL(client,id) }

@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -44,6 +46,8 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "compute/v2/flavors", model: "Flavor", getter: "Get", lister: "ListDetail", getSegments: []string{"flavors", "$id"}, getCodes: []int{200}, noNameQuery: true, listDefaultKey: "is_public", listDefaultValue: "None", extraSpecs: true},
 	{path: "network/v2/extensions/layer3/routers", model: "Router", getter: "Get", lister: "List", getSegments: []string{"routers", "$id"}, getCodes: []int{200}},
 	{path: "network/v2/extensions/security/groups", model: "SecGroup", getter: "Get", lister: "List", getSegments: []string{"security-groups", "$id"}, getCodes: []int{200}, rawListIterator: "IterateSecurityGroups"},
+	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", getter: "Get", lister: "List", getSegments: []string{"subnetpools", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/trunks", model: "Trunk", getter: "Get", lister: "List", getSegments: []string{"trunks", "$id"}, getCodes: []int{200}},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -96,11 +100,6 @@ func identityRawListMetadataValid(spec identityCollectionSpec) bool {
 	return spec.model == "SecGroup" && spec.getter == "Get" && spec.lister == "List" && spec.parents == 0 && len(spec.getSegments) == 2 && spec.getSegments[0] == "security-groups" && spec.getSegments[1] == "$id" && len(spec.getCodes) == 1 && spec.getCodes[0] == 200 && !spec.noNameQuery && spec.rawListIterator == "IterateSecurityGroups"
 }
 
-func identityRawListEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
-	spec, ok := identityCollectionContract(pkg, plan, parents)
-	return ok && spec.rawListIterator != ""
-}
-
 func identityNeutronListSchema(pkg *types.Package, plan *collectionPlan) bool {
 	pageName, extractor := "RouterPage", "ExtractRouters"
 	if sdkPath(pkg.Path()) == "network/v2/extensions/security/groups" {
@@ -149,6 +148,99 @@ func identityNeutronListSchema(pkg *types.Package, plan *collectionPlan) bool {
 		}
 	}
 	return true
+}
+
+// SubnetPool's custom prefix-length decoder and Trunk's inherited links.next
+// pager are native contracts; neither resource gains an SDK list mode.
+func identityPoolTrunkSchema(pkg *types.Package, plan *collectionPlan) bool {
+	pageName, extractor := "SubnetPoolPage", "ExtractSubnetPools"
+	trunk := sdkPath(pkg.Path()) == "network/v2/extensions/trunks"
+	if trunk {
+		pageName, extractor = "TrunkPage", "ExtractTrunks"
+	}
+	pageObject := pkg.Scope().Lookup(pageName)
+	if pageObject == nil {
+		return false
+	}
+	page, ok := pageObject.Type().(*types.Named)
+	if !ok {
+		return false
+	}
+	fields, ok := page.Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 1 || !fields.Field(0).Embedded() || types.TypeString(fields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page, name)
+		if method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	if trunk {
+		for i := 0; i < page.NumMethods(); i++ {
+			if page.Method(i).Name() == "NextPageURL" {
+				return false
+			}
+		}
+	}
+	extract, ok := pkg.Scope().Lookup(extractor).(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	if !trunk {
+		body, ok := plan.model.Underlying().(*types.Struct)
+		if !ok {
+			return false
+		}
+		for _, name := range []string{"DefaultPrefixLen", "MinPrefixLen", "MaxPrefixLen"} {
+			found := false
+			for i := 0; i < body.NumFields(); i++ {
+				if body.Field(i).Name() == name {
+					found = types.Identical(body.Field(i).Type(), types.Typ[types.Int]) && reflect.StructTag(body.Tag(i)).Get("json") == "-"
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// Only the audited Trunk page relies on this dependency's default continuation.
+// Imported type data does not include method bodies, so load the pinned native
+// dependency source rather than infer its wire policy from an interface.
+func (g *generator) identityPaginationDeclarations(path string) (map[string]*ast.FuncDecl, error) {
+	if sdkPath(path) != "network/v2/extensions/trunks" {
+		return nil, nil
+	}
+	source, ok := g.meta[upstreamModule+"/pagination"]
+	if !ok || source.Dir == "" || len(source.GoFiles) == 0 {
+		return nil, fmt.Errorf("audited Trunk identity collection: native pagination dependency metadata missing")
+	}
+	result := map[string]*ast.FuncDecl{}
+	for _, name := range source.GoFiles {
+		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(source.Dir, name), nil, 0)
+		if err != nil {
+			return nil, fmt.Errorf("audited Trunk identity collection: native pagination dependency: %w", err)
+		}
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || identityDeclarationKey(fn) != "LinkedPageBase.NextPageURL" {
+				continue
+			}
+			key := "pagination.LinkedPageBase.NextPageURL"
+			if result[key] != nil {
+				return nil, fmt.Errorf("audited Trunk identity collection: duplicate pagination continuation declaration")
+			}
+			result[key] = fn
+		}
+	}
+	return result, nil
 }
 
 // Flavor's list default and optional enrichment are deliberately separate from
@@ -420,9 +512,38 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"ExtractGroups":            "e42007fd330615fa5e88a454260fee2cfd8a1c2b604d42bd4dc4ff7db325d423",
 		"commonResult.Extract":     "0593db713468ed605d0dbfce265a3003901cedcf742051a00a3e1f385ab13df2",
 	},
+	"network/v2/extensions/subnetpools": {
+		"Get":                            "f2e21c88e17a8ad49060e84dad42244e17c64453bae932aadebe34ad0e7ebc9b",
+		"List":                           "b5685bd0990f632e5bc6b3824520185616669b675d28c83168502946acf8d242",
+		"ListOpts.ToSubnetPoolListQuery": "c6af8790e25021db5d472bfef7cfe34e4c692bcacce1eaf79c2451e9e4343779",
+		"getURL":                         "4e7e71e4b36e374a2fc6830f4f621ab3dd904cb2e1fa10b99e43a5590b7b4b36",
+		"listURL":                        "0a55ee851552d789ddd3c12304e6d0d209cae0cfd477d71b138196681486bf9d",
+		"rootURL":                        "4f185db1078eefd1b5f5b38bd1c601bd6fccaa3c20fa99a7b85371ef7f7b8104",
+		"resourceURL":                    "ca0246cf0e192c0133b2d43b9c5b577badf51c51344d3c5fc499d01a97ef54c8",
+		"commonResult.Extract":           "e70226430ded7b75197a644df50e5484cbb78fcfc8174beba0bb7add0dea5310",
+		"SubnetPool.UnmarshalJSON":       "7166552c0b959e3559a7f81f10bec4072c454530187c73331faf174efce743ef",
+		"SubnetPoolPage.NextPageURL":     "5002bfbc328292413a3aaa785d5fad4a23dcd0835581440ff41497deeb0b7d57",
+		"SubnetPoolPage.IsEmpty":         "4843c1ad38084a3f8fa778644a55267a8cdc9f052735cb111f4299e8285a978f",
+		"ExtractSubnetPools":             "d55581a7189bdae0d033052889b6db3043ecfb67892fc537809b4cec522de3d8",
+	},
+	"network/v2/extensions/trunks": {
+		"Get":                                   "f2e21c88e17a8ad49060e84dad42244e17c64453bae932aadebe34ad0e7ebc9b",
+		"List":                                  "9fcac9fb5387b699ef747b96fd8b049b6319d15e9b22ab1f0d28ae9fbbc890cc",
+		"ListOpts.ToTrunkListQuery":             "46017753bc904ae4fe4aa007cea675e1fd1378173905292c61f5cc32bd194920",
+		"getURL":                                "4e7e71e4b36e374a2fc6830f4f621ab3dd904cb2e1fa10b99e43a5590b7b4b36",
+		"listURL":                               "0a55ee851552d789ddd3c12304e6d0d209cae0cfd477d71b138196681486bf9d",
+		"rootURL":                               "4f185db1078eefd1b5f5b38bd1c601bd6fccaa3c20fa99a7b85371ef7f7b8104",
+		"resourceURL":                           "ca0246cf0e192c0133b2d43b9c5b577badf51c51344d3c5fc499d01a97ef54c8",
+		"commonResult.Extract":                  "a86967d1e97260072f2f9e8a2c1ff10644a529f65912852fe0781206d1a9c332",
+		"TrunkPage.IsEmpty":                     "594c7f1c9b29430d07dccfd9c819a288c71d3c1835075bfd1d7dcb133618121d",
+		"ExtractTrunks":                         "95034dff77e7308bcd4c851032b735581b3c3e4e523f1b354b7255a76c95e6be",
+		"pagination.LinkedPageBase.NextPageURL": "fa8678035238acb855e2d60896aa155d50de519d8545830ed52220490a02ad4e",
+	},
 }
 
 var identityNativeURLConstants = map[string]map[string]string{
+	"network/v2/extensions/subnetpools":     {"resourcePath": "subnetpools"},
+	"network/v2/extensions/trunks":          {"resourcePath": "trunks"},
 	"network/v2/extensions/layer3/routers":  {"resourcePath": "routers"},
 	"network/v2/extensions/security/groups": {"rootPath": "security-groups"},
 	"loadbalancer/v2/pools":                 {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
@@ -485,6 +606,12 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if (spec.path == "network/v2/extensions/layer3/routers" || spec.path == "network/v2/extensions/security/groups") && !identityNeutronListSchema(pkg, selected) {
 			return fmt.Errorf("audited identity collection %s.%s: native concrete/builder list, pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if (spec.path == "network/v2/extensions/subnetpools" || spec.path == "network/v2/extensions/trunks") && !identityPoolTrunkSchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native prefix decoder, inherited pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if spec.path == "network/v2/extensions/trunks" && decls["TrunkPage.NextPageURL"] != nil {
+			return fmt.Errorf("audited identity collection %s.%s: native inherited continuation override changed", spec.path, spec.model)
 		}
 		for name, want := range identityNativeDeclarations[spec.path] {
 			got, err := requestDeclarationHash(decls[name])
