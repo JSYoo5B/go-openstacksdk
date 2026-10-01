@@ -44,12 +44,42 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
-	// Snapshot SDK-owned secondary-search policy before any callback can run.
+	// Snapshot SDK-owned list and enrichment policies before any callback can run.
 	missingListQuery := cloneIdentityFindOptions(IdentityFindOpts{Query: c.binding.IdentityMissingListQuery}).Query
-	for key := range missingListQuery {
-		if err := validateIdentityFindQueryKey(key); err != nil {
+	listDefaults := cloneIdentityFindOptions(IdentityFindOpts{Query: c.binding.IdentityListQueryDefaults}).Query
+	extraSpecs := c.binding.IdentityExtraSpecs
+	for _, query := range []url.Values{missingListQuery, listDefaults} {
+		for key := range query {
+			if err := validateIdentityFindQueryKey(key); err != nil {
+				return fail(err)
+			}
+		}
+	}
+	if config.GetExtraSpecs != nil && extraSpecs == nil {
+		return fail(ErrUnsupported)
+	}
+	getExtraSpecs := config.GetExtraSpecs != nil && *config.GetExtraSpecs
+	finish := func(value *T) (*T, error) {
+		if err := ctx.Err(); err != nil {
 			return fail(err)
 		}
+		if getExtraSpecs {
+			var err error
+			value, err = extraSpecs(ctx, value)
+			if canceled := ctx.Err(); canceled != nil {
+				return fail(canceled)
+			}
+			if err != nil {
+				return fail(err)
+			}
+			if _, err := c.identityFindID(value); err != nil {
+				return fail(err)
+			}
+			if err := ctx.Err(); err != nil {
+				return fail(err)
+			}
+		}
+		return value, nil
 	}
 	originalQuery := cloneIdentityFindOptions(config).Query
 	if config.AllProjects != nil {
@@ -89,7 +119,7 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 			if err := ctx.Err(); err != nil {
 				return fail(err)
 			}
-			return value, nil
+			return finish(value)
 		}
 		if !identityFindCanFallback(err, config.Fallback) {
 			if !identityFindTerminalError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) && ignoreMissing {
@@ -104,6 +134,14 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	// ignorable. List HTTP failures are never suppressed by IgnoreMissing.
 	if c.binding.IterateIdentity == nil && c.binding.IterateControlled == nil && c.binding.Iterate == nil && (c.binding.List == nil || c.binding.Extract == nil) {
 		return fail(ErrUnsupported)
+	}
+	for key, values := range listDefaults {
+		if !config.Query.Has(key) {
+			config.Query[key] = append([]string(nil), values...)
+		}
+		if !originalQuery.Has(key) {
+			originalQuery[key] = append([]string(nil), values...)
+		}
 	}
 	if config.AllProjects != nil && *config.AllProjects {
 		config.Query.Set(c.binding.IdentityAllProjectsQuery, "true")
@@ -144,6 +182,9 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if found == nil && !ignoreMissing {
 		// Do not attach a suppressed direct 400/403 to logical list absence.
 		return fail(&NotFoundError{Resource: kind, Reference: identity})
+	}
+	if found != nil {
+		return finish(found)
 	}
 	return found, nil
 }

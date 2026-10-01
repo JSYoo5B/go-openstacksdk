@@ -42,6 +42,12 @@ type Adapter[T any] struct {
 	// successful empty identity search. SDK bindings own the fixed query overlay;
 	// it never retries HTTP errors or changes ordinary Get/List/Ref lookup.
 	IdentityMissingListQuery url.Values
+	// IdentityListQueryDefaults supplies audited list-only defaults for identity
+	// searches. Explicit caller keys, including empty values, take precedence.
+	IdentityListQueryDefaults url.Values
+	// IdentityExtraSpecs enriches a validated, uniquely resolved resource when
+	// requested. Audited bindings own the native fetch and model snapshot.
+	IdentityExtraSpecs func(context.Context, *T) (*T, error)
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
@@ -68,6 +74,9 @@ type Collection[T any] struct{ binding Adapter[T] }
 func NewCollection[T any](adapter Adapter[T]) *Collection[T] {
 	if adapter.IdentityMissingListQuery != nil {
 		adapter.IdentityMissingListQuery = cloneIdentityFindOptions(IdentityFindOpts{Query: adapter.IdentityMissingListQuery}).Query
+	}
+	if adapter.IdentityListQueryDefaults != nil {
+		adapter.IdentityListQueryDefaults = cloneIdentityFindOptions(IdentityFindOpts{Query: adapter.IdentityListQueryDefaults}).Query
 	}
 	return &Collection[T]{binding: adapter}
 }

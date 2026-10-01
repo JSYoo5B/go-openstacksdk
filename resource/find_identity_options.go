@@ -9,7 +9,8 @@ import (
 
 // IdentityFindOpts configures automatic ID-or-name lookup. A nil IgnoreMissing
 // defaults to true. Details defaults to true and AllProjects to false; explicit
-// values require a binding that supports those list-only policies. Query contains
+// values require a binding that supports those list-only policies. GetExtraSpecs
+// defaults to false; explicit values require an audited enrichment callback. Query contains
 // service-specific GET and list fields; transport, pagination controls and local
 // filters are not FindIdentity inputs.
 type IdentityFindOpts struct {
@@ -18,6 +19,7 @@ type IdentityFindOpts struct {
 	Query         url.Values
 	Details       *bool
 	AllProjects   *bool
+	GetExtraSpecs *bool
 }
 
 // IdentityFindOption configures an identity lookup. Later options win.
@@ -70,6 +72,17 @@ func WithIdentityFindAllProjects(value bool) IdentityFindOption {
 	}
 }
 
+// WithIdentityFindExtraSpecs requests native enrichment after a validated GET or
+// a complete, uniquely matched list search. Explicit false still requires that
+// binding capability; it does not change ordinary Get, List, or Ref lookup.
+func WithIdentityFindExtraSpecs(value bool) IdentityFindOption {
+	return func(options *IdentityFindOpts) error {
+		copy := value
+		options.GetExtraSpecs = &copy
+		return nil
+	}
+}
+
 // WithIdentityFindQuery supplies a wire query field to GET and list fallback.
 // A direct GET with query requires an audited SDK query hook; unsupported
 // bindings reject it before HTTP. List-only names do not require that hook.
@@ -101,6 +114,10 @@ func cloneIdentityFindOptions(value IdentityFindOpts) IdentityFindOpts {
 	if value.AllProjects != nil {
 		allProjects := *value.AllProjects
 		copy.AllProjects = &allProjects
+	}
+	if value.GetExtraSpecs != nil {
+		getExtraSpecs := *value.GetExtraSpecs
+		copy.GetExtraSpecs = &getExtraSpecs
 	}
 	copy.Query = make(url.Values, len(value.Query))
 	for key, values := range value.Query {
@@ -143,7 +160,7 @@ func validateIdentityFindQueryKey(key string) error {
 		}
 	}
 	switch strings.ToLower(key) {
-	case "max_items", "paginated", "base_path", "list_base_path", "jmespath_filters", "headers", "microversion", "allow_unknown_params", "ignore_missing", "fallback", "details", "all_projects":
+	case "max_items", "paginated", "base_path", "list_base_path", "jmespath_filters", "headers", "microversion", "allow_unknown_params", "ignore_missing", "fallback", "details", "all_projects", "get_extra_specs":
 		return invalid("identity find query %q is an SDK control", key)
 	}
 	return nil
