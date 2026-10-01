@@ -1695,18 +1695,28 @@
           "tests": [
             "api/accelerator_attributes_test.go:TestAcceleratorAttributeWaitDeletedStableIDAndContext"
           ]
+        },
+        {
+          "behavior": "Shared Go WaitDeleted completes on 404, nil successful fetch or case-insensitive deleted status, skips terminal callbacks, stops further GET after callback cancellation and honors explicit unlimited wait with parent deadlines.",
+          "tests": [
+            "resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext"
+          ]
         }
       ],
       "differences": [
-        "Python wait_for_delete returns the original/fetched Resource, succeeds on NotFound, a falsy fetch or status=deleted, invokes callback(progress or 0), defaults to 120 seconds and accepts wait=None forever. Go returns error, fixes UUID once, waits only for GET 404 and defaults to a finite five-minute/two-second polling policy.",
-        "The Go helper is Collection-bound with explicit ID/name resolution and parent context cancellation; it does not reproduce generic Resource cache/state/callback behavior."
+        "Python returns its original/fetched Resource; Go returns error and fixes an explicit Ref identity once. Shared Go deletion succeeds on 404, nil successful fetch or binding/selected status=deleted, with optional progress callbacks and explicit unlimited wait. Go defaults to five minutes/two seconds and applies context deadlines to HTTP requests.",
+        "Go callbacks include the initial nonterminal lookup response and read exported integer model progress or zero. Python Resource cache/descriptor/mutation and Adapter semantics remain separate inherited contracts."
       ],
       "documentation": [
-        "accelerator/v2/README.md"
+        "accelerator/v2/README.md",
+        "resource/README.md"
       ],
       "remaining": [
-        "Progress callback, infinite wait, status=deleted/falsy-fetch success and returned Resource contract remain unimplemented or need an explicitly documented policy mapping. Keep the whole generic Python wait operation unresolved.",
-        "Audit Python skip_cache/fetch/Resource identity/error classification and add ARQ/device-specific deletion waiter observations plus forbidden/network-error preservation, rather than counting profile/attribute tests as universal Resource support."
+        "Audit Python skip_cache/fetch/Resource identity/error classification and original Resource return behavior against the documented Go error-only contract; callbacks, unlimited wait and deleted/nil success are implemented rather than missing.",
+        "Add ARQ/device-specific deletion selector/callback and forbidden/network-error observations instead of treating profile/attribute/default native fixtures as universal inherited Resource parity."
       ]
     },
     {
@@ -1732,19 +1742,29 @@
             "api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata",
             "api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName"
           ]
+        },
+        {
+          "behavior": "Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.",
+          "tests": [
+            "resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence",
+            "resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext",
+            "resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields",
+            "resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs"
+          ]
         }
       ],
       "differences": [
-        "Python wait_for_status accepts an existing Resource, arbitrary status attribute, caller-defined failures, optional progress callback and wait=None forever, and can return an already-at-target Resource without fetching. Go Collection.Wait first resolves/fetches a Ref, uses the binding-selected Device.status or ARQ.state, fixed ERROR/BindFailed failures, case-insensitive comparison and finite five-minute/two-second defaults.",
-        "Go owns service-specific capability and 2.3 Device status gating; it does not implement arbitrary Resource/MRO state fetching or Python cache-bypass behavior."
+        "Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout."
       ],
       "documentation": [
         "accelerator/v2/README.md",
-        "accelerator/v2/acceleratorrequests/README.md"
+        "accelerator/v2/acceleratorrequests/README.md",
+        "resource/README.md"
       ],
       "remaining": [
-        "Callback/progress, arbitrary attribute, configurable failure set and unbounded waiting remain unimplemented; this operation must stay unresolved regardless of successful case-insensitive/failure-state fixtures.",
-        "Audit initial-resource target short-circuit versus mandatory Go lookup, Python missing-resource failure classification, skip_cache and mutated Resource identity during polls. Add timeout/cancellation/during-poll and ERROR-state observations for status wait, rather than relying on deletion waiter fixtures."
+        "Audit cached initial Resource short-circuit, None target status, descriptor/unknown-field attribute semantics, skip_cache/fetch errors and Resource identity mutation against the documented Go model/Ref policy. The shared waiter options are implemented, but this whole inherited Python operation remains unresolved.",
+        "Add Cyborg Device/ARQ-specific selector, callback, timeout/in-flight cancellation and configured-failure observations; native Node/Server shared-policy fixtures do not independently establish every Cyborg inherited contract."
       ]
     },
     {
@@ -2431,16 +2451,27 @@
           "tests": [
             "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "Shared Go WaitDeleted completes on 404, nil successful fetch or case-insensitive deleted status, skips terminal callbacks, stops further GET after callback cancellation and honors explicit unlimited wait with parent deadlines.",
+          "tests": [
+            "resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext"
+          ]
         }
       ],
       "differences": [
         "Go deletion wait returns error, uses a five-minute default and treats 404 or DELETE_COMPLETE as completion while ADOPT_COMPLETE is not inferred as deletion. Python returns the Resource and its Stack.fetch treats both complete states as NotFound."
       ],
       "documentation": [
-        "orchestration/v1/stacks/README.md"
+        "orchestration/v1/stacks/README.md",
+        "resource/README.md"
       ],
       "remaining": [
-        "Audit generic resource.wait_for_delete plus Stack.fetch and inherited polling, Resource mutation/progress callback and wait=None/default-120 behavior; add transient polling, timeout and in-flight cancellation/error fixtures before whole-operation mapping."
+        "Audit Stack.fetch and cached/mutated Resource return/error semantics, including Python ADOPT_COMPLETE behavior. Unlimited wait and progress callbacks now exist in the shared Go helper; Heat-specific deletion errors remain authoritative.",
+        "Add Heat transient polling, timeout, in-flight cancellation and callback evidence before whole-operation mapping. Go returns error rather than a Python Resource."
       ]
     },
     {
@@ -2466,17 +2497,28 @@
           "tests": [
             "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.",
+          "tests": [
+            "resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence",
+            "resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext",
+            "resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields",
+            "resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs"
+          ]
         }
       ],
       "differences": [
         "Go stack wait resolves once and polls canonical name/ID, defaults to five minutes/two seconds and treats *_FAILED or ERROR as terminal. Python Proxy delegates a generic Resource with custom failures/attribute/callback and wait=None."
       ],
       "documentation": [
-        "orchestration/v1/stacks/README.md"
+        "orchestration/v1/stacks/README.md",
+        "resource/README.md"
       ],
       "remaining": [
-        "Audit inherited resource.wait_for_status and Utils polling including indefinite wait, custom failure lists/status attribute, progress callback, cached/mutated Resource, timeout and transport errors; scoped stack success/failure tests do not verify the full generic Proxy method.",
-        "Add stack wait timeout, in-flight cancellation and custom failure-policy evidence or document deliberately unsupported generic inputs."
+        "Audit cached/mutated Python Resource, None target status, Stack.fetch, skip_cache and Adapter error/timeout semantics against mandatory Go lookup/context deadlines. Configurable failure states, attribute selection, callbacks and unlimited wait now exist in the shared Go helper.",
+        "Add stack-specific timeout, in-flight cancellation, custom failure/attribute/callback evidence before whole-operation mapping; existing stack default success/failure fixtures and shared Node/Server tests cover different contracts."
       ]
     },
     {
@@ -2953,6 +2995,475 @@
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_quota_set",
+      "source_fingerprint": "b2868bfcc4e46b34e605d872e81e32f797242308fe3efa1304c8c7b0e71ace58",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage"
+      ],
+      "contracts": [
+        {
+          "behavior": "The ordinary and usage=true Cinder endpoint forms have distinct Go methods preserving limit and allocation triples plus raw response data.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go preserves native Limit/InUse/Reserved/Allocated structures; Python common QuotaSet flattens each limit and builds separate usage/reservation dictionaries.",
+        "Go requires an explicit ID or name reference and fixes the project once instead of accepting a Python Project object."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Additional **query fetch parameters have no scoped Go option or audited forwarding policy.",
+        "Audit inherited common QuotaSet/Resource fetch translation, descriptor coercion, dict/location views, cache/skip_cache and microversion/adapter behavior; native typed/raw responses are not a full mapping of the Python Resource object."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_quota_set_defaults",
+      "source_fingerprint": "c01e982612cb31f0b74be256c5b20eb0ba8ac362a662677a349af9fe4ec2128d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Defaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "The dedicated defaults endpoint returns server defaults without resetting or fetching current overrides.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns an independent typed/raw response object associated with a fixed project scope rather than mutating a Python QuotaSet Resource."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Audit inherited common QuotaSet/Resource fetch translation, descriptor coercion, dict/location views, cache/skip_cache and microversion/adapter behavior; native typed/raw responses are not a full mapping of the Python Resource object.",
+        "Python Project/Resource input coercion and dynamic base_path/resource_response_key fetch options have not been mapped or fully audited."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/revert_quota_set",
+      "source_fingerprint": "aef5265a68f9fcea1facd6cb5c7754a5c80b19020db6cc9b751d14ebcfcce641",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithResetIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Quota reset uses strict 404 handling by default and sends no follow-up GET; optional ignore-missing changes only 404.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound"
+          ]
+        }
+      ],
+      "differences": [
+        "Go Reset returns ProjectID/Header metadata; Python revert_quota_set returns None."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Python **query is passed as deletion params; the scope currently has no reset query option.",
+        "Audit inherited Proxy._delete/Resource.delete, Python Project input and adapter retry/cache/microversion behavior before declaring whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_quota_set",
+      "source_fingerprint": "b53cf06abbf44082600d6fa0abb4110ad03c472e199c89b211c357a3cef95c09",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithQuotaOptions",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithUpdateField",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithUpdateForce",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithVolumeTypeQuota"
+      ],
+      "contracts": [
+        {
+          "behavior": "Typed limit omission/zero/-1, force false and exact per-type keys have concrete Go options with detached request data.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaTypedLimitsRetainIntegerPrecision"
+          ]
+        }
+      ],
+      "differences": [
+        "Go protects core fields and does not require callers to implement a builder or track dirty Resource state; response metadata is returned independently."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Python Project/QuotaSet input coercion, deprecated QuotaSet/project_id signature, dropped deprecated query and warnings have not been mapped.",
+        "Audit inherited Proxy._update/Resource.commit and common QuotaSet dirty-body filtering (reservation/usage), unknown-body attributes, response normalization and dict/cache behavior."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_quota",
+      "source_fingerprint": "6dda91626f6b0e9d6998d3e51893c2fa3a209d546d3ecebb1df11d4f1fd14ef2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Get",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordinary and detailed quota variants map to separate typed methods with fixed project identity and raw/metadata evidence.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaRejectsMalformedObjects",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "Get, Detail, Update and Delete preserve 404/403/500 code/body/header causes, pre-canceled contexts and ErrNotFound only for 404; in-flight Update cancellation and Detail deadlines remain observable.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go Detail retains native /details.json routing; pinned Python QuotaDetails uses /details.",
+        "Native detail triples remain typed in Go; Python quota properties use plural attribute names and dictionary usage values."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit Python Quota/QuotaDetails input Resource conversion, project_id/tenant_id alternate identity aliases and extension quota descriptors absent from the native model.",
+        "Audit inherited Resource fetch/query/cache, response normalization and adapter/microversion behavior; raw extension preservation does not implement those semantics."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_quota",
+      "source_fingerprint": "5e9d08802b0733700655b61b454ca0ede2bd7143eff1455e9171fe09f6c32cd8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Update",
+        "gophercloudsdk/network/v2/extensions/quotas.WithQuotaOptions",
+        "gophercloudsdk/network/v2/extensions/quotas.WithUpdateCheckLimit",
+        "gophercloudsdk/network/v2/extensions/quotas.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Optional limits and check_limit have concrete Go equivalents with exact/retry-stable request bodies and construction-time typed snapshots.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses fixed scopes, protected native fields and optional explicit check_limit booleans rather than mutating a dirty Python Quota object."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Python plural property aliases, tenant/project alternate identities and extension quota descriptors require mapping beyond raw WithUpdateField keys.",
+        "Audit Resource/Proxy input coercion, unknown-body/dirty-field commit behavior, removal of id from the request body and response/dict/cache normalization."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_quota",
+      "source_fingerprint": "dfabda66a6e82531821c7b7723351533e871758b26949cad921b00d976e0c225",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete",
+        "gophercloudsdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "The scope supports explicit missing suppression, fixed-project deletion and native response status/header evidence.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
+          ]
+        }
+      ],
+      "differences": [
+        "Go defaults to strict 404; Python defaults ignore_missing=True, represented by WithDeleteIgnoreMissing(true).",
+        "Go returns deletion metadata while Python returns None."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Proxy._delete/Resource.delete and Quota/project_id/tenant_id Resource input identity coercion and adapter behavior; native request tests alone do not establish full Python parity."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_quota_default",
+      "source_fingerprint": "d9c43cdb87c7c9bf105b3c6306122fd00c5e26af4feb4bf740439e6819f31e0e",
+      "status": "unresolved",
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Implement and test the distinct /quotas/{project}/default endpoint; ProjectQuotaScope.Get is the ordinary member endpoint and is not a defaults implementation.",
+        "Audit QuotaDefault URI/identity construction, disabled mutation/list capabilities and inherited fetch/resource/adapter behavior."
+      ]
+    },
+    {
+      "operation": "python:network/v2/quotas",
+      "source_fingerprint": "5160f0ad2c8f297aa8fe13f639e4d88bb909d0102f3d319c56fb5a46fd72f97a",
+      "status": "unresolved",
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Implement an SDK-owned quota collection iterator for /quotas with project identity, response models, pagination/error/cancellation contracts; the current fixed-project scope has no list operation.",
+        "Audit inherited Quota.list and query mapping, unknown attributes, project_id/tenant_id identities and response/dict/cache behavior before mapping **query or collection results."
+      ]
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_quotas",
+      "source_fingerprint": "9d21634e1c9dd7b4b0ac6c02800bcce8434639f53dd277130f4f88e7fd346807",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.BlockStorageProjectQuotas",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "A named project is resolved once through a separate Keystone client before Cinder limit requests.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
+      ]
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/set_volume_quotas",
+      "source_fingerprint": "c30c461fd6ef7343658952039452da8856d0420083ad7b1a5a31f7f74cd866e2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.BlockStorageProjectQuotas",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "A named project is resolved once, and typed/extension quota updates use the fixed project target.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Typed and per-type quota updates preserve zero/unlimited values and detached extension data.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.",
+        "Go returns a typed quota response; the Python cloud setter discards the proxy return value."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
+      ]
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_quotas",
+      "source_fingerprint": "444ad9ce82059504a3f9cee8ecd8862db0f8557c09ba5f1965017761d693573a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.BlockStorageProjectQuotas",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset"
+      ],
+      "contracts": [
+        {
+          "behavior": "A fixed project scope resets quota overrides with strict missing behavior and no automatic read.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Reset uses the frozen project and returns native 200 metadata without a follow-up GET.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_network_quotas",
+      "source_fingerprint": "0404e441e4a9c493952942d5214dc3715e32ef4077970fa4d0c564862ae9bb68",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.NetworkProjectQuotas",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Get",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail"
+      ],
+      "contracts": [
+        {
+          "behavior": "Named project quota reads use a separate Keystone lookup; ordinary and detailed values remain distinct.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Limit and detail endpoints preserve fixed project identity and native/raw result fields.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.",
+        "Native Go detail routing is /details.json; Python details=True uses the QuotaDetails /details resource and descriptor aliases."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/set_network_quotas",
+      "source_fingerprint": "88cf05f0150c246ec3797844fef1bba93b58b73d123f5110f3432ac45876709e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.NetworkProjectQuotas",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Named project quota updates preserve the resolved project and concrete optional limit/flag values.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Typed limit/flag options preserve omission and exact values across reauthentication.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.",
+        "Go returns a typed quota response; the Python cloud setter discards the proxy return value."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_network_quotas",
+      "source_fingerprint": "2bd8b6070337dfa04d7ed868bb2b2825f42bdf11f01b83e0e05f53ca68529af2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.NetworkProjectQuotas",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete",
+        "gophercloudsdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Quota override deletion supports explicit ignore-missing after fixed project resolution.",
+          "tests": [
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Delete keeps fixed-project metadata and suppresses only explicitly ignored 404 responses.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy"
+          ]
+        }
+      ],
+      "differences": [
+        "Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.",
+        "Python cloud delegates to default ignore_missing=True; Go requires WithDeleteIgnoreMissing(true) to reproduce missing-quota idempotence."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ],
+      "remaining": [
+        "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
+        "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
       ]
     }
   ]
