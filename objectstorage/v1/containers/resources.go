@@ -9,6 +9,8 @@ import (
 
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/containers"
+	"github.com/gophercloud/gophercloud/v2/pagination"
+	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
 )
 
@@ -47,28 +49,41 @@ func (a *API) newResources() *resource.Collection[ContainerResource] {
 			}, nil
 		},
 		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*ContainerResource, error] {
-			return func(yield func(*ContainerResource, error) bool) {
-				var options []ListOption
-				for key, values := range query {
-					for _, value := range values {
-						options = append(options, WithListQuery(key, value))
-					}
-				}
-				for item, err := range a.List(ctx, options...) {
-					if err != nil {
-						yield(nil, err)
-						return
-					}
-					if !yield(&ContainerResource{Container: *item}, nil) {
-						return
-					}
-				}
-			}
+			return a.listResources(ctx, query, resource.ListControl{})
 		},
-		Delete: func(ctx context.Context, name string) error { _, err := a.Delete(ctx, name); return err },
-		ID:     func(item *ContainerResource) string { return item.Name }, Name: func(item *ContainerResource) string { return item.Name },
+		IterateControlled: a.listResources,
+		Delete:            func(ctx context.Context, name string) error { _, err := a.Delete(ctx, name); return err },
+		ID:                func(item *ContainerResource) string { return item.Name }, Name: func(item *ContainerResource) string { return item.Name },
 		NameQueryKey: "prefix", NameQuery: func(name string) string { return name },
 	})
+}
+
+func (a *API) listResources(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*ContainerResource, error] {
+	options := make([]ListOption, 0, len(query))
+	for key, values := range query {
+		for _, value := range values {
+			options = append(options, WithListQuery(key, value))
+		}
+	}
+	config, err := request.Apply(ListOpts{}, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(config, false, true, false)
+	}
+	if err != nil {
+		return func(yield func(*ContainerResource, error) bool) { yield(nil, request.Wrap("List", "containers", err)) }
+	}
+	builder := listOptsBuilder{base: config.Options, config: config}
+	return resource.StreamWithControl(ctx, upstream.List(a.client, builder), func(page pagination.Page) ([]ContainerResource, error) {
+		items, err := upstream.ExtractInfo(page)
+		if err != nil {
+			return nil, err
+		}
+		values := make([]ContainerResource, len(items))
+		for i, item := range items {
+			values[i] = ContainerResource{Container: item}
+		}
+		return values, nil
+	}, control)
 }
 
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*ContainerResource, error) {

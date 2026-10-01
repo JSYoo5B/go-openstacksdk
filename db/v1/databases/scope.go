@@ -46,13 +46,18 @@ func (a *API) InInstance(ctx context.Context, parent resource.Ref) (*DatabaseSco
 			return a.Delete(ctx, id, url.PathEscape(name))
 		},
 		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*Database, error] {
-			if len(query) != 0 {
-				return func(yield func(*Database, error) bool) { yield(nil, resource.ErrUnsupported) }
-			}
-			return resource.Stream(ctx, upstream.List(a.client, id), extractScopedDatabases)
+			return scope.listControlled(ctx, query, resource.ListControl{})
 		},
+		IterateControlled: scope.listControlled,
 	})
 	return scope, nil
+}
+
+func (s *DatabaseScope) listControlled(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*Database, error] {
+	if len(query) != 0 {
+		return func(yield func(*Database, error) bool) { yield(nil, resource.ErrUnsupported) }
+	}
+	return resource.StreamWithControl(ctx, upstream.List(s.api.client, s.instanceID), extractScopedDatabases, control)
 }
 
 // Gophercloud's Database lacks a character_set tag. Own the wire conversion so

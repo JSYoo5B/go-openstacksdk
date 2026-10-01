@@ -84,12 +84,11 @@ func (a *API) InServer(ctx context.Context, ref resource.Ref) (*ActionScope, err
 	}
 	scope := &ActionScope{api: a, serverID: id}
 	scope.Collection = resource.NewCollection(resource.Adapter[ActionResource]{
-		Kind: "server action",
-		Get:  scope.get,
-		ID:   func(value *ActionResource) string { return value.RequestID },
-		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*ActionResource, error] {
-			return scope.list(ctx, query)
-		},
+		Kind:              "server action",
+		Get:               scope.get,
+		ID:                func(value *ActionResource) string { return value.RequestID },
+		Iterate:           scope.list,
+		IterateControlled: scope.listControlled,
 	})
 	return scope, nil
 }
@@ -206,6 +205,10 @@ func (p actionPage) NextPageURL() (string, error) {
 }
 
 func (s *ActionScope) list(ctx context.Context, query url.Values) iter.Seq2[*ActionResource, error] {
+	return s.listControlled(ctx, query, resource.ListControl{})
+}
+
+func (s *ActionScope) listControlled(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*ActionResource, error] {
 	return func(yield func(*ActionResource, error) bool) {
 		if err := s.api.validateActionClient(ctx); err != nil {
 			yield(nil, err)
@@ -220,7 +223,7 @@ func (s *ActionScope) list(ctx context.Context, query url.Values) iter.Seq2[*Act
 		pager := pagination.NewPager(s.api.client, endpoint, func(result pagination.PageResult) pagination.Page {
 			return actionPage{pagination.LinkedPageBase{PageResult: result}}
 		})
-		stream := resource.Stream(ctx, pager, func(page pagination.Page) ([]ActionResource, error) {
+		stream := resource.StreamWithControl(ctx, pager, func(page pagination.Page) ([]ActionResource, error) {
 			p := page.(actionPage)
 			actions, err := p.actions()
 			if err != nil {
@@ -236,7 +239,7 @@ func (s *ActionScope) list(ctx context.Context, query url.Values) iter.Seq2[*Act
 				values = append(values, *value)
 			}
 			return values, nil
-		})
+		}, control)
 		for value, err := range stream {
 			if !yield(value, err) || err != nil {
 				return

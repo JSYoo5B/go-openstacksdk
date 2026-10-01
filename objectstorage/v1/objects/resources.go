@@ -9,6 +9,7 @@ import (
 
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
+	"github.com/gophercloud/gophercloud/v2/pagination"
 	"gophercloudsdk/objectstorage/v1/containers"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
@@ -63,29 +64,42 @@ func (a *API) InContainer(ctx context.Context, ref resource.Ref) (*ObjectScope, 
 			}, nil
 		},
 		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*ObjectResource, error] {
-			return func(yield func(*ObjectResource, error) bool) {
-				var options []ListOption
-				for key, values := range query {
-					for _, value := range values {
-						options = append(options, WithListQuery(key, value))
-					}
-				}
-				for item, err := range a.List(ctx, parent, options...) {
-					if err != nil {
-						yield(nil, err)
-						return
-					}
-					if !yield(&ObjectResource{Object: *item, Container: parent}, nil) {
-						return
-					}
-				}
-			}
+			return scope.listResources(ctx, query, resource.ListControl{})
 		},
-		Delete: func(ctx context.Context, name string) error { _, err := a.Delete(ctx, parent, name); return err },
-		ID:     func(item *ObjectResource) string { return item.Name }, Name: func(item *ObjectResource) string { return item.Name },
+		IterateControlled: scope.listResources,
+		Delete:            func(ctx context.Context, name string) error { _, err := a.Delete(ctx, parent, name); return err },
+		ID:                func(item *ObjectResource) string { return item.Name }, Name: func(item *ObjectResource) string { return item.Name },
 		NameQueryKey: "prefix", NameQuery: func(name string) string { return name },
 	})
 	return scope, nil
+}
+
+func (s *ObjectScope) listResources(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*ObjectResource, error] {
+	options := make([]ListOption, 0, len(query))
+	for key, values := range query {
+		for _, value := range values {
+			options = append(options, WithListQuery(key, value))
+		}
+	}
+	config, err := request.Apply(ListOpts{}, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(config, false, true, false)
+	}
+	if err != nil {
+		return func(yield func(*ObjectResource, error) bool) { yield(nil, request.Wrap("List", "objects", err)) }
+	}
+	builder := listOptsBuilder{base: config.Options, config: config}
+	return resource.StreamWithControl(ctx, upstream.List(s.api.client, s.container, builder), func(page pagination.Page) ([]ObjectResource, error) {
+		items, err := upstream.ExtractInfo(page)
+		if err != nil {
+			return nil, err
+		}
+		values := make([]ObjectResource, len(items))
+		for i, item := range items {
+			values[i] = ObjectResource{Object: item, Container: s.container}
+		}
+		return values, nil
+	}, control)
 }
 
 func (s *ObjectScope) Create(ctx context.Context, name string, opts CreateOpts, options ...CreateOption) (*CreateHeader, error) {

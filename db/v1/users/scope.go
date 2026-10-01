@@ -72,24 +72,9 @@ func (a *API) InInstance(ctx context.Context, parent resource.Ref, options ...Sc
 		ID:         func(value *UserResource) string { return value.Name },
 		Name:       func(value *UserResource) string { return value.Name },
 		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*UserResource, error] {
-			if len(query) != 0 {
-				return func(yield func(*UserResource, error) bool) { yield(nil, resource.ErrUnsupported) }
-			}
-			return func(yield func(*UserResource, error) bool) {
-				for value, err := range resource.Stream(ctx, upstream.List(a.client, id), extractScopedUsers) {
-					if err != nil {
-						yield(nil, err)
-						return
-					}
-					if scope.host != nil && effectiveHost(value.Host) != *scope.host {
-						continue
-					}
-					if !yield(value, nil) {
-						return
-					}
-				}
-			}
+			return scope.listControlled(ctx, query, resource.ListControl{})
 		},
+		IterateControlled: scope.listControlled,
 	}
 	binding.Get = func(ctx context.Context, name string) (*UserResource, error) {
 		return scope.getAccount(ctx, userAccountID(name, scope.targetHost()))
@@ -109,6 +94,28 @@ func (a *API) InInstance(ctx context.Context, parent resource.Ref, options ...Sc
 	}
 	scope.deletions = resource.NewCollection(binding)
 	return scope, nil
+}
+
+// The native stream counts every account row before the scope's local host
+// filter. Zero controls retain the complete host-scoped lookup policy.
+func (s *UserScope) listControlled(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*UserResource, error] {
+	if len(query) != 0 {
+		return func(yield func(*UserResource, error) bool) { yield(nil, resource.ErrUnsupported) }
+	}
+	return func(yield func(*UserResource, error) bool) {
+		for value, err := range resource.StreamWithControl(ctx, upstream.List(s.api.client, s.instanceID), extractScopedUsers, control) {
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			if s.host != nil && effectiveHost(value.Host) != *s.host {
+				continue
+			}
+			if !yield(value, nil) {
+				return
+			}
+		}
+	}
 }
 
 // Get lists for an exact literal name at the scope's host, or '%' by default.
