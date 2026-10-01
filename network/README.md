@@ -13,6 +13,8 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.network.delete_network(id)` | `service.Networks.Delete(ctx, resource.ID(id))` |
 | `conn.network.find_router(name_or_id, ignore_missing=False)` | `service.API.Routers.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.network.find_security_group(name_or_id, project_id=projectID)` | `service.API.SecurityGroups.FindIdentity(ctx, nameOrID, resource.WithIdentityFindQuery("project_id", projectID))` |
+| `conn.network.find_subnet_pool(name_or_id)` | `service.API.SubnetPools.FindIdentity(ctx, nameOrID)` |
+| `conn.network.find_trunk(name_or_id)` | `service.API.Trunks.FindIdentity(ctx, nameOrID)` |
 | `conn.network.get_port(id)` | `service.Ports.Get(ctx, id)` |
 | `conn.network.get_ip(id)` | `service.FloatingIPs.Get(ctx, id)` |
 | `conn.create_floating_ip(network="public", server=server, wait=True)` | `service.FloatingIPs.Create(ctx, request, network.WithServer(ref), network.WithWait())` |
@@ -60,6 +62,15 @@ Security Group의 공통 `Resources.List/All`도 raw query를 보존하며, 로�
 옵션을 지원합니다. native typed `List`는 기존 concrete `ListOpts`를 사용합니다.
 Python 속성 별칭과 로컬 Body 필터 분류는 자동 적용하지 않습니다.
 [Python/Go 사용 예제](../docs/finding-identities.md#neutron-routersecurity-group와-project-query)를 참고하세요.
+
+## Subnet Pool·Trunk 자동 조회
+
+`service.API.SubnetPools.FindIdentity`와 `service.API.Trunks.FindIdentity`도 같은
+이름·ID 옵션을 사용합니다. 프로젝트 필터는 `WithIdentityFindQuery("project_id", id)`로
+지정하며 SDK가 자동 추론하지 않습니다. native 모델·오류·페이지 경계를 유지합니다.
+Subnet Pool은 세 prefix 길이의 string/number decode가 필요하므로 `fields=id,name`처럼
+이 값을 제외한 응답은 오류입니다. Trunk의 native pager는 `links.next`, Subnet Pool은
+`subnetpools_links`를 따릅니다. [Python/Go 예제와 경계](../docs/finding-identities.md#neutron-subnet-pooltrunk)를 참고하세요.
 
 ## 삭제와 대기
 

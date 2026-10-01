@@ -60,7 +60,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	identityFindAccess := map[string]string{
 		"compute/v2":      "`Servers/Flavors.FindIdentity(ctx, identity, options...)`",
 		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
-		"network/v2":      "`Networks/Subnets/Ports/Routers/SecurityGroups.FindIdentity(ctx, identity, options...)`",
+		"network/v2":      "`Networks/Subnets/Ports/Routers/SecurityGroups/SubnetPools/Trunks.FindIdentity(ctx, identity, options...)`",
 		"identity/v3":     "`Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)`",
 		"image/v2":        "`Images.FindIdentity(ctx, identity, options...)`",
 		"dns/v2":          "`RecordSets.InZone(ctx, parent)`가 반환한 scope의 `FindIdentity`",

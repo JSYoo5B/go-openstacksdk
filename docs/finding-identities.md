@@ -19,6 +19,8 @@
 | Neutron subnet | `conn.network.find_subnet("web-subnet")` | `network.Subnets.FindIdentity(ctx, "web-subnet")` |
 | Neutron router | `conn.network.find_router("app-router", project_id=project_id)` | `network.Routers.FindIdentity(ctx, "app-router", projectQuery)` |
 | Neutron security group | `conn.network.find_security_group("app-sg", project_id=project_id)` | `network.SecurityGroups.FindIdentity(ctx, "app-sg", projectQuery)` |
+| Neutron subnet pool | `conn.network.find_subnet_pool("app-pool", project_id=project_id)` | `network.SubnetPools.FindIdentity(ctx, "app-pool", projectQuery)` |
+| Neutron trunk | `conn.network.find_trunk("app-trunk", project_id=project_id)` | `network.Trunks.FindIdentity(ctx, "app-trunk", projectQuery)` |
 | Keystone 프로젝트 | `conn.identity.find_project("app", domain_id=domain_id)` | `identity.Projects.FindIdentity(ctx, "app", domainQuery)` |
 | Keystone 사용자 | `conn.identity.find_user("app-user", domain_id=domain_id)` | `identity.Users.FindIdentity(ctx, "app-user", domainQuery)` |
 | Keystone 그룹 | `conn.identity.find_group("app-group", domain_id=domain_id)` | `identity.Groups.FindIdentity(ctx, "app-group", domainQuery)` |
@@ -27,9 +29,10 @@
 | Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
-위 16개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
+위 18개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
 `conn.BlockStorage(ctx).Volumes`, `conn.Image(ctx).Images`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
-Router·Security Group은 `conn.Network(ctx).API.Routers/SecurityGroups`로 접근합니다.
+Router·Security Group·Subnet Pool·Trunk는
+`conn.Network(ctx).API.Routers/SecurityGroups/SubnetPools/Trunks`로 접근합니다.
 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
 ID와 이름이 없는 리소스에 이 정책을 일괄 적용하지 않습니다. Senlin의 다섯
@@ -133,7 +136,7 @@ slash로 decode하지 않고 query에서 `%252F`가 됩니다. 빈 문자열, �
 caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니다. 이름 hint는 목록으로
 전환할 때만 추가하므로 GET에 자동 이름 필터를 넣지 않습니다. caller가 binding의
 이름 query key를 지정하면 자동 이름 hint로 덮어쓰지 않습니다. 기본 hint는 Nova에서
-`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 14개 binding에서는 literal
+`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 16개 binding에서는 literal
 문자열입니다. Flavor는 자동 이름 hint를 서버에 보내지 않습니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
 
 명시 wire `status`는 모델에 Status 필드가 없어도 GET과 목록에 전달합니다.
@@ -428,3 +431,53 @@ microversion 변경은 없습니다.
 
 고정 Python [find_router](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L5570)·[find_security_group](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L6598)는 문자열·ignore_missing·query를 선언합니다.
 [Router query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/router.py#L36)·[SecurityGroup query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/security_group.py#L29)의 별칭은 Go의 wire query와 구분합니다.
+
+## Neutron Subnet Pool·Trunk
+
+Python의 `conn.network.find_subnet_pool("app-pool", project_id=project_id)`와
+`conn.network.find_trunk("app-trunk", project_id=project_id)`는 다음처럼 사용합니다.
+두 리소스도 기본 미존재 무시·strict·GET404-only/compatible/GET-only 정책, raw query와
+전체 native 페이지의 정확한 ID/이름·중복·후속 오류 검사를 공유합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    networkv2 "gophercloudsdk/network/v2"
+    "gophercloudsdk/resource"
+)
+
+func FindSubnetPoolAndTrunk(ctx context.Context, network *networkv2.Service,
+    projectID string) error {
+    filter := resource.WithIdentityFindQuery("project_id", projectID)
+    strict := resource.WithIdentityFindIgnoreMissing(false)
+    pool, err := network.SubnetPools.FindIdentity(ctx, "app-pool", filter, strict)
+    if err != nil { return err }
+    trunk, err := network.Trunks.FindIdentity(ctx, "app-trunk", filter, strict)
+    if err != nil { return err }
+    _, _ = pool.Prefixes, trunk.Subports
+    return nil
+}
+```
+
+native Subnet Pool은 응답의 `default_prefixlen`·`min_prefixlen`·`max_prefixlen`을
+string/number에서 int로 변환합니다. 세 값의 누락·null·bool은 decode 오류로 끝나며
+목록 fallback이나 미존재 무시로 바꾸지 않습니다. `fields`를 직접 쓰면 ID뿐 아니라
+이 세 값도 응답에 포함해야 합니다. Subnet Pool은 native의 기존·RFC3339 timestamp
+해석을 유지하고, Trunk의 time.Time 필드는 RFC3339를 요구합니다.
+
+Subnet Pool의 native 페이지는 `subnetpools_links`의 rel=next를, Trunk는 기본
+LinkedPageBase의 top-level `links.next`를 따릅니다. Trunk에 `trunks_links`만 있으면
+추가 페이지로 처리하지 않습니다. 이 native continuation 차이를 Python의 상속
+RFC Link-header·limit/marker 처리까지 지원한 것으로 확대하지 않습니다.
+
+명시 raw `status`는 두 query 단계에 보존하지만 Subnet Pool의 typed `WithStatus`는
+상태 필드가 없으므로 첫 HTTP 전에 `ErrUnsupported`입니다. 두 binding의 ordinary
+`Resources.List/All`은 whole-map query와 로컬 cap/첫 페이지 제어를 제공하며 native
+typed `List`와 명시 Ref 조회는 유지합니다. Details·AllProjects·ExtraSpecs의 명시 false도
+지원하지 않으며 부모 조회·hidden 검색·추가 GET·microversion 변경을 자동 추가하지 않습니다.
+
+고정 Python [find_subnet_pool](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7621)·[find_trunk](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7869)는 문자열·ignore_missing=True·query를 선언합니다.
+[SubnetPool query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/subnet_pool.py#L34)·[Trunk query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/trunk.py#L33)의 별칭·Body 로컬 필터와 Resource descriptor/cache/session 정책은 별도 비교 범위입니다.
