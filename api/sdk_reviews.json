@@ -7072,7 +7072,7 @@
     {
       "operation": "python:clustering/v1/update_cluster",
       "source_fingerprint": "42cf993a84380ea1715d6a1def6026e8292071e86c43de2f042f5a20064a37d7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/clustering/v1/clusters.API.Update",
         "gophercloudsdk/clustering/v1/clusters.API.Track",
@@ -7081,7 +7081,11 @@
         "gophercloudsdk/clustering/v1/clusters.TrackedCluster.Commit",
         "gophercloudsdk/clustering/v1/clusters.TrackedCluster.Refresh",
         "gophercloudsdk/clustering/v1/actions.Submission.Snapshot",
-        "gophercloudsdk/clustering/v1/clusters.WithUpdateProfileOnlyNull"
+        "gophercloudsdk/clustering/v1/clusters.WithUpdateProfileOnlyNull",
+        "gophercloudsdk/clustering/v1/clusters.API.AtBasePath",
+        "gophercloudsdk/clustering/v1/clusters.UpdateScope.Update",
+        "gophercloudsdk/clustering/v1/clusters.UpdateScope.Load",
+        "gophercloudsdk/clustering/v1/clusters.UpdateScope.Track"
       ],
       "contracts": [
         {
@@ -7123,23 +7127,36 @@
             "api/clustering_cluster_profile_only_null_test.go:TestClusteringClusterProfileOnlyNullTrackedPresenceDirtyAndVersionGate",
             "api/clustering_cluster_profile_only_null_test.go:TestClusteringClusterProfileOnlyNullBoolCompatibilityAndLookupGate"
           ]
+        },
+        {
+          "behavior": "AtBasePath owns a validated literal relative collection and escapes segments once without altering the shared client, default API routes, ResourceBase, headers or original action collection. Scoped Update freezes inputs before all-page exact-name lookup and PATCH; explicit ID is direct. Scoped Load/Track captures both collection and canonical/fixed resource identity for Commit/Refresh. Nil/zero scopes and unsafe paths fail without HTTP; distinct concurrent scopes, live token, escaped reverse prefix, foreign continuation, pending-null gates/source rechecks, native and accepted-response failures preserve routing and dirty/evidence ownership.",
+          "tests": [
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeRejectsUnsafePathsAndNilSourcesWithoutHTTP",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeLiteralRoutingLiveTokenAndConcurrentIsolation",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeNameLookupUsesAllScopedPagesAndFrozenInputs",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeTrackedLoadAndTrackKeepScopedIdentity",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopePendingNullGatesAndSourceRecheck",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeFailuresRetainAcceptedEvidenceDirtyAndFixedRoute",
+            "internal/senlin/collection_path_test.go:TestCollectionPathOwnsLiteralRelativeSegments"
+          ]
         }
       ],
       "differences": [
         "Go maps cached Resource input through concrete SDK-owned Track/Load and Edit/Commit/Refresh handles, context and explicit ID/Name references. Scalar/null helpers distinguish omission, explicit zero/false/empty and null without caller builders or Python truthiness coercion. Views are independent snapshots instead of the same mutable Resource pointer.",
         "Documented singular envelopes and PATCH202 success are strict. Raw HTTP/header/body evidence and exact JSON numbers are retained separately from merged cached views; malformed accepted responses keep dirty state and are not automatically resent.",
         "Connection-selected numeric microversion and protected field/query/header extensions are explicit; Commit gates only the pending key, including null/removal. Offline Edit does not negotiate or fetch. Nullable field support remains deployment-defined.",
-        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion."
+        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion.",
+        "The direct base_path control is mapped to a concrete UpdateScope with a literal unescaped relative path, rejecting full URLs, templates, percent escapes, dot/empty segments, whitespace and controls. Python applies URI formatting for that commit only; the Go handle additionally fixes collection+ID for Load/Commit/Refresh. Other API operations retain their original routes and selected service action collection.",
+        "Python raw attrs normalization accepts mapped Python/wire aliases and locally mutable cached IDs or readonly-looking fields. Go owns its mutable concrete schema and explicit vendor fields, protects core/readonly aliases and keeps the tracked route independent of cache/input changes. These are deliberate policies; separate inherited commit controls are not exposed by these two direct proxies."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
         "clustering/v1/README.md",
         "clustering/v1/tracking/async/README.md",
-        "clustering/v1/tracking/README.md"
+        "clustering/v1/tracking/README.md",
+        "clustering/v1/scoping/README.md"
       ],
-      "remaining": [
-        "Implement the direct proxy base_path override as a safe SDK-owned collection scope for stateless Update and tracked Load/Track/Commit/Refresh, preserving default routes and fixed resource identity. Proxy._update forwards base_path to Resource.commit; the present API fixes its collection path."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:clustering/v1/clusters",
@@ -7390,7 +7407,7 @@
     {
       "operation": "python:clustering/v1/update_node",
       "source_fingerprint": "ca8aeec8761720cf67950b7a779413afacbfd66948e44d56b642a2ac1386f297",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/clustering/v1/nodes.API.Update",
         "gophercloudsdk/clustering/v1/nodes.API.Track",
@@ -7398,7 +7415,11 @@
         "gophercloudsdk/clustering/v1/nodes.TrackedNode.Edit",
         "gophercloudsdk/clustering/v1/nodes.TrackedNode.Commit",
         "gophercloudsdk/clustering/v1/nodes.TrackedNode.Refresh",
-        "gophercloudsdk/clustering/v1/actions.Submission.Snapshot"
+        "gophercloudsdk/clustering/v1/actions.Submission.Snapshot",
+        "gophercloudsdk/clustering/v1/nodes.API.AtBasePath",
+        "gophercloudsdk/clustering/v1/nodes.UpdateScope.Update",
+        "gophercloudsdk/clustering/v1/nodes.UpdateScope.Load",
+        "gophercloudsdk/clustering/v1/nodes.UpdateScope.Track"
       ],
       "contracts": [
         {
@@ -7432,23 +7453,36 @@
             "internal/senlin/tracked_test.go:TestTrackedOwnsAllSnapshotsAndRejectedEditIsAtomic",
             "internal/senlin/tracked_test.go:TestTrackedAcceptShallowMergeAndPreservesNewerEdits"
           ]
+        },
+        {
+          "behavior": "AtBasePath owns a validated literal relative collection and escapes segments once without altering the shared client, default API routes, ResourceBase, headers or original action collection. Scoped Update freezes inputs before all-page exact-name lookup and PATCH; explicit ID is direct. Scoped Load/Track captures both collection and canonical/fixed resource identity for Commit/Refresh. Nil/zero scopes and unsafe paths fail without HTTP; distinct concurrent scopes, live token, escaped reverse prefix, foreign continuation, pending-null gates/source rechecks, native and accepted-response failures preserve routing and dirty/evidence ownership.",
+          "tests": [
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeRejectsUnsafePathsAndNilSourcesWithoutHTTP",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeLiteralRoutingLiveTokenAndConcurrentIsolation",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeNameLookupUsesAllScopedPagesAndFrozenInputs",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeTrackedLoadAndTrackKeepScopedIdentity",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopePendingNullGatesAndSourceRecheck",
+            "api/clustering_update_scope_test.go:TestClusteringUpdateScopeFailuresRetainAcceptedEvidenceDirtyAndFixedRoute",
+            "internal/senlin/collection_path_test.go:TestCollectionPathOwnsLiteralRelativeSegments"
+          ]
         }
       ],
       "differences": [
         "Go maps cached Resource input through concrete SDK-owned Track/Load and Edit/Commit/Refresh handles, context and explicit ID/Name references. Scalar/null helpers distinguish omission, explicit zero/false/empty and null without caller builders or Python truthiness coercion. Views are independent snapshots instead of the same mutable Resource pointer.",
         "Documented singular envelopes and PATCH202 success are strict. Raw HTTP/header/body evidence and exact JSON numbers are retained separately from merged cached views; malformed accepted responses keep dirty state and are not automatically resent.",
         "Connection-selected numeric microversion and protected field/query/header extensions are explicit; Commit gates only the pending key, including null/removal. Offline Edit does not negotiate or fetch. Nullable field support remains deployment-defined.",
-        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion."
+        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion.",
+        "The direct base_path control is mapped to a concrete UpdateScope with a literal unescaped relative path, rejecting full URLs, templates, percent escapes, dot/empty segments, whitespace and controls. Python applies URI formatting for that commit only; the Go handle additionally fixes collection+ID for Load/Commit/Refresh. Other API operations retain their original routes and selected service action collection.",
+        "Python raw attrs normalization accepts mapped Python/wire aliases and locally mutable cached IDs or readonly-looking fields. Go owns its mutable concrete schema and explicit vendor fields, protects core/readonly aliases and keeps the tracked route independent of cache/input changes. These are deliberate policies; separate inherited commit controls are not exposed by these two direct proxies."
       ],
       "documentation": [
         "clustering/v1/nodes/README.md",
         "clustering/v1/README.md",
         "clustering/v1/tracking/async/README.md",
-        "clustering/v1/tracking/README.md"
+        "clustering/v1/tracking/README.md",
+        "clustering/v1/scoping/README.md"
       ],
-      "remaining": [
-        "Implement the direct proxy base_path override as a safe SDK-owned collection scope for stateless Update and tracked Load/Track/Commit/Refresh, preserving default routes and fixed resource identity. Proxy._update forwards base_path to Resource.commit; the present API fixes its collection path."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:clustering/v1/nodes",
