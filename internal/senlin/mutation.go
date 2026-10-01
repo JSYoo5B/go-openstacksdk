@@ -75,6 +75,16 @@ func Headers(headers map[string]string) error {
 // Stateless updates need an explicit field; cached dirty-state no-ops belong to
 // a resource lifecycle, not this request serializer.
 func Body[T any](config request.Config[T], envelope string, forbidden ...string) (json.RawMessage, error) {
+	return body(config, envelope, false, forbidden...)
+}
+
+// CommandBody retains an empty parameter object for commands such as check.
+// Concrete fields and caller extensions follow the ordinary mutation policy.
+func CommandBody[T any](config request.Config[T], command string, forbidden ...string) (json.RawMessage, error) {
+	return body(config, command, true, forbidden...)
+}
+
+func body[T any](config request.Config[T], envelope string, allowEmpty bool, forbidden ...string) (json.RawMessage, error) {
 	if err := request.ValidateCapabilities(config, true, false, true); err != nil {
 		return nil, err
 	}
@@ -104,7 +114,7 @@ func Body[T any](config request.Config[T], envelope string, forbidden ...string)
 	if err != nil {
 		return nil, err
 	}
-	if len(body) == 0 {
+	if len(body) == 0 && !allowEmpty {
 		return nil, fmt.Errorf("%w: Senlin mutation requires at least one field", resource.ErrInvalidOption)
 	}
 	if envelope == "" {
