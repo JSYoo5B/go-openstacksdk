@@ -19,6 +19,7 @@ import (
 
 // ListOpts controls the actual quota collection. Limit zero omits page size;
 // empty sorting defaults to id/asc. Nil AllTenants omits the false-default flag.
+// The first next link may publish a smaller server-capped effective page size.
 // Marker identifies a quota row, not a project or resource name.
 type ListOpts struct {
 	Limit      int
@@ -279,10 +280,14 @@ func nextQuotaCollectionPage(raw json.RawMessage, current string, origin *url.UR
 			}
 			value := strconv.Itoa(limit)
 			if previous := query.Get("limit"); previous != "" && previous != value {
-				return "", fmt.Errorf("%w: quota next link changes page limit", resource.ErrUnsupported)
+				requested, err := strconv.Atoi(previous)
+				if err != nil || current != origin.String() || limit > requested {
+					return "", fmt.Errorf("%w: quota next link changes effective page limit", resource.ErrUnsupported)
+				}
 			}
-			// An initially omitted size uses the server's validated effective
-			// limit, which its next link publishes. It stays fixed thereafter.
+			// Magnum validate_limit caps the requested size at CONF.api.max_limit.
+			// The first next link establishes that effective size (or supplies
+			// it when initially omitted), which stays fixed thereafter.
 			query.Set("limit", value)
 			continue
 		}

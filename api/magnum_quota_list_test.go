@@ -104,6 +104,42 @@ func TestMagnumQuotaListOptionsSnapshotLazyAndReusable(t *testing.T) {
 	}
 }
 
+func TestMagnumQuotaListAcceptsInitialServerCapAndFixesEffectiveLimit(t *testing.T) {
+	for _, laterLimit := range []int{1, 2} {
+		t.Run(strconv.Itoa(laterLimit), func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var calls atomic.Int32
+			cloud.Mux.HandleFunc("GET /magnum/v1/quotas", func(w http.ResponseWriter, r *http.Request) {
+				switch calls.Add(1) {
+				case 1:
+					if r.URL.Query().Get("limit") != "10000" {
+						t.Error(r.URL)
+					}
+					testcloud.JSON(w, 200, `{"quotas":[`+magnumQuotaListRow+`],"next":"?limit=1&marker=9007199254740993"}`)
+				case 2:
+					if r.URL.Query().Get("limit") != "1" {
+						t.Error(r.URL)
+					}
+					testcloud.JSON(w, 200, fmt.Sprintf(`{"quotas":[`+magnumQuotaListRow+`],"next":"?limit=%d&marker=9007199254740994"}`, laterLimit))
+				default:
+					if r.URL.Query().Get("limit") != "1" {
+						t.Error(r.URL)
+					}
+					testcloud.JSON(w, 200, `{"quotas":[]}`)
+				}
+			})
+			values, err := quotas.New(cloud.Client("container-infrastructure-management", "/magnum/v1")).All(context.Background(), quotas.WithListOptions(quotas.ListOpts{Limit: 10000}))
+			if laterLimit == 1 {
+				if err != nil || len(values) != 2 || calls.Load() != 3 {
+					t.Fatal(values, err, calls.Load())
+				}
+			} else if values != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 2 {
+				t.Fatal(values, err, calls.Load())
+			}
+		})
+	}
+}
+
 func TestMagnumQuotaListDefaultsFalseAndServerEffectiveLimit(t *testing.T) {
 	for _, input := range []string{"omitted", "false", "last-false"} {
 		t.Run(input, func(t *testing.T) {
