@@ -36,7 +36,7 @@ _ = value
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Accounts` | [accounts](accounts/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Containers` | [containers](containers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

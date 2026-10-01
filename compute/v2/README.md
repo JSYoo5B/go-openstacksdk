@@ -15,6 +15,10 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 `Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.
 
+`Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.
+
+`InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.
+
 ## Go 사용
 
 ```go
@@ -34,7 +38,7 @@ _ = value
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Aggregates` | [aggregates](aggregates/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `AttachInterfaces` | [attachinterfaces](attachinterfaces/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
@@ -43,7 +47,7 @@ _ = value
 | `Extensions` | [extensions](extensions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Flavors` | [flavors](flavors/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Hypervisors` | [hypervisors](hypervisors/api_generated.go) | `Resources`: ID 조회, 목록, 상태 대기 |
-| `InstanceActions` | [instanceactions](instanceactions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `InstanceActions` | [instanceactions](instanceactions/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록 |
 | `KeyPairs` | [keypairs](keypairs/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Limits` | [limits](limits/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Migrations` | [migrations](migrations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
@@ -53,7 +57,7 @@ _ = value
 | `ServerGroups` | [servergroups](servergroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Servers` | [servers](servers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `Tags` | [tags](tags/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Tags` | [tags](tags/api_generated.go) | `InServer(ctx, parent)`: 문자열 집합 조회·추가·확인·교체·삭제; Collection/상태 대기 없음 |
 | `Usage` | [usage](usage/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `VolumeAttachments` | [volumeattach](volumeattach/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 

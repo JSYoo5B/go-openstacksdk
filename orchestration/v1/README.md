@@ -29,7 +29,7 @@ for value, err := range service.APIVersions.ListVersions(ctx) {
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `APIVersions` | [apiversions](apiversions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `BuildInfo` | [buildinfo](buildinfo/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |

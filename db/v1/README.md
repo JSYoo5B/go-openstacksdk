@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 db/v1 API를 하나의 인증된 서비스 객체에서 �
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.
+
 ## Go 사용
 
 ```go
@@ -32,14 +34,14 @@ _ = value
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Configurations` | [configurations](configurations/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
-| `Databases` | [databases](databases/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Databases` | [databases](databases/api_generated.go) | `InInstance(ctx, parent)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Datastores` | [datastores](datastores/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회 |
 | `Flavors` | [flavors](flavors/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회 |
 | `Instances` | [instances](instances/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
-| `Users` | [users](users/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Users` | [users](users/api_generated.go) | `InInstance(ctx, parent)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

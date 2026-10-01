@@ -31,7 +31,7 @@ for value, err := range service.Introspection.Resources.List(ctx) {
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Introspection` | [introspection](introspection/api_generated.go) | `Resources`: ID 조회, 목록 |
 

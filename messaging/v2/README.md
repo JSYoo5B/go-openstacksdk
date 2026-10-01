@@ -29,7 +29,7 @@ for value, err := range service.Queues.List(ctx) {
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Claims` | [claims](claims/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |

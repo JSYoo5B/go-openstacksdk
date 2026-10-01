@@ -32,7 +32,7 @@ _ = value
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `CronTriggers` | [crontriggers](crontriggers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Executions` | [executions](executions/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |

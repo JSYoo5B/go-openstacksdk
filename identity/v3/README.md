@@ -32,7 +32,7 @@ _ = value
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `ApplicationCredentials` | [applicationcredentials](applicationcredentials/api_generated.go) | `InUser(ctx, parent)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기; `AccessRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Catalog` | [catalog](catalog/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |

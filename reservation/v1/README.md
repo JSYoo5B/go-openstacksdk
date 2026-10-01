@@ -29,7 +29,7 @@ for value, err := range service.Hosts.Resources.List(ctx) {
 
 ## 리소스와 공통 정책
 
-| 서비스 필드 | API 패키지 | 공통 Collection |
+| 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `Hosts` | [hosts](hosts/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 
