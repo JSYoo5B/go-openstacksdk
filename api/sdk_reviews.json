@@ -7199,6 +7199,410 @@
         "clustering/v1/nodes/README.md",
         "clustering/v1/README.md"
       ]
+    },
+    {
+      "operation": "python:clustering/v1/create_receiver",
+      "source_fingerprint": "2019785d4abc48f9f122bfde671d6064b7fa95c8f62d873a5699e2e0062a71de",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST201 receiver creation preserves required name/type, webhook cluster/action, message omission, explicit null and exact raw actor/params; input/options are snapshotted and source/context rechecked before one request.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_receiver",
+      "source_fingerprint": "3eea39491a092142b3f3317568f1a9a1c4ea5de14ea9ed3ed53044cfe27d86c1",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 sends a controller name, short ID or UUID directly without an extra lookup, retains typed/raw receiver identity and ownership, and malformed or native HTTP responses preserve evidence.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/delete_receiver",
+      "source_fingerprint": "11332753c21288654fdf2e1ce95b3f918f7989d81c40cd9c8323b0a0134d4bb5",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE204 preserves direct ID and exact Name resolution, defaults to ignoring only404, supports an explicit strict override and rejects invalid resolved identities without a mutation.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_receiver",
+      "source_fingerprint": "87c8c15c4e84eeffabf6460dd6a57db9ee92f5536d7d898fc52ce4c985678db9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Object PATCH200 accepts owned name/action/params, preserves omission/null/empty/exact numbers and freezes body/headers before Name lookup; source validation is repeated before mutation.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Implement or deliberately map cached Resource dirty detection, unchanged/empty commit no-op, deletion-to-null and response merge/reset lifecycle; explicit stateless PATCH is only the verified mutation contract.",
+        "Compare full inherited Resource normalization and adapter microversion/default policy rather than assuming concrete options close them."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/receivers",
+      "source_fingerprint": "038bd64486ab36f9144f579769291dfbd7122167903101ca4def11e3c73a5f83",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy/reusable GET200 preserves typed query, explicit global_project=false, user_id-to-user at selected>=1.4 in API preparation, public Resources and subsequent pages, local exact JSON filters and pre-filter wire-ID continuation on linked/short pages.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Implement or deliberately map inherited max_items/paginated control, raw-row consumption and JMESPath semantics; a common iterator/local subset filter is not the full Python list contract.",
+        "Compare per-call base_path/header/query consumption and arbitrary Python sort strings; Go currently checks the published sort key/direction set and provides documented vendor query extensions."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/find_receiver",
+      "source_fingerprint": "7aef248b2ab7d07e2ae49330cc8baa71236f6664f2227a606af784b82c5c4901",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/receivers.API.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find defaults to nil,nil on missing with caller override; explicit ID is direct GET and exact Name uses the shared paginated duplicate/error policy without treating HTTP403 as a missing resource.",
+          "tests": [
+            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
+            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
+            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
+            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
+            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
+            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+      ],
+      "documentation": [
+        "clustering/v1/receivers/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Implement or deliberately map Python combined-string GET-first fallback on404/400/403, Resource inputs and inherited lookup/cache policy; explicit ID/Name is only the verified Go path."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/attach_policy_to_cluster",
+      "source_fingerprint": "497f253fcaf813a424547032d5d18c17116ada245264ac847671e8bff80d3715",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.AttachPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 sends the pinned policy_attach object with required raw policy_id, without a child policy GET or invented version gate. Attach/update preserve enabled omission/false/true/null; detach defaults to policy_id alone. Owned body/header snapshots precede one Name lookup and source/context are rechecked before submission.",
+          "tests": [
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "The response action must match one mandatory Location at the selected action origin/path. Submission retains independent exact body/header/status; malformed accepted evidence, native HTTP/context/option errors remain observable with no automatic action fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned proxies perform _find on the cluster string first. Go explicit ID submits directly and explicit Name performs one exact paginated lookup with ambiguity rejection; policy names/UUIDs/short IDs are controller body identities rather than URL identities.",
+        "Go returns a strict published202 Submission with matching body/Location rather than an unvalidated JSON dictionary and never infers completed action status.",
+        "Library-owned concrete options distinguish enabled omission/false/null and snapshot reusable extensions; typed fields and authentication/version/transport headers cannot be overridden. Pinned attach/update kwargs can override policy_id, while Go rejects that collision.",
+        "Detach WithField is a documented Go extension beyond pinned Python policy_id-only input. policy_update follows the pinned implementation and official contributor contract despite the API-ref example spelling update_policy."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/detach_policy_from_cluster",
+      "source_fingerprint": "f8b5072a33e8f67fb2cc9ff6532c7aaeb1a79b81674c09af81eb697ce8177d65",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.DetachPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 sends the pinned policy_detach object with required raw policy_id, without a child policy GET or invented version gate. Attach/update preserve enabled omission/false/true/null; detach defaults to policy_id alone. Owned body/header snapshots precede one Name lookup and source/context are rechecked before submission.",
+          "tests": [
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "The response action must match one mandatory Location at the selected action origin/path. Submission retains independent exact body/header/status; malformed accepted evidence, native HTTP/context/option errors remain observable with no automatic action fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned proxies perform _find on the cluster string first. Go explicit ID submits directly and explicit Name performs one exact paginated lookup with ambiguity rejection; policy names/UUIDs/short IDs are controller body identities rather than URL identities.",
+        "Go returns a strict published202 Submission with matching body/Location rather than an unvalidated JSON dictionary and never infers completed action status.",
+        "Library-owned concrete options distinguish enabled omission/false/null and snapshot reusable extensions; typed fields and authentication/version/transport headers cannot be overridden. Pinned attach/update kwargs can override policy_id, while Go rejects that collision.",
+        "Detach WithField is a documented Go extension beyond pinned Python policy_id-only input. policy_update follows the pinned implementation and official contributor contract despite the API-ref example spelling update_policy."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_cluster_policy",
+      "source_fingerprint": "92d5cde04c94b05db8e4ee0fb541c27a208c891cbf03d7d251a27b44b8e51d5e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.UpdatePolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 sends the pinned policy_update object with required raw policy_id, without a child policy GET or invented version gate. Attach/update preserve enabled omission/false/true/null; detach defaults to policy_id alone. Owned body/header snapshots precede one Name lookup and source/context are rechecked before submission.",
+          "tests": [
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "The response action must match one mandatory Location at the selected action origin/path. Submission retains independent exact body/header/status; malformed accepted evidence, native HTTP/context/option errors remain observable with no automatic action fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsNameLookupFreezesBodyAndHeaders",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsInputPreflight",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsSourceRecheckAfterLookup",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsLookupFailuresNeverSubmit",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsMalformedAcceptedResponseEvidence",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsHTTPFailuresRemainNative",
+            "api/clustering_cluster_policy_commands_test.go:TestClusteringClusterPolicyCommandsOptionErrorsRemainOriginal"
+          ]
+        },
+        {
+          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "tests": [
+            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned proxies perform _find on the cluster string first. Go explicit ID submits directly and explicit Name performs one exact paginated lookup with ambiguity rejection; policy names/UUIDs/short IDs are controller body identities rather than URL identities.",
+        "Go returns a strict published202 Submission with matching body/Location rather than an unvalidated JSON dictionary and never infers completed action status.",
+        "Library-owned concrete options distinguish enabled omission/false/null and snapshot reusable extensions; typed fields and authentication/version/transport headers cannot be overridden. Pinned attach/update kwargs can override policy_id, while Go rejects that collision.",
+        "Detach WithField is a documented Go extension beyond pinned Python policy_id-only input. policy_update follows the pinned implementation and official contributor contract despite the API-ref example spelling update_policy."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
     }
   ]
 }
