@@ -1,0 +1,144 @@
+# Senlin nodes
+
+`conn.ClusteringV1(ctx).Nodes`가 Senlin node의 생성·조회·목록·수정·삭제·이름 검색을 제공합니다.
+Node.ID는 Senlin node이며 PhysicalID는 실제 서버 등 underlying resource의 ID입니다.
+아래 tainted 예제에는 `sdk.WithMicroversion(sdk.Clustering, "1.13")`을 설정합니다.
+
+| openstacksdk | Go | HTTP 계약 |
+|---|---|---|
+| `create_node(**attrs)` | `Nodes.Create(ctx, opts, options...)` | POST `/nodes`, 202 + node와 Location |
+| `get_node(identity, details=False)` | `Nodes.Get(ctx, identity, options...)` | GET `/nodes/{identity}`, 200 |
+| `nodes(**query)` | `Nodes.List` / `All` | GET `/nodes`, 200 |
+| `update_node(identity, **attrs)` | `Nodes.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + node와 Location |
+| `delete_node(identity, ignore_missing=True, force_delete=False)` | `Nodes.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
+| `find_node(identity, ignore_missing=True)` | `Nodes.Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+
+## 생성과 physical details
+
+```python
+node = conn.clustering.create_node(
+    name="worker_1", profile_id="PROFILE_ID", cluster_id="CLUSTER_ID",
+    role="worker", metadata={"team": "infra"},
+)
+node = conn.clustering.get_node(node.id, details=True)
+```
+
+```go
+service, err := conn.ClusteringV1(ctx)
+if err != nil { return err }
+node, err := service.Nodes.Create(ctx, nodes.CreateOpts{
+    Name: "worker_1", ProfileID: "PROFILE_ID",
+}, nodes.WithCreateClusterID("CLUSTER_ID"), nodes.WithCreateRole("worker"),
+   nodes.WithCreateMetadata(map[string]any{"team": "infra"}))
+if err != nil { return err }
+node, err = service.Nodes.Get(ctx, node.ID, nodes.WithGetDetails(true))
+if err != nil { return err }
+fmt.Println(node.ID, node.PhysicalID, node.Details)
+```
+
+Create는 필수 Name/ProfileID를 보내고 ClusterID/Role/Metadata는 명시하면 전송합니다.
+ProfileID와 ClusterID의 이름·UUID·short-ID는 서비스가 해석하며 추가 부모 lookup을 하지 않습니다.
+이름은 ASCII 문자로 시작하고 ASCII 문자·숫자·`_`·`.`·`-`를 사용하며 255자 미만입니다.
+Get은 identity를 직접 route로 보내고 details를 지정하면 `show_details`를 보냅니다.
+생략하면 query를 보내지 않으며 명시 true/false는 각각을 전송하는 Go 정책입니다.
+
+응답은 Body/HTTP Header/StatusCode와 raw 추가 필드를 보존하고 index는 정확한
+`*json.Number`, nullable timestamp/cluster/domain/role은 포인터로 유지합니다.
+사용자 metadata는 `UserMetadata`, physical details/data/dependents는 raw JSON 값입니다.
+Create/Update의 `Operation`과 Delete 반환값은 action 참조이며 Node.ID나 PhysicalID와 별개입니다.
+
+## 수정과 생략·null·false
+
+```python
+node = conn.clustering.update_node(
+    "worker_1", name="worker_2", role=None, metadata={}, tainted=False,
+)
+```
+
+```go
+api := nodes.New(client)
+node, err := api.Update(ctx, resource.Name("worker_1"), nodes.UpdateOpts{},
+    nodes.WithUpdateName("worker_2"), nodes.WithUpdateRoleNull(),
+    nodes.WithUpdateTainted(false), nodes.WithUpdateMetadata(map[string]any{}))
+if err != nil { return err }
+fmt.Println(node.ID, node.Operation.ActionID)
+```
+
+Optional의 zero value는 생략, `request.Null[T]()`은 null, `request.Present(value)`는 값을 보냅니다.
+Metadata RawMessage의 nil·raw null·`{}`도 별도로 유지하고 `WithUpdateMetadata(nil)`은 null입니다.
+Tainted는 false나 null을 포함해 지정하면 numeric microversion 1.13 이상이 필요합니다.
+null의 실제 갱신 의미는 필드별 서버 계약을 따릅니다.
+`WithCreateClusterID`, `WithUpdateRoleNull`, `WithUpdateTainted` 등의 함수가 Optional을
+만들고 생략·null·false를 구분하므로 호출자에게 별도 builder 구현을 요구하지 않습니다.
+
+수정 body/header는 이름의 한 번 lookup보다 먼저 준비하므로 lookup의 변경을 받지 않습니다.
+mutation 직전에도 service/version을 다시 검사합니다. SDK가 concrete options와 serializer를
+제공하고 `With...Options`와 JSON 옵션은 생성 시 snapshot을 재사용마다 독립적으로 적용합니다.
+응답 ID·PhysicalID·owner·status·ClusterID와 인증/version header를 확장으로 덮어쓸 수 없습니다.
+
+## 목록과 이름 검색
+
+```python
+nodes = conn.clustering.nodes(cluster_id="CLUSTER_ID", status="ACTIVE", limit=20)
+node = conn.clustering.find_node("worker_1", ignore_missing=True)
+```
+
+```go
+api := nodes.New(client)
+for node, err := range api.List(ctx,
+    nodes.WithListOptions(nodes.ListOpts{ClusterID: "CLUSTER_ID", Status: "ACTIVE", Limit: 20}),
+    nodes.WithListShowDetails(false), nodes.WithListGlobalProject(false),
+    nodes.WithListFilter("metadata", map[string]any{"team": "infra"}),
+) {
+    if err != nil { return err }
+    fmt.Println(node.ID, node.PhysicalID)
+}
+node, err := api.Find(ctx, resource.Name("worker_1"))
+if err != nil { return err }
+if node != nil { fmt.Println(node.ID) }
+```
+
+ListOpts는 limit/marker/name/cluster_id/status/sort/global_project/show_details를 보냅니다.
+zero/empty/nil은 생략하고 bool의 명시 false는 유지합니다. `WithListFilter`는 알려진 Body 속성의
+로컬 subset/배열/정확한 decimal 비교이며 project_id/domain_id/user_id 별칭도 처리합니다.
+JSON bool과 숫자는 다른 타입입니다. 추가 server query는 `WithListQuery`로 보내고 typed/local
+속성을 그 경로로 덮어쓰지 않습니다.
+
+lazy 목록은 next/link/HTTP Link와 명시 limit의 wire ID marker를 사용합니다. 짧은 nonempty
+페이지도 이어가고 빈 페이지에서 끝납니다. consumer의 모델 변경, break, context 취소,
+URL/marker cycle, collection origin/path와 원래 필터 유지의 계약은 공유 구현이 처리합니다.
+API.Find는 미존재를 기본 `nil,nil`로 반환하고 `resource.WithMissingError()`로 변경합니다.
+Resources.Find는 strict 기본값입니다. Name은 정확한 이름 검색이며 중복을 거부합니다.
+
+## 비동기 삭제
+
+```python
+action = conn.clustering.delete_node("NODE_ID", force_delete=True)
+action = conn.clustering.get_action(action.id)
+```
+
+```go
+api := nodes.New(client)
+submission, err := api.Delete(ctx, resource.ID("NODE_ID"), nodes.WithDeleteForce(true))
+if err != nil { return err }
+if submission == nil { return nil }
+action, err := actions.New(client).Get(ctx, submission.ActionID)
+if err != nil { return err }
+fmt.Println(action.ID, action.Status)
+```
+
+일반 Delete는 body 없이 요청하고 미존재를 기본적으로 무시하며 Force true는 `{"force":true}`와
+기본 strict404를 사용합니다. `WithDeleteIgnoreMissing`으로 둘 다 명시 변경할 수 있습니다.
+403/409와 잘못된 lookup 결과를 미존재로 취급하지 않습니다. 확인한 소스에 force의 최소 버전
+근거가 없으므로 추측 gate를 추가하지 않습니다. Delete는 action을 자동 조회·poll하지 않습니다.
+반환값은 [Submission의 Location/원문/HTTP 증거](../actions/README.md)입니다.
+결과를 버리는 Resources.Delete는 `ErrUnsupported`입니다. Resources의 공유 status polling은
+Python proxy wait 전체의 cached Resource/defaults와 별도로 비교합니다.
+
+Get/Create/Update는 strict node envelope와 지정 success code를 검사합니다. 202의 Location이
+누락·잘못된 경우와 accepted body decode 실패는 `resource.ResponseError`에 원문을 보존하고
+생성·수정·삭제를 재전송하지 않습니다. adopt/check/recover/operation과 inherited
+max_items/paginated/JMESPath·dirty merge·ID-first Find는 별도 계약으로 계속 추적합니다.
+근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
+`node.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
+[공식 Node API](https://docs.openstack.org/api-ref/clustering/#nodes)입니다.

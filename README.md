@@ -10,7 +10,7 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 gophercloudsdk/
 ├── connection*.go           # 인증, 설정, 24개 서비스 접근과 캐시
 ├── accelerator/             # SDK 소유 Cyborg v2 모델·transport
-├── clustering/              # SDK 소유 Senlin v1 profile·policy·조회·타입 정보
+├── clustering/              # SDK 소유 Senlin v1 profile·policy·cluster·node·action
 ├── instanceha/              # SDK 소유 Masakari v1 failover 리소스
 ├── compute/                 # 서버, flavor, 서버 생성 흐름
 ├── network/                 # Neutron 네트워크
@@ -174,7 +174,7 @@ go run ./examples/create-server -name web-01 -image ubuntu -flavor small -networ
 | 서비스 연결 | 최초 접근 시 구성하고 성공한 서비스만 캐시 |
 | Find | 정확한 이름 또는 명시 ID, 미존재는 `ErrNotFound` |
 | 중복 이름 | 항상 `ErrAmbiguous`; 임의로 선택하지 않음 |
-| Delete | 미존재는 성공; `WithMissingError()`로 엄격하게 변경 |
+| Collection.Delete | 미존재는 성공; `WithMissingError()`로 엄격하게 변경. 비동기 Senlin 삭제는 service API가 Submission을 반환하며 force 기본값은 서비스 문서 참조 |
 | List | 모든 페이지를 lazy iterator로 순회; `break`하면 후속 페이지를 읽지 않음 |
 | All | 모든 결과를 메모리에 수집; 빈 목록은 빈 slice |
 | 페이지 크기 | `WithPageSize`는 페이지 크기이며 전체 결과 개수 제한이 아님 |
