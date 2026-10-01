@@ -195,6 +195,9 @@ func (a *API) Validate(ctx context.Context, value ValidateOpts, options ...Valid
 	if err != nil {
 		return nil, request.Wrap("Validate", "clustering.policies", err)
 	}
+	if err := senlin.RequireVersion(ctx, a.RawClient(), 2); err != nil {
+		return nil, request.Wrap("Validate", "clustering.policies", err)
+	}
 	result, err := a.decode(ctx, http.MethodPost, "policies/validate", body, config.Headers, http.StatusOK)
 	return result, request.Wrap("Validate", "clustering.policies", err)
 }

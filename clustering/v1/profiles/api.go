@@ -141,6 +141,9 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err != nil {
 		return nil, request.Wrap("Create", "clustering.profiles", err)
 	}
+	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
+		return nil, request.Wrap("Create", "clustering.profiles", err)
+	}
 	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPost, a.RawClient().ServiceURL("profiles"), body, config.Headers, http.StatusCreated)
 	if err != nil {
 		return nil, request.Wrap("Create", "clustering.profiles", err)
@@ -199,6 +202,9 @@ func (a *API) Validate(ctx context.Context, opts ValidateOpts, options ...Valida
 	}
 	body, err := senlin.Body(config, "profile", responseFields...)
 	if err != nil {
+		return nil, request.Wrap("Validate", "clustering.profiles", err)
+	}
+	if err := senlin.RequireVersion(ctx, a.RawClient(), 2); err != nil {
 		return nil, request.Wrap("Validate", "clustering.profiles", err)
 	}
 	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPost, a.RawClient().ServiceURL("profiles", "validate"), body, config.Headers, http.StatusOK)
