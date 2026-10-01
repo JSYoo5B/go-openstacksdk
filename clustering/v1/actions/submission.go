@@ -16,3 +16,15 @@ type Submission struct {
 	Header     http.Header
 	StatusCode int
 }
+
+// Snapshot returns an independent copy of the accepted request and its HTTP
+// evidence. A nil submission remains nil; copying does not fetch an action.
+func (submission *Submission) Snapshot() *Submission {
+	if submission == nil {
+		return nil
+	}
+	copy := *submission
+	copy.Body = append(json.RawMessage(nil), submission.Body...)
+	copy.Header = submission.Header.Clone()
+	return &copy
+}
