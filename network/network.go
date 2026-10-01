@@ -2,6 +2,8 @@ package network
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	networkapi "gophercloudsdk/network/v2"
 	"net/url"
 	"strings"
@@ -41,9 +43,19 @@ type Dependencies struct {
 // standalone constructor. All collections share the supplied Neutron client.
 func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
 	s := &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
-		Kind:         "network",
-		IdentityFind: true,
-		Get:          func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
+		Kind:             "network",
+		IdentityFind:     true,
+		BodyFilterFields: map[string]string{"subnets": "subnets", "subnet_ids": "subnets"},
+		BodyFilterValue: func(n *Network, key string) (json.RawMessage, error) {
+			if n == nil {
+				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
+			}
+			if key == "subnets" {
+				return json.Marshal(n.Subnets)
+			}
+			return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+		},
+		Get: func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
 			var result networks.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, client, []string{"networks", id}, q, []int{200}, &result.Body)

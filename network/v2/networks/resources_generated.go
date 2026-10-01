@@ -3,6 +3,7 @@ package networks
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	nativefind "gophercloudsdk/internal/nativefind"
@@ -17,7 +18,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Network] {
 	return resource.NewCollection(resource.Adapter[Network]{
-		Kind:         "networks",
+		Kind:             "networks",
+		BodyFilterFields: map[string]string{"subnets": "subnets", "subnet_ids": "subnets"},
+		BodyFilterValue: func(v *Network, key string) (json.RawMessage, error) {
+			if v == nil {
+				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
+			}
+			switch key {
+			case "subnets":
+				return json.Marshal(v.Subnets)
+			default:
+				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+			}
+		},
 		IdentityFind: true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
 			var result upstream.GetResult

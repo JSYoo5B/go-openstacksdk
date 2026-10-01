@@ -21,6 +21,14 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 	}
 	opts := "type ListOpts struct{Name string `q:\"name\"`}\ntype ListOptsBuilder interface{ToListQuery()(string,error)}\nfunc(ListOpts)ToListQuery()(string,error){return \"\",nil}"
 	source := controlledFixtureSource(spec.model, "ID string;Name string", spec.getter, getArgs, spec.lister, listArgs, opts)
+	if spec.path == "network/v2/networks" {
+		source = strings.Replace(source, "type Network struct{ID string;Name string}", "type Network struct{ID string;Name string;Subnets []string `json:\"subnets\"`}", 1)
+		source = strings.ReplaceAll(source, "ToListQuery", "ToNetworkListQuery")
+		source = strings.ReplaceAll(source, "ModelPage", "NetworkPage")
+		source = strings.Replace(source, "type NetworkPage struct{}", "type NetworkPage struct{pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", "ExtractNetworks")
+		source += "\nfunc(*Network)UnmarshalJSON([]byte)error{return nil}\nfunc(NetworkPage)IsEmpty()(bool,error){return false,nil}\nfunc(NetworkPage)NextPageURL()(string,error){return \"\",nil}\nfunc(NetworkPage)ResourceKey()string{return \"networks\"}\nfunc ExtractNetworksInto(r pagination.Page,v any)error{return nil}\nfunc(GetResult)ExtractInto(v any)error{return nil}\n"
+	}
 	if spec.path == "image/v2/images" {
 		source = strings.Replace(source, "type Image struct{ID string;Name string}", "type Image struct{ID string;Name string;Hidden bool `json:\"os_hidden\"`}", 1)
 		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{Name string `q:\"name\"`;Hidden bool `q:\"os_hidden\"`}", 1)
@@ -58,7 +66,7 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		if spec.model == "Trunk" {
 			page, extract = "TrunkPage", "ExtractTrunks"
 		} else {
-			source = strings.Replace(source, "type SubnetPool struct{ID string;Name string}", "type SubnetPool struct{ID string;Name string;DefaultPrefixLen int `json:\"-\"`;MinPrefixLen int `json:\"-\"`;MaxPrefixLen int `json:\"-\"`}", 1)
+			source = strings.Replace(source, "type SubnetPool struct{ID string;Name string}", "type SubnetPool struct{ID string;Name string;DefaultPrefixLen int `json:\"-\"`;MinPrefixLen int `json:\"-\"`;MaxPrefixLen int `json:\"-\"`;Prefixes []string `json:\"prefixes\"`}", 1)
 		}
 		source = strings.ReplaceAll(source, "ModelPage", page)
 		source = strings.Replace(source, "type "+page+" struct{}", "type "+page+" struct{pagination.LinkedPageBase}", 1)
@@ -243,6 +251,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 	request := defaultGet
 	var urls string
 	switch spec.path {
+	case "network/v2/networks":
+		return pinnedNetworkBodyIdentityDeclarations(t)
 	case "image/v2/images":
 		return pinnedImageIdentityDeclarations(t)
 	case "compute/v2/flavors":
@@ -260,7 +270,7 @@ func deleteURL(client *gophercloud.ServiceClient, id string) string { return cli
 	case "blockstorage/v3/volumes":
 		urls = `func getURL(c *gophercloud.ServiceClient, id string) string { return deleteURL(c,id) }
 func deleteURL(c *gophercloud.ServiceClient, id string) string { return c.ServiceURL("volumes",id) }`
-	case "network/v2/ports", "network/v2/networks", "network/v2/subnets":
+	case "network/v2/ports", "network/v2/subnets":
 		request = strings.ReplaceAll(defaultGet, "client", "c")
 		urls = fmt.Sprintf(`func getURL(c *gophercloud.ServiceClient, id string) string { return resourceURL(c,id) }
 func resourceURL(c *gophercloud.ServiceClient, id string) string { return c.ServiceURL(%q,id) }`, spec.getSegments[0])

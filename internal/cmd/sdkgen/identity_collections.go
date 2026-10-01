@@ -303,6 +303,83 @@ func identityQoSAddressSchema(pkg *types.Package, plan *collectionPlan) bool {
 	return true
 }
 
+// Network body selection must retain the native timestamp decoder and the
+// network envelope/extraction chain. This does not add an identity option or
+// reinterpret the existing native List's wire query parameters.
+func identityNetworkListSchema(pkg *types.Package, plan *collectionPlan) bool {
+	model, ok := plan.model.(*types.Named)
+	if !ok {
+		return false
+	}
+	decoder, _, _ := types.LookupFieldOrMethod(types.NewPointer(model), true, nil, "UnmarshalJSON")
+	decode, ok := decoder.(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := decode.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || !types.Identical(sig.Params().At(0).Type(), types.NewSlice(types.Typ[types.Uint8])) || sig.Results().Len() != 1 || !isError(sig.Results().At(0).Type()) {
+		return false
+	}
+	pageObject := pkg.Scope().Lookup("NetworkPage")
+	if pageObject == nil {
+		return false
+	}
+	page, ok := pageObject.Type().(*types.Named)
+	if !ok {
+		return false
+	}
+	fields, ok := page.Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 1 || !fields.Field(0).Embedded() || types.TypeString(fields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page, name)
+		own := false
+		for i := 0; i < page.NumMethods(); i++ {
+			own = own || page.Method(i).Name() == name
+		}
+		if !own || method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	resourceKey, _, _ := types.LookupFieldOrMethod(page, true, nil, "ResourceKey")
+	key, ok := resourceKey.(*types.Func)
+	if !ok {
+		return false
+	}
+	sig = key.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 0 || sig.Results().Len() != 1 || !types.Identical(sig.Results().At(0).Type(), types.Typ[types.String]) {
+		return false
+	}
+	extract, ok := pkg.Scope().Lookup("ExtractNetworks").(*types.Func)
+	if !ok {
+		return false
+	}
+	sig = extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || sig.Results().Len() != 2 || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	into, ok := pkg.Scope().Lookup("ExtractNetworksInto").(*types.Func)
+	if !ok {
+		return false
+	}
+	sig = into.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Params().At(1).Type(), types.NewInterfaceType(nil, nil).Complete()) || sig.Results().Len() != 1 || !isError(sig.Results().At(0).Type()) {
+		return false
+	}
+	getResult := identityGetResult(pkg, plan, 0)
+	if getResult == nil {
+		return false
+	}
+	resultInto, _, _ := types.LookupFieldOrMethod(getResult, true, nil, "ExtractInto")
+	resultMethod, ok := resultInto.(*types.Func)
+	if !ok {
+		return false
+	}
+	sig = resultMethod.Type().(*types.Signature)
+	return !sig.Variadic() && sig.Params().Len() == 1 && types.Identical(sig.Params().At(0).Type(), types.NewInterfaceType(nil, nil).Complete()) && sig.Results().Len() == 1 && isError(sig.Results().At(0).Type())
+}
+
 // Only the audited Trunk page relies on this dependency's default continuation.
 // Imported type data does not include method bodies, so load the pinned native
 // dependency source rather than infer its wire policy from an interface.
@@ -545,15 +622,29 @@ var identityNativeDeclarations = map[string]map[string]string{
 	"compute/v2/servers":      {"Get": "50ec0a3583ae35c61b1f1c3e573f5b5408421e87a2de87b0d1db1e6bcd6178e3", "getURL": "75785c38f3e330094952e6ff7b46ea79dadf61b44cb39090cf6ae3daabbb413d", "deleteURL": "8bb07ce6dfa8e67dac1b1b280aa1fe073ea3297002e2feebe3a8a653f29112ad"},
 	"blockstorage/v3/volumes": {"Get": identityDefaultGetSHA, "getURL": "4194d2d5e9a4771b8f25b5acc62b52272e741d744d3ae4b8d757e6eaa8b88ec8", "deleteURL": "276fb7983145acc055ef71e5aaa7012fa5767b2aa887a7d4c99f7a1bf47c928b"},
 	"network/v2/ports":        {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "ac2ec66769c6a1e92e42344a62cf06bfcf1c1170f91867ef502344924b97c7ec"},
-	"network/v2/networks":     {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "313da020f0b09244e553dac107ce73d06de65812ce24c0339473cc8befd6332a"},
-	"network/v2/subnets":      {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "0fffec6b477ce31fc27ed1dc2ab5c205c5290d79980b3aa259b179ee7766b263"},
-	"identity/v3/projects":    {"Get": identityDefaultGetSHA, "getURL": "d5e4289c71c7a028ecb7fe6a2a47b1e4a8f6438bdaccbc17c7fe1469bc0461f6"},
-	"identity/v3/users":       {"Get": identityDefaultGetSHA, "getURL": "d3b727df4f5525b08c0dc43b6cb255bb5a6bb1b53da4c3fcbad076787334998e"},
-	"identity/v3/groups":      {"Get": identityDefaultGetSHA, "getURL": "0b7a41e86f5eb5dafbcb193d202162b4385462274178934a7ec20f7efbe9ddbe"},
-	"identity/v3/domains":     {"Get": identityDefaultGetSHA, "getURL": "4eed19909e41e8b752adbb281428ba5a3418746dbf5e5410e20078841b9a7475"},
-	"identity/v3/roles":       {"Get": identityDefaultGetSHA, "getURL": "17a433f86f71243f80bdd8826fe2bc785f8950a1c6a166fedd2a171bc2c2c95d"},
-	"dns/v2/recordsets":       {"Get": "045a8befff06647b70ecbe4560f7a809c991290496b3032cebd876a412a90bd4", "rrsetURL": "71398da5ec5a9461f7e0d9ebc8e569b7c27f09d0f2389191a87e0eca75c9a348"},
-	"loadbalancer/v2/pools":   {"GetMember": "9173191d1b3baa7d542d364f4efaa137fdfa84bfe9ee921feb4f09569c384be0", "memberResourceURL": "0ac8d3833de97abc76ece2b63ad0e265e7ed2407a79ed6c75307d8e8538ded9e"},
+	"network/v2/networks": {
+		"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "313da020f0b09244e553dac107ce73d06de65812ce24c0339473cc8befd6332a",
+		"List":                        "cc52c5ec8c677374bafc4322ae68c43f0dce73cc84000b434e15267d3b617d20",
+		"ListOpts.ToNetworkListQuery": "786e84233300d77b73a1e7d1b2f13ec4d5a42ac7bd085a49421e6b15f3394c90",
+		"rootURL":                     "dfa59922daefee3ab2d5e490b69377ca7a0e58f52ef4e06b59de8837f18fb2c3",
+		"listURL":                     "0a55ee851552d789ddd3c12304e6d0d209cae0cfd477d71b138196681486bf9d",
+		"commonResult.Extract":        "f958482bc76477b9059a8c3a4d921dae13668f04f28fb93340ccb9a8709f586b",
+		"commonResult.ExtractInto":    "51fd854e39753b80bd255703daeedbf5d4e279e4542dbb226aaa98247134314f",
+		"Network.UnmarshalJSON":       "f9840328e1d80cc0b32221f0acfa5c98ebe426375dca0985dc2eedf008e1e2ee",
+		"NetworkPage.ResourceKey":     "443f3b4a977a9746314eddc9b8db71d0269e53854d1b5fd9f067764f6ab060a7",
+		"NetworkPage.NextPageURL":     "e6f3f1611b0d2892145f024b0e2fae31b2d29f282a3d24dd25605c1ec4556efc",
+		"NetworkPage.IsEmpty":         "756bddbbc265e3b30dcff213d983b457559b713f7a0299588d0232a2914b1abc",
+		"ExtractNetworks":             "5a2d1db17e38f0070dfdac235159c3aae4589cf69a4399e2f00a3bdd02a1448f",
+		"ExtractNetworksInto":         "808d8179a8b72552591dc81fbb2cd482cef8c07873a77cda7063d5af0fd2f512",
+	},
+	"network/v2/subnets":    {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "0fffec6b477ce31fc27ed1dc2ab5c205c5290d79980b3aa259b179ee7766b263"},
+	"identity/v3/projects":  {"Get": identityDefaultGetSHA, "getURL": "d5e4289c71c7a028ecb7fe6a2a47b1e4a8f6438bdaccbc17c7fe1469bc0461f6"},
+	"identity/v3/users":     {"Get": identityDefaultGetSHA, "getURL": "d3b727df4f5525b08c0dc43b6cb255bb5a6bb1b53da4c3fcbad076787334998e"},
+	"identity/v3/groups":    {"Get": identityDefaultGetSHA, "getURL": "0b7a41e86f5eb5dafbcb193d202162b4385462274178934a7ec20f7efbe9ddbe"},
+	"identity/v3/domains":   {"Get": identityDefaultGetSHA, "getURL": "4eed19909e41e8b752adbb281428ba5a3418746dbf5e5410e20078841b9a7475"},
+	"identity/v3/roles":     {"Get": identityDefaultGetSHA, "getURL": "17a433f86f71243f80bdd8826fe2bc785f8950a1c6a166fedd2a171bc2c2c95d"},
+	"dns/v2/recordsets":     {"Get": "045a8befff06647b70ecbe4560f7a809c991290496b3032cebd876a412a90bd4", "rrsetURL": "71398da5ec5a9461f7e0d9ebc8e569b7c27f09d0f2389191a87e0eca75c9a348"},
+	"loadbalancer/v2/pools": {"GetMember": "9173191d1b3baa7d542d364f4efaa137fdfa84bfe9ee921feb4f09569c384be0", "memberResourceURL": "0ac8d3833de97abc76ece2b63ad0e265e7ed2407a79ed6c75307d8e8538ded9e"},
 	"image/v2/images": {
 		"Get":                   identityDefaultGetSHA,
 		"getURL":                "355bc2abb9f6b47459672d711305c59e8752ca60544b51974e4cf17d40d32b79",
@@ -728,6 +819,9 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if (spec.path == "network/v2/extensions/subnetpools" || spec.path == "network/v2/extensions/trunks") && !identityPoolTrunkSchema(pkg, selected) {
 			return fmt.Errorf("audited identity collection %s.%s: native prefix decoder, inherited pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if spec.path == "network/v2/networks" && !identityNetworkListSchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native network decoder, linked pager, or extractor schema changed", spec.path, spec.model)
 		}
 		if spec.path == "network/v2/extensions/trunks" && decls["TrunkPage.NextPageURL"] != nil {
 			return fmt.Errorf("audited identity collection %s.%s: native inherited continuation override changed", spec.path, spec.model)

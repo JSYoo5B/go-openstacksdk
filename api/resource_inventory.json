@@ -1190,6 +1190,9 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "prefixes"
+    ],
     "delete": true,
     "wait": false
   },
@@ -1250,6 +1253,9 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "subnets"
+    ],
     "delete": true,
     "wait": true
   },

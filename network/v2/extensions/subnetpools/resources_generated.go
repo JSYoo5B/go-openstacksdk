@@ -3,6 +3,7 @@ package subnetpools
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
 	nativefind "gophercloudsdk/internal/nativefind"
@@ -16,7 +17,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[SubnetPool] {
 	return resource.NewCollection(resource.Adapter[SubnetPool]{
-		Kind:         "subnetpools",
+		Kind:             "subnetpools",
+		BodyFilterFields: map[string]string{"prefixes": "prefixes"},
+		BodyFilterValue: func(v *SubnetPool, key string) (json.RawMessage, error) {
+			if v == nil {
+				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
+			}
+			switch key {
+			case "prefixes":
+				return json.Marshal(v.Prefixes)
+			default:
+				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+			}
+		},
 		IdentityFind: true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*SubnetPool, error) {
 			var result upstream.GetResult
