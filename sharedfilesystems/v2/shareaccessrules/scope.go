@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"iter"
+	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/internal/manilaversion"
+	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
 	"gophercloudsdk/sharedfilesystems/v2/shares"
@@ -35,6 +37,9 @@ func (a *API) InShare(ctx context.Context, parent resource.Ref) (*AccessRuleScop
 	if err != nil {
 		return nil, err
 	}
+	if err := requireVersion(ctx, a.client, 45); err != nil {
+		return nil, err
+	}
 	scope := &AccessRuleScope{api: a, shareID: id}
 	scope.resources = resource.NewCollection(resource.Adapter[AccessRule]{
 		Kind: "share access rules",
@@ -48,13 +53,13 @@ func (a *API) InShare(ctx context.Context, parent resource.Ref) (*AccessRuleScop
 		Delete: func(ctx context.Context, id string) error {
 			return maskParent(scope.Deny(ctx, id, WithDenyIgnoreMissing(false)))
 		},
-		Iterate: func(ctx context.Context, query url.Values) iter.Seq2[*AccessRule, error] {
+		IterateControlled: func(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*AccessRule, error] {
 			return func(yield func(*AccessRule, error) bool) {
 				if len(query) != 0 {
 					yield(nil, resource.ErrUnsupported)
 					return
 				}
-				for value, err := range scope.List(ctx) {
+				for value, err := range scope.listWithControl(ctx, control) {
 					if !yield(value, err) {
 						return
 					}
@@ -75,29 +80,14 @@ func requireVersion(ctx context.Context, client *gophercloud.ServiceClient, mini
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	parts := strings.Split(client.Microversion, ".")
-	if client.Microversion == "" {
-		return fmt.Errorf("%w: share access scope requires selected Manila microversion 2.%d", resource.ErrUnsupported, minimum)
+	if client == nil || client.ProviderClient == nil {
+		return invalid("a service client is required")
 	}
-	if len(parts) != 2 {
-		return invalid("invalid selected microversion %q", client.Microversion)
+	minor, err := manilaversion.Minor(client)
+	if err != nil {
+		return err
 	}
-	for _, part := range parts {
-		if part == "" {
-			return invalid("invalid selected microversion %q", client.Microversion)
-		}
-		for _, digit := range part {
-			if digit < '0' || digit > '9' {
-				return invalid("invalid selected microversion %q", client.Microversion)
-			}
-		}
-	}
-	major, err1 := strconv.Atoi(parts[0])
-	minor, err2 := strconv.Atoi(parts[1])
-	if err1 != nil || err2 != nil {
-		return invalid("selected microversion is out of range")
-	}
-	if major != 2 || minor < minimum {
+	if minor < minimum {
 		return fmt.Errorf("%w: operation requires Manila 2.%d or newer, selected %s", resource.ErrUnsupported, minimum, client.Microversion)
 	}
 	return nil
@@ -156,6 +146,9 @@ func (s *AccessRuleScope) Get(ctx context.Context, id string, options ...GetOpti
 	if err != nil {
 		return nil, err
 	}
+	if err := requireVersion(ctx, s.api.client, 45); err != nil {
+		return nil, err
+	}
 	var wire struct {
 		Access json.RawMessage `json:"access"`
 	}
@@ -182,50 +175,79 @@ func (s *AccessRuleScope) Get(ctx context.Context, id string, options ...GetOpti
 // List lazily yields the modern endpoint's slice. No pagination capability is
 // inferred from Python's generic limit/marker mapping or fabricated next links.
 func (s *AccessRuleScope) List(ctx context.Context, options ...ListOption) iter.Seq2[*AccessRule, error] {
+	return s.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (s *AccessRuleScope) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*AccessRule, error] {
+	options = append([]ListOption(nil), options...)
 	return func(yield func(*AccessRule, error) bool) {
 		if err := requireVersion(ctx, s.api.client, 45); err != nil {
 			yield(nil, err)
 			return
 		}
-		cfg, err := request.Apply(ListOpts{}, options...)
+		configured := append([]ListOption{request.WithArgument[ListOpts](listControlArgument, control)}, options...)
+		cfg, err := request.Apply(ListOpts{}, configured...)
 		if err == nil {
-			err = request.ValidateCapabilities(cfg, false, true, true)
+			err = request.ValidateCapabilities(cfg, false, true, true, listControlArgument)
 		}
 		if err != nil {
 			yield(nil, err)
 			return
 		}
-		if _, exists := cfg.Query["share_id"]; exists {
-			yield(nil, invalid("share_id is fixed by the scope"))
+		control, _, err := request.Argument[resource.ListControl](cfg, listControlArgument)
+		if err != nil || control.MaxItems < 0 {
+			if err == nil {
+				err = invalid("max_items must not be negative")
+			}
+			yield(nil, err)
 			return
+		}
+		for _, key := range []string{"share_id", "max_items", "paginated"} {
+			if _, exists := cfg.Query[key]; exists {
+				yield(nil, invalid("query %q is owned by the share scope or local list options", key))
+				return
+			}
 		}
 		headers, err := extraHeaders(cfg, "application/json")
 		if err != nil {
 			yield(nil, err)
 			return
 		}
-		cfg.Query.Set("share_id", s.shareID)
-		var wire struct {
-			Rules json.RawMessage `json:"access_list"`
+		if err := requireVersion(ctx, s.api.client, 45); err != nil {
+			yield(nil, err)
+			return
 		}
-		response, err := s.api.client.Get(ctx, s.api.client.ServiceURL("share-access-rules")+"?"+cfg.Query.Encode(), &wire,
-			&gophercloud.RequestOpts{OkCodes: []int{200}, MoreHeaders: cleanHeaders(headers)})
+		if cfg.Query == nil {
+			cfg.Query = make(url.Values)
+		}
+		cfg.Query.Set("share_id", s.shareID)
+		response, err := rest.DoJSON(ctx, s.api.client, http.MethodGet,
+			s.api.client.ServiceURL("share-access-rules")+"?"+cfg.Query.Encode(), nil, cleanHeaders(headers), 200)
 		if err != nil {
 			yield(nil, request.Wrap("List", "share access rules", err))
 			return
 		}
+		fail := func(cause error) {
+			yield(nil, request.Wrap("List", "share access rules", response.Fail(cause)))
+		}
+		var wire map[string]json.RawMessage
+		if err := json.Unmarshal(response.Body, &wire); err != nil {
+			fail(err)
+			return
+		}
+		rules := wire["access_list"]
 		var entries []json.RawMessage
-		if len(wire.Rules) == 0 || string(wire.Rules) == "null" {
-			yield(nil, fmt.Errorf("access_list must be a JSON array"))
+		if len(rules) == 0 || string(rules) == "null" {
+			fail(fmt.Errorf("access_list must be a JSON array"))
 			return
 		}
-		if err := json.Unmarshal(wire.Rules, &entries); err != nil {
-			yield(nil, err)
+		if err := json.Unmarshal(rules, &entries); err != nil {
+			fail(err)
 			return
 		}
-		for _, raw := range entries {
+		for index, raw := range entries {
 			if err := ctx.Err(); err != nil {
-				yield(nil, err)
+				fail(err)
 				return
 			}
 			value, err := decodeRule(raw, response.Header, s.shareID)
@@ -233,12 +255,22 @@ func (s *AccessRuleScope) List(ctx context.Context, options ...ListOption) iter.
 				err = &ParentMismatchError{ShareID: s.shareID, AccessID: value.ID, ActualShareID: value.ShareID}
 			}
 			if err != nil {
-				yield(nil, request.Wrap("List", "share access rules", err))
+				fail(err)
 				return
 			}
 			if !yield(value, nil) {
 				return
 			}
+			if err := ctx.Err(); err != nil {
+				fail(err)
+				return
+			}
+			if control.MaxItems > 0 && index+1 >= control.MaxItems {
+				return
+			}
+		}
+		if err := ctx.Err(); err != nil {
+			fail(err)
 		}
 	}
 }
@@ -327,6 +359,9 @@ func (s *AccessRuleScope) Allow(ctx context.Context, opts AllowOpts, options ...
 	if err != nil {
 		return nil, err
 	}
+	if err := requireVersion(ctx, s.api.client, 45); err != nil {
+		return nil, err
+	}
 	var wire struct {
 		Access json.RawMessage `json:"access"`
 	}
@@ -383,6 +418,9 @@ func (s *AccessRuleScope) Deny(ctx context.Context, id string, options ...DenyOp
 	if err != nil {
 		return err
 	}
+	if err := requireVersion(ctx, s.api.client, 45); err != nil {
+		return err
+	}
 	ignore := cfg.Options.IgnoreMissing == nil || *cfg.Options.IgnoreMissing
 	_, err = s.Get(ctx, id)
 	if err != nil {
@@ -390,6 +428,13 @@ func (s *AccessRuleScope) Deny(ctx context.Context, id string, options ...DenyOp
 		if ignore && errors.Is(err, resource.ErrNotFound) && !errors.As(err, &parent) {
 			return nil
 		}
+		return err
+	}
+	minimum := 45
+	if cfg.Options.Unrestrict != nil {
+		minimum = 82
+	}
+	if err := requireVersion(ctx, s.api.client, minimum); err != nil {
 		return err
 	}
 	_, err = s.api.client.Post(ctx, s.api.client.ServiceURL("shares", s.shareID, "action"), body, nil,
