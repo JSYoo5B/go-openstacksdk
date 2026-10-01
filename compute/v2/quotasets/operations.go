@@ -2,6 +2,7 @@ package quotasets
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -21,6 +22,30 @@ func WithUpdateForce(force bool) UpdateOption {
 	return request.WithArgument[UpdateOpts](scopeForceArgument, force)
 }
 
+// WithQuotaOptions snapshots every typed limit at option construction. It
+// replaces the entire concrete update input and can be reused across calls.
+func WithQuotaOptions(value UpdateOpts) UpdateOption {
+	snapshot := snapshotOptions(value)
+	return func(config *request.Config[UpdateOpts]) error {
+		config.Options = snapshotOptions(snapshot)
+		return nil
+	}
+}
+
+func snapshotOptions(value UpdateOpts) UpdateOpts {
+	copy := value
+	pointers := reflect.ValueOf(&copy).Elem()
+	for i := 0; i < pointers.NumField(); i++ {
+		field := pointers.Field(i)
+		if field.Kind() == reflect.Pointer && field.Type().Elem().Kind() == reflect.Int && !field.IsNil() {
+			clone := reflect.New(field.Type().Elem())
+			clone.Elem().SetInt(field.Elem().Int())
+			field.Set(clone)
+		}
+	}
+	return copy
+}
+
 type preparedUpdate map[string]any
 
 func (p preparedUpdate) ToComputeQuotaUpdateMap() (map[string]any, error) { return p, nil }
@@ -38,6 +63,7 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	if err := request.ValidateCapabilities(config, true, false, false, scopeForceArgument); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
+	config.Options = snapshotOptions(config.Options)
 	if err := validateLimits(config.Options); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
@@ -45,7 +71,7 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
-	body, err := (updateOptsBuilder{base: config.Options, config: config}).ToComputeQuotaUpdateMap()
+	body, err := quotaUpdateBody(config)
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
@@ -55,6 +81,24 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	result := upstream.Update(ctx, s.api.client, s.projectID, preparedUpdate(body))
 	value, err := decodeQuota(result.Result, s.projectID)
 	return value, quotaError("Update", s.projectID, err)
+}
+
+func quotaUpdateBody(config request.Config[UpdateOpts]) (map[string]any, error) {
+	// Native BuildRequestBody decodes through float64. Preserve typed integer
+	// limits as raw JSON, including exact values larger than 2^53.
+	encoded, err := json.Marshal(config.Options)
+	if err != nil {
+		return nil, fmt.Errorf("%w: quota options: %v", resource.ErrInvalidOption, err)
+	}
+	var core map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &core); err != nil {
+		return nil, fmt.Errorf("%w: quota options: %v", resource.ErrInvalidOption, err)
+	}
+	fields := make(map[string]any, len(core))
+	for key, value := range core {
+		fields[key] = value
+	}
+	return request.MergeFieldsFor(map[string]any{"quota_set": fields}, config.Fields, config.Options)
 }
 
 func validateLimits(options UpdateOpts) error {

@@ -44,7 +44,17 @@ fmt.Println(reset.Header.Get("X-Openstack-Request-Id"))
 
 ## 값과 응답 보존
 
-`UpdateOpts`는 Gophercloud v2.15.0의 native alias입니다. `*int`가 nil이면 해당 limit을 보내지 않고, 0이면 0을 보내며, -1은 무제한입니다. -1보다 작은 typed limit은 HTTP 전송 전에 `resource.ErrInvalidOption`으로 거부합니다. `WithUpdateOptions`는 typed 옵션 전체를 대체합니다.
+`UpdateOpts`는 Gophercloud v2.15.0의 native alias입니다. `*int`가 nil이면 해당 limit을 보내지 않고, 0이면 0을 보내며, -1은 무제한입니다. -1보다 작은 typed limit은 HTTP 전송 전에 `resource.ErrInvalidOption`으로 거부합니다. Scope Update는 core 필드를 raw JSON으로 구성하므로 플랫폼 int 범위에서 2^53보다 큰 값도 float64 반올림 없이 보냅니다.
+
+`WithUpdateOptions`는 typed 입력 전체를 대체하고, 입력의 pointer 값은 Update 호출 중에 복사합니다. 옵션 생성 시의 limit을 고정하려면 Cinder scope와 같은 `WithQuotaOptions`를 사용합니다. 이 옵션은 모든 `*int`를 즉시 복사하며, 여러 호출에서 재사용해도 각 적용마다 독립된 값을 제공합니다. 확장 필드는 기존 `WithUpdateField`로 전달합니다.
+
+```go
+cores := 7
+snapshot := quotasets.WithQuotaOptions(quotasets.UpdateOpts{Cores: &cores})
+cores = 99
+_, err := scope.Update(ctx, quotasets.UpdateOpts{}, snapshot) // cores=7
+if err != nil { return err }
+```
 
 Native `Force bool`의 false는 `omitempty`로 생략됩니다. Scope의 `WithUpdateForce(false)`는 false를 명시적으로 보내고, `WithUpdateForce(true)`는 사용량·예약량보다 작은 새 limit의 적용을 요청합니다. 마지막 force 옵션이 우선합니다. 생략 시 [Nova API의 force 기본값](https://docs.openstack.org/api-ref/compute/#update-quotas)은 false입니다. Python cloud의 `set_compute_quotas`는 force를 True로 강제하지만 이 scope는 compute proxy/API 계약을 따르므로 같은 cloud 동작은 `WithUpdateForce(true)`로 요청합니다. 이 force 옵션은 scope 전용이며 하위 `API.Update`에서는 사용할 수 없습니다.
 
@@ -60,4 +70,4 @@ Reset은 본문 없는 DELETE 성공을 처리하고 `ResetResponse`의 project 
 
 Scope는 선택한 Compute microversion을 변경하지 않습니다. [Nova version history](https://docs.openstack.org/nova/latest/reference/api-microversion-history.html)에 따라 2.36부터 network quota, 2.57부터 injected-file quota가 제거됩니다. Native alias에 필드가 있어도 모든 버전에서 전송할 수 있다는 뜻은 아니며 서버가 허용 여부를 검증합니다. Pinned Python QuotaSet의 최대 microversion 2.56을 전체 quota API의 최소 요구로 해석하지 않습니다.
 
-비교 근거는 pinned [compute proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py), [cloud quota helpers](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py), [common QuotaSet](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/quota_set.py)와 [native quota API](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/compute/v2/quotasets/requests.go)입니다. 의미 있는 HTTP 검증은 [quota 계약 테스트](../../../api/project_quotas_contracts_test.go)에 있습니다.
+비교 근거는 pinned [compute proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py), [cloud quota helpers](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py), [common QuotaSet](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/quota_set.py)와 [native quota API](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/compute/v2/quotasets/requests.go)입니다. 의미 있는 HTTP 검증은 [quota 계약 테스트](../../../api/project_quotas_contracts_test.go)와 [정밀도·snapshot 테스트](../../../api/nova_project_quotas_precision_test.go)에 있습니다.
