@@ -23,7 +23,7 @@ import (
 // Source: pinned Resource's current-value/sticky dirty tracking and tombstones
 // (resource.py:214-246), dirty-only request body (:1231-1249), clean commit
 // short circuit (:1914-1919), shallow response merge/reset (:1380-1387).
-// Cluster/Node AsyncResource commits PATCH202 and retain Location actions.
+// Go Cluster/Node commits require PATCH202 and snapshot Location action evidence.
 // Immutable route, strict accepted evidence and ownership are Go policies.
 const clusteringAsyncTrackedPrefix = "/proxy/tenant/senlin/v1"
 
