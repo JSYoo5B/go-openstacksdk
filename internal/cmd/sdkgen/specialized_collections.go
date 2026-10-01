@@ -22,6 +22,14 @@ var specializedCollections = map[string]collectionRecord{
 		Package: "gophercloudsdk/compute/v2/quotasets", Model: "QuotaResource", UpstreamModel: "QuotaSet", Kind: "singleton",
 		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
 	},
+	upstreamModule + "/openstack/blockstorage/v3/quotasets": {
+		Package: "gophercloudsdk/blockstorage/v3/quotasets", Model: "QuotaResource", UpstreamModel: "QuotaSet", Kind: "singleton",
+		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
+	},
+	upstreamModule + "/openstack/networking/v2/extensions/quotas": {
+		Package: "gophercloudsdk/network/v2/extensions/quotas", Model: "QuotaResource", UpstreamModel: "Quota", Kind: "singleton",
+		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
+	},
 	upstreamModule + "/openstack/objectstorage/v1/containers": {
 		Package: "gophercloudsdk/objectstorage/v1/containers", Model: "ContainerResource", UpstreamModel: "Container", Find: true, Delete: true,
 	},

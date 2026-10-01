@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. nil/zero/-1 limit과 명시적 force, Get/Detail/Update/Reset 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
+
 `Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.
 
 `Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.

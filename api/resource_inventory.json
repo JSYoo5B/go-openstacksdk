@@ -169,10 +169,14 @@
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/quotasets",
+    "model": "QuotaResource",
+    "upstream_model": "QuotaSet",
+    "kind": "singleton",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/schedulerstats",
@@ -1073,10 +1077,14 @@
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/quotas",
+    "model": "QuotaResource",
+    "upstream_model": "Quota",
+    "kind": "singleton",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/network/v2/extensions/rbacpolicies",
