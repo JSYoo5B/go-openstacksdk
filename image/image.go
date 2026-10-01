@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
 	"gophercloudsdk/resource"
 
@@ -26,8 +27,15 @@ func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client, API: imageapi.New(client), Images: resource.NewCollection[Image](resource.Adapter[Image]{
-		Kind:    "image",
-		Get:     func(ctx context.Context, id string) (*Image, error) { return images.Get(ctx, client, id).Extract() },
+		Kind:                     "image",
+		IdentityFind:             true,
+		IdentityMissingListQuery: url.Values{"os_hidden": {"true"}},
+		Get:                      func(ctx context.Context, id string) (*Image, error) { return images.Get(ctx, client, id).Extract() },
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Image, error) {
+			var result images.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, client, []string{"images", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		List:    func(q url.Values) pagination.Pager { return images.List(client, query.Adapter(q)) },
 		Extract: images.ExtractImages,
 		Delete:  func(ctx context.Context, id string) error { return images.Delete(ctx, client, id).ExtractErr() },
