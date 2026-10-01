@@ -202,7 +202,5 @@ func copyTrackedBody(body map[string]json.RawMessage) (map[string]json.RawMessag
 }
 
 func equalTrackedJSON(left, right json.RawMessage) bool {
-	actual, _ := filterJSON(left)
-	expected, _ := filterJSON(right)
-	return equalFilterJSON(actual, expected)
+	return EqualJSON(left, right)
 }
