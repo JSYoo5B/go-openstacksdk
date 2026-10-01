@@ -1,0 +1,154 @@
+// Package senlin supplies private validation and inherited read options for
+// concrete Senlin APIs. Service packages own their models and endpoint contracts.
+package senlin
+
+import (
+	"context"
+	"fmt"
+	"iter"
+	"net/url"
+	"strconv"
+	"strings"
+
+	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/internal/rest"
+	"gophercloudsdk/request"
+	"gophercloudsdk/resource"
+)
+
+// ListOpts reflects the limit/marker options inherited by Python Resource.
+// A zero Limit and empty Marker omit them. Type catalogs do not document these
+// query parameters; deployments decide whether they support them.
+type ListOpts struct {
+	Limit  int
+	Marker string
+}
+
+type ListOption = request.Option[ListOpts]
+
+func Validate(ctx context.Context, client *gophercloud.ServiceClient) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if client == nil || client.ProviderClient == nil {
+		return fmt.Errorf("%w: Senlin service client is required", resource.ErrInvalidOption)
+	}
+	if client.Type != "" && client.Type != "clustering" {
+		return fmt.Errorf("%w: Senlin requires the clustering service type", resource.ErrInvalidOption)
+	}
+	if client.Microversion != "" {
+		if client.Type != "clustering" {
+			return fmt.Errorf("%w: Senlin microversion requires the clustering service type", resource.ErrInvalidOption)
+		}
+		if _, err := Minor(client); err != nil {
+			return err
+		}
+	}
+	for key, value := range client.MoreHeaders {
+		if strings.EqualFold(key, "OpenStack-API-Version") {
+			expected := "clustering " + client.Microversion
+			if client.Microversion == "" || value != expected {
+				return fmt.Errorf("%w: Senlin version header conflicts with selected microversion", resource.ErrInvalidOption)
+			}
+		}
+	}
+	return nil
+}
+
+// Minor validates a selected numeric 1.N version. An empty selection uses the
+// server's 1.0 default; a symbolic latest cannot prove a version requirement.
+func Minor(client *gophercloud.ServiceClient) (int, error) {
+	if client == nil {
+		return 0, fmt.Errorf("%w: Senlin service client is required", resource.ErrInvalidOption)
+	}
+	selected := client.Microversion
+	if selected == "" {
+		return 0, nil
+	}
+	if selected == "latest" {
+		return 0, fmt.Errorf("%w: select a numeric Senlin microversion", resource.ErrUnsupported)
+	}
+	parts := strings.Split(selected, ".")
+	if len(parts) != 2 || parts[0] != "1" {
+		return 0, fmt.Errorf("%w: Senlin microversion must be 1.N", resource.ErrInvalidOption)
+	}
+	minor, err := strconv.Atoi(parts[1])
+	if err != nil || minor < 0 || strconv.Itoa(minor) != parts[1] {
+		return 0, fmt.Errorf("%w: invalid Senlin microversion %q", resource.ErrInvalidOption, selected)
+	}
+	return minor, nil
+}
+
+func RequireVersion(ctx context.Context, client *gophercloud.ServiceClient, minimum int) error {
+	if err := Validate(ctx, client); err != nil {
+		return err
+	}
+	minor, err := Minor(client)
+	if err != nil {
+		return err
+	}
+	if minor < minimum {
+		return fmt.Errorf("%w: operation requires Senlin microversion 1.%d or newer", resource.ErrUnsupported, minimum)
+	}
+	return nil
+}
+
+func Identifier(value string) error { return resource.ID(value).Validate() }
+
+func Query(config request.Config[ListOpts]) (url.Values, error) {
+	if err := request.ValidateCapabilities(config, false, true, false); err != nil {
+		return nil, err
+	}
+	if config.Options.Limit < 0 {
+		return nil, fmt.Errorf("%w: page limit must be non-negative", resource.ErrInvalidOption)
+	}
+	query := make(url.Values)
+	if config.Options.Limit != 0 {
+		query.Set("limit", strconv.Itoa(config.Options.Limit))
+	}
+	if config.Options.Marker != "" {
+		if err := Identifier(config.Options.Marker); err != nil {
+			return nil, err
+		}
+		query.Set("marker", config.Options.Marker)
+	}
+	for key, values := range config.Query {
+		if key == "limit" || key == "marker" {
+			return nil, fmt.Errorf("%w: extension %q is a concrete list option", resource.ErrInvalidOption, key)
+		}
+		query[key] = append([]string(nil), values...)
+	}
+	return query, nil
+}
+
+func List[T any](ctx context.Context, spec rest.CollectionSpec[T], options ...ListOption) iter.Seq2[*T, error] {
+	options = append([]ListOption(nil), options...)
+	return func(yield func(*T, error) bool) {
+		config, err := request.Apply(ListOpts{}, options...)
+		if err != nil {
+			yield(nil, request.Wrap("List", spec.Kind, err))
+			return
+		}
+		query, err := Query(config)
+		if err != nil {
+			yield(nil, request.Wrap("List", spec.Kind, err))
+			return
+		}
+		for value, err := range rest.List(ctx, spec, query) {
+			if !yield(value, request.Wrap("List", spec.Kind, err)) {
+				return
+			}
+		}
+	}
+}
+
+func All[T any](values iter.Seq2[*T, error]) ([]*T, error) {
+	all := make([]*T, 0)
+	for value, err := range values {
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, value)
+	}
+	return all, nil
+}
