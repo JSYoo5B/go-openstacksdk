@@ -40,8 +40,9 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Manila user/share type quota | `projectScope.InUser(ctx, user)` / `InShareType(ctx, shareType)` | 고정 project+selector; Get·Detail·Update·Reset, share type은 2.39 이상 |
 | Manila quota class | `shared.QuotaClassSets.InClass(ctx, "default")` | 고정 class 이름; Get·Update, 프로젝트 조회 없음 |
 | Designate project quota | `conn.DNSProjectQuotas(ctx, project)` / `CurrentDNSProjectQuotas(ctx)` | 고정 project ID와 sudo-project header; Get·PATCH Update·DELETE Reset |
+| Magnum project/resource quota | `conn.ContainerInfraProjectQuotas(ctx, project)` → `ForResource(quotas.Cluster)` | 고정 project+resource; Create·Get·PATCH Update·Delete, explicit hard limit |
 | Nova project limits | `conn.ProjectLimits(ctx, project)` / `CurrentProjectLimits(ctx)` | 고정 tenant_id query; Get, 일반 current 조회는 Limits.Fetch |
-| Cinder project limits | `conn.BlockStorageProjectLimits(ctx, project)` / `CurrentBlockStorageProjectLimits(ctx)` | 고정 project_id query; Get, 실제 API3.39 이상 필요 |
+| Cinder project limits | `conn.BlockStorageProjectLimits(ctx, project)` / `CurrentBlockStorageProjectLimits(ctx)` | 고정 project_id query; Get, 선택한 숫자 버전3.39 이상·admin context 필요 |
 | Heat stack | `orchestration.Stacks.InStack(ctx, ref)` / `ForStack(identity)` | stack name + UUID |
 | Heat stack resource | `orchestration.StackResources.InStack(ctx, ref)` / `ForStack(identity)` | 실제 소속 stack pair + resource_name |
 | Heat stack event | `orchestration.StackEvents.InStack(ctx, ref)` → `ForResource(name)` | stack pair + resource_name + event ID |

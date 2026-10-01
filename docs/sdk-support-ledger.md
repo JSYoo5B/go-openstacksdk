@@ -40,7 +40,8 @@
 | Manila quota class (`9b1b74e`) | [class 계약](../api/manila_quota_class_test.go): 정확한 이름 고정, GET/PUT200·legacy/current 경로, 12개 typed limit·snapshot·reserved field 거부·HTTP/취소·redirect 보호 | inherited Resource·proxy alias·query/cache/dirty·adapter는 추가 비교. [사용법](../sharedfilesystems/v2/quotaclasssets/README.md) |
 
 | Nova project limits (`fd70296`, `07fc92e`) | [query·응답](../api/nova_project_limits_contracts_test.go), [project](../api/nova_project_limits_projects_test.go), [transport](../api/nova_project_limits_transport_test.go), [Connection](../connection_limits_test.go): reserved 0/1·고정 tenant_id, raw/legacy rate·accepted 응답 증거·source auth/retry/context | legacy rate를 적용하거나 제거된 v2 API를 복원하지 않음. Python alias·Resource/cache·adapter는 추가 비교. [사용법](../compute/v2/limits/README.md) |
-| Cinder project limits (`2c8c1cf`, `07fc92e`) | [HTTP 계약](../api/cinder_limits_test.go), [Connection](../connection_limits_test.go): unfiltered3.0·필터3.39, actual header/type 사전검사, 고정 project_id, optional int64·raw timestamp·HTTP/read/decode 오류 | Python Project Resource·최대3.39 자동 선택·cache/adapter는 추가 비교. [사용법](../blockstorage/v3/limits/README.md) |
+| Cinder project limits (`2c8c1cf`, `07fc92e`, `1190b03`) | [HTTP 계약](../api/cinder_limits_test.go), [Connection](../connection_limits_test.go): unfiltered3.0/latest·숫자3.39 필터, header/type 사전검사·매 요청 재검사, 고정 project_id, optional int64·raw timestamp·HTTP/read/decode 오류 | 서버는 non-admin 필터를 무시하며 응답으로 target을 확인할 수 없음. Python Project Resource·최대3.39 자동 선택·cache/adapter는 추가 비교. [사용법](../blockstorage/v3/limits/README.md) |
+| Magnum project/resource quota (`39669a6`, `fcaa34f`, `d0e326f`) | [생성](../api/magnum_quota_create_test.go), [조회·갱신·삭제](../api/magnum_quota_operations_test.go), [Connection](../connection_project_quotas_test.go): 고정 pair, explicit hard limit·snapshot·정확한 JSON 숫자, POST201·GET200·PATCH202·DELETE204, default fallback·accepted 오류·raw metadata | pinned Python에 quota 선언 없음. 추가 REST 계약은 server master 근거이며 별도 SHA inventory·페이지 목록은 남음. [사용법](../containerinfra/v1/quotas/README.md) |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. 이전 quota 추가 단위는 전체 `go test -race -timeout 60s ./...`, `go vet ./...`, 판정 검증을 통과했습니다. 서비스·공통·quota 문서의 Go 예제 42개를 컴파일했고 로컬 Markdown 링크 562개를 확인했습니다. Inspector Start query 보정의 이번 검증은 `go test -race ./api ./baremetalintrospection/... ./internal/cmd/sdkgen` 범위입니다. 그 이전 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`도 통과했습니다.
 
@@ -115,7 +116,7 @@ Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic vir
 
 초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
 
-현재 binding은 native 일반 Collection 108개, SDK 소유 Cyborg Collection 5개, 부모 Collection 범위 19개, Heat 복합 식별자 정책 1개와 자식 resource·event 범위 2개, Nova·Cinder·Neutron·Octavia·Designate native quota singleton 5개와 SDK 소유 Manila quota singleton 1개와 named quota class singleton 1개, Nova·Cinder 읽기 전용 project limits 2개, 별도 tag set 1개입니다. 공통 binding이 없는 native 패키지 61개는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
+현재 binding은 native 일반 Collection 108개, SDK 소유 Cyborg Collection 5개, 부모 Collection 범위 19개, Heat 복합 식별자 정책 1개와 자식 resource·event 범위 2개, Nova·Cinder·Neutron·Octavia·Designate native quota singleton 5개와 SDK 소유 Manila quota singleton 1개와 named quota class singleton 1개, Nova·Cinder 읽기 전용 project limits 2개, Magnum project+resource quota 1개, 별도 tag set 1개입니다. 공통 binding이 없는 native 패키지 60개는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
 
 | 우선 과제 | 확인한 코드 근거 | 필요한 구현과 검증 |
 |---|---|---|
