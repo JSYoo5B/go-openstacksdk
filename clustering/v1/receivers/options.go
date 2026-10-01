@@ -29,6 +29,10 @@ type UpdateOpts struct {
 }
 
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	Name          string
@@ -127,6 +131,21 @@ func WithCreateHeader(key, value string) CreateOption {
 func WithUpdateHeader(key, value string) UpdateOption {
 	return request.WithHeader[UpdateOpts](key, value)
 }
+
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
+
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 func WithListGlobalProject(value bool) ListOption {
 	return func(config *request.Config[ListOpts]) error {
@@ -157,6 +176,9 @@ func listQuery(ctx context.Context, client *gophercloud.ServiceClient, config re
 		return nil, err
 	}
 	value := config.Options
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	query, err := senlin.Query(request.Config[senlin.ListOpts]{Options: senlin.ListOpts{Limit: value.Limit, Marker: value.Marker}})
 	if err != nil {
 		return nil, err
@@ -171,7 +193,7 @@ func listQuery(ctx context.Context, client *gophercloud.ServiceClient, config re
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "name", "type", "cluster_id", "action", "sort", "global_project", "user", "user_id", "id", "project", "project_id", "domain", "domain_id", "actor", "params", "channel", "created_at", "updated_at":
+		case "limit", "marker", "max_items", "paginated", "name", "type", "cluster_id", "action", "sort", "global_project", "user", "user_id", "id", "project", "project_id", "domain", "domain_id", "actor", "params", "channel", "created_at", "updated_at":
 			return nil, fmt.Errorf("%w: query %q is a concrete receiver option or local Body filter", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
