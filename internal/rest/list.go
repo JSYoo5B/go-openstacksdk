@@ -27,6 +27,10 @@ type PagePolicy[T any] struct {
 	HTTPLink       bool
 	MarkerFallback bool
 	Marker         func(*T) (string, error)
+	// MarkerOnShortPage follows every nonempty page when an explicit limit is
+	// present. Python Resource uses this rule; other APIs may stop when their
+	// returned page is shorter than the limit. An empty page always stops.
+	MarkerOnShortPage bool
 	// AllowFirstLimitReduction permits only the first continuation to reduce
 	// the requested limit. That reduced limit is fixed for all later pages.
 	AllowFirstLimitReduction bool
@@ -151,7 +155,7 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 				fail(response.Fail(err))
 				return
 			}
-			if next == nil && spec.Paging.MarkerFallback && limit > 0 && len(items) >= limit {
+			if next == nil && spec.Paging.MarkerFallback && limit > 0 && len(items) > 0 && (spec.Paging.MarkerOnShortPage || len(items) >= limit) {
 				// Derive the marker from retained wire data. The consumer owns
 				// yielded models and may have changed their fields or metadata.
 				last, err := decodeListItem(items[len(items)-1], response, spec.Metadata)
