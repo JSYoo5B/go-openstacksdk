@@ -30,7 +30,7 @@ func newManilaQuotaClassScope(t *testing.T, cloud *testcloud.Cloud, version stri
 }
 
 func TestManilaQuotaClassNamedScopesUseVersionedRoutesWithoutLookups(t *testing.T) {
-	for _, tc := range []struct{ version, root string }{{"", "os-quota-class-sets"}, {"2.6", "os-quota-class-sets"}, {"2.7", "quota-class-sets"}, {"2.80", "quota-class-sets"}, {"latest", "quota-class-sets"}} {
+	for _, tc := range []struct{ version, root string }{{"", "os-quota-class-sets"}, {"2.6", "os-quota-class-sets"}, {"2.7", "quota-class-sets"}, {"2.80", "quota-class-sets"}} {
 		t.Run("version-"+tc.version, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32

@@ -118,8 +118,10 @@ The endpoint's catalog project and the target quota project remain distinct.
 The configured service client's resource base is retained; no project is guessed
 from its URL. An omitted microversion, or 2.6 and earlier, uses
 `os-quota-sets/{project}`; 2.7+ uses `quota-sets/{project}`. `Detail` needs a
-configured microversion of at least 2.25. `latest` delegates negotiation to the
-server. The SDK never raises the client's microversion automatically.
+configured numeric microversion of at least 2.25. Symbolic `latest` fails before
+lookup or HTTP: it cannot determine whether the server uses legacy or current
+routes. Connection range discovery can select a numeric version first. The SDK
+never raises the client's microversion automatically.
 
 The selected version is validated against source `MoreHeaders` before lookup
 and on every operation. Case-insensitive legacy or general version headers

@@ -106,7 +106,7 @@ func TestManilaProjectQuotaLegacyRoutesAndDetailVersionPreflight(t *testing.T) {
 	for _, tc := range []struct {
 		version, root string
 		detail        bool
-	}{{"", "os-quota-sets", false}, {"2.6", "os-quota-sets", false}, {"2.7", "quota-sets", false}, {"2.25", "quota-sets", true}, {"latest", "quota-sets", true}} {
+	}{{"", "os-quota-sets", false}, {"2.6", "os-quota-sets", false}, {"2.7", "quota-sets", false}, {"2.25", "quota-sets", true}} {
 		t.Run("version-"+tc.version, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32

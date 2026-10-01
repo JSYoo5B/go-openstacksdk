@@ -37,7 +37,9 @@ func updateQuotaClass(ctx context.Context, client *gophercloud.ServiceClient) er
 URL path segment. A UUID-shaped class name remains a class name. The catalog
 endpoint's project component is retained without being interpreted as a quota
 target. Omitted microversion or API 2.6 and earlier uses `os-quota-class-sets`;
-2.7+ uses `quota-class-sets`. `latest` delegates version negotiation to the server.
+2.7+ uses `quota-class-sets`. Symbolic `latest` fails before HTTP because its
+negotiated version cannot establish the route. Connection range discovery can
+select a numeric version before creating a quota class scope.
 Configure the service client's microversion before sharing it across callers;
 the SDK does not upgrade it automatically.
 

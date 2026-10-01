@@ -12,7 +12,8 @@ import (
 )
 
 // Minor returns the configured 2.N minor version. Empty selection means 2.0;
-// latest retains the native header and delegates negotiation to the server.
+// Symbolic latest cannot establish the 2.7 route switch before HTTP. Use a
+// numeric version, optionally selected through Connection range discovery.
 // Manila reads its legacy header, so a generic version header alone cannot
 // establish the selected version on a manual client with an empty Type.
 func Minor(client *gophercloud.ServiceClient) (int, error) {
@@ -24,17 +25,16 @@ func Minor(client *gophercloud.ServiceClient) (int, error) {
 	if expected == "" {
 		expected = "2.0"
 	}
-	minor := int(^uint(0) >> 1)
-	if expected != "latest" {
-		parts := strings.Split(expected, ".")
-		if len(parts) != 2 || parts[0] != "2" {
-			return 0, fmt.Errorf("%w: Manila microversion must be 2.N or latest", resource.ErrInvalidOption)
-		}
-		var err error
-		minor, err = strconv.Atoi(parts[1])
-		if err != nil || minor < 0 || strconv.Itoa(minor) != parts[1] {
-			return 0, fmt.Errorf("%w: invalid Manila microversion %q", resource.ErrInvalidOption, selected)
-		}
+	if expected == "latest" {
+		return 0, fmt.Errorf("%w: Manila quota routes require a selected numeric microversion; negotiate a range before binding a scope", resource.ErrUnsupported)
+	}
+	parts := strings.Split(expected, ".")
+	if len(parts) != 2 || parts[0] != "2" {
+		return 0, fmt.Errorf("%w: Manila microversion must be 2.N", resource.ErrInvalidOption)
+	}
+	minor, err := strconv.Atoi(parts[1])
+	if err != nil || minor < 0 || strconv.Itoa(minor) != parts[1] {
+		return 0, fmt.Errorf("%w: invalid Manila microversion %q", resource.ErrInvalidOption, selected)
 	}
 	legacy := false
 	for key, value := range client.MoreHeaders {

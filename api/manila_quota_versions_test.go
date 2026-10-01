@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"reflect"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -13,6 +14,54 @@ import (
 	"gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
 	"gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
+
+func TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP(t *testing.T) {
+	cloud := testcloud.New(t)
+	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("symbolic latest made quota/lookup HTTP: %s", r.URL)
+	})
+	ctx := context.Background()
+	client := cloud.Client("shared-file-system", "/manila")
+	client.Microversion = "2.39"
+	api := quotasets.New(client)
+	parent, err := api.InProject(ctx, resource.ID("p"), quotasets.WithIdentityClient(cloud.Client("identity", "/identity/v3")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	user, err := parent.InUser(ctx, resource.ID("u"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	shareType, err := parent.InShareType(ctx, resource.ID("t"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	classes := quotaclasssets.New(client)
+	class, err := classes.InClass(ctx, "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.Microversion = "latest"
+	operations := map[string]func() error{
+		"project name lookup": func() error { _, e := api.InProject(ctx, resource.Name("tenant")); return e },
+		"current project":     func() error { _, e := api.CurrentProject(ctx); return e },
+		"class binding":       func() error { _, e := classes.InClass(ctx, "default"); return e },
+		"user name lookup":    func() error { _, e := parent.InUser(ctx, resource.Name("user")); return e },
+		"type name lookup":    func() error { _, e := parent.InShareType(ctx, resource.Name("type")); return e },
+		"project get":         func() error { _, e := parent.Get(ctx); return e },
+		"user get":            func() error { _, e := user.Get(ctx); return e },
+		"type get":            func() error { _, e := shareType.Get(ctx); return e },
+		"class get":           func() error { _, e := class.Get(ctx); return e },
+	}
+	for name, operation := range operations {
+		if err := operation(); !errors.Is(err, resource.ErrUnsupported) || !strings.Contains(err.Error(), "numeric microversion") {
+			t.Errorf("%s err=%v", name, err)
+		}
+	}
+	if client.Microversion != "latest" {
+		t.Fatal("scope upgraded or mutated source version")
+	}
+}
 
 func TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup(t *testing.T) {
 	for _, tc := range []struct {
@@ -58,7 +107,7 @@ func TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup(t *testing.T)
 
 func TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes(t *testing.T) {
 	for _, kind := range []string{"shared-file-system", "sharev2", "share"} {
-		for _, version := range []string{"", "2.6", "2.7", "2.25", "2.39", "latest"} {
+		for _, version := range []string{"", "2.6", "2.7", "2.25", "2.39"} {
 			t.Run(kind+"/"+version, func(t *testing.T) {
 				cloud := testcloud.New(t)
 				root, classRoot := "quota-sets", "quota-class-sets"
