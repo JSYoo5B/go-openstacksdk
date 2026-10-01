@@ -237,6 +237,9 @@ func (c *Collection[T]) Delete(ctx context.Context, ref Ref, opts ...LookupOptio
 			return nil
 		}
 		id = c.binding.ID(v)
+		if err := c.validateID(id); err != nil {
+			return c.wrap("delete", err)
+		}
 	}
 	err = c.binding.Delete(ctx, id)
 	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
