@@ -2,6 +2,7 @@
 package cyborg
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,7 @@ import (
 
 func Collection[T any](client *gophercloud.ServiceClient, path, single, plural string,
 	id, name, status func(*T) string, metadata func(*T) *common.Metadata,
-	deleteURL func(string) string) *resource.Collection[T] {
+	deleteURL func(string) string, validateID ...func(string) error) *resource.Collection[T] {
 	adapter := resource.Adapter[T]{Kind: plural, ID: id, Name: name, Status: status,
 		Get: func(ctx context.Context, id string) (*T, error) {
 			return Fetch[T](ctx, client, "GET", client.ServiceURL(path, url.PathEscape(id)), nil, single, metadata, 200)
@@ -36,6 +37,9 @@ func Collection[T any](client *gophercloud.ServiceClient, path, single, plural s
 			})
 		},
 		Extract: func(p pagination.Page) ([]T, error) { return p.(page[T]).extract() },
+	}
+	if len(validateID) > 0 {
+		adapter.ValidateID = validateID[0]
 	}
 	if deleteURL != nil {
 		adapter.Delete = func(ctx context.Context, id string) error {
@@ -60,24 +64,65 @@ func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method
 }
 
 func fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, single string, metadata func(*T) *common.Metadata, codes ...int) (*T, error) {
+	return DecodeSingleMutation(ctx, client, method, endpoint, body, headers, single, single+"s", metadata, codes...)
+}
+
+// JSONResponse retains the entire response for operations that return batches.
+// A successful HTTP request can still return a decoding error; metadata survives
+// so callers can inspect it without retrying an already accepted mutation.
+func JSONResponse(ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, codes ...int) (json.RawMessage, *common.Metadata, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	guarded, err := guardedClient(client)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var raw json.RawMessage
 	response, err := guarded.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, MoreHeaders: headers, OkCodes: codes})
+	var meta *common.Metadata
+	if response != nil {
+		value := ResponseMetadata(response)
+		meta = &value
+	}
+	return raw, meta, err
+}
+
+// DecodeSingleMutation accepts a flat object, a singular envelope, or exactly
+// one resource in a plural envelope. It never silently chooses a batch member.
+func DecodeSingleMutation[T any](ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, single, plural string, metadata func(*T) *common.Metadata, codes ...int) (*T, error) {
+	raw, response, err := JSONResponse(ctx, client, method, endpoint, body, headers, codes...)
 	if err != nil {
 		return nil, err
+	}
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 || raw[0] != '{' {
+		return nil, fmt.Errorf("Cyborg singleton response must be an object")
 	}
 	var envelope map[string]json.RawMessage
 	if err := json.Unmarshal(raw, &envelope); err != nil {
 		return nil, err
 	}
-	if nested, ok := envelope[single]; ok {
+	nested, singular := envelope[single]
+	batch, multiple := envelope[plural]
+	if singular && multiple {
+		return nil, fmt.Errorf("Cyborg response contains both %s and %s", single, plural)
+	}
+	if singular {
 		raw = nested
+	} else if multiple {
+		batch = bytes.TrimSpace(batch)
+		if len(batch) == 0 || batch[0] != '[' {
+			return nil, fmt.Errorf("Cyborg response must contain %s array", plural)
+		}
+		var items []json.RawMessage
+		if err := json.Unmarshal(batch, &items); err != nil {
+			return nil, err
+		}
+		if len(items) != 1 {
+			return nil, fmt.Errorf("Cyborg singleton response contains %d %s", len(items), plural)
+		}
+		raw = items[0]
 	}
 	var value T
 	if err := json.Unmarshal(raw, &value); err != nil {
