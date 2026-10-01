@@ -23,22 +23,23 @@ import (
 // Value returns the merged cache; Response returns the last successful HTTP
 // fields. Both preserve independently owned asynchronous submission evidence.
 type TrackedNode struct {
-	api        *API
-	id         string
-	state      *senlin.TrackedState
-	opMu       sync.Mutex
-	responseMu sync.RWMutex
-	response   *Node
+	api            *API
+	id             string
+	collectionPath string
+	state          *senlin.TrackedState
+	opMu           sync.Mutex
+	responseMu     sync.RWMutex
+	response       *Node
 }
 
 // Track takes ownership of a cached model without HTTP. Body is authoritative
 // when present, including its exact lowercase id; typed edits to that input do
 // not change the tracked cache. A Body-less model supplies a local JSON seed.
 func (a *API) Track(value *Node) (*TrackedNode, error) {
-	return a.trackNode(value, "")
+	return a.trackNode(value, "", "nodes")
 }
 
-func (a *API) trackNode(value *Node, routeID string) (*TrackedNode, error) {
+func (a *API) trackNode(value *Node, routeID, path string) (*TrackedNode, error) {
 	if value == nil {
 		return nil, request.Wrap("Track", "clustering.nodes", fmt.Errorf("%w: node is required", resource.ErrInvalidOption))
 	}
@@ -60,14 +61,19 @@ func (a *API) trackNode(value *Node, routeID string) (*TrackedNode, error) {
 	if err := senlin.Identifier(routeID); err != nil {
 		return nil, request.Wrap("Track", "clustering.nodes", err)
 	}
-	return &TrackedNode{api: a, id: routeID, state: state, response: response}, nil
+	return &TrackedNode{api: a, id: routeID, collectionPath: path, state: state, response: response}, nil
 }
 
 // Load performs one strict explicit-reference lookup. An ID reference fixes
 // the route to that input even when the returned id changes or is absent/null;
 // a Name reference captures the returned canonical lowercase id once.
 func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedNode, error) {
+	return a.loadAt(ctx, ref, "nodes")
+}
+
+func (a *API) loadAt(ctx context.Context, ref resource.Ref, path string) (*TrackedNode, error) {
 	collection := spec(a.RawClient())
+	collection.Path = path
 	collection.ValidateItem = func(value *Node) error {
 		var err error
 		value.ID, err = trackedNodeString(value.Body, "id")
@@ -97,7 +103,7 @@ func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedNode, error) 
 	if !ref.IsName() {
 		routeID = ref.String()
 	}
-	return a.trackNode(value, routeID)
+	return a.trackNode(value, routeID, path)
 }
 
 func nodeMetadata(value *Node) *resource.Metadata { return &value.Metadata }
@@ -280,7 +286,7 @@ func (tracked *TrackedNode) Commit(ctx context.Context, options ...UpdateOption)
 	if err != nil {
 		return nil, request.Wrap("Commit", "clustering.nodes", err)
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL("nodes", url.PathEscape(tracked.id)), json.RawMessage(body), headers, http.StatusAccepted)
+	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL(tracked.collectionPath, url.PathEscape(tracked.id)), json.RawMessage(body), headers, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap("Commit", "clustering.nodes", err)
 	}
@@ -311,7 +317,7 @@ func (tracked *TrackedNode) Refresh(ctx context.Context) (*Node, error) {
 		return nil, request.Wrap("Refresh", "clustering.nodes", err)
 	}
 	pending := tracked.state.Pending()
-	response, err := rest.DoJSON(ctx, client, http.MethodGet, client.ServiceURL("nodes", url.PathEscape(tracked.id)), nil, nil, http.StatusOK)
+	response, err := rest.DoJSON(ctx, client, http.MethodGet, client.ServiceURL(tracked.collectionPath, url.PathEscape(tracked.id)), nil, nil, http.StatusOK)
 	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		err = &resource.NotFoundError{Resource: "clustering.nodes", Reference: tracked.id, Cause: err}
 	}

@@ -239,6 +239,10 @@ func validateUpdate(ctx context.Context, client *gophercloud.ServiceClient, valu
 }
 
 func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, options ...UpdateOption) (*Node, error) {
+	return a.updateAt(ctx, ref, "nodes", value, options...)
+}
+
+func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, value UpdateOpts, options ...UpdateOption) (*Node, error) {
 	client := a.RawClient()
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.nodes", err)
@@ -256,7 +260,9 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, op
 	}
 	requiresTainted := config.Options.Tainted.IsSet()
 	extraHeaders := maps.Clone(config.Headers)
-	identity, err := rest.Collection(spec(client)).ResolveID(ctx, ref)
+	collection := spec(client)
+	collection.Path = path
+	identity, err := rest.Collection(collection).ResolveID(ctx, ref)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.nodes", err)
 	}
@@ -268,7 +274,7 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, op
 			return nil, request.Wrap("Update", "clustering.nodes", err)
 		}
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL("nodes", url.PathEscape(identity)), body, extraHeaders, http.StatusAccepted)
+	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL(path, url.PathEscape(identity)), body, extraHeaders, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.nodes", err)
 	}
