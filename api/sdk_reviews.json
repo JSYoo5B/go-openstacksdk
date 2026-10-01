@@ -8536,6 +8536,290 @@
         "The functional supported-route alternative is implemented and tested, but synchronous key-wise metadata transport and mutable Resource/cache return semantics are not reproduced. The Go result intentionally separates observed, requested and accepted states; the audited nonexistent routes are not implementation backlog.",
         "GET/PATCH and later queued action application have no proven atomic key-deletion/CAS contract. Concurrent metadata added after GET can be removed by the full replacement; the result reports accepted intent rather than final application. No retry/rollback or runtime completion guarantee is claimed."
       ]
+    },
+    {
+      "operation": "python:compute/v2/servers",
+      "source_fingerprint": "704f3b43c7bf45acdfe0bf1f2ed3af075045fe6f65c04341f2de45fb92238fcb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/servers.API.All",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The tested default detailed-server path preserves literal exact-name regex escaping, status query, explicit limit and arbitrary vendor query while applying raw consumption controls.",
+          "tests": [
+            "api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+      ],
+      "remaining": [
+        "Audit the details=False/all_projects proxy alternatives, every typed filter and inherited Server Body/query/descriptor/normalization contracts beyond the tested detailed listing path.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:dns/v2/recordsets",
+      "source_fingerprint": "7572e52b9e737103d55f971b749de71dcfab4b38088754b55bc4075357621d22",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/recordsets.API.InZone",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-zone Collection preserves the parent route, name/status/vendor query, explicit limit and default typed all-project/sudo-tenant headers while applying raw consumption controls.",
+          "tests": [
+            "api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation",
+            "api/generated_list_controls_test.go:TestGeneratedListPublicZeroControlKeepsDesignateHeaderBuilder"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+      ],
+      "remaining": [
+        "The tested controlled Collection fixes a zone; audit the global no-zone /recordsets alternative, every typed filter/header and inherited Recordset Body/query/descriptor contracts separately.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/members",
+      "source_fingerprint": "7bd839e55ab4b00964ba5183f0778419f999359a62737fb5a0b07148f950a99e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/pools.API.Members",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-pool member Collection keeps the parent route and name/vendor query, consumes raw rows before its local provisioning-status filter, and preserves explicit page size.",
+          "tests": [
+            "api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard",
+            "api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+      ],
+      "remaining": [
+        "Audit every Member query/Body alias and descriptor, Python Resource/string pool conversion and inherited resource normalization beyond the fixed explicit pool listing.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/server_actions",
+      "source_fingerprint": "babe5dc26aabea9cd44772ac0dc27a4cef93a3432200c01a9d739b8d623a0ff5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/instanceactions.API.InServer",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-server action history retains requestID, server identity, summary/event extensions and raw response evidence while controlling linked-page consumption.",
+          "tests": [
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+      ],
+      "remaining": [
+        "Audit every Nova ServerAction query and microversion field, Python Resource/string server input and inherited Body/query/descriptor semantics beyond the verified history scope.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/containers",
+      "source_fingerprint": "a6e7b2e801cb63c5289a43c7936d4eb2e69c38112d446e67497c6950b81acfe3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The container Collection preserves native Swift marker pagination, prefix/explicit-limit query and typed count/byte fields while applying controls before local exact-name filtering.",
+          "tests": [
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.",
+        "The pinned Swift proxy explicitly forces paginated=True. First-page consumption is an explicit Go scope/Collection extension rather than a proxy keyword default mapping."
+      ],
+      "remaining": [
+        "Audit every Swift Container query/Body alias, response normalization, metadata/cache and native-versus-Python pagination fallback beyond the tested marker listing.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/objects",
+      "source_fingerprint": "f51e8504aa80d9a53f402ea626d0bbd016572d5f6f6e44d95df7698e7f1209da",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.InContainer",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-container listing preserves escaped opaque container names, marker query, object metadata and delimiter subdirectory rows without HEAD; subdirectory rows count toward the raw cap.",
+          "tests": [
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSwiftSubdirectoryConsumesRawCap"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.",
+        "The pinned Swift proxy explicitly forces paginated=True. First-page consumption is an explicit Go scope/Collection extension rather than a proxy keyword default mapping."
+      ],
+      "remaining": [
+        "Audit every Swift Object query/Body alias, Python container Resource/name conversion and response/cache/metadata semantics beyond the tested fixed-container listing.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:database/v1/databases",
+      "source_fingerprint": "9551641c39ad73092672fbd494cd63da1d1f3d18d516562f88d25bfe06318598",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/db/v1/databases.API.InInstance",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-instance database scope retains name/charset/collation and native continuation while applying raw row and first-page controls without inventing initial query capability.",
+          "tests": [
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+      ],
+      "remaining": [
+        "Audit Python Database Body/query/descriptor aliases and arbitrary proxy query, instance Resource input and inherited response/cache behavior beyond the verified explicit instance scope.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:database/v1/users",
+      "source_fingerprint": "d0edb2742a543eb1c4530be3c7ef9f622e788ddc54fb41ee4069be82d98f8121",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/db/v1/users.UserScope.List",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-instance user scope consumes all account rows before its optional local host and exact-name filters, retaining literal account names, hosts and returned database/password fields.",
+          "tests": [
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak",
+            "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md"
+      ],
+      "differences": [
+        "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.",
+        "The Go WithHost scope filter follows raw consumption, so max_items does not refill the cap with matching-host accounts."
+      ],
+      "remaining": [
+        "Audit Python User Body/query/descriptor aliases and arbitrary proxy query, Resource instance inputs and inherited normalization/cache behavior beyond the verified host-scoped listing.",
+        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+      ]
     }
   ]
 }
