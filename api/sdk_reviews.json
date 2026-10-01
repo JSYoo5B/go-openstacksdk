@@ -4984,7 +4984,8 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/clustering/v1/actions.API.List",
-        "gophercloudsdk/clustering/v1/actions.API.All"
+        "gophercloudsdk/clustering/v1/actions.API.All",
+        "gophercloudsdk/clustering/v1/actions.WithListFilter"
       ],
       "contracts": [
         {
@@ -5021,13 +5022,43 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "Nested object subsets, exact large decimal values, arrays of complete objects, bool/number distinction and empty-object behavior are verified using the real typed facade.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
         "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/actions/README.md",
@@ -5035,7 +5066,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited Body-only local filtering, field/query normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration.",
+        "Compare automatic Body/query classification and field/descriptor normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration. Explicit local raw Body filters and their aliases are implemented separately.",
         "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
@@ -5045,7 +5076,8 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/clustering/v1/events.API.List",
-        "gophercloudsdk/clustering/v1/events.API.All"
+        "gophercloudsdk/clustering/v1/events.API.All",
+        "gophercloudsdk/clustering/v1/events.WithListFilter"
       ],
       "contracts": [
         {
@@ -5082,13 +5114,49 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "Nested object subsets, exact large decimal values, arrays of complete objects, bool/number distinction and empty-object behavior are verified using the real typed facade.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
+          ]
+        },
+        {
+          "behavior": "A numeric raw level matches the corresponding exact numeric filter and does not match the typed-model string spelling.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersEventLevelUsesRawJSONRatherThanTypedString"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
         "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/events/README.md",
@@ -5096,7 +5164,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited Body-only local filtering, field/query normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration.",
+        "Compare automatic Body/query classification and descriptor defaults/coercion, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration. Raw Event.level filtering intentionally does not reuse the typed string conversion.",
         "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
@@ -5285,7 +5353,8 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/clustering/v1/policytypes.API.List",
-        "gophercloudsdk/clustering/v1/policytypes.API.All"
+        "gophercloudsdk/clustering/v1/policytypes.API.All",
+        "gophercloudsdk/clustering/v1/policytypes.WithListFilter"
       ],
       "contracts": [
         {
@@ -5312,13 +5381,49 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "Nested object subsets, exact large decimal values, arrays of complete objects, bool/number distinction and empty-object behavior are verified using the real typed facade.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
+          ]
+        },
+        {
+          "behavior": "Raw type id filters do not synthesize a name fallback, while the binding scope still requires a valid raw binding ID before local filtering and preserves failure evidence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
         "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/policytypes/README.md",
@@ -5326,7 +5431,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, name/schema/support_status Body-only local filters, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. The official type catalog declares no paging query protocol; local cap/first-page controls and opt-in wire-limit hints are now tested."
+        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
       ]
     },
     {
@@ -5335,7 +5440,8 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/clustering/v1/profiletypes.API.List",
-        "gophercloudsdk/clustering/v1/profiletypes.API.All"
+        "gophercloudsdk/clustering/v1/profiletypes.API.All",
+        "gophercloudsdk/clustering/v1/profiletypes.WithListFilter"
       ],
       "contracts": [
         {
@@ -5362,13 +5468,49 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "Nested object subsets, exact large decimal values, arrays of complete objects, bool/number distinction and empty-object behavior are verified using the real typed facade.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
+          ]
+        },
+        {
+          "behavior": "Raw type id filters do not synthesize a name fallback, while the binding scope still requires a valid raw binding ID before local filtering and preserves failure evidence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
         "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/profiletypes/README.md",
@@ -5376,7 +5518,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, name/schema/support_status Body-only local filters, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. The official type catalog declares no paging query protocol; local cap/first-page controls and opt-in wire-limit hints are now tested."
+        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
       ]
     },
     {
@@ -5385,7 +5527,8 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/clustering/v1/services.API.List",
-        "gophercloudsdk/clustering/v1/services.API.All"
+        "gophercloudsdk/clustering/v1/services.API.All",
+        "gophercloudsdk/clustering/v1/services.WithListFilter"
       ],
       "contracts": [
         {
@@ -5412,13 +5555,44 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsServicesVersionGateBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "An entirely filtered first page cannot bypass the selected numeric 1.7 service gate before advertised continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersServicesVersionGateOnFilteredContinuation",
+            "internal/senlin/catalog_filter_test.go:TestBodyFilterCatalogFacadesUseRawFieldsAndOwnNamespaces"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
         "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/services/README.md",
@@ -5426,8 +5600,8 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited state/binary/host/updated_at/disabled_reason Body filters, field/query normalization, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath controls. Generic local status filtering is distinct from this remaining Body filter surface.",
-        "Compare inherited limit/marker fallback and the controller default/capped limit; Services has no documented paging query protocol. Numeric1.7+, local cap/first-page behavior and opt-in limit hints are tested."
+        "Compare automatic Body/query classification, descriptor normalization, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath controls. Explicit local id/name/state/binary/host/updated_at/disabled_reason/status filters are implemented independently of common status filtering.",
+        "Compare inherited limit/marker fallback and the controller default/capped limit; Services has no documented paging query protocol. Numeric1.7+, filtered continuation revalidation, local cap/first-page behavior and opt-in limit hints are tested."
       ]
     },
     {
@@ -8268,7 +8442,8 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/clusterpolicies.API.InCluster",
         "gophercloudsdk/clustering/v1/clusterpolicies.Scope.List",
-        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.All"
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.All",
+        "gophercloudsdk/clustering/v1/clusterpolicies.WithListFilter"
       ],
       "contracts": [
         {
@@ -8302,16 +8477,52 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Known pinned Body fields and Python attribute aliases can be selected explicitly for local raw JSON comparison, including query-capable fields; unknown/source-excluded fields and raw Body query extensions fail before child HTTP.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSourceAliasesAndQueryCapableFieldsStayLocal",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersKnownQueryUnknownFieldsAndNamespacesFailBeforeChildHTTP"
+          ]
+        },
+        {
+          "behavior": "Filter JSON and canonical maps are owned snapshots, alias/canonical options use last-wins and each iterator traversal owns its prepared arguments; missing and explicit null compare as null without erasing raw presence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersSixFacadesSnapshotAliasesAndReuse",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersMissingAndExplicitNullRemainDistinctFromValues",
+            "internal/senlin/filter_options_test.go:TestBodyFilterOptionsSnapshotCanonicalAliasesAndOwnRawMaps"
+          ]
+        },
+        {
+          "behavior": "Raw pagination and validation precede filtering: nonmatching rows consume caps and determine markers, single-page/cap stops skip unused continuation.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCapsAndSinglePageBeforeMatching",
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersFilteredPagesKeepRawMarkersAndParent"
+          ]
+        },
+        {
+          "behavior": "Nested object subsets, exact large decimal values, arrays of complete objects, bool/number distinction and empty-object behavior are verified using the real typed facade.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
+          ]
+        },
+        {
+          "behavior": "Raw type id filters do not synthesize a name fallback, while the binding scope still requires a valid raw binding ID before local filtering and preserves failure evidence.",
+          "tests": [
+            "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
+          ]
         }
       ],
       "differences": [
         "Go confirms and fixes a canonical parent through explicit ID/Name references instead of Python _proxy.py:1078-1081 extracting the supplied cluster ID and interpolating it directly.",
         "Senlin16.0.0 ClusterPolicyController.index whitelists enabled, policy_name, policy_type and sort. Go rejects initial limit/marker even through Resources and follows only same-origin, same-parent collection links preserving initial filters; advertised deployment markers remain allowed. This intentionally does not simulate unsupported stock-server pagination.",
-        "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/header/secondary-argument options and concrete-query collisions; stock Senlin vendor support is not promised.",
+        "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/header/foreign-argument options and accepts the owned local filter namespace through WithListFilter and concrete-query collisions; stock Senlin vendor support is not promised.",
         "Go requires a cluster_policies array, separate valid canonical raw identities and a matching parent, preserving unknown/null/raw JSON fields. Python Resource.list wraps non-array collections, removes self and overlays URI fields on row dictionaries; Go stores fixed URIClusterID separately and uses PolicyID only as the collection identity callback.",
         "Published filters use concrete typed inputs and grammar-checked sort, while null/omission and exact numbers remain visible in Body rather than being hidden by Python Resource bool/dict descriptor conversions.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. Unlike Python Resource.list max_items, the binding cap sends no limit hint because the audited stock controller whitelists only enabled/policy_name/policy_type/sort.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
       ],
       "documentation": [
         "clustering/v1/clusterpolicies/README.md",
@@ -8319,9 +8530,9 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map per-call base_path/microversion/headers and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls now limit raw rows locally, with no stock-unsupported wire-limit hint (proxy.py:866-928; resource.py:2155-2358).",
-        "Map known Body-only local filters such as id, policy_id, cluster_name and recursive data subsets, including Python scalar equality, missing-as-None and empty-dictionary behavior; these are not current Go server-query options (resource.py:2222-2267,2322-2338).",
-        "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them (resource.py:271-299,657-669,2362-2440)."
+        "Map per-call base_path/microversion/headers and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls limit raw rows locally with no stock-unsupported wire-limit hint.",
+        "Compare automatic Body/query classification, descriptor defaults/coercion, Python scalar equality and Resource.id alternate-policy_id behavior. Explicit raw Body filters are implemented but Go validates required binding identity before any filter and keeps JSON booleans distinct from numbers.",
+        "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them."
       ]
     },
     {
