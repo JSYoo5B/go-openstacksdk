@@ -182,19 +182,23 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, 
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Node, error) bool) {
 		config, err := request.Apply(ListOpts{}, options...)
+		var client *gophercloud.ServiceClient
+		if err == nil {
+			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)
+		}
 		var query url.Values
 		var filters map[string]json.RawMessage
 		if err == nil {
 			query, err = listQuery(config)
 		}
 		if err == nil {
-			filters, err = prepareFilters(config)
+			filters, err = prepareFilters(senlin.ListQueryConfig(config))
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", "clustering.nodes", err))
 			return
 		}
-		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
+		for value, err := range rest.ListWithControl(ctx, senlin.ListSpec(a.RawClient(), client, spec), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if err != nil {
 				yield(nil, request.Wrap("List", "clustering.nodes", err))
 				return

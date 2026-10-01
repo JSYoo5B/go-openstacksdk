@@ -174,7 +174,7 @@ func TestClusteringNodesListPreflightAndSharedStatus(t *testing.T) {
 			{"unknown-filter", nodes.WithListFilter("vendor", true)},
 			{"filter-json-error", nodes.WithListFilter("metadata", make(chan int))},
 			{"unsupported-fields", request.WithField[nodes.ListOpts]("vendor", true)},
-			{"unsupported-headers", request.WithHeader[nodes.ListOpts]("X-Vendor", "ignored")},
+			{"protected-header", request.WithHeader[nodes.ListOpts]("X-Auth-Token", "ignored")},
 			{"unsupported-argument", request.WithArgument[nodes.ListOpts]("vendor", true)},
 			{"wrong-filter-argument", request.WithArgument[nodes.ListOpts]("nodes.local_filters", true)},
 			{"invalid-filter-json", request.WithArgument[nodes.ListOpts]("nodes.local_filters", map[string]json.RawMessage{"metadata": json.RawMessage(`{`)})},

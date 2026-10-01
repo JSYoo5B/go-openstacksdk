@@ -397,7 +397,7 @@ func TestClusteringClustersDefaultsAndInvalidOptionsPreflight(t *testing.T) {
 	if err != nil || values == nil || len(values) != 0 || calls.Load() != 1 {
 		t.Fatal(values, err, calls.Load())
 	}
-	for _, option := range []clusters.ListOption{nil, clusters.WithListOptions(clusters.ListOpts{Limit: -1}), clusters.WithListOptions(clusters.ListOpts{Sort: "name:wrong"}), clusters.WithListOptions(clusters.ListOpts{Marker: "bad/marker"}), clusters.WithListQuery("name", "hidden"), clusters.WithListQuery("status", "hidden"), clusters.WithListQuery("metadata", "hidden"), clusters.WithListFilter("unknown", true), request.WithHeader[clusters.ListOpts]("X-Custom", "value"), request.WithArgument[clusters.ListOpts]("unknown", true)} {
+	for _, option := range []clusters.ListOption{nil, clusters.WithListOptions(clusters.ListOpts{Limit: -1}), clusters.WithListOptions(clusters.ListOpts{Sort: "name:wrong"}), clusters.WithListOptions(clusters.ListOpts{Marker: "bad/marker"}), clusters.WithListQuery("name", "hidden"), clusters.WithListQuery("status", "hidden"), clusters.WithListQuery("metadata", "hidden"), clusters.WithListFilter("unknown", true), request.WithHeader[clusters.ListOpts]("X-Auth-Token", "value"), request.WithArgument[clusters.ListOpts]("unknown", true)} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
