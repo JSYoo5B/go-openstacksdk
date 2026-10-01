@@ -9381,6 +9381,67 @@
         "Audit Python User Body/query/descriptor aliases and arbitrary proxy query, Resource instance inputs and inherited normalization/cache behavior beyond the verified host-scoped listing.",
         "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
       ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/access_rules",
+      "source_fingerprint": "8f18b6347da3262737680f0d3e7c13cb0668adfacee8966eafda3c8d6cb0ce17",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/shareaccessrules.API.InShare",
+        "gophercloudsdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.List",
+        "gophercloudsdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.All",
+        "gophercloudsdk/sharedfilesystems/v2/shareaccessrules.WithListMaxItems",
+        "gophercloudsdk/sharedfilesystems/v2/shareaccessrules.WithListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "A fixed share scope lists GET200 access_list once with owned typed local caps and first-response controls. Repeated traversals have independent counters, options use last-wins and zero unlimited, explicit vendor/limit/marker/header inputs remain unchanged and local controls never invent a wire-limit hint or follow advertised links.",
+          "tests": [
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsSnapshotAndSingleCollection",
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsCapBeforeLaterDecode"
+          ]
+        },
+        {
+          "behavior": "Numeric Manila>=2.45 validation checks actual service type and case-insensitive version headers, rejects mismatches/latest/invalid selections, and rechecks after caller options or parent-name resolution. A matching legacy header is required for a manual empty-Type client.",
+          "tests": [
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsStrictSourceVersion",
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsRecheckSourceAfterOptionsAndLookup"
+          ]
+        },
+        {
+          "behavior": "Negative caps, fixed share/local-control query collisions, unsupported fields/arguments/headers and canceled context fail before child HTTP. Consumed-row/envelope failures retain whole accepted-page body/header/status; HTTP failures keep native evidence, and terminal cancellation remains observable while consumer break stops consumption.",
+          "tests": [
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsRejectBeforeHTTP",
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsAcceptedAndNativeErrors",
+            "api/manila_access_list_controls_test.go:TestManilaAccessListControlsTerminalCancellation"
+          ]
+        },
+        {
+          "behavior": "Only exact lowercase response id/share_id establish access and parent identities. Case-folded aliases remain raw extensions, cannot shadow a foreign parent, and do not fabricate an omitted parent; invalid canonical identities fail before routing while a known valid created ID survives later decoding errors.",
+          "tests": [
+            "api/manila_access_identity_test.go:TestManilaAccessIdentityCanonicalFieldsAndRawAliases",
+            "api/manila_access_identity_test.go:TestManilaAccessIdentityShadowCannotAuthorizeDeny",
+            "api/manila_access_identity_test.go:TestManilaAccessIdentityOmittedParentAndFixedMutationRoute",
+            "api/manila_access_identity_test.go:TestManilaAccessIdentityRejectsMissingInvalidCanonicalIDs",
+            "api/manila_access_identity_test.go:TestManilaAccessIdentityKnownCreatedIDSurvivesDecodeFailure"
+          ]
+        }
+      ],
+      "differences": [
+        "Go requires an explicit ID/Name share reference and returns stateless native-backed rule snapshots with raw Body/Header and separate ParentShareID, rather than reusing Python Resource input/cache or overlaying a response share_id.",
+        "The reviewed modern Manila endpoint returns one collection with no server paging contract. Go does not infer Resource.list marker fallback or follow next links; both Paginated settings consume one GET and MaxItems is only a raw-row bound.",
+        "Known options protect fixed parent and local control keys, but explicitly supplied vendor query values reach the deployment rather than Python unknown-query omission. Only exact lowercase wire identities establish scope ownership; strict typed/parent validation and accepted-response evidence are deliberate Go policies."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/shareaccessrules/README.md",
+        "sharedfilesystems/v2/README.md",
+        "docs/listing.md"
+      ],
+      "remaining": [
+        "Compare automatic known Body/query classification, descriptor aliases/defaults/coercion and unknown-query omission; the current scope has no arbitrary local Body filter API.",
+        "Map inherited per-call base_path/microversion/header controls and deprecated proxy JMESPath behavior beyond the tested local cap/one-response policy.",
+        "Compare arbitrary Resource/cache input ownership, URI overlay and full lifecycle semantics. Strict modern2.45+ scope behavior does not implement the earlier legacy access_list action contract."
+      ]
     }
   ]
 }
