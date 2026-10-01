@@ -69,10 +69,19 @@ custom Iterate는 cap을 적용하지만 first-page 제어를 지원하지 않�
 따릅니다. Senlin의 typed 옵션·limit hint·Python과의 차이는
 [목록 제어](../clustering/v1/listing/README.md)에 있습니다.
 
-현재 생성된 버전별 API의 `Resources`도 Iterate 경로를 사용하므로 첫 페이지 제어는
-미지원입니다. 상위 Compute 서버/flavor, Image 이미지, Network 네트워크와 Block Storage
-볼륨은 native pager 경로로 지원하고, Senlin의 11개 목록은 REST 경로로 지원합니다.
-생성된 binding과 별도 scope의 페이지 제어 연결은 후속 구현 대상입니다.
+생성된 native binding 121개(일반 Collection 107개와 부모 범위 14개)는 공통
+`WithMaxItems`와 `WithPaginated`를 native pager 소비 지점에 적용합니다. Swift 컨테이너·객체,
+Trove 데이터베이스·사용자, Nova action 이력의 수동 binding 5개도 지원합니다.
+native typed API의 `WithListOptions` 등 기존 옵션은 그대로 사용하며, 로컬 제어는
+`Resources.List/All` 또는 scope의 `List/All`에 전달합니다. native 경로는 MaxItems로
+wire limit을 추정하지 않습니다. Trove 사용자 host 필터도 raw cap 뒤에 적용합니다.
+상위 Compute 서버/flavor, Image 이미지, Network 네트워크와 Block Storage 볼륨의 native
+pager 경로 및 Senlin의 REST 목록 제어도 사용할 수 있습니다.
+[서비스별 Python/Go 목록 비교](../docs/listing.md)에 실제 사용 예제가 있습니다.
+
+공통 native stream은 기존 pager의 continuation 의미와 순환 검사를 유지합니다.
+origin·path·query 연속성 검사는 별도 REST binding의 정책이며 native stream에 자동으로
+적용되지 않습니다. cap·첫 페이지·break로 소비하지 않을 next link는 해석하지 않습니다.
 
 서버의 `next` URL 또는 marker가 이전에 요청한 페이지를 반복하면 추가 요청 전에 `ErrPaginationCycle`로 중단합니다. 같은 URL의 query 순서가 바뀌어도 반복으로 판정합니다. `PaginationCycleError.URL`에는 반복한 링크가 들어 있습니다. 이 정책은 서비스의 typed List, 공통 Collection, page 단위 iterator에 함께 적용됩니다. 소비자가 `break`하면 다음 링크 검사와 후속 요청을 하지 않습니다.
 

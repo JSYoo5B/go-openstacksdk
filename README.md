@@ -190,7 +190,11 @@ go run ./examples/create-server -name web-01 -image ubuntu -flavor small -networ
 목록 cap은 필터를 통과한 결과 수를 채우는 옵션이 아닙니다. Senlin은 raw 행을 decode·검증한
 뒤 cap에서 즉시 멈추지만 native Gophercloud는 페이지 전체 extraction 때문에 뒤쪽 malformed
 행의 오류도 반환할 수 있습니다. limit hint와 빈 페이지 종료는 서비스별 정책입니다.
-[공통 목록 정책](resource/README.md)과 [Senlin/Python 비교](clustering/v1/listing/README.md)를 참고하세요.
+[공통 목록 정책](resource/README.md), [서비스별 Python/Go 목록 비교](docs/listing.md)와
+[Senlin/Python 비교](clustering/v1/listing/README.md)를 참고하세요. 생성된 native 일반 Collection
+107개와 부모 scope 14개, Swift·Trove·Nova 이력의 수동 binding 5개에 같은 로컬 목록 옵션을
+연결했습니다. native typed List의 기존 옵션은 유지하며 `Resources.List/All` 또는 scope의
+`List/All`에서 `resource.WithMaxItems`와 `resource.WithPaginated`를 사용합니다.
 
 원래 HTTP 오류는 보존됩니다. 403을 미존재로 취급하거나 생성으로 자동 전환하지 않습니다. `WithIgnoreMissing()`을 사용한 Find는 미존재일 때 `nil, nil`을 반환하므로 결과의 nil 여부를 확인해야 합니다.
 
