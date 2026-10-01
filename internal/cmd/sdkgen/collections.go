@@ -17,6 +17,7 @@ type collectionRecord struct {
 	UpstreamModel string `json:"upstream_model,omitempty"`
 	Kind          string `json:"kind,omitempty"`
 	Find          bool   `json:"find"`
+	IdentityFind  bool   `json:"identity_find,omitempty"`
 	Delete        bool   `json:"delete"`
 	Wait          bool   `json:"wait"`
 	Scope         string `json:"scope,omitempty"`
@@ -257,6 +258,9 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 	emitCollectionAdapter(&e, plan, "a", nil)
 	e.printf("}\n")
 	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
+	if identityCollectionEnabled(pkg, plan, 0) {
+		emitIdentityFind(&e, "a *API", "a.Resources", plan.modelName)
+	}
 	e.printf("func(a *API)All(ctx context.Context,options ...resource.ListOption)([]*%s,error){return a.Resources.All(ctx,options...)}\n", plan.modelName)
 	e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
 	e.printf("func(a *API)WaitFor(ctx context.Context,ref resource.Ref,status string,options ...resource.WaitOption)(*%s,error){return a.Resources.Wait(ctx,ref,status,options...)}\n", plan.modelName)
@@ -279,7 +283,11 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.use("strings")
 	}
 	arguments := func(id string) string { return strings.Join(append(append([]string{"ctx"}, parents...), id), ",") }
-	e.printf("resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\nGet:func(ctx context.Context,id string)(*%s,error){", plan.modelName, e.pkg.Name(), plan.modelName)
+	e.printf("resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\n", plan.modelName, e.pkg.Name())
+	if identityCollectionEnabled(e.pkg, plan, len(parents)) {
+		e.printf("IdentityFind:true,\n")
+	}
+	e.printf("Get:func(ctx context.Context,id string)(*%s,error){", plan.modelName)
 	if isInteger(plan.getIDType) {
 		e.use("gophercloudsdk/request")
 		e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return nil,err};return %s.%s(%s)},\n", e.typ(plan.getIDType), receiver, plan.getter.Name(), arguments("parsed"))
@@ -337,7 +345,15 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	if plan.listInput == nil {
 		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, controlledListName(list), listArgs)
 	} else if plan.listQueryBuilder {
-		e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, controlledListName(list), listArgs)
+		if identityCollectionEnabled(e.pkg, plan, len(parents)) {
+			// FindIdentity can retain repeated query values and a present nil
+			// name key. A sequence of WithQuery options would Set each value
+			// and collapse that input before the native builder sees it.
+			e.use("gophercloudsdk/request")
+			e.printf("options:=[]%sOption{func(config *request.Config[%s])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn %s.%s(%s,options...)\n", list, e.typ(plan.listInput), receiver, controlledListName(list), listArgs)
+		} else {
+			e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, controlledListName(list), listArgs)
+		}
 	} else {
 		e.use("gophercloudsdk/request")
 		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, controlledListName(list), listArgs, list)

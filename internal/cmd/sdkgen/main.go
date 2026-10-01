@@ -301,7 +301,7 @@ func (g *generator) generate(path string) error {
 	} else {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", Delete: plan.deleter != nil, Wait: plan.status != ""})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), Delete: plan.deleter != nil, Wait: plan.status != ""})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {
@@ -352,7 +352,7 @@ func (g *generator) generate(path string) error {
 	}
 	for _, scope := range scopes {
 		p := scope.collection
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", IdentityFind: identityCollectionEnabled(pkg, p, 1), Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
 	}
 	return g.emitScopes(pkg, scopes, source)
 }

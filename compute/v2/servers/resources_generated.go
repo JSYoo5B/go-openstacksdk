@@ -4,6 +4,7 @@ package servers
 import (
 	context "context"
 	fmt "fmt"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -15,12 +16,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Server] {
 	return resource.NewCollection(resource.Adapter[Server]{
-		Kind:      "servers",
-		Get:       func(ctx context.Context, id string) (*Server, error) { return a.Get(ctx, string(id)) },
-		ID:        func(v *Server) string { return fmt.Sprint(v.ID) },
-		Name:      func(v *Server) string { return fmt.Sprint(v.Name) },
-		NameQuery: func(name string) string { return "^" + regexp.QuoteMeta(name) + "$" },
-		Status:    func(v *Server) string { return fmt.Sprint(v.Status) },
+		Kind:         "servers",
+		IdentityFind: true,
+		Get:          func(ctx context.Context, id string) (*Server, error) { return a.Get(ctx, string(id)) },
+		ID:           func(v *Server) string { return fmt.Sprint(v.ID) },
+		Name:         func(v *Server) string { return fmt.Sprint(v.Name) },
+		NameQuery:    func(name string) string { return "^" + regexp.QuoteMeta(name) + "$" },
+		Status:       func(v *Server) string { return fmt.Sprint(v.Status) },
 		Failed: func(status string) bool {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
@@ -28,17 +30,23 @@ func (a *API) newResources() *resource.Collection[Server] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Server, error] {
 			q = maps.Clone(q)
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Server, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Server, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Server, error) {
 	return a.Resources.All(ctx, options...)

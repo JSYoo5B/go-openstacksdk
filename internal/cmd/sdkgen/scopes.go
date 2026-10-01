@@ -98,6 +98,9 @@ func (g *generator) emitScopes(pkg *types.Package, plans []scopePlan, apiSource 
 		e.printf("func(s *%s)newResources()*resource.Collection[%s]{return ", typeName, plan.modelName)
 		emitCollectionAdapter(&e, plan, "s.api", []string{"s.parentID"})
 		e.printf("}\n")
+		if identityCollectionEnabled(pkg, plan, 1) {
+			emitIdentityFind(&e, "s *"+typeName, "s.Collection", plan.modelName)
+		}
 		suffix := strings.TrimPrefix(spec.get, "Get")
 		for _, mutation := range []struct {
 			native, public string

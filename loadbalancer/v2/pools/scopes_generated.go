@@ -4,6 +4,7 @@ package pools
 import (
 	context "context"
 	fmt "fmt"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -30,7 +31,8 @@ func (a *API) Members(ctx context.Context, parent resource.Ref) (*MemberScope, e
 }
 func (s *MemberScope) newResources() *resource.Collection[Member] {
 	return resource.NewCollection(resource.Adapter[Member]{
-		Kind: "pools",
+		Kind:         "pools",
+		IdentityFind: true,
 		Get: func(ctx context.Context, id string) (*Member, error) {
 			return s.api.GetMember(ctx, s.parentID, string(id))
 		},
@@ -46,14 +48,20 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Member, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := make([]ListMembersOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListMembersQuery(key, value))
+			options := []ListMembersOption{func(config *request.Config[ListMembersOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return s.api.listMembersWithControl(ctx, s.parentID, control, options...)
 		}})
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (s *MemberScope) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Member, error) {
+	return s.Collection.FindIdentity(ctx, identity, options...)
 }
 
 // Create applies CreateMember within the fixed parent.

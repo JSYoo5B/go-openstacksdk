@@ -5,6 +5,7 @@ import (
 	context "context"
 	fmt "fmt"
 	zones "gophercloudsdk/dns/v2/zones"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -31,7 +32,8 @@ func (a *API) InZone(ctx context.Context, parent resource.Ref) (*RecordSetScope,
 }
 func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 	return resource.NewCollection(resource.Adapter[RecordSet]{
-		Kind: "recordsets",
+		Kind:         "recordsets",
+		IdentityFind: true,
 		Get: func(ctx context.Context, id string) (*RecordSet, error) {
 			return s.api.Get(ctx, s.parentID, string(id))
 		},
@@ -46,14 +48,20 @@ func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*RecordSet, error] {
 			q = maps.Clone(q)
-			options := make([]ListByZoneOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListByZoneQuery(key, value))
+			options := []ListByZoneOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return s.api.listByZoneWithControl(ctx, s.parentID, control, options...)
 		}})
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (s *RecordSetScope) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*RecordSet, error) {
+	return s.Collection.FindIdentity(ctx, identity, options...)
 }
 
 // Create applies Create within the fixed parent.

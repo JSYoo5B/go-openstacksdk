@@ -112,7 +112,7 @@ func(ListOpts)ToListQuery()(string,error){return "",nil}`
 	if strings.Count(string(emitted), "request.Apply(") != 1 || nodeText(private.Type.Params.List[1].Type) != "resource.ListControl" {
 		t.Fatalf("options duplicated or control signature changed: %s", emitted)
 	}
-	for _, fragment := range []string{`regexp.QuoteMeta(name)`, `IterateControlled:`, `WithListQuery(key, value)`, `a.listWithControl(ctx, control, options...)`, `q = maps.Clone(q)`} {
+	for _, fragment := range []string{`regexp.QuoteMeta(name)`, `IterateControlled:`, `config.Query[key] = append([]string(nil), values...)`, `a.listWithControl(ctx, control, options...)`, `q = maps.Clone(q)`} {
 		if !strings.Contains(string(adapter), fragment) {
 			t.Fatalf("Nova binding lost %q:\n%s", fragment, adapter)
 		}

@@ -214,6 +214,7 @@
     "package": "gophercloudsdk/blockstorage/v3/volumes",
     "model": "Volume",
     "find": true,
+    "identity_find": true,
     "delete": true,
     "wait": true
   },
@@ -360,6 +361,7 @@
     "package": "gophercloudsdk/compute/v2/servers",
     "model": "Server",
     "find": true,
+    "identity_find": true,
     "delete": true,
     "wait": true
   },
@@ -513,6 +515,7 @@
     "package": "gophercloudsdk/dns/v2/recordsets",
     "model": "RecordSet",
     "find": true,
+    "identity_find": true,
     "delete": true,
     "wait": true,
     "scope": "InZone",
@@ -889,6 +892,7 @@
     "package": "gophercloudsdk/loadbalancer/v2/pools",
     "model": "Member",
     "find": true,
+    "identity_find": true,
     "delete": true,
     "wait": true,
     "scope": "Members",
@@ -1208,6 +1212,7 @@
     "package": "gophercloudsdk/network/v2/ports",
     "model": "Port",
     "find": true,
+    "identity_find": true,
     "delete": true,
     "wait": true
   },
