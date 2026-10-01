@@ -1089,6 +1089,8 @@
     "package": "gophercloudsdk/network/v2/extensions/qos/policies",
     "model": "Policy",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1148,6 +1150,8 @@
     "package": "gophercloudsdk/network/v2/extensions/security/addressgroups",
     "model": "AddressGroup",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },

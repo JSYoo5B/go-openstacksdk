@@ -48,6 +48,8 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "network/v2/extensions/security/groups", model: "SecGroup", getter: "Get", lister: "List", getSegments: []string{"security-groups", "$id"}, getCodes: []int{200}, rawListIterator: "IterateSecurityGroups"},
 	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", getter: "Get", lister: "List", getSegments: []string{"subnetpools", "$id"}, getCodes: []int{200}},
 	{path: "network/v2/extensions/trunks", model: "Trunk", getter: "Get", lister: "List", getSegments: []string{"trunks", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/qos/policies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"qos", "policies", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", getter: "Get", lister: "List", getSegments: []string{"address-groups", "$id"}, getCodes: []int{200}},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -206,6 +208,96 @@ func identityPoolTrunkSchema(pkg *types.Package, plan *collectionPlan) bool {
 			if !found {
 				return false
 			}
+		}
+	}
+	return true
+}
+
+// These two native models use ordinary JSON decoding and their own linked
+// continuation. Preserve full native fields without inferring extension gates
+// or introducing a decoder, parent scope, or identity list mode.
+func identityQoSAddressSchema(pkg *types.Package, plan *collectionPlan) bool {
+	policy := sdkPath(pkg.Path()) == "network/v2/extensions/qos/policies"
+	pageName, extractor := "AddressGroupPage", "ExtractGroups"
+	fields := map[string][2]string{
+		"ID": {"string", "id"}, "Name": {"string", "name"},
+		"Description": {"string", "description"}, "ProjectID": {"string", "project_id"},
+		"Addresses": {"[]string", "addresses"},
+	}
+	if policy {
+		pageName, extractor = "PolicyPage", "ExtractPolicies"
+		delete(fields, "Addresses")
+		for name, value := range map[string][2]string{
+			"TenantID": {"string", "tenant_id"}, "CreatedAt": {"time.Time", "created_at"},
+			"UpdatedAt": {"time.Time", "updated_at"}, "IsDefault": {"bool", "is_default"},
+			"Shared": {"bool", "shared"}, "RevisionNumber": {"int", "revision_number"},
+			"Rules": {"[]map[string]any", "rules"}, "Tags": {"[]string", "tags"},
+		} {
+			fields[name] = value
+		}
+	}
+	body, ok := plan.model.Underlying().(*types.Struct)
+	if !ok || body.NumFields() != len(fields) {
+		return false
+	}
+	for i := 0; i < body.NumFields(); i++ {
+		field := body.Field(i)
+		want, found := fields[field.Name()]
+		matchesType := types.TypeString(field.Type(), func(p *types.Package) string { return p.Path() }) == want[0]
+		if want[0] == "[]map[string]any" {
+			matchesType = types.Identical(field.Type(), types.NewSlice(types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())))
+		}
+		if !found || field.Embedded() || !matchesType || reflect.StructTag(body.Tag(i)).Get("json") != want[1] {
+			return false
+		}
+	}
+	model, ok := plan.model.(*types.Named)
+	if !ok {
+		return false
+	}
+	for i := 0; i < model.NumMethods(); i++ {
+		if model.Method(i).Name() == "UnmarshalJSON" {
+			return false
+		}
+	}
+	pageObject := pkg.Scope().Lookup(pageName)
+	if pageObject == nil {
+		return false
+	}
+	page, ok := pageObject.Type().(*types.Named)
+	if !ok {
+		return false
+	}
+	pageFields, ok := page.Underlying().(*types.Struct)
+	if !ok || pageFields.NumFields() != 1 || !pageFields.Field(0).Embedded() || types.TypeString(pageFields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page, name)
+		own := false
+		for i := 0; i < page.NumMethods(); i++ {
+			own = own || page.Method(i).Name() == name
+		}
+		if !own || method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	extract, ok := pkg.Scope().Lookup(extractor).(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	if policy {
+		into, ok := pkg.Scope().Lookup("ExtractPolicysInto").(*types.Func)
+		if !ok {
+			return false
+		}
+		sig = into.Type().(*types.Signature)
+		if sig.Variadic() || sig.Params().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Params().At(1).Type(), types.NewInterfaceType(nil, nil).Complete()) || sig.Results().Len() != 1 || !isError(sig.Results().At(0).Type()) {
+			return false
 		}
 	}
 	return true
@@ -539,15 +631,42 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"ExtractTrunks":                         "95034dff77e7308bcd4c851032b735581b3c3e4e523f1b354b7255a76c95e6be",
 		"pagination.LinkedPageBase.NextPageURL": "fa8678035238acb855e2d60896aa155d50de519d8545830ed52220490a02ad4e",
 	},
+	"network/v2/extensions/qos/policies": {
+		"Get":                        "f2e21c88e17a8ad49060e84dad42244e17c64453bae932aadebe34ad0e7ebc9b",
+		"List":                       "04d9ad4cd55b330c83fc0c5e013b75491d40a00b0c1c3615414bc1bd8095f5e7",
+		"ListOpts.ToPolicyListQuery": "d6253365fadc272a3df97e2569174347bd27f82ea52eac33b26b5fbe7c2bbcfe",
+		"getURL":                     "4e7e71e4b36e374a2fc6830f4f621ab3dd904cb2e1fa10b99e43a5590b7b4b36",
+		"listURL":                    "0a55ee851552d789ddd3c12304e6d0d209cae0cfd477d71b138196681486bf9d",
+		"rootURL":                    "4f185db1078eefd1b5f5b38bd1c601bd6fccaa3c20fa99a7b85371ef7f7b8104",
+		"resourceURL":                "ca0246cf0e192c0133b2d43b9c5b577badf51c51344d3c5fc499d01a97ef54c8",
+		"commonResult.Extract":       "9c467d68ba024143e8a8ba5a4a69db0e027a035507c38e1aa0387a13d1c191c9",
+		"PolicyPage.NextPageURL":     "7b97a390dc18f3874d6a0bcca3e030ed8ad60129e7a6d8310227785a8d6602ca",
+		"PolicyPage.IsEmpty":         "88fa833c9862dd1c989f138f4614c917e32483879512f3880ef9ea9dc3aeebd7",
+		"ExtractPolicies":            "9be7267032ad765ebed4e8f5deb34f80b6804da02b42288ff362106f314789b6",
+		"ExtractPolicysInto":         "8ac0e33d92c10eabc76680aa76b5dd845589c8c45adf242b0ec59ad14cba50de",
+	},
+	"network/v2/extensions/security/addressgroups": {
+		"Get":                              "c0787d9b62a2cda3caa71d9a5deeaa3b99842417646def58aea2161caf892fb9",
+		"List":                             "5df8dc6e3d372ae3b098dcf493fb5a64c82ba6c1dfdd25ca0671c132ded1251b",
+		"ListOpts.ToAddressGroupListQuery": "9926b4a40d1b9c796d9a344a5935194b52681701b31be5eed66df3faa95be487",
+		"rootURL":                          "5a4bf90be880f0165342169abba24c6938989c185637bae8e4c5092f33ac9f3b",
+		"resourceURL":                      "ff31c93c543d54044b2c72a7219311759861582c91db4787e04a5f2d3dfc060c",
+		"commonResult.Extract":             "e6cfb8e6b6b251cfcdb21e8017c976fa7cccd580d3cc8bd3319f5e1d5ee818db",
+		"AddressGroupPage.NextPageURL":     "db55578ce9b76a89b003f2907d3491ba56684dafdac9c1e6fe343b5460ae92cd",
+		"AddressGroupPage.IsEmpty":         "ba7bc94d31fad840c0a0c2437508ed26c1782391692a5852ef3ae2d3ed7c8054",
+		"ExtractGroups":                    "d478953739195b0391c1228d9a5b5576638a3a96fbfb93fb41042920a47cfe30",
+	},
 }
 
 var identityNativeURLConstants = map[string]map[string]string{
-	"network/v2/extensions/subnetpools":     {"resourcePath": "subnetpools"},
-	"network/v2/extensions/trunks":          {"resourcePath": "trunks"},
-	"network/v2/extensions/layer3/routers":  {"resourcePath": "routers"},
-	"network/v2/extensions/security/groups": {"rootPath": "security-groups"},
-	"loadbalancer/v2/pools":                 {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
-	"identity/v3/roles":                     {"rolePath": "roles"},
+	"network/v2/extensions/qos/policies":           {"resourcePath": "qos/policies"},
+	"network/v2/extensions/security/addressgroups": {"rootPath": "address-groups"},
+	"network/v2/extensions/subnetpools":            {"resourcePath": "subnetpools"},
+	"network/v2/extensions/trunks":                 {"resourcePath": "trunks"},
+	"network/v2/extensions/layer3/routers":         {"resourcePath": "routers"},
+	"network/v2/extensions/security/groups":        {"rootPath": "security-groups"},
+	"loadbalancer/v2/pools":                        {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
+	"identity/v3/roles":                            {"rolePath": "roles"},
 }
 
 // Export data omits private URL constants. Read their literal source values,
@@ -612,6 +731,11 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if spec.path == "network/v2/extensions/trunks" && decls["TrunkPage.NextPageURL"] != nil {
 			return fmt.Errorf("audited identity collection %s.%s: native inherited continuation override changed", spec.path, spec.model)
+		}
+		if spec.path == "network/v2/extensions/qos/policies" || spec.path == "network/v2/extensions/security/addressgroups" {
+			if !identityQoSAddressSchema(pkg, selected) || decls[spec.model+".UnmarshalJSON"] != nil {
+				return fmt.Errorf("audited identity collection %s.%s: native model, decoder, linked pager, or extractor schema changed", spec.path, spec.model)
+			}
 		}
 		for name, want := range identityNativeDeclarations[spec.path] {
 			got, err := requestDeclarationHash(decls[name])

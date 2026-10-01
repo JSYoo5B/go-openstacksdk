@@ -68,6 +68,25 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 			source += "func(" + page + ")NextPageURL()(string,error){return \"\",nil}\n"
 		}
 	}
+	if spec.path == "network/v2/extensions/qos/policies" || spec.path == "network/v2/extensions/security/addressgroups" {
+		page, extract := "AddressGroupPage", "ExtractGroups"
+		fields := "ID string `json:\"id\"`;Name string `json:\"name\"`;Description string `json:\"description\"`;ProjectID string `json:\"project_id\"`;Addresses []string `json:\"addresses\"`"
+		if spec.model == "Policy" {
+			page, extract = "PolicyPage", "ExtractPolicies"
+			fields = "ID string `json:\"id\"`;Name string `json:\"name\"`;TenantID string `json:\"tenant_id\"`;ProjectID string `json:\"project_id\"`;CreatedAt time.Time `json:\"created_at\"`;UpdatedAt time.Time `json:\"updated_at\"`;IsDefault bool `json:\"is_default\"`;Description string `json:\"description\"`;Shared bool `json:\"shared\"`;RevisionNumber int `json:\"revision_number\"`;Rules []map[string]any `json:\"rules\"`;Tags []string `json:\"tags\"`"
+			source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
+			source = strings.ReplaceAll(source, "ListOptsBuilder", "PolicyListOptsBuilder")
+			source = strings.ReplaceAll(source, "ToListQuery", "ToPolicyListQuery")
+			source += "\nfunc ExtractPolicysInto(r pagination.Page,v any)error{return nil}\n"
+		} else {
+			source = strings.ReplaceAll(source, "ToListQuery", "ToAddressGroupListQuery")
+		}
+		source = strings.Replace(source, "type "+spec.model+" struct{ID string;Name string}", "type "+spec.model+" struct{"+fields+"}", 1)
+		source = strings.ReplaceAll(source, "ModelPage", page)
+		source = strings.Replace(source, "type "+page+" struct{}", "type "+page+" struct{pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", extract)
+		source += "\nfunc(" + page + ")IsEmpty()(bool,error){return false,nil}\nfunc(" + page + ")NextPageURL()(string,error){return \"\",nil}\n"
+	}
 
 	// Member uses GetMemberResult upstream; use its actual signature instead of
 	// allowing the emitter to assume every native getter returns GetResult.
@@ -98,26 +117,28 @@ func identityAuditPlans(spec identityCollectionSpec, plan *collectionPlan) (*col
 
 func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 	routes := map[string]string{
-		"compute/v2/servers":                    `[]string{"servers", id}, q, []int{200, 203}`,
-		"compute/v2/flavors":                    `[]string{"flavors", id}, q, []int{200}`,
-		"network/v2/extensions/layer3/routers":  `[]string{"routers", id}, q, []int{200}`,
-		"network/v2/extensions/security/groups": `[]string{"security-groups", id}, q, []int{200}`,
-		"network/v2/extensions/subnetpools":     `[]string{"subnetpools", id}, q, []int{200}`,
-		"network/v2/extensions/trunks":          `[]string{"trunks", id}, q, []int{200}`,
-		"blockstorage/v3/volumes":               `[]string{"volumes", id}, q, []int{200}`,
-		"network/v2/ports":                      `[]string{"ports", id}, q, []int{200}`,
-		"network/v2/networks":                   `[]string{"networks", id}, q, []int{200}`,
-		"network/v2/subnets":                    `[]string{"subnets", id}, q, []int{200}`,
-		"identity/v3/projects":                  `[]string{"projects", id}, q, []int{200}`,
-		"identity/v3/users":                     `[]string{"users", id}, q, []int{200}`,
-		"identity/v3/groups":                    `[]string{"groups", id}, q, []int{200}`,
-		"identity/v3/domains":                   `[]string{"domains", id}, q, []int{200}`,
-		"identity/v3/roles":                     `[]string{"roles", id}, q, []int{200}`,
-		"dns/v2/recordsets":                     `[]string{"zones", s.parentID, "recordsets", id}, q, []int{200}`,
-		"loadbalancer/v2/pools":                 `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
-		"image/v2/images":                       `[]string{"images", id}, q, []int{200}`,
+		"compute/v2/servers":                           `[]string{"servers", id}, q, []int{200, 203}`,
+		"compute/v2/flavors":                           `[]string{"flavors", id}, q, []int{200}`,
+		"network/v2/extensions/layer3/routers":         `[]string{"routers", id}, q, []int{200}`,
+		"network/v2/extensions/security/groups":        `[]string{"security-groups", id}, q, []int{200}`,
+		"network/v2/extensions/subnetpools":            `[]string{"subnetpools", id}, q, []int{200}`,
+		"network/v2/extensions/trunks":                 `[]string{"trunks", id}, q, []int{200}`,
+		"network/v2/extensions/qos/policies":           `[]string{"qos", "policies", id}, q, []int{200}`,
+		"network/v2/extensions/security/addressgroups": `[]string{"address-groups", id}, q, []int{200}`,
+		"blockstorage/v3/volumes":                      `[]string{"volumes", id}, q, []int{200}`,
+		"network/v2/ports":                             `[]string{"ports", id}, q, []int{200}`,
+		"network/v2/networks":                          `[]string{"networks", id}, q, []int{200}`,
+		"network/v2/subnets":                           `[]string{"subnets", id}, q, []int{200}`,
+		"identity/v3/projects":                         `[]string{"projects", id}, q, []int{200}`,
+		"identity/v3/users":                            `[]string{"users", id}, q, []int{200}`,
+		"identity/v3/groups":                           `[]string{"groups", id}, q, []int{200}`,
+		"identity/v3/domains":                          `[]string{"domains", id}, q, []int{200}`,
+		"identity/v3/roles":                            `[]string{"roles", id}, q, []int{200}`,
+		"dns/v2/recordsets":                            `[]string{"zones", s.parentID, "recordsets", id}, q, []int{200}`,
+		"loadbalancer/v2/pools":                        `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
+		"image/v2/images":                              `[]string{"images", id}, q, []int{200}`,
 	}
-	if len(identityCollectionSpecs) != 18 || len(identityNativeDeclarations) != 18 {
+	if len(identityCollectionSpecs) != 20 || len(identityNativeDeclarations) != 20 {
 		t.Fatal("identity opt-in inventory must remain explicit", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 	for _, spec := range identityCollectionSpecs {
@@ -230,6 +251,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 		return pinnedNeutronExtensionIdentityDeclarations(t, spec)
 	case "network/v2/extensions/subnetpools", "network/v2/extensions/trunks":
 		return pinnedPoolTrunkIdentityDeclarations(t, spec)
+	case "network/v2/extensions/qos/policies", "network/v2/extensions/security/addressgroups":
+		return pinnedQoSAddressIdentityDeclarations(t, spec)
 	case "compute/v2/servers":
 		request = strings.Replace(defaultGet, "&r.Body, nil", "&r.Body, &gophercloud.RequestOpts{\n\t\tOkCodes: []int{200, 203},\n\t}", 1)
 		urls = `func getURL(client *gophercloud.ServiceClient, id string) string { return deleteURL(client,id) }

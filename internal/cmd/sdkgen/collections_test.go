@@ -61,12 +61,15 @@ func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Pa
 	http := types.NewPackage("net/http", "http")
 	http.Scope().Insert(types.NewTypeName(token.NoPos, http, "Header", types.NewNamed(types.NewTypeName(token.NoPos, http, "Header", nil), types.NewMap(types.Typ[types.String], types.NewSlice(types.Typ[types.String])), nil)))
 	http.MarkComplete()
+	times := types.NewPackage("time", "time")
+	times.Scope().Insert(types.NewTypeName(token.NoPos, times, "Time", types.NewNamed(types.NewTypeName(token.NoPos, times, "Time", nil), types.NewStruct(nil, nil), nil)))
+	times.MarkComplete()
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "fixture.go", source, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page, "context": contexts, "net/http": http}}
+	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page, "context": contexts, "net/http": http, "time": times}}
 	pkg, err := config.Check(packagePath, fset, []*ast.File{file}, nil)
 	if err != nil {
 		t.Fatal(err)
