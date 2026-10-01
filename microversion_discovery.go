@@ -67,7 +67,7 @@ func (d *discoveryDocument) UnmarshalJSON(data []byte) error {
 
 var discoveryPathVersion = regexp.MustCompile(`^v[0-9]+(?:\.[0-9]+)?$`)
 
-// Project-scoped Nova, Cinder and Manila catalog URLs point beneath the
+// Project-scoped Nova, Cinder, Manila and Masakari catalog URLs point beneath the
 // version discovery document. Remove only the optional last project segment
 // and the version segment, keeping reverse-proxy prefixes intact. Other
 // services publish discovery directly at a versioned or unversioned endpoint.
@@ -80,7 +80,7 @@ func microversionDiscoveryURLs(service Service, endpoint string) ([]string, *mic
 	index := len(parts) - 1
 	if index >= 1 && !discoveryPathVersion.MatchString(parts[index]) && discoveryPathVersion.MatchString(parts[index-1]) {
 		switch service {
-		case Compute, BlockStorage, SharedFileSystem:
+		case Compute, BlockStorage, SharedFileSystem, InstanceHA:
 			index--
 		}
 	}

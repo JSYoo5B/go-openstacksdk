@@ -14,11 +14,13 @@ const (
 	Accelerator            Service = "accelerator"
 	BareMetal              Service = "baremetal"
 	BareMetalIntrospection Service = "baremetal-introspection"
+	Clustering             Service = "clustering"
 	Container              Service = "application-container"
 	ContainerInfra         Service = "container-infrastructure-management"
 	Database               Service = "database"
 	DNS                    Service = "dns"
 	Identity               Service = "identity"
+	InstanceHA             Service = "instance-ha"
 	KeyManager             Service = "key-manager"
 	LoadBalancer           Service = "load-balancer"
 	Messaging              Service = "message"
@@ -46,11 +48,13 @@ var serviceDefinitions = map[Service]serviceDefinition{
 	BlockStorage:           {"v3", "3", map[string]clientFactory{"v2": openstack.NewBlockStorageV2, "v3": openstack.NewBlockStorageV3}},
 	BareMetal:              {"v1", "1", map[string]clientFactory{"v1": openstack.NewBareMetalV1}},
 	BareMetalIntrospection: {"v1", "1", map[string]clientFactory{"v1": openstack.NewBareMetalIntrospectionV1}},
+	Clustering:             {"v1", "1", map[string]clientFactory{"v1": newClusteringV1}},
 	Container:              {"v1", "1", map[string]clientFactory{"v1": openstack.NewContainerV1}},
 	ContainerInfra:         {"v1", "1", map[string]clientFactory{"v1": openstack.NewContainerInfraV1}},
 	Database:               {"v1", "", map[string]clientFactory{"v1": openstack.NewDBV1}},
 	DNS:                    {"v2", "", map[string]clientFactory{"v2": openstack.NewDNSV2}},
 	Identity:               {"v3", "", map[string]clientFactory{"v2": openstack.NewIdentityV2, "v3": openstack.NewIdentityV3}},
+	InstanceHA:             {"v1", "1", map[string]clientFactory{"v1": newInstanceHAV1}},
 	KeyManager:             {"v1", "", map[string]clientFactory{"v1": openstack.NewKeyManagerV1}},
 	LoadBalancer:           {"v2", "", map[string]clientFactory{"v2": openstack.NewLoadBalancerV2}},
 	Messaging:              {"v2", "", map[string]clientFactory{}},
