@@ -4,6 +4,9 @@ package users
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
+	nativefind "gophercloudsdk/internal/nativefind"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -13,7 +16,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[User] {
 	return resource.NewCollection(resource.Adapter[User]{
-		Kind:      "users",
+		Kind:         "users",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*User, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"users", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:       func(ctx context.Context, id string) (*User, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *User) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *User) string { return fmt.Sprint(v.Name) },
@@ -22,17 +31,23 @@ func (a *API) newResources() *resource.Collection[User] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*User, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*User, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*User, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*User, error) {
 	return a.Resources.All(ctx, options...)

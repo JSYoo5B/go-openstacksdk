@@ -4,6 +4,8 @@ package pools
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/loadbalancer/v2/pools"
+	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
@@ -33,6 +35,11 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 	return resource.NewCollection(resource.Adapter[Member]{
 		Kind:         "pools",
 		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Member, error) {
+			var result upstream.GetMemberResult
+			result.Header, result.Err = nativefind.Get(ctx, s.api.RawClient(), []string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get: func(ctx context.Context, id string) (*Member, error) {
 			return s.api.GetMember(ctx, s.parentID, string(id))
 		},

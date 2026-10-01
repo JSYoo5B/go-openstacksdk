@@ -224,11 +224,16 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	decls := map[string]*ast.FuncDecl{}
+	nativeDecls := map[string]*ast.FuncDecl{}
+	nativeConstants := map[string]string{}
 	sourceImports := map[string]*types.Package{}
 	for _, name := range m.GoFiles {
 		f, err := parser.ParseFile(token.NewFileSet(), filepath.Join(m.Dir, name), nil, 0)
 		if err != nil {
 			return err
+		}
+		for name, value := range identitySourceConstants(f) {
+			nativeConstants[name] = value
 		}
 		for _, spec := range f.Imports {
 			path, err := strconv.Unquote(spec.Path.Value)
@@ -247,10 +252,13 @@ func (g *generator) generate(path string) error {
 		}
 		for _, decl := range f.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
-			if !ok || fn.Recv != nil || !ast.IsExported(fn.Name.Name) {
+			if !ok || fn.Recv != nil {
 				continue
 			}
-			decls[fn.Name.Name] = fn
+			nativeDecls[fn.Name.Name] = fn
+			if ast.IsExported(fn.Name.Name) {
+				decls[fn.Name.Name] = fn
+			}
 		}
 	}
 	if err := validateAuditedRequestCalls(pkg, decls); err != nil {
@@ -263,6 +271,9 @@ func (g *generator) generate(path string) error {
 	}
 	scopes, err := identifyScopes(pkg, decls, extractors)
 	if err != nil {
+		return err
+	}
+	if err := validateIdentityCollectionContracts(pkg, nativeDecls, plan, scopes, nativeConstants); err != nil {
 		return err
 	}
 	names := []string{}
@@ -301,7 +312,7 @@ func (g *generator) generate(path string) error {
 	} else {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), Delete: plan.deleter != nil, Wait: plan.status != ""})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), Delete: plan.deleter != nil, Wait: plan.status != ""})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {
@@ -352,7 +363,7 @@ func (g *generator) generate(path string) error {
 	}
 	for _, scope := range scopes {
 		p := scope.collection
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", IdentityFind: identityCollectionEnabled(pkg, p, 1), Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", IdentityFind: identityCollectionEnabled(pkg, p, 1), IdentityGetQuery: identityCollectionEnabled(pkg, p, 1), Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
 	}
 	return g.emitScopes(pkg, scopes, source)
 }

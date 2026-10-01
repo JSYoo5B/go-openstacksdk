@@ -215,6 +215,7 @@
     "model": "Volume",
     "find": true,
     "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -362,6 +363,7 @@
     "model": "Server",
     "find": true,
     "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -516,6 +518,7 @@
     "model": "RecordSet",
     "find": true,
     "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true,
     "scope": "InZone",
@@ -620,6 +623,8 @@
     "package": "gophercloudsdk/identity/v3/domains",
     "model": "Domain",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -657,6 +662,8 @@
     "package": "gophercloudsdk/identity/v3/groups",
     "model": "Group",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -699,6 +706,8 @@
     "package": "gophercloudsdk/identity/v3/projects",
     "model": "Project",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -720,6 +729,8 @@
     "package": "gophercloudsdk/identity/v3/roles",
     "model": "Role",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -748,6 +759,8 @@
     "package": "gophercloudsdk/identity/v3/users",
     "model": "User",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -893,6 +906,7 @@
     "model": "Member",
     "find": true,
     "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true,
     "scope": "Members",
@@ -1205,6 +1219,8 @@
     "package": "gophercloudsdk/network/v2/networks",
     "model": "Network",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1213,6 +1229,7 @@
     "model": "Port",
     "find": true,
     "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1220,6 +1237,8 @@
     "package": "gophercloudsdk/network/v2/subnets",
     "model": "Subnet",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },

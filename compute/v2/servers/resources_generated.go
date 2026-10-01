@@ -4,6 +4,8 @@ package servers
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
+	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
@@ -18,11 +20,16 @@ func (a *API) newResources() *resource.Collection[Server] {
 	return resource.NewCollection(resource.Adapter[Server]{
 		Kind:         "servers",
 		IdentityFind: true,
-		Get:          func(ctx context.Context, id string) (*Server, error) { return a.Get(ctx, string(id)) },
-		ID:           func(v *Server) string { return fmt.Sprint(v.ID) },
-		Name:         func(v *Server) string { return fmt.Sprint(v.Name) },
-		NameQuery:    func(name string) string { return "^" + regexp.QuoteMeta(name) + "$" },
-		Status:       func(v *Server) string { return fmt.Sprint(v.Status) },
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Server, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"servers", id}, q, []int{200, 203}, &result.Body)
+			return result.Extract()
+		},
+		Get:       func(ctx context.Context, id string) (*Server, error) { return a.Get(ctx, string(id)) },
+		ID:        func(v *Server) string { return fmt.Sprint(v.ID) },
+		Name:      func(v *Server) string { return fmt.Sprint(v.Name) },
+		NameQuery: func(name string) string { return "^" + regexp.QuoteMeta(name) + "$" },
+		Status:    func(v *Server) string { return fmt.Sprint(v.Status) },
 		Failed: func(status string) bool {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"

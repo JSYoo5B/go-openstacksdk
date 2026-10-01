@@ -4,6 +4,9 @@ package networks
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	nativefind "gophercloudsdk/internal/nativefind"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -14,7 +17,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Network] {
 	return resource.NewCollection(resource.Adapter[Network]{
-		Kind:      "networks",
+		Kind:         "networks",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"networks", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:       func(ctx context.Context, id string) (*Network, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *Network) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *Network) string { return fmt.Sprint(v.Name) },
@@ -27,17 +36,23 @@ func (a *API) newResources() *resource.Collection[Network] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Network, error] {
 			q = maps.Clone(q)
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Network, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Network, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Network, error) {
 	return a.Resources.All(ctx, options...)

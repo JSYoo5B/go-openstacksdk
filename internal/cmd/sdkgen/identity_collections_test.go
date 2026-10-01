@@ -67,7 +67,7 @@ func TestIdentityCollectionsOnlyEnableAuditedMemberRoutes(t *testing.T) {
 					case "wrong-lister":
 						altered.lister = "ListOther"
 					case "unrelated-package":
-						altered.path = "identity/v3/users"
+						altered.path = "identity/v3/credentials"
 					}
 					pkg, plan := identityCollectionFixture(t, altered, fields, idType, query)
 					if identityCollectionEnabled(pkg, plan, altered.parents) {
@@ -79,7 +79,7 @@ func TestIdentityCollectionsOnlyEnableAuditedMemberRoutes(t *testing.T) {
 	}
 	// Pools itself has Get/List/Name/ID, but only its fixed-parent member route
 	// is audited. Sharing a package cannot enable the global pool binding.
-	pools := identityCollectionSpec{"loadbalancer/v2/pools", "Pool", "Get", "List", 0}
+	pools := identityCollectionSpec{path: "loadbalancer/v2/pools", model: "Pool", getter: "Get", lister: "List"}
 	pkg, plan := identityCollectionFixture(t, pools, "ID string;Name string", "string", "name")
 	if identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal("member opt-in leaked to pools")
@@ -168,9 +168,9 @@ func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *t
 
 func TestIdentityCollectionsDoNotEmitCapabilitiesForUnrelatedBindings(t *testing.T) {
 	for _, spec := range []identityCollectionSpec{
-		{"identity/v3/users", "User", "Get", "List", 0},
-		{"loadbalancer/v2/pools", "Pool", "Get", "List", 0},
-		{"compute/v2/attachinterfaces", "Interface", "Get", "List", 1},
+		{path: "identity/v3/credentials", model: "Credential", getter: "Get", lister: "List"},
+		{path: "loadbalancer/v2/pools", model: "Pool", getter: "Get", lister: "List"},
+		{path: "compute/v2/attachinterfaces", model: "Interface", getter: "Get", lister: "List", parents: 1},
 	} {
 		t.Run(spec.path, func(t *testing.T) {
 			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")

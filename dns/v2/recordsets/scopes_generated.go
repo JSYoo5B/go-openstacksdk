@@ -4,7 +4,9 @@ package recordsets
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/dns/v2/recordsets"
 	zones "gophercloudsdk/dns/v2/zones"
+	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
@@ -34,6 +36,11 @@ func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 	return resource.NewCollection(resource.Adapter[RecordSet]{
 		Kind:         "recordsets",
 		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*RecordSet, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, s.api.RawClient(), []string{"zones", s.parentID, "recordsets", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get: func(ctx context.Context, id string) (*RecordSet, error) {
 			return s.api.Get(ctx, s.parentID, string(id))
 		},

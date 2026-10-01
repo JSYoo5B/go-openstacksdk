@@ -13,10 +13,11 @@ import (
 func controlledFixtureSource(model, fields, getter, getArgs, lister, listArgs, opts string) string {
 	return fmt.Sprintf(`package fixture
 import "context"
+import "net/http"
 import gophercloud "github.com/gophercloud/gophercloud/v2"
 import "github.com/gophercloud/gophercloud/v2/pagination"
 type %s struct{%s}
-type GetResult struct{}
+type GetResult struct{Body any;Header http.Header;Err error}
 func(GetResult)Extract()(*%s,error){return nil,nil}
 %s
 type ModelPage struct{}
