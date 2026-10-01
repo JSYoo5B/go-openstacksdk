@@ -1668,5 +1668,27 @@
     "find": false,
     "delete": false,
     "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/clusterpolicies",
+    "source": "sdk_owned",
+    "model": "ClusterPolicy",
+    "kind": "policy_binding",
+    "find": true,
+    "delete": false,
+    "wait": false,
+    "scope": "InCluster",
+    "parent": "gophercloudsdk/clustering/v1/clusters"
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/clusterattributes",
+    "source": "sdk_owned",
+    "model": "ClusterAttribute",
+    "kind": "scoped_list_only",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InCluster",
+    "parent": "gophercloudsdk/clustering/v1/clusters"
   }
 ]

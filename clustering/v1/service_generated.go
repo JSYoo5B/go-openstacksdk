@@ -5,46 +5,52 @@ import (
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	resource0 "gophercloudsdk/clustering/v1/actions"
 	resource1 "gophercloudsdk/clustering/v1/buildinfo"
-	resource2 "gophercloudsdk/clustering/v1/clusters"
-	resource3 "gophercloudsdk/clustering/v1/events"
-	resource4 "gophercloudsdk/clustering/v1/nodes"
-	resource5 "gophercloudsdk/clustering/v1/policies"
-	resource6 "gophercloudsdk/clustering/v1/policytypes"
-	resource7 "gophercloudsdk/clustering/v1/profiles"
-	resource8 "gophercloudsdk/clustering/v1/profiletypes"
-	resource9 "gophercloudsdk/clustering/v1/receivers"
-	resource10 "gophercloudsdk/clustering/v1/services"
+	resource2 "gophercloudsdk/clustering/v1/clusterattributes"
+	resource3 "gophercloudsdk/clustering/v1/clusterpolicies"
+	resource4 "gophercloudsdk/clustering/v1/clusters"
+	resource5 "gophercloudsdk/clustering/v1/events"
+	resource6 "gophercloudsdk/clustering/v1/nodes"
+	resource7 "gophercloudsdk/clustering/v1/policies"
+	resource8 "gophercloudsdk/clustering/v1/policytypes"
+	resource9 "gophercloudsdk/clustering/v1/profiles"
+	resource10 "gophercloudsdk/clustering/v1/profiletypes"
+	resource11 "gophercloudsdk/clustering/v1/receivers"
+	resource12 "gophercloudsdk/clustering/v1/services"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client       *gophercloud.ServiceClient
-	Actions      *resource0.API
-	BuildInfo    *resource1.API
-	Clusters     *resource2.API
-	Events       *resource3.API
-	Nodes        *resource4.API
-	Policies     *resource5.API
-	PolicyTypes  *resource6.API
-	Profiles     *resource7.API
-	ProfileTypes *resource8.API
-	Receivers    *resource9.API
-	Services     *resource10.API
+	client            *gophercloud.ServiceClient
+	Actions           *resource0.API
+	BuildInfo         *resource1.API
+	ClusterAttributes *resource2.API
+	ClusterPolicies   *resource3.API
+	Clusters          *resource4.API
+	Events            *resource5.API
+	Nodes             *resource6.API
+	Policies          *resource7.API
+	PolicyTypes       *resource8.API
+	Profiles          *resource9.API
+	ProfileTypes      *resource10.API
+	Receivers         *resource11.API
+	Services          *resource12.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		Actions:      resource0.New(client),
-		BuildInfo:    resource1.New(client),
-		Clusters:     resource2.New(client),
-		Events:       resource3.New(client),
-		Nodes:        resource4.New(client),
-		Policies:     resource5.New(client),
-		PolicyTypes:  resource6.New(client),
-		Profiles:     resource7.New(client),
-		ProfileTypes: resource8.New(client),
-		Receivers:    resource9.New(client),
-		Services:     resource10.New(client),
+		Actions:           resource0.New(client),
+		BuildInfo:         resource1.New(client),
+		ClusterAttributes: resource2.New(client),
+		ClusterPolicies:   resource3.New(client),
+		Clusters:          resource4.New(client),
+		Events:            resource5.New(client),
+		Nodes:             resource6.New(client),
+		Policies:          resource7.New(client),
+		PolicyTypes:       resource8.New(client),
+		Profiles:          resource9.New(client),
+		ProfileTypes:      resource10.New(client),
+		Receivers:         resource11.New(client),
+		Services:          resource12.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

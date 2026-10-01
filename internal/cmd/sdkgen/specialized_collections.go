@@ -100,4 +100,6 @@ var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/clustering/v1/actions", Source: "sdk_owned", Model: "Action", Find: true, Wait: true},
 	{Package: "gophercloudsdk/clustering/v1/events", Source: "sdk_owned", Model: "Event"},
 	{Package: "gophercloudsdk/clustering/v1/services", Source: "sdk_owned", Model: "Service", Kind: "list_only"},
+	{Package: "gophercloudsdk/clustering/v1/clusterpolicies", Source: "sdk_owned", Model: "ClusterPolicy", Kind: "policy_binding", Find: true, Scope: "InCluster", Parent: "gophercloudsdk/clustering/v1/clusters"},
+	{Package: "gophercloudsdk/clustering/v1/clusterattributes", Source: "sdk_owned", Model: "ClusterAttribute", Kind: "scoped_list_only", Scope: "InCluster", Parent: "gophercloudsdk/clustering/v1/clusters"},
 }
