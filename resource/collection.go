@@ -2,6 +2,7 @@ package resource
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"iter"
@@ -58,6 +59,12 @@ type Adapter[T any] struct {
 	NameQuery         func(string) string
 	NameQueryKey      string
 	Status            func(*T) string
+	// BodyFilterFields maps SDK-owned aliases to canonical response fields.
+	// The canonical field must also map to itself. Only audited bindings opt in.
+	BodyFilterFields map[string]string
+	// BodyFilterValue projects one canonical field from the native typed model.
+	// This does not restore original wire presence or numeric precision.
+	BodyFilterValue func(*T, string) (json.RawMessage, error)
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
@@ -72,6 +79,7 @@ type Adapter[T any] struct {
 type Collection[T any] struct{ binding Adapter[T] }
 
 func NewCollection[T any](adapter Adapter[T]) *Collection[T] {
+	adapter.BodyFilterFields = maps.Clone(adapter.BodyFilterFields)
 	if adapter.IdentityMissingListQuery != nil {
 		adapter.IdentityMissingListQuery = cloneIdentityFindOptions(IdentityFindOpts{Query: adapter.IdentityMissingListQuery}).Query
 	}
@@ -139,6 +147,11 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			yield(nil, invalid("maximum items must be non-negative"))
 			return
 		}
+		bodyFilters, err := c.prepareBodyFilters(o.bodyFilters)
+		if err != nil {
+			yield(nil, err)
+			return
+		}
 		if o.status && c.binding.Status == nil {
 			yield(nil, c.wrap("list", ErrUnsupported))
 			return
@@ -175,6 +188,14 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 					yield(nil, c.wrap("list", err))
 					return
 				}
+				matched, err := c.matchBodyFilters(value, bodyFilters)
+				if err != nil {
+					yield(nil, c.wrap("list", err))
+					return
+				}
+				if !matched {
+					continue
+				}
 				if o.name != nil && c.binding.Name(value) != *o.name {
 					continue
 				}
@@ -193,7 +214,7 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 		}
 		stopped := false
 		count := 0
-		err := eachPage(ctx, c.binding.List(wireQuery), func(_ context.Context, page pagination.Page) (bool, error) {
+		err = eachPage(ctx, c.binding.List(wireQuery), func(_ context.Context, page pagination.Page) (bool, error) {
 			items, err := c.binding.Extract(page)
 			if err != nil {
 				return false, err
@@ -203,7 +224,11 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 					return false, err
 				}
 				count++
-				matched := o.name == nil || c.binding.Name(&items[i]) == *o.name
+				matched, err := c.matchBodyFilters(&items[i], bodyFilters)
+				if err != nil {
+					return false, err
+				}
+				matched = matched && (o.name == nil || c.binding.Name(&items[i]) == *o.name)
 				if o.status && !strings.EqualFold(c.binding.Status(&items[i]), o.query.Get("status")) {
 					matched = false
 				}

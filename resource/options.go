@@ -31,16 +31,17 @@ func (r Ref) Validate() error {
 }
 
 type listOptions struct {
-	name    *string
-	query   url.Values
-	status  bool
-	control ListControl
+	name        *string
+	query       url.Values
+	status      bool
+	control     ListControl
+	bodyFilters []bodyFilterUpdate
 }
 
 // ListOption configures a typed resource iterator. Later options win.
 type ListOption func(*listOptions) error
 
-// WithMaxItems caps rows before local name/status filtering. Zero is unlimited.
+// WithMaxItems caps rows before local name/status/Body filtering. Zero is unlimited.
 // It is separate from WithPageSize, which controls the server's requested page.
 func WithMaxItems(maximum int) ListOption {
 	return func(o *listOptions) error {
