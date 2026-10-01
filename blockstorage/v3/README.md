@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 blockstorage/v3 API를 하나의 인증된 서비스 객�
 
 `Volumes.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
 
+서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.
+
 `conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.
 
 `Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.BlockStorageProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. 프로젝트 필터는 실제 요청 버전 3.39 이상이 필요하며 [limits 사용법](limits/README.md)에 버전·typed/raw 응답을 설명합니다.

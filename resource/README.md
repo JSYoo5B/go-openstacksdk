@@ -32,6 +32,10 @@ Nova 서버·Cinder v3 볼륨·Neutron 네트워크/subnet/포트, Keystone 프�
 [이름·ID 자동 조회](../docs/finding-identities.md)에 설명합니다. 다른 native binding은
 이 자동 정책을 아직 지원하지 않습니다.
 
+Nova 서버·Cinder v3 볼륨에서는 `WithIdentityFindDetails(false)`로 fallback summary
+목록을, `WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다.
+두 옵션은 GET에 전달하지 않으며 기본값은 details=true, all_projects=false입니다.
+
 ## 옵션
 
 | 연산 | 옵션 |

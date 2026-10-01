@@ -20,7 +20,7 @@
 | Keystone 그룹 | `conn.identity.find_group("app-group", domain_id=domain_id)` | `identity.Groups.FindIdentity(ctx, "app-group", domainQuery)` |
 | Keystone domain | `conn.identity.find_domain("Default")` | `identity.Domains.FindIdentity(ctx, "Default")` |
 | Keystone role | `conn.identity.find_role("reader", domain_id=domain_id)` | `identity.Roles.FindIdentity(ctx, "reader", domainQuery)` |
-| Designate recordset | `conn.dns.find_recordset("www.example.org.", zone)` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
+| Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
 위 12개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
@@ -101,6 +101,8 @@ func FindScopedResources(ctx context.Context, dns *dnsv2.Service,
 | `WithIdentityFindIgnoreMissing(false)` | 성공한 빈 검색은 `ErrNotFound` |
 | `WithIdentityFindFallback(resource.FindFallbackNotFoundOnly)` | 시도한 GET이 404일 때만 목록 검색 |
 | `WithIdentityFindFallback(resource.FindFallbackNever)` | GET만 사용, 404에만 미존재 옵션 적용 |
+| `WithIdentityFindDetails(false)` | Nova·Cinder fallback에서 summary 목록 사용, 기본값은 true |
+| `WithIdentityFindAllProjects(true)` | Nova·Cinder fallback 목록에만 `all_tenants=true` 추가, 기본값은 false |
 | `WithIdentityFindQuery(key, value)` | 직접 GET과 fallback 목록의 서버 query, 같은 key는 뒤의 옵션 우선 |
 | `WithIdentityFindOptions(resource.IdentityFindOpts{...})` | bool pointer와 query를 포함한 concrete 설정 |
 
@@ -145,6 +147,54 @@ typed native 응답에 없는 HTTP 본문·헤더를 이 검증 오류에 만들
 목록을 소비하며 로컬 cap이나 첫 페이지 중단 옵션을 받지 않습니다. 생성한 옵션은
 bool pointer, query map과 slice를 복사하고 호출마다 독립적으로 적용합니다. 옵션
 생성 뒤 원본 설정을 바꾸어도 이미 생성한 옵션의 동작은 바뀌지 않습니다.
+
+## Nova·Cinder 목록 모드
+
+Python의 `find_server(..., details=False, all_projects=True)`와
+`find_volume(..., details=False, all_projects=True)`는 두 concrete 옵션으로 표현합니다.
+이 옵션은 첫 GET의 경로나 query를 변경하지 않습니다. GET에서 찾았다면 그 native
+응답을 즉시 반환하므로 `details=False`에서도 상세 GET 결과를 받을 수 있습니다.
+
+GET이 fallback으로 전환되면 `Details`의 nil/true는 `/servers/detail` 또는
+`/volumes/detail`, false는 `/servers` 또는 `/volumes`를 선택합니다. summary에서도
+같은 native 모델을 해석하며 생략된 필드는 zero value입니다. 이름을 찾은 뒤 상세
+GET을 자동으로 추가하지 않습니다. summary 목록에도 전체 페이지의 정확한 ID/이름·
+중복·후속 실패 검사가 적용됩니다.
+
+`AllProjects`의 nil/false는 자동 wire key를 넣지 않고 true만 목록 query에
+`all_tenants=true`를 추가합니다. cloud 권한은 서버가 판단합니다. 직접 지정한
+`all_tenants`와 명시적 `AllProjects`를 함께 쓰면 값이나 옵션 순서와 관계없이 요청
+전에 `ErrInvalidOption`입니다. nil/빈 slice도 직접 지정한 key로 취급합니다.
+`AllProjects`를 지정하지 않은 raw `all_tenants` query는 일반 query 확장으로서
+GET과 목록 모두에 전달됩니다. `details`·`all_projects`를 raw query로 쓰면 오류입니다.
+
+두 옵션은 감사된 Nova 서버·Cinder v3 볼륨에만 제공합니다. 다른 `FindIdentity`
+binding에서 명시적으로 true나 false를 지정하면 첫 HTTP 전에 `ErrUnsupported`입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    computev2 "gophercloudsdk/compute/v2"
+    blockstoragev3 "gophercloudsdk/blockstorage/v3"
+    "gophercloudsdk/resource"
+)
+
+func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
+    storage *blockstoragev3.Service) error {
+    summary := resource.WithIdentityFindDetails(false)
+    allProjects := resource.WithIdentityFindAllProjects(true)
+    strict := resource.WithIdentityFindIgnoreMissing(false)
+    server, err := compute.Servers.FindIdentity(ctx, "web-01", summary, allProjects, strict)
+    if err != nil { return err }
+    volume, err := storage.Volumes.FindIdentity(ctx, "data-01", summary, allProjects, strict)
+    if err != nil { return err }
+    _, _ = server, volume
+    return nil
+}
+```
 
 ## Keystone domain과 네트워크 필터
 
@@ -192,13 +242,10 @@ func FindTenantResources(ctx context.Context, identity *identityv3.Service,
 
 ## Python과 추가로 비교할 범위
 
-Nova와 Cinder의 fallback은 native detail pager를 사용하여 Python의 기본
-`details=True`에 대응합니다. `details=False`로 summary 경로를 선택하는 옵션,
-`list_base_path` 교체, 호출별 header·microversion 선택은 이 공통 API에 없습니다.
-Nova·Cinder의 cross-project 목록 wire key는 `all_tenants`입니다. Python의
-`all_projects` 인자는 목록에만 이 key를 넣는 별도 정책이므로 일반 query 옵션과
-같지 않습니다. 이 typed 인자는 아직 제공하지 않습니다. `WithIdentityFindQuery`로
-지정한 wire query는 GET과 목록에 모두 전달하며, 권한과 의미는 해당 서버가 결정합니다.
+Nova와 Cinder의 기본 `details=True`와 `all_projects=False` 및 명시적 변경은 위
+옵션에 대응합니다. 임의 `list_base_path` 교체, 호출별 header·microversion 선택은
+이 공통 API에 없습니다. `WithIdentityFindQuery`로 지정한 wire query는 GET과 목록에
+모두 전달하며, Python의 descriptor query 별칭·로컬 Body 필터 변환까지 자동 적용하지 않습니다.
 
 이 API는 typed Gophercloud 응답을 반환합니다. Python의 Resource 입력·cache·descriptor
 변환·dirty state 전체와 native 응답의 추가 raw HTTP metadata를 제공한다는 뜻은
