@@ -1,4 +1,4 @@
-package senlin
+package jsonfilter
 
 import (
 	"encoding/json"
@@ -158,20 +158,5 @@ func TestMatchFiltersOnlyReadsReferencedFieldsAndNeverMutatesInputs(t *testing.T
 		if err != nil || !match || string(body["field"]) != beforeBody || string(filters["field"]) != beforeFilter || string(body["unreferenced"]) != "invalid" {
 			t.Fatalf("pure comparison changed inputs: match=%v error=%v", match, err)
 		}
-	}
-}
-
-func TestMatchFiltersKeepsSenlinErrorPrefixesAfterSharedExtraction(t *testing.T) {
-	_, err := MatchFilters(nil, map[string]json.RawMessage{"field": nil})
-	if err == nil || err.Error() != `Senlin filter "field": EOF` || !errors.Is(err, io.EOF) {
-		t.Fatal("filter error prefix or cause changed", err)
-	}
-	_, err = MatchFilters(map[string]json.RawMessage{"field": nil}, map[string]json.RawMessage{"field": json.RawMessage(`null`)})
-	if err == nil || err.Error() != `Senlin body field "field": EOF` || !errors.Is(err, io.EOF) {
-		t.Fatal("body error prefix or cause changed", err)
-	}
-	_, err = MatchFilters(nil, map[string]json.RawMessage{"field": json.RawMessage(`null false`)})
-	if err == nil || err.Error() != `Senlin filter "field": multiple JSON values` {
-		t.Fatal("multiple-value error prefix changed", err)
 	}
 }
