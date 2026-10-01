@@ -57,6 +57,16 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if parts[0] == "metric" {
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")
 	}
+	identityFindAccess := map[string]string{
+		"compute/v2":      "`Servers.FindIdentity(ctx, identity, options...)`",
+		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
+		"network/v2":      "`Ports.FindIdentity(ctx, identity, options...)`",
+		"dns/v2":          "`RecordSets.InZone(ctx, parent)`가 반환한 scope의 `FindIdentity`",
+		"loadbalancer/v2": "`Pools.Members(ctx, parent)`가 반환한 scope의 `FindIdentity`",
+	}
+	if access, ok := identityFindAccess[key]; ok {
+		fmt.Fprintf(&out, "%s는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·경로 정책을 설명합니다.\n\n", access)
+	}
 	switch key {
 	case "instanceha/v1":
 		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산과 [대기 정책](waiting/README.md)의 두 proxy wait 대응을 확인합니다. 네 fetch 가능한 리소스의 WaitForStatus/WaitForDelete는 무제한·ERROR 실패·2초 간격 상태 대기와 120초 삭제 대기를 제공합니다. Host·VMove는 고정 부모 범위를 유지하고 VMove GET은 1.3 이상을 재검사합니다. 전체 17개 직접 선언 연산에 대응하는 API를 제공하며 marker fallback·nullable 입력·Resource/cache의 전체 계약은 추가 비교가 필요합니다.\n\n")

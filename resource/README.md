@@ -16,6 +16,7 @@ resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 |---|---|
 | `Get(ctx, id)` | 단일 ID 조회, 404면 `ErrNotFound` |
 | `Find(ctx, ref, ...LookupOption)` | 명시 ID 조회 또는 정확한 이름 검색, 중복 검사 |
+| `FindIdentity(ctx, identity, ...IdentityFindOption)` | SDK가 지원한 binding의 이름·ID 문자열 자동 조회, 기본 미존재 무시 |
 | `ResolveID(ctx, ref)` | ID는 요청 없이 검증, 이름은 정확히 찾아 안정적인 ID 반환 |
 | `List(ctx, ...ListOption)` | lazy `iter.Seq2[*T, error]`, 모든 페이지 순회 |
 | `All(ctx, ...ListOption)` | iterator를 slice로 수집 |
@@ -25,12 +26,19 @@ resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 
 Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에서 수행합니다. Find에 별도 tenant/project 필터를 전달하는 기능은 아직 없습니다. 중복 오류의 IDs는 중복을 확인한 첫 두 리소스입니다.
 
+Nova 서버·Cinder v3 볼륨·Neutron 포트와 고정 zone의 Designate recordset·고정 pool의
+Octavia member는 `FindIdentity`로 문자열을 자동 조회합니다. 기본 GET400·403·404
+fallback, query 옵션, unsafe 이름의 목록 경로와 Python 사용법은
+[이름·ID 자동 조회](../docs/finding-identities.md)에 설명합니다. 다른 native binding은
+이 자동 정책을 아직 지원하지 않습니다.
+
 ## 옵션
 
 | 연산 | 옵션 |
 |---|---|
 | 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithMaxItems`, `WithPaginated`, `WithQuery` |
 | 조회/삭제 | `WithIgnoreMissing`, `WithMissingError` |
+| 자동 문자열 조회 | `WithIdentityFindOptions`, `WithIdentityFindIgnoreMissing`, `WithIdentityFindFallback`, `WithIdentityFindQuery` |
 | 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates`, `WithStatusAttribute`, `WithProgressCallback` |
 
 페이지 크기와 로컬 행 수 제한을 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는

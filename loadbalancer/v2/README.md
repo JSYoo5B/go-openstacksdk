@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 loadbalancer/v2 API를 하나의 인증된 서비스 객�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Pools.Members(ctx, parent)`가 반환한 scope의 `FindIdentity`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·경로 정책을 설명합니다.
+
 `conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.
 
 ## Go 사용
