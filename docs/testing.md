@@ -91,6 +91,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/clustering_cluster_policy_commands_test.go` | policy_attach/detach/update의 required body identity·GET 생략·버전 gate 없음, enabled 생략/false/true/null·독립 snapshot, parent lookup 전 body/header 고정·source 재검사, typed/header/query 보호, strict202 action/Location·원문/native 오류 |
 | `connection_senlin_receivers_policy_test.go` | Receiver와 정책 명령의 공유 client·최신 token·선택1.4·reverse prefix, user/global_project=false, 동기 응답의 incidental Location 미해석·202 이후 추가 조회 없음 |
 
+| `api/clustering_wait_contracts_test.go` | 9개 facade·기본status/unlimited/ERROR와delete120초·실제요청deadline/override/common5분, attr preflight·target우선·4status/5nostatus 종결, callback/cancel·Name1회·고정ID·token/source/header 재검사, missing/duplicate/later403·native/transport/malformed200 증거 |
+| `connection_senlin_wait_test.go` | 공유 provider의 polling 중 token교체·선택1.13·reverse prefix, 응답 ID 변경에도 고정 route, receiver404 완료·channel/action/DELETE 미호출 |
+
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
 ## 아직 확인하지 않은 것
