@@ -71,7 +71,7 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/instanceha_notifications_test.go`, `api/instanceha_vmoves_test.go` | notification UUID·payload/timestamp, raw workflow 숫자, 고정 notification scope·VM move1.3, 상태 polling·실패·취소, 부모와 server identity 구별·accepted 응답 증거 |
 | `api/clustering_discovery_test.go`, `api/clustering_read_test.go` | build-info singleton·type 이름/schema·profile ops1.4, action epoch/target·event level string/숫자/null/생략·큰 정수·반복 filter snapshot, service1.7/list-only, 페이지·strict envelope·HTTP 오류 |
 | `internal/rest/list_short_page_test.go`, `api/clustering_read_test.go` | 명시 limit에서 짧은 페이지 뒤에도 wire ID marker 유지, consumer 모델 변경·break·no-limit·빈 페이지·순환 정책 |
-| `internal/senlin/mutation_test.go`, `internal/senlin/filter_test.go`, `internal/senlin/query_test.go` | optional JSON 생략/null/빈 객체, snapshot·원문 숫자·SDK 소유 field/header 보호, 로컬 재귀 subset·배열·타입·정확한 decimal/거대 지수 비교, sort grammar와 별도 key allowlist |
+| `internal/senlin/mutation_test.go`, `internal/senlin/filter_test.go`, `internal/senlin/query_test.go` | wrapped/flat body·optional JSON 생략/null/빈 객체, snapshot·원문 숫자·SDK 소유 field/header 보호, 로컬 재귀 subset·배열·타입·정확한 decimal/거대 지수 비교, sort grammar와 별도 key allowlist |
 | `api/clustering_profiles_test.go`, `api/clustering_policies_test.go`, `connection_sdk_resources_test.go` | profile/policy CRUD·객체 PATCH·Validate1.2, spec/metadata snapshot·null/빈 객체·숫자, 이름/ID·미존재·중복·409, 로컬 Body 필터·페이지·accepted 오류·인증/버전 공유 |
 | `api/clustering_mutation_recheck_test.go`, `api/clustering_profiles_update_snapshot_test.go`, `api/clustering_policies_response_test.go` | custom option·이름 lookup 이후 source/version 재검사, 준비한 body/header 소유권, Get/Validate accepted malformed 응답 증거·재전송 없음·미선언 success code 거부 |
 | `resource/delete_identity_test.go` | 이름 조회 응답의 빈/공백/다른 종류 ID를 binding 정책으로 검사해 collection 경로 삭제를 막고, 유효한 ID는 한 번 해석 후 삭제 |
@@ -79,12 +79,14 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `internal/senlin/async_test.go`, `api/clustering_async_location_case_test.go` | 선택한 action collection·origin·reverse prefix, required/empty/중복·대소문자 Location, accepted 원문/헤더/status 보존, 조회·재전송 없음 |
 | `api/clustering_clusters_test.go`, `api/clustering_clusters_response_test.go`, `api/clustering_clusters_pagination_test.go` | cluster POST201·PATCH/DELETE202, raw 숫자·생략/null·profile_only1.6, 이름 해석 전 snapshot·source 재검사, 일반/force404 차이, malformed 응답·짧은 페이지·로컬 필터·취소 |
 | `api/clustering_nodes_test.go`, `api/clustering_nodes_pagination_test.go` | node POST/PATCH/DELETE202·필수 action 참조, physical ID/index/details·tainted1.13, nullable 입력·snapshot·strict force404, query/로컬 필터·raw marker·다중 페이지 Find 중복/후속 오류 |
-| `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 CRUD·ScaleOut/Check/Cancel client·최신 token·1.13·reverse prefix 공유, 자동 조회 없이 submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성 |
+| `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 CRUD·ScaleOut/Check/Cancel client·최신 token·1.13·reverse prefix 공유, 자동 조회 없이 submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성, Adopt/Preview/Recover/PerformOperation의 선택1.7·token·prefix 공유·incidental Location 미해석 |
 | `resource/list_options_snapshot_test.go` | native·SDK 소유 lazy iterator의 caller 옵션 slice 교체/nil·반복 iteration·잘못된 옵션 소유권과 HTTP 사전 차단 |
 | `internal/senlin/command_test.go` | 빈 command 객체·typed key 보호·plugin 입력 snapshot, 응답 action과 필수 Location ID 일치·accepted 오류 증거·경로와 header 소유권 |
 | `api/clustering_action_update_test.go` | PATCH202·CANCELLED·1.12, force query 생략/false/true, snapshot·이름 lookup 후 source/version 검사, empty/opaque 원문·native HTTP/context 오류 |
 | `api/clustering_clusters_commands_test.go` | ScaleIn/Out count:null·정확한 Resize 숫자·optional 값, 노드 배열/map·gate1.3/1.4, parent 1회 해석·snapshot, strict202 action/Location·오류 원문·취소·재전송 없음 |
 | `api/clustering_nodes_commands_test.go` | Check/Recover 기본 객체, operation 생략/empty/null·params/null·명시 check1.6·ops1.4, plugin key 범위, 입력/header snapshot·lookup 후 gate, missing/ambiguous·accepted 오류·HTTP 원인 |
+| `api/clustering_nodes_adopt_test.go` | flat Adopt/Preview POST200·1.7, physical body identity·nullable 선택 입력과 snapshot, preview 네 필드 기본 null·숫자/string/null version·정밀한 inner/outer 원문, incidental Location 미해석, custom option 이후 source/version/context 재검사·malformed200/native/read 오류 |
+| `api/clustering_cluster_health_test.go` | Check/Recover 기본 객체·check-only1.6 성공·capacity1.7·ops1.4, operation/params optional 및 server Filters 구분, lookup 전 body/header/minimum 고정·재검사, typed 충돌·202/Location 증거·native/context 오류 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
