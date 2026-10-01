@@ -4065,6 +4065,496 @@
       "documentation": [
         "loadbalancer/v2/quotas/README.md"
       ]
+    },
+    {
+      "operation": "gophercloud:dns/v2/quotas.Get",
+      "source_fingerprint": "eeda6c2ac351862f07310f3022a47332e56b28f6a98a71fb27d8141f8d3b2b6b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.API.InProject",
+        "gophercloudsdk/dns/v2/quotas.API.CurrentProject",
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.",
+          "tests": [
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden"
+          ]
+        },
+        {
+          "behavior": "Every scoped request sets the fixed sudo-project header, explicit false can override all-projects while omission preserves source configuration, and retries/reauth cannot retarget the method, URL or project. Context owns transport and accepted body reads.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaAllProjectsHeaderIsExplicitAndLastOptionWins",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaCancellationDoesNotWaitForSharedReauth",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaContextOwnsTransportAndBodyRead"
+          ]
+        },
+        {
+          "behavior": "404 gains ErrNotFound while original status/body/header remains available; unexpected success codes remain errors, and generated native Get/Update methods retain their original contracts.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaGeneratedNativeAPIRemainsUnchanged"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
+        "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:dns/v2/quotas.Update",
+      "source_fingerprint": "73c52c6eeec5614c0b535ce7f2a49ed464b11fa1043c8d865dd38d8c774fb56f",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Update",
+        "gophercloudsdk/dns/v2/quotas.WithQuotaOptions",
+        "gophercloudsdk/dns/v2/quotas.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH sends an unwrapped partial quota object: nil typed pointers omit fields, zero/large native integer values are exact, WithQuotaOptions snapshots pointers, extensions snapshot JSON, and core identity/capability collisions fail before HTTP.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaInvalidOptionsAndZeroScopeFailBeforeHTTP",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody"
+          ]
+        },
+        {
+          "behavior": "GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden"
+          ]
+        },
+        {
+          "behavior": "Every scoped request sets the fixed sudo-project header, explicit false can override all-projects while omission preserves source configuration, and retries/reauth cannot retarget the method, URL or project. Context owns transport and accepted body reads.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaAllProjectsHeaderIsExplicitAndLastOptionWins",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaCancellationDoesNotWaitForSharedReauth",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaContextOwnsTransportAndBodyRead"
+          ]
+        },
+        {
+          "behavior": "404 gains ErrNotFound while original status/body/header remains available; unexpected success codes remain errors, and generated native Get/Update methods retain their original contracts.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaGeneratedNativeAPIRemainsUnchanged"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
+        "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.",
+        "Concrete native UpdateOpts and library-owned functional options replace caller-implemented builders; known limit validation remains the service schema contract."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "python:dns/v2/get_quota",
+      "source_fingerprint": "8defb9508cb6fac7cb786838ec495144a5174ca3d31d0b08ea4d0a8460871031",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.API.InProject",
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.",
+          "tests": [
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden"
+          ]
+        },
+        {
+          "behavior": "Every scoped request sets the fixed sudo-project header, explicit false can override all-projects while omission preserves source configuration, and retries/reauth cannot retarget the method, URL or project. Context owns transport and accepted body reads.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaAllProjectsHeaderIsExplicitAndLastOptionWins",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaCancellationDoesNotWaitForSharedReauth",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaContextOwnsTransportAndBodyRead"
+          ]
+        },
+        {
+          "behavior": "404 gains ErrNotFound while original status/body/header remains available; unexpected success codes remain errors, and generated native Get/Update methods retain their original contracts.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaGeneratedNativeAPIRemainsUnchanged"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
+        "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:dns/v2/update_quota",
+      "source_fingerprint": "984e8042352f23becdd0e771d156154d31d18c176898f715543f275cdd78b7f1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.API.InProject",
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.",
+          "tests": [
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "PATCH sends an unwrapped partial quota object: nil typed pointers omit fields, zero/large native integer values are exact, WithQuotaOptions snapshots pointers, extensions snapshot JSON, and core identity/capability collisions fail before HTTP.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaInvalidOptionsAndZeroScopeFailBeforeHTTP",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody"
+          ]
+        },
+        {
+          "behavior": "GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden"
+          ]
+        },
+        {
+          "behavior": "Every scoped request sets the fixed sudo-project header, explicit false can override all-projects while omission preserves source configuration, and retries/reauth cannot retarget the method, URL or project. Context owns transport and accepted body reads.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaAllProjectsHeaderIsExplicitAndLastOptionWins",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaCancellationDoesNotWaitForSharedReauth",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaContextOwnsTransportAndBodyRead"
+          ]
+        },
+        {
+          "behavior": "404 gains ErrNotFound while original status/body/header remains available; unexpected success codes remain errors, and generated native Get/Update methods retain their original contracts.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaGeneratedNativeAPIRemainsUnchanged"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
+        "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:dns/v2/delete_quota",
+      "source_fingerprint": "6f13aa60ea44f9f13c3072d5339ca9955b01b337d0a3a866bebf3c60eda672b3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.API.InProject",
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Reset"
+      ],
+      "contracts": [
+        {
+          "behavior": "The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.",
+          "tests": [
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Reset uses DELETE204 without a follow-up read; strict missing behavior is the Go default and WithResetIgnoreMissing changes only404. Reset responses carry the fixed project and independent HTTP metadata.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject"
+          ]
+        },
+        {
+          "behavior": "Every scoped request sets the fixed sudo-project header, explicit false can override all-projects while omission preserves source configuration, and retries/reauth cannot retarget the method, URL or project. Context owns transport and accepted body reads.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaAllProjectsHeaderIsExplicitAndLastOptionWins",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRetriesAndReauthKeepFixedProjectAndSnapshottedBody",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaRedirectCannotResetAnotherProjectOrCurrentProject",
+            "api/designate_project_quotas_transport_test.go:TestDesignateQuotaCancellationDoesNotWaitForSharedReauth",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaContextOwnsTransportAndBodyRead"
+          ]
+        },
+        {
+          "behavior": "404 gains ErrNotFound while original status/body/header remains available; unexpected success codes remain errors, and generated native Get/Update methods retain their original contracts.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaErrorsPreserveNativeResponseAndMissingPolicy",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaGeneratedNativeAPIRemainsUnchanged"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.",
+        "The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.",
+        "Python delete_quota defaults ignore_missing=True; Go Reset is strict unless WithResetIgnoreMissing(true) is supplied."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:dns/v2/quotas",
+      "source_fingerprint": "6999dbc6c98d2bce1b583910c632d8f48b83356bc2ef805f7e391ffc00b0abfc",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/quotas.API.CurrentProject",
+        "gophercloudsdk/dns/v2/quotas.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.",
+          "tests": [
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity",
+            "api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.",
+          "tests": [
+            "api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence",
+            "api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden"
+          ]
+        }
+      ],
+      "differences": [
+        "The documented GET /quotas/ is a current-project quota object; the Go scope does not fabricate a multi-project Collection from Python allow_list."
+      ],
+      "documentation": [
+        "dns/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Reconcile the pinned Python generator/list Resource contract with the documented singleton collection-path response before implementing any list mapping; compare inherited query/pagination and adapter behavior."
+      ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/get_quota_set",
+      "source_fingerprint": "dc4c3ea00eb5b445337b6b68db634c1be2211d84badc538b0c7c163f78de73ef",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.InProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.CurrentProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit and exact-name project resolution, recorded Keystone v2/v3 authentication and preflight validation bind a fixed project without endpoint guessing; the pinned native transport has no Manila quota package.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaExactNamesUseSeparateKeystoneAndFreezeID",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaRecordedV2V3AuthenticationAndNoEndpointGuess",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaPreflightAndCancellationPreserveContext",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Manila routes use legacy os-quota-sets through2.6 and quota-sets from2.7; Detail requires2.25 and share-type scope requires2.39 before lookup. Limit/detail models preserve exact int64/raw null/omission/extensions and fixed request identities.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaLegacyRoutesAndDetailVersionPreflight",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaResponsePreservesNullOmissionExtensionsAndExactInts",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
+            "api/manila_scoped_quotas_test.go:TestManilaShareTypeQuotaNamesUseServiceCollectionAfterVersionGate"
+          ]
+        },
+        {
+          "behavior": "User scopes resolve exact Keystone names separately and share-type scopes use the Manila collection after version validation. Their method sets expose only scoped Get/Detail/Update/Reset; redirect or retry cannot drop selectors and downgrade cannot widen scope.",
+          "tests": [
+            "api/manila_scoped_quotas_test.go:TestManilaUserQuotaExactNamesInheritOrOverrideKeystone",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaLookupFailuresPreventQuotaRequests",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaPreflightAndMethodSetsCannotWidenScope",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaReauthenticationKeepsBodyAndFixedUser"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
+        "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Compare inherited common QuotaSet/Resource translation, fallback behavior, cached Resource/dirty-state inputs and adapter/microversion selection beyond the verified service HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/update_quota_set",
+      "source_fingerprint": "9727f0bbecaa93245495c09169520e35dee81f5d723bbc01700d76f0a59abe3b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.InProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.CurrentProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.ProjectQuotaScope.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit and exact-name project resolution, recorded Keystone v2/v3 authentication and preflight validation bind a fixed project without endpoint guessing; the pinned native transport has no Manila quota package.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaExactNamesUseSeparateKeystoneAndFreezeID",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaRecordedV2V3AuthenticationAndNoEndpointGuess",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaPreflightAndCancellationPreserveContext",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Manila routes use legacy os-quota-sets through2.6 and quota-sets from2.7; Detail requires2.25 and share-type scope requires2.39 before lookup. Limit/detail models preserve exact int64/raw null/omission/extensions and fixed request identities.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaLegacyRoutesAndDetailVersionPreflight",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaResponsePreservesNullOmissionExtensionsAndExactInts",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
+            "api/manila_scoped_quotas_test.go:TestManilaShareTypeQuotaNamesUseServiceCollectionAfterVersionGate"
+          ]
+        },
+        {
+          "behavior": "User scopes resolve exact Keystone names separately and share-type scopes use the Manila collection after version validation. Their method sets expose only scoped Get/Detail/Update/Reset; redirect or retry cannot drop selectors and downgrade cannot widen scope.",
+          "tests": [
+            "api/manila_scoped_quotas_test.go:TestManilaUserQuotaExactNamesInheritOrOverrideKeystone",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaLookupFailuresPreventQuotaRequests",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaPreflightAndMethodSetsCannotWidenScope",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaReauthenticationKeepsBodyAndFixedUser"
+          ]
+        },
+        {
+          "behavior": "PUT200 sends a quota_set partial update with nil/zero/-1 typed limits, explicit force false, deep pointer/extension snapshots and protected identity/core fields; invalid limits/capabilities fail before HTTP.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaUpdateSnapshotsPointersAndNestedExtensionsExactly",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaUpdateInvalidInputsMakeNoRequests",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaReauthenticationKeepsBodyAndFixedUser"
+          ]
+        },
+        {
+          "behavior": "DELETE202 resets only the bound project or selector; strict404 and explicit ignore-missing remain distinct, HTTP/decode/context causes are preserved, and unexpected status codes do not become success.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaStrictStatusResetAndHTTPDecodeCauses",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
+        "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Compare inherited common QuotaSet/Resource translation, fallback behavior, cached Resource/dirty-state inputs and adapter/microversion selection beyond the verified service HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/revert_quota_set",
+      "source_fingerprint": "56cdfed9691155fbb37eab13af02a6e3c095368ebe07b8f6ad925ebc0f2eeb07",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.InProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.API.CurrentProject",
+        "gophercloudsdk/sharedfilesystems/v2/quotasets.ProjectQuotaScope.Reset"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit and exact-name project resolution, recorded Keystone v2/v3 authentication and preflight validation bind a fixed project without endpoint guessing; the pinned native transport has no Manila quota package.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaExactNamesUseSeparateKeystoneAndFreezeID",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaRecordedV2V3AuthenticationAndNoEndpointGuess",
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaPreflightAndCancellationPreserveContext",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "User scopes resolve exact Keystone names separately and share-type scopes use the Manila collection after version validation. Their method sets expose only scoped Get/Detail/Update/Reset; redirect or retry cannot drop selectors and downgrade cannot widen scope.",
+          "tests": [
+            "api/manila_scoped_quotas_test.go:TestManilaUserQuotaExactNamesInheritOrOverrideKeystone",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaLookupFailuresPreventQuotaRequests",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaPreflightAndMethodSetsCannotWidenScope",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaReauthenticationKeepsBodyAndFixedUser"
+          ]
+        },
+        {
+          "behavior": "DELETE202 resets only the bound project or selector; strict404 and explicit ignore-missing remain distinct, HTTP/decode/context causes are preserved, and unexpected status codes do not become success.",
+          "tests": [
+            "api/manila_project_quotas_test.go:TestManilaProjectQuotaStrictStatusResetAndHTTPDecodeCauses",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
+            "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
+        "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Compare inherited common QuotaSet/Resource translation, fallback behavior, cached Resource/dirty-state inputs and adapter/microversion selection beyond the verified service HTTP mapping."
+      ]
     }
   ]
 }
