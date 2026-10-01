@@ -152,7 +152,7 @@ func (s *Scope) spec() rest.CollectionSpec[ClusterPolicy] {
 			value.URIClusterID = s.ClusterID()
 			return nil
 		},
-		Paging: rest.PagePolicy[ClusterPolicy]{HTTPLink: true},
+		Paging: rest.PagePolicy[ClusterPolicy]{HTTPLink: true, MaxItemsLimitHint: false, StopOnEmptyPage: true},
 	}
 }
 
@@ -177,7 +177,9 @@ func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Clus
 			yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
 			return
 		}
-		for value, err := range rest.List(ctx, s.spec(), query) {
+		control := rest.ListControl{MaxItems: config.Options.MaxItems,
+			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: false}
+		for value, err := range rest.ListWithControl(ctx, s.spec(), query, control) {
 			if !yield(value, request.Wrap("List", "clustering.clusterpolicies", err)) {
 				return
 			}

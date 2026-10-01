@@ -15,11 +15,25 @@ type ListOpts struct {
 	PolicyName string
 	PolicyType string
 	Sort       string
+	MaxItems   int
+	Paginated  *bool
 }
 
 type ListOption = request.Option[ListOpts]
 
 func WithListOptions(value ListOpts) ListOption { return senlin.Snapshot(value) }
+
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
 
 func WithListEnabled(value bool) ListOption {
 	return func(config *request.Config[ListOpts]) error {
@@ -46,6 +60,9 @@ func WithListSort(value string) ListOption {
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func validateQuery(query url.Values) error {
+	if query.Has("max_items") || query.Has("paginated") {
+		return fmt.Errorf("%w: cluster policy pagination controls are local options", resource.ErrInvalidOption)
+	}
 	if query.Has("is_enabled") {
 		return fmt.Errorf("%w: cluster policy is_enabled is an SDK alias; wire queries use enabled", resource.ErrInvalidOption)
 	}
@@ -68,6 +85,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	if err := request.ValidateCapabilities(config, false, true, false); err != nil {
 		return nil, err
 	}
+	if config.Options.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: maximum items must be non-negative", resource.ErrInvalidOption)
+	}
 	query := make(url.Values)
 	value := config.Options
 	if value.Enabled != nil {
@@ -80,7 +100,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "enabled", "is_enabled", "policy_name", "policy_type", "sort", "cluster_id", "id", "policy_id", "cluster_name", "data":
+		case "enabled", "is_enabled", "policy_name", "policy_type", "sort", "cluster_id", "id", "policy_id", "cluster_name", "data", "max_items", "paginated":
 			return nil, fmt.Errorf("%w: query %q is owned by a concrete cluster policy option or response field", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
