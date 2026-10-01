@@ -11097,6 +11097,149 @@
         "Pinned Proxy.request and Resource.fetch/_translate_response (openstack/proxy.py:209-268; openstack/resource.py:1780-1828,1338-1394) provide conditional GET cache, seeded Resource merge and descriptor/default/unknown-field conversion that are not fully mapped to this stateless native result lifecycle.",
         "Pinned Resource.list/_get_next_link (openstack/resource.py:2217-2234,2359-2436) includes query alias/Body local classification, RFC Link-header and limit/marker continuation and per-call session/path controls. Native FlavorPage and fixed detailed-list policy do not implement all of those inherited paths."
       ]
+    },
+    {
+      "operation": "python:network/v2/find_router",
+      "source_fingerprint": "5dd33cefbc80b4a9c8d0d857c692ac88997f6163d13498d0fa28de836aff9d54",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/layer3/routers.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct find_router (openstack/network/v2/_proxy.py:5570) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /routers/id with the router envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes"
+          ]
+        },
+        {
+          "behavior": "Compatible GET400/403/404 may fall back, with explicit 404-only/GET-only policies. Logical absence defaults to nil,nil and strict uses ErrNotFound after successful full native absence; LIST403/404 is never ignored. Native list200/204/300 semantics remain distinct from the member getter.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Caller raw query is frozen across both GET and LIST with repetitions, explicit nil/empty name precedence, vendor fields and concurrent option reuse. Only LIST receives an absent-key literal name hint. No project/domain filter is inferred; exact ID OR name matching and cross-project/repeated-ID ambiguity consume all native continuation pages, including later HTTP/decode/cycle errors.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsQuerySnapshotsAndConcurrentReuse",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Generated leaf and cached Connection.Network.API collections retain the original live provider, token, headers, HTTP middleware, microversion, caller context and reverse ResourceBase. Unsafe names are literal list-only; GET-only unsafe names, nil/canceled contexts and explicit Details/AllProjects/ExtraSpecs true or false fail before HTTP.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsLiveSourceAndCancellation",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsUnsafeNamesAndCapabilityPreflight"
+          ]
+        },
+        {
+          "behavior": "Ordinary Resources.List/All preserve explicit raw status/fields/shared/vendor query and native paging while MaxItems applies before local name filtering and Paginated(false) stops continuation without a wire limit. Explicit Ref ID/Name lookup remains separate, with no automatic identity defaults or member lookup added to ordinary lists.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsOrdinaryCollectionsQueriesAndControls"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Go provides SDK-owned concrete IdentityFindOpts and WithIdentityFind... defaults/snapshots. FindIdentity ignores logical absence by default like pinned Python, while existing explicit Ref Find stays strict. Unsafe names are list-only and every returned/consumed model needs a safe nonblank ID.",
+        "Go raw wire Query is used by both GET and LIST and preserves unknown keys and repetitions; Python list query transposition/local Body filtering is not implicit. Router is_admin_state_up/is_distributed/is_ha and SecurityGroup is_shared require explicit wire admin_state_up/distributed/ha/shared, with tag aliases also explicit.",
+        "Neither binding provides typed Details/AllProjects/ExtraSpecs, hidden lookup, list defaults or automatic microversion changes. Caller project filters are preserved without inference; declared native model/extractor/plural_links policies remain intact.",
+        "The audited Router builder bridge preserves whole raw query in ordinary Resources.List/All as well as FindIdentity, including unknown keys, repetitions and explicit empty values. Its public native typed List API remains intact."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared aliases, discard unknown query names and apply declared non-query Body attributes locally. Go preserves explicit raw wire query instead; automatic classification, local Body filters and descriptor coercion remain separate.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled. The stateless native identity lookup does not provide that conditional response cache or cached Resource lifecycle.",
+        "Pinned Resource.fetch/_translate_response and NetworkResource (openstack/resource.py:1780-1828,1338-1394; openstack/network/v2/_base.py:23-50) merge a seeded Resource, apply descriptors/defaults/aliases/coercion, retain unknown Body fields and expose revision/header policies. Native models and strict safe nonblank result-ID validation do not map that entire lifecycle.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. Go uses the native plural_links pager and does not implement every inherited Python continuation path.",
+        "Both resources inherit _max_microversion=None, so a class-specific maximum-version negotiation gap is not claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from Go frozen raw wire query, which keeps configured client settings and rejects SDK query control keys."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_security_group",
+      "source_fingerprint": "bf6f70e1b1a979b5d7d16b98364b68324ff466cddfe5df3bcbbbdded9e545a2a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/security/groups.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct find_security_group (openstack/network/v2/_proxy.py:6598) accepts a string, ignore_missing=True and query. Safe identities use native GET200 /security-groups/id with the security_group envelope and native nested model/timestamp extraction. GET203/204, accepted decode and missing result-ID errors remain terminal without fallback.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsGETModelsAndNativeCodes"
+          ]
+        },
+        {
+          "behavior": "Compatible GET400/403/404 may fall back, with explicit 404-only/GET-only policies. Logical absence defaults to nil,nil and strict uses ErrNotFound after successful full native absence; LIST403/404 is never ignored. Native list200/204/300 semantics remain distinct from the member getter.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Caller raw query is frozen across both GET and LIST with repetitions, explicit nil/empty name precedence, vendor fields and concurrent option reuse. Only LIST receives an absent-key literal name hint. No project/domain filter is inferred; exact ID OR name matching and cross-project/repeated-ID ambiguity consume all native continuation pages, including later HTTP/decode/cycle errors.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsQuerySnapshotsAndConcurrentReuse",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Generated leaf and cached Connection.Network.API collections retain the original live provider, token, headers, HTTP middleware, microversion, caller context and reverse ResourceBase. Unsafe names are literal list-only; GET-only unsafe names, nil/canceled contexts and explicit Details/AllProjects/ExtraSpecs true or false fail before HTTP.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsLiveSourceAndCancellation",
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsUnsafeNamesAndCapabilityPreflight"
+          ]
+        },
+        {
+          "behavior": "Ordinary Resources.List/All preserve explicit raw status/fields/shared/vendor query and native paging while MaxItems applies before local name filtering and Paginated(false) stops continuation without a wire limit. Explicit Ref ID/Name lookup remains separate, with no automatic identity defaults or member lookup added to ordinary lists.",
+          "tests": [
+            "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsOrdinaryCollectionsQueriesAndControls"
+          ]
+        },
+        {
+          "behavior": "SecurityGroup alone bridges the native concrete ListOpts limitation with an SDK-owned raw query pager using the original ServiceClient, SecGroupPage, ExtractGroups and StreamWithControl. Query and returned rows are independently owned; native full-page decode beyond a local cap, HTTP/transport/cycle/context failures remain observable.",
+          "tests": [
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsPreserveQueriesModelsAndLiveSource",
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsLocalControlsStopBeforeContinuation",
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsCodesAndWholePageErrors",
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsContinuationAndFailuresAreTerminal",
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsInvalidSourceContextAndControlBeforeHTTP",
+            "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsConcurrentReuseHasOwnedRowsAndQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Go provides SDK-owned concrete IdentityFindOpts and WithIdentityFind... defaults/snapshots. FindIdentity ignores logical absence by default like pinned Python, while existing explicit Ref Find stays strict. Unsafe names are list-only and every returned/consumed model needs a safe nonblank ID.",
+        "Go raw wire Query is used by both GET and LIST and preserves unknown keys and repetitions; Python list query transposition/local Body filtering is not implicit. Router is_admin_state_up/is_distributed/is_ha and SecurityGroup is_shared require explicit wire admin_state_up/distributed/ha/shared, with tag aliases also explicit.",
+        "Neither binding provides typed Details/AllProjects/ExtraSpecs, hidden lookup, list defaults or automatic microversion changes. Caller project filters are preserved without inference; declared native model/extractor/plural_links policies remain intact.",
+        "The raw-query pager deliberately extends ordinary common Resources.List/All beyond the concrete native ListOpts whitelist, including status and vendor keys. The public native typed List and its existing ListOpts contract are retained."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared aliases, discard unknown query names and apply declared non-query Body attributes locally. Go preserves explicit raw wire query instead; automatic classification, local Body filters and descriptor coercion remain separate.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled. The stateless native identity lookup does not provide that conditional response cache or cached Resource lifecycle.",
+        "Pinned Resource.fetch/_translate_response and NetworkResource (openstack/resource.py:1780-1828,1338-1394; openstack/network/v2/_base.py:23-50) merge a seeded Resource, apply descriptors/defaults/aliases/coercion, retain unknown Body fields and expose revision/header policies. Native models and strict safe nonblank result-ID validation do not map that entire lifecycle.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. Go uses the native plural_links pager and does not implement every inherited Python continuation path.",
+        "Both resources inherit _max_microversion=None, so a class-specific maximum-version negotiation gap is not claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from Go frozen raw wire query, which keeps configured client settings and rejects SDK query control keys."
+      ]
     }
   ]
 }
