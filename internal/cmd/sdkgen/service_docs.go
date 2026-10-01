@@ -54,14 +54,16 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
 	case "compute/v2":
-		out.WriteString("`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. nil/zero/-1 limit과 명시적 force, Get/Detail/Update/Reset 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.\n\n")
+		out.WriteString("`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.\n\n")
 		out.WriteString("`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.\n\n")
 		out.WriteString("`InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.\n\n")
 	case "blockstorage/v3":
 		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.\n\n")
 	case "network/v2":
-		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Detail/Update/Delete와 check_limit, quota extension·삭제 응답 정책은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
+		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
+	case "loadbalancer/v2":
+		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
 	case "db/v1":
 		out.WriteString("`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.\n\n")
 	case "objectstorage/v1":
@@ -119,11 +121,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				continue
 			}
 			if record.Kind == "singleton" {
-				operations := "Get·Detail·Update·Reset"
+				operations := "Get·Defaults·Detail·Update·Reset"
 				if strings.HasSuffix(record.Package, "/blockstorage/v3/quotasets") {
 					operations = "Get·Defaults·Usage·Update·Reset"
 				} else if strings.HasSuffix(record.Package, "/network/v2/extensions/quotas") {
-					operations = "Get·Detail·Update·Delete"
+					operations = "Get·Defaults·Detail·Update·Delete"
+				} else if strings.HasSuffix(record.Package, "/loadbalancer/v2/quotas") {
+					operations = "Get·Update·Reset; Defaults는 전역 조회"
 				}
 				policies = append(policies, fmt.Sprintf("`%s`: 고정 프로젝트의 %s; List/Find/Wait 없음", label, operations))
 				continue

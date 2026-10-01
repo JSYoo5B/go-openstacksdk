@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 loadbalancer/v2 API를 하나의 인증된 서비스 객�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.
+
 ## Go 사용
 
 ```go
@@ -44,7 +46,7 @@ _ = value
 | `Monitors` | [monitors](monitors/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Pools` | [pools](pools/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `Members(ctx, parent)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Providers` | [providers](providers/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `Quotas` | [quotas](quotas/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Quotas` | [quotas](quotas/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Update·Reset; Defaults는 전역 조회; List/Find/Wait 없음 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

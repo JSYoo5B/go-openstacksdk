@@ -13,7 +13,7 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. nil/zero/-1 limit과 명시적 force, Get/Detail/Update/Reset 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
+`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
 `Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.
 
@@ -53,7 +53,7 @@ _ = value
 | `KeyPairs` | [keypairs](keypairs/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Limits` | [limits](limits/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Migrations` | [migrations](migrations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Detail·Update·Reset; List/Find/Wait 없음 |
+| `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Detail·Update·Reset; List/Find/Wait 없음 |
 | `RemoteConsoles` | [remoteconsoles](remoteconsoles/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SecurityGroups` | [secgroups](secgroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `ServerGroups` | [servergroups](servergroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

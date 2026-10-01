@@ -887,10 +887,14 @@
   },
   {
     "package": "gophercloudsdk/loadbalancer/v2/quotas",
+    "model": "QuotaResource",
+    "upstream_model": "Quota",
+    "kind": "singleton",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/messaging/v2/claims",
