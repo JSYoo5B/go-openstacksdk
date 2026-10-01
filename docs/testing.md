@@ -53,6 +53,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/nova_quota_defaults_users_test.go` | 별도 project defaults, 고정 project+user·Keystone user 해석, 사용자 query·retry/reauth snapshot·redirect 범위 보호, 취소·malformed·HTTP 원인 |
 | `api/neutron_quota_defaults_test.go`, `api/neutron_quotas_list_test.go` | 별도 defaults, 단일 override 목록·검증된 project/tenant identity, lazy break·로컬 filter/한도·옵션 소유권·continuation 거부·raw metadata·취소 |
 | `api/octavia_project_quotas_contracts_test.go`, `api/octavia_project_quotas_projects_test.go`, `api/octavia_project_quotas_list_test.go` | 공식 lbaas 경로·전역 defaults 구분·null 상속·native alias, lazy pagination·필터 보존·True/False·cycle/origin·decode 원문, Connection 프로젝트 해석 |
+| `api/manila_project_quotas_test.go`, `api/manila_scoped_quotas_test.go` | SDK 소유 quota transport, 2.7 경로·2.25 Detail·2.39 share type, 고정 project/user/type·Keystone 해석, exact int64·snapshot·DELETE202·selector redirect/reauth 보호 |
+| `api/manila_quota_class_test.go` | 고정 class 이름·legacy/current 경로·GET/PUT200, 12개 limit exact int64·snapshot, force/selector 거부·지원 method set·원본 HTTP/JSON/context·redirect 보호 |
+| `api/designate_project_quotas_contracts_test.go`, `api/designate_project_quotas_projects_test.go`, `api/designate_project_quotas_transport_test.go` | root quota 객체·PATCH200·DELETE204, sudo-project/all-projects header, accepted 응답 decode 증거, 고정 프로젝트·snapshot·HTTP/취소·redirect/retry/reauth 보호 |
 | `api/heat_stacks_contracts_test.go` | name+ID identity, output query, summary/detail 차이, linked/marker pagination, 고정 대상 waiter·실패/삭제 완료 |
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
