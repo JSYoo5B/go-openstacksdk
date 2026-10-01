@@ -7031,6 +7031,174 @@
         "Map inherited Resource dirty/cache/no-change commit, mutable Resource input and response merge/reset; explicit cancellation PATCH alone does not close that lifecycle.",
         "Compare actual controller/cloud accepted response models against the pinned Python Resource commit expectation before declaring update_action result parity."
       ]
+    },
+    {
+      "operation": "python:clustering/v1/check_cluster",
+      "source_fingerprint": "a0f1478e0ee4551c67dc134c15db5b2d9f02139fb1eb9146e646044f7e743d7d",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Check"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 health check sends an empty check object by default and preserves nested owned plugin parameters without inventing a version gate.",
+          "tests": [
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthWirePresenceAndRoutes",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthSnapshotsBeforeNameLookup",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthVersionPreflightAndRecheck",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthInvalidInputsNeverRequest",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthAcceptedEvidenceAndNativeErrors"
+          ]
+        },
+        {
+          "behavior": "Owned bodies, extension headers and minimum version are frozen before exact-name lookup and checked again before mutation. Accepted action and Location must identify the same action; original response evidence is retained without implicit follow, state fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses explicit ID/Name/context and concrete options. IDs route directly without GET like pinned _get_resource string input; an exact paginated Name lookup with ambiguity rejection is an explicit Go convenience instead of Python mutable Resource input.",
+        "Selected numeric minimums and typed input/header ownership are checked locally. Optional fields preserve wire presence; published object inputs accept omitted/object/null shapes, while actual null meaning, profile operation names and plugin schema remain controller decisions.",
+        "Go returns Submission with action identity, Location, original Body/Header/StatusCode and requires published202 plus matching body/Location. Pinned Python returns an unvalidated response JSON dictionary. This strict accepted-response policy does not infer completion or automatically fetch the action."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/recover_cluster",
+      "source_fingerprint": "c343975676655b3b7a40bb83ebee1d669f66c22ea4d478f19ef051f565f21a94",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Recover"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 recovery preserves omitted/empty/null operation, object/null/omitted operation_params and bool omission/false/null; explicit check requires>=1.6 and check_capacity>=1.7, including successful check-only use at exact1.6.",
+          "tests": [
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthWirePresenceAndRoutes",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthSnapshotsBeforeNameLookup",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthVersionPreflightAndRecheck",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthInvalidInputsNeverRequest",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthAcceptedEvidenceAndNativeErrors"
+          ]
+        },
+        {
+          "behavior": "Owned bodies, extension headers and minimum version are frozen before exact-name lookup and checked again before mutation. Accepted action and Location must identify the same action; original response evidence is retained without implicit follow, state fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        },
+        {
+          "behavior": "Connection shares the selected version1.7, refreshed token and reverse-proxy service prefix across adoption, preview, cluster recovery and profile operation, without extra resource lookup or Location follow.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAdoptionAndClusterRecoveryShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses explicit ID/Name/context and concrete options. IDs route directly without GET like pinned _get_resource string input; an exact paginated Name lookup with ambiguity rejection is an explicit Go convenience instead of Python mutable Resource input.",
+        "Selected numeric minimums and typed input/header ownership are checked locally. Optional fields preserve wire presence; published object inputs accept omitted/object/null shapes, while actual null meaning, profile operation names and plugin schema remain controller decisions.",
+        "Go returns Submission with action identity, Location, original Body/Header/StatusCode and requires published202 plus matching body/Location. Pinned Python returns an unvalidated response JSON dictionary. This strict accepted-response policy does not infer completion or automatically fetch the action."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/perform_operation_on_cluster",
+      "source_fingerprint": "f80edf2b0864832df5705b2a36901ce8227b67c3b8d5d11beff1b6b6dfc20a46",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.PerformOperation"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 clusters/{identity}/ops sends {operation:{filters,params}} at>=1.4, preserving missing/object/null input and exact numbers; filters select operation nodes on the server rather than filtering a local resource iterator.",
+          "tests": [
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthWirePresenceAndRoutes",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthSnapshotsBeforeNameLookup",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthVersionPreflightAndRecheck",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthInvalidInputsNeverRequest",
+            "api/clustering_cluster_health_test.go:TestClusteringClusterHealthAcceptedEvidenceAndNativeErrors"
+          ]
+        },
+        {
+          "behavior": "Owned bodies, extension headers and minimum version are frozen before exact-name lookup and checked again before mutation. Accepted action and Location must identify the same action; original response evidence is retained without implicit follow, state fetch or accepted mutation resend.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        },
+        {
+          "behavior": "Connection shares the selected version1.7, refreshed token and reverse-proxy service prefix across adoption, preview, cluster recovery and profile operation, without extra resource lookup or Location follow.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAdoptionAndClusterRecoveryShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses explicit ID/Name/context and concrete options. IDs route directly without GET like pinned _get_resource string input; an exact paginated Name lookup with ambiguity rejection is an explicit Go convenience instead of Python mutable Resource input.",
+        "Selected numeric minimums and typed input/header ownership are checked locally. Optional fields preserve wire presence; published object inputs accept omitted/object/null shapes, while actual null meaning, profile operation names and plugin schema remain controller decisions.",
+        "Go returns Submission with action identity, Location, original Body/Header/StatusCode and requires published202 plus matching body/Location. Pinned Python returns an unvalidated response JSON dictionary. This strict accepted-response policy does not infer completion or automatically fetch the action."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/adopt_node",
+      "source_fingerprint": "367b76e2c47345bffd8ed8994a40e58519de79587b6a5b1535e67e582c20f520",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Adopt",
+        "gophercloudsdk/clustering/v1/nodes.API.AdoptPreview"
+      ],
+      "contracts": [
+        {
+          "behavior": "Both pinned adoption branches send flat POST200 requests at selected>=1.7. Adopt forwards owned attributes retaining optional omission/empty/null/false. Preview sends exactly identity/type/overrides/snapshot, including null for absent overrides/snapshot, and returns the whole response with raw inner properties/version. Location is incidental evidence and neither branch fabricates an action or performs another HTTP request.",
+          "tests": [
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptDefaultsFlatBodyAndIncidentalLocation",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptPresenceSnapshotsAndIndependentReuse",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptPreviewFourFieldsNullDefaultsAndExactVersion",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptPreviewSnapshotsFalseNullAndEmptyObject",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptVersionTypeRecheckAndCanceledOptions",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptInputCapabilityAndOwnedFieldPreflight",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptMalformedAcceptedResponsesRetainEvidence",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptHTTPFailuresRetainNativeErrors",
+            "api/clustering_nodes_adopt_test.go:TestClusteringNodeAdoptTransportAndAcceptedReadErrorsPreserveCauses"
+          ]
+        },
+        {
+          "behavior": "Shared flat body serialization snapshots exact JSON, protects concrete fields, owned headers and forbidden query/arguments; wrapped resource mutations still reject an empty body and commands retain empty parameter objects.",
+          "tests": [
+            "internal/senlin/mutation_test.go:TestMutationFlatBodyPreservesRootFieldsAndGuards",
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy"
+          ]
+        },
+        {
+          "behavior": "Connection shares its selected1.7, refreshed authentication token and reverse-proxy prefix for both adoption branches and cluster recovery/operations.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAdoptionAndClusterRecoveryShareSelectedSource"
+          ]
+        }
+      ],
+      "differences": [
+        "Go splits preview=False/True into Adopt/AdoptPreview with owned typed options and context. Physical resource Identity/Type are required body strings with no route-identifier restriction; optional name/null/profile semantics remain server decisions.",
+        "Preview extra fields/query/arguments cause a preflight error rather than Python silently dropping unknown preview attrs. Typed field and authentication/version/transport header replacement is rejected; ordinary Adopt still exposes owned extension attributes.",
+        "The SDK requires the selected numeric>=1.7 without silently upgrading the adapter, snapshots caller JSON/options, and revalidates the source before POST. Pinned methods do not enforce the numeric gate themselves.",
+        "Go enforces published200 and strict node/node_preview object envelopes, returning Node with Operation=nil or an owned PreviewResult preserving exact entire RawBody, outer/inner fields and raw version/properties. Python translates the adopt response through mutable Resource or returns preview JSON directly; Go never assumes an action from incidental Location."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
     }
   ]
 }
