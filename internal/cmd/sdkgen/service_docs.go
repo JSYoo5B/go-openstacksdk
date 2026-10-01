@@ -66,6 +66,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
 	case "sharedfilesystems/v2":
 		out.WriteString("`conn.SharedFileSystemProjectQuotas(ctx, project)`와 `CurrentSharedFileSystemProjectQuotas(ctx)`는 Manila quota의 프로젝트를 고정합니다. Get/Defaults/Detail/Update/Reset과 microversion별 경로는 [quota 사용법](quotasets/README.md)을 참고합니다. 이 quota API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.\n\n")
+		out.WriteString("`service.QuotaClassSets.InClass(ctx, \"default\")`는 class 이름을 고정해 Get/Update를 제공합니다. 프로젝트 해석이나 List/Reset은 없으며 [quota class 사용법](quotaclasssets/README.md)에 Python 대응과 typed limit·확장 입력을 설명합니다.\n\n")
 	case "dns/v2":
 		out.WriteString("`conn.DNSProjectQuotas(ctx, project)`와 `CurrentDNSProjectQuotas(ctx)`는 Designate quota의 프로젝트를 고정합니다. Get/PATCH Update/DELETE Reset과 sudo-project·all-projects header는 [quota 사용법](quotas/README.md)을 참고합니다. 별도 defaults endpoint나 프로젝트 quota 목록은 제공하지 않습니다.\n\n")
 	case "db/v1":
@@ -140,6 +141,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 					operations = "Get·Update·Reset"
 				}
 				policies = append(policies, fmt.Sprintf("`%s`: 고정 프로젝트의 %s; List/Find/Wait 없음", label, operations))
+				continue
+			}
+			if record.Kind == "named_singleton" {
+				policies = append(policies, "`InClass(ctx, className)`: 고정 이름의 Get·Update; 프로젝트 해석·List·Reset·Wait 없음")
 				continue
 			}
 			if record.Kind == "compound_identity" {

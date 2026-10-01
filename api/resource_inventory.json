@@ -1480,6 +1480,16 @@
     "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
+    "package": "gophercloudsdk/sharedfilesystems/v2/quotaclasssets",
+    "source": "sdk_owned",
+    "model": "QuotaClassResource",
+    "kind": "named_singleton",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InClass"
+  },
+  {
     "package": "gophercloudsdk/accelerator/v2/devices",
     "source": "sdk_owned",
     "model": "Device",

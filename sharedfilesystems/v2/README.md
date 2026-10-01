@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 sharedfilesystems/v2 API를 하나의 인증된 서비스
 
 `conn.SharedFileSystemProjectQuotas(ctx, project)`와 `CurrentSharedFileSystemProjectQuotas(ctx)`는 Manila quota의 프로젝트를 고정합니다. Get/Defaults/Detail/Update/Reset과 microversion별 경로는 [quota 사용법](quotasets/README.md)을 참고합니다. 이 quota API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.
 
+`service.QuotaClassSets.InClass(ctx, "default")`는 class 이름을 고정해 Get/Update를 제공합니다. 프로젝트 해석이나 List/Reset은 없으며 [quota class 사용법](quotaclasssets/README.md)에 Python 대응과 typed limit·확장 입력을 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -38,6 +40,7 @@ _ = value
 |---|---|---|
 | `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
+| `QuotaClassSets` | [quotaclasssets](quotaclasssets/api.go) | `InClass(ctx, className)`: 고정 이름의 Get·Update; 프로젝트 해석·List·Reset·Wait 없음 |
 | `QuotaSets` | [quotasets](quotasets/api.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Detail·Update·Reset; List/Find/Wait 없음 |
 | `Replicas` | [replicas](replicas/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
