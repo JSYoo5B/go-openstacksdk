@@ -5925,9 +5925,20 @@
     {
       "operation": "python:clustering/v1/update_profile",
       "source_fingerprint": "dcb9501a8ffdab3262b27b432013571824620a7d2a32b5ef693935c866c22e84",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/profiles.API.Update"
+        "gophercloudsdk/clustering/v1/profiles.API.Update",
+        "gophercloudsdk/clustering/v1/profiles.API.Track",
+        "gophercloudsdk/clustering/v1/profiles.API.Load",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Edit",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.RemoveName",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.RemoveMetadata",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Commit",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Refresh",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Value",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Response",
+        "gophercloudsdk/clustering/v1/profiles.TrackedProfile.Dirty",
+        "gophercloudsdk/clustering/v1/profiles.WithUpdateName"
       ],
       "contracts": [
         {
@@ -5944,20 +5955,55 @@
           "tests": [
             "api/clustering_profiles_update_snapshot_test.go:TestClusteringProfilesUpdateSnapshotsHeadersBeforeLookupAndRechecksVersion"
           ]
+        },
+        {
+          "behavior": "The SDK-owned tracked handle reuses concrete UpdateOpts and With options; current-value assignment equality gives clean same-value/no-change commits, sticky A-to-B-to-A dirty fields, and null tombstones when a cached mutable field is removed. Only dirty fields reach the PATCH200 object envelope; profile metadata preserves omission, null and empty-object presence.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNoOpStickyDirtyMergeAndSeparateResponse",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedDeletionNullAndMetadataPresence",
+            "internal/senlin/tracked_test.go:TestTrackedCurrentComparisonStickyDirtyAndRemoval"
+          ]
+        },
+        {
+          "behavior": "Track owns an authoritative cached Body or a typed-only local seed without invented HTTP evidence; Value and Response are deep snapshots of the merged cache and last successful response fields. Explicit Load IDs remain fixed and exact Name lookup occurs once even when response IDs change, are null or are omitted.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedSnapshotsAndAuthoritativeTrackIdentity",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedManualSeedAndInvalidCachedModels",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedExplicitLoadKeepsRequestIDAndNameResolvesOnce",
+            "internal/senlin/tracked_test.go:TestTrackedOwnsAllSnapshotsAndRejectedEditIsAtomic"
+          ]
+        },
+        {
+          "behavior": "Valid responses shallow-merge whole fields, replace nested objects, preserve omitted cached values and clean accepted revisions even when an edited field is omitted. Refresh GETs the fixed ID and resets pre-fetch revisions; edits made during Commit or Refresh survive response merge and remain dirty for the next explicit commit.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNoOpStickyDirtyMergeAndSeparateResponse",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedRefreshMergeResetAndFailurePreservesChanges",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNewEditsSurviveCommitAndRefreshInFlight",
+            "internal/senlin/tracked_test.go:TestTrackedAcceptShallowMergeAndPreservesNewerEdits"
+          ]
+        },
+        {
+          "behavior": "Invalid edits and body/query/auth-header commit options fail atomically before HTTP, including clean commits; canceled contexts and invalid selected service/version remain errors. Native HTTP and transport failures preserve their cause and dirty state. Accepted malformed responses retain raw HTTP evidence in ResponseError, keep the last valid response and never trigger an automatic mutation resend.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedInvalidEditsAndCommitOptionsStayAtomic",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedCommitFailureKeepsDirtyAndResponseEvidence",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedRefreshMergeResetAndFailurePreservesChanges"
+          ]
         }
       ],
       "differences": [
-        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
-        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
-        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+        "Stateless Update sends explicit fields and rejects an empty request; cached lifecycle is the separate concrete Track/Load plus Edit/Commit/Refresh API, with snapshots instead of mutating or returning the original Python Resource pointer. Apps need no builder or lifecycle interface implementation.",
+        "The official mutable core is name and metadata. Go rejects known readonly fields and case-variant typed collisions; explicit RemoveName and profile RemoveMetadata send null tombstones, whose server acceptance is not assumed. Python permissive descriptors/attrs and implicit Body coercion are replaced by concrete owned options; explicit unknown vendor fields are a documented Go extension.",
+        "Track uses raw cached Body and its decoded ID when present, ignoring caller mutations to exported typed fields; typed-only models are local seeds rather than evidence of an HTTP response. Explicit Load preserves the request ID, exact Name lookup uses one list resolution, and response IDs never retarget subsequent requests.",
+        "JSON numbers compare exactly and booleans remain distinct from numbers, unlike Python True-equals-1 assignment comparison. Unknown response fields are preserved, Value.Body is the merged cache, and Response.Body contains last successful response fields; a manual Track Response remains the local seed until HTTP succeeds.",
+        "Clean Commit validates context, selected service/version and options and returns without HTTP even with valid header-only options. Header dirtiness and allow_empty_commit do not force an empty Go PATCH; newer concurrent edits are revision-protected rather than cleared by an older response.",
+        "The documented object envelope and success200 are strict. Python flat/empty fallback and ignored non-parseable responses are replaced by ResponseError with accepted HTTP evidence; failure keeps dirty state and the SDK does not automatically retry, so callers can Refresh before an explicit resend.",
+        "Endpoint, authentication and numeric microversion belong to the selected client. Arbitrary Python Resource subclasses and inherited per-call base_path, prepend_key, has_body, retry_on_conflict and microversion controls are not options on this concrete Senlin mapping; implicit adapter negotiation and version upgrades are not performed."
       ],
       "documentation": [
         "clustering/v1/profiles/README.md",
+        "clustering/v1/tracking/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Compare and implement the cached Resource lifecycle: dirty-field detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics.",
-        "Review inherited Body normalization and nullable mutable attributes against server schemas before declaring the entire update proxy equivalent."
       ]
     },
     {
@@ -6158,9 +6204,19 @@
     {
       "operation": "python:clustering/v1/update_policy",
       "source_fingerprint": "0955a7e39cf5408174368a76199fc97c4016677d2b82f7b212eab65582f1feab",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/policies.API.Update"
+        "gophercloudsdk/clustering/v1/policies.API.Update",
+        "gophercloudsdk/clustering/v1/policies.API.Track",
+        "gophercloudsdk/clustering/v1/policies.API.Load",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Edit",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.RemoveName",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Commit",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Refresh",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Value",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Response",
+        "gophercloudsdk/clustering/v1/policies.TrackedPolicy.Dirty",
+        "gophercloudsdk/clustering/v1/policies.WithUpdateName"
       ],
       "contracts": [
         {
@@ -6170,20 +6226,55 @@
             "api/clustering_policies_test.go:TestClusteringPolicyUpdateIDSkipsLookupAndSnapshotCanBeReused",
             "api/clustering_policies_test.go:TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions"
           ]
+        },
+        {
+          "behavior": "The SDK-owned tracked handle reuses concrete UpdateOpts and With options; current-value assignment equality gives clean same-value/no-change commits, sticky A-to-B-to-A dirty fields, and null tombstones when a cached mutable field is removed. Only dirty fields reach the PATCH200 object envelope; profile metadata preserves omission, null and empty-object presence.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNoOpStickyDirtyMergeAndSeparateResponse",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedDeletionNullAndMetadataPresence",
+            "internal/senlin/tracked_test.go:TestTrackedCurrentComparisonStickyDirtyAndRemoval"
+          ]
+        },
+        {
+          "behavior": "Track owns an authoritative cached Body or a typed-only local seed without invented HTTP evidence; Value and Response are deep snapshots of the merged cache and last successful response fields. Explicit Load IDs remain fixed and exact Name lookup occurs once even when response IDs change, are null or are omitted.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedSnapshotsAndAuthoritativeTrackIdentity",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedManualSeedAndInvalidCachedModels",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedExplicitLoadKeepsRequestIDAndNameResolvesOnce",
+            "internal/senlin/tracked_test.go:TestTrackedOwnsAllSnapshotsAndRejectedEditIsAtomic"
+          ]
+        },
+        {
+          "behavior": "Valid responses shallow-merge whole fields, replace nested objects, preserve omitted cached values and clean accepted revisions even when an edited field is omitted. Refresh GETs the fixed ID and resets pre-fetch revisions; edits made during Commit or Refresh survive response merge and remain dirty for the next explicit commit.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNoOpStickyDirtyMergeAndSeparateResponse",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedRefreshMergeResetAndFailurePreservesChanges",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedNewEditsSurviveCommitAndRefreshInFlight",
+            "internal/senlin/tracked_test.go:TestTrackedAcceptShallowMergeAndPreservesNewerEdits"
+          ]
+        },
+        {
+          "behavior": "Invalid edits and body/query/auth-header commit options fail atomically before HTTP, including clean commits; canceled contexts and invalid selected service/version remain errors. Native HTTP and transport failures preserve their cause and dirty state. Accepted malformed responses retain raw HTTP evidence in ResponseError, keep the last valid response and never trigger an automatic mutation resend.",
+          "tests": [
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedInvalidEditsAndCommitOptionsStayAtomic",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedCommitFailureKeepsDirtyAndResponseEvidence",
+            "api/clustering_lifecycle_test.go:TestClusteringTrackedRefreshMergeResetAndFailurePreservesChanges"
+          ]
         }
       ],
       "differences": [
-        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
-        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
-        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+        "Stateless Update sends explicit fields and rejects an empty request; cached lifecycle is the separate concrete Track/Load plus Edit/Commit/Refresh API, with snapshots instead of mutating or returning the original Python Resource pointer. Apps need no builder or lifecycle interface implementation.",
+        "The official mutable core is name only. Go rejects known readonly fields and case-variant typed collisions; explicit RemoveName sends a null tombstone, whose server acceptance is not assumed. Python permissive descriptors/attrs and implicit Body coercion are replaced by concrete owned options; explicit unknown vendor fields are a documented Go extension.",
+        "Track uses raw cached Body and its decoded ID when present, ignoring caller mutations to exported typed fields; typed-only models are local seeds rather than evidence of an HTTP response. Explicit Load preserves the request ID, exact Name lookup uses one list resolution, and response IDs never retarget subsequent requests.",
+        "JSON numbers compare exactly and booleans remain distinct from numbers, unlike Python True-equals-1 assignment comparison. Unknown response fields are preserved, Value.Body is the merged cache, and Response.Body contains last successful response fields; a manual Track Response remains the local seed until HTTP succeeds.",
+        "Clean Commit validates context, selected service/version and options and returns without HTTP even with valid header-only options. Header dirtiness and allow_empty_commit do not force an empty Go PATCH; newer concurrent edits are revision-protected rather than cleared by an older response.",
+        "The documented object envelope and success200 are strict. Python flat/empty fallback and ignored non-parseable responses are replaced by ResponseError with accepted HTTP evidence; failure keeps dirty state and the SDK does not automatically retry, so callers can Refresh before an explicit resend.",
+        "Endpoint, authentication and numeric microversion belong to the selected client. Arbitrary Python Resource subclasses and inherited per-call base_path, prepend_key, has_body, retry_on_conflict and microversion controls are not options on this concrete Senlin mapping; implicit adapter negotiation and version upgrades are not performed."
       ],
       "documentation": [
         "clustering/v1/policies/README.md",
+        "clustering/v1/tracking/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Compare and implement the cached Resource lifecycle: dirty-field detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics.",
-        "Review inherited Body normalization and nullable mutable attributes against server schemas before declaring the entire update proxy equivalent."
       ]
     },
     {
