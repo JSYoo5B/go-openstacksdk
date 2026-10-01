@@ -1,10 +1,14 @@
 package shareaccessrules
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
+
+	"gophercloudsdk/resource"
 )
 
 var (
@@ -55,13 +59,37 @@ func decodeRule(raw json.RawMessage, header http.Header, parent string) (*Access
 		return nil, fmt.Errorf("access rule must be a JSON object")
 	}
 	value := &AccessRule{ParentShareID: parent, Body: body, Header: header.Clone()}
-	// Preserve a known identity even if decoding a later field fails after allow.
-	_ = json.Unmarshal(body["id"], &value.ID)
-	_ = json.Unmarshal(body["share_id"], &value.ShareID)
-	var native ShareAccess
-	if err := json.Unmarshal(raw, &native); err != nil {
+	// Only exact wire identity keys establish IDs. Keep a valid created ID even
+	// when a later field fails; never let encoding/json's case folding select it.
+	if err := json.Unmarshal(body["id"], &value.ID); err != nil {
+		return value, fmt.Errorf("access rule id must be a JSON string: %w", err)
+	}
+	if err := resource.ID(value.ID).Validate(); err != nil {
+		return value, fmt.Errorf("access rule response has an invalid id: %w", err)
+	}
+	if rawShare, exists := body["share_id"]; exists {
+		if bytes.Equal(bytes.TrimSpace(rawShare), []byte("null")) {
+			return value, fmt.Errorf("access rule share_id must be a JSON string")
+		}
+		if err := json.Unmarshal(rawShare, &value.ShareID); err != nil {
+			return value, fmt.Errorf("access rule share_id must be a JSON string: %w", err)
+		}
+		if value.ShareID == "" {
+			return value, &ParentMismatchError{ShareID: parent, AccessID: value.ID}
+		}
+		if err := resource.ID(value.ShareID).Validate(); err != nil {
+			return value, fmt.Errorf("access rule response has an invalid share_id: %w", err)
+		}
+	}
+	nativeBody, err := withoutRuleIdentity(raw)
+	if err != nil {
 		return value, err
 	}
+	var native ShareAccess
+	if err := json.Unmarshal(nativeBody, &native); err != nil {
+		return value, err
+	}
+	native.ID, native.ShareID = value.ID, value.ShareID
 	value.ShareAccess = native
 	var locks struct {
 		Visibility *bool   `json:"lock_visibility"`
@@ -72,8 +100,47 @@ func decodeRule(raw json.RawMessage, header http.Header, parent string) (*Access
 		return value, err
 	}
 	value.LockVisibility, value.LockDeletion, value.LockReason = locks.Visibility, locks.Deletion, locks.Reason
-	if value.ID == "" {
-		return value, fmt.Errorf("access rule response has no id")
-	}
 	return value, nil
+}
+
+// Preserve field order and native decoding for non-identity fields, while
+// excluding both canonical and case-variant identities from native decoding.
+// Body retains every original field, including ignored identity aliases.
+func withoutRuleIdentity(raw json.RawMessage) (json.RawMessage, error) {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if _, err := decoder.Token(); err != nil {
+		return nil, err
+	}
+	result := json.RawMessage{'{'}
+	for decoder.More() {
+		token, err := decoder.Token()
+		if err != nil {
+			return nil, err
+		}
+		key, ok := token.(string)
+		if !ok {
+			return nil, fmt.Errorf("access rule property must have a string key")
+		}
+		var value json.RawMessage
+		if err := decoder.Decode(&value); err != nil {
+			return nil, err
+		}
+		if strings.EqualFold(key, "id") || strings.EqualFold(key, "share_id") {
+			continue
+		}
+		if len(result) != 1 {
+			result = append(result, ',')
+		}
+		encodedKey, err := json.Marshal(key)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, encodedKey...)
+		result = append(result, ':')
+		result = append(result, value...)
+	}
+	if _, err := decoder.Token(); err != nil {
+		return nil, err
+	}
+	return append(result, '}'), nil
 }
