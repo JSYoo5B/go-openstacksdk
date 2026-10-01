@@ -9,7 +9,7 @@
 | `profiles(**query)` | `Profiles.List/All(ctx, options...)` | GET `/profiles`, 200 |
 | `update_profile(profile, **attrs)` | `Profiles.Update(...)` 또는 `Load/Track → Edit → Commit` | 객체 PATCH `/profiles/{identity}`, 200; tracked는 dirty 필드만 보내고 clean이면 HTTP 없음 |
 | `delete_profile(profile, ignore_missing=True)` | `Profiles.Delete(ctx, ref, options...)` | DELETE, 204; 기본 미존재 무시 |
-| `find_profile(identity, ignore_missing=True)` | `Profiles.Find(ctx, ref, options...)` | 명시한 ID 또는 정확한 이름 검색 |
+| `find_profile(identity, ignore_missing=True)` | `Profiles.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `validate_profile(spec=...)` | `Profiles.Validate(ctx, ValidateOpts, options...)` | POST `/profiles/validate`, 200; 숫자 1.2 이상 |
 
 ## 생성과 검증
@@ -121,13 +121,13 @@ typed server query는 limit/marker/name/type/sort/global_project입니다. 0/빈
 
 `WithListQuery`는 명시적인 추가 서버 query이며 알려진 core/local 필드의 덮어쓰기는 거부합니다. Python이 모르는 query를 생략하는 동작과 다릅니다. body/header next 링크는 같은 collection origin/path에만 허용하며 최초 필터·정렬·limit을 유지합니다. 반복 URL/marker와 필터를 바꾸는 continuation은 오류입니다. iterator는 lazy하고 재순회할 수 있으며 break는 후속 요청을 막습니다.
 
-Get은 컨트롤러의 이름·UUID·짧은 ID를 직접 받습니다. `resource.ID(value)`는 UUID 형태를 추측하지 않고 직접 route로 사용합니다. `resource.Name(value)`는 목록에서 정확히 해석하고 중복 이름을 오류로 처리합니다. `API.Find`는 Python proxy처럼 기본 미존재 무시이며 `resource.WithMissingError()`로 바꿀 수 있습니다. `Resources.Find`의 공통 기본값은 미존재 오류입니다. Python combined-string Find의 ID-first GET과 400/403/404 후 목록 fallback은 아직 별도 비교 범위입니다.
+Get은 컨트롤러의 이름·UUID·짧은 ID를 직접 받습니다. `resource.ID(value)`는 UUID 형태를 추측하지 않고 직접 route로 사용합니다. `resource.Name(value)`는 목록에서 정확히 해석하고 중복 이름을 오류로 처리합니다. `API.Find`는 Python proxy처럼 기본 미존재 무시이며 `resource.WithMissingError()`로 바꿀 수 있습니다. `Resources.Find`의 공통 기본값은 미존재 오류입니다. `FindIdentity(ctx, identity)`는 GET-first와 400·403·404 목록 fallback을 제공합니다. [자동 조회와 옵션](../finding/README.md)을 참고합니다.
 
 ## 결과와 남은 범위
 
 결과의 wire `metadata`는 `Profile.UserMetadata`이며 HTTP 증거인 embedded `resource.Metadata`와 구분합니다. spec과 사용자 metadata는 raw JSON 숫자를 보존하고 `Body`는 null/생략·unknown 필드, `Header`/`StatusCode`는 HTTP 응답을 보존합니다. 단건 응답은 `profile` 객체 envelope를 요구합니다. Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 실패는 `resource.ResponseError`에 원문·header·status를 남기며 mutation을 재전송하지 않습니다. Delete는 ignored404 외의 권한·사용 중 오류를 숨기지 않으며, 찾은 응답 ID가 없으면 삭제 요청을 보내지 않습니다.
 
-Profile update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
+Profile update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path와 proxy JMESPath는 남은 비교·구현 범위입니다. combined-string Find는 [FindIdentity](../finding/README.md)로 제공합니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
 
 근거: [고정 Profile](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/profile.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_profiles_test.go), [lookup snapshot 회귀](../../../api/clustering_profiles_update_snapshot_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
 
@@ -179,3 +179,27 @@ Go 확장이며 Python unknown query 생략과 구별합니다.
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+## 문자열 이름/ID 자동 조회
+
+Python `find_profile(identity, ignore_missing=False)`는 `FindIdentity`와 `WithFindIgnoreMissing(false)`로 호출합니다. SDK가 GET-first, literal 이름 query, 모든 advertised 페이지의 정확한 ID/이름 일치와 중복·후속 오류를 처리합니다. 기본 미존재는 `nil, nil`이며 아래 예제는 strict입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/profiles"
+)
+
+func FindProfileStrict(ctx context.Context, conn *sdk.Connection) (*profiles.Profile, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    return service.Profiles.FindIdentity(ctx, "worker_template",
+        profiles.WithFindIgnoreMissing(false))
+}
+```
+
+`WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.

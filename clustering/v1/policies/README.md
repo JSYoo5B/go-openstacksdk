@@ -9,7 +9,7 @@
 | `policies(**query)` | `Policies.List/All(ctx, options...)` | GET `/policies`, 200 |
 | `update_policy(policy, name=...)` | `Policies.Update(...)` 또는 `Load/Track → Edit → Commit` | 객체 PATCH `/policies/{identity}`, 200; tracked는 dirty 필드만 보내고 clean이면 HTTP 없음 |
 | `delete_policy(policy, ignore_missing=True)` | `Policies.Delete(ctx, ref, options...)` | DELETE, 204; 기본 미존재 무시 |
-| `find_policy(identity, ignore_missing=True)` | `Policies.Find(ctx, ref, options...)` | 명시한 ID 또는 정확한 이름 검색 |
+| `find_policy(identity, ignore_missing=True)` | `Policies.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `validate_policy(spec=...)` | `Policies.Validate(ctx, ValidateOpts, options...)` | POST `/policies/validate`, 200; 숫자 1.2 이상 |
 
 ## 생성·검증·갱신
@@ -112,7 +112,7 @@ typed server query는 limit/marker/name/type/sort/global_project입니다. 0/빈
 
 `WithListQuery`는 명시적인 추가 서버 query이며 core/local 필드 덮어쓰기를 거부합니다. Python unknown-query 생략과 다릅니다. body/header next 링크는 같은 collection origin/path만 허용하고 최초 필터·정렬·limit을 유지합니다. 반복 URL/marker나 범위를 바꾸는 continuation은 오류입니다. lazy iterator는 재순회할 수 있으며 break는 후속 요청을 막습니다. 사용자가 바꾼 모델 ID로 다음 marker를 만들지 않습니다.
 
-Get은 이름·UUID·짧은 ID를 직접 컨트롤러로 전달합니다. `resource.ID(value)`는 UUID 모양을 추측하지 않고 직접 route를 지정합니다. `resource.Name(value)`는 전체 목록에서 정확히 해석하며 중복은 오류입니다. `API.Find`는 기본 미존재 무시이고 `resource.WithMissingError()`로 바꿀 수 있습니다. `Resources.Find`의 공통 기본값은 미존재 오류입니다. Python combined-string Find의 ID-first GET과 400/403/404 후 목록 fallback은 아직 별도 비교 범위입니다.
+Get은 이름·UUID·짧은 ID를 직접 컨트롤러로 전달합니다. `resource.ID(value)`는 UUID 모양을 추측하지 않고 직접 route를 지정합니다. `resource.Name(value)`는 전체 목록에서 정확히 해석하며 중복은 오류입니다. `API.Find`는 기본 미존재 무시이고 `resource.WithMissingError()`로 바꿀 수 있습니다. `Resources.Find`의 공통 기본값은 미존재 오류입니다. `FindIdentity(ctx, identity)`는 GET-first와 400·403·404 목록 fallback을 제공합니다. [자동 조회와 옵션](../finding/README.md)을 참고합니다.
 
 Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반환합니다. 403·409 등의 오류를 숨기지 않으며 목록에서 찾은 ID가 없으면 collection 경로로 DELETE하지 않습니다. Go Delete는 error를, Python proxy는 None을 반환합니다. 상속한 Resource 삭제 lifecycle은 별도 계약입니다.
 
@@ -120,7 +120,7 @@ Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반
 
 `Policy.Spec`/`Data`는 JSON 숫자를 보존하며 embedded `resource.Metadata`의 `Body`/`Header`/`StatusCode`는 unknown/null/생략 및 HTTP 증거를 보존합니다. wire project/domain/user는 각각 Go ProjectID/DomainID/UserID입니다. 단건 응답은 `policy` 객체 envelope를 요구하며 Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 오류는 `resource.ResponseError`에 원문·header·status를 남기고 mutation을 재전송하지 않습니다.
 
-Policy update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 리소스 갱신과 cluster의 policy 연결은 별도 API 계약이며 직접 연산 7개와 Python proxy 전체 계약 완료를 구분합니다.
+Policy update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path와 proxy JMESPath는 남은 비교·구현 범위입니다. combined-string Find는 [FindIdentity](../finding/README.md)로 제공합니다. 리소스 갱신과 cluster의 policy 연결은 별도 API 계약이며 직접 연산 7개와 Python proxy 전체 계약 완료를 구분합니다.
 
 근거: [고정 Policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/policy.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_policies_test.go), [응답 경계 계약](../../../api/clustering_policies_response_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
 
@@ -172,3 +172,27 @@ Go 확장이며 Python unknown query 생략과 구별합니다.
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+## 문자열 이름/ID 자동 조회
+
+Python `find_policy(identity, ignore_missing=False)`는 `FindIdentity`와 `WithFindIgnoreMissing(false)`로 호출합니다. SDK가 GET-first, literal 이름 query, 모든 advertised 페이지의 정확한 ID/이름 일치와 중복·후속 오류를 처리합니다. 기본 미존재는 `nil, nil`이며 아래 예제는 strict입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/policies"
+)
+
+func FindPolicyStrict(ctx context.Context, conn *sdk.Connection) (*policies.Policy, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    return service.Policies.FindIdentity(ctx, "placement",
+        policies.WithFindIgnoreMissing(false))
+}
+```
+
+`WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.
