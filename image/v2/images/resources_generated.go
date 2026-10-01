@@ -4,6 +4,9 @@ package images
 import (
 	context "context"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
+	nativefind "gophercloudsdk/internal/nativefind"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -14,12 +17,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Image] {
 	return resource.NewCollection(resource.Adapter[Image]{
-		Kind:      "images",
-		Get:       func(ctx context.Context, id string) (*Image, error) { return a.Get(ctx, string(id)) },
-		ID:        func(v *Image) string { return fmt.Sprint(v.ID) },
-		Name:      func(v *Image) string { return fmt.Sprint(v.Name) },
-		NameQuery: func(name string) string { return name },
-		Status:    func(v *Image) string { return fmt.Sprint(v.Status) },
+		Kind:         "images",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Image, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"images", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
+		IdentityMissingListQuery: url.Values{"os_hidden": {"true"}},
+		Get:                      func(ctx context.Context, id string) (*Image, error) { return a.Get(ctx, string(id)) },
+		ID:                       func(v *Image) string { return fmt.Sprint(v.ID) },
+		Name:                     func(v *Image) string { return fmt.Sprint(v.Name) },
+		NameQuery:                func(name string) string { return name },
+		Status:                   func(v *Image) string { return fmt.Sprint(v.Status) },
 		Failed: func(status string) bool {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
@@ -27,17 +37,23 @@ func (a *API) newResources() *resource.Collection[Image] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Image, error] {
 			q = maps.Clone(q)
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Image, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Image, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Image, error) {
 	return a.Resources.All(ctx, options...)

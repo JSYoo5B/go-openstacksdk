@@ -19,6 +19,7 @@ type collectionRecord struct {
 	Find                bool   `json:"find"`
 	IdentityFind        bool   `json:"identity_find,omitempty"`
 	IdentityGetQuery    bool   `json:"identity_get_query,omitempty"`
+	IdentityMissingList bool   `json:"identity_missing_list,omitempty"`
 	IdentityDetails     bool   `json:"identity_details,omitempty"`
 	IdentityAllProjects bool   `json:"identity_all_projects,omitempty"`
 	Delete              bool   `json:"delete"`
@@ -290,6 +291,9 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok {
 		e.printf("IdentityFind:true,\n")
 		emitIdentityGetQuery(e, plan, receiver, parents, contract)
+		if contract.missingListKey != "" {
+			e.printf("IdentityMissingListQuery:url.Values{%q:{%q}},\n", contract.missingListKey, contract.missingListValue)
+		}
 		if len(parents) == 0 {
 			if mode, ok := identityListModeContract(e.pkg, plan); ok {
 				e.printf("IdentityAllProjectsQuery:\"all_tenants\",\nIterateIdentity:func(ctx context.Context,q url.Values,details bool)iter.Seq2[*%s,error]{return nativefind.%s(ctx,%s.RawClient(),q,details)},\n", plan.modelName, mode.iterator, receiver)

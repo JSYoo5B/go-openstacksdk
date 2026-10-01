@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -17,6 +18,8 @@ type identityCollectionSpec struct {
 	parents                     int
 	getSegments                 []string
 	getCodes                    []int
+	missingListKey              string
+	missingListValue            string
 }
 
 var identityCollectionSpecs = []identityCollectionSpec{
@@ -32,6 +35,7 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "identity/v3/roles", model: "Role", getter: "Get", lister: "List", getSegments: []string{"roles", "$id"}, getCodes: []int{200}},
 	{path: "dns/v2/recordsets", model: "RecordSet", getter: "Get", lister: "ListByZone", parents: 1, getSegments: []string{"zones", "$parent", "recordsets", "$id"}, getCodes: []int{200}},
 	{path: "loadbalancer/v2/pools", model: "Member", getter: "GetMember", lister: "ListMembers", parents: 1, getSegments: []string{"lbaas", "pools", "$parent", "members", "$id"}, getCodes: []int{200}},
+	{path: "image/v2/images", model: "Image", getter: "Get", lister: "List", getSegments: []string{"images", "$id"}, getCodes: []int{200}, missingListKey: "os_hidden", missingListValue: "true"},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -55,10 +59,69 @@ func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parent
 	}
 	for _, spec := range identityCollectionSpecs {
 		if sdkPath(pkg.Path()) == spec.path && plan.modelName == spec.model && plan.getter.Name() == spec.getter && plan.lister.Name() == spec.lister && parents == spec.parents && identityGetResult(pkg, plan, parents) != nil {
+			if !identityMissingListMetadataValid(spec) {
+				return identityCollectionSpec{}, false
+			}
 			return spec, true
 		}
 	}
 	return identityCollectionSpec{}, false
+}
+
+// Only Glance's audited Image.find performs one additional list after a
+// successful complete absence. The fixed overlay is SDK policy, not caller
+// query or an inferred capability of every name-capable pager.
+func identityMissingListMetadataValid(spec identityCollectionSpec) bool {
+	if spec.path != "image/v2/images" {
+		return spec.missingListKey == "" && spec.missingListValue == ""
+	}
+	return spec.model == "Image" && spec.getter == "Get" && spec.lister == "List" && spec.parents == 0 && len(spec.getSegments) == 2 && spec.getSegments[0] == "images" && spec.getSegments[1] == "$id" && len(spec.getCodes) == 1 && spec.getCodes[0] == 200 && spec.missingListKey == "os_hidden" && spec.missingListValue == "true"
+}
+
+func identityMissingListEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
+	spec, ok := identityCollectionContract(pkg, plan, parents)
+	return ok && spec.missingListKey != ""
+}
+
+func identityImageListSchema(pkg *types.Package, plan *collectionPlan) bool {
+	boolField := func(value types.Type, name, tag, key string) bool {
+		fields, ok := value.Underlying().(*types.Struct)
+		if !ok {
+			return false
+		}
+		for i := 0; i < fields.NumFields(); i++ {
+			if fields.Field(i).Name() == name {
+				return types.Identical(fields.Field(i).Type(), types.Typ[types.Bool]) && reflect.StructTag(fields.Tag(i)).Get(tag) == key
+			}
+		}
+		return false
+	}
+	if !boolField(plan.listInput, "Hidden", "q", "os_hidden") || !boolField(plan.model, "Hidden", "json", "os_hidden") {
+		return false
+	}
+	page := pkg.Scope().Lookup("ImagePage")
+	if page == nil {
+		return false
+	}
+	fields, ok := page.Type().Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 2 || fields.Field(0).Name() != "serviceURL" || !types.Identical(fields.Field(0).Type(), types.Typ[types.String]) || !fields.Field(1).Embedded() || types.TypeString(fields.Field(1).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	extract, ok := pkg.Scope().Lookup("ExtractImages").(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page.Type(), name)
+		if method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	return true
 }
 
 // The query GET writes into the native result before calling its own Extract.
@@ -144,6 +207,18 @@ var identityNativeDeclarations = map[string]map[string]string{
 	"identity/v3/roles":       {"Get": identityDefaultGetSHA, "getURL": "17a433f86f71243f80bdd8826fe2bc785f8950a1c6a166fedd2a171bc2c2c95d"},
 	"dns/v2/recordsets":       {"Get": "045a8befff06647b70ecbe4560f7a809c991290496b3032cebd876a412a90bd4", "rrsetURL": "71398da5ec5a9461f7e0d9ebc8e569b7c27f09d0f2389191a87e0eca75c9a348"},
 	"loadbalancer/v2/pools":   {"GetMember": "9173191d1b3baa7d542d364f4efaa137fdfa84bfe9ee921feb4f09569c384be0", "memberResourceURL": "0ac8d3833de97abc76ece2b63ad0e265e7ed2407a79ed6c75307d8e8538ded9e"},
+	"image/v2/images": {
+		"Get":                   identityDefaultGetSHA,
+		"getURL":                "355bc2abb9f6b47459672d711305c59e8752ca60544b51974e4cf17d40d32b79",
+		"imageURL":              "ea231904b908b3bc2434f047f5138294a049d86e5b4b1a7c85445bfaf044a505",
+		"List":                  "981709ad79bbf9aee3e1ff8a30515a1a274838c3b6eb4854dc39f661377a3ef1",
+		"listURL":               "c58721a00b1c1b3dd3b75dced77e3afc2b72d2ab9610d85b8d76d05af388f3a9",
+		"commonResult.Extract":  "8b6be427158a900857f0a4672e80308615a9ce9ed9a4a84af494f3d3d9ae5ae6",
+		"ExtractImages":         "1de7a58440781a8e7359d5c9e4b339f00dbac3f6d3b49f3f16871830110609ed",
+		"ImagePage.IsEmpty":     "b697d4a95e86389114db26bf21230180d982ed7d9534d2685f96dfb98d49367d",
+		"ImagePage.NextPageURL": "8af361267917a4230d811f9938d8d4b3057096263f704c7b831db46dc0b0318e",
+		"nextPageURL":           "7ac8c7e2868170732aa46e3bfa231d509eee709c214323a364e1e6e4047400f7",
+	},
 }
 
 var identityNativeURLConstants = map[string]map[string]string{
@@ -198,6 +273,9 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if !identityCollectionEnabled(pkg, selected, spec.parents) {
 			return fmt.Errorf("audited identity collection %s.%s: native signature, model, query, or result schema changed", spec.path, spec.model)
+		}
+		if spec.missingListKey != "" && !identityImageListSchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native hidden query, image, pager, or extractor schema changed", spec.path, spec.model)
 		}
 		for name, want := range identityNativeDeclarations[spec.path] {
 			got, err := requestDeclarationHash(decls[name])

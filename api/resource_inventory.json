@@ -786,6 +786,9 @@
     "package": "gophercloudsdk/image/v2/images",
     "model": "Image",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
+    "identity_missing_list": true,
     "delete": true,
     "wait": true
   },

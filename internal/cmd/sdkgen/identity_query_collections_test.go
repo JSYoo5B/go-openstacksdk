@@ -18,6 +18,14 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 	}
 	opts := "type ListOpts struct{Name string `q:\"name\"`}\ntype ListOptsBuilder interface{ToListQuery()(string,error)}\nfunc(ListOpts)ToListQuery()(string,error){return \"\",nil}"
 	source := controlledFixtureSource(spec.model, "ID string;Name string", spec.getter, getArgs, spec.lister, listArgs, opts)
+	if spec.path == "image/v2/images" {
+		source = strings.Replace(source, "type Image struct{ID string;Name string}", "type Image struct{ID string;Name string;Hidden bool `json:\"os_hidden\"`}", 1)
+		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{Name string `q:\"name\"`;Hidden bool `q:\"os_hidden\"`}", 1)
+		source = strings.ReplaceAll(source, "ModelPage", "ImagePage")
+		source = strings.Replace(source, "type ImagePage struct{}", "type ImagePage struct{serviceURL string;pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", "ExtractImages")
+		source += "\nfunc(ImagePage)IsEmpty()(bool,error){return false,nil}\nfunc(ImagePage)NextPageURL()(string,error){return \"\",nil}\n"
+	}
 	// Member uses GetMemberResult upstream; use its actual signature instead of
 	// allowing the emitter to assume every native getter returns GetResult.
 	source = strings.ReplaceAll(source, "GetResult", spec.getter+"Result")
@@ -59,8 +67,9 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 		"identity/v3/roles":       `[]string{"roles", id}, q, []int{200}`,
 		"dns/v2/recordsets":       `[]string{"zones", s.parentID, "recordsets", id}, q, []int{200}`,
 		"loadbalancer/v2/pools":   `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
+		"image/v2/images":         `[]string{"images", id}, q, []int{200}`,
 	}
-	if len(identityCollectionSpecs) != 12 || len(identityNativeDeclarations) != 12 {
+	if len(identityCollectionSpecs) != 13 || len(identityNativeDeclarations) != 13 {
 		t.Fatal("identity opt-in inventory must remain explicit", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 	for _, spec := range identityCollectionSpecs {
@@ -160,6 +169,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 	request := defaultGet
 	var urls string
 	switch spec.path {
+	case "image/v2/images":
+		return pinnedImageIdentityDeclarations(t)
 	case "compute/v2/servers":
 		request = strings.Replace(defaultGet, "&r.Body, nil", "&r.Body, &gophercloud.RequestOpts{\n\t\tOkCodes: []int{200, 203},\n\t}", 1)
 		urls = `func getURL(client *gophercloud.ServiceClient, id string) string { return deleteURL(client,id) }
