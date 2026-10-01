@@ -11,7 +11,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.compute.servers(status="ACTIVE")` | `service.Servers.List(ctx, resource.WithStatus("ACTIVE"))` |
 | `conn.compute.delete_server(id)` | `service.Servers.Delete(ctx, resource.ID(id))` |
 | `conn.compute.wait_for_server(server, status="ACTIVE", wait=300)` | `service.Servers.Wait(ctx, resource.ID(server.ID), "ACTIVE", resource.WithTimeout(5*time.Minute))` |
-| `conn.compute.find_flavor(name, ignore_missing=False)` | `service.Flavors.Find(ctx, resource.Name(name))` |
+| `conn.compute.find_flavor(name_or_id, ignore_missing=False)` | `service.Flavors.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
+| `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
@@ -46,6 +47,15 @@ for server, err := range service.Servers.List(ctx, resource.WithStatus("ACTIVE")
 ```
 
 `WithName`은 Nova의 정규표현식 대신 정확한 이름으로 처리합니다. `web[1].*`처럼 특수문자가 있는 이름도 문자 그대로 비교합니다.
+
+## Flavor 자동 조회
+
+`service.Flavors.FindIdentity(ctx, "small")`는 ID GET부터 시도한 뒤 필요하면 전체
+상세 목록을 정확한 ID/이름으로 검색합니다. 자동 이름 query를 보내지 않고 목록에서만
+기본 `is_public=None`을 적용하며, caller의 명시 wire 값은 보존합니다.
+`resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가
+비어 있을 때만 반환된 ID의 extra-specs GET을 추가합니다. 기본값은 false이고, 후속
+GET 실패는 IgnoreMissing으로 숨기지 않습니다. [Python/Go 예제와 옵션](../docs/finding-identities.md#nova-flavor와-extra-specs)을 참고하세요.
 
 ## 이름 해석을 포함한 생성
 

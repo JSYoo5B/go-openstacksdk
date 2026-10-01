@@ -58,7 +58,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")
 	}
 	identityFindAccess := map[string]string{
-		"compute/v2":      "`Servers.FindIdentity(ctx, identity, options...)`",
+		"compute/v2":      "`Servers/Flavors.FindIdentity(ctx, identity, options...)`",
 		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
 		"network/v2":      "`Networks/Subnets/Ports.FindIdentity(ctx, identity, options...)`",
 		"identity/v3":     "`Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)`",
@@ -71,6 +71,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "compute/v2" || key == "blockstorage/v3" {
 		out.WriteString("서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.\n\n")
+	}
+	if key == "compute/v2" {
+		out.WriteString("Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/detail` 전체를 검사하며, caller가 지정하지 않은 `is_public`은 목록에만 `None`으로 설정합니다. 기본 extra specs 추가 조회는 하지 않습니다. `resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가 비어 있을 때만 반환된 ID의 `/os-extra_specs`를 조회합니다. 후속 GET에는 caller query를 전달하지 않으며 실패를 미존재로 숨기지 않습니다. 이 옵션은 Flavor만 지원하고 summary/all-projects 목록 모드는 제공하지 않습니다.\n\n")
 	}
 	if key == "image/v2" {
 		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")

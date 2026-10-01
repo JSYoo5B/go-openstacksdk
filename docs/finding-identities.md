@@ -11,6 +11,7 @@
 | 서비스 | openstacksdk | Go |
 |---|---|---|
 | Nova 서버 | `conn.compute.find_server("web-01")` | `compute.Servers.FindIdentity(ctx, "web-01")` |
+| Nova flavor | `conn.compute.find_flavor("small", get_extra_specs=True)` | `compute.Flavors.FindIdentity(ctx, "small", resource.WithIdentityFindExtraSpecs(true))` |
 | Cinder v3 볼륨 | `conn.block_storage.find_volume("data-01")` | `storage.Volumes.FindIdentity(ctx, "data-01")` |
 | Glance v2 이미지 | `conn.image.find_image("ubuntu")` | `image.Images.FindIdentity(ctx, "ubuntu")` |
 | Neutron 포트 | `conn.network.find_port("web-port")` | `network.Ports.FindIdentity(ctx, "web-port")` |
@@ -24,7 +25,7 @@
 | Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
-위 13개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
+위 14개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
 `conn.BlockStorage(ctx).Volumes`, `conn.Image(ctx).Images`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
@@ -104,6 +105,7 @@ func FindScopedResources(ctx context.Context, dns *dnsv2.Service,
 | `WithIdentityFindFallback(resource.FindFallbackNever)` | GET만 사용, 404에만 미존재 옵션 적용 |
 | `WithIdentityFindDetails(false)` | Nova·Cinder fallback에서 summary 목록 사용, 기본값은 true |
 | `WithIdentityFindAllProjects(true)` | Nova·Cinder fallback 목록에만 `all_tenants=true` 추가, 기본값은 false |
+| `WithIdentityFindExtraSpecs(true)` | Nova flavor의 단일 결과에 extra specs가 없을 때 후속 GET, 기본값은 false |
 | `WithIdentityFindQuery(key, value)` | 직접 GET과 fallback 목록의 서버 query, 같은 key는 뒤의 옵션 우선 |
 | `WithIdentityFindOptions(resource.IdentityFindOpts{...})` | bool pointer와 query를 포함한 concrete 설정 |
 
@@ -129,7 +131,7 @@ caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니�
 전환할 때만 추가하므로 GET에 자동 이름 필터를 넣지 않습니다. caller가 binding의
 이름 query key를 지정하면 자동 이름 hint로 덮어쓰지 않습니다. 기본 hint는 Nova에서
 `^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 12개 binding에서는 literal
-문자열입니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
+문자열입니다. Flavor는 자동 이름 hint를 서버에 보내지 않습니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
 
 query가 없으면 기존 native Get을 사용합니다. query를 지정하면 SDK가 감사한 member
 경로·성공 코드를 사용하고 같은 native `GetResult.Extract`로 응답을 해석합니다. 서비스
@@ -143,7 +145,7 @@ GET 결과와 소비한 목록의 각 행은 nil이 아닌 리소스와 안전�
 typed native 응답에 없는 HTTP 본문·헤더를 이 검증 오류에 만들어 붙이지 않습니다.
 
 `max_items`, `paginated`, `base_path`, `list_base_path`, `jmespath_filters`, `headers`,
-`microversion`, `allow_unknown_params`, `ignore_missing`, `fallback`은 이 조회의 query가
+`microversion`, `allow_unknown_params`, `ignore_missing`, `fallback`, `get_extra_specs`는 이 조회의 query가
 아닙니다. 대소문자를 바꾼 키도 HTTP 전에 거부합니다. 중복과 후속 오류를 확인하기 위해 자동 조회는 전체
 목록을 소비하며 로컬 cap이나 첫 페이지 중단 옵션을 받지 않습니다. 생성한 옵션은
 bool pointer, query map과 slice를 복사하고 호출마다 독립적으로 적용합니다. 옵션
@@ -196,6 +198,60 @@ func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
     return nil
 }
 ```
+
+## Nova flavor와 extra specs
+
+Flavor 자동 조회는 GET부터 시도하고 fallback은 `/flavors/detail` 전체를 검사합니다.
+이름은 서버 query mapping에 없으므로 SDK가 자동 `name` hint를 추가하지 않습니다.
+목록에서 `is_public`을 지정하지 않았다면 문자열 `None`을 보내 공개·비공개 flavor를
+함께 검색합니다. 이 기본값은 GET에 전달하지 않으며 서버 권한은 그대로 적용됩니다.
+caller가 지정한 raw wire `is_public`과 반복 query는 GET·목록에서 보존합니다.
+Go의 명시 nil/빈 slice는 key를 지정한 것으로 취급해 기본값을 막고 wire에서는 생략합니다.
+Python은 이 인자의 None도 문자열 `None`으로 바꾸므로, Go에서 그 요청이 필요하면
+`WithIdentityFindQuery("is_public", "None")`으로 명시합니다.
+
+Python `find_flavor(..., get_extra_specs=True)`는
+`resource.WithIdentityFindExtraSpecs(true)`로 표현합니다. 생략과 false는 추가 호출을
+하지 않습니다. true일 때 GET 결과 또는 전체 목록을 검증한 단일 결과의 `ExtraSpecs`가
+nil/빈 map이면, 반환된 canonical ID의 `/flavors/{id}/os-extra_specs`를 한 번 조회합니다.
+이미 한 개 이상의 spec이 있으면 추가 GET을 하지 않으며, 이름으로 찾은 뒤 상세 member
+GET을 추가하지도 않습니다. 이 조회에는 caller query를 전달하지 않습니다.
+
+후속 GET 결과는 복사한 Flavor 모델의 ExtraSpecs를 교체합니다. HTTP403·404,
+잘못된 typed 응답·전송·취소 오류는 조회 실패이며 fallback이나 IgnoreMissing으로
+숨기지 않습니다. 목록의 중복·후속 실패·미존재도 추가 specs 요청을 시작하지 않습니다.
+inline extra specs가 도입된 2.61을 별도 extra-specs GET의 최소 microversion으로
+강제하지 않고 원래 client의 설정을 유지합니다. native Extract의 missing/null
+`extra_specs`는 nil map이며 Python의 missing 기본 빈 dict와 구별합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    computev2 "gophercloudsdk/compute/v2"
+    "gophercloudsdk/resource"
+)
+
+func FindFlavor(ctx context.Context, compute *computev2.Service) error {
+    flavor, err := compute.Flavors.FindIdentity(ctx, "small",
+        resource.WithIdentityFindExtraSpecs(true),
+        resource.WithIdentityFindIgnoreMissing(false),
+        resource.WithIdentityFindQuery("minRam", "256"))
+    if err != nil { return err }
+    _, _ = flavor.ID, flavor.ExtraSpecs
+    return nil
+}
+```
+
+Go query는 `minRam`·`minDisk` 같은 wire key를 사용하며 Python의 `min_ram`·`min_disk`
+별칭을 자동 변환하지 않습니다. ExtraSpecs 옵션의 명시 true/false는 Flavor만 지원합니다.
+Flavor에 typed `Details`나 `AllProjects`를 지정하면 HTTP 전에 `ErrUnsupported`입니다.
+일반 Get/List와 explicit ID/Name Find는 이 자동 조회의 목록 기본값·후속 specs 정책을
+적용하지 않습니다.
+생성된 Flavor `Resources.List/All`의 query 전달도 보정했습니다. 전체 query map을
+복사해 보존하며, 이전 adapter가 버리던 raw `status`도 서버에 전달합니다.
 
 ## Glance 숨김 이미지 검색
 
