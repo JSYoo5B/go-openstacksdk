@@ -8329,9 +8329,18 @@
     {
       "operation": "python:clustering/v1/update_receiver",
       "source_fingerprint": "87c8c15c4e84eeffabf6460dd6a57db9ee92f5536d7d898fc52ce4c985678db9",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/receivers.API.Update"
+        "gophercloudsdk/clustering/v1/receivers.API.Update",
+        "gophercloudsdk/clustering/v1/receivers.API.Track",
+        "gophercloudsdk/clustering/v1/receivers.API.Load",
+        "gophercloudsdk/clustering/v1/receivers.TrackedReceiver.Edit",
+        "gophercloudsdk/clustering/v1/receivers.TrackedReceiver.Commit",
+        "gophercloudsdk/clustering/v1/receivers.TrackedReceiver.Refresh",
+        "gophercloudsdk/clustering/v1/receivers.API.AtBasePath",
+        "gophercloudsdk/clustering/v1/receivers.UpdateScope.Update",
+        "gophercloudsdk/clustering/v1/receivers.UpdateScope.Load",
+        "gophercloudsdk/clustering/v1/receivers.UpdateScope.Track"
       ],
       "contracts": [
         {
@@ -8353,21 +8362,44 @@
           "tests": [
             "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
           ]
+        },
+        {
+          "behavior": "Owned TrackedReceiver maps cached input through atomic offline edits, sticky current-value dirty tracking, absence/null/empty and removal tombstones, dirty-only PATCH200, whole-field response merge and separate actual response snapshots. Clean Commit validates context/source/version/header without HTTP; canonical raw ID/name or an explicit requested ID fixes the route. Native and malformed accepted errors retain whole HTTP evidence and state without resending; Refresh resets older revisions and HTTP-in-flight edits survive. Action remains a command name and incidental Location/channel URLs are not followed; cached user does not impose the list user1.4 gate.",
+          "tests": [
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedEmptyNullAndRemovalPresence",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedAtomicEditAndHeaderOnlyCommitProtection",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedOwnsInputOptionsMapsPointersAndHTTPViews",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedCanonicalNameAllPagesAndExplicitFixedID",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedNativeAndMalformedResponseEvidenceNoResend",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedRefreshResetsOlderDirtyAndPreservesFailures",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedNewEditsSurviveCommitAndRefreshInFlight",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation"
+          ]
+        },
+        {
+          "behavior": "AtBasePath uses the common validated literal collection path and escapes Unicode once under the selected ResourceBase. Scoped stateless name lookup freezes body/header before all pages; Load/Track capture collection and ID for Commit/Refresh. Concurrent scopes retain the same API/client/authentication and leave default routes and other scopes unchanged. Nil/zero scopes, protected options and invalid source fail before HTTP.",
+          "tests": [
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation",
+            "api/clustering_receivers_lifecycle_test.go:TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation",
+            "internal/senlin/collection_path_test.go:TestCollectionPathOwnsLiteralRelativeSegments"
+          ]
         }
       ],
       "differences": [
-        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
+        "Go maps cached Resource input through SDK-owned Track/Load/Edit/Commit/Refresh and immutable snapshots instead of the same mutable Python Resource pointer. It retains owned concrete options/context and explicit ID/Name references. Create/type validation remains separate from tracked updates; no unproved update microversion gate is invented.",
         "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
-        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions.",
+        "The direct base_path control is mapped to a literal relative UpdateScope with validated unescaped segments, rejecting URLs, templates, percent escapes, dot/empty segments, whitespace and controls. Python overrides the current commit only; the Go handle fixes collection+ID for Load/Commit/Refresh. Other operations keep default routes and the shared client remains live.",
+        "Python permissive descriptor/attrs coercion and cached ID/readonly-looking field mutation are deliberately mapped to mutable concrete Name/Action/Params, explicit vendor fields, exact raw tracked identity and core/readonly protection. Separate inherited Resource.commit controls are not exposed by the direct update_receiver proxy."
       ],
       "documentation": [
         "clustering/v1/receivers/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/tracking/receivers/README.md"
       ],
-      "remaining": [
-        "Implement or deliberately map cached Resource dirty detection, unchanged/empty commit no-op, deletion-to-null and response merge/reset lifecycle; explicit stateless PATCH is only the verified mutation contract.",
-        "Compare full inherited Resource normalization and adapter microversion/default policy rather than assuming concrete options close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:clustering/v1/receivers",
