@@ -21,9 +21,11 @@
 | Trove database 범위 (`8138e64`) | [목록·생성·삭제 계약](../api/trove_databases_contracts_test.go): pinned SDK의 list 기반 fetch, 정확 이름, charset, 단일/batch 배열, 오류·삭제 대기 | credential/access 변경은 다른 리소스 동작. batch 원자성·비동기 생성 완료를 추정하지 않음 |
 | Nova action 이력 범위 (`b59edb4`) | [목록·상세·event 계약](../api/instance_actions_scope_test.go): requestID·고정 parent, 추가 JSON·헤더, pagination·cycle·취소, non-object 응답 거부 | 이름·삭제·상태 대기를 가정하지 않음. event 노출은 실제 microversion과 cloud 권한 정책을 따름 |
 | Trove user/host 범위 (`546b679`) | [계정 식별자 계약](../api/trove_users_contracts_test.go): all-host 정확 이름, WithHost와 default % ID 일관성, literal @/%·2단계 decode, 오류·삭제 대기 | password/credential 갱신, access grant/revoke와 root 관리는 별도 |
-| Cyborg Device·Deployable (`1eaf547`, `acd97e1`) | [조회 계약](../api/accelerator_read_test.go), [action/program 계약](../api/accelerator_actions_test.go): SDK 소유 연결·microversion·UUID·응답 JSON/헤더, pagination·break·cycle·origin, 실제 program URL·입력 snapshot | device profiles·ARQs·attributes, Python Resource 입력·자동 버전 선택·dirty state·wait callback은 별도. [사용법과 source pin](../accelerator/v2/README.md) |
+| Cyborg Device·Deployable (`1eaf547`, `acd97e1`) | [조회 계약](../api/accelerator_read_test.go), [action/program 계약](../api/accelerator_actions_test.go): SDK 소유 연결·microversion·UUID·응답 JSON/헤더, pagination·break·cycle·origin, 실제 program URL·입력 snapshot | Python Resource 입력·자동 버전 선택·dirty state·wait callback은 별도. [사용법과 source pin](../accelerator/v2/README.md) |
+| Cyborg profiles·attributes·ARQs | [프로필](../api/accelerator_profiles_test.go), [attribute](../api/accelerator_attributes_test.go), [ARQ](../api/accelerator_requests_test.go), [binding/delete](../api/accelerator_request_binding_test.go), [accepted 응답](../api/accelerator_request_response_boundary_test.go): UUID 안전 삭제·typed snapshot·전체 batch·부분 결과·raw bytes, 실제 collection PATCH/DELETE, service token·microversion | Python inherited Resource/Adapter 입력·query 변환·자동 버전 선택·dirty state와 generic wait 전체 의미는 추가 조사. [서비스 비교](../accelerator/v2/README.md) |
+| Heat child resource·event scope (`1a3881f`, `7e74a08`) | [자식 계약](../api/heat_stackresources_contracts_test.go), [raw 응답](../api/heat_stackresources_responses_test.go), [event 경로](../api/heat_stackevents_scope_test.go), [pagination](../api/heat_stackevents_pagination_test.go): 실제 nested owner·resource_name·health false, stack/resource event path·marker·취소·오류 | signal·resource type workflow, Python inherited query/cache/dirty state 전체 비교는 추가 조사. [resource](../orchestration/v1/stackresources/README.md)·[event](../orchestration/v1/stackevents/README.md) |
 | Nova project quota (`41e5053`, `5f64488`) | [singleton 계약](../api/project_quotas_contracts_test.go), [Connection 계약](../connection_quotas_test.go): ID 고정, 별도 Keystone 이름 해석, recorded v2/v3 auth, zero/-1/force false, raw limit/detail 응답·Reset | defaults·user quota·query, Python cloud의 force=True 기본과 별도 quota 서비스는 추가 단위. [사용법](../compute/v2/quotasets/README.md) |
-| Heat stack (`11bbdf6`, `51d873e`) | [복합 식별자 계약](../api/heat_stacks_contracts_test.go): canonical name+ID, resolve_outputs False, summary/detail 구분, marker/linked cycle, *_FAILED·삭제 완료·고정 pair 대기 | child stackresources/stackevents, 생성·adopt·preview·template·snapshot 등 추가 stack workflow는 별도. [사용법](../orchestration/v1/stacks/README.md) |
+| Heat stack (`11bbdf6`, `51d873e`) | [복합 식별자 계약](../api/heat_stacks_contracts_test.go): canonical name+ID, resolve_outputs False, summary/detail 구분, marker/linked cycle, *_FAILED·삭제 완료·고정 pair 대기 | 생성·adopt·preview·template·snapshot 등 추가 stack workflow는 별도. [사용법](../orchestration/v1/stacks/README.md) |
 | Manila share access scope | [share/rule/action 계약](../api/share_access_rules_scope_test.go):2.45 조회·parent 일치, 부모404/403 구분, allow/deny·2.82 locks, 취소·waiter |2.45 이전 legacy scope와 lock/unlock 별도 연산·다른 share 복합 작업은 추가 단위 |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. Inspector Start query 보정의 이번 검증은 `go test -race ./api ./baremetalintrospection/... ./internal/cmd/sdkgen` 범위입니다. 그 이전 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`도 통과했습니다.
@@ -79,7 +81,7 @@ go run ./internal/cmd/paritycheck -sync
 
 `-sync`는 수작업 판정을 다시 쓰지 않습니다. 검토한 원본의 fingerprint가 달라지거나 기존 연산이 없어지면 catalog 저장 전에 실패하여 기존 근거를 보존합니다. 미검토 연산도 삭제하지 않으며 저장 중 write 실패에도 기존 catalog가 남습니다. 새 소스를 다시 검토하고 판정 상태와 근거를 함께 갱신해야 합니다. `make check`도 이 검증을 실행합니다.
 
-현재 durable 판정은 native 암호 조회와 보정한 Inspector 시작의 Go 매핑 두 항목부터 연결했습니다. 대응 Python 연산은 확인한 세부 계약을 기록하고 전체 상속·리소스 의미 비교가 남아 `unresolved`로 유지합니다. 다른 구현의 증거도 같은 방식으로 점진적으로 연결하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
+Durable 판정은 native 암호 조회·Inspector 시작에 더해 Nova quota singleton과 Heat stack·child resource·event 조회의 소스·입력·응답·오류 계약을 연결했습니다. 대응 Python 연산은 확인한 세부 계약과 Go 정책 차이를 기록하고 미검증 inherited Resource·query·cache·dirty state 또는 wait 기능을 구체적인 `remaining`으로 남깁니다. 검증된 계약을 연결한 상태와 전체 SDK 완성도를 구분하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
 
 ## 증거를 연결할 수 있는 기존 구현
 
@@ -98,7 +100,7 @@ Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic vir
 
 초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
 
-현재 binding은 native 일반 Collection 108개, SDK 소유 Cyborg Collection 2개, 부모 Collection 범위 19개, Heat 복합 식별자 정책 1개, Nova quota singleton 1개와 별도 tag set 1개입니다. 공통 binding이 없는 native 패키지 69개는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
+현재 binding은 native 일반 Collection 108개, SDK 소유 Cyborg Collection 5개, 부모 Collection 범위 19개, Heat 복합 식별자 정책 1개와 자식 resource·event 범위 2개, Nova quota singleton 1개와 별도 tag set 1개입니다. 공통 binding이 없는 native 패키지 67개는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
 
 | 우선 과제 | 확인한 코드 근거 | 필요한 구현과 검증 |
 |---|---|---|

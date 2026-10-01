@@ -6,6 +6,232 @@
   },
   "reviews": [
     {
+      "operation": "gophercloud:baremetalintrospection/v1/introspection.StartIntrospection",
+      "source_fingerprint": "519fff8408a390adbea0077a9c491935fff20736f5fe06990541bb8e8bc861f9",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection",
+        "gophercloudsdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted, false and true manage_boot and escaped extension query values reach the POST URL.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions"
+          ]
+        },
+        {
+          "behavior": "Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.",
+          "tests": [
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause",
+            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext"
+          ]
+        }
+      ],
+      "documentation": [
+        "baremetalintrospection/v1/introspection/README.md"
+      ],
+      "differences": [
+        "The SDK fixes the pinned native function that discards its serialized query; a private helper preserves that query and the original 202/error policy."
+      ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/quotasets.Delete",
+      "source_fingerprint": "2740605b9efbd9f1640d4002979529626182910cd1fb70494279fd05d51394bc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Reset",
+        "gophercloudsdk/compute/v2/quotasets.WithResetIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE removes quota overrides for the fixed project; a successful bodyless response returns independent headers and no follow-up GET or fabricated quota object.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse"
+          ]
+        },
+        {
+          "behavior": "Reset defaults to strict 404 handling; only an explicitly ignored 404 becomes nil,nil, the last missing-policy option wins and invalid options fail before HTTP.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The quota singleton exposes Reset rather than generic resource Delete; success returns ResetResponse(ProjectID, Header) instead of requiring a quota extraction from an empty DELETE body.",
+        "404 remains an error by default; optional WithResetIgnoreMissing changes only that status."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/quotasets.Get",
+      "source_fingerprint": "1138fa461cf5a1dc8efe774c9b04bb2f4239c8552715262ac5d9ed4e69eb1467",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.API.CurrentProject",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "Recorded Keystone v2/v3 authentication supplies a frozen project ID; manual, unscoped and malformed results fail without Nova requests.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults"
+          ]
+        },
+        {
+          "behavior": "GET /os-quota-sets/{projectID} retains all native limits, zero/unlimited values, the separate request ProjectID and response ID, extension/null fields and independent response headers.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse"
+          ]
+        },
+        {
+          "behavior": "Missing, null, scalar/array quota objects and invalid known field types fail instead of creating a zero-valued singleton.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go scope returns an embedded native quota model plus ProjectID, decoded raw quota fields and copied headers instead of a Result extractor; the request project remains fixed even when the response ID differs.",
+        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/quotasets.GetDetail",
+      "source_fingerprint": "81dc69daf67f3790bac3b442f020b4ec24da0a7181dedd777acee9c0e1404e5a",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.API.CurrentProject",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Detail"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "Recorded Keystone v2/v3 authentication supplies a frozen project ID; manual, unscoped and malformed results fail without Nova requests.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults"
+          ]
+        },
+        {
+          "behavior": "GET /os-quota-sets/{projectID}/detail retains native limit/in_use/reserved values, raw nested extensions and independent response headers.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse"
+          ]
+        },
+        {
+          "behavior": "Missing, null, scalar/array quota objects and invalid known field types fail instead of creating a zero-valued singleton.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go scope returns an embedded native quota model plus ProjectID, decoded raw quota fields and copied headers instead of a Result extractor; the request project remains fixed even when the response ID differs.",
+        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/quotasets.Update",
+      "source_fingerprint": "3577cd59770e117bea0088ad2ce70530f7ee2563bd9f54ae9f223b0340c90de3",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Update",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateOptions",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateField",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT /os-quota-sets/{projectID} uses a quota_set envelope; nil limits are omitted, zero and -1 are sent, native force=true and explicit force=false are distinct and the last functional option wins.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited"
+          ]
+        },
+        {
+          "behavior": "Extension values are snapshotted; invalid limits, core collisions, unsupported request capabilities and nil options fail before HTTP.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "The updated server quota response, extension/null fields and independent headers are returned; malformed models fail decoding.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Callers provide native concrete UpdateOpts and SDK-owned functional options rather than UpdateOptsBuilder implementations.",
+        "The scope rejects typed limits below -1 before HTTP, adds an explicit force=false option, and returns QuotaResource with the fixed project and response metadata."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ]
+    },
+    {
       "operation": "gophercloud:compute/v2/servers.GetPassword",
       "source_fingerprint": "6898af458222dab0c25561c3f138a599659d85a739976d6f861abee52913af67",
       "status": "go_mapping",
@@ -35,12 +261,617 @@
       ]
     },
     {
-      "operation": "gophercloud:baremetalintrospection/v1/introspection.StartIntrospection",
-      "source_fingerprint": "519fff8408a390adbea0077a9c491935fff20736f5fe06990541bb8e8bc861f9",
+      "operation": "gophercloud:orchestration/v1/stackevents.Find",
+      "source_fingerprint": "f74a11d3678002636f7c9e0486e42a69e8b9d4dd4c1098afd19b7233c1287478",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackevents.API.Find",
+        "gophercloudsdk/orchestration/v1/stackevents.API.InStack"
+      ],
+      "contracts": [],
+      "differences": [
+        "The high-level scope resolves a stack separately and lists at a canonical path; this is not evidence for the native /stacks/{name}/events identity redirect endpoint."
+      ],
+      "documentation": [
+        "orchestration/v1/stackevents/README.md"
+      ],
+      "remaining": [
+        "Add native Find fixtures for /stacks/{name}/events canonical redirect, resulting non-paged events extraction and HTTP/decode failures before classifying this direct operation."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackevents.Get",
+      "source_fingerprint": "0bc550813895945c66e4d091574c9af8458a8727c0f9cefbf63118f74866b2c6",
       "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection",
-        "gophercloudsdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery"
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.Get",
+        "gophercloudsdk/orchestration/v1/stackevents.ResourceEventScope.Get",
+        "gophercloudsdk/orchestration/v1/stackevents.WithGetHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Both stack-scope and resource-scope GET use the complete stack name/ID/resource/event path, preserve request and wire identities separately, return native fields/properties/links with Detailed=true, and retain raw null/large integers and response headers.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsGetUsesCompleteResourcePathAndPreservesRequestIdentity"
+          ]
+        },
+        {
+          "behavior": "Invalid event/resource segments, nil/unsupported options and attempts to override auth/Accept/microversion fail before HTTP; canceled GET also performs no request.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions"
+          ]
+        },
+        {
+          "behavior": "Missing/null/wrong-type detail objects, missing IDs, bad timestamps and bad resource_type fail instead of returning a usable event.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsMalformedResponsesAndLaterErrorsRemainObservable"
+          ]
+        },
+        {
+          "behavior": "GET 400/401/403/404/500 preserve original status, body, header and URL; only 404 is classified as resource.ErrNotFound.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPreservesGetAndPaginationHTTPErrors"
+          ]
+        },
+        {
+          "behavior": "Unicode stack/resource/event segments are escaped and simultaneous scope GETs retain independent caller-mutable raw bodies and headers.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsScopesEscapeUnicodeSegmentsAndRemainConcurrent"
+          ]
+        }
+      ],
+      "differences": [
+        "Go fixes stack and optional resource parents, accepts a concrete event ID and returns EventResource instead of GetResult. Request identity, raw body/header and optional resource_type are preserved separately; path/options and response object/ID are validated before a usable result is returned."
+      ],
+      "documentation": [
+        "orchestration/v1/stackevents/README.md"
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackevents.List",
+      "source_fingerprint": "8951cd33a29a37bb27e63dd368a6b80f60e7e1f21d44b53944793ea1d50e608b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.List",
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.All",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListOptions",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListQuery",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListHeader",
+        "gophercloudsdk/resource.Pages"
+      ],
+      "contracts": [
+        {
+          "behavior": "Stack list uses its canonical events path; typed marker/limit, repeated actions/statuses/resource names, resource_type and sort_keys/sort_dir plus nested_depth, escaped extension query and headers are asserted. Native fields, request identity, null/omission, large raw integers and summary/detail distinction are retained.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists"
+          ]
+        },
+        {
+          "behavior": "Last event ID becomes the next marker while page size, filters and headers remain; an empty page ends traversal and page response headers are independently retained.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationUsesLastEventMarkerAndEmptyPage"
+          ]
+        },
+        {
+          "behavior": "Break skips later item decoding and next page; cancellation between resource-list items is returned without another HTTP request.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationStopsOnBreakAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Both stack and resource list reject a repeated marker URL before a third request.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationRejectsRepeatedMarkerBeforeRefetch"
+          ]
+        },
+        {
+          "behavior": "Malformed pages/items and later decode or HTTP errors make All return nil plus error rather than a partial complete list.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsMalformedResponsesAndLaterErrorsRemainObservable",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPreservesGetAndPaginationHTTPErrors"
+          ]
+        },
+        {
+          "behavior": "Nil/unsupported field/argument/header options and canceled list fail before HTTP; in-flight cancellation reaches the list HTTP request.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsInFlightCancellationReachesHTTPRequest"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns a lazy typed EventResource sequence or non-nil collected slice rather than Pager. The native last-event-ID marker protocol is retained, with library-owned raw decoding, parent identity, query/header extensions, cancellation and cycle protection."
+      ],
+      "documentation": [
+        "orchestration/v1/stackevents/README.md"
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackevents.ListResourceEvents",
+      "source_fingerprint": "61ca807571438cd3a5c41f59d67d1fec0001b681091498177e2c0daea63c9080",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackevents.ResourceEventScope.List",
+        "gophercloudsdk/orchestration/v1/stackevents.ResourceEventScope.All",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListResourceEventsOptions",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListResourceEventsQuery",
+        "gophercloudsdk/orchestration/v1/stackevents.WithListResourceEventsHeader",
+        "gophercloudsdk/resource.Pages"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resource list uses the distinct /resources/{logicalName}/events path, typed resource_name filter, nested_depth query and extension header; the next last-ID marker request ends on 204. Request resource name remains independent of the response name.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists"
+          ]
+        },
+        {
+          "behavior": "Resource-list repeated marker is rejected; between-item cancellation, malformed options and HTTP errors remain observable.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationRejectsRepeatedMarkerBeforeRefetch",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationStopsOnBreakAndCancellation",
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPreservesGetAndPaginationHTTPErrors"
+          ]
+        }
+      ],
+      "differences": [
+        "The logical resource parent is fixed by ForResource rather than repeated as a string; event response name remains separate from the request name."
+      ],
+      "documentation": [
+        "orchestration/v1/stackevents/README.md"
+      ],
+      "remaining": [
+        "Add a resource-scoped fixture asserting the full distinct ListResourceEventsOpts inputs: explicit initial Marker and Limit, repeated ResourceActions/Statuses/Types and SortKey/SortDir. Existing resource-list assertions cover ResourceNames/nested_depth/header and marker progression but must not be represented as a full typed-option audit."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.Find",
+      "source_fingerprint": "12f74ac31fb8fc23abb17d4819b25ba5d387b720e84c6a769de26505b4c21f2d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.Find"
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "Native Find requests /stacks/{stackName}/resources and returns the stack-wide resource list; StackScope.Find performs a child exact-name/ID lookup under an already fixed name+ID and is not the same operation.",
+        "Audit and test the generated stack-name Find route, redirect/errors, response decoding, headers and cancellation before assigning a mapping status."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.Get",
+      "source_fingerprint": "d57ecacccb870235b4906d77a7317ada686bce6d95cd6713f04c35ef3c9b162e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.ForStack",
+        "gophercloudsdk/orchestration/v1/stackresources.API.InStack",
+        "gophercloudsdk/orchestration/v1/stackresources.API.ForResource",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.Get",
+        "gophercloudsdk/orchestration/v1/stackresources.ResourceScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resource routing uses resource_name independently from logical/physical IDs, retains native fields/timestamps and fixes the complete stack identity.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesKnownPairAndParentResolution",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesSinglePageModelsAndLocalFilters",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesExactFindRoutingAndMissing"
+          ]
+        },
+        {
+          "behavior": "A direct GET checks the requested resource_name and known owner, rejects conflicting identity links and invalid models, and retains original HTTP/decode causes.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesModelAndHTTPErrors",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesExactFindRoutingAndMissing"
+          ]
+        },
+        {
+          "behavior": "Status waits poll the fixed owning stack/resource_name, detect *_FAILED states and preserve timeout causes.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesWaitUsesFixedResourceNameAndHeatFailureStates",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesListAndWaitErrorCauses"
+          ]
+        },
+        {
+          "behavior": "Raw resource Body retains unknown fields, explicit null and the exact integer 9007199254740993; response StatusCode and cloned headers are preserved without aliasing between list models or later GETs.",
+          "tests": [
+            "api/heat_stackresources_responses_test.go:TestHeatStackResourcesRetainRawFieldsAndIndependentHeaders"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns a ResourceView with owner/detail metadata instead of GetResult; scope identity checks and malformed response rejection are stricter than native extraction.",
+        "The scope directly performs the same resource GET with the pinned native success policy of HTTP 200 so it can retain StatusCode, copied Header and raw Body; it does not change accepted success codes."
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.List",
+      "source_fingerprint": "efc89fe6f01cad3fb50aaa2e22ce1d07266268b3fc2278a3e36d6d853f121521",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.ForStack",
+        "gophercloudsdk/orchestration/v1/stackresources.API.InStack",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.List",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.All",
+        "gophercloudsdk/orchestration/v1/stackresources.WithNestedDepth",
+        "gophercloudsdk/orchestration/v1/stackresources.WithDetails"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resource routing uses resource_name independently from logical/physical IDs, retains native fields/timestamps and fixes the complete stack identity.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesKnownPairAndParentResolution",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesSinglePageModelsAndLocalFilters",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesExactFindRoutingAndMissing"
+          ]
+        },
+        {
+          "behavior": "Resource lists follow Heat single-page behavior, preserve nested owners, apply exact local name/status filters, ignore top-level next links, stop on break, and reject unsupported pagination/invalid queries before HTTP.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesSinglePageModelsAndLocalFilters",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesListAndWaitErrorCauses"
+          ]
+        },
+        {
+          "behavior": "Raw resource Body retains unknown fields, explicit null and the exact integer 9007199254740993; response StatusCode and cloned headers are preserved without aliasing between list models or later GETs.",
+          "tests": [
+            "api/heat_stackresources_responses_test.go:TestHeatStackResourcesRetainRawFieldsAndIndependentHeaders"
+          ]
+        },
+        {
+          "behavior": "Missing/null/non-array list envelopes and null entries fail rather than being misclassified as an empty resource list.",
+          "tests": [
+            "api/heat_stackresources_responses_test.go:TestHeatStackResourcesRejectMalformedListEnvelopes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go lazily yields ResourceView values with actual owner identities and optional detailed results; it follows the server SinglePage contract and rejects unsupported marker/limit before HTTP.",
+        "The private single-page resource parser requires a resources JSON array and rejects malformed/missing/null envelopes instead of treating them as empty; item response metadata and raw fields remain observable."
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.ListTypes",
+      "source_fingerprint": "8b510ec2198df0cafa0075c44c7fce4951e3e9dd7a0620b3124eb2091e395924",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.ListTypes"
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "ListTypes is a global resource-type operation (GET /resource_types), not a child stack resource scope; a generated facade alone does not establish SDK support.",
+        "Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.MarkUnhealthy",
+      "source_fingerprint": "f43bedcb27066b6e666109d317bb1eaeaf747f580cb6645a2d8e1bab86eac80d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.MarkUnhealthy",
+        "gophercloudsdk/orchestration/v1/stackresources.ResourceScope.MarkUnhealthy",
+        "gophercloudsdk/orchestration/v1/stackresources.WithHealthReason"
+      ],
+      "contracts": [
+        {
+          "behavior": "A health mutation preserves false and its optional reason, preflights resource_name/owner, blocks unknown or different nested owners, and requires an explicit owning ResourceIdentity to target a child.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesNestedOwnerCannotMutateRoot",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesUnknownOwnerAndPhysicalFallbackAreBlocked",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesHealthHTTPErrorsAndMetadataDecodeCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The scope takes the required bool and optional SDK-owned reason rather than MarkUnhealthyOptsBuilder, and GET-preflights logical/resource_name targeting before PATCH."
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "The native/server health endpoint also permits physical-ID targeting; the high-level scope deliberately restricts routing to resource_name and the generated physical-ID API branch has not received a meaningful dedicated HTTP contract test.",
+        "Audit generated WithMarkUnhealthyOptions/WithMarkUnhealthyField and native builder extension/error behavior separately before judging the entire direct native operation complete."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.Metadata",
+      "source_fingerprint": "38ef5dd111b9cfbd98dbf5aef57b4abe819067c97be2ceded277f76ebbd96ee1",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.Metadata",
+        "gophercloudsdk/orchestration/v1/stackresources.ResourceScope.Metadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET metadata within the fixed owner returns arbitrary JSON object/array/number/bool/null values with inherited auth/MoreHeaders and preserves original HTTP/decode/context error causes.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesMetadataPreservesJSONAndHTTPCauses",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesHealthHTTPErrorsAndMetadataDecodeCause",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesCancellationReachesHTTP",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go scope expands the native map[string]string result to map[string]any according to the Heat metadata object contract; numbers use the default float64 decoder.",
+        "The parent scope and exact Name/ID policy own routing; callers provide no custom result extractors."
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.Schema",
+      "source_fingerprint": "5e42a142ef5f4b6a791e3d85a650b66d5f3382453bbc5bc8eb517bea4e80ce04",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.Schema"
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "Schema is a global resource-type operation (GET /resource_types/{typeName}), not a child stack resource scope; a generated facade alone does not establish SDK support.",
+        "Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stackresources.Template",
+      "source_fingerprint": "debd803c5cb833e9c05971ce7be652586fb1b0311be254dc98009dc85827ac43",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.Template"
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "Template is a global resource-type operation (GET /resource_types/{typeName}/template), not a child stack resource scope; a generated facade alone does not establish SDK support.",
+        "Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.Abandon",
+      "source_fingerprint": "b774759939eb0670405b181e5f173328ab90ec71cae4e1e59237e7062dccdf77",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Abandon",
+        "gophercloudsdk/orchestration/v1/stacks.API.Abandon"
+      ],
+      "contracts": [],
+      "differences": [
+        "Go exposes the fixed-identity native typed AbandonedStack response rather than a mutable Resource."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Add DELETE /stacks/{name}/{id}/abandon with required HTTP 200 and an AbandonedStack payload fixture, plus errors/cancellation/decoding and preservation of all returned fields. No existing scope HTTP test calls Abandon."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.Delete",
+      "source_fingerprint": "b30a332e0e72321036dc6e07fbe45c6f84ab9c08ccadd34161df0f5a78e480a7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Delete",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Delete",
+        "gophercloudsdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the fixed name/ID without a lookup; default 404 is ignored and explicit strict 404 returns resource.ErrNotFound.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy"
+          ]
+        }
+      ],
+      "differences": [
+        "Scoped Go deletion fixes name/ID and ignores 404 by default; native Delete directly returns its HTTP error."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Add positive native DELETE 202/204 fixtures plus forbidden/server-error/cancellation assertions for the mutating request itself. Current scoped delete fixture only returns 404; deletion waiter GET cases do not verify DELETE success or errors."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.Find",
+      "source_fingerprint": "6618ac5faff5a12e3a6115386c8a372bdc54c7725d28fca556affc80cee6b66e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.API.Find",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Find",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Get",
+        "gophercloudsdk/orchestration/v1/stacks.WithResolveOutputs"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "Duplicate exact names across pages fail, strict absence fails and explicit ignore-missing returns nil; empty collection is non-nil.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies"
+          ]
+        },
+        {
+          "behavior": "The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders"
+          ]
+        }
+      ],
+      "differences": [
+        "Go explicit Name references resolve exact list summaries and ID references fetch details, whereas native Find passes a single identity string to Heat."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Test the unchanged native Find name-or-ID /stacks/{identity} redirect entry point and its result/errors separately; exact-name SDK list resolution plus the canonical ID fixture do not exercise its name-string variant."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.Get",
+      "source_fingerprint": "cdf9c6353c98fdf6631c07a51408f7f5e76fa1dddf5b53a0fe6ba1ff1c34fea9",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Get",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Get",
+        "gophercloudsdk/orchestration/v1/stacks.WithResolveOutputs"
+      ],
+      "contracts": [
+        {
+          "behavior": "A fixed name/ID GET returns a detailed native field model; parameter values, output presence, rollback=false, timeout and query omission/resolve_outputs=False are asserted.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders"
+          ]
+        },
+        {
+          "behavior": "Changed name/ID, missing/null objects, incomplete identity and bad timestamps fail; 403/404 retain an unexpected-response cause and strict 404 is resource.ErrNotFound.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIdentityMismatchesAndHTTPErrorsArePreserved"
+          ]
+        },
+        {
+          "behavior": "Invalid compound identities, nil GET option and canceled GET fail without HTTP.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns StackResource with Detailed=true instead of GetResult; the scope owns canonical name/ID, validates response identity and optionally sends resolve_outputs=False without changing the original native API. Context/errors are explicit."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.List",
+      "source_fingerprint": "a3eb7c31faca15bd3b4d7128843e5388513fa4355c8509067236b57429055e44",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.List",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.All",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk/resource.WithPageSize"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "Positive limit advances last canonical ID as marker until an empty page; break avoids the next request and unchanged markers produce a cycle error before refetch.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerMarkerFallbackCycleAndBreak"
+          ]
+        },
+        {
+          "behavior": "An identical relative next URL produces a cycle error after one request; break skips next-link processing.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerRepeatedLinkUsesCommonGuard"
+          ]
+        }
+      ],
+      "differences": [
+        "Go SDK resources use linked pages with relative-link resolution and positive-limit marker fallback rather than pinned native SinglePageBase; summaries share a StackResource model and explicit Detailed=false."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit and add assertions for native list typed query filters and defaults (tenant/id/status/name/sort, global_tenant, show_deleted/show_nested/show_hidden, tags/tags_any/not_tags/not_tags_any). Current scoped fixtures prove page size/name lookup/paging and selected summary fields, not every declared ListOpts serialization."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.Update",
+      "source_fingerprint": "11f82e54be45e94f9f7234c8a5af50a3793622c6b626d4689711c9a516305b8b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Update",
+        "gophercloudsdk/orchestration/v1/stacks.API.Update",
+        "gophercloudsdk/orchestration/v1/stacks.WithUpdateField"
+      ],
+      "contracts": [],
+      "differences": [
+        "The scope retains name/ID and delegates to concrete native PUT options; no successful PUT contract is established by a PATCH fixture."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Add an actual PUT fixture asserting the required template, Template/Environment/file handling, body/extensions, native 201/202 success codes and errors. Method existence alone is not completion evidence."
+      ]
+    },
+    {
+      "operation": "gophercloud:orchestration/v1/stacks.UpdatePatch",
+      "source_fingerprint": "681db7f0d69a94413835094dbb35f729f68c24c1e9456ec0090e5fad4ffd9418",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.UpdatePatch",
+        "gophercloudsdk/orchestration/v1/stacks.API.UpdatePatch",
+        "gophercloudsdk/orchestration/v1/stacks.WithUpdatePatchField"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH can omit a template and sends parameters, comma-joined tags and explicit false extension at the fixed name/ID endpoint; 204 succeeds.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Canceled scoped PATCH is rejected without a request.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go supplies concrete options and field extensions with a fixed canonical pair and returns error; the native template-optional PATCH behavior is preserved in the exercised subset."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit Template/Environment parsing and referenced-file merging, explicit empty versus omitted Tags/Parameters, all native success statuses 200/202/204 and HTTP/decode/option errors. The present PATCH fixture proves template omission, parameters/tags/false extension and 204, not the complete helper surface."
+      ]
+    },
+    {
+      "operation": "python:baremetal_introspection/v1/start_introspection",
+      "source_fingerprint": "d17d61c24b9e38f5cc30035cd85f8abcf7a32ae4e6795d2436f4b24335a8f1c4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection"
       ],
       "contracts": [
         {
@@ -62,7 +893,183 @@
         "baremetalintrospection/v1/introspection/README.md"
       ],
       "differences": [
-        "The SDK fixes the pinned native function that discards its serialized query; a private helper preserves that query and the original 202/error policy."
+        "Python returns an Introspection Resource after accepting the request; the Go API returns an error and exposes Resources for later lookup."
+      ],
+      "remaining": [
+        "Audit the Python node-object/name input and Introspection create/response state against a consistent Go node-reference operation."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_compute_quotas",
+      "source_fingerprint": "7a392424fbc5704386ecce3c02f0047acb83c841119dad75f6c4461ca15e431e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.WithIdentityClient",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Reset"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "The Go reset handles bodyless DELETE without fabricating a quota object and keeps strict 404 by default.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call.",
+        "Python cloud returns None; Go returns the reset request target and copied response headers."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_compute_quotas",
+      "source_fingerprint": "7bb86e57cef8befae1311712eda639802e1fa701f3bcf405425b51e36662fee9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.WithIdentityClient",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "The ordinary quota limits response and original HTTP/context causes are retained by the project singleton.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity.",
+        "Audit inherited normalized unknown quota attrs and usage/reservation dictionaries and compute maximum microversion selection."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/set_compute_quotas",
+      "source_fingerprint": "e442c18e8ed1de291f2c3940331247448e141fdc52968f96278730ff61f3bf57",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.WithIdentityClient",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Update",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "Go preserves explicit false/true and omitted force states for concrete quota updates.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited"
+          ]
+        }
+      ],
+      "differences": [
+        "The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call.",
+        "Python cloud forcibly replaces force with True and returns None; Go defaults to native/server force=False, permits explicit WithUpdateForce(True), and returns the updated quota model."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity.",
+        "Verify a cloud-compatible force=True wrapper or keep the explicit Go default policy documented while completing arbitrary attrs, response and error mapping."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_quota_set",
+      "source_fingerprint": "29796a3176fa37559e9befd8cd9e0fa5a7a6953fe2c719d0d544badfdf2b2d28",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.API.InProject",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Get",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Detail"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests",
+            "connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient",
+            "connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope"
+          ]
+        },
+        {
+          "behavior": "Python usage=False and usage=True endpoint choices have Go Get and Detail counterparts; the native detail triple remains intact.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns native typed limit/detail models plus raw fields and copied headers; Python common QuotaSet flattens limit values and separates usage/reservation dictionaries.",
+        "Go references explicitly distinguish IDs from exact project names, and the scope freezes the project once."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Additional fetch query parameters, including user/user_id variants, have no scoped Go mapping.",
+        "Audit inherited common QuotaSet.fetch/Resource.fetch response normalization, cache/skip_cache behavior, descriptor coercion and maximum microversion 2.56 selection before declaring whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_quota_set_defaults",
+      "source_fingerprint": "9310d7d06ea44ada7f4cacbe9d3de7163facdedb4b1e4a5fe0b13808a6875e3c",
+      "status": "unresolved",
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "The pinned proxy fetches /os-quota-sets/{projectID}/defaults; ProjectQuotaScope.Get uses the ordinary project endpoint and is not a defaults implementation.",
+        "Add a dedicated defaults contract and HTTP tests, then audit inherited QuotaSet/Resource response and microversion behavior."
       ]
     },
     {
@@ -98,36 +1105,497 @@
       ]
     },
     {
-      "operation": "python:baremetal_introspection/v1/start_introspection",
-      "source_fingerprint": "d17d61c24b9e38f5cc30035cd85f8abcf7a32ae4e6795d2436f4b24335a8f1c4",
+      "operation": "python:compute/v2/revert_quota_set",
+      "source_fingerprint": "1e631ccd77071b505259799d7b2a0904da3e7bd867e42215522d735f372b1f4e",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/baremetalintrospection/v1/introspection.API.StartIntrospection"
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Reset",
+        "gophercloudsdk/compute/v2/quotasets.WithResetIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Omitted, false and true manage_boot and escaped extension query values reach the POST URL.",
+          "behavior": "The no-query project reset uses bodyless DELETE and strict missing handling without an additional GET.",
           "tests": [
-            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions"
+            "api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound"
           ]
         },
         {
-          "behavior": "Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.",
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
           "tests": [
-            "api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP",
-            "api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause",
-            "api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext"
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
         }
       ],
-      "documentation": [
-        "baremetalintrospection/v1/introspection/README.md"
-      ],
       "differences": [
-        "Python returns an Introspection Resource after accepting the request; the Go API returns an error and exposes Resources for later lookup."
+        "Python returns None; Go returns ResetResponse with the project and copied headers and can explicitly ignore a 404."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
       ],
       "remaining": [
-        "Audit the Python node-object/name input and Introspection create/response state against a consistent Go node-reference operation."
+        "The Python proxy forwards arbitrary reset query parameters through Resource.delete; the scoped Go reset does not expose them or user-scoped reset.",
+        "Audit inherited Proxy._delete/QuotaSet/Resource missing, response, adapter and microversion behavior beyond the tested no-query project reset."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/update_quota_set",
+      "source_fingerprint": "1fc7b1c9a0d757aaa6374e25feadb1d7ba4720aa362e11475fe1e2c8510dc00d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Update",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateOptions",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateField",
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete project limit updates distinguish omission, zero, unlimited and explicit force=false, with a SDK-owned body builder and protected extension fields.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "The original HTTP status, body and response header remain in the error chain; 404 is additionally ErrNotFound and context cancellation/deadlines remain observable.",
+          "tests": [
+            "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses explicit pointer-valued native inputs and functional options instead of Resource dirty-field commits and arbitrary attrs.",
+        "The Go scope returns QuotaResource retaining native values/raw decoded fields/header; Python returns a mutable normalized QuotaSet."
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
+      ],
+      "remaining": [
+        "Map the optional user input and user_id update query.",
+        "Audit and map, or explicitly retire with a documented Go policy, the deprecated QuotaSet/project_id inputs and legacy query branch.",
+        "Audit inherited common QuotaSet body filtering of usage/reservation, unknown attrs, dirty/clean state, commit requests, descriptor coercion and microversion selection."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/abandon_stack",
+      "source_fingerprint": "a15592974beae82ead2d535ccf1273de14836969fedbbd284bc7bade580b134b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Abandon",
+        "gophercloudsdk/orchestration/v1/stacks.API.Abandon"
+      ],
+      "contracts": [],
+      "differences": [
+        "Python Stack.abandon returns resp.json without its own raise_from_response; Go uses native HTTP-200 validation and typed AbandonedStack extraction."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit Proxy._get_resource and Stack.abandon HTTP/JSON/error behavior including a Python Resource argument; add an actual scoped abandon fixture and reconcile unknown response fields. Binding or method existence does not verify abandonment."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/delete_stack",
+      "source_fingerprint": "f76daa1a107a6ab183936222265b6a2d83d6e414756ab2d13379a989d97db1c6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Delete",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Delete",
+        "gophercloudsdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the fixed name/ID without a lookup; default 404 is ignored and explicit strict 404 returns resource.ErrNotFound.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy"
+          ]
+        }
+      ],
+      "differences": [
+        "Go explicit references/complete identity and concrete missing-policy options replace Python string-or-Stack input and exceptions."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit Proxy._delete and inherited Resource.delete/existing identity, microversion, URL preparation and error policy; exercise native successful DELETE and authorization/server errors as well as the 404 policy before mapping the whole operation."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/find_stack",
+      "source_fingerprint": "52a0101c2ebb25ba7325762b661493e43d947c6d2414eedf77f96c97dd2f5b9b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Find",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Get",
+        "gophercloudsdk/orchestration/v1/stacks.API.InStack",
+        "gophercloudsdk/resource.WithIgnoreMissing",
+        "gophercloudsdk/orchestration/v1/stacks.WithResolveOutputs"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "Duplicate exact names across pages fail, strict absence fails and explicit ignore-missing returns nil; empty collection is non-nil.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies"
+          ]
+        },
+        {
+          "behavior": "The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders"
+          ]
+        }
+      ],
+      "differences": [
+        "Python defaults ignore_missing=True and returns a detailed Resource through Stack.find/fetch. Go requires explicit ID versus Name, defaults missing lookup to error and returns a summary for Name; duplicates are rejected using a full exact local scan."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit Proxy._find and the Resource existing/request/cache/response path used by direct Stack.find/fetch, including resolve_outputs forwarded through find_stack.",
+        "Add behavioral evidence for Python ambiguous/name redirect and DELETE_COMPLETE/ADOPT_COMPLETE filtering versus Go policies. Name Find does not accept WithResolveOutputs; obtaining details is a separate scoped Get."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/get_stack",
+      "source_fingerprint": "a323b027f5905caff34b2f9ada1b305fcb0173160fd7c571c2cffd9573519073",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Get",
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Get",
+        "gophercloudsdk/orchestration/v1/stacks.WithResolveOutputs"
+      ],
+      "contracts": [
+        {
+          "behavior": "A fixed name/ID GET returns a detailed native field model; parameter values, output presence, rollback=false, timeout and query omission/resolve_outputs=False are asserted.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders"
+          ]
+        },
+        {
+          "behavior": "Changed name/ID, missing/null objects, incomplete identity and bad timestamps fail; 403/404 retain an unexpected-response cause and strict 404 is resource.ErrNotFound.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackIdentityMismatchesAndHTTPErrorsArePreserved"
+          ]
+        },
+        {
+          "behavior": "Invalid compound identities, nil GET option and canceled GET fail without HTTP.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns a new typed StackResource and explicit error, retains DELETE_COMPLETE/ADOPT_COMPLETE data in normal GET and validates canonical identity. Python Stack.fetch mutates a Resource and treats those two complete states as NotFound."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit Proxy._get and Stack.fetch inherited request preparation, microversion/cache/skip_cache and response translation; cover existing Python Stack input as well as ID input.",
+        "Reconcile declared Python Stack response fields absent from the native model, including deletion_time, owner/parent IDs, environment/files/template and preview-change fields, before declaring the whole operation mapped."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/resources",
+      "source_fingerprint": "ac66e70f935db141759eeb2281151dd9a776cf3c6be75d46f4300a4ed01f041d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackresources.API.ForStack",
+        "gophercloudsdk/orchestration/v1/stackresources.API.InStack",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.List",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.All",
+        "gophercloudsdk/orchestration/v1/stackresources.StackScope.Find",
+        "gophercloudsdk/orchestration/v1/stackresources.ResourceView.Identity",
+        "gophercloudsdk/orchestration/v1/stackresources.API.ForResource"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resource routing uses resource_name independently from logical/physical IDs, retains native fields/timestamps and fixes the complete stack identity.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesKnownPairAndParentResolution",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesSinglePageModelsAndLocalFilters",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesExactFindRoutingAndMissing"
+          ]
+        },
+        {
+          "behavior": "Resource lists follow Heat single-page behavior, preserve nested owners, apply exact local name/status filters, ignore top-level next links, stop on break, and reject unsupported pagination/invalid queries before HTTP.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesSinglePageModelsAndLocalFilters",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesListAndWaitErrorCauses"
+          ]
+        },
+        {
+          "behavior": "A health mutation preserves false and its optional reason, preflights resource_name/owner, blocks unknown or different nested owners, and requires an explicit owning ResourceIdentity to target a child.",
+          "tests": [
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesNestedOwnerCannotMutateRoot",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesUnknownOwnerAndPhysicalFallbackAreBlocked",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP",
+            "api/heat_stackresources_contracts_test.go:TestHeatStackResourcesHealthHTTPErrorsAndMetadataDecodeCause"
+          ]
+        },
+        {
+          "behavior": "Raw resource Body retains unknown fields, explicit null and the exact integer 9007199254740993; response StatusCode and cloned headers are preserved without aliasing between list models or later GETs.",
+          "tests": [
+            "api/heat_stackresources_responses_test.go:TestHeatStackResourcesRetainRawFieldsAndIndependentHeaders"
+          ]
+        },
+        {
+          "behavior": "Malformed resources envelopes are rejected explicitly.",
+          "tests": [
+            "api/heat_stackresources_responses_test.go:TestHeatStackResourcesRejectMalformedListEnvelopes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go explicitly fixes stack name+canonical ID, uses resource_name as routing identity, and preserves nested actual owners rather than treating every result as root-owned.",
+        "Go rejects marker/limit and unknown server query keys before HTTP and maps results to native fields plus owner/detail/raw-response metadata rather than Python Resource objects."
+      ],
+      "documentation": [
+        "orchestration/v1/stackresources/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Python Stack.find/_find name-or-ID and object inputs, deleted/adopted-stack state policy, and full Resource.list/MRO/descriptor/cache/adapter behavior before whole-operation parity.",
+        "Audit Python client-side query/filter behavior and inherited pagination against the Heat server single-page restrictions, including unsupported marker/limit and all accepted filter forms.",
+        "Audit Python Resource unknown Body/URI state, alternate logical-resource ID, descriptor/date coercion and response/error policies separately; tested Go raw fields/header retention does not account for the complete inherited Resource surface."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/stack_events",
+      "source_fingerprint": "c57d9af064d81becb4fbe9344e9cd79f4744fadd153f25b46f778e1955157ab8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stackevents.API.InStack",
+        "gophercloudsdk/orchestration/v1/stackevents.API.ForStack",
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.ForResource",
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.List",
+        "gophercloudsdk/orchestration/v1/stackevents.ResourceEventScope.List",
+        "gophercloudsdk/orchestration/v1/stackevents.StackEventScope.All",
+        "gophercloudsdk/orchestration/v1/stackevents.ResourceEventScope.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact stack-name binding consumes all parent pages once, fixes both canonical components and keeps stack-wide and resource-specific event paths separate.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists"
+          ]
+        },
+        {
+          "behavior": "Explicit ID parent binding reuses canonical GET/redirect exactly once; later event reads issue no parent lookup and empty All results are non-nil.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsInStackIDReusesCanonicalLookup"
+          ]
+        },
+        {
+          "behavior": "Missing, duplicate and forbidden parents are reported rather than treated as empty event lists.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsParentErrorsAndDuplicateNamesRemainObservable"
+          ]
+        },
+        {
+          "behavior": "Stack list uses its canonical events path; typed marker/limit, repeated actions/statuses/resource names, resource_type and sort_keys/sort_dir plus nested_depth, escaped extension query and headers are asserted. Native fields, request identity, null/omission, large raw integers and summary/detail distinction are retained.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists"
+          ]
+        },
+        {
+          "behavior": "Last event ID becomes the next marker while page size, filters and headers remain; an empty page ends traversal and page response headers are independently retained.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationUsesLastEventMarkerAndEmptyPage"
+          ]
+        },
+        {
+          "behavior": "Resource list uses the distinct /resources/{logicalName}/events path, typed resource_name filter, nested_depth query and extension header; the next last-ID marker request ends on 204. Request resource name remains independent of the response name.",
+          "tests": [
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists"
+          ]
+        },
+        {
+          "behavior": "Resource-list repeated marker is rejected; between-item cancellation, malformed options and HTTP errors remain observable.",
+          "tests": [
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationRejectsRepeatedMarkerBeforeRefetch",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationStopsOnBreakAndCancellation",
+            "api/heat_stackevents_scope_test.go:TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions",
+            "api/heat_stackevents_pagination_test.go:TestHeatStackEventsPreservesGetAndPaginationHTTPErrors"
+          ]
+        }
+      ],
+      "differences": [
+        "Go fixes canonical stack identity and resource logical name once, provides typed immutable request metadata plus raw body/header and uses native marker traversal with cycle protection.",
+        "Go uses Heat sort_keys through native SortKey and HTTP query extensions; pinned Python StackEvent advertises sort_key. Empty resource name is rejected by ForResource instead of Python falsey resource_name selecting a whole-stack list."
+      ],
+      "documentation": [
+        "orchestration/v1/stackevents/README.md",
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Proxy._get/_list and StackEvent Resource/MRO query mapping, pagination, descriptors/cache/response hydration and Resource input behavior.",
+        "Add assertions for complete resource-scoped typed options and explicitly resolve Python sort_key versus Heat sort_keys compatibility; no inherited StackEvent.fetch parity is implied by the Go resource-scoped GET feature."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/stacks",
+      "source_fingerprint": "34a2edd378507bc1920adf9261230b4462d6689e2241af7f251ea76dcbfd3801",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.List",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.All",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk/resource.WithPageSize"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails"
+          ]
+        },
+        {
+          "behavior": "Positive limit advances last canonical ID as marker until an empty page; break avoids the next request and unchanged markers produce a cycle error before refetch.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerMarkerFallbackCycleAndBreak"
+          ]
+        },
+        {
+          "behavior": "An identical relative next URL produces a cycle error after one request; break skips next-link processing.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerRepeatedLinkUsesCommonGuard"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns typed summaries with Detailed=false rather than mutable Stack Resources; query names are HTTP names and Python project_id/tag aliases are not automatic Go aliases."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Proxy._list/Resource.list query transformation and descriptor/default handling, particularly project_id->tenant_id and CSV tag aliases any_tags/not_any_tags.",
+        "Verify all declared Python Stack summary/body fields and MRO list hydration/defaults; current tests prove selected native fields and linked/marker traversal, not complete Python Resource equivalence."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/update_stack",
+      "source_fingerprint": "23126b8a7e260a27c5337e23611062b5801e0c79d1085bd163babf6cc4a4bffb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Update",
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.UpdatePatch",
+        "gophercloudsdk/orchestration/v1/stacks.API.Update",
+        "gophercloudsdk/orchestration/v1/stacks.API.UpdatePatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH can omit a template and sends parameters, comma-joined tags and explicit false extension at the fixed name/ID endpoint; 204 succeeds.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Canceled scoped PATCH is rejected without a request.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go separates PUT from template-optional PATCH and returns error, while Python Stack.commit mutates Resource dirty state and translates a response.",
+        "Pinned Proxy.update_stack passes preview positionally to Stack.commit prepend_key, but Stack.commit preview is keyword-only; the source wiring must not be assumed to exercise a preview endpoint."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit inherited _get_resource/_prepare_request, dirty-body/id removal and response translation; provide PUT versus PATCH and preview behavior fixtures rather than treating the PATCH test as Python commit evidence.",
+        "Define and test compatibility for the pinned positional preview wiring, direct Stack.commit keyword-only preview, template/environment/files and incomplete name-or-ID paths."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/wait_for_delete",
+      "source_fingerprint": "ea69be26efb805dc5143013714f6c520fea337688de9d8572a3e952b86bdb4f0",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.WaitDeleted",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.WaitDeleted",
+        "gophercloudsdk/resource.Collection.WaitDeleted",
+        "gophercloudsdk/resource.WithTimeout",
+        "gophercloudsdk/resource.WithPollInterval"
+      ],
+      "contracts": [
+        {
+          "behavior": "Stack deletion wait succeeds on HTTP 404 or DELETE_COMPLETE, rejects DELETE_FAILED and preserves 403 as an HTTP error.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeDeletionWaitRecognizesCompletionFailureAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Canceled stack deletion waiting performs no HTTP.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go deletion wait returns error, uses a five-minute default and treats 404 or DELETE_COMPLETE as completion while ADOPT_COMPLETE is not inferred as deletion. Python returns the Resource and its Stack.fetch treats both complete states as NotFound."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit generic resource.wait_for_delete plus Stack.fetch and inherited polling, Resource mutation/progress callback and wait=None/default-120 behavior; add transient polling, timeout and in-flight cancellation/error fixtures before whole-operation mapping."
+      ]
+    },
+    {
+      "operation": "python:orchestration/v1/wait_for_status",
+      "source_fingerprint": "64174d19a894beb4a9ecd0ecc403d80161ba562a4b001c5b42e64ed77e49c8c3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/orchestration/v1/stacks.StackScope.Wait",
+        "gophercloudsdk/orchestration/v1/stacks.StackResources.Wait",
+        "gophercloudsdk/resource.Collection.Wait",
+        "gophercloudsdk/resource.WithTimeout",
+        "gophercloudsdk/resource.WithPollInterval"
+      ],
+      "contracts": [
+        {
+          "behavior": "Stack polling keeps the fixed name/ID, returns detailed CREATE_COMPLETE and terminates on CREATE_FAILED, UPDATE_FAILED or ROLLBACK_FAILED after exactly two requests.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeWaitUsesFixedPairAndDetectsFailedStates"
+          ]
+        },
+        {
+          "behavior": "Empty target status fails before HTTP.",
+          "tests": [
+            "api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go stack wait resolves once and polls canonical name/ID, defaults to five minutes/two seconds and treats *_FAILED or ERROR as terminal. Python Proxy delegates a generic Resource with custom failures/attribute/callback and wait=None."
+      ],
+      "documentation": [
+        "orchestration/v1/stacks/README.md"
+      ],
+      "remaining": [
+        "Audit inherited resource.wait_for_status and Utils polling including indefinite wait, custom failure lists/status attribute, progress callback, cached/mutated Resource, timeout and transport errors; scoped stack success/failure tests do not verify the full generic Proxy method.",
+        "Add stack wait timeout, in-flight cancellation and custom failure-policy evidence or document deliberately unsupported generic inputs."
       ]
     }
   ]
