@@ -810,33 +810,105 @@ func TestNovaQuotaUserRedirectRetainsCallerAndHTTPTimeoutContexts(t *testing.T) 
 		t.Run(strconv.FormatBool(httpTimeout), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			release := make(chan struct{})
+			arrived, release := make(chan struct{}), make(chan struct{})
 			t.Cleanup(func() { close(release) })
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				if calls.Add(1) == 1 {
+				switch calls.Add(1) {
+				case 1:
 					w.Header().Set("Location", r.URL.String())
 					w.WriteHeader(http.StatusTemporaryRedirect)
 					return
+				case 2:
+					close(arrived)
 				}
 				select {
 				case <-r.Context().Done():
 				case <-release:
 				}
 			})
+			var redirectRequest *http.Request
+			var redirectContext context.Context
 			cloud.Provider.HTTPClient.CheckRedirect = func(next *http.Request, via []*http.Request) error {
+				redirectRequest, redirectContext = next, next.Context()
 				*next = *next.WithContext(context.Background())
 				return nil
 			}
 			ctx := context.Background()
+			cancel := func() {}
+			expected := context.DeadlineExceeded
+			var sentContexts []context.Context
 			if httpTimeout {
-				cloud.Provider.HTTPClient.Timeout = 30 * time.Millisecond
+				// net/http installs Client.Timeout when sending each request,
+				// after CheckRedirect. Observe that deadline at the transport
+				// boundary without requiring the second handler to be scheduled.
+				cloud.Provider.HTTPClient.Timeout = 500 * time.Millisecond
+				transport := cloud.Provider.HTTPClient.Transport
+				if transport == nil {
+					transport = http.DefaultTransport
+				}
+				cloud.Provider.HTTPClient.Transport = novaQuotaTransport(func(req *http.Request) (*http.Response, error) {
+					sentContexts = append(sentContexts, req.Context())
+					return transport.RoundTrip(req)
+				})
 			} else {
-				var cancel context.CancelFunc
-				ctx, cancel = context.WithTimeout(ctx, 30*time.Millisecond)
-				defer cancel()
+				// A long deadline also checks deadline ownership. Cancellation
+				// is triggered by redirect arrival, rather than elapsed time.
+				ctx, cancel = context.WithTimeout(ctx, time.Hour)
+				expected = context.Canceled
 			}
-			if value, err := newNovaUserQuotaScope(t, cloud, "chosen-user").Reset(ctx); value != nil || !errors.Is(err, context.DeadlineExceeded) || calls.Load() != 2 {
-				t.Fatalf("reset=%v calls=%d err=%v", value, calls.Load(), err)
+			defer cancel()
+			scope := newNovaUserQuotaScope(t, cloud, "chosen-user")
+			type result struct {
+				value *quotasets.ResetResponse
+				err   error
+			}
+			done := make(chan result, 1)
+			go func() {
+				value, err := scope.Reset(ctx)
+				done <- result{value, err}
+			}()
+			if !httpTimeout {
+				select {
+				case <-arrived:
+					cancel()
+				case got := <-done:
+					t.Fatalf("reset finished before redirect arrival: reset=%v calls=%d err=%v", got.value, calls.Load(), got.err)
+				case <-time.After(5 * time.Second):
+					t.Fatal("redirect request did not arrive")
+				}
+			}
+			var got result
+			select {
+			case got = <-done:
+			case <-time.After(5 * time.Second):
+				t.Fatal("redirect lost caller cancellation or HTTP timeout")
+			}
+			if got.value != nil || !errors.Is(got.err, expected) {
+				t.Fatalf("reset=%v calls=%d err=%v", got.value, calls.Load(), got.err)
+			}
+			if redirectRequest == nil || redirectContext == nil {
+				t.Fatal("redirect policy was not entered")
+			}
+			if httpTimeout {
+				if len(sentContexts) == 0 {
+					t.Fatal("request did not reach the source transport")
+				}
+				deadline, present := sentContexts[0].Deadline()
+				if !present {
+					t.Fatal("HTTP client timeout was absent at the transport boundary")
+				}
+				for _, sent := range sentContexts[1:] {
+					other, present := sent.Deadline()
+					if !present || !other.Equal(deadline) {
+						t.Fatal("redirect changed the HTTP client timeout deadline")
+					}
+				}
+			} else {
+				before, beforeOK := redirectContext.Deadline()
+				after, afterOK := redirectRequest.Context().Deadline()
+				if !beforeOK || !afterOK || !before.Equal(after) || redirectRequest.Context().Done() != redirectContext.Done() {
+					t.Fatal("redirect policy replaced the original deadline or cancellation context")
+				}
 			}
 		})
 	}
