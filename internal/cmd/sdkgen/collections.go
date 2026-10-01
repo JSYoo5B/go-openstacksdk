@@ -35,6 +35,21 @@ type collectionPlan struct {
 	getIDType, deleteIDType     types.Type
 }
 
+// Only collection-planned typed slice pagers expose row/page controls. Other
+// native streams, including value streams and raw pages, retain their API.
+func collectionControlledLists(plan *collectionPlan, scopes []scopePlan) map[string]bool {
+	result := make(map[string]bool)
+	if plan != nil {
+		result[plan.lister.Name()] = true
+	}
+	for _, scope := range scopes {
+		result[scope.collection.lister.Name()] = true
+	}
+	return result
+}
+
+func controlledListName(operation string) string { return lower(operation) + "WithControl" }
+
 func simpleInput(fn *types.Func, ids int) (types.Type, bool) {
 	if fn == nil {
 		return nil, false
@@ -306,7 +321,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 			e.printf("return %s.%s(%s)},\n", receiver, plan.deleter.Name(), arguments(idArg))
 		}
 	}
-	e.printf("Iterate:func(ctx context.Context,q url.Values)iter.Seq2[*%s,error]{\n", plan.modelName)
+	e.printf("IterateControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*%s,error]{\n", plan.modelName)
 	e.use("maps")
 	e.printf("q=maps.Clone(q)\n")
 	if plan.nameQuery != "" && plan.nameQuery != "name" {
@@ -318,14 +333,14 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.printf("if value:=q.Get(\"status\");value!=\"\"{q.Set(%q,value);q.Del(\"status\")}\n", plan.statusQuery)
 	}
 	list := plan.lister.Name()
-	listArgs := strings.Join(append([]string{"ctx"}, parents...), ",")
+	listArgs := strings.Join(append(append([]string{"ctx"}, parents...), "control"), ",")
 	if plan.listInput == nil {
-		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, list, listArgs)
+		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, controlledListName(list), listArgs)
 	} else if plan.listQueryBuilder {
-		e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, list, listArgs)
+		e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, controlledListName(list), listArgs)
 	} else {
 		e.use("gophercloudsdk/request")
-		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, list, listArgs, list)
+		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, controlledListName(list), listArgs, list)
 	}
 	e.printf("},})")
 }

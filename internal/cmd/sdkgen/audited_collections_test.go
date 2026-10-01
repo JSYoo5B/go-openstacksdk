@@ -43,7 +43,7 @@ func TestAuditedNamedCollectionsUseInspectedIdentityAndReadOnlyPolicies(t *testi
 			}
 			e := emitter{pkg: pkg, imports: map[string]string{}}
 			emitCollectionAdapter(&e, plan, "a", nil)
-			if !strings.Contains(e.body.String(), "v."+spec.identifier) || !strings.Contains(e.body.String(), "a."+spec.getter) || !strings.Contains(e.body.String(), "a."+spec.lister) {
+			if !strings.Contains(e.body.String(), "v."+spec.identifier) || !strings.Contains(e.body.String(), "a."+spec.getter) || !strings.Contains(e.body.String(), "a."+controlledListName(spec.lister)) {
 				t.Fatalf("identity and native names were not emitted: %s", e.body.String())
 			}
 		})

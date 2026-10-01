@@ -135,10 +135,11 @@ func sdkPath(path string) string {
 }
 
 type emitter struct {
-	pkg           *types.Package
-	imports       map[string]string
-	sourceImports map[string]*types.Package
-	body          bytes.Buffer
+	pkg             *types.Package
+	imports         map[string]string
+	sourceImports   map[string]*types.Package
+	controlledLists map[string]bool
+	body            bytes.Buffer
 }
 
 func (e *emitter) use(path string) string {
@@ -278,7 +279,7 @@ func (g *generator) generate(path string) error {
 	if len(names) == 0 {
 		return nil
 	}
-	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports}
+	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports, controlledLists: collectionControlledLists(plan, scopes)}
 	e.use(pkg.Path())
 	e.use(upstreamModule)
 	specialized, hasSpecialized := specializedCollections[path]
@@ -561,6 +562,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	contextAlias := e.use("context")
 	requestAlias := e.use("gophercloudsdk/request")
 	params := []string{"ctx " + contextAlias + ".Context"}
+	forwardArgs := []string{"ctx"}
 	args := []string{}
 	clientIndex := clientParam(sig)
 	defaultOptions := strings.HasPrefix(op, "List") || strings.HasPrefix(op, "Delete") || strings.HasPrefix(op, "Get") || strings.HasPrefix(op, "Head") || strings.HasPrefix(op, "Download")
@@ -593,6 +595,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			}
 			if bi == 0 && !defaultOptions {
 				params = append(params, b.name+" "+e.typ(b.base))
+				forwardArgs = append(forwardArgs, b.name)
 			}
 			continue
 		}
@@ -607,8 +610,10 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		if sig.Variadic() && i == sig.Params().Len()-1 {
 			typeText = "..." + e.typ(v.Type().(*types.Slice).Elem())
 			args = append(args, name+"...")
+			forwardArgs = append(forwardArgs, name+"...")
 		} else {
 			args = append(args, name)
+			forwardArgs = append(forwardArgs, name)
 		}
 		params = append(params, name+" "+typeText)
 	}
@@ -634,6 +639,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			e.printf("func With%s%s(value %s) %sOption { return %s.WithArgument[%s](%q,value) }\n", op, title(b.name), e.typ(b.base), op, requestAlias, base, b.name)
 		}
 		params = append(params, "options ..."+op+"Option")
+		forwardArgs = append(forwardArgs, "options...")
 		for _, b := range builders {
 			if b.iface != nil {
 				emitBuilder(e, b)
@@ -647,6 +653,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			return fmt.Errorf("result options conflict with request options")
 		}
 		params = append(params, "options ..."+normalizer.options)
+		forwardArgs = append(forwardArgs, "options...")
 	}
 	resultExtractor, resultExtraction := operationExtractor(fn)
 	extractName := ""
@@ -674,6 +681,10 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		for i := 0; i < ex.Results().Len(); i++ {
 			returnTypes = append(returnTypes, ex.Results().At(i).Type())
 		}
+	}
+	controlled := e.controlledLists[op]
+	if controlled && (policy != "stream" || streamType == nil || streamValues) {
+		return fmt.Errorf("controlled collection list %s requires a typed slice pager", op)
 	}
 	if policy == "error" || policy == "direct-error" {
 		returnTypes = []types.Type{types.Universe.Lookup("error").Type()}
@@ -715,6 +726,22 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 	}
 	e.printf("\n// %s invokes the upstream API with library-owned builders and result handling.\nfunc (a *API) %s(%s) %s {\n", op, op, strings.Join(params, ","), returns)
+	if controlled {
+		resourceAlias := e.use("gophercloudsdk/resource")
+		// A control parameter precedes variadic options, keeping the public
+		// signature and its native option preparation unchanged.
+		position := len(params)
+		if len(forwardArgs) > 0 && strings.HasSuffix(forwardArgs[len(forwardArgs)-1], "...") {
+			position--
+		}
+		privateParams := append([]string(nil), params[:position]...)
+		privateParams = append(privateParams, "control "+resourceAlias+".ListControl")
+		privateParams = append(privateParams, params[position:]...)
+		delegateArgs := append([]string(nil), forwardArgs[:position]...)
+		delegateArgs = append(delegateArgs, resourceAlias+".ListControl{}")
+		delegateArgs = append(delegateArgs, forwardArgs[position:]...)
+		e.printf("return a.%s(%s)\n}\n\nfunc (a *API) %s(%s) %s {\n", controlledListName(op), strings.Join(delegateArgs, ","), controlledListName(op), strings.Join(privateParams, ","), returns)
+	}
 	errReturn := func() {
 		e.printf("err=%s.Wrap(%q,%q,err)\n", requestAlias, op, e.pkg.Name())
 		if policy == "normalize" {
@@ -794,7 +821,12 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				e.printf("return %s.StreamValues(ctx,%s,%s.%s)\n", resourceAlias, call, extractPackage, extractName)
 			} else {
 				pageAlias := e.use(upstreamModule + "/pagination")
-				e.printf("return %s.Stream(ctx,%s,func(page %s.Page)([]%s,error){values,err:=%s.%s(page);return []%s(values),err})\n", resourceAlias, call, pageAlias, e.typ(streamType), extractPackage, extractName, e.typ(streamType))
+				stream := "Stream"
+				control := ""
+				if controlled {
+					stream, control = "StreamWithControl", ",control"
+				}
+				e.printf("return %s.%s(ctx,%s,func(page %s.Page)([]%s,error){values,err:=%s.%s(page);return []%s(values),err}%s)\n", resourceAlias, stream, call, pageAlias, e.typ(streamType), extractPackage, extractName, e.typ(streamType), control)
 			}
 		} else {
 			e.printf("return %s.Pages(ctx,%s)\n", resourceAlias, call)
