@@ -40,7 +40,7 @@ gophercloudsdk/
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | metadata 생성·직접 업로드·선택적 대기 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
-Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, [floating IP 생성·연결](network/README.md)과 [이미지 직접 업로드](image/README.md)를 제공합니다. Senlin Profile·Policy는 [변경 추적과 Commit](clustering/v1/tracking/README.md)을 제공합니다. 다른 리소스의 변경 추적, floating IP 재사용·서버 생성과 자동 연결, 이미지 import 흐름과 안전한 바이너리 자동 재시도는 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다. Senlin은 [전용 상태·삭제 대기](clustering/v1/waiting/README.md), [고정 cluster의 policy 조회](clustering/v1/clusterpolicies/README.md), [node attribute 수집](clustering/v1/clusterattributes/README.md), [cluster metadata 관리](clustering/v1/clusters/metadata/README.md)를 제공합니다. [서버 계약 비교](docs/senlin-server-contracts.md)는 API reference와 실제 release 코드의 성공 코드·metadata 경로 차이를 기록합니다.
+Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, [floating IP 생성·연결](network/README.md)과 [이미지 직접 업로드](image/README.md)를 제공합니다. Senlin Profile·Policy는 [변경 추적과 Commit](clustering/v1/tracking/README.md)을 제공합니다. 다른 리소스의 변경 추적, floating IP 재사용·서버 생성과 자동 연결, 이미지 import 흐름과 안전한 바이너리 자동 재시도는 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다. Senlin은 [전용 상태·삭제 대기](clustering/v1/waiting/README.md), [고정 cluster의 policy 조회](clustering/v1/clusterpolicies/README.md), [node attribute 수집](clustering/v1/clusterattributes/README.md), [cluster metadata 관리](clustering/v1/clusters/metadata/README.md)와 [목록 행 수·첫 페이지 제어](clustering/v1/listing/README.md)를 제공합니다. [서버 계약 비교](docs/senlin-server-contracts.md)는 API reference와 실제 release 코드의 성공 코드·metadata 경로 차이를 기록합니다.
 
 ## 모든 서비스의 사용 문서
 
@@ -88,6 +88,7 @@ openstacksdk는 `Connection`에서 서비스 Proxy에 접근합니다. 이 프�
 | ID 참조 조회 | `conn.compute.find_server(id)` | `computeService.Servers.Find(ctx, resource.ID(id))` |
 | 목록 | `conn.compute.servers(status="ACTIVE")` | `computeService.Servers.List(ctx, resource.WithStatus("ACTIVE"))` |
 | 목록 수집 | `list(conn.compute.servers())` | `computeService.Servers.All(ctx)` |
+| 목록 제한 | `max_items=50`, `paginated=False` | `resource.WithMaxItems(50)`, `resource.WithPaginated(false)`; Senlin typed API는 `WithListMaxItems`, `WithListPaginated` |
 | 선택 인자 | keyword argument / 기본값 | 작업별 `With...` 옵션 / 문서화된 기본값 |
 | 확장 입력 | `**attrs`, `**query` | `compute.WithField(...)`, `resource.WithQuery(...)` |
 | 오류 | 예외 | 반환된 `error`, `errors.Is`, `errors.As` |
@@ -178,11 +179,18 @@ go run ./examples/create-server -name web-01 -image ubuntu -flavor small -networ
 | List | 모든 페이지를 lazy iterator로 순회; `break`하면 후속 페이지를 읽지 않음 |
 | All | 모든 결과를 메모리에 수집; 빈 목록은 빈 slice |
 | 페이지 크기 | `WithPageSize`는 페이지 크기이며 전체 결과 개수 제한이 아님 |
+| 로컬 목록 제한 | `WithMaxItems(50)`은 로컬 name/status 필터 전 raw 행 cap; 0 무제한, 음수는 순회 시 HTTP 전에 오류 |
+| 첫 페이지 | `WithPaginated(false)`는 continuation을 읽지 않음; 기본 true, page 경계 없는 custom iterator는 `ErrUnsupported` |
 | Wait | 대상 상태를 필수로 지정; 최대 5분, 간격 2초, context로 취소 가능 |
 | Create | 생성 응답 즉시 반환; `compute.WithWait()`면 ACTIVE까지 대기 |
 | 생성 후 대기 실패 | 생성된 서버와 오류를 함께 반환, 자동 삭제하지 않음 |
 
 같은 설정에 대한 옵션은 뒤에 지정한 값이 우선합니다. `WithName`은 항상 정확한 이름 필터로 적용되며 `WithQuery("name", ...)`보다 우선합니다. `WithQuery`로 전달하는 이름 필터는 서비스 자체의 의미를 따릅니다.
+
+목록 cap은 필터를 통과한 결과 수를 채우는 옵션이 아닙니다. Senlin은 raw 행을 decode·검증한
+뒤 cap에서 즉시 멈추지만 native Gophercloud는 페이지 전체 extraction 때문에 뒤쪽 malformed
+행의 오류도 반환할 수 있습니다. limit hint와 빈 페이지 종료는 서비스별 정책입니다.
+[공통 목록 정책](resource/README.md)과 [Senlin/Python 비교](clustering/v1/listing/README.md)를 참고하세요.
 
 원래 HTTP 오류는 보존됩니다. 403을 미존재로 취급하거나 생성으로 자동 전환하지 않습니다. `WithIgnoreMissing()`을 사용한 Find는 미존재일 때 `nil, nil`을 반환하므로 결과의 nil 여부를 확인해야 합니다.
 

@@ -29,11 +29,20 @@ Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에�
 
 | 연산 | 옵션 |
 |---|---|
-| 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithQuery` |
+| 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithMaxItems`, `WithPaginated`, `WithQuery` |
 | 조회/삭제 | `WithIgnoreMissing`, `WithMissingError` |
 | 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates`, `WithStatusAttribute`, `WithProgressCallback` |
 
-페이지 크기와 총 결과 수를 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는 크기이며 List/All은 후속 페이지도 읽습니다. 원하는 수에서 `break`하면 추가 페이지를 가져오지 않습니다.
+페이지 크기와 로컬 행 수 제한을 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는
+크기이며 기본 List/All은 후속 페이지도 읽습니다. `WithMaxItems(250)`은 서버 응답에서 decode한
+행을 로컬 name/status 필터 전에 최대 250개 소비합니다. 따라서 필터를 통과해 반환하는 결과는
+250개보다 적을 수 있습니다. 0은 무제한이고 음수는 lazy 순회가 시작될 때 HTTP 전에
+`ErrInvalidOption`입니다. 같은 설정은 마지막 옵션이 우선합니다.
+
+`WithPaginated(false)`는 첫 페이지만 읽습니다. MaxItems와 함께 사용하면 첫 페이지에서도
+cap에서 멈춥니다. 기본값과 `WithPaginated(true)`는 continuation을 허용합니다. cap 또는
+`break`에서 중단하면 추가 페이지를 가져오지 않습니다. wire limit hint는 서비스별 opt-in이며,
+공통 MaxItems가 모든 서버에 limit을 보내는 것은 아닙니다.
 
 iterator 사용 예제는 오류를 반환하는 함수 안에서 작성합니다:
 
@@ -48,6 +57,14 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 에러는 `(nil, error)`로 한 번 전달하고 순회를 종료합니다. iterator를 다시 순회하면 새로운 API 요청이 시작됩니다. All 도중 오류가 발생하면 부분 결과 대신 `nil, error`를 반환합니다.
 List를 만들 때 전달한 옵션 slice를 보관하므로 caller가 나중에 slice의 옵션을 바꾸어도
 기존 iterator의 동작은 바뀌지 않습니다. 옵션 적용과 검증은 각 순회가 시작될 때 수행합니다.
+
+Senlin REST bindings는 실제 소비한 행의 decode·검증 뒤 cap을 적용하고, 사용하지 않을
+후속 행이나 next link를 해석하지 않습니다. native Gophercloud pager는 페이지 전체를 먼저
+Extract하므로 cap 뒤 malformed 행도 extraction 오류를 낼 수 있습니다. page 경계가 없는
+custom Iterate는 cap을 적용하지만 first-page 제어를 지원하지 않으면
+`WithPaginated(false)`에 `ErrUnsupported`입니다. 빈 페이지 continuation 정책도 binding에
+따릅니다. Senlin의 typed 옵션·limit hint·Python과의 차이는
+[목록 제어](../clustering/v1/listing/README.md)에 있습니다.
 
 서버의 `next` URL 또는 marker가 이전에 요청한 페이지를 반복하면 추가 요청 전에 `ErrPaginationCycle`로 중단합니다. 같은 URL의 query 순서가 바뀌어도 반복으로 판정합니다. `PaginationCycleError.URL`에는 반복한 링크가 들어 있습니다. 이 정책은 서비스의 typed List, 공통 Collection, page 단위 iterator에 함께 적용됩니다. 소비자가 `break`하면 다음 링크 검사와 후속 요청을 하지 않습니다.
 
@@ -88,3 +105,27 @@ Collection과 서비스 객체의 zero value는 사용하지 않습니다. `Conn
 부모가 필요한 리소스는 [범위 객체](../docs/scoped-resources.md)를 사용합니다. `dns.RecordSets.InZone(ctx, resource.Name("example.org."))`처럼 부모를 한 번 해석하고, 반환된 객체의 Find/List/Delete/Wait와 Create/Update가 같은 부모를 사용합니다. 기본 식별자 검증은 빈 ID, `.`, `..`와 URL 경로·query 문자가 들어간 ID를 요청 전에 거부합니다.
 
 테스트는 [collection_test.go](collection_test.go)와 [서비스 공통 통합 테스트](../collections_test.go)에 있습니다.
+
+## 목록 제어 함수 예제
+
+준비된 collection을 받아 첫 페이지에서 최대 5개의 raw 행을 소비하는 함수입니다.
+
+```go
+package example
+
+import (
+    "context"
+    "fmt"
+
+    "gophercloudsdk/resource"
+)
+
+func PrintFirstPage[T any](ctx context.Context, collection *resource.Collection[T]) error {
+    for value, err := range collection.List(ctx,
+        resource.WithMaxItems(5), resource.WithPaginated(false)) {
+        if err != nil { return err }
+        fmt.Println(value)
+    }
+    return nil
+}
+```
