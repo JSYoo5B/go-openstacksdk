@@ -3,18 +3,20 @@ package accelerator
 
 import (
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/accelerator/v2/acceleratorrequests"
 	"gophercloudsdk/accelerator/v2/deployables"
 	"gophercloudsdk/accelerator/v2/devices"
 )
 
 type Service struct {
-	client      *gophercloud.ServiceClient
-	Deployables *deployables.API
-	Devices     *devices.API
+	client              *gophercloud.ServiceClient
+	Deployables         *deployables.API
+	Devices             *devices.API
+	AcceleratorRequests *acceleratorrequests.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, Deployables: deployables.New(client), Devices: devices.New(client)}
+	return &Service{client: client, Deployables: deployables.New(client), Devices: devices.New(client), AcceleratorRequests: acceleratorrequests.New(client)}
 }
 
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

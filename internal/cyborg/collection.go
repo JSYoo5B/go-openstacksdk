@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -78,14 +79,25 @@ func JSONResponse(ctx context.Context, client *gophercloud.ServiceClient, method
 	if err != nil {
 		return nil, nil, err
 	}
-	var raw json.RawMessage
-	response, err := guarded.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, MoreHeaders: headers, OkCodes: codes})
+	response, err := guarded.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, KeepResponseBody: true, MoreHeaders: headers, OkCodes: codes})
 	var meta *common.Metadata
 	if response != nil {
 		value := ResponseMetadata(response)
 		meta = &value
 	}
-	return raw, meta, err
+	if err != nil {
+		return nil, meta, err
+	}
+	defer response.Body.Close()
+	raw, err := io.ReadAll(response.Body)
+	if err != nil {
+		return raw, meta, err
+	}
+	var decoded json.RawMessage
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		return raw, meta, err
+	}
+	return decoded, meta, nil
 }
 
 // DecodeSingleMutation accepts a flat object, a singular envelope, or exactly
