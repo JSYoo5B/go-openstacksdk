@@ -13,7 +13,7 @@ instanceha/v1 API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. Python의 permissive flat/empty 응답 fallback과 달리 각 endpoint의 명시한 object envelope를 검증합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산·Python 대응을 확인합니다. marker fallback·nullable 입력·Resource/cache와 proxy wait의 전체 계약은 추가 비교가 필요합니다.
+Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산과 [대기 정책](waiting/README.md)의 두 proxy wait 대응을 확인합니다. 네 fetch 가능한 리소스의 WaitForStatus/WaitForDelete는 무제한·ERROR 실패·2초 간격 상태 대기와 120초 삭제 대기를 제공합니다. Host·VMove는 고정 부모 범위를 유지하고 VMove GET은 1.3 이상을 재검사합니다. 전체 17개 직접 선언 연산에 대응하는 API를 제공하며 marker fallback·nullable 입력·Resource/cache의 전체 계약은 추가 비교가 필요합니다.
 
 ## Go 사용
 

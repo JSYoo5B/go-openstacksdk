@@ -59,4 +59,9 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 	if !strings.Contains(read("instanceha/v1/README.md"), "conn.instance_ha") {
 		t.Fatal("Python service name missing")
 	}
+	for _, part := range []string{"waiting/README.md", "17개 직접 선언", "WaitForStatus/WaitForDelete", "120초 삭제 대기", "고정 부모 범위"} {
+		if !strings.Contains(read("instanceha/v1/README.md"), part) {
+			t.Fatalf("missing Masakari wait capability %q", part)
+		}
+	}
 }
