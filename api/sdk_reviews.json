@@ -4992,6 +4992,13 @@
           "tests": [
             "api/clustering_read_test.go:TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot"
           ]
+        },
+        {
+          "behavior": "With an explicit positive limit, every nonempty page including a short page advances by its retained raw response ID; consumer model mutation cannot replace the wire marker and an empty page ends the stream.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadShortPagesContinueUsingUnchangedWireIDs",
+            "internal/rest/list_short_page_test.go:TestListShortPageMarkerPolicyUsesWireRowsAndStopsOnEmptyPage"
+          ]
         }
       ],
       "differences": [
@@ -5020,6 +5027,13 @@
           "behavior": "Concrete/default query values and defensive snapshots preserve service-specific filters, raw responses and actual list capability.",
           "tests": [
             "api/clustering_read_test.go:TestClusteringReadEventRepeatedFiltersSnapshotAndExactBody"
+          ]
+        },
+        {
+          "behavior": "With an explicit positive limit, every nonempty page including a short page advances by its retained raw response ID; consumer model mutation cannot replace the wire marker and an empty page ends the stream.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadShortPagesContinueUsingUnchangedWireIDs",
+            "internal/rest/list_short_page_test.go:TestListShortPageMarkerPolicyUsesWireRowsAndStopsOnEmptyPage"
           ]
         }
       ],
@@ -5780,6 +5794,459 @@
       "remaining": [
         "Verify the server wire marker and required no-link fallback for VMove rows, including responses that omit UUID.",
         "Map inherited paginated/base_path/max_items/JSONPath and local query/filter consumption."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/create_profile",
+      "source_fingerprint": "f6dfe09a56354dbfefd0e7f8a2b9f19aaf4267a594a0d1ceea839640ddda1d3e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST201 sends a single resource object with required name and spec; library-owned JSON options retain nested false, exact numbers and independent option reuse, while core/identity/header collisions fail before HTTP.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence",
+            "api/clustering_profiles_test.go:TestClusteringProfilesMetadataPresenceAndOptionsReuse",
+            "api/clustering_profiles_test.go:TestClusteringProfilesMutationSchemaAndProtectedExtensionsPreflight",
+            "api/clustering_profiles_test.go:TestClusteringProfilesAcceptedMalformedMutationNeverResends"
+          ]
+        },
+        {
+          "behavior": "A custom option that changes the configured service type is rejected by the final source validation before sending the prepared POST.",
+          "tests": [
+            "api/clustering_mutation_recheck_test.go:TestClusteringMutationsRecheckConfiguredSourceAfterOptions"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_profile",
+      "source_fingerprint": "ec9f67a3f5e18f14fa1c162401f3b0488d41fbf25da959c2adcb2153f0311779",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 routes a controller name, UUID or short ID directly and decodes only the documented singular object envelope, preserving null/missing identities and raw HTTP response evidence.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence",
+            "api/clustering_profiles_test.go:TestClusteringProfilesAcceptedMalformedMutationNeverResends",
+            "api/clustering_profiles_test.go:TestClusteringProfilesExplicitSuccessCodesAndNativeErrors"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/delete_profile",
+      "source_fingerprint": "82f48dcfaea32d751d6142f43e9c324aa50a51b181783ac7fe4eb07ebb7a6693",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE204 uses an explicit route or one exact-name lookup; ignored404 remains the default, strict404/403/409 preserve causes, and a missing resolved response ID cannot delete the collection path.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesDeleteIgnoresOnlyAbsence",
+            "api/clustering_profiles_test.go:TestClusteringProfilesContextAndClientValidationBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "The shared Collection validates a resolved identity with the binding before Delete, preventing empty, whitespace or a wrong-kind ID from becoming a collection-path request.",
+          "tests": [
+            "resource/delete_identity_test.go:TestDeleteNameValidatesResolvedIdentityBeforeMutation"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/validate_profile",
+      "source_fingerprint": "d4c5f098672e9ea4a6bfd65a0c9635a8a89b8d77b25ddad68b49f8c00ce0fe0c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST200 to the resource validate endpoint requires a selected numeric microversion>=1.2 before HTTP, sends the spec object and preserves nullable result identity and precise JSON fields.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesValidateVersionBodyAndNullableIdentity",
+            "api/clustering_profiles_test.go:TestClusteringProfilesAcceptedMalformedMutationNeverResends",
+            "api/clustering_profiles_test.go:TestClusteringProfilesMutationSchemaAndProtectedExtensionsPreflight"
+          ]
+        },
+        {
+          "behavior": "A custom option that demotes the selected microversion from 1.2 to 1.1 is rejected after body preparation and before the validation POST.",
+          "tests": [
+            "api/clustering_mutation_recheck_test.go:TestClusteringMutationsRecheckConfiguredSourceAfterOptions"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_profile",
+      "source_fingerprint": "dcb9501a8ffdab3262b27b432013571824620a7d2a32b5ef693935c866c22e84",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence",
+            "api/clustering_profiles_test.go:TestClusteringProfilesNameUpdateFindDefaultsAndAmbiguity",
+            "api/clustering_profiles_test.go:TestClusteringProfilesMetadataPresenceAndOptionsReuse",
+            "api/clustering_profiles_test.go:TestClusteringProfilesDefaultsInvalidOptionsAndEmptyUpdatePreflight"
+          ]
+        },
+        {
+          "behavior": "Name resolution cannot mutate the prepared body or cloned headers; an invalid selected version introduced during lookup prevents the subsequent PATCH.",
+          "tests": [
+            "api/clustering_profiles_update_snapshot_test.go:TestClusteringProfilesUpdateSnapshotsHeadersBeforeLookupAndRechecksVersion"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare and implement the cached Resource lifecycle: dirty-field detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics.",
+        "Review inherited Body normalization and nullable mutable attributes against server schemas before declaring the entire update proxy equivalent."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/profiles",
+      "source_fingerprint": "f5780d484e189d8e4d151d7eeecb43c09035b345c09401216bb76a889af6614d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy typed queries preserve selected filters and explicit false across links and last-wire-ID marker fallback, including short pages; local Body subsets, arrays, aliases and exact numeric filters never become server queries.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesListShortPagesLocalFiltersAndSnapshot",
+            "api/clustering_profiles_test.go:TestClusteringProfilesLocalJSONFilterTypesArraysAndNull",
+            "api/clustering_profiles_test.go:TestClusteringProfilesPaginationGuardsAndConsumerControl"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
+        "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
+        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map inherited paginated, base_path, max_items and proxy JMESPath controls, including the pinned Python raw-row counting rule before local filters.",
+        "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/find_profile",
+      "source_fingerprint": "f62a000a2d8b37fa894aa4843f1d642a9d1630f9c1e3282ee078795bb7013f06",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiles.API.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "The direct convenience defaults to ignored absence with a caller strict override, while explicit ID and exact Name references separate routing from name searches and reject duplicate names.",
+          "tests": [
+            "api/clustering_profiles_test.go:TestClusteringProfilesNameUpdateFindDefaultsAndAmbiguity",
+            "api/clustering_profiles_test.go:TestClusteringProfilesDeleteIgnoresOnlyAbsence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
+        "API.Find defaults to ignored absence, matching the Python proxy. Resources.Find retains the shared strict default; Go explicit Name searches the collection without an ID-first GET."
+      ],
+      "documentation": [
+        "clustering/v1/profiles/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare the combined-string ID-first lookup and 400/403/404 fallback to lists, plus inherited Resource input and additional list/URI parameters."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/create_policy",
+      "source_fingerprint": "46ba54efdd03cbcd99e364d5ac83ef8b20cb567b86c82f8915d47da9ff6736f1",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST201 sends a single resource object with required name and spec; library-owned JSON options retain nested false, exact numbers and independent option reuse, while core/identity/header collisions fail before HTTP.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyCreateEnvelopePrecisionAndOptionsSnapshot",
+            "api/clustering_policies_test.go:TestClusteringPolicyCreateSpecConvenienceSnapshotsObjects",
+            "api/clustering_policies_test.go:TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions",
+            "api/clustering_policies_test.go:TestClusteringPolicyAcceptedMalformedMutationDoesNotResend"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_policy",
+      "source_fingerprint": "d849471b34de6853d6d990de9473efa88cae9a72d26dbd2f223731ea6f38c8bb",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 routes a controller name, UUID or short ID directly and decodes only the documented singular object envelope, preserving null/missing identities and raw HTTP response evidence.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyGetIdentityNullAndEnvelopeEvidence",
+            "api/clustering_policies_test.go:TestClusteringPolicyRejectsWrongSuccessCodeAndPreservesHTTPError"
+          ]
+        },
+        {
+          "behavior": "Missing, null and malformed accepted objects retain the exact HTTP body, status and header without a repeated request; an undeclared 201 response is rejected.",
+          "tests": [
+            "api/clustering_policies_response_test.go:TestClusteringPolicyGetAndValidateRetainMalformedAcceptedResponseEvidence",
+            "api/clustering_policies_response_test.go:TestClusteringPolicyGetAndValidateRejectUndeclaredSuccessCodes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/delete_policy",
+      "source_fingerprint": "09cf7d44d3828aa700cb03170b9779e2aeeceee914f199ea7d182f67461ba0b3",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE204 uses an explicit route or one exact-name lookup; ignored404 remains the default, strict404/403/409 preserve causes, and a missing resolved response ID cannot delete the collection path.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyFindDefaultsAmbiguityAndDeleteConflict",
+            "api/clustering_policies_test.go:TestClusteringPolicyDeleteSuccessAndMissingResponseIDCannotBeUsed"
+          ]
+        },
+        {
+          "behavior": "The shared Collection validates a resolved identity with the binding before Delete, preventing empty, whitespace or a wrong-kind ID from becoming a collection-path request.",
+          "tests": [
+            "resource/delete_identity_test.go:TestDeleteNameValidatesResolvedIdentityBeforeMutation"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/validate_policy",
+      "source_fingerprint": "b3d895bd02045c2abdb6c4f7fd9a3480742ad352eee670471f113612e9bf9e52",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST200 to the resource validate endpoint requires a selected numeric microversion>=1.2 before HTTP, sends the spec object and preserves nullable result identity and precise JSON fields.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyValidateVersionGateAndPrecision",
+            "api/clustering_policies_test.go:TestClusteringPolicyContextAndVersionHeadersPreflight"
+          ]
+        },
+        {
+          "behavior": "A custom option that demotes the selected microversion from 1.2 to 1.1 is rejected after body preparation and before the validation POST.",
+          "tests": [
+            "api/clustering_mutation_recheck_test.go:TestClusteringMutationsRecheckConfiguredSourceAfterOptions"
+          ]
+        },
+        {
+          "behavior": "Missing, null and malformed accepted objects retain the exact HTTP body, status and header without a repeated request; an undeclared 201 response is rejected.",
+          "tests": [
+            "api/clustering_policies_response_test.go:TestClusteringPolicyGetAndValidateRetainMalformedAcceptedResponseEvidence",
+            "api/clustering_policies_response_test.go:TestClusteringPolicyGetAndValidateRejectUndeclaredSuccessCodes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_policy",
+      "source_fingerprint": "0955a7e39cf5408174368a76199fc97c4016677d2b82f7b212eab65582f1feab",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyUpdateNameResolvedOnceAndInputsFrozen",
+            "api/clustering_policies_test.go:TestClusteringPolicyUpdateIDSkipsLookupAndSnapshotCanBeReused",
+            "api/clustering_policies_test.go:TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare and implement the cached Resource lifecycle: dirty-field detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics.",
+        "Review inherited Body normalization and nullable mutable attributes against server schemas before declaring the entire update proxy equivalent."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/policies",
+      "source_fingerprint": "5e4b27b208807f9c9a4e3860163783886d6c1d67110facf32c3527702529f7fd",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy typed queries preserve selected filters and explicit false across links and last-wire-ID marker fallback, including short pages; local Body subsets, arrays, aliases and exact numeric filters never become server queries.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyListShortPagesRetainFiltersAndSnapshot",
+            "api/clustering_policies_test.go:TestClusteringPolicyLocalFiltersSnapshotExactNumbersAndNull",
+            "api/clustering_policies_test.go:TestClusteringPolicyListDefaultBreakAndInvalidExtensions",
+            "api/clustering_policies_test.go:TestClusteringPolicyNameGrammarAndInFlightListCancellation"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
+        "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
+        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map inherited paginated, base_path, max_items and proxy JMESPath controls, including the pinned Python raw-row counting rule before local filters.",
+        "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/find_policy",
+      "source_fingerprint": "d97e7c31122cb1e35717170770ed8a67c266a5e80f01badb1f4e151922627370",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policies.API.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "The direct convenience defaults to ignored absence with a caller strict override, while explicit ID and exact Name references separate routing from name searches and reject duplicate names.",
+          "tests": [
+            "api/clustering_policies_test.go:TestClusteringPolicyFindDefaultsAmbiguityAndDeleteConflict"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
+        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
+        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
+        "API.Find defaults to ignored absence, matching the Python proxy. Resources.Find retains the shared strict default; Go explicit Name searches the collection without an ID-first GET."
+      ],
+      "documentation": [
+        "clustering/v1/policies/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare the combined-string ID-first lookup and 400/403/404 fallback to lists, plus inherited Resource input and additional list/URI parameters."
       ]
     }
   ]

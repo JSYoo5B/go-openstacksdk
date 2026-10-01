@@ -459,7 +459,9 @@ func TestClusteringPolicyLocalFiltersSnapshotExactNumbersAndNull(t *testing.T) {
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc("GET /senlin/v1/policies", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		if r.URL.RawQuery != "" { t.Error("local filters leaked to wire", r.URL) }
+		if r.URL.RawQuery != "" {
+			t.Error("local filters leaked to wire", r.URL)
+		}
 		testcloud.JSON(w, 200, `{"policies":[{"id":"yes","project":"project-1","domain":null,"spec":{"properties":{"number":9007199254740993,"enabled":false,"extra":1}},"data":{"ordered":[1,2]}},{"id":"rounded","project":"project-1","spec":{"properties":{"number":9007199254740992,"enabled":false}},"data":{"ordered":[1,2]}},{"id":"numeric-bool","project":"project-1","spec":{"properties":{"number":9007199254740993,"enabled":0}},"data":{"ordered":[1,2]}},{"id":"reversed","project":"project-1","spec":{"properties":{"number":9007199254740993,"enabled":false}},"data":{"ordered":[2,1]}},{"id":"missing-null","project":"project-1","spec":{"properties":{"number":9007199254740993,"enabled":false}},"data":{"ordered":[1,2]}}]}`)
 	})
 	input := map[string]any{"properties": map[string]any{"number": json.Number("9007199254740993.0"), "enabled": false}}
@@ -468,12 +470,22 @@ func TestClusteringPolicyLocalFiltersSnapshotExactNumbersAndNull(t *testing.T) {
 	api := policies.New(cloud.Client("clustering", "/senlin/v1"))
 	for range 2 {
 		values, err := api.All(context.Background(), option, policies.WithListFilter("project_id", "project-1"), policies.WithListFilter("domain_id", nil), policies.WithListFilter("data", map[string]any{"ordered": []int{1, 2}}))
-		if err != nil || len(values) != 2 || values[0].ID != "yes" || values[1].ID != "missing-null" { t.Fatal(values, err) }
+		if err != nil || len(values) != 2 || values[0].ID != "yes" || values[1].ID != "missing-null" {
+			t.Fatal(values, err)
+		}
 	}
-	if calls.Load() != 2 { t.Fatal(calls.Load()) }
+	if calls.Load() != 2 {
+		t.Fatal(calls.Load())
+	}
 	invalid := []policies.ListOption{policies.WithListFilter("unknown", 1), policies.WithListFilter("spec", make(chan int)), policies.WithListQuery("spec", "wire"), request.WithArgument[policies.ListOpts]("policies.local_filters", "wrong-type"), request.WithArgument[policies.ListOpts]("policies.local_filters", map[string]json.RawMessage{"spec": json.RawMessage(`{`)})}
-	for _, option := range invalid { if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) { t.Fatal(err) } }
-	if calls.Load() != 2 { t.Fatal(calls.Load()) }
+	for _, option := range invalid {
+		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
+	}
+	if calls.Load() != 2 {
+		t.Fatal(calls.Load())
+	}
 }
 
 func TestClusteringPolicyDeleteSuccessAndMissingResponseIDCannotBeUsed(t *testing.T) {
@@ -485,10 +497,18 @@ func TestClusteringPolicyDeleteSuccessAndMissingResponseIDCannotBeUsed(t *testin
 	})
 	cloud.Mux.HandleFunc("DELETE /senlin/v1/policies/explicit-id", func(w http.ResponseWriter, r *http.Request) { deletes.Add(1); w.WriteHeader(204) })
 	api := policies.New(cloud.Client("clustering", "/senlin/v1"))
-	if err := api.Delete(context.Background(), resource.ID("explicit-id")); err != nil { t.Fatal(err) }
-	if err := api.Delete(context.Background(), resource.Name("null-id")); !errors.Is(err, resource.ErrInvalidOption) { t.Fatal(err) }
-	if _, err := api.Update(context.Background(), resource.Name("null-id"), policies.UpdateOpts{}, policies.WithUpdateName("new-name")); !errors.Is(err, resource.ErrInvalidOption) { t.Fatal(err) }
-	if lists.Load() != 2 || deletes.Load() != 1 { t.Fatal(lists.Load(), deletes.Load()) }
+	if err := api.Delete(context.Background(), resource.ID("explicit-id")); err != nil {
+		t.Fatal(err)
+	}
+	if err := api.Delete(context.Background(), resource.Name("null-id")); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(err)
+	}
+	if _, err := api.Update(context.Background(), resource.Name("null-id"), policies.UpdateOpts{}, policies.WithUpdateName("new-name")); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(err)
+	}
+	if lists.Load() != 2 || deletes.Load() != 1 {
+		t.Fatal(lists.Load(), deletes.Load())
+	}
 }
 
 func TestClusteringPolicyNameGrammarAndInFlightListCancellation(t *testing.T) {
@@ -502,15 +522,23 @@ func TestClusteringPolicyNameGrammarAndInFlightListCancellation(t *testing.T) {
 	})
 	api := policies.New(cloud.Client("clustering", "/senlin/v1"))
 	for _, name := range []string{"1first", "한글", "space name", "bad/name", strings.Repeat("a", 255)} {
-		if _, err := api.Create(context.Background(), policies.CreateOpts{Name: name, Spec: json.RawMessage(`{}`)}); !errors.Is(err, resource.ErrInvalidOption) { t.Fatal(name, err) }
+		if _, err := api.Create(context.Background(), policies.CreateOpts{Name: name, Spec: json.RawMessage(`{}`)}); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(name, err)
+		}
 	}
 	var yielded int
 	for value, err := range api.List(ctx) {
 		if yielded == 0 {
-			if err != nil || value.ID != "one" { t.Fatal(value, err) }
+			if err != nil || value.ID != "one" {
+				t.Fatal(value, err)
+			}
 			cancel()
-		} else if value != nil || !errors.Is(err, context.Canceled) { t.Fatal(value, err) }
+		} else if value != nil || !errors.Is(err, context.Canceled) {
+			t.Fatal(value, err)
+		}
 		yielded++
 	}
-	if yielded != 2 || calls.Load() != 1 { t.Fatal(yielded, calls.Load()) }
+	if yielded != 2 || calls.Load() != 1 {
+		t.Fatal(yielded, calls.Load())
+	}
 }
