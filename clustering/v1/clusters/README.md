@@ -6,7 +6,7 @@ Connection은 인증된 client와 선택한 numeric microversion을 공유합니
 
 | openstacksdk | Go | HTTP 계약 |
 |---|---|---|
-| `create_cluster(**attrs)` | `Clusters.Create(ctx, opts, options...)` | POST `/clusters`, 201 + cluster |
+| `create_cluster(**attrs)` | `Clusters.Create(ctx, opts, options...)` | POST `/clusters`, 201 또는 202 + cluster; 202는 action Location 필수 |
 | `get_cluster(identity)` | `Clusters.Get(ctx, identity)` | GET `/clusters/{identity}`, 200 |
 | `clusters(**query)` | `Clusters.List` / `All` | GET `/clusters`, 200 |
 | `update_cluster(identity, **attrs)` | `Clusters.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + cluster와 Location |
@@ -49,8 +49,14 @@ GET을 하지 않습니다. name은 ASCII 문자로 시작하고 ASCII 문자·�
 
 `Cluster.ID`와 action ID는 별개입니다. 응답의 숫자는 `*json.Number`, config/metadata/data와
 dependents는 raw JSON 값으로 보존합니다. 사용자 metadata는 `UserMetadata`, HTTP와 원래
-필드는 `Header`, `StatusCode`, `Body`에 있습니다. 생성 응답에 Location이 있으면
-`Operation`에도 action 참조와 원문 응답을 보존합니다.
+필드는 `Header`, `StatusCode`, `Body`에 있습니다. Create는 공개 API reference의 201과
+Senlin 16.0.0 router의 202를 모두 허용합니다. 202에서는 유효한 action Location이 필수이며
+`Operation`에 action 참조와 원문 응답·header·실제 status를 보존합니다. 201은 Location을
+생략할 수 있고 그때 Operation은 nil입니다. 201에 Location이 있으면 같은 action URI 검증을
+적용합니다. Create는 action을 자동 조회하거나 완료를 기다리지 않으며, 잘못된 accepted
+응답은 증거를 보존한 `resource.ResponseError`로 반환하고 재전송하지 않습니다.
+[16.0.0 source audit](../../../docs/senlin-server-contracts.md)은 공개 문서와 release 코드의
+차이를 기록하며 실제 cloud 검증과 구분합니다.
 
 ## 수정과 null
 
