@@ -18,6 +18,10 @@ import (
 // SDK service packages construct it; normal SDK callers do not implement adapters.
 type Adapter[T any] struct {
 	Kind string
+	// IdentityFind opts an audited SDK binding into GET-first identity lookup.
+	// Numeric IDs, opaque keys and hierarchical controllers require a separate
+	// binding audit; Get/List availability alone does not enable this capability.
+	IdentityFind bool
 	// ValidateID is supplied by SDK bindings whose identifiers are not ordinary
 	// URL segments, such as Swift object keys. Such bindings also own URL escaping.
 	ValidateID func(string) error
