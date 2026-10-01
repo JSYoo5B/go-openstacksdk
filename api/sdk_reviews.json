@@ -6349,7 +6349,7 @@
       ],
       "contracts": [
         {
-          "behavior": "POST201 cluster creation preserves omitted capacity/size/timeout defaults, explicit zero/-1/null and raw config/metadata, requiring name/profile_id and retaining a supplied action Location.",
+          "behavior": "POST201 published and POST202 controller creation preserve omitted capacity/size/timeout defaults, explicit zero/-1/null and raw config/metadata, require name/profile_id, and preserve an optional201 or mandatory202 action Location.",
           "tests": [
             "api/clustering_clusters_test.go:TestClusteringClustersCreateGetExactModelAndSubmission",
             "api/clustering_clusters_test.go:TestClusteringClustersCreateDefaultsOmitOptionalFields",
@@ -6359,17 +6359,27 @@
             "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
             "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
           ]
+        },
+        {
+          "behavior": "The verified16.0.0 router accepts creation with202; both201 and202 preserve the cluster model and response evidence, while a202 without one valid selected-service action Location fails without a second POST. Undeclared200 and malformed accepted bodies retain their distinct HTTP/decode causes.",
+          "tests": [
+            "api/clustering_cluster_create_status_test.go:TestClusteringClusterCreatePublishedAndControllerSuccessCodes",
+            "api/clustering_cluster_create_status_test.go:TestClusteringClusterCreateAcceptedRequiresValidActionLocation",
+            "api/clustering_cluster_create_status_test.go:TestClusteringClusterCreateUndeclaredStatusAndMalformedAcceptedBody"
+          ]
         }
       ],
       "differences": [
         "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
         "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
         "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result.",
+        "Go accepts published201 and verified16.0.0 controller202;202 is an asynchronous submission and requires action evidence. This release-source audit and local HTTP test do not claim live-cloud acceptance."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "docs/senlin-server-contracts.md"
       ]
     },
     {
@@ -7708,7 +7718,8 @@
         "gophercloudsdk/clustering/v1/policies.API.WaitForStatus",
         "gophercloudsdk/clustering/v1/receivers.API.WaitForStatus",
         "gophercloudsdk/clustering/v1/profiletypes.API.WaitForStatus",
-        "gophercloudsdk/clustering/v1/policytypes.API.WaitForStatus"
+        "gophercloudsdk/clustering/v1/policytypes.API.WaitForStatus",
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.WaitForStatus"
       ],
       "contracts": [
         {
@@ -7759,6 +7770,15 @@
             "api/clustering_wait_contracts_test.go:TestClusteringWaitContractsTransportAndInFlightContextFailures",
             "api/clustering_wait_contracts_test.go:TestClusteringWaitContractsNameLookupFailuresNeverPollDetail"
           ]
+        },
+        {
+          "behavior": "ClusterPolicy polling fixes one canonical parent and direct policy identity, uses PolicyID rather than binding ID for Name lookup, rejects default status before HTTP, and supports GET-only deletion polling without detaching a policy. Exact lower-case raw identities/names own routes and each request rechecks the service source.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesPreflightAndScopedWaits",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactBodyIdentityOwnsRoutes",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactNameIgnoresCaseFoldedExtensions",
+            "connection_senlin_scopes_test.go:TestConnectionSenlinParentScopesShareLiveAuthVersionAndFixedRoutes"
+          ]
         }
       ],
       "differences": [
@@ -7769,10 +7789,10 @@
       ],
       "documentation": [
         "clustering/v1/waiting/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/clusterpolicies/README.md"
       ],
       "remaining": [
-        "Provide parent-scoped ClusterPolicy wait APIs after the fixed-cluster binding resource is implemented; nine flat fetchable APIs do not cover that Resource surface.",
         "Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path."
       ]
     },
@@ -7789,7 +7809,8 @@
         "gophercloudsdk/clustering/v1/policies.API.WaitForDelete",
         "gophercloudsdk/clustering/v1/receivers.API.WaitForDelete",
         "gophercloudsdk/clustering/v1/profiletypes.API.WaitForDelete",
-        "gophercloudsdk/clustering/v1/policytypes.API.WaitForDelete"
+        "gophercloudsdk/clustering/v1/policytypes.API.WaitForDelete",
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.WaitForDelete"
       ],
       "contracts": [
         {
@@ -7840,6 +7861,15 @@
             "api/clustering_wait_contracts_test.go:TestClusteringWaitContractsTransportAndInFlightContextFailures",
             "api/clustering_wait_contracts_test.go:TestClusteringWaitContractsNameLookupFailuresNeverPollDetail"
           ]
+        },
+        {
+          "behavior": "ClusterPolicy polling fixes one canonical parent and direct policy identity, uses PolicyID rather than binding ID for Name lookup, rejects default status before HTTP, and supports GET-only deletion polling without detaching a policy. Exact lower-case raw identities/names own routes and each request rechecks the service source.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesPreflightAndScopedWaits",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactBodyIdentityOwnsRoutes",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactNameIgnoresCaseFoldedExtensions",
+            "connection_senlin_scopes_test.go:TestConnectionSenlinParentScopesShareLiveAuthVersionAndFixedRoutes"
+          ]
         }
       ],
       "differences": [
@@ -7850,10 +7880,10 @@
       ],
       "documentation": [
         "clustering/v1/waiting/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/clusterpolicies/README.md"
       ],
       "remaining": [
-        "Provide parent-scoped ClusterPolicy wait APIs after the fixed-cluster binding resource is implemented; nine flat fetchable APIs do not cover that Resource surface.",
         "Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path."
       ]
     },
@@ -7951,6 +7981,141 @@
       ],
       "remaining": [
         "Complete comparison and implementation of cached Resource immediate-return/fetch mutation lifecycle, arbitrary Resource/custom typed attribute inputs and deletion original-resource return; this review verifies the documented stateless UUID Ref polling path."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_cluster_policy",
+      "source_fingerprint": "72f6b04d279ccd96a738ef5caca8b387d4ae4231c86a2c31f36a8e0ff544c439",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusterpolicies.API.InCluster",
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 uses the selected fixed canonical cluster and a controller policy name, short ID or UUID directly; the binding ID remains distinct from policy_id and no separate policy lookup or incidental Location fetch is performed.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesCanonicalScopeAndDirectPolicyRoutes",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactBodyIdentityOwnsRoutes",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactNameIgnoresCaseFoldedExtensions"
+          ]
+        },
+        {
+          "behavior": "The documented cluster_policy object preserves raw numbers, unknown/null fields, copied HTTP metadata and canonical lowercase identity fields; missing or invalid IDs and a foreign parent produce whole accepted-response evidence, while unexpected codes and canceled contexts retain their original causes without a second binding request.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesRequiredRowsRetainWholeResponse",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesWrongCodesRemainNative",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesParentIdentityEvidenceAndSourceRecheck",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesPreflightAndScopedWaits"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, explicit ID/Name parent references and independent response snapshots instead of Python proxy._get_resource reusing and updating a mutable ClusterPolicy instance. This declared Get mapping does not claim inherited Resource fetch/cache controls.",
+        "InCluster adds a parent GET or exact Name-list search, requires its canonical lowercase raw id and fixes that parent once. Python _proxy.py:1097-1099 passes cluster directly as the URI attribute without that confirmation request.",
+        "Go requires separate valid raw id, policy_id and matching cluster_id fields and restores exact lowercase identity/name values despite case-folded JSON extensions. Python Resource.id can fall back to the alternate policy_id and its Body/URI descriptors normalize resource attributes.",
+        "Go accepts only HTTP200 and the singular object envelope, retaining accepted-response errors and raw HTTP evidence instead of Python permissive flat/empty fallback and cache mutation. URIClusterID is separate from the response Body; Location is not interpreted as an action.",
+        "Source authentication, endpoint prefix and selected Senlin version remain explicit and are checked before scope creation and binding reads; this base operation has no invented minimum microversion."
+      ],
+      "documentation": [
+        "clustering/v1/clusterpolicies/README.md",
+        "docs/senlin-server-contracts.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/cluster_policies",
+      "source_fingerprint": "01e3412c5b404aeddd4c7696f7cc7c1efb90702b2359820a7a585be69681f294",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusterpolicies.API.InCluster",
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.List",
+        "gophercloudsdk/clustering/v1/clusterpolicies.Scope.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy GET200 list queries map is_enabled to enabled, preserve explicit false and policy_name/policy_type/sort plus owned vendor-query snapshots, repeat independently and stop after consumer break. Only advertised next links supply a marker; response binding or policy IDs never invent a marker fallback.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesLazyLinkedPagesSnapshotsAndNoFallback",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesPreflightAndScopedWaits"
+          ]
+        },
+        {
+          "behavior": "Each row retains independent raw JSON/HTTP metadata and separate canonical binding/policy/parent identities. Foreign continuation parents, malformed rows and source changes stop the collection with original accepted-page or native HTTP evidence.",
+          "tests": [
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesRequiredRowsRetainWholeResponse",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactBodyIdentityOwnsRoutes",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExplicitLinksKeepParentAndSource",
+            "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactNameIgnoresCaseFoldedExtensions"
+          ]
+        }
+      ],
+      "differences": [
+        "Go confirms and fixes a canonical parent through explicit ID/Name references instead of Python _proxy.py:1078-1081 extracting the supplied cluster ID and interpolating it directly.",
+        "Senlin16.0.0 ClusterPolicyController.index whitelists enabled, policy_name, policy_type and sort. Go rejects initial limit/marker even through Resources and follows only same-origin, same-parent collection links preserving initial filters; advertised deployment markers remain allowed. This intentionally does not simulate unsupported stock-server pagination.",
+        "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/header/secondary-argument options and concrete-query collisions; stock Senlin vendor support is not promised.",
+        "Go requires a cluster_policies array, separate valid canonical raw identities and a matching parent, preserving unknown/null/raw JSON fields. Python Resource.list wraps non-array collections, removes self and overlays URI fields on row dictionaries; Go stores fixed URIClusterID separately and uses PolicyID only as the collection identity callback.",
+        "Published filters use concrete typed inputs and grammar-checked sort, while null/omission and exact numbers remain visible in Body rather than being hidden by Python Resource bool/dict descriptor conversions."
+      ],
+      "documentation": [
+        "clustering/v1/clusterpolicies/README.md",
+        "docs/senlin-server-contracts.md"
+      ],
+      "remaining": [
+        "Map the inherited controls forwarded by this proxy: paginated=False first-response termination, max_items counting raw rows before local filtering and adding a wire limit, per-call base_path/microversion/headers, and the deprecated proxy JMESPath filter (proxy.py:866-928; resource.py:2155-2358).",
+        "Map known Body-only local filters such as id, policy_id, cluster_name and recursive data subsets, including Python scalar equality, missing-as-None and empty-dictionary behavior; these are not current Go server-query options (resource.py:2222-2267,2322-2338).",
+        "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them (resource.py:271-299,657-669,2371-2440)."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/collect_cluster_attrs",
+      "source_fingerprint": "2da97d1bd802dd5298e158db42a67a77635d842179e31db4a64cacd774dbaff9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusterattributes.API.InCluster",
+        "gophercloudsdk/clustering/v1/clusterattributes.Scope.List",
+        "gophercloudsdk/clustering/v1/clusterattributes.Scope.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed escaped JSONPath collection requires selected numeric Senlin1.2+, trims the path and rejects empty/None before parent HTTP, confirms the canonical parent once and rechecks the source/version before each collection page.",
+          "tests": [
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesJSONPathRemainsOneFixedSegment",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesMinimumVersionAndPathPreflight",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesParentCanonicalizationAndGateRecheck",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesExactParentNameUsesCanonicalRawField"
+          ]
+        },
+        {
+          "behavior": "Both published HTTP202 and Senlin16.0.0 controller/WSGI HTTP200 decode cluster_attributes synchronously. Exact lowercase id/value fields preserve object/array/scalar, huge numbers and null-versus-omitted values with independent raw Body/Header/status; incidental Location/action does not create a Submission or another request.",
+          "tests": [
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesSynchronousCodesAndRawValues",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesCanonicalRawFieldsOwnIdentityAndValue",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesResponseErrorsPreserveEvidence"
+          ]
+        },
+        {
+          "behavior": "The list-only iterator is lazy, stops on break, follows only explicit links retaining its fixed parent and escaped path, and checks version changes before another page. Initial queries and fabricated Get/Delete/status capabilities are rejected, preserving cancellation and whole malformed-response evidence.",
+          "tests": [
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesLazyExplicitPagingAndVersionGuard",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesListOnlyCapabilitiesAndQueries",
+            "api/clustering_cluster_attributes_test.go:TestClusteringClusterAttributesResponseErrorsPreserveEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned _proxy.py:630-648 declares **query but forwards only cluster_id and path to _list. Every supplied query/control is ignored by that proxy. Go correspondingly exposes no List/All query options and rejects initial Resources queries; absent query forwarding is not a missing direct collect proxy contract.",
+        "Go performs a parent confirmation request or exact Name search and fixes its canonical raw ID. Python directly interpolates the supplied parent/path URI values. Go trims and escapes the path as one segment and requires selected numeric1.2+ instead of relying on implicit adapter negotiation and server validation.",
+        "The public API-ref says HTTP202, while the audited Senlin16.0.0 router has no cluster_collect success override and WSGI defaults to HTTP200. Both are accepted as synchronous read results, with no fabricated action state and no live-cloud completion claim.",
+        "Go requires the documented array and canonical valid node id and stores fixed URIClusterID/URIPath separately; raw value bytes preserve missing/null and exact numeric precision. Python Resource.list can wrap singleton collections, removes self, overlays URI fields and constructs mutable descriptor-backed Resource objects.",
+        "Go follows only same-origin, same-collection explicit links, retaining the fixed escaped path and detecting invalid continuation evidence. It does not guess node-ID marker fallback or expose arbitrary Resource routes."
+      ],
+      "documentation": [
+        "clustering/v1/clusterattributes/README.md",
+        "docs/senlin-server-contracts.md"
+      ],
+      "remaining": [
+        "The separate inherited ClusterAttr.list interface remains unmapped: paginated=False, explicit limit/marker and Resource.id fallback, max_items raw-row counting/wire limit, and per-call base_path/microversion/headers. These controls are available on Resource.list itself but are ignored when passed through this declared collect proxy, so this is inherited-resource comparison scope rather than missing collect query forwarding (resource.py:2155-2440; _proxy.py:645-648).",
+        "Compare direct inherited ClusterAttr.list Body-filter inputs node_id, inherited id and attr_value, plus constructor node_id/attr_value aliases, including scalar/recursive-subset filtering and constructor alias-to-wire normalization. The collect proxy never forwards such filters; Go currently requires canonical wire id/value and retains separate fixed URI fields instead of Python row URI overlay (cluster_attr.py:16-31; resource.py:2222-2267,2299-2338,917-951)."
       ]
     }
   ]
