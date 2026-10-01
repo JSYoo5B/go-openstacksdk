@@ -34,6 +34,10 @@ var specializedCollections = map[string]collectionRecord{
 		Package: "gophercloudsdk/loadbalancer/v2/quotas", Model: "QuotaResource", UpstreamModel: "Quota", Kind: "singleton",
 		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
 	},
+	upstreamModule + "/openstack/dns/v2/quotas": {
+		Package: "gophercloudsdk/dns/v2/quotas", Model: "QuotaResource", UpstreamModel: "Quota", Kind: "singleton",
+		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
+	},
 	upstreamModule + "/openstack/objectstorage/v1/containers": {
 		Package: "gophercloudsdk/objectstorage/v1/containers", Model: "ContainerResource", UpstreamModel: "Container", Find: true, Delete: true,
 	},
@@ -59,9 +63,10 @@ var specializedCollections = map[string]collectionRecord{
 	},
 }
 
-// These resources are implemented directly against the pinned Python/Cyborg
-// contracts. Source distinguishes them from inferred native Gophercloud models.
+// These resources are implemented directly against documented service and
+// pinned Python contracts. Source distinguishes them from native models.
 var sdkOwnedCollections = []collectionRecord{
+	{Package: "gophercloudsdk/sharedfilesystems/v2/quotasets", Source: "sdk_owned", Model: "QuotaResource", Kind: "singleton", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
 	{Package: "gophercloudsdk/accelerator/v2/devices", Source: "sdk_owned", Model: "Device", Wait: true},
 	{Package: "gophercloudsdk/accelerator/v2/deployables", Source: "sdk_owned", Model: "Deployable", Find: true},
 	{Package: "gophercloudsdk/accelerator/v2/deviceprofiles", Source: "sdk_owned", Model: "DeviceProfile", Find: true, Delete: true},

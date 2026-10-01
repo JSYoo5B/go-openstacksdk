@@ -27,6 +27,52 @@ type quotaConnectionCase struct {
 func quotaConnectionCases() []quotaConnectionCase {
 	return []quotaConnectionCase{
 		{
+			name: "Manila", service: sdk.SharedFileSystem, endpoint: "/manila/v2/admin", quotaPath: "/manila/v2/admin/quota-sets/resolved", body: `{"quota_set":{"id":"wire-project","shares":8}}`,
+			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
+				scope, err := c.SharedFileSystemProjectQuotas(ctx, ref)
+				if err != nil {
+					return "", nil, err
+				}
+				return scope.ProjectID(), func(ctx context.Context) error {
+					value, err := scope.Get(ctx)
+					if err == nil && (value.ProjectID != "resolved" || value.ID != "wire-project" || value.Shares == nil || *value.Shares != 8) {
+						return errors.New("fixed target changed")
+					}
+					return err
+				}, nil
+			},
+			current: func(c *sdk.Connection, ctx context.Context) (string, error) {
+				scope, err := c.CurrentSharedFileSystemProjectQuotas(ctx)
+				if err != nil {
+					return "", err
+				}
+				return scope.ProjectID(), nil
+			},
+		},
+		{
+			name: "Designate", service: sdk.DNS, endpoint: "/designate/v2", quotaPath: "/designate/v2/quotas/resolved", body: `{"zones":8,"wire_extension":"preserved"}`,
+			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
+				scope, err := c.DNSProjectQuotas(ctx, ref)
+				if err != nil {
+					return "", nil, err
+				}
+				return scope.ProjectID(), func(ctx context.Context) error {
+					value, err := scope.Get(ctx)
+					if err == nil && (value.ProjectID != "resolved" || value.Zones != 8 || string(value.Body["wire_extension"]) != `"preserved"`) {
+						return errors.New("fixed target changed")
+					}
+					return err
+				}, nil
+			},
+			current: func(c *sdk.Connection, ctx context.Context) (string, error) {
+				scope, err := c.CurrentDNSProjectQuotas(ctx)
+				if err != nil {
+					return "", err
+				}
+				return scope.ProjectID(), nil
+			},
+		},
+		{
 			name: "Octavia", service: sdk.LoadBalancer, endpoint: "/octavia", quotaPath: "/octavia/v2.0/lbaas/quotas/resolved", body: `{"quota":{"project_id":"wire-project","loadbalancer":8}}`,
 			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
 				scope, err := c.LoadBalancerProjectQuotas(ctx, ref)
@@ -105,7 +151,7 @@ func TestConnectionServiceQuotaNamesUseSeparateIdentityClient(t *testing.T) {
 			var lookups, gets atomic.Int32
 			cloud.Mux.HandleFunc("GET /keystone/v3/projects", func(w http.ResponseWriter, r *http.Request) {
 				lookups.Add(1)
-				if r.URL.Query().Get("name") != "tenant" || r.Header.Get("X-OpenStack-Volume-API-Version") != "" || r.Header.Get("OpenStack-API-Version") != "" {
+				if r.URL.Query().Get("name") != "tenant" || r.Header.Get("X-OpenStack-Volume-API-Version") != "" || r.Header.Get("OpenStack-API-Version") != "" || r.Header.Get("X-Auth-Sudo-Project-ID") != "" {
 					t.Errorf("identity headers/query: %s %v", r.URL, r.Header)
 				}
 				testcloud.JSON(w, 200, `{"projects":[{"id":"resolved","name":"tenant"}]}`)
@@ -115,11 +161,20 @@ func TestConnectionServiceQuotaNamesUseSeparateIdentityClient(t *testing.T) {
 				if test.service == sdk.BlockStorage && r.Header.Get("X-OpenStack-Volume-API-Version") != "3.70" {
 					t.Error(r.Header)
 				}
+				if test.service == sdk.SharedFileSystem && r.Header.Get("X-OpenStack-Manila-API-Version") != "2.39" {
+					t.Error(r.Header)
+				}
+				if test.service == sdk.DNS && r.Header.Get("X-Auth-Sudo-Project-ID") != "resolved" {
+					t.Error(r.Header)
+				}
 				testcloud.JSON(w, 200, test.body)
 			})
 			options := []sdk.ConnectionOption{sdk.WithEndpoint(test.service, cloud.Server.URL+test.endpoint), sdk.WithEndpoint(sdk.Identity, cloud.Server.URL+"/keystone/v3")}
 			if test.service == sdk.BlockStorage {
 				options = append(options, sdk.WithMicroversion(sdk.BlockStorage, "3.70"))
+			}
+			if test.service == sdk.SharedFileSystem {
+				options = append(options, sdk.WithMicroversion(sdk.SharedFileSystem, "2.39"))
 			}
 			c, err := sdk.FromProvider(cloud.Provider, options...)
 			if err != nil {

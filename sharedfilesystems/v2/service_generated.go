@@ -5,16 +5,17 @@ import (
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	resource0 "gophercloudsdk/sharedfilesystems/v2/availabilityzones"
 	resource1 "gophercloudsdk/sharedfilesystems/v2/messages"
-	resource2 "gophercloudsdk/sharedfilesystems/v2/replicas"
-	resource3 "gophercloudsdk/sharedfilesystems/v2/schedulerstats"
-	resource4 "gophercloudsdk/sharedfilesystems/v2/securityservices"
-	resource5 "gophercloudsdk/sharedfilesystems/v2/services"
-	resource6 "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
-	resource7 "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
-	resource8 "gophercloudsdk/sharedfilesystems/v2/shares"
-	resource9 "gophercloudsdk/sharedfilesystems/v2/sharetransfers"
-	resource10 "gophercloudsdk/sharedfilesystems/v2/sharetypes"
-	resource11 "gophercloudsdk/sharedfilesystems/v2/snapshots"
+	resource2 "gophercloudsdk/sharedfilesystems/v2/quotasets"
+	resource3 "gophercloudsdk/sharedfilesystems/v2/replicas"
+	resource4 "gophercloudsdk/sharedfilesystems/v2/schedulerstats"
+	resource5 "gophercloudsdk/sharedfilesystems/v2/securityservices"
+	resource6 "gophercloudsdk/sharedfilesystems/v2/services"
+	resource7 "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+	resource8 "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+	resource9 "gophercloudsdk/sharedfilesystems/v2/shares"
+	resource10 "gophercloudsdk/sharedfilesystems/v2/sharetransfers"
+	resource11 "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+	resource12 "gophercloudsdk/sharedfilesystems/v2/snapshots"
 )
 
 // Service shares one authenticated client across its resource APIs.
@@ -22,32 +23,34 @@ type Service struct {
 	client            *gophercloud.ServiceClient
 	AvailabilityZones *resource0.API
 	Messages          *resource1.API
-	Replicas          *resource2.API
-	SchedulerStats    *resource3.API
-	SecurityServices  *resource4.API
-	Services          *resource5.API
-	ShareAccessRules  *resource6.API
-	ShareNetworks     *resource7.API
-	Shares            *resource8.API
-	Sharetransfers    *resource9.API
-	ShareTypes        *resource10.API
-	Snapshots         *resource11.API
+	QuotaSets         *resource2.API
+	Replicas          *resource3.API
+	SchedulerStats    *resource4.API
+	SecurityServices  *resource5.API
+	Services          *resource6.API
+	ShareAccessRules  *resource7.API
+	ShareNetworks     *resource8.API
+	Shares            *resource9.API
+	Sharetransfers    *resource10.API
+	ShareTypes        *resource11.API
+	Snapshots         *resource12.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
 		AvailabilityZones: resource0.New(client),
 		Messages:          resource1.New(client),
-		Replicas:          resource2.New(client),
-		SchedulerStats:    resource3.New(client),
-		SecurityServices:  resource4.New(client),
-		Services:          resource5.New(client),
-		ShareAccessRules:  resource6.New(client),
-		ShareNetworks:     resource7.New(client),
-		Shares:            resource8.New(client),
-		Sharetransfers:    resource9.New(client),
-		ShareTypes:        resource10.New(client),
-		Snapshots:         resource11.New(client),
+		QuotaSets:         resource2.New(client),
+		Replicas:          resource3.New(client),
+		SchedulerStats:    resource4.New(client),
+		SecurityServices:  resource5.New(client),
+		Services:          resource6.New(client),
+		ShareAccessRules:  resource7.New(client),
+		ShareNetworks:     resource8.New(client),
+		Shares:            resource9.New(client),
+		Sharetransfers:    resource10.New(client),
+		ShareTypes:        resource11.New(client),
+		Snapshots:         resource12.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

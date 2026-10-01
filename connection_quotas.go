@@ -4,9 +4,11 @@ import (
 	"context"
 	blockquotas "gophercloudsdk/blockstorage/v3/quotasets"
 	"gophercloudsdk/compute/v2/quotasets"
+	dnsquotas "gophercloudsdk/dns/v2/quotas"
 	loadbalancerquotas "gophercloudsdk/loadbalancer/v2/quotas"
 	networkquotas "gophercloudsdk/network/v2/extensions/quotas"
 	"gophercloudsdk/resource"
+	filequotas "gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 // ProjectQuotas binds Nova quotas to an explicit project ID or exact Keystone
@@ -133,6 +135,70 @@ func (c *Connection) LoadBalancerProjectQuotas(ctx context.Context, project reso
 // CurrentLoadBalancerProjectQuotas uses the recorded Keystone project scope.
 func (c *Connection) CurrentLoadBalancerProjectQuotas(ctx context.Context) (*loadbalancerquotas.ProjectQuotaScope, error) {
 	service, err := c.LoadBalancerV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.CurrentProject(ctx)
+}
+
+// SharedFileSystemProjectQuotas fixes Manila quotas to an explicit project ID
+// or an exact Keystone project name resolved once with a separate client.
+func (c *Connection) SharedFileSystemProjectQuotas(ctx context.Context, project resource.Ref) (*filequotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.SharedFileSystemV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.QuotaSets.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.QuotaSets.InProject(ctx, project, filequotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentSharedFileSystemProjectQuotas uses the recorded Keystone project.
+func (c *Connection) CurrentSharedFileSystemProjectQuotas(ctx context.Context) (*filequotas.ProjectQuotaScope, error) {
+	service, err := c.SharedFileSystemV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.QuotaSets.CurrentProject(ctx)
+}
+
+// DNSProjectQuotas fixes Designate quotas to an explicit project ID or an exact
+// Keystone project name. The quota request uses Designate's project header.
+func (c *Connection) DNSProjectQuotas(ctx context.Context, project resource.Ref) (*dnsquotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.DNSV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Quotas.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.InProject(ctx, project, dnsquotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentDNSProjectQuotas uses the recorded Keystone project.
+func (c *Connection) CurrentDNSProjectQuotas(ctx context.Context) (*dnsquotas.ProjectQuotaScope, error) {
+	service, err := c.DNSV2(ctx)
 	if err != nil {
 		return nil, err
 	}

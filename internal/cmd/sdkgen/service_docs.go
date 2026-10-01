@@ -64,6 +64,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
 	case "loadbalancer/v2":
 		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
+	case "sharedfilesystems/v2":
+		out.WriteString("`conn.SharedFileSystemProjectQuotas(ctx, project)`와 `CurrentSharedFileSystemProjectQuotas(ctx)`는 Manila quota의 프로젝트를 고정합니다. Get/Defaults/Detail/Update/Reset과 microversion별 경로는 [quota 사용법](quotasets/README.md)을 참고합니다. 이 quota API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.\n\n")
+	case "dns/v2":
+		out.WriteString("`conn.DNSProjectQuotas(ctx, project)`와 `CurrentDNSProjectQuotas(ctx)`는 Designate quota의 프로젝트를 고정합니다. Get/PATCH Update/DELETE Reset과 sudo-project·all-projects header는 [quota 사용법](quotas/README.md)을 참고합니다. 별도 defaults endpoint나 프로젝트 quota 목록은 제공하지 않습니다.\n\n")
 	case "db/v1":
 		out.WriteString("`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.\n\n")
 	case "objectstorage/v1":
@@ -108,9 +112,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	out.WriteString("## 리소스와 공통 정책\n\n| 서비스 필드 | API 패키지 | 공통 정책·범위 |\n|---|---|---|\n")
 	for _, path := range paths {
 		var policies []string
+		apiFile := "api_generated.go"
 		for _, record := range g.collections {
 			if record.Package != "gophercloudsdk/"+key+"/"+path || record.Model == "" {
 				continue
+			}
+			if record.Source == "sdk_owned" {
+				apiFile = "api.go"
 			}
 			label := "Resources"
 			if record.Scope != "" {
@@ -128,6 +136,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 					operations = "Get·Defaults·Detail·Update·Delete"
 				} else if strings.HasSuffix(record.Package, "/loadbalancer/v2/quotas") {
 					operations = "Get·Update·Reset; Defaults는 전역 조회"
+				} else if strings.HasSuffix(record.Package, "/dns/v2/quotas") {
+					operations = "Get·Update·Reset"
 				}
 				policies = append(policies, fmt.Sprintf("`%s`: 고정 프로젝트의 %s; List/Find/Wait 없음", label, operations))
 				continue
@@ -159,7 +169,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		if policy == "" {
 			policy = "API 연산 제공; 공통 Collection 미적용"
 		}
-		fmt.Fprintf(&out, "| `%s` | [%s](%s/api_generated.go) | %s |\n", registryField(path), path, path, policy)
+		fmt.Fprintf(&out, "| `%s` | [%s](%s/%s) | %s |\n", registryField(path), path, path, apiFile, policy)
 	}
 	out.WriteString("\n공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.\n\n")
 	out.WriteString("## 변경 요청\n\n리소스 API의 Create/Update에 concrete options를 전달합니다. 기본 필드는 typed options로 지정하고 추가 필드는 `With...Field`로 지정합니다. query와 header도 해당 연산이 제공하는 `With...` 함수를 사용합니다. 기본 필드·헤더 덮어쓰기와 지원되지 않는 확장 방식은 요청 전에 거부합니다. 요청 builder interface는 SDK가 구현합니다.\n\n")

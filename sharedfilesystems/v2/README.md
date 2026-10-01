@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 sharedfilesystems/v2 API를 하나의 인증된 서비스
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`conn.SharedFileSystemProjectQuotas(ctx, project)`와 `CurrentSharedFileSystemProjectQuotas(ctx)`는 Manila quota의 프로젝트를 고정합니다. Get/Defaults/Detail/Update/Reset과 microversion별 경로는 [quota 사용법](quotasets/README.md)을 참고합니다. 이 quota API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.
+
 ## Go 사용
 
 ```go
@@ -36,6 +38,7 @@ _ = value
 |---|---|---|
 | `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
+| `QuotaSets` | [quotasets](quotasets/api.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Detail·Update·Reset; List/Find/Wait 없음 |
 | `Replicas` | [replicas](replicas/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SecurityServices` | [securityservices](securityservices/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |

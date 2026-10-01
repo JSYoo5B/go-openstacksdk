@@ -488,10 +488,14 @@
   },
   {
     "package": "gophercloudsdk/dns/v2/quotas",
+    "model": "QuotaResource",
+    "upstream_model": "Quota",
+    "kind": "singleton",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/dns/v2/recordsets",
@@ -1463,6 +1467,17 @@
     "find": true,
     "delete": true,
     "wait": false
+  },
+  {
+    "package": "gophercloudsdk/sharedfilesystems/v2/quotasets",
+    "source": "sdk_owned",
+    "model": "QuotaResource",
+    "kind": "singleton",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/accelerator/v2/devices",
