@@ -12,6 +12,10 @@ Connection은 인증된 client와 선택한 numeric microversion을 공유합니
 | `update_cluster(identity, **attrs)` | `Clusters.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + cluster와 Location |
 | `delete_cluster(identity, ignore_missing=True, force_delete=False)` | `Clusters.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
 | `find_cluster(identity, ignore_missing=True)` | `Clusters.Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+| `scale_in_cluster` / `scale_out_cluster` | `ScaleIn` / `ScaleOut` | POST `/clusters/{id}/actions`, 202 |
+| `resize_cluster` | `Resize` | 같은 경로, `resize` 매개변수 |
+| `add_nodes_to_cluster` / `remove_nodes_from_cluster` | `AddNodes` / `RemoveNodes` | 같은 경로, `add_nodes` / `del_nodes` |
+| `replace_nodes_in_cluster` | `ReplaceNodes` | 같은 경로, `replace_nodes`, 1.3 이상 |
 
 ## 생성과 조회
 
@@ -143,7 +147,76 @@ Resources.Delete는 이 결과를 버리는 error-only 형태이므로 `ErrUnsup
 Resources는 ID 조회·목록·이름 검색·상태 polling을 제공하지만 Python proxy wait 전체의
 cached Resource·기본값을 완료한 의미는 아닙니다.
 
-이 단위 이후의 resize·scale·node membership·policy binding·metadata 작업, 일반 inherited
+## 크기와 scaling 명령
+
+```python
+action = conn.clustering.scale_out_cluster("CLUSTER_ID", count=1)
+action = conn.clustering.resize_cluster(
+    "CLUSTER_ID", adjustment_type="EXACT_CAPACITY", number=3, min_size=0, strict=False,
+)
+```
+
+```go
+api := clusters.New(client)
+scaled, err := api.ScaleOut(ctx, resource.ID("CLUSTER_ID"), clusters.ScaleOutOpts{},
+    clusters.WithScaleOutCount(1))
+if err != nil { return err }
+resized, err := api.Resize(ctx, resource.ID("CLUSTER_ID"), clusters.ResizeOpts{},
+    clusters.WithResizeAdjustmentType(clusters.ExactCapacity),
+    clusters.WithResizeNumber(json.Number("3")), clusters.WithResizeMinSize(0),
+    clusters.WithResizeStrict(false))
+if err != nil { return err }
+fmt.Println(scaled.ActionID, resized.ActionID)
+```
+
+ScaleIn/ScaleOut에서 count를 지정하지 않으면 pinned Python과 같이 `count:null`을 보냅니다.
+명시한 0도 보존하고, scaling policy·크기 제약의 실제 판정은 Senlin이 합니다. Resize는
+adjustment_type/number/min_size/max_size/min_step/strict를 제공하며 Optional의 생략·null·0·false를
+구분합니다. Number는 정확한 JSON decimal 값입니다. 기본 scale/resize 명령에 임의의 최소
+버전 gate를 추가하지 않습니다. 선택한 policy나 조합의 유효성은 서버가 검증합니다.
+
+## node membership 명령
+
+```python
+action = conn.clustering.add_nodes_to_cluster("CLUSTER_ID", ["NODE_ID"])
+action = conn.clustering.remove_nodes_from_cluster(
+    "CLUSTER_ID", ["NODE_ID"], destroy_after_deletion=False,
+)
+action = conn.clustering.replace_nodes_in_cluster("CLUSTER_ID", {"OLD_NODE": "NEW_NODE"})
+```
+
+```go
+api := clusters.New(client)
+added, err := api.AddNodes(ctx, resource.ID("CLUSTER_ID"), clusters.AddNodesOpts{
+    Nodes: []string{"NODE_ID"},
+})
+if err != nil { return err }
+removed, err := api.RemoveNodes(ctx, resource.ID("CLUSTER_ID"), clusters.RemoveNodesOpts{
+    Nodes: []string{"NODE_ID"},
+}, clusters.WithRemoveNodesDestroyAfterDeletion(false))
+if err != nil { return err }
+replaced, err := api.ReplaceNodes(ctx, resource.ID("CLUSTER_ID"), clusters.ReplaceNodesOpts{
+    Nodes: map[string]string{"OLD_NODE": "NEW_NODE"},
+})
+if err != nil { return err }
+fmt.Println(added.ActionID, removed.ActionID, replaced.ActionID)
+```
+
+이 예제에는 numeric microversion 1.4 이상을 설정합니다. ReplaceNodes 전체는 1.3 이상,
+RemoveNodes의 DestroyAfterDeletion은 false/null을 포함해 명시하면 1.4 이상이 필요합니다.
+기본 AddNodes/RemoveNodes는 별도 gate 없이 동작합니다. Node identity는 서버에 전달하며
+각 node를 추가 GET하지 않습니다. 비어 있는 node 목록·replacement map과 잘못된 identity는
+lookup 전에 거부하고, slice/map은 이름 lookup 전에 복제합니다.
+
+여섯 명령은 `{"action":"ID"}`와 Location이 같은 action을 가리키는 202 응답을
+Submission으로 반환합니다. Python은 response JSON을 직접 반환하고 Location을 검사하지
+않으므로 Go의 stricter 검증을 차이로 문서화합니다. 추가 명령 매개변수는 `With...Field`로
+전달하고 typed 매개변수는 덮어쓸 수 없습니다. 매개변수는 Resource 속성과 다른 범위라
+plugin의 id/status 같은 이름을 임의로 금지하지 않습니다. 잘못된 accepted 응답은 원문을
+보존하고 재전송·자동 action 조회를 하지 않습니다. 이름 해석·source/version 재검사와
+header 입력 보관은 CRUD와 같은 정책입니다.
+
+이 단위 이후의 policy binding·metadata·check/recover/operation 작업, 일반 inherited
 max_items/paginated/JMESPath·dirty commit/merge·ID-first Find는 별도로 추적합니다.
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `cluster.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
