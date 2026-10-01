@@ -7074,7 +7074,14 @@
       "source_fingerprint": "42cf993a84380ea1715d6a1def6026e8292071e86c43de2f042f5a20064a37d7",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/clusters.API.Update"
+        "gophercloudsdk/clustering/v1/clusters.API.Update",
+        "gophercloudsdk/clustering/v1/clusters.API.Track",
+        "gophercloudsdk/clustering/v1/clusters.API.Load",
+        "gophercloudsdk/clustering/v1/clusters.TrackedCluster.Edit",
+        "gophercloudsdk/clustering/v1/clusters.TrackedCluster.Commit",
+        "gophercloudsdk/clustering/v1/clusters.TrackedCluster.Refresh",
+        "gophercloudsdk/clustering/v1/actions.Submission.Snapshot",
+        "gophercloudsdk/clustering/v1/clusters.WithUpdateProfileOnlyNull"
       ],
       "contracts": [
         {
@@ -7088,21 +7095,50 @@
             "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
             "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
           ]
+        },
+        {
+          "behavior": "Owned tracked handles snapshot models and accepted Operation evidence, compare current values with sticky dirty state, preserve zero/false/empty/null and deletion tombstones, validate Edit atomically offline, and PATCH pending fields only. Clean Commit validates source/context/header without HTTP; accepted responses merge whole fields while actual Response stays separate. Fixed explicit ID or one canonical-name resolution owns the route; pending-only numeric field gates, failures and concurrent edits preserve state; successful Refresh resets the older revision and accepted Operation.",
+          "tests": [
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNoOpStickyDirtyShallowMergeAndActualResponse",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedScalarPresenceAndRemovalTombstones",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedInvalidEditsAndHeaderOnlyCommitAreAtomic",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedModelAndOperationDeepOwnership",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedFixedIDAndNameLookupOnce",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedFailuresKeepDirtyAndAcceptedEvidence",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedRefreshResetsOperationAndFailureKeepsChanges",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNewEditsSurviveCommitAndRefreshInFlight",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedPendingPresenceVersionGates",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedOfflineEditAndCleanSourceContextValidation",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNameLoadAbsenceDuplicatesAndNilHandles",
+            "clustering/v1/actions/submission_test.go:TestSubmissionSnapshotOwnsAcceptedResponseEvidence",
+            "internal/senlin/tracked_test.go:TestTrackedCurrentComparisonStickyDirtyAndRemoval",
+            "internal/senlin/tracked_test.go:TestTrackedOwnsAllSnapshotsAndRejectedEditIsAtomic",
+            "internal/senlin/tracked_test.go:TestTrackedAcceptShallowMergeAndPreservesNewerEdits"
+          ]
+        },
+        {
+          "behavior": "Explicit profile_only null is preserved through JSON decode/encode and WithUpdateOptions snapshots, including absent-to-null tracked edits and case-folded aliases. Bool/null helper last-wins and old public nonnil bool pointers stay authoritative. Null, false and removal all require numeric>=1.6 only when transmitted; clean Commit rejects body options and failed source gates retain dirty state.",
+          "tests": [
+            "api/clustering_cluster_profile_only_null_test.go:TestClusteringClusterProfileOnlyNullStatelessWireSnapshotsAndLastWins",
+            "api/clustering_cluster_profile_only_null_test.go:TestClusteringClusterProfileOnlyNullTrackedPresenceDirtyAndVersionGate",
+            "api/clustering_cluster_profile_only_null_test.go:TestClusteringClusterProfileOnlyNullBoolCompatibilityAndLookupGate"
+          ]
         }
       ],
       "differences": [
-        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
-        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
-        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+        "Go maps cached Resource input through concrete SDK-owned Track/Load and Edit/Commit/Refresh handles, context and explicit ID/Name references. Scalar/null helpers distinguish omission, explicit zero/false/empty and null without caller builders or Python truthiness coercion. Views are independent snapshots instead of the same mutable Resource pointer.",
+        "Documented singular envelopes and PATCH202 success are strict. Raw HTTP/header/body evidence and exact JSON numbers are retained separately from merged cached views; malformed accepted responses keep dirty state and are not automatically resent.",
+        "Connection-selected numeric microversion and protected field/query/header extensions are explicit; Commit gates only the pending key, including null/removal. Offline Edit does not negotiate or fetch. Nullable field support remains deployment-defined.",
+        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/tracking/async/README.md",
+        "clustering/v1/tracking/README.md"
       ],
       "remaining": [
-        "Implement or deliberately map cached Resource dirty detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics; explicit PATCH inputs alone do not close that lifecycle.",
-        "Compare the full inherited Resource input/normalization and adapter-selected microversion policy; selected numeric field gates do not negotiate automatically."
+        "Implement the direct proxy base_path override as a safe SDK-owned collection scope for stateless Update and tracked Load/Track/Commit/Refresh, preserving default routes and fixed resource identity. Proxy._update forwards base_path to Resource.commit; the present API fixes its collection path."
       ]
     },
     {
@@ -7356,7 +7392,13 @@
       "source_fingerprint": "ca8aeec8761720cf67950b7a779413afacbfd66948e44d56b642a2ac1386f297",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/nodes.API.Update"
+        "gophercloudsdk/clustering/v1/nodes.API.Update",
+        "gophercloudsdk/clustering/v1/nodes.API.Track",
+        "gophercloudsdk/clustering/v1/nodes.API.Load",
+        "gophercloudsdk/clustering/v1/nodes.TrackedNode.Edit",
+        "gophercloudsdk/clustering/v1/nodes.TrackedNode.Commit",
+        "gophercloudsdk/clustering/v1/nodes.TrackedNode.Refresh",
+        "gophercloudsdk/clustering/v1/actions.Submission.Snapshot"
       ],
       "contracts": [
         {
@@ -7370,21 +7412,42 @@
             "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
             "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
           ]
+        },
+        {
+          "behavior": "Owned tracked handles snapshot models and accepted Operation evidence, compare current values with sticky dirty state, preserve zero/false/empty/null and deletion tombstones, validate Edit atomically offline, and PATCH pending fields only. Clean Commit validates source/context/header without HTTP; accepted responses merge whole fields while actual Response stays separate. Fixed explicit ID or one canonical-name resolution owns the route; pending-only numeric field gates, failures and concurrent edits preserve state; successful Refresh resets the older revision and accepted Operation.",
+          "tests": [
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNoOpStickyDirtyShallowMergeAndActualResponse",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedScalarPresenceAndRemovalTombstones",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedInvalidEditsAndHeaderOnlyCommitAreAtomic",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedModelAndOperationDeepOwnership",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedFixedIDAndNameLookupOnce",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedFailuresKeepDirtyAndAcceptedEvidence",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedRefreshResetsOperationAndFailureKeepsChanges",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNewEditsSurviveCommitAndRefreshInFlight",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedPendingPresenceVersionGates",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedOfflineEditAndCleanSourceContextValidation",
+            "api/clustering_async_lifecycle_test.go:TestClusteringAsyncTrackedNameLoadAbsenceDuplicatesAndNilHandles",
+            "clustering/v1/actions/submission_test.go:TestSubmissionSnapshotOwnsAcceptedResponseEvidence",
+            "internal/senlin/tracked_test.go:TestTrackedCurrentComparisonStickyDirtyAndRemoval",
+            "internal/senlin/tracked_test.go:TestTrackedOwnsAllSnapshotsAndRejectedEditIsAtomic",
+            "internal/senlin/tracked_test.go:TestTrackedAcceptShallowMergeAndPreservesNewerEdits"
+          ]
         }
       ],
       "differences": [
-        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
-        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
-        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+        "Go maps cached Resource input through concrete SDK-owned Track/Load and Edit/Commit/Refresh handles, context and explicit ID/Name references. Scalar/null helpers distinguish omission, explicit zero/false/empty and null without caller builders or Python truthiness coercion. Views are independent snapshots instead of the same mutable Resource pointer.",
+        "Documented singular envelopes and PATCH202 success are strict. Raw HTTP/header/body evidence and exact JSON numbers are retained separately from merged cached views; malformed accepted responses keep dirty state and are not automatically resent.",
+        "Connection-selected numeric microversion and protected field/query/header extensions are explicit; Commit gates only the pending key, including null/removal. Offline Edit does not negotiate or fetch. Nullable field support remains deployment-defined.",
+        "Pinned AsyncResource does not override Update/commit or convert its Location to an Action. Go additionally requires an accepted action Location at the selected origin/collection and snapshots it as Operation without following, polling, inventing status, or treating dirty=false as completion."
       ],
       "documentation": [
         "clustering/v1/nodes/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/tracking/async/README.md",
+        "clustering/v1/tracking/README.md"
       ],
       "remaining": [
-        "Implement or deliberately map cached Resource dirty detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics; explicit PATCH inputs alone do not close that lifecycle.",
-        "Compare the full inherited Resource input/normalization and adapter-selected microversion policy; selected numeric field gates do not negotiate automatically."
+        "Implement the direct proxy base_path override as a safe SDK-owned collection scope for stateless Update and tracked Load/Track/Commit/Refresh, preserving default routes and fixed resource identity. Proxy._update forwards base_path to Resource.commit; the present API fixes its collection path."
       ]
     },
     {
