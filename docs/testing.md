@@ -65,6 +65,11 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
 | `api/share_access_rules_scope_test.go`, `api/share_access_rules_errors_test.go` | Manila2.45/2.82 access rule 조회·action·잠금, share 일치·부모404/403 보존, 취소·waiter |
+| `resource/metadata_test.go`, `internal/rest/response_test.go`, `internal/rest/list_test.go` | 추가 JSON·null·생략·정확한 숫자, 응답 header 소유권·accepted 오류 증거, 고정 URL·retry/reauth·origin, lazy break·marker/link 순환·query 보존·명시 paging 정책 |
+| `connection_sdk_owned_test.go`, `connection_sdk_resources_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Senlin·Masakari catalog root/version/project/proxy, raw escaped tenant·Masakari discovery, 공유 인증·캐시·취소·microversion, typed 서비스 연결·singleton/list-only 생성 정책 |
+| `api/instanceha_segments_test.go`, `api/instanceha_hosts_test.go` | segment UUID·DB ID 구별, enabled1.2·false·snapshot, 고정 segment host·부모 이름 1회 해석, POST202/201·PUT200·DELETE204, exact 이름·페이지·HTTP 오류·취소 |
+| `api/instanceha_notifications_test.go`, `api/instanceha_vmoves_test.go` | notification UUID·payload/timestamp, raw workflow 숫자, 고정 notification scope·VM move1.3, 상태 polling·실패·취소, 부모와 server identity 구별·accepted 응답 증거 |
+| `api/clustering_discovery_test.go`, `api/clustering_read_test.go` | build-info singleton·type 이름/schema·profile ops1.4, action epoch/target·event level string/숫자/null/생략·큰 정수·반복 filter snapshot, service1.7/list-only, 페이지·strict envelope·HTTP 오류 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
