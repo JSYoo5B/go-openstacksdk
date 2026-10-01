@@ -44,7 +44,7 @@ func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*RecordSet, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*RecordSet, error] {
 			q = maps.Clone(q)
 			options := make([]ListByZoneOption, 0, len(q))
 			for key, values := range q {
@@ -52,7 +52,7 @@ func (s *RecordSetScope) newResources() *resource.Collection[RecordSet] {
 					options = append(options, WithListByZoneQuery(key, value))
 				}
 			}
-			return s.api.ListByZone(ctx, s.parentID, options...)
+			return s.api.listByZoneWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 

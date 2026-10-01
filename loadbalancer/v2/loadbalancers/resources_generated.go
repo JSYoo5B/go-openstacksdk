@@ -25,7 +25,7 @@ func (a *API) newResources() *resource.Collection[LoadBalancer] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*LoadBalancer, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*LoadBalancer, error] {
 			q = maps.Clone(q)
 			if value := q.Get("status"); value != "" {
 				q.Set("provisioning_status", value)
@@ -37,7 +37,7 @@ func (a *API) newResources() *resource.Collection[LoadBalancer] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*LoadBalancer, error) {

@@ -251,6 +251,10 @@ func (b listByZoneOptsBuilder) ToRecordSetListQuery() (string, error) {
 
 // ListByZone invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListByZone(ctx context.Context, zoneID string, options ...ListByZoneOption) iter.Seq2[*RecordSet, error] {
+	return a.listByZoneWithControl(ctx, zoneID, resource.ListControl{}, options...)
+}
+
+func (a *API) listByZoneWithControl(ctx context.Context, zoneID string, control resource.ListControl, options ...ListByZoneOption) iter.Seq2[*RecordSet, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -262,10 +266,10 @@ func (a *API) ListByZone(ctx context.Context, zoneID string, options ...ListByZo
 		return func(yield func(*RecordSet, error) bool) { var zero *RecordSet; yield(zero, err) }
 	}
 	_opts := listByZoneOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListByZone(a.client, zoneID, _opts), func(page pagination.Page) ([]RecordSet, error) {
+	return resource.StreamWithControl(ctx, upstream.ListByZone(a.client, zoneID, _opts), func(page pagination.Page) ([]RecordSet, error) {
 		values, err := upstream.ExtractRecordSets(page)
 		return []RecordSet(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

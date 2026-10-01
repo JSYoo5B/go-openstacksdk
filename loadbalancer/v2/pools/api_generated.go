@@ -224,6 +224,10 @@ func (b listOptsBuilder) ToPoolListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Pool, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -235,10 +239,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Pool, 
 		return func(yield func(*Pool, error) bool) { var zero *Pool; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Pool, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Pool, error) {
 		values, err := upstream.ExtractPools(page)
 		return []Pool(values), err
-	})
+	}, control)
 }
 
 type ListMembersOption = request.Option[ListMembersOpts]
@@ -271,6 +275,10 @@ func (b listMembersOptsBuilder) ToMembersListQuery() (string, error) {
 
 // ListMembers invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListMembers(ctx context.Context, poolID string, options ...ListMembersOption) iter.Seq2[*Member, error] {
+	return a.listMembersWithControl(ctx, poolID, resource.ListControl{}, options...)
+}
+
+func (a *API) listMembersWithControl(ctx context.Context, poolID string, control resource.ListControl, options ...ListMembersOption) iter.Seq2[*Member, error] {
 	var opts ListMembersOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -282,10 +290,10 @@ func (a *API) ListMembers(ctx context.Context, poolID string, options ...ListMem
 		return func(yield func(*Member, error) bool) { var zero *Member; yield(zero, err) }
 	}
 	_opts := listMembersOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListMembers(a.client, poolID, _opts), func(page pagination.Page) ([]Member, error) {
+	return resource.StreamWithControl(ctx, upstream.ListMembers(a.client, poolID, _opts), func(page pagination.Page) ([]Member, error) {
 		values, err := upstream.ExtractMembers(page)
 		return []Member(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

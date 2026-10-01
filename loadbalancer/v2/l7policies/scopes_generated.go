@@ -39,7 +39,7 @@ func (s *RuleScope) newResources() *resource.Collection[Rule] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return s.api.DeleteRule(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Rule, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Rule, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListRulesOption, 0, len(q))
@@ -48,7 +48,7 @@ func (s *RuleScope) newResources() *resource.Collection[Rule] {
 					options = append(options, WithListRulesQuery(key, value))
 				}
 			}
-			return s.api.ListRules(ctx, s.parentID, options...)
+			return s.api.listRulesWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 

@@ -43,7 +43,7 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return s.api.DeleteMember(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Member, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Member, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListMembersOption, 0, len(q))
@@ -52,7 +52,7 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 					options = append(options, WithListMembersQuery(key, value))
 				}
 			}
-			return s.api.ListMembers(ctx, s.parentID, options...)
+			return s.api.listMembersWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 

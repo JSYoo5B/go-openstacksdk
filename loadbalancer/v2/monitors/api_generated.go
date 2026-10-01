@@ -128,6 +128,10 @@ func (b listOptsBuilder) ToMonitorListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Monitor, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Monitor, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -139,10 +143,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Monito
 		return func(yield func(*Monitor, error) bool) { var zero *Monitor; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Monitor, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Monitor, error) {
 		values, err := upstream.ExtractMonitors(page)
 		return []Monitor(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

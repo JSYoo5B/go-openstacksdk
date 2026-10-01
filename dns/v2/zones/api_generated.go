@@ -149,6 +149,10 @@ func (b listOptsBuilder) ToZoneListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Zone, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -160,10 +164,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Zone, 
 		return func(yield func(*Zone, error) bool) { var zero *Zone; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Zone, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Zone, error) {
 		values, err := upstream.ExtractZones(page)
 		return []Zone(values), err
-	})
+	}, control)
 }
 
 type ListSharesOption = request.Option[ListSharesOpts]

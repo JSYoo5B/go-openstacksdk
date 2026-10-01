@@ -22,7 +22,7 @@ func (a *API) newResources() *resource.Collection[Amphora] {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Amphora, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Amphora, error] {
 			q = maps.Clone(q)
 			options := make([]ListOption, 0, len(q))
 			for key, values := range q {
@@ -30,7 +30,7 @@ func (a *API) newResources() *resource.Collection[Amphora] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Amphora, error) {

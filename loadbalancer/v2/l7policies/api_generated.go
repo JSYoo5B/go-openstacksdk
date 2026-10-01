@@ -212,6 +212,10 @@ func (b listOptsBuilder) ToL7PolicyListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*L7Policy, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*L7Policy, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -223,10 +227,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*L7Poli
 		return func(yield func(*L7Policy, error) bool) { var zero *L7Policy; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]L7Policy, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]L7Policy, error) {
 		values, err := upstream.ExtractL7Policies(page)
 		return []L7Policy(values), err
-	})
+	}, control)
 }
 
 type ListRulesOption = request.Option[ListRulesOpts]
@@ -257,6 +261,10 @@ func (b listRulesOptsBuilder) ToRulesListQuery() (string, error) {
 
 // ListRules invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListRules(ctx context.Context, policyID string, options ...ListRulesOption) iter.Seq2[*Rule, error] {
+	return a.listRulesWithControl(ctx, policyID, resource.ListControl{}, options...)
+}
+
+func (a *API) listRulesWithControl(ctx context.Context, policyID string, control resource.ListControl, options ...ListRulesOption) iter.Seq2[*Rule, error] {
 	var opts ListRulesOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -268,10 +276,10 @@ func (a *API) ListRules(ctx context.Context, policyID string, options ...ListRul
 		return func(yield func(*Rule, error) bool) { var zero *Rule; yield(zero, err) }
 	}
 	_opts := listRulesOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListRules(a.client, policyID, _opts), func(page pagination.Page) ([]Rule, error) {
+	return resource.StreamWithControl(ctx, upstream.ListRules(a.client, policyID, _opts), func(page pagination.Page) ([]Rule, error) {
 		values, err := upstream.ExtractRules(page)
 		return []Rule(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

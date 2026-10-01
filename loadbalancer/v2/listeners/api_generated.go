@@ -154,6 +154,10 @@ func (b listOptsBuilder) ToListenerListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Listener, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Listener, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -165,10 +169,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Listen
 		return func(yield func(*Listener, error) bool) { var zero *Listener; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Listener, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Listener, error) {
 		values, err := upstream.ExtractListeners(page)
 		return []Listener(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]
