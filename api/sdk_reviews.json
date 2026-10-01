@@ -191,7 +191,8 @@
         "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Update",
         "gophercloudsdk/compute/v2/quotasets.WithUpdateOptions",
         "gophercloudsdk/compute/v2/quotasets.WithUpdateField",
-        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce"
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce",
+        "gophercloudsdk/compute/v2/quotasets.WithQuotaOptions"
       ],
       "contracts": [
         {
@@ -220,6 +221,13 @@
           "tests": [
             "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        },
+        {
+          "behavior": "All fourteen typed integer limits retain exact values above 2^53 in scope Update; WithQuotaOptions snapshots pointers at construction and remains independent across repeated applications.",
+          "tests": [
+            "api/nova_project_quotas_precision_test.go:TestNovaProjectQuotaTypedLimitsPreserveIntegerPrecision",
+            "api/nova_project_quotas_precision_test.go:TestNovaProjectQuotaOptionsCapturePointersAndAreReusable"
           ]
         }
       ],
@@ -2469,6 +2477,482 @@
       "remaining": [
         "Audit inherited resource.wait_for_status and Utils polling including indefinite wait, custom failure lists/status attribute, progress callback, cached/mutated Resource, timeout and transport errors; scoped stack success/failure tests do not verify the full generic Proxy method.",
         "Add stack wait timeout, in-flight cancellation and custom failure-policy evidence or document deliberately unsupported generic inputs."
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/quotasets.Get",
+      "source_fingerprint": "610129ca7282b5568bf50c34befa941661eb381326673ecbf384fa442392b57c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.API.InProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.API.CurrentProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET uses /os-quota-sets/{fixedProject}, preserves native zero/unlimited limits, separate response ID, per-type Extra, exact raw extension/null/large-integer fields and copied response headers.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "ProjectQuotaScope fixes one project and returns a typed native model plus ProjectID, raw Body and independent Header metadata; callers do not construct native builders or extract Results."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/quotasets.GetDefaults",
+      "source_fingerprint": "17d9955008701ce085b2a3f4d0cd80dca9b12f97482aa626ddde28428bc6ff46",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.API.InProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.API.CurrentProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Defaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET uses the distinct /os-quota-sets/{fixedProject}/defaults endpoint, retains server defaults and raw per-type/large-integer fields, and leaves configured overrides unchanged.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "ProjectQuotaScope fixes one project and returns a typed native model plus ProjectID, raw Body and independent Header metadata; callers do not construct native builders or extract Results."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/quotasets.GetUsage",
+      "source_fingerprint": "417e85eff888c107f96e3e5f012a92e5b429835a736fa21fe14fa128a96af863",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.API.InProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.API.CurrentProject",
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "Recorded Keystone v2 tenant or v3 project IDs are frozen when the scope is created; manual, unsupported, typed-nil, system/domain and malformed authentication results are rejected without quota requests or token disclosure.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET uses ?usage=true on the project endpoint, retains native Limit/InUse/Reserved/Allocated values and exact raw nested extension fields rather than Nova detail routing.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "ProjectQuotaScope fixes one project and returns a typed native model plus ProjectID, raw Body and independent Header metadata; callers do not construct native builders or extract Results."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/quotasets.Update",
+      "source_fingerprint": "eae3db2cc3e423ec9e338817ef1f366495bd14bef66c1a967cbfdc5e75918235",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithQuotaOptions",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithUpdateForce",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithUpdateField",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithVolumeTypeQuota"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT updates only supplied limits: nil omits, zero and -1 remain explicit, native force=true is retained and WithUpdateForce(false) sends false with last-option precedence.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "WithQuotaOptions snapshots typed pointers and nested Extra maps/slices at option creation and remains reusable; extension options are detached, omitted core fields are still protected and duplicate Extra/field keys fail before HTTP.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaInvalidOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Raw-JSON request construction preserves all seven typed integer limits and per-type gigabyte values above 2^53 on 64-bit platforms; volume-type quota keys use the exact supplied type name without lookup.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaTypedLimitsRetainIntegerPrecision",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Only native HTTP 200 succeeds for PUT; wrong success codes retain their original expected/actual status and response headers.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeleteAndUpdateAcceptOnlyNative200"
+          ]
+        },
+        {
+          "behavior": "Missing, null, array/scalar quota_set envelopes and invalid known field types return decoding errors rather than zero-valued quota objects.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaRejectsMalformedQuotaObjects"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete scope API owns extension construction and protects core fields that native Extra can overwrite; malformed options and typed limits below -1 fail before HTTP.",
+        "WithQuotaOptions copies at option construction; direct opts and native WithUpdateOptions are detached during Update. WithUpdateForce preserves explicit false; raw JSON avoids native builder float64 rounding."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/quotasets.Delete",
+      "source_fingerprint": "c992f43eaf6028258f14e8b0aab386ddfd0ebf0ee5880e041a9764f6c57feae8",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset",
+        "gophercloudsdk/blockstorage/v3/quotasets.WithResetIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE resets overrides at the fixed project endpoint, accepts native HTTP 200, returns bodyless reset metadata and performs no follow-up GET.",
+          "tests": [
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget",
+            "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeleteAndUpdateAcceptOnlyNative200"
+          ]
+        },
+        {
+          "behavior": "Reset is strict on 404 by default; explicit ignore-missing suppresses only 404, a later false restores strict behavior and nil options are rejected before HTTP.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaInvalidOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "All five operations retain original HTTP status/body/header causes, add ErrNotFound only for 404 and preserve pre-canceled contexts; in-flight GET cancellation and Usage deadlines remain observable.",
+          "tests": [
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
+            "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The project singleton exposes Reset rather than a generic resource Delete, with ResetResponse(ProjectID, Header) instead of a fabricated quota model.",
+        "Explicit ignore-missing affects only 404; the default matches the native strict error contract."
+      ],
+      "documentation": [
+        "blockstorage/v3/quotasets/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/quotas.Get",
+      "source_fingerprint": "b5e2a2d68cf3134636f63aeb3b1308b7a860b929b6dd8b66ab1c2ab024b7541b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.API.InProject",
+        "gophercloudsdk/network/v2/extensions/quotas.API.CurrentProject",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs perform no lookup; exact names are resolved once with a separate Keystone v3 client across pages, retaining missing/duplicate/invalid-ID/403 failures and selected Network-client headers.",
+          "tests": [
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient",
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "CurrentProject freezes the recorded Keystone v2/v3 project ID; later auth changes do not move the target, and missing/unsupported/typed-nil/system/domain/malformed auth results fail before HTTP.",
+          "tests": [
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth",
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET uses /quotas/{fixedProject}, keeps native zero/unlimited limits, exact raw extension/null/large-integer fields, selected ResourceBase/configured headers and independent response metadata.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaRejectsMalformedObjects",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "GET/PUT retain native HTTP 200 only, while DELETE accepts native 202 and 204 and returns the actual accepted code with independent headers.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Get, Detail, Update and Delete preserve 404/403/500 code/body/header causes, pre-canceled contexts and ErrNotFound only for 404; in-flight Update cancellation and Detail deadlines remain observable.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The singleton scope replaces per-call project IDs and result extraction with native typed values plus fixed ProjectID, raw Body, copied Header and HTTP StatusCode."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/quotas.GetDetail",
+      "source_fingerprint": "e169941d8ef365e37c2391c5eab6a32e16a4ea885ad002d6b6fdcb9b119f967b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.API.InProject",
+        "gophercloudsdk/network/v2/extensions/quotas.API.CurrentProject",
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit project IDs perform no lookup; exact names are resolved once with a separate Keystone v3 client across pages, retaining missing/duplicate/invalid-ID/403 failures and selected Network-client headers.",
+          "tests": [
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient",
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+          ]
+        },
+        {
+          "behavior": "CurrentProject freezes the recorded Keystone v2/v3 project ID; later auth changes do not move the target, and missing/unsupported/typed-nil/system/domain/malformed auth results fail before HTTP.",
+          "tests": [
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth",
+            "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth",
+            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET uses native /quotas/{fixedProject}/details.json, retains Used/Reserved/Limit values and exact nested raw fields including integer-string reserved compatibility.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaRejectsMalformedObjects",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "GET/PUT retain native HTTP 200 only, while DELETE accepts native 202 and 204 and returns the actual accepted code with independent headers.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Get, Detail, Update and Delete preserve 404/403/500 code/body/header causes, pre-canceled contexts and ErrNotFound only for 404; in-flight Update cancellation and Detail deadlines remain observable.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The singleton scope replaces per-call project IDs and result extraction with native typed values plus fixed ProjectID, raw Body, copied Header and HTTP StatusCode."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/quotas.Update",
+      "source_fingerprint": "27d76a15a5fde9e5db7e368616b2d245c49c8639047889322a2a68b789287030",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Update",
+        "gophercloudsdk/network/v2/extensions/quotas.WithQuotaOptions",
+        "gophercloudsdk/network/v2/extensions/quotas.WithUpdateCheckLimit",
+        "gophercloudsdk/network/v2/extensions/quotas.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Nil limits omit, zero/-1 remain explicit and check_limit omission/true/false are distinct with last-option precedence; integer values stay exact and the serialized body is unchanged across 401 reauthentication.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "WithQuotaOptions freezes typed pointers at option construction and provides new pointers on each application, preserving reuse after callers mutate either the original input or a previous application.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable"
+          ]
+        },
+        {
+          "behavior": "Nil options, invalid typed limits, core/check_limit field collisions, nonserializable extensions and unsupported query/header/argument options fail before HTTP.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Missing/null/array/scalar quota envelopes and wrong known field types fail; Detail accepts native integer-string reserved values but rejects malformed integer strings.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaRejectsMalformedObjects",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
+          ]
+        },
+        {
+          "behavior": "GET/PUT retain native HTTP 200 only, while DELETE accepts native 202 and 204 and returns the actual accepted code with independent headers.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Get, Detail, Update and Delete preserve 404/403/500 code/body/header causes, pre-canceled contexts and ErrNotFound only for 404; in-flight Update cancellation and Detail deadlines remain observable.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Raw JSON request construction preserves exact integers and retry snapshots instead of native any/float64 conversion; callers use concrete options and SDK-owned field/flag helpers rather than custom builders.",
+        "WithUpdateCheckLimit supplies an explicit optional boolean absent from pinned native UpdateOpts; extension/usage-check support remains a server decision."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/quotas.Delete",
+      "source_fingerprint": "70eaa2e1d83ec0f20dc56a3dac360628b10cffb23fb212f6d9ac0b4b36472ef4",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete",
+        "gophercloudsdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE resets fixed-project overrides with no request body or follow-up GET and exposes actual native 202/204 status plus independent response headers.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Delete is strict by default; explicit ignore-missing suppresses only 404, a later false restores strict errors and nil delete options fail before HTTP.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Get, Detail, Update and Delete preserve 404/403/500 code/body/header causes, pre-canceled contexts and ErrNotFound only for 404; in-flight Update cancellation and Detail deadlines remain observable.",
+          "tests": [
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
+            "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Delete returns metadata rather than requiring extraction from an empty response; strict missing behavior preserves the native default and can be explicitly changed."
+      ],
+      "documentation": [
+        "network/v2/extensions/quotas/README.md"
       ]
     }
   ]
