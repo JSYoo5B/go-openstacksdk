@@ -143,3 +143,5 @@ SDK가 소유합니다. context·서비스·선택 버전·옵션 검증은 clea
 `TestClusteringTrackedNewEditsSurviveCommitAndRefreshInFlight`입니다.
 
 Cluster·Node도 SDK 소유 Track/Load·Edit·Commit·Refresh를 제공합니다. PATCH202의 Operation과 cached/actual Response, null·pending 버전 gate, 고정 경로는 [Cluster·Node 비동기 변경 추적](async/README.md)에 별도 설명합니다.
+
+[Receiver 변경 추적](receivers/README.md)도 같은 SDK 소유 dirty 상태를 사용합니다. Receiver는 PATCH 200의 동기 모델이고 Action 명령 이름·Channel·Location을 비동기 작업으로 변환하지 않습니다.

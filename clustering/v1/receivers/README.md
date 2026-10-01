@@ -10,7 +10,7 @@ Connection을 사용하면 `conn.Clustering(ctx)`가 반환한 서비스의 `Rec
 |---|---|---|
 | `create_receiver(**attrs)` | `Create(ctx, opts, options...)` | POST `/receivers`, 201 + receiver |
 | `get_receiver(identity)` | `Get(ctx, identity)` | GET `/receivers/{identity}`, 200 |
-| `update_receiver(identity, **attrs)` | `Update(ctx, ref, opts, options...)` | PATCH, 200 + receiver |
+| `update_receiver(identity, **attrs)` | `Update(...)` 또는 `Load/Track` → `Edit` → `Commit` | PATCH, 200 + receiver |
 | `delete_receiver(identity, ignore_missing=True)` | `Delete(ctx, ref, options...)` | DELETE, 204 |
 | `receivers(**query)` | `List` / `All` | GET `/receivers`, 200 + receivers |
 | `find_receiver(identity, ignore_missing=True)` | `FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
@@ -72,7 +72,7 @@ fmt.Println(receiver.ID, receiver.Action)
 
 수정은 Name/Action/Params를 받으며 Type/ClusterID/Actor/Channel은 수정 입력으로 허용하지
 않습니다. Optional과 RawMessage의 생략·null·빈 값은 유지하고 stateless 빈 Update는 사전 오류입니다.
-Python Resource의 dirty merge, 기존 값과 같은 갱신의 no-op, cache/lifecycle은 별도 미결 계약입니다.
+SDK 소유 `TrackedReceiver`의 dirty merge·같은 값 no-op·cache/lifecycle과 `AtBasePath` scope는 [변경 추적 사용법](../tracking/receivers/README.md)에 제공합니다.
 SDK가 concrete option과 serializer를 제공하며 `With...Options`와 JSON/Field 옵션은 생성 시
 snapshot을 만들고 재사용마다 독립적으로 적용합니다. Update body/header는 Name lookup보다 먼저
 준비하며 lookup 후에도 source/version을 검사합니다. `WithCreateField`/`WithUpdateField`는 vendor
