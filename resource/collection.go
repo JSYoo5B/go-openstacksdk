@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"iter"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -30,7 +31,10 @@ type Adapter[T any] struct {
 	NameQuery    func(string) string
 	NameQueryKey string
 	Status       func(*T) string
-	Failed       func(string) bool
+	// LocalStatus keeps WithStatus out of the wire query for bindings whose
+	// controllers expose a state field but no generic status query parameter.
+	LocalStatus bool
+	Failed      func(string) bool
 }
 
 // Collection shares lookup, streaming, deletion and wait policies across services.
@@ -107,8 +111,13 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			}
 			o.query.Set(key, c.binding.NameQuery(*o.name))
 		}
+		wireQuery := o.query
+		if o.status && c.binding.LocalStatus {
+			wireQuery = maps.Clone(o.query)
+			delete(wireQuery, "status")
+		}
 		if c.binding.Iterate != nil {
-			for value, err := range c.binding.Iterate(ctx, o.query) {
+			for value, err := range c.binding.Iterate(ctx, wireQuery) {
 				if err != nil {
 					yield(nil, c.wrap("list", err))
 					return
@@ -130,7 +139,7 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			return
 		}
 		stopped := false
-		err := eachPage(ctx, c.binding.List(o.query), func(_ context.Context, page pagination.Page) (bool, error) {
+		err := eachPage(ctx, c.binding.List(wireQuery), func(_ context.Context, page pagination.Page) (bool, error) {
 			items, err := c.binding.Extract(page)
 			if err != nil {
 				return false, err

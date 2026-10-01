@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,19 +20,13 @@ import (
 func Collection[T any](client *gophercloud.ServiceClient, path, single, plural string,
 	id, name, status func(*T) string, metadata func(*T) *common.Metadata,
 	deleteURL func(string) string, validateID ...func(string) error) *resource.Collection[T] {
-	adapter := resource.Adapter[T]{Kind: plural, ID: id, Name: name, Status: status,
+	adapter := resource.Adapter[T]{Kind: plural, ID: id, Name: name, Status: status, LocalStatus: status != nil,
 		Get: func(ctx context.Context, id string) (*T, error) {
 			return Fetch[T](ctx, client, "GET", client.ServiceURL(path, url.PathEscape(id)), nil, single, metadata, 200)
 		},
 		List: func(query url.Values) pagination.Pager {
 			if query.Has("limit") || query.Has("marker") {
 				return pagination.Pager{Err: fmt.Errorf("%w: Cyborg controllers do not support caller-supplied limit/marker pagination", resource.ErrUnsupported)}
-			}
-			// Cyborg device/ARQ status is a local Collection filter. Their
-			// controllers do not accept a generic status query argument.
-			if status != nil {
-				query = maps.Clone(query)
-				delete(query, "status")
 			}
 			guarded, err := guardedClient(client)
 			if err != nil {
@@ -107,7 +100,7 @@ func JSONResponse(ctx context.Context, client *gophercloud.ServiceClient, method
 	if err := json.Unmarshal(raw, &decoded); err != nil {
 		return raw, meta, err
 	}
-	return decoded, meta, nil
+	return raw, meta, nil
 }
 
 // DecodeSingleMutation accepts a flat object, a singular envelope, or exactly

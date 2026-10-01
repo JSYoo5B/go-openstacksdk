@@ -25,7 +25,7 @@ for _, arq := range created.Requests {
 | 여러 UUID / instance selector 삭제 | `DeleteMany(ctx, []string{...})` / `DeleteByInstance(ctx, instanceUUID)` |
 | `wait_for_status(arq, "Bound", attribute="state")` | `Wait(ctx, resource.ID(uuid), "Bound", ...)` |
 
-생성은 flat JSON `{"device_profile_name": ...}`을 POST하고 201의 `arqs` 배열 전체를 `CreateResponse.Requests`로 반환합니다. 빈 배열도 보존합니다. 고정한 Python `AcceleratorRequest._consume_attrs`는 첫 항목만 소비하지만 Go는 나머지 생성 결과를 버리지 않습니다. 응답 전체는 `RawBody`와 `Body`, 각 리소스는 자기 `Body`에 보존하며 HTTP 헤더는 서로 독립된 복사본입니다. 성공한 HTTP 응답의 JSON 또는 항목 해석이 실패하면 생성 응답·정상 해석한 항목·원문을 오류와 함께 반환합니다. 이때 자동으로 다시 생성하거나 정리하지 않습니다. provider에 설정된 인증·HTTP 재시도 정책은 그대로 적용됩니다.
+생성은 flat JSON `{"device_profile_name": ...}`을 POST하고 201의 `arqs` 배열 전체를 `CreateResponse.Requests`로 반환합니다. 빈 배열도 보존합니다. 고정한 Python `AcceleratorRequest._consume_attrs`는 첫 항목만 소비하지만 Go는 나머지 생성 결과를 버리지 않습니다. 응답 전체 bytes는 `RawBody`, envelope 필드는 `Body`, 각 리소스는 자기 `Body`에 보존하며 HTTP 헤더는 서로 독립된 복사본입니다. 성공한 HTTP 응답의 JSON 또는 항목 해석이 실패하면 생성 응답·정상 해석한 모든 항목·원문을 오류와 함께 반환합니다. 잘못된 항목 뒤의 정상 항목도 보존하고 오류에는 항목 위치를 기록합니다. 이때 자동으로 다시 생성하거나 정리하지 않습니다. provider에 설정된 인증·HTTP 재시도 정책은 그대로 적용됩니다.
 
 바인딩 PATCH의 실제 경로는 `/accelerator_requests`입니다. UUID는 URL에 추가하지 않고 JSON 객체의 키로 전달합니다. 고정한 Python Resource의 일반 단건 request 준비와 이 controller 계약의 차이를 Go에서 바로잡습니다. `PatchMany`로 같은 방식의 add/remove batch를 보내며, `Bind`는 hostname·device RP UUID·instance UUID 필드를 구성합니다. `/project_id`를 지정하려면 microversion 2.1 이상이 필요합니다. `remove`는 unbind 연산입니다. 이 API는 임의 리소스 필드 수정이나 일반 RFC6902 patch를 제공하지 않습니다. 202 응답은 빈 본문이므로 상태를 추측하지 않고 HTTP metadata를 반환합니다. 갱신된 상태는 명시적으로 `Wait`합니다.
 

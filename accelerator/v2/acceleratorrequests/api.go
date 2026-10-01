@@ -33,6 +33,9 @@ func (v *AcceleratorRequest) UnmarshalJSON(data []byte) error {
 	if err := common.Decode(data, &decoded, &decoded.Metadata); err != nil {
 		return err
 	}
+	if err := validateID(decoded.UUID); err != nil {
+		return fmt.Errorf("Cyborg ARQ response: %w", err)
+	}
 	*v = AcceleratorRequest(decoded)
 	return nil
 }

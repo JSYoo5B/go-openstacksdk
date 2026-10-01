@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -90,16 +91,15 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := json.Unmarshal(batch, &items); err != nil {
 		return result, request.Wrap("create", "arqs", err)
 	}
+	var decodeErrors []error
 	for i, item := range items {
 		var v AcceleratorRequest
 		if err := json.Unmarshal(item, &v); err != nil {
-			return result, request.Wrap("create", "arqs", fmt.Errorf("request %d: %w", i, err))
-		}
-		if err := validateID(v.UUID); err != nil {
-			return result, request.Wrap("create", "arqs", fmt.Errorf("request %d: %w", i, err))
+			decodeErrors = append(decodeErrors, fmt.Errorf("request %d: %w", i, err))
+			continue
 		}
 		v.Header, v.StatusCode = result.Header.Clone(), result.StatusCode
 		result.Requests = append(result.Requests, &v)
 	}
-	return result, nil
+	return result, request.Wrap("create", "arqs", errors.Join(decodeErrors...))
 }

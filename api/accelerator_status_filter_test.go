@@ -3,6 +3,7 @@ package api_test
 import (
 	"context"
 	"errors"
+	"github.com/gophercloud/gophercloud/v2"
 	"net/http"
 	"testing"
 
@@ -15,7 +16,14 @@ import (
 func TestAcceleratorStatusFilterStaysLocal(t *testing.T) {
 	cloud := testcloud.New(t)
 	cloud.Mux.HandleFunc("/v2/accelerator_requests", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Query().Has("status") || r.URL.Query().Get("instance") != "instance" {
+		if r.URL.Query().Has("status") {
+			if r.URL.Query().Get("status") != "Bound" {
+				t.Errorf("explicit status changed: %s", r.URL)
+			}
+			testcloud.JSON(w, 400, `{"error":"unknown status filter"}`)
+			return
+		}
+		if r.URL.Query().Get("instance") != "instance" {
 			t.Errorf("ARQ query %s", r.URL)
 		}
 		testcloud.JSON(w, 200, `{"arqs":[{"uuid":"a1","state":"Initial"},{"uuid":"a2","state":"Bound"}]}`)
@@ -36,6 +44,9 @@ func TestAcceleratorStatusFilterStaysLocal(t *testing.T) {
 	arqs, err := acceleratorrequests.New(client).All(context.Background(), resource.WithStatus("bound"), resource.WithQuery("instance", "instance"))
 	if err != nil || len(arqs) != 1 || arqs[0].UUID != "a2" {
 		t.Fatalf("ARQ filter %+v/%v", arqs, err)
+	}
+	if _, err := acceleratorrequests.New(client).All(context.Background(), resource.WithQuery("status", "Bound")); !gophercloud.ResponseCodeIs(err, 400) {
+		t.Fatalf("explicit query silently discarded: %v", err)
 	}
 	d, err := devices.New(client).All(context.Background(), resource.WithStatus("ENABLED"), resource.WithQuery("hostname", "compute"))
 	if err != nil || len(d) != 1 || d[0].UUID != "d1" {

@@ -48,7 +48,9 @@ func TestAcceleratorRequestCreatePartialAndErrors(t *testing.T) {
 		valid bool
 	}{
 		{`{"arqs":[]}`, 0, true},
+		{" \n{\"arqs\":[{\"uuid\":\"a1\"}]} \n", 1, true},
 		{`{"arqs":[{"uuid":"a1"},null]}`, 1, false},
+		{`{"arqs":[{"uuid":"a1"},null,{"uuid":"a3"}]}`, 2, false},
 		{`{"arqs":[{"uuid":"a1"},{"state":"Initial"}]}`, 1, false},
 		{`{"arqs":null}`, 0, false},
 		{`{"uuid":"a1"}`, 0, false},
@@ -64,7 +66,7 @@ func TestAcceleratorRequestCreatePartialAndErrors(t *testing.T) {
 				testcloud.JSON(w, 201, tc.body)
 			})
 			v, err := acceleratorrequests.New(cloud.Client("accelerator", "/v2")).Create(context.Background(), acceleratorrequests.CreateOpts{DeviceProfileName: "fpga"})
-			if (err == nil) != tc.valid || v == nil || v.Requests == nil || len(v.Requests) != tc.count || v.Header.Get("X-Request-Id") != "accepted" || v.StatusCode != 201 || calls.Load() != 1 {
+			if (err == nil) != tc.valid || v == nil || v.Requests == nil || len(v.Requests) != tc.count || v.Header.Get("X-Request-Id") != "accepted" || v.StatusCode != 201 || string(v.RawBody) != tc.body || calls.Load() != 1 {
 				t.Fatalf("partial result=%+v err=%v calls=%d", v, err, calls.Load())
 			}
 		})
@@ -78,6 +80,23 @@ func TestAcceleratorRequestCreatePartialAndErrors(t *testing.T) {
 	var cause gophercloud.ErrUnexpectedResponseCode
 	if v != nil || !errors.As(err, &cause) || cause.Actual != 403 || cause.ResponseHeader.Get("X-Request-Id") != "denied" {
 		t.Fatalf("cause: %+v/%v", v, err)
+	}
+}
+
+func TestAcceleratorRequestReadRejectsMissingIdentity(t *testing.T) {
+	for _, body := range []string{`{}`, `{"uuid":""}`, `{"uuid":"a1,a2"}`} {
+		t.Run(body, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			cloud.Mux.HandleFunc("/v2/accelerator_requests/a1", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, body) })
+			cloud.Mux.HandleFunc("/v2/accelerator_requests", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"arqs":[`+body+`]}`) })
+			a := acceleratorrequests.New(cloud.Client("accelerator", "/v2"))
+			if v, err := a.Get(context.Background(), "a1"); err == nil || v != nil {
+				t.Fatalf("missing identity get: %+v/%v", v, err)
+			}
+			if values, err := a.All(context.Background()); err == nil || values != nil {
+				t.Fatalf("missing identity list: %+v/%v", values, err)
+			}
+		})
 	}
 }
 
