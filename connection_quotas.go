@@ -2,7 +2,9 @@ package gophercloudsdk
 
 import (
 	"context"
+	blockquotas "gophercloudsdk/blockstorage/v3/quotasets"
 	"gophercloudsdk/compute/v2/quotasets"
+	networkquotas "gophercloudsdk/network/v2/extensions/quotas"
 	"gophercloudsdk/resource"
 )
 
@@ -38,4 +40,68 @@ func (c *Connection) CurrentProjectQuotas(ctx context.Context) (*quotasets.Proje
 		return nil, err
 	}
 	return compute.QuotaSets.CurrentProject(ctx)
+}
+
+// BlockStorageProjectQuotas fixes Cinder quotas to an explicit project ID or
+// exact Keystone project name, using a separate Identity client for names.
+func (c *Connection) BlockStorageProjectQuotas(ctx context.Context, project resource.Ref) (*blockquotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.QuotaSets.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.QuotaSets.InProject(ctx, project, blockquotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentBlockStorageProjectQuotas uses the recorded Keystone project scope.
+func (c *Connection) CurrentBlockStorageProjectQuotas(ctx context.Context) (*blockquotas.ProjectQuotaScope, error) {
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.QuotaSets.CurrentProject(ctx)
+}
+
+// NetworkProjectQuotas fixes Neutron quotas to an explicit project ID or exact
+// Keystone project name, using a separate Identity client for names.
+func (c *Connection) NetworkProjectQuotas(ctx context.Context, project resource.Ref) (*networkquotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.NetworkV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Quotas.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.InProject(ctx, project, networkquotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentNetworkProjectQuotas uses the recorded Keystone project scope.
+func (c *Connection) CurrentNetworkProjectQuotas(ctx context.Context) (*networkquotas.ProjectQuotaScope, error) {
+	service, err := c.NetworkV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.CurrentProject(ctx)
 }
