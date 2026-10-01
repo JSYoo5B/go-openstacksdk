@@ -1603,6 +1603,22 @@
     "wait": false
   },
   {
+    "package": "gophercloudsdk/clustering/v1/profiles",
+    "source": "sdk_owned",
+    "model": "Profile",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/policies",
+    "source": "sdk_owned",
+    "model": "Policy",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
     "package": "gophercloudsdk/clustering/v1/actions",
     "source": "sdk_owned",
     "model": "Action",

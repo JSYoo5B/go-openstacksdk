@@ -9,6 +9,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/policies"
+	"gophercloudsdk/clustering/v1/profiles"
 	"gophercloudsdk/instanceha/v1/segments"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/resource"
@@ -84,5 +86,50 @@ func TestConnectionSDKOwnedResourcesUseCachedProviderAndExactServiceRoots(t *tes
 	cancel()
 	if _, err := conn.InstanceHA(canceled); !errors.Is(err, context.Canceled) {
 		t.Fatalf("cached canceled getter: %v", err)
+	}
+}
+
+func TestConnectionSenlinProfilesAndPoliciesShareSelectedVersionAndFreshToken(t *testing.T) {
+	cloud := testcloud.New(t)
+	check := func(r *http.Request) {
+		if r.Header.Get("X-Auth-Token") != "fresh-token" || r.Header.Get("OpenStack-API-Version") != "clustering 1.2" {
+			t.Errorf("request lost shared auth/version: %#v", r.Header)
+		}
+	}
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/profiles", func(w http.ResponseWriter, r *http.Request) {
+		check(r)
+		var body map[string]map[string]json.RawMessage
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || string(body["profile"]["name"]) != `"template"` || string(body["profile"]["metadata"]) != `{}` {
+			t.Errorf("profile body=%v err=%v", body, err)
+		}
+		testcloud.JSON(w, 201, `{"profile":{"id":"created-profile","name":"template","spec":{"type":"os.nova.server","version":"1.0","properties":{}},"metadata":{}}}`)
+	})
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/policies/validate", func(w http.ResponseWriter, r *http.Request) {
+		check(r)
+		var body map[string]map[string]json.RawMessage
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || len(body["policy"]) != 1 || body["policy"]["spec"] == nil {
+			t.Errorf("validation body=%v err=%v", body, err)
+		}
+		testcloud.JSON(w, 200, `{"policy":{"id":null,"name":null,"type":"senlin.policy.scaling","spec":{"type":"senlin.policy.scaling","version":"1.0","properties":{}},"created_at":null}}`)
+	})
+	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithEndpoint(sdk.Clustering, cloud.Server.URL+"/reverse/senlin"), sdk.WithMicroversion(sdk.Clustering, "1.2"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := conn.Clustering(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if service.Profiles.RawClient() != service.RawClient() || service.Policies.RawClient() != service.RawClient() {
+		t.Fatal("Senlin resource APIs do not share the configured client")
+	}
+	cloud.Provider.SetToken("fresh-token")
+	profile, err := service.Profiles.Create(context.Background(), profiles.CreateOpts{Name: "template", Spec: json.RawMessage(`{"type":"os.nova.server","version":"1.0","properties":{}}`), Metadata: json.RawMessage(`{}`)})
+	if err != nil || profile == nil || profile.StatusCode != 201 || string(profile.Body["metadata"]) != `{}` {
+		t.Fatalf("profile=%+v err=%v", profile, err)
+	}
+	policy, err := service.Policies.Validate(context.Background(), policies.ValidateOpts{Spec: json.RawMessage(`{"type":"senlin.policy.scaling","version":"1.0","properties":{}}`)})
+	if err != nil || policy == nil || policy.StatusCode != 200 || string(policy.Body["id"]) != "null" {
+		t.Fatalf("policy=%+v err=%v", policy, err)
 	}
 }
