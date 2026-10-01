@@ -68,7 +68,10 @@ func validateSort(value string) error {
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false, localFiltersKey); err != nil {
+	if err := senlin.ValidateListCapabilities(config, localFiltersKey); err != nil {
+		return nil, err
+	}
+	if err := senlin.RejectListControlQuery(config.Query); err != nil {
 		return nil, err
 	}
 	value := config.Options

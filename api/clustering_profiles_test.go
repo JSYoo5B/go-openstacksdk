@@ -387,7 +387,7 @@ func TestClusteringProfilesDefaultsInvalidOptionsAndEmptyUpdatePreflight(t *test
 		profiles.WithListOptions(profiles.ListOpts{Sort: "name:sideways"}), profiles.WithListOptions(profiles.ListOpts{Sort: "name,,type"}),
 		profiles.WithListQuery("metadata", "wire-filter"), profiles.WithListQuery("global_project", "true"), profiles.WithListQuery("name", "hidden"),
 		profiles.WithListFilter("unknown", true), profiles.WithListFilter("metadata", make(chan int)),
-		request.WithField[profiles.ListOpts]("vendor", true), request.WithHeader[profiles.ListOpts]("X-Custom", "value"), request.WithArgument[profiles.ListOpts]("unknown", true),
+		request.WithField[profiles.ListOpts]("vendor", true), request.WithHeader[profiles.ListOpts]("X-Auth-Token", "value"), request.WithArgument[profiles.ListOpts]("unknown", true),
 	} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

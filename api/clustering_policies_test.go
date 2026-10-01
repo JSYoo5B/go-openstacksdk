@@ -362,7 +362,7 @@ func TestClusteringPolicyListDefaultBreakAndInvalidExtensions(t *testing.T) {
 	if calls.Load() != 1 {
 		t.Fatal(calls.Load())
 	}
-	invalid := []policies.ListOption{policies.WithListQuery("name", "override"), policies.WithListOptions(policies.ListOpts{Limit: -1}), policies.WithListOptions(policies.ListOpts{Sort: "name:sideways"}), request.WithField[policies.ListOpts]("vendor", false), request.WithHeader[policies.ListOpts]("X-Vendor", "ignored")}
+	invalid := []policies.ListOption{policies.WithListQuery("name", "override"), policies.WithListOptions(policies.ListOpts{Limit: -1}), policies.WithListOptions(policies.ListOpts{Sort: "name:sideways"}), request.WithField[policies.ListOpts]("vendor", false), request.WithHeader[policies.ListOpts]("X-Auth-Token", "ignored")}
 	for _, option := range invalid {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
