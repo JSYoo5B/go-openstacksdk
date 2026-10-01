@@ -55,6 +55,21 @@ func OptionalObject(raw json.RawMessage, field string) error {
 	return Object(raw, field)
 }
 
+// Headers validates additional headers for requests with or without a body.
+// Authentication, version and transport headers remain owned by the SDK.
+func Headers(headers map[string]string) error {
+	for key, value := range headers {
+		if strings.TrimSpace(key) == "" || strings.ContainsAny(key, " \t\r\n:") || strings.ContainsAny(value, "\r\n") {
+			return fmt.Errorf("%w: invalid Senlin extension header", resource.ErrInvalidOption)
+		}
+		switch strings.ToLower(key) {
+		case "openstack-api-version", "x-auth-token", "x-service-token", "authorization", "host", "cookie", "content-type", "content-length":
+			return fmt.Errorf("%w: extension header %q is owned by the SDK", resource.ErrInvalidOption, key)
+		}
+	}
+	return nil
+}
+
 // Body snapshots a single resource envelope. Extensions cannot replace concrete
 // inputs, response identities or SDK-owned auth/version/transport headers.
 // Stateless updates need an explicit field; cached dirty-state no-ops belong to
@@ -63,11 +78,8 @@ func Body[T any](config request.Config[T], envelope string, forbidden ...string)
 	if err := request.ValidateCapabilities(config, true, false, true); err != nil {
 		return nil, err
 	}
-	for key := range config.Headers {
-		switch strings.ToLower(key) {
-		case "openstack-api-version", "x-auth-token", "x-service-token", "authorization", "host", "cookie", "content-type", "content-length":
-			return nil, fmt.Errorf("%w: extension header %q is owned by the SDK", resource.ErrInvalidOption, key)
-		}
+	if err := Headers(config.Headers); err != nil {
+		return nil, err
 	}
 	for key := range config.Fields {
 		for _, protected := range forbidden {

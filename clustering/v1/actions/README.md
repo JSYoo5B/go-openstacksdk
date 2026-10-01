@@ -42,6 +42,21 @@ Sort는 `created_at:desc,name`처럼 문서화된 key와 asc/desc를 사용합�
 지원하며 origin/경로와 기존 필터를 고정하고 cycle을 거부합니다. List는 lazy이며 break와
 context 취소 후 추가 요청을 하지 않습니다.
 
+## 비동기 요청 결과
+
+cluster·node의 비동기 mutation은 `actions.Submission`으로 요청 수락의 근거를 보존합니다.
+`ActionID`와 원래 `Location`, 원문 `Body`, 독립적인 `Header`, `StatusCode`를 제공하며,
+이 값으로 작업 완료나 Action 상태를 추정하지 않습니다. 상태가 필요하면 같은 서비스의
+`Actions.Get(ctx, submission.ActionID)`를 호출합니다. Submission을 만드는 과정에서는
+Location을 따라가거나 추가 조회·대기를 하지 않습니다.
+
+Location은 선택한 서비스의 `actions/{ID}`를 가리키는 한 개의 URI여야 합니다.
+동일 origin의 절대 URI, root-relative URI와 `actions/{ID}` 상대 URI를 지원하며
+reverse-proxy/project 경로를 유지합니다. query·fragment·userinfo, 다른 collection,
+빈 ID·추가 경로·dot segment·escaped slash는 거부합니다. Python의 마지막 slash 뒤
+문자열 추출보다 엄격한 Go 정책입니다. 서버가 이미 수락한 응답의 Location 해석 실패는
+`resource.ResponseError`로 원문/헤더/status를 보존하고 mutation을 다시 보내지 않습니다.
+
 이 단위는 `get_action`과 `actions`만 구현합니다. Action Update/Create/Delete는 제공하지
 않습니다. `Resources`의 공유 lookup/wait 기능은 Senlin proxy의 전체 mutable Resource/
 wait 기본값을 구현했다는 의미가 아닙니다. 특히 service 수준 `wait_for_status` parity는
