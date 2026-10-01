@@ -1560,6 +1560,24 @@
     "parent": "gophercloudsdk/instanceha/v1/segments"
   },
   {
+    "package": "gophercloudsdk/instanceha/v1/notifications",
+    "source": "sdk_owned",
+    "model": "Notification",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/instanceha/v1/vmoves",
+    "source": "sdk_owned",
+    "model": "VMove",
+    "find": false,
+    "delete": false,
+    "wait": true,
+    "scope": "InNotification",
+    "parent": "gophercloudsdk/instanceha/v1/notifications"
+  },
+  {
     "package": "gophercloudsdk/clustering/v1/buildinfo",
     "source": "sdk_owned",
     "model": "BuildInfo",
@@ -1581,6 +1599,31 @@
     "source": "sdk_owned",
     "model": "PolicyType",
     "find": true,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/actions",
+    "source": "sdk_owned",
+    "model": "Action",
+    "find": true,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/events",
+    "source": "sdk_owned",
+    "model": "Event",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/services",
+    "source": "sdk_owned",
+    "model": "Service",
+    "kind": "list_only",
+    "find": false,
     "delete": false,
     "wait": false
   }

@@ -49,7 +49,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	fmt.Fprintf(&out, "| 작업 | openstacksdk | Go |\n|---|---|---|\n| 서비스 접근 | %s | `conn.%s(ctx)` |\n| 선택 인자·기본값 | keyword arguments | concrete options와 작업별 `With...Options` |\n| 확장 입력 | `**attrs`, `**query` | 가능한 연산의 `With...Field/Query/Header` |\n| 결과 | Resource 또는 generator | typed 값과 error 또는 `iter.Seq2` |\n\n", pythonAccess, method)
 	out.WriteString("전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. ")
 	if sdkOwnedService {
-		out.WriteString("응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. ")
+		out.WriteString("응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. Python의 permissive flat/empty 응답 fallback과 달리 각 endpoint의 명시한 object envelope를 검증합니다. ")
 	} else {
 		out.WriteString("기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. ")
 	}
@@ -59,9 +59,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	switch key {
 	case "instanceha/v1":
-		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. `Segments`의 route ID는 `UUID`이며 별도 데이터베이스 `ID`는 원문으로 보존합니다. `enabled` 요청은 실제 numeric microversion 1.2 이상을 요구합니다. [Segment CRUD·페이지·Python 대응](segments/README.md)을 참고합니다. 다른 리소스와 wait helpers는 아직 지원을 별도로 닫아야 합니다.\n\n")
+		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산·Python 대응을 확인합니다. marker fallback·nullable 입력·Resource/cache와 proxy wait의 전체 계약은 추가 비교가 필요합니다.\n\n")
 	case "clustering/v1":
-		out.WriteString("Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `ProfileTypes.Operations(ctx, name)`은 numeric microversion 1.4 이상을 요구합니다. [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md)의 API·Python 차이를 참고합니다. 나머지 cluster/node/command 구현은 아직 pending입니다.\n\n")
+		out.WriteString("Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `ProfileTypes.Operations(ctx, name)`은 numeric microversion 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 11개 조회 연산을 확인합니다. cluster/node/변경·명령과 proxy wait의 전체 계약은 아직 pending입니다.\n\n")
 	case "baremetal/v1":
 		out.WriteString("`Nodes.GetVirtualMedia`는 SDK의 `VirtualMedia` 모델에 연결한 이미지, 삽입 상태, 매체 종류를 반환합니다. [virtual media 조회 사용법](nodes/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Conductors.Resources`는 `Conductor.Hostname`을 ID와 이름으로 사용합니다. `resource.ID(\"conductor-01\")`는 직접 조회하고 `resource.Name(\"conductor-01\")`는 전체 목록에서 정확히 찾습니다. `Drivers.Resources`의 ID와 이름은 `Driver.Name`입니다. 두 리소스는 조회·목록·이름 검색만 제공하며 삭제와 상태 대기는 `ErrUnsupported`입니다. [conductor](conductors/README.md), [driver](drivers/README.md) 사용법을 참고합니다.\n\n")

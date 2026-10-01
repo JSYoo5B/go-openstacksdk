@@ -34,7 +34,8 @@ next/links와 HTTP Link를 지원하며 다음 URL은 같은 origin/collection �
 다음 marker를 만들지 않습니다. `Resources`의 Delete와 상태 Wait는 지원하지 않습니다.
 
 이 패키지는 policy type Get/List만 구현합니다. mutable Python Resource나 Senlin 전체
-parity를 의미하지 않습니다. 근거는 pinned openstacksdk revision
+parity를 의미하지 않습니다. Get은 이름 문자열을 받아 공식 `policy_type` object envelope를
+요구하며 Python의 flat/empty 응답 fallback을 적용하지 않습니다. 근거는 pinned openstacksdk revision
 `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`와
 [공식 policy type API](https://docs.openstack.org/api-ref/clustering/#policy-types-policy-types)이며
 GET 성공 코드는 200입니다.

@@ -4,20 +4,26 @@ package v1
 import (
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	resource0 "gophercloudsdk/instanceha/v1/hosts"
-	resource1 "gophercloudsdk/instanceha/v1/segments"
+	resource1 "gophercloudsdk/instanceha/v1/notifications"
+	resource2 "gophercloudsdk/instanceha/v1/segments"
+	resource3 "gophercloudsdk/instanceha/v1/vmoves"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client   *gophercloud.ServiceClient
-	Hosts    *resource0.API
-	Segments *resource1.API
+	client        *gophercloud.ServiceClient
+	Hosts         *resource0.API
+	Notifications *resource1.API
+	Segments      *resource2.API
+	VMoves        *resource3.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		Hosts:    resource0.New(client),
-		Segments: resource1.New(client),
+		Hosts:         resource0.New(client),
+		Notifications: resource1.New(client),
+		Segments:      resource2.New(client),
+		VMoves:        resource3.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

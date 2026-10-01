@@ -11,9 +11,9 @@ clustering/v1 API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.
 | 확장 입력 | `**attrs`, `**query` | 가능한 연산의 `With...Field/Query/Header` |
 | 결과 | Resource 또는 generator | typed 값과 error 또는 `iter.Seq2` |
 
-전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. 수정한 응답이 자동 저장되지는 않습니다.
+전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. Python의 permissive flat/empty 응답 fallback과 달리 각 endpoint의 명시한 object envelope를 검증합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `ProfileTypes.Operations(ctx, name)`은 numeric microversion 1.4 이상을 요구합니다. [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md)의 API·Python 차이를 참고합니다. 나머지 cluster/node/command 구현은 아직 pending입니다.
+Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `ProfileTypes.Operations(ctx, name)`은 numeric microversion 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 11개 조회 연산을 확인합니다. cluster/node/변경·명령과 proxy wait의 전체 계약은 아직 pending입니다.
 
 ## Go 사용
 
@@ -36,9 +36,12 @@ _ = value
 
 | 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
+| `Actions` | [actions](actions/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 상태 대기 |
 | `BuildInfo` | [buildinfo](buildinfo/api.go) | `Get(ctx)`: 서비스 build 정보 singleton; ID·목록·변경·상태 대기 없음 |
+| `Events` | [events](events/api.go) | `Resources`: ID 조회, 목록 |
 | `PolicyTypes` | [policytypes](policytypes/api.go) | `Resources`: ID 조회, 목록, 이름 조회 |
 | `ProfileTypes` | [profiletypes](profiletypes/api.go) | `Resources`: ID 조회, 목록, 이름 조회 |
+| `Services` | [services](services/api.go) | `List/All`: 목록만 제공; 단건 조회·변경·상태 대기 없음 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

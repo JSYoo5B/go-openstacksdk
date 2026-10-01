@@ -55,6 +55,9 @@ values, err := api.All(ctx,
 결과의 `Body`, `Header`, `StatusCode`는 raw JSON과 HTTP 근거를 담습니다. HTTP 오류의
 원래 status/body/header와 malformed accepted response의 `resource.ResponseError`를
 보존합니다. Python의 mutable Resource 전체 또는 Senlin 전체 parity를 주장하지 않습니다.
+Python의 permissive flat/empty 응답 fallback과 달리 Get은 `profile_type` object,
+Operations는 root `operations` object를 검증합니다. Get은 type 이름 문자열을 받고
+응답을 변경해도 자동으로 commit하지 않습니다.
 
 근거: pinned openstacksdk revision `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `profile_type.py`, `_proxy.py`, 상속 `resource.py`와

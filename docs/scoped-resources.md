@@ -50,6 +50,8 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Trove database | `database.Databases.InInstance(ctx, instance)` | 데이터베이스 이름 |
 | Trove user | `database.Users.InInstance(ctx, instance)` | 사용자·host 식별자 (서비스 설명 참조) |
 | Magnum node group | `magnum.NodeGroups.InCluster(ctx, cluster)` | UUID |
+| Masakari host | `ha.Hosts.InSegment(ctx, segment)` | Host UUID; Segment UUID는 한 번 고정 |
+| Masakari VMove | `ha.VMoves.InNotification(ctx, notification)` | VMove UUID; Notification UUID와 numeric1.3 이상 필요 |
 | Keystone application credential | `identity.ApplicationCredentials.InUser(ctx, user)` | credential ID |
 | Keystone access rule | `identity.ApplicationCredentials.AccessRules(ctx, user)` | access rule ID |
 | Keystone EC2 credential | `identity.EC2Credentials.InUser(ctx, user)` | access ID |
@@ -63,6 +65,8 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Swift object | `swift.Objects.InContainer(ctx, container)` | object 이름 |
 
 Compute/Network/Image의 전체 API 객체는 `conn.ComputeV2(ctx)`, `conn.NetworkV2(ctx)`, `conn.ImageV2(ctx)`로 가져오거나 기존 서비스의 `API` 필드를 사용합니다. 표의 부모는 `resource.ID(...)` 또는 `resource.Name(...)`입니다. floating IP처럼 이름 필드가 없는 부모는 ID로 지정합니다.
+
+Masakari의 `ha`는 `conn.InstanceHA(ctx)`로 얻습니다. [Host scope](../instanceha/v1/hosts/README.md)는 Segment 이름이나 UUID를 한 번 해석하며 [VMove scope](../instanceha/v1/vmoves/README.md)는 이름이 없는 Notification의 UUID를 사용합니다. 데이터베이스 `ID`와 URI UUID를 구별하고, scope의 부모 ID를 응답 body나 확장 query로 바꾸지 않습니다.
 
 Collection 기반 범위 객체는 Get/Find/List/All/Delete/Wait/WaitDeleted/ResolveID를 공유합니다. 이름·삭제·상태가 없는 모델은 해당 기능에 `ErrUnsupported`를 반환합니다. Delete는 기본적으로 404를 무시하며 `WithMissingError()`로 엄격한 동작을 선택합니다. Create/Update는 원래 API에 해당 연산이 있는 범위에 제공됩니다.
 

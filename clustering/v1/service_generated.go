@@ -3,24 +3,33 @@ package v1
 
 import (
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/clustering/v1/buildinfo"
-	resource1 "gophercloudsdk/clustering/v1/policytypes"
-	resource2 "gophercloudsdk/clustering/v1/profiletypes"
+	resource0 "gophercloudsdk/clustering/v1/actions"
+	resource1 "gophercloudsdk/clustering/v1/buildinfo"
+	resource2 "gophercloudsdk/clustering/v1/events"
+	resource3 "gophercloudsdk/clustering/v1/policytypes"
+	resource4 "gophercloudsdk/clustering/v1/profiletypes"
+	resource5 "gophercloudsdk/clustering/v1/services"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
 	client       *gophercloud.ServiceClient
-	BuildInfo    *resource0.API
-	PolicyTypes  *resource1.API
-	ProfileTypes *resource2.API
+	Actions      *resource0.API
+	BuildInfo    *resource1.API
+	Events       *resource2.API
+	PolicyTypes  *resource3.API
+	ProfileTypes *resource4.API
+	Services     *resource5.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		BuildInfo:    resource0.New(client),
-		PolicyTypes:  resource1.New(client),
-		ProfileTypes: resource2.New(client),
+		Actions:      resource0.New(client),
+		BuildInfo:    resource1.New(client),
+		Events:       resource2.New(client),
+		PolicyTypes:  resource3.New(client),
+		ProfileTypes: resource4.New(client),
+		Services:     resource5.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

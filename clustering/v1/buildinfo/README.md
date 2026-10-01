@@ -21,6 +21,7 @@ if info.API != nil && info.API.Revision != nil {
 이 패키지는 build information 조회만 구현합니다. Python의 mutable Resource,
 dirty-field 관리나 모든 Senlin API 지원을 의미하지 않습니다. 잘못된 envelope는
 원본 응답을 담은 `*resource.ResponseError`로 반환합니다.
+Python의 flat/empty 응답 fallback과 달리 공식 `build_info` object envelope를 요구합니다.
 
 계약 근거: pinned openstacksdk revision
 `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 `build_info.py`, `_proxy.py`와
