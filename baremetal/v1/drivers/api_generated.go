@@ -115,6 +115,10 @@ func (b listDriversOptsBuilder) ToListDriversOptsQuery() (string, error) {
 
 // ListDrivers invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDrivers(ctx context.Context, options ...ListDriversOption) iter.Seq2[*Driver, error] {
+	return a.listDriversWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDriversWithControl(ctx context.Context, control resource.ListControl, options ...ListDriversOption) iter.Seq2[*Driver, error] {
 	var opts ListDriversOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -126,10 +130,10 @@ func (a *API) ListDrivers(ctx context.Context, options ...ListDriversOption) ite
 		return func(yield func(*Driver, error) bool) { var zero *Driver; yield(zero, err) }
 	}
 	_opts := listDriversOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDrivers(a.client, _opts), func(page pagination.Page) ([]Driver, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDrivers(a.client, _opts), func(page pagination.Page) ([]Driver, error) {
 		values, err := upstream.ExtractDrivers(page)
 		return []Driver(values), err
-	})
+	}, control)
 }
 
 // ListVendorPassthruMethods invokes the upstream API with library-owned builders and result handling.

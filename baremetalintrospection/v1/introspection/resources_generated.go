@@ -18,7 +18,7 @@ func (a *API) newResources() *resource.Collection[Introspection] {
 			return a.GetIntrospectionStatus(ctx, string(id))
 		},
 		ID: func(v *Introspection) string { return fmt.Sprint(v.UUID) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Introspection, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Introspection, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListIntrospectionsOption, 0, len(q))
@@ -27,7 +27,7 @@ func (a *API) newResources() *resource.Collection[Introspection] {
 					options = append(options, WithListIntrospectionsQuery(key, value))
 				}
 			}
-			return a.ListIntrospections(ctx, options...)
+			return a.listIntrospectionsWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Introspection, error) {

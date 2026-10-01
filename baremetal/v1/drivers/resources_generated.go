@@ -17,7 +17,7 @@ func (a *API) newResources() *resource.Collection[Driver] {
 		Get:  func(ctx context.Context, id string) (*Driver, error) { return a.GetDriverDetails(ctx, string(id)) },
 		ID:   func(v *Driver) string { return fmt.Sprint(v.Name) },
 		Name: func(v *Driver) string { return fmt.Sprint(v.Name) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Driver, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Driver, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListDriversOption, 0, len(q))
@@ -26,7 +26,7 @@ func (a *API) newResources() *resource.Collection[Driver] {
 					options = append(options, WithListDriversQuery(key, value))
 				}
 			}
-			return a.ListDrivers(ctx, options...)
+			return a.listDriversWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Driver, error) {

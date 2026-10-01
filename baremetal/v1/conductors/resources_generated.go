@@ -17,7 +17,7 @@ func (a *API) newResources() *resource.Collection[Conductor] {
 		Get:  func(ctx context.Context, id string) (*Conductor, error) { return a.Get(ctx, string(id)) },
 		ID:   func(v *Conductor) string { return fmt.Sprint(v.Hostname) },
 		Name: func(v *Conductor) string { return fmt.Sprint(v.Hostname) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Conductor, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Conductor, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -26,7 +26,7 @@ func (a *API) newResources() *resource.Collection[Conductor] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Conductor, error) {

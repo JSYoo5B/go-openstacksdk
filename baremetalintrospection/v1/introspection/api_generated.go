@@ -87,6 +87,10 @@ func (b listIntrospectionsOptsBuilder) ToIntrospectionsListQuery() (string, erro
 
 // ListIntrospections invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListIntrospections(ctx context.Context, options ...ListIntrospectionsOption) iter.Seq2[*Introspection, error] {
+	return a.listIntrospectionsWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listIntrospectionsWithControl(ctx context.Context, control resource.ListControl, options ...ListIntrospectionsOption) iter.Seq2[*Introspection, error] {
 	var opts ListIntrospectionsOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -98,10 +102,10 @@ func (a *API) ListIntrospections(ctx context.Context, options ...ListIntrospecti
 		return func(yield func(*Introspection, error) bool) { var zero *Introspection; yield(zero, err) }
 	}
 	_opts := listIntrospectionsOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListIntrospections(a.client, _opts), func(page pagination.Page) ([]Introspection, error) {
+	return resource.StreamWithControl(ctx, upstream.ListIntrospections(a.client, _opts), func(page pagination.Page) ([]Introspection, error) {
 		values, err := upstream.ExtractIntrospections(page)
 		return []Introspection(values), err
-	})
+	}, control)
 }
 
 // ReApplyIntrospection invokes the upstream API with library-owned builders and result handling.
