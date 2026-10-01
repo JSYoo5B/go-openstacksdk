@@ -1,10 +1,11 @@
 # 프로젝트별 Nova quota
 
-Quota는 프로젝트당 하나의 limit 집합입니다. `InProject(ctx, projectRef)`가 프로젝트를 한 번 고정하며, 결과는 Get·Detail·Update·Reset을 제공합니다. List·Find·Wait나 일반 리소스 Delete는 제공하지 않습니다. Reset은 프로젝트의 quota override를 지워 Nova 기본값으로 되돌리는 작업입니다.
+Quota는 프로젝트당 하나의 limit 집합입니다. `InProject(ctx, projectRef)`가 프로젝트를 한 번 고정하며, 결과는 Get·Defaults·Detail·Update·Reset을 제공합니다. List·Find·Wait나 일반 리소스 Delete는 제공하지 않습니다. Reset은 프로젝트의 quota override를 지워 Nova 기본값으로 되돌리는 작업입니다.
 
 | openstacksdk | Go scope |
 |---|---|
 | `conn.compute.get_quota_set(project)` | `scope.Get(ctx)` |
+| `conn.compute.get_quota_set_defaults(project)` | `scope.Defaults(ctx)` |
 | `conn.compute.get_quota_set(project, usage=True)` | `scope.Detail(ctx)` |
 | `conn.compute.update_quota_set(project, cores=0, force=False)` | `scope.Update(ctx, quotasets.UpdateOpts{Cores: &zero}, quotasets.WithUpdateForce(false))` |
 | `conn.compute.revert_quota_set(project)` | `scope.Reset(ctx)` |
@@ -60,13 +61,13 @@ Native `Force bool`의 false는 `omitempty`로 생략됩니다. Scope의 `WithUp
 
 추가 quota 필드는 `WithUpdateField("vendor_quota", value)`로 전달합니다. 값은 옵션 생성 시 JSON으로 복사하며 native input의 core 필드와 충돌하면 거부합니다. 서버가 확장 필드의 의미를 검증합니다. Query·header 확장이나 사용자 정의 builder는 받지 않습니다.
 
-Get·Update의 `QuotaResource`는 embedded native `QuotaSet`, 고정된 `ProjectID`, 전체 quota 객체의 `Body`, 복사된 응답 `Header`를 제공합니다. Detail의 `QuotaDetailResource`는 native `QuotaDetailSet`을 보존하므로 `Cores.Limit/InUse/Reserved`처럼 읽습니다. Python common QuotaSet처럼 usage·reservation을 별도 dictionary로 펼치지 않습니다. 알려지지 않은 quota와 nested 확장 값도 `Body`에서 읽을 수 있으며 키 존재 여부로 생략·null을 구분합니다. null·배열·scalar quota 객체, 잘못된 known field 타입은 decode 오류입니다.
+Get·Defaults·Update의 `QuotaResource`는 embedded native `QuotaSet`, 고정된 `ProjectID`, 전체 quota 객체의 `Body`, 복사된 응답 `Header`를 제공합니다. Defaults는 `/os-quota-sets/{project}/defaults`를 GET하고 현재 quota override를 변경하지 않습니다. 해당 endpoint에는 사용자별 `user_id` query를 가정하지 않습니다. Detail의 `QuotaDetailResource`는 native `QuotaDetailSet`을 보존하므로 `Cores.Limit/InUse/Reserved`처럼 읽습니다. Python common QuotaSet처럼 usage·reservation을 별도 dictionary로 펼치지 않습니다. 알려지지 않은 quota와 nested 확장 값도 `Body`에서 읽을 수 있으며 키 존재 여부로 생략·null을 구분합니다. null·배열·scalar quota 객체, 잘못된 known field 타입은 decode 오류입니다.
 
 Reset은 본문 없는 DELETE 성공을 처리하고 `ResetResponse`의 project ID·헤더만 반환합니다. 결과 quota를 자동으로 GET하지 않습니다. 기본 404는 `resource.ErrNotFound`이며 `WithResetIgnoreMissing(true)`는 404만 `nil, nil`로 바꿉니다. 후속 `WithResetIgnoreMissing(false)`로 다시 엄격하게 설정할 수 있습니다. 다른 HTTP 오류의 status·본문·헤더와 decode·context 취소 원인은 모두 보존합니다.
 
 ## 지원 범위
 
-이 단위는 native Get·GetDetail·Update·Delete에 대응하는 프로젝트 quota singleton입니다. Python의 `get_quota_set_defaults`, user/user_id quota, Get·Reset 추가 query, Resource 변경 추적·자동 commit은 아직 구현하지 않았습니다. 일반 quota 목록 endpoint나 리소스 상태 대기를 가정하지 않습니다. 기존 하위 `API.Get/GetDetail/Update/Delete`는 native 모델 반환 계약을 유지합니다.
+이 단위는 native Get·GetDetail·Update·Delete와 공식 Nova Defaults endpoint에 대응하는 프로젝트 quota singleton입니다. User/user_id quota, Get·Reset 추가 query, Resource 변경 추적·자동 commit은 아직 구현하지 않았습니다. 일반 quota 목록 endpoint나 리소스 상태 대기를 가정하지 않습니다. 기존 하위 `API.Get/GetDetail/Update/Delete`는 native 모델 반환 계약을 유지하며, native에 없는 Defaults는 고수준 scope에서 제공합니다.
 
 Scope는 선택한 Compute microversion을 변경하지 않습니다. [Nova version history](https://docs.openstack.org/nova/latest/reference/api-microversion-history.html)에 따라 2.36부터 network quota, 2.57부터 injected-file quota가 제거됩니다. Native alias에 필드가 있어도 모든 버전에서 전송할 수 있다는 뜻은 아니며 서버가 허용 여부를 검증합니다. Pinned Python QuotaSet의 최대 microversion 2.56을 전체 quota API의 최소 요구로 해석하지 않습니다.
 

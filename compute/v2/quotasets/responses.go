@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/quotasets"
@@ -70,6 +71,24 @@ func quotaError(operation, projectID string, err error) error {
 		err = &resource.NotFoundError{Resource: "compute quota", Reference: projectID, Cause: err}
 	}
 	return request.Wrap(operation, "compute quota", err)
+}
+
+func (a *API) quotaURL(projectID, userID, suffix string) string {
+	parts := []string{"os-quota-sets", projectID}
+	if suffix != "" {
+		parts = append(parts, suffix)
+	}
+	endpoint := a.client.ServiceURL(parts...)
+	if userID != "" {
+		endpoint += "?" + url.Values{"user_id": []string{userID}}.Encode()
+	}
+	return endpoint
+}
+
+func (a *API) getQuotaResponse(ctx context.Context, projectID, userID, suffix string) (result gophercloud.Result) {
+	response, err := a.client.Get(ctx, a.quotaURL(projectID, userID, suffix), &result.Body, &gophercloud.RequestOpts{OkCodes: []int{http.StatusOK}})
+	_, result.Header, result.Err = gophercloud.ParseResponse(response, err)
+	return
 }
 
 // Get fetches the project's limits, preserving response extensions and headers.
