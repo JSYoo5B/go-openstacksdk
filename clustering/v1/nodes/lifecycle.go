@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -73,6 +74,11 @@ func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedNode, error) 
 		if err != nil {
 			return err
 		}
+		if ref.IsName() {
+			if err := senlin.Identifier(value.ID); err != nil {
+				return err
+			}
+		}
 		value.Name, err = trackedNodeString(value.Body, "name")
 		return err
 	}
@@ -120,6 +126,11 @@ func trackedNodeString(body map[string]json.RawMessage, key string) (string, err
 	if raw, exists := body[key]; exists {
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return "", fmt.Errorf("%w: tracked node %s must be a string or null", resource.ErrInvalidOption, key)
+		}
+		if key == "id" && !bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+			if err := senlin.Identifier(value); err != nil {
+				return "", err
+			}
 		}
 	}
 	return value, nil
