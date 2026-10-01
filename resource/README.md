@@ -44,6 +44,9 @@ cap에서 멈춥니다. 기본값과 `WithPaginated(true)`는 continuation을 �
 `break`에서 중단하면 추가 페이지를 가져오지 않습니다. wire limit hint는 서비스별 opt-in이며,
 공통 MaxItems가 모든 서버에 limit을 보내는 것은 아닙니다.
 
+`max_items`와 `paginated`는 로컬 옵션 이름입니다. `WithQuery`에 넣으면 HTTP 전에
+`ErrInvalidOption`을 반환하므로 전용 `WithMaxItems`와 `WithPaginated`를 사용합니다.
+
 iterator 사용 예제는 오류를 반환하는 함수 안에서 작성합니다:
 
 ```go

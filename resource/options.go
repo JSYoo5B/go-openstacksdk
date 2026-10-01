@@ -87,10 +87,14 @@ func WithPageSize(size int) ListOption {
 
 // WithQuery passes a service-specific query field without a custom builder.
 // The server validates its semantics. WithName remains an exact local filter.
+// Local controls max_items and paginated require their dedicated options.
 func WithQuery(key, value string) ListOption {
 	return func(o *listOptions) error {
 		if strings.TrimSpace(key) == "" {
 			return invalid("query key must not be empty")
+		}
+		if key == "max_items" || key == "paginated" {
+			return invalid("local list controls require WithMaxItems or WithPaginated")
 		}
 		o.query.Set(key, value)
 		return nil

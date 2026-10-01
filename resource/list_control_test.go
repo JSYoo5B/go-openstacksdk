@@ -146,6 +146,11 @@ func TestCollectionListControlOptionsRemainLazyAndOwned(t *testing.T) {
 	if rows, err := collection.All(context.Background(), resource.WithMaxItems(-1)); rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 2 {
 		t.Fatal("negative control reached HTTP", rows, err, calls.Load())
 	}
+	for _, key := range []string{"max_items", "paginated"} {
+		if rows, err := collection.All(context.Background(), resource.WithQuery(key, "1")); rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 2 {
+			t.Fatal("local control bypassed typed options and reached HTTP", key, rows, err, calls.Load())
+		}
+	}
 }
 
 func TestOpaqueIteratorCapsRawRowsAndRejectsUnknownPageBoundaries(t *testing.T) {
