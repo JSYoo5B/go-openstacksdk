@@ -25,6 +25,10 @@ func (a *API) newResources() *resource.Collection[Server] {
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"servers", id}, q, []int{200, 203}, &result.Body)
 			return result.Extract()
 		},
+		IdentityAllProjectsQuery: "all_tenants",
+		IterateIdentity: func(ctx context.Context, q url.Values, details bool) iter.Seq2[*Server, error] {
+			return nativefind.IterateServers(ctx, a.RawClient(), q, details)
+		},
 		Get:       func(ctx context.Context, id string) (*Server, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *Server) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *Server) string { return fmt.Sprint(v.Name) },

@@ -3,6 +3,7 @@ package compute
 import (
 	"context"
 	computeapi "gophercloudsdk/compute/v2"
+	"iter"
 	"net/url"
 	"regexp"
 	"strings"
@@ -54,9 +55,13 @@ func New(client *gophercloud.ServiceClient, dependencies Dependencies) *Service 
 		Servers: &Servers{
 			dependencies: dependencies, client: client,
 			Collection: resource.NewCollection[Server](resource.Adapter[Server]{
-				Kind:         "server",
-				IdentityFind: true,
-				Get:          func(ctx context.Context, id string) (*Server, error) { return servers.Get(ctx, client, id).Extract() },
+				Kind:                     "server",
+				IdentityFind:             true,
+				IdentityAllProjectsQuery: "all_tenants",
+				IterateIdentity: func(ctx context.Context, q url.Values, details bool) iter.Seq2[*Server, error] {
+					return nativefind.IterateServers(ctx, client, q, details)
+				},
+				Get: func(ctx context.Context, id string) (*Server, error) { return servers.Get(ctx, client, id).Extract() },
 				GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Server, error) {
 					var result servers.GetResult
 					result.Header, result.Err = nativefind.Get(ctx, client, []string{"servers", id}, q, []int{200, 203}, &result.Body)

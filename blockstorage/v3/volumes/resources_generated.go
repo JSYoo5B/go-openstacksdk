@@ -24,6 +24,10 @@ func (a *API) newResources() *resource.Collection[Volume] {
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"volumes", id}, q, []int{200}, &result.Body)
 			return result.Extract()
 		},
+		IdentityAllProjectsQuery: "all_tenants",
+		IterateIdentity: func(ctx context.Context, q url.Values, details bool) iter.Seq2[*Volume, error] {
+			return nativefind.IterateVolumes(ctx, a.RawClient(), q, details)
+		},
 		Get:       func(ctx context.Context, id string) (*Volume, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *Volume) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *Volume) string { return fmt.Sprint(v.Name) },

@@ -3,6 +3,7 @@ package blockstorage
 import (
 	"context"
 	blockstorageapi "gophercloudsdk/blockstorage/v3"
+	"iter"
 	"net/url"
 	"strings"
 
@@ -27,9 +28,13 @@ func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client, API: blockstorageapi.New(client), Volumes: resource.NewCollection[Volume](resource.Adapter[Volume]{
-		Kind:         "volume",
-		IdentityFind: true,
-		Get:          func(ctx context.Context, id string) (*Volume, error) { return volumes.Get(ctx, client, id).Extract() },
+		Kind:                     "volume",
+		IdentityFind:             true,
+		IdentityAllProjectsQuery: "all_tenants",
+		IterateIdentity: func(ctx context.Context, q url.Values, details bool) iter.Seq2[*Volume, error] {
+			return nativefind.IterateVolumes(ctx, client, q, details)
+		},
+		Get: func(ctx context.Context, id string) (*Volume, error) { return volumes.Get(ctx, client, id).Extract() },
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Volume, error) {
 			var result volumes.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, client, []string{"volumes", id}, q, []int{200}, &result.Body)

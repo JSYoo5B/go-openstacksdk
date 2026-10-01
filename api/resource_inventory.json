@@ -216,6 +216,8 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "identity_details": true,
+    "identity_all_projects": true,
     "delete": true,
     "wait": true
   },
@@ -364,6 +366,8 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "identity_details": true,
+    "identity_all_projects": true,
     "delete": true,
     "wait": true
   },

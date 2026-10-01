@@ -252,10 +252,15 @@ func (g *generator) generate(path string) error {
 		}
 		for _, decl := range f.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
-			if !ok || fn.Recv != nil {
+			if !ok {
 				continue
 			}
-			nativeDecls[fn.Name.Name] = fn
+			if key := identityDeclarationKey(fn); key != "" {
+				nativeDecls[key] = fn
+			}
+			if fn.Recv != nil {
+				continue
+			}
 			if ast.IsExported(fn.Name.Name) {
 				decls[fn.Name.Name] = fn
 			}
@@ -274,6 +279,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateIdentityCollectionContracts(pkg, nativeDecls, plan, scopes, nativeConstants); err != nil {
+		return err
+	}
+	if err := validateIdentityListModeContracts(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	names := []string{}
@@ -312,7 +320,7 @@ func (g *generator) generate(path string) error {
 	} else {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), Delete: plan.deleter != nil, Wait: plan.status != ""})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), Delete: plan.deleter != nil, Wait: plan.status != ""})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {

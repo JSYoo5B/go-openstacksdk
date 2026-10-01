@@ -217,3 +217,119 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 func emitIdentityFind(e *emitter, receiver, target, model string) {
 	e.printf("// FindIdentity tries an ID request before exact ID/name fallback within this collection.\nfunc(%s)FindIdentity(ctx context.Context,identity string,options ...resource.IdentityFindOption)(*%s,error){return %s.FindIdentity(ctx,identity,options...)}\n", receiver, model, target)
 }
+
+// Only these two audited pagers expose details/all-projects identity controls.
+// Other query-capable identity collections keep their original list contract.
+type identityListModeSpec struct {
+	path, model, iterator, page, extractor string
+	lists                                  []string
+	declarations                           map[string]string
+}
+
+var identityListModeSpecs = []identityListModeSpec{
+	{path: "compute/v2/servers", model: "Server", iterator: "IterateServers", page: "ServerPage", extractor: "ExtractServers", lists: []string{"List", "ListSimple"}, declarations: map[string]string{
+		"List":                   "debdc7a25f7ae93e59e6f2f8292a2402f8c3a7ee1b316e601365d3cf3757cafe",
+		"ListSimple":             "204e88938805bcb7b556643cc82792cad58e07449ce7253467442b2f3df2de01",
+		"listURL":                "b3320a7cc0d5105912c77f89d32f6c789b71dc26cef6f66149c00594686fff13",
+		"listDetailURL":          "bf3e8432831c52c83f877d90c9a1370dcf8f4d15e7270c29a7753c9b7d0252ed",
+		"createURL":              "0360b8ba1a61b2b662f07f10920ab4a0ad669d0162762be02d1822890d1ebf52",
+		"ExtractServers":         "9f1a1e7bc37e31a989738ce59f6f3ff2a393103d8ba16c8a0d02285636bd4072",
+		"ExtractServersInto":     "b46cf06bf3408c6b02b9c3610b39922ae6dda921393bb081806b6447669dfcf6",
+		"ServerPage.IsEmpty":     "953b8c265c7b031f21a0c38efa5038b2bdf62b1fbf6e689ff1df10dfe80134f5",
+		"ServerPage.NextPageURL": "ca478f6213cb598ee7b2d644bb6cac751c4d60dd63058626074a47615292af13",
+	}},
+	{path: "blockstorage/v3/volumes", model: "Volume", iterator: "IterateVolumes", page: "VolumePage", extractor: "ExtractVolumes", lists: []string{"List"}, declarations: map[string]string{
+		"List":                   "416520c9ff811390c33f07194805b2f823f6ca9e7415dcf261017695b37b2209",
+		"listURL":                "a173be7936d74d1d2dd2a156cf522bd73eb5a16db5b3be6830372258d37d5046",
+		"createURL":              "6f9440e658f9b65c3c533e3e7d3d7913264a0bd7a7e63dc24953c44622ca79c8",
+		"ExtractVolumes":         "0d4014c0aba5755840c37b5adef94262b95fe3c626ac6ba053e79ddaadb3256d",
+		"ExtractVolumesInto":     "f061096c974f8c5029522f8e150fe42fcaf1b232cf49b1a3079173c97af68a65",
+		"VolumePage.IsEmpty":     "8a770771b9f1951ea31737ea36c0bffefe53b02b150a93dd81919788d210f14e",
+		"VolumePage.NextPageURL": "7286969be75fc92d1a471029cb95807be0373609b6b3cdd8a5cf1f68e42fa176",
+	}},
+}
+
+func identityDeclarationKey(fn *ast.FuncDecl) string {
+	if fn.Recv == nil {
+		return fn.Name.Name
+	}
+	if len(fn.Recv.List) != 1 {
+		return ""
+	}
+	receiver := fn.Recv.List[0].Type
+	if pointer, ok := receiver.(*ast.StarExpr); ok {
+		receiver = pointer.X
+	}
+	if named, ok := receiver.(*ast.Ident); ok {
+		return named.Name + "." + fn.Name.Name
+	}
+	return ""
+}
+
+func identityListModeEnabled(pkg *types.Package, plan *collectionPlan) bool {
+	_, ok := identityListModeContract(pkg, plan)
+	return ok
+}
+
+func identityListModeContract(pkg *types.Package, plan *collectionPlan) (identityListModeSpec, bool) {
+	if !identityCollectionEnabled(pkg, plan, 0) {
+		return identityListModeSpec{}, false
+	}
+	for _, spec := range identityListModeSpecs {
+		if spec.path != sdkPath(pkg.Path()) || plan.modelName != spec.model {
+			continue
+		}
+		for _, name := range spec.lists {
+			fn, ok := pkg.Scope().Lookup(name).(*types.Func)
+			if !ok {
+				return identityListModeSpec{}, false
+			}
+			sig := fn.Type().(*types.Signature)
+			if sig.Variadic() || sig.Params().Len() != 2 || clientParam(sig) != 0 || sig.Results().Len() != 1 || !isPager(sig.Results().At(0).Type()) || !types.Identical(sig.Params().At(1).Type(), plan.lister.Type().(*types.Signature).Params().At(1).Type()) {
+				return identityListModeSpec{}, false
+			}
+		}
+		page := pkg.Scope().Lookup(spec.page)
+		if page == nil {
+			return identityListModeSpec{}, false
+		}
+		fields, ok := page.Type().Underlying().(*types.Struct)
+		if !ok || fields.NumFields() != 1 || !fields.Field(0).Embedded() || types.TypeString(fields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+			return identityListModeSpec{}, false
+		}
+		extract, ok := pkg.Scope().Lookup(spec.extractor).(*types.Func)
+		if !ok {
+			return identityListModeSpec{}, false
+		}
+		sig := extract.Type().(*types.Signature)
+		if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+			return identityListModeSpec{}, false
+		}
+		for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+			method := extractionMethod(page.Type(), name)
+			if method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+				return identityListModeSpec{}, false
+			}
+		}
+		return spec, true
+	}
+	return identityListModeSpec{}, false
+}
+
+func validateIdentityListModeContracts(pkg *types.Package, decls map[string]*ast.FuncDecl, plan *collectionPlan) error {
+	for _, spec := range identityListModeSpecs {
+		if spec.path != sdkPath(pkg.Path()) {
+			continue
+		}
+		if !identityListModeEnabled(pkg, plan) {
+			return fmt.Errorf("audited identity list modes %s.%s: native pager, extractor, or list signature changed", spec.path, spec.model)
+		}
+		for name, want := range spec.declarations {
+			got, err := requestDeclarationHash(decls[name])
+			if err != nil || got != want {
+				return fmt.Errorf("audited identity list modes %s.%s: pinned native declaration %s changed; review routes, pages and extraction", spec.path, spec.model, name)
+			}
+		}
+	}
+	return nil
+}

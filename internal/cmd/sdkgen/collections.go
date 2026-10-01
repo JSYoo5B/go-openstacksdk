@@ -11,19 +11,21 @@ import (
 )
 
 type collectionRecord struct {
-	Package          string `json:"package"`
-	Source           string `json:"source,omitempty"`
-	Model            string `json:"model,omitempty"`
-	UpstreamModel    string `json:"upstream_model,omitempty"`
-	Kind             string `json:"kind,omitempty"`
-	Find             bool   `json:"find"`
-	IdentityFind     bool   `json:"identity_find,omitempty"`
-	IdentityGetQuery bool   `json:"identity_get_query,omitempty"`
-	Delete           bool   `json:"delete"`
-	Wait             bool   `json:"wait"`
-	Scope            string `json:"scope,omitempty"`
-	Parent           string `json:"parent,omitempty"`
-	Issue            string `json:"issue,omitempty"`
+	Package             string `json:"package"`
+	Source              string `json:"source,omitempty"`
+	Model               string `json:"model,omitempty"`
+	UpstreamModel       string `json:"upstream_model,omitempty"`
+	Kind                string `json:"kind,omitempty"`
+	Find                bool   `json:"find"`
+	IdentityFind        bool   `json:"identity_find,omitempty"`
+	IdentityGetQuery    bool   `json:"identity_get_query,omitempty"`
+	IdentityDetails     bool   `json:"identity_details,omitempty"`
+	IdentityAllProjects bool   `json:"identity_all_projects,omitempty"`
+	Delete              bool   `json:"delete"`
+	Wait                bool   `json:"wait"`
+	Scope               string `json:"scope,omitempty"`
+	Parent              string `json:"parent,omitempty"`
+	Issue               string `json:"issue,omitempty"`
 }
 
 type collectionPlan struct {
@@ -288,6 +290,11 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok {
 		e.printf("IdentityFind:true,\n")
 		emitIdentityGetQuery(e, plan, receiver, parents, contract)
+		if len(parents) == 0 {
+			if mode, ok := identityListModeContract(e.pkg, plan); ok {
+				e.printf("IdentityAllProjectsQuery:\"all_tenants\",\nIterateIdentity:func(ctx context.Context,q url.Values,details bool)iter.Seq2[*%s,error]{return nativefind.%s(ctx,%s.RawClient(),q,details)},\n", plan.modelName, mode.iterator, receiver)
+			}
+		}
 	}
 	e.printf("Get:func(ctx context.Context,id string)(*%s,error){", plan.modelName)
 	if isInteger(plan.getIDType) {
