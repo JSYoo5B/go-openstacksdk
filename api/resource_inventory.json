@@ -283,10 +283,13 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/instanceactions",
+    "model": "ActionResource",
+    "upstream_model": "InstanceAction",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InServer",
+    "parent": "gophercloudsdk/compute/v2/servers"
   },
   {
     "package": "gophercloudsdk/compute/v2/keypairs",
@@ -353,10 +356,13 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/tags",
+    "model": "string",
+    "kind": "string_set",
     "find": false,
-    "delete": false,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InServer",
+    "parent": "gophercloudsdk/compute/v2/servers"
   },
   {
     "package": "gophercloudsdk/compute/v2/usage",
@@ -434,10 +440,12 @@
   },
   {
     "package": "gophercloudsdk/db/v1/databases",
-    "find": false,
-    "delete": false,
+    "model": "Database",
+    "find": true,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InInstance",
+    "parent": "gophercloudsdk/db/v1/instances"
   },
   {
     "package": "gophercloudsdk/db/v1/datastores",
@@ -462,10 +470,13 @@
   },
   {
     "package": "gophercloudsdk/db/v1/users",
-    "find": false,
-    "delete": false,
+    "model": "UserResource",
+    "upstream_model": "User",
+    "find": true,
+    "delete": true,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InInstance",
+    "parent": "gophercloudsdk/db/v1/instances"
   },
   {
     "package": "gophercloudsdk/dns/v2/quotas",

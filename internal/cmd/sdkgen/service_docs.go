@@ -55,6 +55,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.\n\n")
+		out.WriteString("`Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.\n\n")
+		out.WriteString("`InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.\n\n")
+	case "db/v1":
+		out.WriteString("`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.\n\n")
 	case "objectstorage/v1":
 		out.WriteString("Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.\n\n")
 		out.WriteString("`Containers.Resources`와 `Objects.InContainer(ctx, parent)`는 공통 리소스 정책을 제공합니다. HEAD로 조회하면 SDK의 `ContainerResource/ObjectResource`가 typed 정보와 사용자 metadata, 전체 헤더를 함께 보관합니다. [Swift 리소스 사용법](objects/README.md)을 참고합니다.\n\n")
@@ -88,7 +92,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if parts[0] == "metric" {
 		out.WriteString("`metrics`는 `gophercloudsdk/metric/v1/metrics`입니다.\n\n")
 	}
-	out.WriteString("## 리소스와 공통 정책\n\n| 서비스 필드 | API 패키지 | 공통 Collection |\n|---|---|---|\n")
+	out.WriteString("## 리소스와 공통 정책\n\n| 서비스 필드 | API 패키지 | 공통 정책·범위 |\n|---|---|---|\n")
 	for _, path := range paths {
 		var policies []string
 		for _, record := range g.collections {
@@ -98,6 +102,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			label := "Resources"
 			if record.Scope != "" {
 				label = record.Scope + "(ctx, parent)"
+			}
+			if record.Kind == "string_set" {
+				policies = append(policies, fmt.Sprintf("`%s`: 문자열 집합 조회·추가·확인·교체·삭제; Collection/상태 대기 없음", label))
+				continue
 			}
 			features := []string{"ID 조회", "목록"}
 			if record.Find {

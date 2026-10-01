@@ -14,6 +14,7 @@ type collectionRecord struct {
 	Package       string `json:"package"`
 	Model         string `json:"model,omitempty"`
 	UpstreamModel string `json:"upstream_model,omitempty"`
+	Kind          string `json:"kind,omitempty"`
 	Find          bool   `json:"find"`
 	Delete        bool   `json:"delete"`
 	Wait          bool   `json:"wait"`
