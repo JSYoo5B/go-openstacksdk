@@ -17,7 +17,7 @@ import (
 const scopeForceArgument = "project_quota_force"
 
 // WithUpdateForce makes force explicit, including false. This option belongs
-// to ProjectQuotaScope.Update; the lower-level API.Update retains native opts.
+// to the project/user scope Update; lower-level API.Update retains native opts.
 func WithUpdateForce(force bool) UpdateOption {
 	return request.WithArgument[UpdateOpts](scopeForceArgument, force)
 }
@@ -56,31 +56,39 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, opts UpdateOpts, options
 	if err := s.api.validateQuotaClient(ctx); err != nil {
 		return nil, quotaError("Update", s.projectID, err)
 	}
-	config, err := request.Apply(opts, options...)
+	body, err := prepareQuotaUpdate(opts, options...)
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
-	}
-	if err := request.ValidateCapabilities(config, true, false, false, scopeForceArgument); err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	config.Options = snapshotOptions(config.Options)
-	if err := validateLimits(config.Options); err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	force, explicitForce, err := request.Argument[bool](config, scopeForceArgument)
-	if err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	body, err := quotaUpdateBody(config)
-	if err != nil {
-		return nil, quotaError("Update", s.projectID, err)
-	}
-	if explicitForce {
-		body["quota_set"].(map[string]any)["force"] = force
 	}
 	result := upstream.Update(ctx, s.api.client, s.projectID, preparedUpdate(body))
 	value, err := decodeQuota(result.Result, s.projectID)
 	return value, quotaError("Update", s.projectID, err)
+}
+
+func prepareQuotaUpdate(opts UpdateOpts, options ...UpdateOption) (map[string]any, error) {
+	config, err := request.Apply(opts, options...)
+	if err != nil {
+		return nil, err
+	}
+	if err := request.ValidateCapabilities(config, true, false, false, scopeForceArgument); err != nil {
+		return nil, err
+	}
+	config.Options = snapshotOptions(config.Options)
+	if err := validateLimits(config.Options); err != nil {
+		return nil, err
+	}
+	force, explicitForce, err := request.Argument[bool](config, scopeForceArgument)
+	if err != nil {
+		return nil, err
+	}
+	body, err := quotaUpdateBody(config)
+	if err != nil {
+		return nil, err
+	}
+	if explicitForce {
+		body["quota_set"].(map[string]any)["force"] = force
+	}
+	return body, nil
 }
 
 func quotaUpdateBody(config request.Config[UpdateOpts]) (map[string]any, error) {
@@ -115,7 +123,7 @@ func validateLimits(options UpdateOpts) error {
 
 type resetOptions struct{ ignoreMissing bool }
 
-// ResetOption configures the reset's missing-project policy.
+// ResetOption configures the project/user reset's missing-target policy.
 type ResetOption func(*resetOptions) error
 
 // WithResetIgnoreMissing makes only HTTP 404 return nil, nil. The default is

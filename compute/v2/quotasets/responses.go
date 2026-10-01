@@ -17,8 +17,10 @@ import (
 type QuotaResource struct {
 	QuotaSet
 	ProjectID string
-	Body      map[string]json.RawMessage
-	Header    http.Header
+	// UserID is set only for an explicitly bound UserQuotaScope.
+	UserID string
+	Body   map[string]json.RawMessage
+	Header http.Header
 }
 
 // QuotaDetailResource retains limit/in-use/reserved values and raw detail
@@ -26,15 +28,19 @@ type QuotaResource struct {
 type QuotaDetailResource struct {
 	QuotaDetailSet
 	ProjectID string
-	Body      map[string]json.RawMessage
-	Header    http.Header
+	// UserID is set only for an explicitly bound UserQuotaScope.
+	UserID string
+	Body   map[string]json.RawMessage
+	Header http.Header
 }
 
 // ResetResponse retains the reset response headers. Reset returns no quota
 // object and does not automatically fetch defaults or the resulting limits.
 type ResetResponse struct {
 	ProjectID string
-	Header    http.Header
+	// UserID is set only for an explicitly bound UserQuotaScope.
+	UserID string
+	Header http.Header
 }
 
 func quotaObject(result gophercloud.Result) (json.RawMessage, map[string]json.RawMessage, error) {
