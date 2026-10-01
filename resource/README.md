@@ -26,9 +26,9 @@ resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 
 Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에서 수행합니다. Find에 별도 tenant/project 필터를 전달하는 기능은 아직 없습니다. 중복 오류의 IDs는 중복을 확인한 첫 두 리소스입니다.
 
-Nova 서버·Cinder v3 볼륨·Neutron 포트와 고정 zone의 Designate recordset·고정 pool의
-Octavia member는 `FindIdentity`로 문자열을 자동 조회합니다. 기본 GET400·403·404
-fallback, query 옵션, unsafe 이름의 목록 경로와 Python 사용법은
+Nova 서버·Cinder v3 볼륨·Neutron 네트워크/subnet/포트, Keystone 프로젝트/사용자/그룹/domain/role과
+고정 zone의 Designate recordset·고정 pool의 Octavia member는 `FindIdentity`로 문자열을 자동 조회합니다.
+기본 GET400·403·404 fallback, 양쪽 HTTP 단계의 query 옵션, unsafe 이름의 목록 경로와 Python 사용법은
 [이름·ID 자동 조회](../docs/finding-identities.md)에 설명합니다. 다른 native binding은
 이 자동 정책을 아직 지원하지 않습니다.
 

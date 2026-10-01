@@ -60,12 +60,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	identityFindAccess := map[string]string{
 		"compute/v2":      "`Servers.FindIdentity(ctx, identity, options...)`",
 		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
-		"network/v2":      "`Ports.FindIdentity(ctx, identity, options...)`",
+		"network/v2":      "`Networks/Subnets/Ports.FindIdentity(ctx, identity, options...)`",
+		"identity/v3":     "`Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)`",
 		"dns/v2":          "`RecordSets.InZone(ctx, parent)`가 반환한 scope의 `FindIdentity`",
 		"loadbalancer/v2": "`Pools.Members(ctx, parent)`가 반환한 scope의 `FindIdentity`",
 	}
 	if access, ok := identityFindAccess[key]; ok {
-		fmt.Fprintf(&out, "%s는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·경로 정책을 설명합니다.\n\n", access)
+		fmt.Fprintf(&out, "%s는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.\n\n", access)
 	}
 	switch key {
 	case "instanceha/v1":

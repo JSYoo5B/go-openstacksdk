@@ -13,11 +13,18 @@
 | Nova 서버 | `conn.compute.find_server("web-01")` | `compute.Servers.FindIdentity(ctx, "web-01")` |
 | Cinder v3 볼륨 | `conn.block_storage.find_volume("data-01")` | `storage.Volumes.FindIdentity(ctx, "data-01")` |
 | Neutron 포트 | `conn.network.find_port("web-port")` | `network.Ports.FindIdentity(ctx, "web-port")` |
+| Neutron 네트워크 | `conn.network.find_network("web-net")` | `network.Networks.FindIdentity(ctx, "web-net")` |
+| Neutron subnet | `conn.network.find_subnet("web-subnet")` | `network.Subnets.FindIdentity(ctx, "web-subnet")` |
+| Keystone 프로젝트 | `conn.identity.find_project("app", domain_id=domain_id)` | `identity.Projects.FindIdentity(ctx, "app", domainQuery)` |
+| Keystone 사용자 | `conn.identity.find_user("app-user", domain_id=domain_id)` | `identity.Users.FindIdentity(ctx, "app-user", domainQuery)` |
+| Keystone 그룹 | `conn.identity.find_group("app-group", domain_id=domain_id)` | `identity.Groups.FindIdentity(ctx, "app-group", domainQuery)` |
+| Keystone domain | `conn.identity.find_domain("Default")` | `identity.Domains.FindIdentity(ctx, "Default")` |
+| Keystone role | `conn.identity.find_role("reader", domain_id=domain_id)` | `identity.Roles.FindIdentity(ctx, "reader", domainQuery)` |
 | Designate recordset | `conn.dns.find_recordset("www.example.org.", zone)` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
-위 다섯 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
-`conn.BlockStorage(ctx).Volumes`, `conn.Network(ctx).Ports`도 같은 조회 정책을 제공합니다.
+위 12개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
+`conn.BlockStorage(ctx).Volumes`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
 ID와 이름이 없는 리소스에 이 정책을 일괄 적용하지 않습니다. Senlin의 다섯
@@ -94,7 +101,7 @@ func FindScopedResources(ctx context.Context, dns *dnsv2.Service,
 | `WithIdentityFindIgnoreMissing(false)` | 성공한 빈 검색은 `ErrNotFound` |
 | `WithIdentityFindFallback(resource.FindFallbackNotFoundOnly)` | 시도한 GET이 404일 때만 목록 검색 |
 | `WithIdentityFindFallback(resource.FindFallbackNever)` | GET만 사용, 404에만 미존재 옵션 적용 |
-| `WithIdentityFindQuery(key, value)` | fallback 목록의 서버 query, 같은 key는 뒤의 옵션 우선 |
+| `WithIdentityFindQuery(key, value)` | 직접 GET과 fallback 목록의 서버 query, 같은 key는 뒤의 옵션 우선 |
 | `WithIdentityFindOptions(resource.IdentityFindOpts{...})` | bool pointer와 query를 포함한 concrete 설정 |
 
 기본 미존재 무시는 고정한 Python 소스의 `ignore_missing=True`에 대응합니다. 이 Python
@@ -115,10 +122,18 @@ slash로 decode하지 않고 query에서 `%252F`가 됩니다. 빈 문자열, �
 잘못된 UTF-8과 제어 문자는 요청 전에 거부합니다. Python의 모든 문자열 GET-first와
 다른 Go 경로 정책입니다.
 
-query는 fallback에만 전달하며 GET의 필터로 적용하지 않습니다. caller가 binding의
+caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니다. 이름 hint는 목록으로
+전환할 때만 추가하므로 GET에 자동 이름 필터를 넣지 않습니다. caller가 binding의
 이름 query key를 지정하면 자동 이름 hint로 덮어쓰지 않습니다. 기본 hint는 Nova에서
-`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 네 binding에서는 literal
+`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 11개 binding에서는 literal
 문자열입니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
+
+query가 없으면 기존 native Get을 사용합니다. query를 지정하면 SDK가 감사한 member
+경로·성공 코드를 사용하고 같은 native `GetResult.Extract`로 응답을 해석합니다. 서비스
+client와 provider를 복제하거나 변경하지 않으며 최신 인증 token·HTTP client·기본 헤더와
+microversion을 유지합니다. 내부 binding에 GET-query hook이 없으면 안전한 ID의 query
+조회는 첫 HTTP 전에 `ErrUnsupported`입니다. GET을 사용하지 않는 unsafe 이름의
+목록 검색은 이 hook을 요구하지 않습니다.
 
 GET 결과와 소비한 목록의 각 행은 nil이 아닌 리소스와 안전한 ID를 요구합니다.
 빈 ID나 경로에 사용할 수 없는 ID가 있는 행은 일치 여부와 관계없이 오류입니다.
@@ -131,13 +146,59 @@ typed native 응답에 없는 HTTP 본문·헤더를 이 검증 오류에 만들
 bool pointer, query map과 slice를 복사하고 호출마다 독립적으로 적용합니다. 옵션
 생성 뒤 원본 설정을 바꾸어도 이미 생성한 옵션의 동작은 바뀌지 않습니다.
 
+## Keystone domain과 네트워크 필터
+
+이름만으로 프로젝트·사용자·그룹을 검색하면 서로 다른 domain의 같은 이름도 중복으로
+판정합니다. SDK는 인증한 사용자의 domain을 검색 필터로 추정하지 않습니다.
+`domain_id`를 명시하면 첫 GET과 모든 fallback 페이지에 전달합니다. 서버가 필터를
+무시하면 정확한 이름·중복 검사도 유지합니다. Keystone role의 domain 필터도 서버의
+권한·API 계약에 따릅니다. Domains의 query 확장은 Go 기능이며 Python `find_domain`은
+추가 query 인자를 받지 않습니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    identityv3 "gophercloudsdk/identity/v3"
+    networkv2 "gophercloudsdk/network/v2"
+    "gophercloudsdk/resource"
+)
+
+func FindTenantResources(ctx context.Context, identity *identityv3.Service,
+    network *networkv2.Service) error {
+    strict := resource.WithIdentityFindIgnoreMissing(false)
+    domain, err := identity.Domains.FindIdentity(ctx, "Default", strict)
+    if err != nil { return err }
+    domainQuery := resource.WithIdentityFindQuery("domain_id", domain.ID)
+    project, err := identity.Projects.FindIdentity(ctx, "app", strict, domainQuery)
+    if err != nil { return err }
+    user, err := identity.Users.FindIdentity(ctx, "app-user", strict, domainQuery)
+    if err != nil { return err }
+    group, err := identity.Groups.FindIdentity(ctx, "app-group", strict, domainQuery)
+    if err != nil { return err }
+    role, err := identity.Roles.FindIdentity(ctx, "reader", strict, domainQuery)
+    if err != nil { return err }
+    net, err := network.Networks.FindIdentity(ctx, "web-net", strict)
+    if err != nil { return err }
+    subnet, err := network.Subnets.FindIdentity(ctx, "web-subnet", strict,
+        resource.WithIdentityFindQuery("network_id", net.ID))
+    if err != nil { return err }
+    _, _, _, _, _ = project, user, group, role, subnet
+    return nil
+}
+```
+
 ## Python과 추가로 비교할 범위
 
 Nova와 Cinder의 fallback은 native detail pager를 사용하여 Python의 기본
 `details=True`에 대응합니다. `details=False`로 summary 경로를 선택하는 옵션,
 `list_base_path` 교체, 호출별 header·microversion 선택은 이 공통 API에 없습니다.
-`all_projects` 같은 서버 필터는 `WithIdentityFindQuery`로 명시합니다. query 자체의
-권한과 의미는 해당 OpenStack 서버가 결정합니다.
+Nova·Cinder의 cross-project 목록 wire key는 `all_tenants`입니다. Python의
+`all_projects` 인자는 목록에만 이 key를 넣는 별도 정책이므로 일반 query 옵션과
+같지 않습니다. 이 typed 인자는 아직 제공하지 않습니다. `WithIdentityFindQuery`로
+지정한 wire query는 GET과 목록에 모두 전달하며, 권한과 의미는 해당 서버가 결정합니다.
 
 이 API는 typed Gophercloud 응답을 반환합니다. Python의 Resource 입력·cache·descriptor
 변환·dirty state 전체와 native 응답의 추가 raw HTTP metadata를 제공한다는 뜻은
@@ -150,3 +211,11 @@ Nova와 Cinder의 fallback은 native detail pager를 사용하여 Python의 기�
 [Neutron find_port](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L3950),
 [Designate find_recordset](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/dns/v2/_proxy.py#L337),
 [Octavia find_member](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/load_balancer/v2/_proxy.py#L542)입니다.
+
+Neutron의 [find_network](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L3214),
+[find_subnet](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7487)과 Keystone의
+[find_project](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1063),
+[find_user](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1379),
+[find_group](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L782),
+[find_domain](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L259),
+[find_role](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1743)도 같은 pin으로 비교했습니다.

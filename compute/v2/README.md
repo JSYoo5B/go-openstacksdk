@@ -13,7 +13,7 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-`Servers.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·경로 정책을 설명합니다.
+`Servers.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
 
 `conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
