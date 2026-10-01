@@ -174,6 +174,10 @@ func (b listDetailOptsBuilder) ToClustersListQuery() (string, error) {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Cluster, error] {
+	return a.listDetailWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Cluster, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -185,10 +189,10 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 		return func(yield func(*Cluster, error) bool) { var zero *Cluster; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Cluster, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Cluster, error) {
 		values, err := upstream.ExtractClusters(page)
 		return []Cluster(values), err
-	})
+	}, control)
 }
 
 type ResizeOption = request.Option[ResizeOpts]

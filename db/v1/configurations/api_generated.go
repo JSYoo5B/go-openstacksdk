@@ -115,10 +115,14 @@ func (a *API) GetGlobalParam(ctx context.Context, versionID string, paramID stri
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Config, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Config, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Config, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Config, error) {
 		values, err := upstream.ExtractConfigs(page)
 		return []Config(values), err
-	})
+	}, control)
 }
 
 // ListDatastoreParams invokes the upstream API with library-owned builders and result handling.

@@ -19,7 +19,7 @@ func (a *API) newResources() *resource.Collection[CronTrigger] {
 		Name:      func(v *CronTrigger) string { return fmt.Sprint(v.Name) },
 		NameQuery: func(name string) string { return name },
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*CronTrigger, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*CronTrigger, error] {
 			q = maps.Clone(q)
 			if value := q.Get("name"); value != "" {
 				q.Set("-", value)
@@ -32,7 +32,7 @@ func (a *API) newResources() *resource.Collection[CronTrigger] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*CronTrigger, error) {

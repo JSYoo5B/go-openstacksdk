@@ -118,6 +118,10 @@ func (b listOptsBuilder) ToNodeGroupsListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, clusterID string, options ...ListOption) iter.Seq2[*NodeGroup, error] {
+	return a.listWithControl(ctx, clusterID, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, clusterID string, control resource.ListControl, options ...ListOption) iter.Seq2[*NodeGroup, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -129,10 +133,10 @@ func (a *API) List(ctx context.Context, clusterID string, options ...ListOption)
 		return func(yield func(*NodeGroup, error) bool) { var zero *NodeGroup; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, clusterID, _opts), func(page pagination.Page) ([]NodeGroup, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, clusterID, _opts), func(page pagination.Page) ([]NodeGroup, error) {
 		values, err := upstream.ExtractNodeGroups(page)
 		return []NodeGroup(values), err
-	})
+	}, control)
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.

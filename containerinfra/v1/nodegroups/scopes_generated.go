@@ -43,7 +43,7 @@ func (s *NodeGroupScope) newResources() *resource.Collection[NodeGroup] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*NodeGroup, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*NodeGroup, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -52,7 +52,7 @@ func (s *NodeGroupScope) newResources() *resource.Collection[NodeGroup] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return s.api.List(ctx, s.parentID, options...)
+			return s.api.listWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 

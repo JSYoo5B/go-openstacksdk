@@ -50,10 +50,14 @@ func (a *API) GetVersion(ctx context.Context, datastoreID string, versionID stri
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Datastore, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Datastore, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Datastore, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Datastore, error) {
 		values, err := upstream.ExtractDatastores(page)
 		return []Datastore(values), err
-	})
+	}, control)
 }
 
 // ListVersions invokes the upstream API with library-owned builders and result handling.

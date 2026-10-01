@@ -48,10 +48,14 @@ func (a *API) Get(ctx context.Context, imageID string, memberID string) (*Member
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, id string) iter.Seq2[*Member, error] {
-	return resource.Stream(ctx, upstream.List(a.client, id), func(page pagination.Page) ([]Member, error) {
+	return a.listWithControl(ctx, id, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, id string, control resource.ListControl) iter.Seq2[*Member, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, id), func(page pagination.Page) ([]Member, error) {
 		values, err := upstream.ExtractMembers(page)
 		return []Member(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

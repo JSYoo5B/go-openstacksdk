@@ -325,6 +325,10 @@ func (b listOptsBuilder) ToContainerListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Container, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Container, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -336,10 +340,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Contai
 		return func(yield func(*Container, error) bool) { var zero *Container; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Container, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Container, error) {
 		values, err := upstream.ExtractContainers(page)
 		return []Container(values), err
-	})
+	}, control)
 }
 
 type ListConsumersOption = request.Option[ListOpts]

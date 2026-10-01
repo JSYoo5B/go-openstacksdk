@@ -17,13 +17,13 @@ func (a *API) newResources() *resource.Collection[Flavor] {
 		Get:  func(ctx context.Context, id string) (*Flavor, error) { return a.Get(ctx, string(id)) },
 		ID:   func(v *Flavor) string { return fmt.Sprint(v.ID) },
 		Name: func(v *Flavor) string { return fmt.Sprint(v.Name) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Flavor, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Flavor, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*Flavor, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return a.List(ctx)
+			return a.listWithControl(ctx, control)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Flavor, error) {

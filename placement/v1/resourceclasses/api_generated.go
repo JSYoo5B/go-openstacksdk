@@ -88,10 +88,14 @@ func (a *API) Get(ctx context.Context, name string) (*ResourceClass, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*ResourceClass, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]ResourceClass, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*ResourceClass, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]ResourceClass, error) {
 		values, err := upstream.ExtractResourceClasses(page)
 		return []ResourceClass(values), err
-	})
+	}, control)
 }
 
 // Update invokes the upstream API with library-owned builders and result handling.

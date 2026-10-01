@@ -117,6 +117,10 @@ func (b listOptsBuilder) ToTaskListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Task, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Task, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -128,8 +132,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Task, 
 		return func(yield func(*Task, error) bool) { var zero *Task; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Task, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Task, error) {
 		values, err := upstream.ExtractTasks(page)
 		return []Task(values), err
-	})
+	}, control)
 }

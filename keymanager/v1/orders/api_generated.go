@@ -124,6 +124,10 @@ func (b listOptsBuilder) ToOrderListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Order, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Order, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -135,8 +139,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Order,
 		return func(yield func(*Order, error) bool) { var zero *Order; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Order, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Order, error) {
 		values, err := upstream.ExtractOrders(page)
 		return []Order(values), err
-	})
+	}, control)
 }

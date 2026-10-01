@@ -38,8 +38,12 @@ func (a *API) Get(ctx context.Context, id string) (*Flavor, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Flavor, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Flavor, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Flavor, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Flavor, error) {
 		values, err := upstream.ExtractFlavors(page)
 		return []Flavor(values), err
-	})
+	}, control)
 }

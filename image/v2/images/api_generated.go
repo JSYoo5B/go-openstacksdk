@@ -173,6 +173,10 @@ func (b listOptsBuilder) ToImageListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Image, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Image, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -184,10 +188,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Image,
 		return func(yield func(*Image, error) bool) { var zero *Image; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Image, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Image, error) {
 		values, err := upstream.ExtractImages(page)
 		return []Image(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

@@ -40,13 +40,13 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Member, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Member, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*Member, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return s.api.List(ctx, s.parentID)
+			return s.api.listWithControl(ctx, s.parentID, control)
 		}})
 }
 

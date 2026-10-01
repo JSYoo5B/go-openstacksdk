@@ -129,10 +129,14 @@ func (a *API) IsRootEnabled(ctx context.Context, id string) (bool, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Instance, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Instance, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Instance, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Instance, error) {
 		values, err := upstream.ExtractInstances(page)
 		return []Instance(values), err
-	})
+	}, control)
 }
 
 // Resize invokes the upstream API with library-owned builders and result handling.
