@@ -83,11 +83,11 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	if err := senlin.Validate(ctx, a.RawClient()); err != nil {
 		return nil, request.Wrap("Create", "clustering.clusters", err)
 	}
-	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPost, a.RawClient().ServiceURL("clusters"), body, headers, http.StatusCreated)
+	response, err := rest.DoJSON(ctx, a.RawClient(), http.MethodPost, a.RawClient().ServiceURL("clusters"), body, headers, http.StatusCreated, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap("Create", "clustering.clusters", err)
 	}
-	value, err := decodeMutation(a.RawClient(), response, false)
+	value, err := decodeMutation(a.RawClient(), response, response.StatusCode == http.StatusAccepted)
 	return value, request.Wrap("Create", "clustering.clusters", err)
 }
 

@@ -121,7 +121,7 @@ func TestClusteringClustersExplicitSuccessCodesAndNativeErrors(t *testing.T) {
 			if operation == "Update" || operation == "Delete" {
 				expected = 202
 			}
-			if code == expected {
+			if code == expected || (operation == "Create" && code == http.StatusAccepted) {
 				continue
 			}
 			t.Run(operation+"/"+fmt.Sprint(code), func(t *testing.T) {
