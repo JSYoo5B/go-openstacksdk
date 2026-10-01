@@ -167,7 +167,7 @@ func WithProperties(properties map[string]any) UploadImageOption {
 func WithWait(options ...resource.WaitOption) UploadImageOption {
 	options = append([]resource.WaitOption(nil), options...)
 	return func(o *uploadImageOptions) error {
-		if err := resource.ValidateWaitOptions(options...); err != nil {
+		if err := resource.ValidateWaitOptionsFor[images.Image](options...); err != nil {
 			return err
 		}
 		o.wait = true

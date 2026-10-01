@@ -26,7 +26,7 @@ fmt.Println(value.UUID, value.Finished, value.State)
 
 ## WaitUntilFinished의 정책
 
-Waiter는 공통 `resource.WaitOption`을 그대로 사용합니다. 기본 timeout은 5분, poll 간격은 2초입니다. 옵션은 요청 전에 검사하며 뒤에 지정한 값이 우선합니다. 부모 context의 취소와 더 짧은 deadline을 보존합니다.
+Waiter는 공통 `resource.WaitOption`을 사용합니다. 기본 timeout은 5분, poll 간격은 2초입니다. `WithUnlimitedWait()`도 부모 context의 취소와 deadline을 보존합니다. `WithProgressCallback`은 모델에 progress가 없어 비종료 응답마다 0을 받습니다. `WithStatusAttribute`는 `Finished`라는 완료 조건을 바꾸므로 이 전용 waiter에서는 거부합니다. `WithFailureStates()`로도 조회 중 확인한 서비스 Error를 무시할 수 없습니다. 옵션은 요청 전에 검사하며 뒤에 지정한 값이 우선합니다.
 
 입력 UUID를 한 번 해석한 뒤 같은 UUID를 계속 조회합니다. 후속 응답에 UUID가 없거나 다른 UUID가 있더라도 다른 URL로 조회를 바꾸지 않습니다. 반환 모델의 UUID는 서버 응답 그대로 보존합니다. 이미 `Finished=true`이면 첫 응답에서 즉시 반환합니다.
 

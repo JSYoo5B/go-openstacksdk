@@ -246,7 +246,7 @@ func (s *StackScope) Wait(ctx context.Context, ref resource.Ref, status string, 
 	if strings.TrimSpace(status) == "" {
 		return nil, fmt.Errorf("%w: target status must not be empty", resource.ErrInvalidOption)
 	}
-	if err := resource.ValidateWaitOptions(options...); err != nil {
+	if err := resource.ValidateWaitOptionsFor[ResourceView](options...); err != nil {
 		return nil, err
 	}
 	name, err := s.ResolveID(ctx, ref)

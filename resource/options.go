@@ -96,6 +96,8 @@ type waitOptions struct {
 	timeout, interval time.Duration
 	failureStates     []string
 	failureStatesSet  bool
+	statusAttribute   string
+	progressCallback  func(int)
 }
 type WaitOption func(*waitOptions) error
 
@@ -128,6 +130,31 @@ func WithFailureStates(states ...string) WaitOption {
 		}
 		o.failureStates = states
 		o.failureStatesSet = true
+		return nil
+	}
+}
+
+// WithStatusAttribute selects an exported string field by its JSON tag or Go
+// name. The SDK owns field access; callers do not implement a status adapter.
+func WithStatusAttribute(attribute string) WaitOption {
+	return func(o *waitOptions) error {
+		if strings.TrimSpace(attribute) == "" || strings.ContainsAny(attribute, ". /\\\t\r\n") {
+			return invalid("status attribute must be a single non-empty field name")
+		}
+		o.statusAttribute = attribute
+		return nil
+	}
+}
+
+// WithProgressCallback reports model progress after each nonterminal response,
+// including the initial lookup. Missing or nil progress is reported as zero.
+// The callback runs synchronously and is not called for success or failure.
+func WithProgressCallback(callback func(int)) WaitOption {
+	return func(o *waitOptions) error {
+		if callback == nil {
+			return invalid("progress callback must not be nil")
+		}
+		o.progressCallback = callback
 		return nil
 	}
 }

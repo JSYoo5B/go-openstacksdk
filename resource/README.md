@@ -21,7 +21,7 @@ resource.ID(server.ID)   // 조회한 응답을 다음 작업에서 참조
 | `All(ctx, ...ListOption)` | iterator를 slice로 수집 |
 | `Delete(ctx, ref, ...LookupOption)` | 이름이면 ID 해석 후 삭제, 기본 미존재 무시 |
 | `Wait(ctx, ref, status, ...WaitOption)` | 참조를 한 번 해석하고 동일 ID의 상태 확인 |
-| `WaitDeleted(ctx, ref, ...WaitOption)` | 동일 ID를 조회하다가 404가 오면 삭제 완료 |
+| `WaitDeleted(ctx, ref, ...WaitOption)` | 동일 ID를 조회하다가 404·nil 결과·deleted 상태면 삭제 완료 |
 
 Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에서 수행합니다. Find에 별도 tenant/project 필터를 전달하는 기능은 아직 없습니다. 중복 오류의 IDs는 중복을 확인한 첫 두 리소스입니다.
 
@@ -31,7 +31,7 @@ Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에�
 |---|---|
 | 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithQuery` |
 | 조회/삭제 | `WithIgnoreMissing`, `WithMissingError` |
-| 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates` |
+| 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates`, `WithStatusAttribute`, `WithProgressCallback` |
 
 페이지 크기와 총 결과 수를 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는 크기이며 List/All은 후속 페이지도 읽습니다. 원하는 수에서 `break`하면 추가 페이지를 가져오지 않습니다.
 
@@ -57,7 +57,21 @@ Wait의 기본 timeout은 5분, 간격은 2초입니다. `WithUnlimitedWait()`�
 
 Python `resource.wait_for_status(..., failures=[], wait=None)`에 대응하는 Go 옵션은 `WithFailureStates(), WithUnlimitedWait()`입니다. Go는 응답 객체를 받아 캐시된 상태를 검사하는 대신 처음부터 HTTP로 조회하고, timeout을 HTTP 요청에도 context deadline으로 전달합니다. 이미 취소된 context에서는 목표 상태 응답도 성공으로 반환하지 않습니다.
 
-Wait는 없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 오류를 반환합니다. WaitDeleted는 이미 없는 리소스에도 성공하며, 인증 오류나 서버 오류를 삭제 완료로 처리하지 않습니다. flavor처럼 상태가 없는 리소스는 Wait/WithStatus를 요청하면 `ErrUnsupported`를 반환합니다.
+Python의 `attribute="provision_state"`는 `WithStatusAttribute("provision_state")`에 대응합니다. SDK가 모델의 JSON tag 또는 exported Go 필드 이름을 찾으므로 별도 getter나 builder를 구현하지 않습니다. embedded 모델도 지원하며, 없는 필드·문자열이 아닌 필드·모호한 필드는 요청 전에 `ErrUnsupported`입니다. `*string`은 지원하지만 실제 응답이 nil이면 명확한 오류를 반환합니다. `WaitUntilFinished`처럼 완료 조건을 고정한 전용 waiter에서는 속성을 교체할 수 없습니다.
+
+```go
+node, err := service.Nodes.Resources.Wait(ctx, resource.ID("node-uuid"), "power on",
+    resource.WithStatusAttribute("power_state"),
+    resource.WithFailureStates("error"),
+    resource.WithUnlimitedWait(),
+    resource.WithProgressCallback(func(progress int) { fmt.Println(progress) }))
+if err != nil { return err }
+_ = node
+```
+
+`WithProgressCallback`은 초기 조회와 이후 각 비종료 응답의 `progress` 정수 필드를 읽습니다. 필드가 없거나 nil이면 0이며 값의 범위를 보정하지 않습니다. 완료·실패·HTTP 오류에서는 호출하지 않습니다. callback은 호출한 goroutine에서 동기적으로 실행되며, callback에서 context를 취소하면 추가 조회를 하지 않습니다. 서비스 생성 workflow는 `ValidateWaitOptionsFor[Model]`로 속성의 지원 여부까지 검사한 뒤 생성 요청을 보냅니다.
+
+Wait는 없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 오류를 반환합니다. 성공 응답에서 리소스 객체가 nil이면 `ErrFailedState`입니다. WaitDeleted는 이미 없는 리소스·nil 결과·대소문자 무시 `deleted` 상태에도 성공하며, 인증 오류나 서버 오류를 삭제 완료로 처리하지 않습니다. 삭제 대기에도 callback과 속성 선택을 사용할 수 있습니다. flavor처럼 기본 상태가 없는 리소스는 Wait/WithStatus를 요청하면 `ErrUnsupported`를 반환하며, Wait에서 실제 문자열 속성을 명시적으로 선택할 수는 있습니다.
 
 ## SDK 내부 어댑터
 

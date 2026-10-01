@@ -37,7 +37,8 @@ func (a *API) WaitUntilFinished(ctx context.Context, ref resource.Ref, options .
 	// Progress labels exist only inside this waiter. The native model has no
 	// Status field, and the public Resources collection does not acquire one.
 	waiter := resource.NewCollection(resource.Adapter[Introspection]{
-		Kind: "introspection",
+		Kind:            "introspection",
+		FixedWaitStatus: true,
 		Get: func(ctx context.Context, _ string) (*Introspection, error) {
 			value, err := a.GetIntrospectionStatus(ctx, id)
 			if err != nil {

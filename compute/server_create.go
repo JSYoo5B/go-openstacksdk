@@ -142,7 +142,7 @@ func WithNetworks(refs ...resource.Ref) CreateServerOption {
 func WithWait(opts ...resource.WaitOption) CreateServerOption {
 	opts = append([]resource.WaitOption(nil), opts...)
 	return func(o *createServerOptions) error {
-		if err := resource.ValidateWaitOptions(opts...); err != nil {
+		if err := resource.ValidateWaitOptionsFor[servers.Server](opts...); err != nil {
 			return err
 		}
 		o.wait = true
