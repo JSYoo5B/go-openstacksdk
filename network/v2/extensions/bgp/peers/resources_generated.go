@@ -18,13 +18,13 @@ func (a *API) newResources() *resource.Collection[BGPPeer] {
 		ID:     func(v *BGPPeer) string { return fmt.Sprint(v.ID) },
 		Name:   func(v *BGPPeer) string { return fmt.Sprint(v.Name) },
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*BGPPeer, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*BGPPeer, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*BGPPeer, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return a.List(ctx)
+			return a.listWithControl(ctx, control)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*BGPPeer, error) {

@@ -122,6 +122,10 @@ func (b listOptsBuilder) ToRBACPolicyListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*RBACPolicy, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*RBACPolicy, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -133,10 +137,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*RBACPo
 		return func(yield func(*RBACPolicy, error) bool) { var zero *RBACPolicy; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]RBACPolicy, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]RBACPolicy, error) {
 		values, err := upstream.ExtractRBACPolicies(page)
 		return []RBACPolicy(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

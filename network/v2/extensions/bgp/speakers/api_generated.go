@@ -205,10 +205,14 @@ func (a *API) GetAdvertisedRoutes(ctx context.Context, bgpSpeakerID string) iter
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*BGPSpeaker, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]BGPSpeaker, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*BGPSpeaker, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]BGPSpeaker, error) {
 		values, err := upstream.ExtractBGPSpeakers(page)
 		return []BGPSpeaker(values), err
-	})
+	}, control)
 }
 
 type RemoveBGPPeerOption = request.Option[RemoveBGPPeerOpts]

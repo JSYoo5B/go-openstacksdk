@@ -327,6 +327,10 @@ func (b listOptsBuilder) ToBGPVPNListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*BGPVPN, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*BGPVPN, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -338,10 +342,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*BGPVPN
 		return func(yield func(*BGPVPN, error) bool) { var zero *BGPVPN; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]BGPVPN, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]BGPVPN, error) {
 		values, err := upstream.ExtractBGPVPNs(page)
 		return []BGPVPN(values), err
-	})
+	}, control)
 }
 
 type ListNetworkAssociationsOption = request.Option[ListNetworkAssociationsOpts]
