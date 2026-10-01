@@ -244,6 +244,7 @@ func TestNativeIdentityListModesBreakCancellationAndPreflight(t *testing.T) {
 					break
 				}
 				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
 				var result error
 				for value, err := range mode.list(ctx, client, nil, details) {
 					if err != nil {
