@@ -182,6 +182,69 @@ func ListWithBodyFilters[T any](ctx context.Context, spec rest.CollectionSpec[T]
 	}
 }
 
+// ListWithClientBodyFilters prepares each iteration's owned request controls
+// before rebuilding the concrete collection gates for its effective client.
+func ListWithClientBodyFilters[T any](ctx context.Context, source *gophercloud.ServiceClient, factory func(*gophercloud.ServiceClient) rest.CollectionSpec[T], filters BodyFilterSpec, options ...ListOption) iter.Seq2[*T, error] {
+	options = append([]ListOption(nil), options...)
+	filters = snapshotBodyFilterSpec(filters)
+	return func(yield func(*T, error) bool) {
+		kind := "clustering.list"
+		if factory != nil {
+			kind = factory(source).Kind
+		}
+		config, err := request.Apply(ListOpts{}, options...)
+		if err == nil {
+			err = ValidateListCapabilities(config, filters.Namespace)
+		}
+		var effective *gophercloud.ServiceClient
+		if err == nil {
+			effective, err = PrepareListClient(ctx, source, config)
+		}
+		if err == nil && factory == nil {
+			err = fmt.Errorf("%w: list collection factory is required", resource.ErrInvalidOption)
+		}
+		if err != nil {
+			yield(nil, request.Wrap("List", kind, err))
+			return
+		}
+		spec := ListSpec(source, effective, factory)
+		kind = spec.Kind
+		data := ListQueryConfig(config)
+		query, err := Query(data, filters.Namespace)
+		if err == nil {
+			err = RejectListControlQuery(query)
+		}
+		if err == nil {
+			err = RejectBodyFilterQuery(query, filters)
+		}
+		var prepared map[string]json.RawMessage
+		if err == nil {
+			prepared, err = PrepareBodyFilters(data, filters)
+		}
+		if err != nil {
+			yield(nil, request.Wrap("List", kind, err))
+			return
+		}
+		control := rest.ListControl{MaxItems: config.Options.MaxItems,
+			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated,
+			LimitHint:  spec.Paging.MaxItemsLimitHint}
+		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
+			if err != nil {
+				yield(nil, request.Wrap("List", kind, err))
+				return
+			}
+			matched, err := MatchFilters(spec.Metadata(value).Body, prepared)
+			if err != nil {
+				yield(nil, request.Wrap("List", kind, err))
+				return
+			}
+			if matched && !yield(value, nil) {
+				return
+			}
+		}
+	}
+}
+
 func List[T any](ctx context.Context, spec rest.CollectionSpec[T], options ...ListOption) iter.Seq2[*T, error] {
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*T, error) bool) {
