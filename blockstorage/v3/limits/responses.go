@@ -75,8 +75,10 @@ func (r *RateLimits) UnmarshalJSON(data []byte) error {
 }
 
 type LimitsResource struct {
-	Absolute     *AbsoluteLimit
-	Rate         []RateLimits
+	Absolute *AbsoluteLimit
+	Rate     []RateLimits
+	// ProjectID is the requested filter, not server-confirmed response identity.
+	// Cinder silently ignores project filters for non-admin callers.
 	ProjectID    string
 	Body         map[string]json.RawMessage
 	AbsoluteBody map[string]json.RawMessage

@@ -96,13 +96,17 @@ func (a *API) requireProjectFilter() error {
 	if err != nil {
 		return err
 	}
+	if a.client.Microversion == "latest" {
+		return fmt.Errorf("%w: Cinder project limits filtering requires a selected numeric microversion 3.39 or newer", resource.ErrUnsupported)
+	}
 	if minor < 39 {
 		return fmt.Errorf("%w: Cinder project limits filtering requires microversion 3.39", resource.ErrUnsupported)
 	}
 	return nil
 }
 
-// InProject checks 3.39 before any exact-name lookup, then fixes the target ID.
+// InProject checks a selected numeric 3.39+ before any exact-name lookup, then
+// fixes the requested filter. Cinder ignores that filter for non-admin callers.
 // No endpoint component or authentication token is interpreted as a project.
 func (a *API) InProject(ctx context.Context, ref resource.Ref, options ...ProjectOption) (*ProjectLimitsScope, error) {
 	if err := a.validateClient(ctx); err != nil {

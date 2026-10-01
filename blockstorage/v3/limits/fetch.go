@@ -59,7 +59,8 @@ func prepareQuery(fixedProject string, options ...GetOption) (url.Values, string
 
 // Fetch preserves Cinder's implicit authenticated-project behavior when no
 // filter is supplied. ProjectID is then empty, rather than guessed or refreshed.
-// An explicit project filter requires the caller's selected version to be 3.39+.
+// An explicit project filter requires a selected numeric version of 3.39+.
+// Cinder ignores that filter for non-admin callers; it is not response identity.
 func (a *API) Fetch(ctx context.Context, options ...GetOption) (*LimitsResource, error) {
 	if err := a.validateClient(ctx); err != nil {
 		return nil, limitsError("Fetch", "", err)

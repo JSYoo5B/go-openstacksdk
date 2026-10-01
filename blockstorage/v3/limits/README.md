@@ -48,9 +48,19 @@ func readLimits(ctx context.Context, client *gophercloud.ServiceClient) error {
 Cinder added the admin-only `project_id` filter in API 3.39. An omitted version
 uses 3.0 behavior: unfiltered `Fetch` works, while `InProject`, `CurrentProject`
 and filtered `Fetch` fail before a Keystone lookup or Cinder HTTP. A selected
-3.39+ or `latest` version permits the filter, subject to the server's policy.
+numeric 3.39+ version permits the filter. Symbolic `latest` remains valid for
+unfiltered `Fetch`, but fails project-filter preflight because a deployment's
+maximum may be below 3.39. Connection microversion range discovery can select a
+numeric version before binding the scope; the SDK does not upgrade it here.
 The pinned Python resource caps its selected microversion at 3.39. This Go layer
 retains the service client's selected version and never raises or caps it.
+
+Cinder silently ignores `project_id` for non-admin callers, even at 3.39+,
+and returns the authenticated project's limits. The response has no project
+identity to verify. `LimitsResource.ProjectID` records the requested filter;
+it does not confirm which project's data the server returned. Cross-project
+reads therefore require an admin context. The SDK does not infer server admin
+policy from local role names.
 
 `WithGetOptions(limits.GetOpts{ProjectID: "project-id"})` also filters `Fetch`.
 `WithGetQuery` adds query extension fields using the same concrete request
@@ -97,4 +107,5 @@ list, find or wait methods.
 Sources: pinned openstacksdk
 [`Limits`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/block_storage/v3/limits.py),
 [`get_limits`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/block_storage/v3/_proxy.py),
-and official [Cinder API version history](https://docs.openstack.org/api-ref/block-storage/api_microversion_history.html).
+official [Cinder API version history](https://docs.openstack.org/api-ref/block-storage/api_microversion_history.html),
+and [server project-filter behavior](https://github.com/openstack/cinder/blob/master/cinder/api/v3/limits.py).

@@ -31,7 +31,7 @@ func newCinderLimitsAPI(cloud *testcloud.Cloud, version string) *limits.API {
 }
 
 func TestCinderLimitsImplicitFetchWorksAtLegacyVersionAndNativeGetRemains(t *testing.T) {
-	for _, version := range []string{"", "3.0", "3.38"} {
+	for _, version := range []string{"", "3.0", "3.38", "latest"} {
 		t.Run("version-"+version, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
@@ -60,7 +60,7 @@ func TestCinderLimitsProjectFilteringRequires339BeforeIdentityOrHTTP(t *testing.
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t.Errorf("unsupported project limits made HTTP: %s", r.URL)
 	})
-	for _, version := range []string{"", "3.0", "3.38"} {
+	for _, version := range []string{"", "3.0", "3.38", "latest"} {
 		api := newCinderLimitsAPI(cloud, version)
 		for _, ref := range []resource.Ref{resource.ID("p"), resource.Name("tenant")} {
 			if _, err := api.InProject(context.Background(), ref, limits.WithIdentityClient(cloud.Client("identity", "/identity/v3"))); !errors.Is(err, resource.ErrUnsupported) {
@@ -71,6 +71,9 @@ func TestCinderLimitsProjectFilteringRequires339BeforeIdentityOrHTTP(t *testing.
 			t.Fatal(err)
 		}
 		if _, err := api.Fetch(context.Background(), limits.WithGetOptions(limits.GetOpts{ProjectID: "p"})); !errors.Is(err, resource.ErrUnsupported) {
+			t.Fatal(err)
+		}
+		if _, err := api.Fetch(context.Background(), limits.WithGetQuery("project_id", "p")); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(err)
 		}
 	}
@@ -119,6 +122,31 @@ func TestCinderLimitsExactProjectNamesUseSeparateKeystoneOnce(t *testing.T) {
 	}
 	if lookups.Load() != 2 || calls.Load() != 2 {
 		t.Fatal("project re-resolved")
+	}
+}
+
+func TestCinderLimitsScopeRechecksVersionBeforeSendingProjectFilter(t *testing.T) {
+	cloud := testcloud.New(t)
+	var calls atomic.Int32
+	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		testcloud.JSON(w, 200, cinderLimitsBody)
+	})
+	client := cloud.Client("block-storage", "/cinder/v3/catalog-project")
+	client.Microversion = "3.39"
+	scope, err := limits.New(client).InProject(context.Background(), resource.ID("fixed"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, version := range []string{"latest", "3.38", ""} {
+		client.Microversion = version
+		if value, err := scope.Get(context.Background()); value != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 0 {
+			t.Fatal(version, value, err, calls.Load())
+		}
+	}
+	client.Microversion = "3.70"
+	if value, err := scope.Get(context.Background()); err != nil || value.ProjectID != "fixed" || calls.Load() != 1 {
+		t.Fatal(value, err, calls.Load())
 	}
 }
 
@@ -221,7 +249,7 @@ func TestCinderLimitsVersionHeadersCannotOverrideSelectedMicroversion(t *testing
 		name, version, kind string
 		headers             map[string]string
 		valid               bool
-	}{{"matching legacy", "3.39", "block-storage", map[string]string{"x-openstack-volume-api-version": "3.39"}, true}, {"matching generic", "3.70", "volumev3", map[string]string{"OpenStack-API-Version": "volume 3.70"}, true}, {"latest", "latest", "volume", map[string]string{"X-OpenStack-Volume-API-Version": "latest"}, true}, {"blank type explicit", "3.39", "", map[string]string{"X-OpenStack-Volume-API-Version": "3.39"}, true}, {"lower legacy", "3.39", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": "3.38"}, false}, {"lower generic", "3.39", "block-storage", map[string]string{"openstack-api-version": "volume 3.38"}, false}, {"wrong generic service", "3.39", "block-storage", map[string]string{"OpenStack-API-Version": "block-storage 3.39"}, false}, {"suppressed legacy", "3.39", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": ""}, false}, {"implicit upgraded header", "", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": "3.39"}, false}, {"blank type no header", "3.39", "", nil, false}, {"wrong client service", "3.39", "compute", nil, false}} {
+	}{{"matching legacy", "3.39", "block-storage", map[string]string{"x-openstack-volume-api-version": "3.39"}, true}, {"matching generic", "3.70", "volumev3", map[string]string{"OpenStack-API-Version": "volume 3.70"}, true}, {"blank type explicit", "3.39", "", map[string]string{"X-OpenStack-Volume-API-Version": "3.39"}, true}, {"lower legacy", "3.39", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": "3.38"}, false}, {"lower generic", "3.39", "block-storage", map[string]string{"openstack-api-version": "volume 3.38"}, false}, {"wrong generic service", "3.39", "block-storage", map[string]string{"OpenStack-API-Version": "block-storage 3.39"}, false}, {"suppressed legacy", "3.39", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": ""}, false}, {"implicit upgraded header", "", "block-storage", map[string]string{"X-OpenStack-Volume-API-Version": "3.39"}, false}, {"blank type no header", "3.39", "", nil, false}, {"wrong client service", "3.39", "compute", nil, false}} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
