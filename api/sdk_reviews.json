@@ -11365,6 +11365,151 @@
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. Go uses the native plural_links pager and does not implement every inherited Python continuation path.",
         "Both resources inherit _max_microversion=None, so a class-specific maximum-version negotiation gap is not claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from Go frozen raw wire query, which keeps configured client settings and rejects SDK query control keys."
       ]
+    },
+    {
+      "operation": "python:network/v2/find_subnet_pool",
+      "source_fingerprint": "83005704e7cac9f3e5132236f713615b2199f8f4c4dc1f7efc535d12bbfa1619",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/subnetpools.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct find_subnet_pool (openstack/network/v2/_proxy.py:7621) accepts a string, ignore_missing=True and query. Native GET200 /subnetpools/id and subnetpool envelope preserve canonical IDs and typed nested model/timestamp extraction; undeclared GET203/204 and accepted decode errors remain terminal without fallback or resend.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes"
+          ]
+        },
+        {
+          "behavior": "Compatible GET400/403/404 may fall back, with explicit 404-only/GET-only and strict options. Logical absence defaults to nil,nil after successful complete native absence, while LIST403/404 and later HTTP/decode/cycle/cancellation remain terminal. Exact ID OR name matches include repeated-ID and cross-project ambiguity over all native continuations.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Caller raw query, including status/fields/tags/vendor/project filters, is frozen and retained in both phases with repetitions, explicit nil/empty name precedence and concurrent reuse. Only an absent caller name gets a literal LIST hint; no project scope is inferred and raw status alone never becomes a local response filter.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksQuerySnapshotsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Leaf and cached Connection.Network.API retain the original provider/live token, configured headers/version, HTTP middleware, context and ResourceBase. Unsafe names are literal list-only; nil/canceled context, GET-only unsafe names and explicit Details/AllProjects/ExtraSpecs true or false fail before HTTP.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksLiveSourceAndCancellation",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksUnsafeNamesAndCapabilityPreflight"
+          ]
+        },
+        {
+          "behavior": "Ordinary Resources.List/All preserve full raw wire query with native page extraction and local cap-before-name/first-page controls, without adding a wire limit or identity lookup. Existing explicit ID/Name Ref lookups and the native typed List API remain separate.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksOrdinaryCollectionsQueriesAndControls"
+          ]
+        },
+        {
+          "behavior": "Native SubnetPool requires all default_prefixlen/min_prefixlen/max_prefixlen values and decodes string or number representations into native int fields. Missing/null/bool or malformed timestamps remain accepted decode errors without lookup fallback. Native old and RFC3339 timestamp forms, prefixes/IPVersion/default flag, and subnetpools_links rel=next are preserved; top-level links.next alone is ignored.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksAllPagesAndTerminalObservations",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksUnsafeNamesAndCapabilityPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "SDK-owned concrete identity options preserve missing/default/fallback policies and query ownership. Raw wire aliases and unknown keys are explicit Go extensions; Python query transposition/local Body classification is not automatic. No hidden/default/enrichment/parent or microversion-discovery policy is added.",
+        "Unsafe names are list-only, GET-only rejects them before HTTP and consumed models require safe nonblank IDs. Native accepted statuses, model/extractor and advertised native continuation semantics remain intact. Project scope is caller-selected rather than inferred.",
+        "The audited ordinary common-list bridge preserves repeated/empty raw query, including status and extensions, instead of collapsing values or silently deleting status. Native typed List options and explicit Ref semantics are retained.",
+        "Native SubnetPool decoding requires three prefix lengths even when a caller fields projection requests only id/name. Such a projected response fails instead of providing a permissive partially seeded Python Resource. Typed WithStatus is unsupported because the native model has no Status; raw status remains wire-only."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared aliases, discard unknown query names and apply declared non-query Body attributes locally. Go preserves explicit raw wire query instead; automatic classification, local Body filters and descriptor coercion remain separate.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled. The stateless native identity lookup does not provide that conditional response cache or cached Resource lifecycle.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges seeded state and applies descriptor/default/alias/coercion response policies. These classes inherit Resource with tag mixins, not NetworkResource; native strict safe-ID extraction and the SubnetPool decoder do not map the entire seeded Resource lifecycle.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. Go uses the native plural_links pager and does not implement every inherited Python continuation path.",
+        "This resource inherits _max_microversion=None, so a class-specific maximum negotiation gap is not claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from Go frozen raw query, which retains configured client settings."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_trunk",
+      "source_fingerprint": "6bcc1d0c68f2e3a6303739872deade901804ae1f4673b1fdc8d6dbed2c3337a4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/trunks.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct find_trunk (openstack/network/v2/_proxy.py:7869) accepts a string, ignore_missing=True and query. Native GET200 /trunks/id and trunk envelope preserve canonical IDs and typed nested model/timestamp extraction; undeclared GET203/204 and accepted decode errors remain terminal without fallback or resend.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes"
+          ]
+        },
+        {
+          "behavior": "Compatible GET400/403/404 may fall back, with explicit 404-only/GET-only and strict options. Logical absence defaults to nil,nil after successful complete native absence, while LIST403/404 and later HTTP/decode/cycle/cancellation remain terminal. Exact ID OR name matches include repeated-ID and cross-project ambiguity over all native continuations.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksAllPagesAndTerminalObservations"
+          ]
+        },
+        {
+          "behavior": "Caller raw query, including status/fields/tags/vendor/project filters, is frozen and retained in both phases with repetitions, explicit nil/empty name precedence and concurrent reuse. Only an absent caller name gets a literal LIST hint; no project scope is inferred and raw status alone never becomes a local response filter.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksFallbackQueryAndMissingPolicies",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksQuerySnapshotsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Leaf and cached Connection.Network.API retain the original provider/live token, configured headers/version, HTTP middleware, context and ResourceBase. Unsafe names are literal list-only; nil/canceled context, GET-only unsafe names and explicit Details/AllProjects/ExtraSpecs true or false fail before HTTP.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksLiveSourceAndCancellation",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksUnsafeNamesAndCapabilityPreflight"
+          ]
+        },
+        {
+          "behavior": "Ordinary Resources.List/All preserve full raw wire query with native page extraction and local cap-before-name/first-page controls, without adding a wire limit or identity lookup. Existing explicit ID/Name Ref lookups and the native typed List API remain separate.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksOrdinaryCollectionsQueriesAndControls"
+          ]
+        },
+        {
+          "behavior": "Native Trunk preserves port/subport segmentation, status, revision and RFC3339 time.Time values. Its embedded LinkedPageBase with no override uses top-level links.next; trunks_links alone is ignored. All advertised native pages still participate in identity ambiguity/late-failure checks.",
+          "tests": [
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksGETModelsAndNativeCodes",
+            "api/find_identity_network_pools_trunks_test.go:TestNativeFindIdentityNetworkPoolsTrunksAllPagesAndTerminalObservations"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "SDK-owned concrete identity options preserve missing/default/fallback policies and query ownership. Raw wire aliases and unknown keys are explicit Go extensions; Python query transposition/local Body classification is not automatic. No hidden/default/enrichment/parent or microversion-discovery policy is added.",
+        "Unsafe names are list-only, GET-only rejects them before HTTP and consumed models require safe nonblank IDs. Native accepted statuses, model/extractor and advertised native continuation semantics remain intact. Project scope is caller-selected rather than inferred.",
+        "The audited ordinary common-list bridge preserves repeated/empty raw query, including status and extensions, instead of collapsing values or silently deleting status. Native typed List options and explicit Ref semantics are retained.",
+        "Native Trunk time.Time decoding requires RFC3339, without a custom old timestamp normalizer. Its default pager reads links.next rather than Python trunks_links, and the SDK does not synthesize another continuation format."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared aliases, discard unknown query names and apply declared non-query Body attributes locally. Go preserves explicit raw wire query instead; automatic classification, local Body filters and descriptor coercion remain separate.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled. The stateless native identity lookup does not provide that conditional response cache or cached Resource lifecycle.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges seeded state and applies descriptor/default/alias/coercion response policies. These classes inherit Resource with tag mixins, not NetworkResource; native strict safe-ID extraction and the SubnetPool decoder do not map the entire seeded Resource lifecycle.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes resource-specific trunks_links, RFC Link-header and limit/marker continuation. The native TrunkPage instead inherits links.next; these Python continuation paths remain unmapped.",
+        "This resource inherits _max_microversion=None, so a class-specific maximum negotiation gap is not claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from Go frozen raw query, which retains configured client settings."
+      ]
     }
   ]
 }
