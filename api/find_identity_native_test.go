@@ -26,7 +26,7 @@ import (
 
 // Pinned Resource.find tries GET, falls back only for 400/403/404, and scans
 // ID OR name matches through all pages (resource.py:2439-2456,2536-2582).
-// These native pilot tests retain each Gophercloud getter, extractor, detail
+// These audited native tests retain each Gophercloud getter, extractor, detail
 // list and parent route. They do not claim raw HTTP metadata on typed getters.
 type nativeIdentityFindView struct{ id, name string }
 type nativeIdentityFindAccess func(context.Context, string, ...resource.IdentityFindOption) (*nativeIdentityFindView, error)
@@ -48,7 +48,7 @@ type nativeIdentityFindFixture struct {
 }
 
 func nativeIdentityFindFixtures() []nativeIdentityFindFixture {
-	return []nativeIdentityFindFixture{
+	return append([]nativeIdentityFindFixture{
 		{"compute", "/reverse/nova/v2.1/project", "/reverse/nova/v2.1/project/servers", "/reverse/nova/v2.1/project/servers/detail", "server", "servers", true,
 			func(_ *testing.T, client *gophercloud.ServiceClient) nativeIdentityFindAccess {
 				return nativeIdentityFindAccessFor(servers.New(client).FindIdentity, func(v *servers.Server) string { return v.ID }, func(v *servers.Server) string { return v.Name })
@@ -77,7 +77,7 @@ func nativeIdentityFindFixtures() []nativeIdentityFindFixture {
 				}
 				return nativeIdentityFindAccessFor(scope.FindIdentity, func(v *pools.Member) string { return v.ID }, func(v *pools.Member) string { return v.Name })
 			}},
-	}
+	}, nativeIdentityNetworkFindFixtures()...)
 }
 
 func nativeIdentityFindClient(cloud *testcloud.Cloud, fixture nativeIdentityFindFixture) *gophercloud.ServiceClient {
@@ -100,7 +100,7 @@ func nativeIdentityFindGetBody(fixture nativeIdentityFindFixture, row string) st
 func nativeIdentityFindListBody(fixture nativeIdentityFindFixture, rows, next string) string {
 	links := ""
 	if next != "" {
-		if fixture.plural == "recordsets" {
+		if fixture.plural == "recordsets" || fixture.service == "identity" {
 			links = fmt.Sprintf(`,"links":{"next":%q}`, next)
 		} else {
 			links = fmt.Sprintf(`,%q:[{"rel":"next","href":%q}]`, fixture.plural+"_links", next)
@@ -123,7 +123,7 @@ func TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter(t *testing.
 			var gets, lists atomic.Int32
 			cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) {
 				gets.Add(1)
-				if r.URL.RawQuery != "" || r.Header.Get("X-Auth-Token") != "test-token" {
+				if r.URL.Query().Get("vendor") != "both-phases" || r.Header.Get("X-Auth-Token") != "test-token" {
 					t.Error(r.URL, r.Header)
 				}
 				status := 200
@@ -134,7 +134,7 @@ func TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter(t *testing.
 			})
 			cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) { lists.Add(1); w.WriteHeader(500) })
 			find := fixture.new(t, nativeIdentityFindClient(cloud, fixture))
-			value, err := find(context.Background(), "lookup", resource.WithIdentityFindQuery("vendor", "list-only"))
+			value, err := find(context.Background(), "lookup", resource.WithIdentityFindQuery("vendor", "both-phases"))
 			if err != nil || value == nil || value.id != "returned-id" || value.name != "DifferentName" || gets.Load() != 1 || lists.Load() != 0 {
 				t.Fatal(value, err, gets.Load(), lists.Load())
 			}
@@ -151,17 +151,20 @@ func TestNativeFindIdentityFallbackPoliciesAndMissingDefaults(t *testing.T) {
 					var gets, lists atomic.Int32
 					cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) {
 						gets.Add(1)
+						if r.URL.Query().Get("vendor") != "both-phases" {
+							t.Error("GET dropped the caller query", r.URL)
+						}
 						testcloud.JSON(w, status, `{"error":"direct failure"}`)
 					})
 					cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) {
 						lists.Add(1)
-						if r.URL.Query().Get("name") != nativeIdentityFindName(fixture, "lookup") {
+						if r.URL.Query().Get("name") != nativeIdentityFindName(fixture, "lookup") || r.URL.Query().Get("vendor") != "both-phases" {
 							t.Error(r.URL)
 						}
 						testcloud.JSON(w, 200, nativeIdentityFindListBody(fixture, nativeIdentityFindRow("found", "lookup"), ""))
 					})
 					find := fixture.new(t, nativeIdentityFindClient(cloud, fixture))
-					value, err := find(context.Background(), "lookup", resource.WithIdentityFindFallback(policy))
+					value, err := find(context.Background(), "lookup", resource.WithIdentityFindFallback(policy), resource.WithIdentityFindQuery("vendor", "both-phases"))
 					fallback := policy == resource.FindFallbackCompatible || policy == resource.FindFallbackNotFoundOnly && status == 404
 					if fallback {
 						if err != nil || value == nil || value.id != "found" || lists.Load() != 1 {
@@ -171,7 +174,7 @@ func TestNativeFindIdentityFallbackPoliciesAndMissingDefaults(t *testing.T) {
 						if value != nil || err != nil || lists.Load() != 0 {
 							t.Fatal("GET-only default did not ignore 404", value, err, lists.Load())
 						}
-						if value, err := find(context.Background(), "lookup", resource.WithIdentityFindFallback(policy), resource.WithIdentityFindIgnoreMissing(false)); value != nil || !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) {
+						if value, err := find(context.Background(), "lookup", resource.WithIdentityFindFallback(policy), resource.WithIdentityFindIgnoreMissing(false), resource.WithIdentityFindQuery("vendor", "both-phases")); value != nil || !errors.Is(err, resource.ErrNotFound) || !gophercloud.ResponseCodeIs(err, 404) {
 							t.Fatal(value, err)
 						}
 					} else if value != nil || !gophercloud.ResponseCodeIs(err, status) || lists.Load() != 0 {
@@ -230,7 +233,12 @@ func TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches(t *test
 		}
 		t.Run(fixture.plural+"/caller-query-and-ID-only-match", func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(404) })
+			cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Query().Get("name") != "caller-pattern" || r.URL.Query().Get("vendor") != "kept" {
+					t.Error("caller query was not preserved in GET", r.URL)
+				}
+				w.WriteHeader(404)
+			})
 			cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Query().Get("name") != "caller-pattern" || r.URL.Query().Get("vendor") != "kept" {
 					t.Error(r.URL)
@@ -370,8 +378,16 @@ func TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse(t *tes
 			t.Run(fixture.plural+"/"+mode, func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var captured *resource.IdentityFindOpts
-				var lists atomic.Int32
+				var gets, lists atomic.Int32
+				checkQuery := func(r *http.Request) {
+					q := r.URL.Query()
+					if !reflect.DeepEqual(q["tags"], []string{"first", "second"}) || !reflect.DeepEqual(q["fields"], []string{"id", "name"}) || mode == "repeated" && q.Get("name") != "explicit-pattern" || (mode == "nil-name" || mode == "zero-values-name") && q.Has("name") || mode == "empty-name" && (!q.Has("name") || q.Get("name") != "") {
+						t.Error("query ownership or name-key presence changed", r.URL)
+					}
+				}
 				cloud.Mux.HandleFunc("GET "+fixture.base+"/snapshot", func(w http.ResponseWriter, r *http.Request) {
+					gets.Add(1)
+					checkQuery(r)
 					if captured != nil {
 						captured.Query.Set("name", "mutated")
 						captured.Query["tags"][0] = "mutated"
@@ -380,13 +396,15 @@ func TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse(t *tes
 					}
 					w.WriteHeader(404)
 				})
-				cloud.Mux.HandleFunc("GET "+fixture.base+"/reuse", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(404) })
+				cloud.Mux.HandleFunc("GET "+fixture.base+"/reuse", func(w http.ResponseWriter, r *http.Request) {
+					gets.Add(1)
+					checkQuery(r)
+					w.WriteHeader(404)
+				})
 				cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) {
 					lists.Add(1)
+					checkQuery(r)
 					q := r.URL.Query()
-					if !reflect.DeepEqual(q["tags"], []string{"first", "second"}) || !reflect.DeepEqual(q["fields"], []string{"id", "name"}) || mode == "repeated" && q.Get("name") != "explicit-pattern" || (mode == "nil-name" || mode == "zero-values-name") && q.Has("name") || mode == "empty-name" && (!q.Has("name") || q.Get("name") != "") {
-						t.Error("query ownership or name-key presence changed", q)
-					}
 					rows := nativeIdentityFindRow("found", q.Get("identity"))
 					if q.Get("phase") == "missing" {
 						rows = ""
@@ -427,8 +445,8 @@ func TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse(t *tes
 					}()
 				}
 				wait.Wait()
-				if lists.Load() != 4 {
-					t.Fatal(lists.Load())
+				if gets.Load() != 4 || lists.Load() != 4 {
+					t.Fatal(gets.Load(), lists.Load())
 				}
 			})
 		}
@@ -443,36 +461,48 @@ func (transport nativeIdentityFindTransport) RoundTrip(r *http.Request) (*http.R
 
 func TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback(t *testing.T) {
 	for _, fixture := range nativeIdentityFindFixtures() {
-		t.Run(fixture.plural+"/decode", func(t *testing.T) {
-			cloud := testcloud.New(t)
-			var gets, lists atomic.Int32
-			cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) {
-				gets.Add(1)
-				testcloud.JSON(w, 200, nativeIdentityFindGetBody(fixture, `{"id":false,"name":"bad"}`))
+		for _, withQuery := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/decode/query-%t", fixture.plural, withQuery), func(t *testing.T) {
+				cloud := testcloud.New(t)
+				var gets, lists atomic.Int32
+				cloud.Mux.HandleFunc("GET "+fixture.base+"/lookup", func(w http.ResponseWriter, r *http.Request) {
+					gets.Add(1)
+					testcloud.JSON(w, 200, nativeIdentityFindGetBody(fixture, `{"id":false,"name":"bad"}`))
+				})
+				cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) { lists.Add(1); w.WriteHeader(500) })
+				var options []resource.IdentityFindOption
+				if withQuery {
+					options = append(options, resource.WithIdentityFindQuery("fields", "id"))
+				}
+				value, err := fixture.new(t, nativeIdentityFindClient(cloud, fixture))(context.Background(), "lookup", options...)
+				if value != nil || err == nil || gets.Load() != 1 || lists.Load() != 0 {
+					t.Fatal(value, err, gets.Load(), lists.Load())
+				}
 			})
-			cloud.Mux.HandleFunc("GET "+fixture.path, func(w http.ResponseWriter, r *http.Request) { lists.Add(1); w.WriteHeader(500) })
-			value, err := fixture.new(t, nativeIdentityFindClient(cloud, fixture))(context.Background(), "lookup")
-			if value != nil || err == nil || gets.Load() != 1 || lists.Load() != 0 {
-				t.Fatal(value, err, gets.Load(), lists.Load())
+		}
+	}
+	for _, withQuery := range []bool{false, true} {
+		t.Run(fmt.Sprintf("transport-wrapping-native-404/query-%t", withQuery), func(t *testing.T) {
+			fixture := nativeIdentityFindFixtures()[0]
+			cloud := testcloud.New(t)
+			client := nativeIdentityFindClient(cloud, fixture)
+			original := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
+			var calls atomic.Int32
+			cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
+				calls.Add(1)
+				return nil, &url.Error{Op: "GET", URL: r.URL.String(), Err: original}
+			})
+			var options []resource.IdentityFindOption
+			if withQuery {
+				options = append(options, resource.WithIdentityFindQuery("fields", "id"))
+			}
+			value, err := fixture.new(t, client)(context.Background(), "lookup", options...)
+			var transport *url.Error
+			if value != nil || !errors.As(err, &transport) || !errors.Is(err, original) || calls.Load() != 1 {
+				t.Fatal(value, err, calls.Load())
 			}
 		})
 	}
-	t.Run("transport-wrapping-native-404", func(t *testing.T) {
-		fixture := nativeIdentityFindFixtures()[0]
-		cloud := testcloud.New(t)
-		client := nativeIdentityFindClient(cloud, fixture)
-		original := &gophercloud.ErrUnexpectedResponseCode{Actual: 404}
-		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeIdentityFindTransport(func(r *http.Request) (*http.Response, error) {
-			calls.Add(1)
-			return nil, &url.Error{Op: "GET", URL: r.URL.String(), Err: original}
-		})
-		value, err := fixture.new(t, client)(context.Background(), "lookup")
-		var transport *url.Error
-		if value != nil || !errors.As(err, &transport) || !errors.Is(err, original) || calls.Load() != 1 {
-			t.Fatal(value, err, calls.Load())
-		}
-	})
 }
 
 func TestNativeFindIdentityExplicitOptInExcludesOtherBindings(t *testing.T) {

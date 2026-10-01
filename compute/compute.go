@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
 	"gophercloudsdk/resource"
 
@@ -56,10 +57,15 @@ func New(client *gophercloud.ServiceClient, dependencies Dependencies) *Service 
 				Kind:         "server",
 				IdentityFind: true,
 				Get:          func(ctx context.Context, id string) (*Server, error) { return servers.Get(ctx, client, id).Extract() },
-				List:         func(q url.Values) pagination.Pager { return servers.List(client, query.Adapter(q)) },
-				Extract:      servers.ExtractServers,
-				Delete:       func(ctx context.Context, id string) error { return servers.Delete(ctx, client, id).ExtractErr() },
-				ID:           func(s *Server) string { return s.ID }, Name: func(s *Server) string { return s.Name },
+				GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Server, error) {
+					var result servers.GetResult
+					result.Header, result.Err = nativefind.Get(ctx, client, []string{"servers", id}, q, []int{200, 203}, &result.Body)
+					return result.Extract()
+				},
+				List:    func(q url.Values) pagination.Pager { return servers.List(client, query.Adapter(q)) },
+				Extract: servers.ExtractServers,
+				Delete:  func(ctx context.Context, id string) error { return servers.Delete(ctx, client, id).ExtractErr() },
+				ID:      func(s *Server) string { return s.ID }, Name: func(s *Server) string { return s.Name },
 				NameQuery: func(name string) string { return "^" + regexp.QuoteMeta(name) + "$" },
 				Status:    func(s *Server) string { return s.Status },
 				Failed:    func(status string) bool { return strings.EqualFold(status, "ERROR") },

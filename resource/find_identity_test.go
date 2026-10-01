@@ -42,15 +42,23 @@ func identityFindItems(page pagination.Page) ([]identityFindItem, error) {
 
 func identityFindAdapter(cloud *testcloud.Cloud) resource.Adapter[identityFindItem] {
 	client := cloud.Client("test", "/reverse/v1")
+	get := func(ctx context.Context, id string, query url.Values) (*identityFindItem, error) {
+		var body struct {
+			Item identityFindItem `json:"item"`
+		}
+		target := client.ServiceURL("items", id)
+		if encoded := query.Encode(); encoded != "" {
+			target += "?" + encoded
+		}
+		_, err := client.Get(ctx, target, &body, &gophercloud.RequestOpts{OkCodes: []int{200, 203}})
+		return &body.Item, err
+	}
 	return resource.Adapter[identityFindItem]{
 		Kind: "identity-items", IdentityFind: true,
 		Get: func(ctx context.Context, id string) (*identityFindItem, error) {
-			var body struct {
-				Item identityFindItem `json:"item"`
-			}
-			_, err := client.Get(ctx, client.ServiceURL("items", id), &body, &gophercloud.RequestOpts{OkCodes: []int{200, 203}})
-			return &body.Item, err
+			return get(ctx, id, nil)
 		},
+		GetIdentityQuery: get,
 		List: func(query url.Values) pagination.Pager {
 			return pagination.NewPager(client, client.ServiceURL("items")+"?"+query.Encode(), func(result pagination.PageResult) pagination.Page {
 				return identityFindPage{pagination.LinkedPageBase{PageResult: result}}
@@ -215,6 +223,9 @@ func TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions(t *testing.
 			}
 			cloud.Mux.HandleFunc("GET /reverse/v1/items/input", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
+				if !reflect.DeepEqual(r.URL.Query()["vendor"], []string{"one", "two"}) || r.URL.Query().Has("name") {
+					t.Error("direct GET lost the frozen query", r.URL)
+				}
 				if custom {
 					*captured.IgnoreMissing = true
 					captured.Fallback = resource.FindFallbackNever
@@ -248,7 +259,17 @@ func TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions(t *testing.
 func TestCollectionFindIdentityCallerQueryPrecedenceAndBulkReset(t *testing.T) {
 	cloud := testcloud.New(t)
 	var mode atomic.Int32
-	cloud.Mux.HandleFunc("GET /reverse/v1/items/input", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 404, `{}`) })
+	cloud.Mux.HandleFunc("GET /reverse/v1/items/input", func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		if mode.Load() == 0 {
+			if !query.Has("name") || query.Get("name") != "" || query.Get("vendor") != "a&b" {
+				t.Error("direct GET query", query)
+			}
+		} else if r.URL.RawQuery != "" {
+			t.Error("bulk reset added a list-only name hint to GET", r.URL)
+		}
+		testcloud.JSON(w, 404, `{}`)
+	})
 	cloud.Mux.HandleFunc("GET /reverse/v1/items", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		if mode.Load() == 0 {
@@ -518,6 +539,167 @@ func TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList(
 			}
 			if phase == "get" && lists.Load() != 0 {
 				t.Fatal("fallback continued after cancellation", lists.Load())
+			}
+		})
+	}
+}
+
+func TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP(t *testing.T) {
+	cloud := testcloud.New(t)
+	var gets, lists atomic.Int32
+	cloud.Mux.HandleFunc("GET /reverse/v1/items/safe", func(w http.ResponseWriter, r *http.Request) {
+		gets.Add(1)
+		if r.URL.RawQuery != "" {
+			t.Error(r.URL)
+		}
+		testcloud.JSON(w, 200, `{"item":{"id":"safe","name":"safe"}}`)
+	})
+	cloud.Mux.HandleFunc("GET /reverse/v1/items", func(w http.ResponseWriter, r *http.Request) {
+		lists.Add(1)
+		if r.URL.Query().Get("domain_id") != "domain" || r.URL.Query().Get("name") != "^unsafe name$" {
+			t.Error(r.URL)
+		}
+		testcloud.JSON(w, 200, identityFindBody(`{"id":"canonical","name":"unsafe name"}`, ""))
+	})
+	adapter := identityFindAdapter(cloud)
+	adapter.GetIdentityQuery = nil
+	collection := resource.NewCollection(adapter)
+	for _, query := range []url.Values{{"domain_id": {"domain"}}, {"name": nil}, {"name": {}}} {
+		for _, policy := range []resource.FindFallbackPolicy{resource.FindFallbackCompatible, resource.FindFallbackNotFoundOnly, resource.FindFallbackNever} {
+			value, err := collection.FindIdentity(context.Background(), "safe", resource.WithIdentityFindOptions(resource.IdentityFindOpts{Query: query, Fallback: policy}))
+			if value != nil || !errors.Is(err, resource.ErrUnsupported) || gets.Load() != 0 || lists.Load() != 0 {
+				t.Fatal(query, policy, value, err, gets.Load(), lists.Load())
+			}
+		}
+	}
+	if value, err := collection.FindIdentity(context.Background(), "safe", resource.WithIdentityFindOptions(resource.IdentityFindOpts{Query: url.Values{}})); err != nil || value == nil || gets.Load() != 1 {
+		t.Fatal(value, err, gets.Load())
+	}
+	if value, err := collection.FindIdentity(context.Background(), "unsafe name", resource.WithIdentityFindQuery("domain_id", "domain")); err != nil || value == nil || gets.Load() != 1 || lists.Load() != 1 {
+		t.Fatal(value, err, gets.Load(), lists.Load())
+	}
+	adapter.GetIdentityQuery = func(context.Context, string, url.Values) (*identityFindItem, error) {
+		t.Error("empty query selected the query hook")
+		return nil, nil
+	}
+	if value, err := resource.NewCollection(adapter).FindIdentity(context.Background(), "safe"); err != nil || value == nil || gets.Load() != 2 {
+		t.Fatal(value, err, gets.Load())
+	}
+}
+
+func TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback(t *testing.T) {
+	for _, nameValues := range [][]string{nil, {}, {""}, {"caller", "second"}} {
+		t.Run(fmt.Sprint(nameValues), func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var calls atomic.Int32
+			query := url.Values{"vendor": {"one", "two"}, "name": append([]string(nil), nameValues...)}
+			frozen := url.Values{"vendor": {"one", "two"}, "name": append([]string(nil), nameValues...)}
+			ignored := false
+			option := resource.WithIdentityFindOptions(resource.IdentityFindOpts{IgnoreMissing: &ignored, Query: query})
+			query["vendor"][0] = "before"
+			query["name"] = []string{"before"}
+			ignored = true
+			cloud.Mux.HandleFunc("GET /reverse/v1/items/input", func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
+				if r.URL.RawQuery != frozen.Encode() {
+					t.Error("GET", r.URL.RawQuery, frozen.Encode())
+				}
+				testcloud.JSON(w, 403, `{"error":"private"}`)
+			})
+			cloud.Mux.HandleFunc("GET /reverse/v1/items", func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
+				if r.URL.RawQuery != frozen.Encode() {
+					t.Error("LIST", r.URL.RawQuery, frozen.Encode())
+				}
+				testcloud.JSON(w, 200, identityFindBody("", ""))
+			})
+			adapter := identityFindAdapter(cloud)
+			get, list := adapter.GetIdentityQuery, adapter.List
+			adapter.GetIdentityQuery = func(ctx context.Context, id string, received url.Values) (*identityFindItem, error) {
+				if !reflect.DeepEqual(received, frozen) {
+					t.Error("hook query", received, frozen)
+				}
+				value, err := get(ctx, id, received)
+				received["vendor"][0] = "hook-mutated"
+				received["name"] = []string{"hook-mutated"}
+				received["extra"] = []string{"hook-mutated"}
+				return value, err
+			}
+			adapter.List = func(received url.Values) pagination.Pager {
+				if !reflect.DeepEqual(received, frozen) {
+					t.Error("fallback map", received, frozen)
+				}
+				return list(received)
+			}
+			collection := resource.NewCollection(adapter)
+			value, err := collection.FindIdentity(context.Background(), "input", option)
+			var missing *resource.NotFoundError
+			if value != nil || !errors.As(err, &missing) || missing.Cause != nil || gophercloud.ResponseCodeIs(err, 403) || calls.Load() != 2 {
+				t.Fatal(value, err, missing, calls.Load())
+			}
+			if value, err := collection.FindIdentity(context.Background(), "input", option, resource.WithIdentityFindIgnoreMissing(true)); value != nil || err != nil || calls.Load() != 4 {
+				t.Fatal("reused query hook or option was not independent", value, err, calls.Load())
+			}
+		})
+	}
+}
+
+func TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses(t *testing.T) {
+	for _, outcome := range []string{"not-found", "accepted", "transport", "decode", "read", "canceled"} {
+		t.Run(outcome, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			var gets, lists atomic.Int32
+			cloud.Mux.HandleFunc("GET /reverse/v1/items/input", func(w http.ResponseWriter, r *http.Request) {
+				gets.Add(1)
+				if r.URL.Query().Get("domain_id") != "domain" {
+					t.Error(r.URL)
+				}
+				w.Header().Set("X-Evidence", "query-get")
+				testcloud.JSON(w, 404, `{"error":"original"}`)
+			})
+			cloud.Mux.HandleFunc("GET /reverse/v1/items", func(w http.ResponseWriter, r *http.Request) { lists.Add(1) })
+			adapter := identityFindAdapter(cloud)
+			get := adapter.GetIdentityQuery
+			adapter.GetIdentityQuery = func(ctx context.Context, id string, query url.Values) (*identityFindItem, error) {
+				value, err := get(ctx, id, query)
+				switch outcome {
+				case "accepted":
+					return nil, &resource.ResponseError{Body: []byte(`{"accepted":true}`), Header: http.Header{"X-Evidence": {"accepted"}}, StatusCode: 200, Cause: err}
+				case "transport":
+					return nil, &url.Error{Op: "GET", URL: "original", Err: err}
+				case "decode":
+					return nil, errors.Join(err, &json.UnmarshalTypeError{Value: "bool", Type: reflect.TypeFor[string]()})
+				case "read":
+					return nil, errors.Join(err, io.ErrUnexpectedEOF)
+				case "canceled":
+					cancel()
+				}
+				return value, err
+			}
+			options := []resource.IdentityFindOption{resource.WithIdentityFindQuery("domain_id", "domain")}
+			if outcome == "not-found" {
+				options = append(options, resource.WithIdentityFindFallback(resource.FindFallbackNever), resource.WithIdentityFindIgnoreMissing(false))
+			}
+			value, err := resource.NewCollection(adapter).FindIdentity(ctx, "input", options...)
+			if value != nil || err == nil || gets.Load() != 1 || lists.Load() != 0 {
+				t.Fatal(value, err, gets.Load(), lists.Load())
+			}
+			if outcome == "not-found" {
+				var missing *resource.NotFoundError
+				var native gophercloud.ErrUnexpectedResponseCode
+				var operation, getOperation *resource.OperationError
+				if !errors.As(err, &missing) || !errors.As(missing.Cause, &native) || native.ResponseHeader.Get("X-Evidence") != "query-get" || string(native.Body) != `{"error":"original"}` || !errors.As(err, &operation) || operation.Operation != "find_identity" || !errors.As(operation.Cause, &getOperation) || getOperation.Operation != "get" {
+					t.Fatal(err, missing, native)
+				}
+			} else if outcome == "accepted" {
+				var accepted *resource.ResponseError
+				if !errors.As(err, &accepted) || accepted.StatusCode != 200 || accepted.Header.Get("X-Evidence") != "accepted" {
+					t.Fatal(err, accepted)
+				}
+			} else if outcome == "canceled" && !errors.Is(err, context.Canceled) {
+				t.Fatal(err)
 			}
 		})
 	}

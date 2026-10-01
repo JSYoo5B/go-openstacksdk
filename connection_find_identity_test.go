@@ -57,16 +57,27 @@ func TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources(t *testing.T
 				}
 				return port.ID, err
 			}},
+		{"network", "/network/v2.0/networks", "networks", "web-net", "web-net",
+			func(ctx context.Context, value string, options ...resource.IdentityFindOption) (string, error) {
+				valueNetwork, err := network.Networks.FindIdentity(ctx, value, options...)
+				if valueNetwork == nil {
+					return "", err
+				}
+				return valueNetwork.ID, err
+			}},
 	}
 	for _, check := range checks {
 		t.Run(check.kind, func(t *testing.T) {
 			var gets, lists atomic.Int32
 			cloud.Mux.HandleFunc("GET "+check.base+"/"+check.identity, func(w http.ResponseWriter, r *http.Request) {
 				gets.Add(1)
+				if !reflect.DeepEqual(r.URL.Query()["tag"], []string{"first", "second"}) || r.URL.Query().Has("name") {
+					t.Errorf("caller query or list-only hint on direct GET: %v", r.URL.Query())
+				}
 				testcloud.JSON(w, http.StatusForbidden, `{"error":"ID lookup denied"}`)
 			})
 			listPath := check.base
-			if check.kind != "port" {
+			if check.kind == "server" || check.kind == "volume" {
 				listPath += "/detail"
 			}
 			cloud.Mux.HandleFunc("GET "+listPath, func(w http.ResponseWriter, r *http.Request) {
@@ -103,8 +114,5 @@ func TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources(t *testing.T
 	}
 	if _, err := compute.Flavors.FindIdentity(ctx, "flavor"); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatalf("unaudited flavor: %v", err)
-	}
-	if _, err := network.Networks.FindIdentity(ctx, "network"); !errors.Is(err, resource.ErrUnsupported) {
-		t.Fatalf("unaudited network: %v", err)
 	}
 }

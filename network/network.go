@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
 	"gophercloudsdk/resource"
 
@@ -40,8 +41,14 @@ type Dependencies struct {
 // standalone constructor. All collections share the supplied Neutron client.
 func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
 	s := &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
-		Kind:    "network",
-		Get:     func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
+		Kind:         "network",
+		IdentityFind: true,
+		Get:          func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
+			var result networks.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, client, []string{"networks", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		List:    func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) },
 		Extract: networks.ExtractNetworks,
 		Delete:  func(ctx context.Context, id string) error { return networks.Delete(ctx, client, id).ExtractErr() },

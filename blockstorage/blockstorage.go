@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
 	"gophercloudsdk/resource"
 
@@ -29,8 +30,13 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Kind:         "volume",
 		IdentityFind: true,
 		Get:          func(ctx context.Context, id string) (*Volume, error) { return volumes.Get(ctx, client, id).Extract() },
-		List:         func(q url.Values) pagination.Pager { return volumes.List(client, query.Adapter(q)) },
-		Extract:      volumes.ExtractVolumes,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Volume, error) {
+			var result volumes.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, client, []string{"volumes", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
+		List:    func(q url.Values) pagination.Pager { return volumes.List(client, query.Adapter(q)) },
+		Extract: volumes.ExtractVolumes,
 		Delete: func(ctx context.Context, id string) error {
 			return volumes.Delete(ctx, client, id, volumes.DeleteOpts{}).ExtractErr()
 		},

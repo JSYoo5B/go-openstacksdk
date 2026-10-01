@@ -8,7 +8,7 @@ import (
 )
 
 // IdentityFindOpts configures automatic ID-or-name lookup. A nil IgnoreMissing
-// defaults to true. Query contains only service-specific list query fields;
+// defaults to true. Query contains only service-specific GET and list fields;
 // transport, pagination controls and local filters are not FindIdentity inputs.
 type IdentityFindOpts struct {
 	IgnoreMissing *bool
@@ -45,7 +45,9 @@ func WithIdentityFindFallback(value FindFallbackPolicy) IdentityFindOption {
 	}
 }
 
-// WithIdentityFindQuery supplies a wire query field to the list phase only.
+// WithIdentityFindQuery supplies a wire query field to GET and list fallback.
+// A direct GET with query requires an audited SDK query hook; unsupported
+// bindings reject it before HTTP. List-only names do not require that hook.
 // An explicit name-query key takes precedence over the automatic name hint;
 // local matching still compares the original identity against each ID or name.
 func WithIdentityFindQuery(key, value string) IdentityFindOption {

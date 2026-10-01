@@ -49,7 +49,10 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 		return fail(err)
 	}
 	if safeRoute {
-		value, err := c.Get(ctx, identity)
+		if len(config.Query) != 0 && c.binding.GetIdentityQuery == nil {
+			return fail(ErrUnsupported)
+		}
+		value, err := c.getIdentity(ctx, identity, config.Query)
 		if canceled := ctx.Err(); canceled != nil {
 			return fail(canceled)
 		}
@@ -132,6 +135,25 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 		return fail(&NotFoundError{Resource: kind, Reference: identity})
 	}
 	return found, nil
+}
+
+// getIdentity retains Get's native error and missing-resource policy. The query
+// hook receives its own copy so callback mutations cannot change list fallback.
+func (c *Collection[T]) getIdentity(ctx context.Context, identity string, query url.Values) (*T, error) {
+	if len(query) == 0 {
+		return c.Get(ctx, identity)
+	}
+	if err := c.validateID(identity); err != nil {
+		return nil, err
+	}
+	value, err := c.binding.GetIdentityQuery(ctx, identity, cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query)
+	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+		err = &NotFoundError{Resource: c.binding.Kind, Reference: identity, Cause: err}
+	}
+	if err != nil {
+		return nil, c.wrap("get", err)
+	}
+	return value, nil
 }
 
 func validateIdentityFindInput(identity string) error {
