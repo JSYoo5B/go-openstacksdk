@@ -29,6 +29,10 @@ type ValidateOpts struct {
 }
 
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	Name          string
@@ -88,6 +92,21 @@ func WithUpdateHeader(key, value string) UpdateOption {
 func WithValidateHeader(key, value string) ValidateOption {
 	return request.WithHeader[ValidateOpts](key, value)
 }
+
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
+
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 func WithListGlobalProject(value bool) ListOption {
 	return func(config *request.Config[ListOpts]) error {
@@ -102,6 +121,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		return nil, err
 	}
 	value := config.Options
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	if err := senlin.SortGrammar(value.Sort); err != nil {
 		return nil, err
 	}
@@ -119,7 +141,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "name", "type", "sort", "global_project", "metadata", "spec", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at":
+		case "limit", "marker", "max_items", "paginated", "name", "type", "sort", "global_project", "metadata", "spec", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at":
 			return nil, fmt.Errorf("%w: query %q is a concrete option or local profile filter", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)

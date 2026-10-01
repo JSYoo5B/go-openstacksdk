@@ -11,6 +11,10 @@ import (
 )
 
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	Name          string
@@ -23,9 +27,11 @@ type ListOption = request.Option[ListOpts]
 
 func WithListOptions(value ListOpts) ListOption {
 	value.GlobalProject = senlin.Bool(value.GlobalProject)
+	value.Paginated = senlin.Bool(value.Paginated)
 	return func(config *request.Config[ListOpts]) error {
 		copy := value
 		copy.GlobalProject = senlin.Bool(value.GlobalProject)
+		copy.Paginated = senlin.Bool(value.Paginated)
 		config.Options = copy
 		return nil
 	}
@@ -35,6 +41,20 @@ func WithListGlobalProject(value bool) ListOption {
 	return func(config *request.Config[ListOpts]) error {
 		copy := value
 		config.Options.GlobalProject = &copy
+		return nil
+	}
+}
+
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
 		return nil
 	}
 }
@@ -52,6 +72,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		return nil, err
 	}
 	value := config.Options
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	if err := validateSort(value.Sort); err != nil {
 		return nil, err
 	}
@@ -69,7 +92,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "name", "type", "sort", "global_project", "data", "spec", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at":
+		case "limit", "marker", "max_items", "paginated", "name", "type", "sort", "global_project", "data", "spec", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at":
 			return nil, fmt.Errorf("%w: query %q is a concrete option or local policy filter", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)

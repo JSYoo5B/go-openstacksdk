@@ -45,7 +45,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Profile] {
 			return senlin.SortGrammar(query.Get("sort"))
 		},
 		ValidateID: senlin.Identifier,
-		Paging: rest.PagePolicy[Profile]{HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
+		Paging: rest.PagePolicy[Profile]{MaxItemsLimitHint: true, StopOnEmptyPage: true, HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
 			Marker: func(value *Profile) (string, error) {
 				if value == nil {
 					return "", fmt.Errorf("%w: missing profile pagination row", resource.ErrInvalidOption)
@@ -85,7 +85,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Profil
 			yield(nil, request.Wrap("List", "clustering.profiles", err))
 			return
 		}
-		for value, err := range rest.List(ctx, spec(a.RawClient()), query) {
+		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if err != nil {
 				yield(nil, request.Wrap("List", "clustering.profiles", err))
 				return
