@@ -127,7 +127,7 @@ Get은 컨트롤러의 이름·UUID·짧은 ID를 직접 받습니다. `resource
 
 결과의 wire `metadata`는 `Profile.UserMetadata`이며 HTTP 증거인 embedded `resource.Metadata`와 구분합니다. spec과 사용자 metadata는 raw JSON 숫자를 보존하고 `Body`는 null/생략·unknown 필드, `Header`/`StatusCode`는 HTTP 응답을 보존합니다. 단건 응답은 `profile` 객체 envelope를 요구합니다. Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 실패는 `resource.ResponseError`에 원문·header·status를 남기며 mutation을 재전송하지 않습니다. Delete는 ignored404 외의 권한·사용 중 오류를 숨기지 않으며, 찾은 응답 ID가 없으면 삭제 요청을 보내지 않습니다.
 
-Profile update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path/microversion/header, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
+Profile update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
 
 근거: [고정 Profile](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/profile.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_profiles_test.go), [lookup snapshot 회귀](../../../api/clustering_profiles_update_snapshot_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
 
@@ -166,8 +166,16 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
 List 전체 계약은 partial입니다. 알려진 `WithListFilter`의 raw JSON 비교와 별도로 Python
-Resource field/default/alias 정규화 및 query 소비, per-call base_path/microversion/header와
+Resource field/default/alias 정규화 및 query 소비, per-call base_path와
 deprecated JMESPath는 계속 비교합니다. `WithListQuery`는 vendor query를 실제로 전달하는
 Go 확장이며 Python unknown query 생략과 구별합니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.

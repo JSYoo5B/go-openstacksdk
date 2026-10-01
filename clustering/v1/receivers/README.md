@@ -113,7 +113,7 @@ Python은 임의 sort 문자열을 서버로 전달하므로 Go의 공시된 키
 목록은 lazy/reusable이며 break와 취소가 후속 요청을 멈춥니다. server links/next/HTTP Link와 명시
 limit의 wire ID marker를 사용하고 짧은 nonempty page도 이어갑니다. marker는 local filter나
 consumer의 ID 수정 전에 고정합니다. collection origin/path, 필터와 정렬 유지, 반복 URL/marker는
-공유 pager가 검사합니다. max_items/paginated 소비 제어는 아래처럼 제공하며 deprecated JMESPath와 per-call base_path/microversion/header는 미결입니다.
+공유 pager가 검사합니다. max_items/paginated 소비 제어는 아래처럼 제공하며 deprecated JMESPath와 per-call base_path는 미결입니다.
 
 ## 이름 검색과 삭제
 
@@ -177,8 +177,16 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
 List 전체 계약은 partial입니다. 알려진 `WithListFilter`의 raw JSON 비교와 별도로 Python
-Resource field/default/alias 정규화 및 query 소비, per-call base_path/microversion/header와
+Resource field/default/alias 정규화 및 query 소비, per-call base_path와
 deprecated JMESPath는 계속 비교합니다. `WithListQuery`는 vendor query를 실제로 전달하는
 Go 확장이며 Python unknown query 생략과 구별합니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.

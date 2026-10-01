@@ -140,7 +140,7 @@ Python proxy wait 전체의 cached Resource/defaults와 별도로 비교합니�
 Get/Create/Update는 strict node envelope와 지정 success code를 검사합니다. 202의 Location이
 누락·잘못된 경우와 accepted body decode 실패는 `resource.ResponseError`에 원문을 보존하고
 생성·수정·삭제를 재전송하지 않습니다. inherited
-per-call base_path/microversion/header와 JMESPath·dirty merge·ID-first Find는 별도 계약으로 계속 추적합니다.
+per-call base_path와 JMESPath·dirty merge·ID-first Find는 별도 계약으로 계속 추적합니다.
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `node.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
 [공식 Node API](https://docs.openstack.org/api-ref/clustering/#nodes)입니다.
@@ -277,8 +277,16 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
 List 전체 계약은 partial입니다. 알려진 `WithListFilter`의 raw JSON 비교와 별도로 Python
-Resource field/default/alias 정규화 및 query 소비, per-call base_path/microversion/header와
+Resource field/default/alias 정규화 및 query 소비, per-call base_path와
 deprecated JMESPath는 계속 비교합니다. `WithListQuery`는 vendor query를 실제로 전달하는
 Go 확장이며 Python unknown query 생략과 구별합니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
