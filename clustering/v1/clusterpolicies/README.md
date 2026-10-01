@@ -81,9 +81,10 @@ Python의 `is_enabled` alias는 Go의 Enabled에 대응하고 wire key는 `enabl
 
 `WithListQuery`는 custom deployment query의 명시적 opt-in입니다. Stock Senlin은 unknown query를
 400으로 거부하므로 vendor query 지원을 보장하지 않습니다. concrete 옵션, fixed parent/응답 ID,
-SDK alias와 initial pagination key는 확장 query로 덮어쓸 수 없습니다. List의 body Fields, secondary
-Arguments와 per-request Headers는 지원하지 않습니다. Source client의 인증·endpoint prefix·선택
-microversion은 일반 Senlin 요청 정책을 공유합니다.
+SDK alias와 initial pagination key는 확장 query로 덮어쓸 수 없습니다. List의 body Fields와
+per-request Headers는 지원하지 않습니다. Source client의 인증·endpoint prefix·선택
+microversion은 일반 Senlin 요청 정책을 공유합니다. Secondary Arguments는 아래의 SDK 소유
+로컬 Body 필터 namespace만 지원합니다.
 
 ## 대기와 Python Resource 차이
 
@@ -105,10 +106,10 @@ cache/URI 속성을 갱신하는 방식 대신 고정 scope와 독립된 모델�
 요청과 필수 canonical response ID/parent 검증은 명시적인 Go 정책입니다.
 
 List는 partial입니다. `paginated=False`와 `max_items`의 raw 행 소비 제어는 제공하지만
-per-call base path/microversion/header와 deprecated JMESPath filter는 노출하지 않습니다. `id`,
-`policy_id`, `cluster_name`, `data` 같은 Body-only local filter와 recursive subset 비교도 제공하지
-않습니다. Python 공통 query의 초기 limit/marker와 Resource.id fallback은 stock controller의
-whitelist에 없어서 Go가 지원하지 않으며, unknown query를 버리는 Python과 명시적 vendor query를
+per-call base path/microversion/header와 deprecated JMESPath filter는 노출하지 않습니다.
+Python의 자동 query/Body 분류도 적용하지 않습니다. Python 공통 query의 초기 limit/marker는
+stock controller의 whitelist에 없어 Go가 지원하지 않습니다. Resource.id fallback 대신 raw Body
+필터를 사용하며, unknown query를 버리는 Python과 명시적 vendor query를
 전달하는 Go의 차이도 유지합니다. Create/Update/Delete 및 임의 metadata subresource route는
 이 읽기 API의 기능으로 만들지 않습니다.
 
@@ -153,3 +154,57 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_catalog_list_controls_test.go)를 참고합니다.
+
+## scope의 Body 필터
+
+Python `cluster_policies(cluster, data={"team": "infra"})`의 로컬 비교는 Go에서 아래처럼
+`clusterpolicies.WithListFilter`로 명시합니다. 지원 canonical 필드는
+`id/name/policy_id/policy_name/cluster_name/policy_type/enabled/data`이며 `is_enabled` alias는
+raw `enabled`를 비교합니다. query-capable `policy_name/policy_type/enabled`도 이 옵션을 쓰면
+로컬에서만 비교합니다. 기존 `WithListEnabled/PolicyName/PolicyType`은 server query 입력입니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/clusterpolicies"
+	"gophercloudsdk/resource"
+)
+
+func FilterClusterPolicies(ctx context.Context, conn *sdk.Connection, cluster resource.Ref) error {
+	service, err := conn.ClusteringV1(ctx)
+	if err != nil {
+		return err
+	}
+	scope, err := service.ClusterPolicies.InCluster(ctx, cluster)
+	if err != nil {
+		return err
+	}
+	for binding, err := range scope.List(ctx,
+		clusterpolicies.WithListFilter("is_enabled", false),
+		clusterpolicies.WithListFilter("data", map[string]any{"team": "infra"}),
+		clusterpolicies.WithListMaxItems(50), clusterpolicies.WithListPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(binding.ID, binding.PolicyID, binding.URIClusterID)
+	}
+	return nil
+}
+```
+
+`cluster_id`는 pinned URI 속성이므로 Body 필터로 받지 않습니다. Go 추가 `URIClusterID`나
+unknown 필드도 거부합니다. 필터는 별도 policy GET 없이 이미 받은 raw Body를 비교하며
+binding ID를 PolicyID로 대체하지 않습니다. 필수 `id/policy_id/cluster_id`와 고정 부모 검증은
+필터보다 먼저 수행하므로, 필터에 불일치할 행이라도 필수 ID가 없거나 부모가 다르면
+`resource.ResponseError`입니다. cap도 일치 결과 수가 아니라 검증한 원래 응답 행을 셉니다.
+
+입력은 옵션 생성 시 JSON snapshot으로 소유합니다. 객체는 recursive subset, 배열은 순서와
+전체 값, 숫자는 정확한 decimal 값으로 비교하고 bool과 구분합니다. scalar null은 생략과 같고
+빈 실제 객체는 객체 필터와 매칭하지 않습니다. 기존 initial limit/marker unsupported·no hint·
+source recheck와 continuation guard는 그대로입니다. [공통 정책](../listing/README.md)과
+[Body 필터 HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.

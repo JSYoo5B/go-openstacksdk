@@ -122,3 +122,62 @@ Python의 per-call base_path/microversion/headers와 Resource cache·URI overlay
 [pinned Resource.list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2155-L2358), Go의
 [공통 리소스 정책](../../../resource/README.md)과
 [REST 제어 계약 테스트](../../../internal/rest/list_control_test.go)입니다.
+
+## 명시적인 raw Body 필터
+
+Typed List/All 11개는 각 패키지의 `WithListFilter(key, value)`로 known Body 필드를 로컬에서
+비교합니다. 기존 Profiles/Policies/Clusters/Nodes/Receivers의 필터에 더해
+Actions/Events/Services/ProfileTypes/PolicyTypes/ClusterPolicies에도 같은 선택 경로를 제공합니다.
+필터의 JSON 입력은 옵션 생성 시 snapshot으로 소유하고 재순회 시 독립적으로 적용합니다.
+`Resources.List`의 공통 Name/Status 필터와는 다른 typed API이며 공통 Collection에 임의 Body
+선택 옵션을 추가하지 않습니다. 애플리케이션이 필터 builder나 resource interface를 구현하지 않습니다.
+
+Python은 `_query_mapping`에서 소비한 키를 server query로 보내고 남은 known Body 속성을
+로컬 필터로 분류합니다. Go에서는 기존 concrete `ListOpts` 또는 서비스별 typed 옵션으로
+서버 query를 선택하고, `WithListFilter`로 로컬 비교를 명시합니다. query-capable 키에도 로컬
+옵션을 쓸 수 있다는 점은 의도적인 Go 확장입니다. 두 입력을 함께 주면 server query 응답에
+로컬 필터를 추가 적용합니다. known Body 필드나 그 alias를 `WithListQuery`로 보내는 것은
+사전 오류이며 unknown vendor query는 기존 explicit opt-in 정책을 유지합니다. 이 기능이
+stock controller에 새로운 query나 schema를 추가하지는 않습니다.
+
+| 추가 리소스 | canonical Body 필드 | 허용 Python alias |
+|---|---|---|
+| Actions | id, name, target, action, cause, owner, user, project, domain, interval, start_time, end_time, timeout, status, status_reason, inputs, outputs, depends_on, depended_by, created_at, updated_at, cluster_id | target_id→target, owner_id→owner, user_id→user, project_id→project, domain_id→domain, start_at→start_time, end_at→end_time |
+| Events | id, name, timestamp, oid, oname, otype, cluster_id, level, user, project, action, status, status_reason, meta_data | generated_at→timestamp, obj_id→oid, obj_name→oname, obj_type→otype, user_id→user, project_id→project |
+| Services | id, name, status, state, binary, disabled_reason, host, updated_at | 없음 |
+| ProfileTypes / PolicyTypes | id, name, schema, support_status | 없음 |
+| ClusterPolicies | id, name, policy_id, policy_name, cluster_name, policy_type, enabled, data | is_enabled→enabled |
+
+Alias와 canonical 키는 같은 raw 필드에 대응하며 마지막 값이 적용됩니다. unknown Body 키와
+Go에만 추가한 Actions.data, Services.topic, type catalog의 version은 거부합니다. ClusterPolicies의
+cluster_id는 URI 속성으로 고정하므로 Body 필터가 아니며 URIClusterID도 Go의 scope 값입니다.
+각 패키지는 자신의 필터 namespace만 허용하고 body Fields·per-request Headers·다른 Arguments를
+필터 입력으로 받지 않습니다.
+
+비교는 typed 모델에 변환된 값이 아닌 실제 raw JSON을 사용합니다. Event Level 숫자 20과 문자열
+`"20"`은 다르고, bool과 숫자도 다른 타입입니다. JSON 숫자는 float64로 변환하지 않고 정확한
+decimal 값으로 비교하므로 `1`, `1.0`, `1e0`은 같습니다. 호출자가 먼저 float64로 반올림한 값은
+복원하지 않으므로 큰 수는 `json.Number`, `json.RawMessage` 또는 정확한 정수 입력으로 지정합니다.
+scalar null 필터는 생략과 JSON null 모두에 매칭합니다. `false`, `0`, 빈 문자열과 빈 배열은
+null과 다르며 배열은 순서와 전체 값이 같아야 합니다.
+
+객체 필터는 재귀적으로 subset을 비교합니다. 실제 객체가 비어 있으면 빈 `{}` 필터에도 매칭하지
+않고, 실제 객체가 비어 있지 않으면 `{}` 필터가 매칭합니다. 객체 필터와 null·scalar·배열은
+매칭하지 않습니다. 이는 pinned Python의 dict truthiness를 유지하되 non-object에서 Python이
+발생시킬 수 있는 `.get` 오류를 불일치로 처리하는 Go 정책입니다. Python의 `True == 1`과
+`False == 0`도 적용하지 않습니다. 객체 내부의 없는 scalar 키와 null은 같은 비교를 사용합니다.
+
+검증·cap·marker 계산은 Body 필터보다 먼저 적용합니다. 모든 행이 걸러져도 소비 행 수와 마지막
+raw ID는 유지하며 cap 이후에 있는 결과를 채우려고 더 조회하지 않습니다. binding의 필수
+ID/parent 검증은 불일치할 행에도 수행합니다. 필터는 Python Resource.id의 alternate-ID fallback을
+만들지 않습니다. 예를 들어 type catalog의 raw `id`가 없으면 name을 대신 비교하지 않으며,
+binding의 필수 raw `id`가 없으면 기존 응답 검증 오류입니다.
+
+이 구현은 로컬 비교를 제공하지만 Python의 임의 mutable Resource/cache, 자동 query 소비,
+unknown query 생략, per-call base_path/microversion/headers와 deprecated JMESPath까지 완료한
+것은 아닙니다. wire query 지원·버전·plugin schema는 기존 controller 계약을 그대로 따릅니다.
+실제 공개 사용 예제는 [Actions](../actions/README.md), [Events](../events/README.md),
+[Services](../services/README.md), [ProfileTypes](../profiletypes/README.md),
+[PolicyTypes](../policytypes/README.md), [ClusterPolicies](../clusterpolicies/README.md)에 있습니다.
+비교 근거는 [pinned Resource.list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2248-L2338),
+[공통 필터 구현](../../../internal/senlin/filter.go)과 [6개 HTTP 계약](../../../api/clustering_body_filters_test.go)입니다.
