@@ -58,6 +58,11 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 	if strings.Contains(docs, "service.BuildInfo.Resources") || strings.Contains(docs, "service.ProfileTypes.Find(ctx") {
 		t.Fatal("documentation invented Collection or API method")
 	}
+	for _, part := range []string{"listing/README.md", "WithListMaxItems", "WithListPaginated", "resource.WithMaxItems", "resource.WithPaginated", "로컬 필터 이전의 raw 행", "ClusterPolicies는 cap을 로컬에만", "type catalog와 Services의 hint 지원은 deployment가 판정", "전체 list 선언의 완료 판정은 별개"} {
+		if !strings.Contains(docs, part) {
+			t.Fatalf("missing bounded Senlin list control contract %q: %s", part, docs)
+		}
+	}
 	if !strings.Contains(read("instanceha/v1/README.md"), "conn.instance_ha") {
 		t.Fatal("Python service name missing")
 	}
