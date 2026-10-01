@@ -52,8 +52,9 @@ func WithFindMicroversion(value string) FindOption {
 }
 
 // FindIdentity tries the controller identity route first, then optionally
-// searches all listed rows for one exact original ID or name. Headers and the
-// selected version are prepared once and shared by both request phases.
+// searches all listed rows for one exact original ID or name. Explicit
+// transport controls are prepared once for both phases; without these controls
+// the existing source client selection remains live.
 func FindIdentity[T any](ctx context.Context, source *gophercloud.ServiceClient, factory func(*gophercloud.ServiceClient) rest.CollectionSpec[T], normalize func(*T, string, string), identity string, options ...FindOption) (*T, error) {
 	kind := "clustering.find"
 	if factory != nil {

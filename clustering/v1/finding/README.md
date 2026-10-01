@@ -102,7 +102,7 @@ func FindClusterStrict(ctx context.Context, conn *sdk.Connection) error {
 }
 ```
 
-호출별 header·microversion은 GET과 fallback의 모든 페이지에 같은 선택을 적용합니다. 숫자 버전과 clustering service type·원본 version header를 검사하며 공유 ServiceClient를 변경하지 않습니다. `WithFindMicroversion("")`는 effective 1.0을 선택하고 버전 header를 생략합니다. source의 충돌한 version header는 재설정으로 숨기지 않습니다. 원본 source는 요청 사이에도 재검사하며 ProviderClient의 현재 token·reauth는 공유합니다. [목록 호출 설정](../listing/README.md#목록-호출별-헤더와-버전)의 동일한 header 우선순위·소유권 규칙을 사용합니다.
+호출별 header·microversion은 GET과 fallback의 모든 페이지에 같은 선택을 적용합니다. 숫자 버전과 clustering service type·원본 version header를 검사하며 공유 ServiceClient를 변경하지 않습니다. `WithFindMicroversion("")`는 effective 1.0을 선택하고 버전 header를 생략합니다. source의 충돌한 version header는 재설정으로 숨기지 않습니다. 호출별 header나 microversion을 하나라도 선택하면 source에서 상속한 설정도 그 호출에 고정합니다. 둘 다 생략하면 기존 client의 live header/version 선택을 유지합니다. 원본 source는 요청 사이에도 재검사하며 ProviderClient의 현재 token·reauth는 공유합니다. [목록 호출 설정](../listing/README.md#목록-호출별-헤더와-버전)의 동일한 header 우선순위·소유권 규칙을 사용합니다.
 
 auth·version·transport header는 보호되며 전용 microversion 옵션을 사용합니다. Find의 body field·arbitrary query·foreign argument는 지원하지 않아 요청 전에 거부합니다. 원본 Get/Find/List/Wait와 다른 호출은 이 선택으로 변경하지 않습니다.
 
