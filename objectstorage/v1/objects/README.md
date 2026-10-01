@@ -44,3 +44,45 @@ ID로 parent를 지정하면 사전 조회를 하지 않습니다. `resource.Nam
 delimiter 목록에서 얻은 디렉터리 항목은 `Object.Subdir`에 보관하며 실제 object 조회 응답을 뜻하지 않습니다. 상태 필드가 없으므로 `Wait`와 `WithStatus`는 `ErrUnsupported`입니다. `WaitDeleted`는 HEAD의 404를 삭제 완료로 판단합니다. Delete는 기본적으로 404를 무시하고, 403 등의 오류는 원래 응답 오류를 보존합니다.
 
 범위 객체는 `Update`, `Copy`, `Download`에도 같은 container와 object 참조를 사용합니다. `CopyOpts.Destination`은 `/container/object` 형식으로 지정합니다. 입력 확장은 기존 API의 `objects.With...Header/Query`를 전달합니다. `Create`는 업로드 응답 헤더를 반환하며 서버의 객체를 추가 HEAD로 읽지 않습니다. 특정 object version, SLO/DLO와 temp URL 등의 API 입력은 전체 API에서 사용할 수 있으며, 이 공통 Collection의 조회·삭제 기본값은 현재 object version입니다.
+
+## 목록의 읽기 범위
+
+Python `conn.object_store.objects(container, max_items=20)`의 읽을 행 수는 Go에서 `resource.WithMaxItems(20)`로 지정합니다. pinned Python Swift proxy는 `paginated=True`를 명시하므로 Go의 `resource.WithPaginated(false)`는 그 proxy에 대한 첫 페이지 확장입니다. 두 옵션은 공통 `scope.List/All`에 사용하며 기존 공개 `service.Objects.List(ctx, container, objects.WithListOptions(...))`와 typed query 입력은 유지됩니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/resource"
+)
+
+func ListObjects(ctx context.Context, conn *sdk.Connection, containerName string) error {
+	service, err := conn.ObjectStorage(ctx)
+	if err != nil {
+		return err
+	}
+	scope, err := service.Objects.InContainer(ctx, resource.ID(containerName))
+	if err != nil {
+		return err
+	}
+	for object, err := range scope.List(ctx,
+		resource.WithPageSize(100),
+		resource.WithMaxItems(20),
+		resource.WithPaginated(false),
+	) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(object.Container, object.Name, object.Subdir, object.Bytes)
+	}
+	return nil
+}
+```
+
+cap은 공통 `WithName`의 정확한 로컬 비교보다 먼저 응답 행을 셉니다. delimiter로 얻은 `Subdir`도 한 행이므로 실제 object 결과가 cap보다 적을 수 있습니다. scope의 container와 opaque object 이름 처리는 유지하며 목록에서 HEAD를 추가하지 않습니다. `WithMaxItems(0)`은 무제한, 음수는 iterator 순회 시 HTTP 전 오류이며 같은 옵션은 마지막 값이 적용됩니다. cap만으로 wire `limit`을 만들지 않고 명시한 `WithPageSize`만 요청에 사용합니다.
+
+`break`·context 취소는 추가 요청을 중단합니다. 현재 페이지 전체 `IsEmpty/Extract` decode 오류는 cap 이후 행에도 적용됩니다. native marker continuation과 반복 링크 검사를 유지하며, cap이나 첫 페이지가 완료되면 다음 marker 처리 전에 멈춥니다. [공통 목록 가이드](../../../docs/listing.md), [container 목록](../containers/README.md), [native 범위 HTTP 계약](../../../api/native_scope_list_controls_test.go)을 참고합니다.

@@ -71,3 +71,44 @@ Gophercloud의 Events 주석에 있는 2.50을 모든 event 조회의 최소 버
 Python의 대응 모델은 [pinned ServerAction](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/server_action.py)에 있습니다. Go는 Resource의 URI 부모를 명시적 scope로 고정하고 typed 값과 보존된 JSON을 반환합니다. 변경 추적·자동 commit은 제공하지 않습니다.
 
 구현은 [scope와 모델](resources.go), 검증은 [HTTP 계약 테스트](../../../api/instance_actions_scope_test.go)에 있습니다.
+
+## 읽을 행 수와 첫 페이지
+
+Python `conn.compute.server_actions(server, max_items=20, paginated=False)`의 목록 제어는 Go에서 `scope.List/All`에 `resource.WithMaxItems(20)`, `resource.WithPaginated(false)`로 지정합니다. scope는 controlled stream을 사용하며 기존 `resource.Stream`은 제어값이 없는 같은 경로로 위임합니다. 공개 native `service.InstanceActions.List`의 signature와 서비스별 typed options는 유지됩니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/resource"
+)
+
+func ListServerActions(ctx context.Context, conn *sdk.Connection, serverID string) error {
+	service, err := conn.ComputeV2(ctx)
+	if err != nil {
+		return err
+	}
+	scope, err := service.InstanceActions.InServer(ctx, resource.ID(serverID))
+	if err != nil {
+		return err
+	}
+	for action, err := range scope.List(ctx,
+		resource.WithMaxItems(20), resource.WithPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(action.ServerID, action.RequestID, action.Action)
+	}
+	return nil
+}
+```
+
+이 예제는 wire `limit`을 추가하지 않습니다. `WithPageSize`를 별도로 사용할 때의 2.58 이상 조건은 그대로입니다. 서버가 실제로 제공한 첫 페이지의 action을 최대 20개 읽으며 상세 GET을 하지 않습니다. event·추가 JSON·응답 헤더의 보존과 고정된 ServerID도 기존 목록과 같습니다.
+
+`WithMaxItems(0)`은 무제한이고 음수는 iterator 순회 시 HTTP 전에 실패합니다. 같은 제어는 마지막 옵션이 적용됩니다. `break`와 context 취소는 추가 요청을 중단합니다. 현재 페이지의 action·event 전체 decode 오류는 cap 이후 행에 있어도 반환됩니다. 다음 페이지가 필요하면 기존 `links` continuation과 반복 링크 검사를 사용하며, native 경로에 REST의 origin·path guard를 추가하지 않았습니다. cap이나 첫 페이지 옵션으로 멈추면 다음 링크를 처리하지 않습니다.
+
+공통 정책은 [목록 가이드](../../../docs/listing.md), 실제 scope 연결과 raw 모델 보존은 [native 목록 HTTP 계약](../../../api/native_scope_list_controls_test.go)에서 확인합니다.
