@@ -50,7 +50,7 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 		t.Fatalf("registry field names: %s", registry)
 	}
 	docs := read("clustering/v1/README.md")
-	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "receivers/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "receivers/README.md", "객체 PATCH 갱신", "65개 직접 선언", "Collection.Delete는 미지원", "policy attach/detach/update", "wire `user`", "waiting/README.md", "무제한·ERROR 실패·2초 간격", "공통 Resources.Wait의 5분 정책", "clusterpolicies/api.go", "clusterattributes/api.go", "별도 binding ID", "고정 cluster·JSONPath", "tracking/README.md"} {
+	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "receivers/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "receivers/README.md", "객체 PATCH 갱신", "69개 직접 선언", "Collection.Delete는 미지원", "policy attach/detach/update", "wire `user`", "waiting/README.md", "무제한·ERROR 실패·2초 간격", "공통 Resources.Wait의 5분 정책", "clusterpolicies/api.go", "clusterattributes/api.go", "별도 binding ID", "고정 cluster·JSONPath", "tracking/README.md", "clusters/metadata/README.md", "Previous/Requested", "accepted Operation"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing actual SDK capability %q: %s", part, docs)
 		}
