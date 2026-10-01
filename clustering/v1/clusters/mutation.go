@@ -37,7 +37,7 @@ func submission(client *gophercloud.ServiceClient, response *rest.Response) (*ac
 	if err != nil {
 		return nil, err
 	}
-	return &actions.Submission{ActionID: id, Location: response.Header.Get("Location"), Body: append(json.RawMessage(nil), response.Body...), Header: response.Header.Clone(), StatusCode: response.StatusCode}, nil
+	return &actions.Submission{ActionID: id, Location: senlin.LocationValues(response.Header)[0], Body: append(json.RawMessage(nil), response.Body...), Header: response.Header.Clone(), StatusCode: response.StatusCode}, nil
 }
 
 func decodeMutation(client *gophercloud.ServiceClient, response *rest.Response, actionRequired bool) (*Cluster, error) {
@@ -45,7 +45,7 @@ func decodeMutation(client *gophercloud.ServiceClient, response *rest.Response, 
 	if err != nil {
 		return nil, err
 	}
-	if actionRequired || len(response.Header.Values("Location")) != 0 {
+	if actionRequired || len(senlin.LocationValues(response.Header)) != 0 {
 		value.Operation, err = submission(client, response)
 		if err != nil {
 			return nil, err

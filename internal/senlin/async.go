@@ -2,6 +2,7 @@ package senlin
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -9,6 +10,18 @@ import (
 	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/resource"
 )
+
+// LocationValues includes case variants supplied by custom HTTP transports.
+// The returned slice is independent of the response header.
+func LocationValues(headers http.Header) []string {
+	var locations []string
+	for key, values := range headers {
+		if strings.EqualFold(key, "Location") {
+			locations = append(locations, values...)
+		}
+	}
+	return locations
+}
 
 // ActionID extracts a Location reference without following it. The reference
 // must identify one action in the selected service's collection. A malformed
@@ -20,12 +33,7 @@ func ActionID(client *gophercloud.ServiceClient, response *rest.Response) (strin
 	if response == nil {
 		return fail("requires an HTTP response")
 	}
-	var locations []string
-	for key, values := range response.Header {
-		if strings.EqualFold(key, "Location") {
-			locations = append(locations, values...)
-		}
-	}
+	locations := LocationValues(response.Header)
 	if len(locations) != 1 || strings.TrimSpace(locations[0]) == "" {
 		return fail("must contain exactly one nonempty value")
 	}
