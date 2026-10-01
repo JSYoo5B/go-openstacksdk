@@ -9,6 +9,7 @@
 | `conn.load_balancer.update_quota(project_id, listeners=0)` | `scope.Update(ctx, quotas.UpdateOpts{Listener: &zero})` |
 | `conn.load_balancer.delete_quota(project_id, ignore_missing=False)` | `scope.Reset(ctx)` |
 | `ignore_missing=True` | `scope.Reset(ctx, quotas.WithResetIgnoreMissing(true))` |
+| `conn.load_balancer.quotas(**query)` | `api.ListProjects(ctx, quotas.WithProjectListOptions(opts))` |
 | Keystone 프로젝트 이름 해석 | `api.InProject(ctx, resource.Name(name), quotas.WithIdentityClient(identityClient))` |
 | 인증된 프로젝트의 quota | `api.CurrentProject(ctx)` |
 
@@ -32,6 +33,13 @@ func manageQuotas(ctx context.Context, client *gophercloud.ServiceClient) error 
     }, quotas.WithDefaultLimit(quotas.LimitMembers))
     if err != nil { return err }
     fmt.Println(updated.Header.Get("X-Openstack-Request-Id"))
+
+    for quota, err := range api.ListProjects(ctx, quotas.WithProjectListOptions(
+        quotas.ProjectListOpts{Limit: 100},
+    )) {
+        if err != nil { return err }
+        fmt.Println(quota.ProjectID, quota.Pool)
+    }
 
     _, err = scope.Reset(ctx)
     return err
@@ -60,14 +68,20 @@ func manageQuotas(ctx context.Context, client *gophercloud.ServiceClient) error 
 
 quota 객체가 없거나 null·배열·scalar이거나 알려진 필드 타입이 잘못되면 오류입니다. 성공 상태의 잘못된 JSON도 `QuotaResponseError`에 status·header·원문 byte·decode 원인을 보존하며 이미 수락된 PUT을 decode 실패 때문에 재시도하지 않습니다. HTTP 원인과 취소·timeout은 `errors.As`/`errors.Is`로 확인할 수 있습니다.
 
+## 목록
+
+`ListProjects`는 lazy iterator이며 `AllProjects`는 전체 목록을 수집합니다. `ProjectListOpts`는 `ProjectID`, 반복되는 `Fields`, `Limit`, `Marker`, `PageReverse`를 제공합니다. PageReverse는 [Octavia의 대소문자 구분](https://docs.openstack.org/octavia/latest/_modules/octavia/api/common/pagination.html)에 맞춰 `True`/`False`로 전송하고 nil이면 생략합니다. `WithProjectListOptions`는 fields와 bool pointer를 생성 시 복사하고 재사용할 때마다 다시 복사합니다. iterator는 생성 시 옵션 배열도 복사합니다. limit 0은 query 생략, 음수는 오류입니다.
+
+페이지의 `quotas_links` 중 `next`만 따라가며 상대 URL·빈 페이지를 지원합니다. 서버 링크에서 빠진 최초 query 옵션은 다음 페이지에도 유지하고, 링크에 명시된 paging 값은 우선합니다. iterator break는 다음 항목 decode와 다음 GET을 중단합니다. 취소·pagination cycle·다른 origin 링크·서로 다른 복수 next 링크를 거절합니다. 응답 item의 `project_id`를 읽고 fields projection으로 빠진 ID는 빈 값으로 둡니다. 필터 값이나 현재 인증 프로젝트를 응답 ID로 만들지 않습니다.
+
 ## HTTP와 지원 범위
 
-SDK scope는 pinned Python 및 [공식 Octavia quota API](https://docs.openstack.org/api-ref/load-balancer/v2/#quotas)의 `/lbaas/quotas` 경로를 사용합니다. 선택한 ServiceClient의 ResourceBase가 이미 `/lbaas/`로 끝나면 prefix를 중복하지 않습니다. Gophercloud v2.15.0 quota URL에는 `lbaas/`가 빠져 있어 **생성된 `API.Get/Update/Delete`의 기존 `/quotas` 계약과 경로가 다릅니다**. 이 보정은 새 scope/collection 연산에만 적용하며 client 설정을 변경하지 않습니다.
+SDK scope와 collection은 pinned Python 및 [공식 Octavia quota API](https://docs.openstack.org/api-ref/load-balancer/v2/#quotas)의 `/lbaas/quotas` 경로를 사용합니다. 선택한 ServiceClient의 ResourceBase가 이미 `/lbaas/`로 끝나면 prefix를 중복하지 않습니다. Gophercloud v2.15.0 quota URL에는 `lbaas/`가 빠져 있어 **생성된 `API.Get/Update/Delete`의 기존 `/quotas` 계약과 경로가 다릅니다**. 이 보정은 새 scope/collection 연산에만 적용하며 client 설정을 변경하지 않습니다.
 
-GET·Defaults 성공은 200만 허용합니다. PUT은 native 호환 정책의 200·202, Reset은 202·204를 유지합니다. 공식 API의 PUT·DELETE 성공은 각각 202·204입니다. Reset은 metadata만 반환하고 후속 GET을 보내지 않습니다.
+GET·Defaults·ListProjects 성공은 200만 허용합니다. PUT은 native 호환 정책의 200·202, Reset은 202·204를 유지합니다. 공식 API의 PUT·DELETE 성공은 각각 202·204입니다. Reset은 metadata만 반환하고 후속 GET을 보내지 않습니다.
 
 Reset 기본 404 정책은 엄격합니다. Python의 `ignore_missing=True` 기본값에 대응하려면 `WithResetIgnoreMissing(true)`를 지정하고, 뒤의 false 옵션으로 다시 엄격하게 설정할 수 있습니다. 403 등 다른 오류는 숨기지 않습니다.
 
-이 구현은 quota 조회·전역 defaults·갱신·override reset을 제공합니다. Python Resource 입력·dirty-state·자동 commit·cache·임의 query 계약까지 동일하다는 의미는 아닙니다. quota singleton에 생성·이름 Find·상태 Wait를 추가하지 않습니다.
+이 구현은 quota 조회·전역 defaults·갱신·override reset·collection 목록을 제공합니다. Python Resource 입력·dirty-state·자동 commit·cache·임의 query 계약까지 동일하다는 의미는 아닙니다. quota singleton에 생성·이름 Find·상태 Wait를 추가하지 않습니다.
 
-근거: [native requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/loadbalancer/v2/quotas/requests.go), [native URL](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/loadbalancer/v2/quotas/urls.go), pinned [Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/load_balancer/v2/_proxy.py), [Python quota resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/load_balancer/v2/quota.py). 테스트는 [HTTP·옵션·오류](../../../api/octavia_project_quotas_contracts_test.go), [프로젝트·인증](../../../api/octavia_project_quotas_projects_test.go)에 있습니다.
+근거: [native requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/loadbalancer/v2/quotas/requests.go), [native URL](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/loadbalancer/v2/quotas/urls.go), pinned [Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/load_balancer/v2/_proxy.py), [Python quota resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/load_balancer/v2/quota.py). 테스트는 [HTTP·옵션·오류](../../../api/octavia_project_quotas_contracts_test.go), [프로젝트·인증](../../../api/octavia_project_quotas_projects_test.go), [목록](../../../api/octavia_project_quotas_list_test.go)에 있습니다.
