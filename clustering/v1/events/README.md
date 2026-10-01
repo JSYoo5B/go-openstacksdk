@@ -81,9 +81,58 @@ page 정책에 따라 cap보다 적을 수 있습니다.
 Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
-List 전체 계약은 partial입니다. Python Body 속성의 local filtering/query 소비와 unknown
-query 생략, per-call base_path/microversion/header, deprecated JMESPath 및 controller의
+List 전체 계약은 partial입니다. Python의 자동 query/Body 분류와 unknown query 생략,
+per-call base_path/microversion/header, deprecated JMESPath 및 controller의
 default/capped limit 비교는 남아 있습니다. `WithListQuery`는 vendor query를 실제로 전달하는
 Go 확장이며 Python unknown query 생략과 구별합니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
+
+## raw Body 로컬 필터
+
+Python `events(status="ERROR", meta_data={"team": "infra"})`의 Body 필터는 Go에서
+`events.WithListFilter`로 명시합니다. `oid/oname/otype/action/cluster_id/level` 같은 서버 query
+필드도 이 옵션으로 지정하면 로컬에서만 비교하며, 기존 `ListOpts`의 query 입력과 독립적입니다.
+
+canonical 필드는 `id/name/timestamp/oid/oname/otype/cluster_id/level/user/project/action/status/status_reason/meta_data`입니다.
+Python alias `generated_at/obj_id/obj_name/obj_type/user_id/project_id`는 각각
+`timestamp/oid/oname/otype/user/project`를 비교합니다. `WithListFilter("level", 20)`은 raw JSON
+숫자 20만 비교하고 문자열 `"20"`은 다른 값입니다. 모델의 문자열 `Level`로 변환한 결과를
+필터 값으로 사용하지 않습니다. known Body 키의 확장 query는 거부하고 unknown vendor query는
+기존 명시적 opt-in 정책을 유지합니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/events"
+)
+
+func FilterEvents(ctx context.Context, conn *sdk.Connection) error {
+	service, err := conn.ClusteringV1(ctx)
+	if err != nil {
+		return err
+	}
+	for event, err := range service.Events.List(ctx,
+		events.WithListFilter("status", "ERROR"),
+		events.WithListFilter("meta_data", json.RawMessage(`{"count":9007199254740993}`)),
+		events.WithListMaxItems(50), events.WithListPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(event.ID, event.Level, event.Status)
+	}
+	return nil
+}
+```
+
+snapshot 입력은 재사용마다 독립적으로 적용합니다. cap·마지막 raw Event ID는 필터보다 먼저
+계산하므로 모든 결과가 걸러져도 다음 marker는 원래 마지막 행을 기준으로 합니다. 객체는
+recursive subset, 배열은 순서와 전체 값, 숫자는 정확한 decimal 값으로 비교합니다. bool은
+숫자와 다르고 생략은 scalar null과 같습니다. 빈 실제 객체는 객체 필터에 매칭하지 않습니다.
+[공통 Body 필터 정책](../listing/README.md)과 [HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.

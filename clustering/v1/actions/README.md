@@ -137,9 +137,57 @@ page 정책에 따라 cap보다 적을 수 있습니다.
 Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
-List 전체 계약은 partial입니다. Python Body 속성의 local filtering/query 소비와 unknown
-query 생략, per-call base_path/microversion/header, deprecated JMESPath 및 controller의
+List 전체 계약은 partial입니다. Python의 자동 query/Body 분류와 unknown query 생략,
+per-call base_path/microversion/header, deprecated JMESPath 및 controller의
 default/capped limit 비교는 남아 있습니다. `WithListQuery`는 vendor query를 실제로 전달하는
 Go 확장이며 Python unknown query 생략과 구별합니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
+
+## 명시적인 Body 필터
+
+`actions.WithListFilter(key, value)`는 known response Body 필드를 로컬에서 비교합니다.
+Python `actions(owner_id="engine")`의 Body 필터는 Go에서 `WithListFilter("owner_id", "engine")`로
+지정하며, query-capable `name/target/action/status/cluster_id`도 이 옵션으로 명시하면 wire query를
+보내지 않습니다. 기존 `ListOpts`는 해당 서버 query를 지정하는 독립적인 입력입니다.
+
+지원 canonical 필드는 `id/name/target/action/cause/owner/user/project/domain/interval/start_time/end_time/timeout/status/status_reason/inputs/outputs/depends_on/depended_by/created_at/updated_at/cluster_id`입니다.
+Python alias `target_id/owner_id/user_id/project_id/domain_id/start_at/end_at`는 각각
+`target/owner/user/project/domain/start_time/end_time`을 비교합니다. Go 추가 모델 필드 `data`와
+unknown 필드는 이 필터에 포함하지 않습니다. known Body 키를 `WithListQuery`로 보내는 것은
+거부하며, 기존 typed query와 명시적인 unknown vendor query 정책은 유지합니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/actions"
+)
+
+func FilterActions(ctx context.Context, conn *sdk.Connection, ownerID string) error {
+	service, err := conn.ClusteringV1(ctx)
+	if err != nil {
+		return err
+	}
+	for action, err := range service.Actions.List(ctx,
+		actions.WithListFilter("owner_id", ownerID),
+		actions.WithListFilter("inputs", map[string]any{"region": "region-one"}),
+		actions.WithListMaxItems(50), actions.WithListPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(action.ID, action.Status)
+	}
+	return nil
+}
+```
+
+필터 입력은 옵션 생성 시 JSON snapshot으로 소유합니다. cap과 마지막 응답 ID의 marker 계산은
+필터보다 먼저 진행하므로 걸러진 행도 소비합니다. 객체는 recursive subset, 배열은 순서와 전체
+값을 비교하며 숫자는 정확한 decimal 값으로 비교하고 bool과 숫자를 구분합니다. 생략과 null은
+scalar null 필터에서 같고, 빈 실제 객체는 객체 필터에 일치하지 않습니다. 상세한 Python 차이는
+[Body 필터 가이드](../listing/README.md), HTTP 근거는 [6개 리소스 필터 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.
