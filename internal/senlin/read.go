@@ -4,6 +4,7 @@ package senlin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"iter"
 	"net/url"
@@ -109,8 +110,8 @@ func RequireVersion(ctx context.Context, client *gophercloud.ServiceClient, mini
 
 func Identifier(value string) error { return resource.ID(value).Validate() }
 
-func Query(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false); err != nil {
+func Query(config request.Config[ListOpts], allowedArguments ...string) (url.Values, error) {
+	if err := request.ValidateCapabilities(config, false, true, false, allowedArguments...); err != nil {
 		return nil, err
 	}
 	if config.Options.Limit < 0 {
@@ -136,6 +137,49 @@ func Query(config request.Config[ListOpts]) (url.Values, error) {
 		query[key] = append([]string(nil), values...)
 	}
 	return query, nil
+}
+
+// ListWithBodyFilters applies owned raw Body filters after REST row validation
+// and local pagination controls. Filtered rows still consume the raw row cap.
+func ListWithBodyFilters[T any](ctx context.Context, spec rest.CollectionSpec[T], filters BodyFilterSpec, options ...ListOption) iter.Seq2[*T, error] {
+	options = append([]ListOption(nil), options...)
+	filters = snapshotBodyFilterSpec(filters)
+	return func(yield func(*T, error) bool) {
+		config, err := request.Apply(ListOpts{}, options...)
+		if err != nil {
+			yield(nil, request.Wrap("List", spec.Kind, err))
+			return
+		}
+		query, err := Query(config, filters.Namespace)
+		if err == nil {
+			err = RejectBodyFilterQuery(query, filters)
+		}
+		var prepared map[string]json.RawMessage
+		if err == nil {
+			prepared, err = PrepareBodyFilters(config, filters)
+		}
+		if err != nil {
+			yield(nil, request.Wrap("List", spec.Kind, err))
+			return
+		}
+		control := rest.ListControl{MaxItems: config.Options.MaxItems,
+			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated,
+			LimitHint:  spec.Paging.MaxItemsLimitHint}
+		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
+			if err != nil {
+				yield(nil, request.Wrap("List", spec.Kind, err))
+				return
+			}
+			matches, err := MatchFilters(spec.Metadata(value).Body, prepared)
+			if err != nil {
+				yield(nil, request.Wrap("List", spec.Kind, err))
+				return
+			}
+			if matches && !yield(value, nil) {
+				return
+			}
+		}
+	}
 }
 
 func List[T any](ctx context.Context, spec rest.CollectionSpec[T], options ...ListOption) iter.Seq2[*T, error] {
