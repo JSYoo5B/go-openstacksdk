@@ -23,7 +23,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 108개 일반 Collection과 15개 부모 범위에 적용합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 108개 일반 Collection과 18개 부모 Collection 범위에 적용하며, 서버 tag는 별도 문자열 집합 범위로 제공합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 

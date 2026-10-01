@@ -27,6 +27,10 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | DNS record set | `dns.RecordSets.InZone(ctx, zone)` | record set ID |
 | Nova interface | `compute.AttachInterfaces.InServer(ctx, server)` | port ID |
 | Nova volume attachment | `compute.VolumeAttachments.InServer(ctx, server)` | volume ID |
+| Nova instance action | `compute.InstanceActions.InServer(ctx, server)` | request ID |
+| Nova server tags | `compute.Tags.InServer(ctx, server)` | 태그 문자열 집합 |
+| Trove database | `database.Databases.InInstance(ctx, instance)` | 데이터베이스 이름 |
+| Trove user | `database.Users.InInstance(ctx, instance)` | 사용자·host 식별자 (서비스 설명 참조) |
 | Magnum node group | `magnum.NodeGroups.InCluster(ctx, cluster)` | UUID |
 | Keystone application credential | `identity.ApplicationCredentials.InUser(ctx, user)` | credential ID |
 | Keystone access rule | `identity.ApplicationCredentials.AccessRules(ctx, user)` | access rule ID |
@@ -42,8 +46,12 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 
 Compute/Network/Image의 전체 API 객체는 `conn.ComputeV2(ctx)`, `conn.NetworkV2(ctx)`, `conn.ImageV2(ctx)`로 가져오거나 기존 서비스의 `API` 필드를 사용합니다. 표의 부모는 `resource.ID(...)` 또는 `resource.Name(...)`입니다. floating IP처럼 이름 필드가 없는 부모는 ID로 지정합니다.
 
-모든 범위 객체는 Get/Find/List/All/Delete/Wait/WaitDeleted/ResolveID를 공유합니다. 이름이나 상태가 없는 모델은 해당 기능에 `ErrUnsupported`를 반환합니다. Delete는 기본적으로 404를 무시하며 `WithMissingError()`로 엄격한 동작을 선택합니다. Create/Update는 원래 API에 해당 연산이 있는 범위에 제공됩니다.
+Collection 기반 범위 객체는 Get/Find/List/All/Delete/Wait/WaitDeleted/ResolveID를 공유합니다. 이름·삭제·상태가 없는 모델은 해당 기능에 `ErrUnsupported`를 반환합니다. Delete는 기본적으로 404를 무시하며 `WithMissingError()`로 엄격한 동작을 선택합니다. Create/Update는 원래 API에 해당 연산이 있는 범위에 제공됩니다.
+
+서버 tag 범위는 Collection 대신 Add/Check/List/Replace/Remove/RemoveAll을 제공하는 문자열 집합입니다. microversion 2.26 이상을 요구하며 nil·빈 교체 목록은 집합을 비웁니다. [tag의 선택적 404 정책](../compute/v2/tags/README.md)을 참고합니다. Nova action은 requestID로만 조회하고 이름·삭제·상태 대기는 지원하지 않습니다. SDK의 [ActionResource](../compute/v2/instanceactions/README.md)는 목록·상세와 event의 추가 필드·원본 JSON·헤더를 보존합니다.
+
+Trove의 [database](../db/v1/databases/README.md)와 [user](../db/v1/users/README.md)는 pinned native/Python SDK가 fetch를 노출하지 않아 Get을 같은 instance의 목록 검색으로 제공합니다. 단일 Create와 CreateBatch 모두 배열 본문으로 요청하고 error를 반환합니다. 자식 상태 대기는 제공하지 않습니다. 응답이 없는 비동기 생성의 완료나 batch 원자성을 추정하지 않습니다.
 
 Swift의 container 이름과 object 키는 해당 서비스의 식별자입니다. object 키의 `/`, 공백과 query 문자도 SDK가 URL에 인코딩하며, 애플리케이션은 원래 문자열을 `resource.ID(...)`에 전달합니다. [Swift 사용법](../objectstorage/v1/objects/README.md)에서 metadata 조회와 업로드·다운로드를 확인합니다.
 
-범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. HTTP 테스트는 [scoped_contracts_test.go](../api/scoped_contracts_test.go), [qos_contracts_test.go](../api/qos_contracts_test.go), [swift_resources_contracts_test.go](../api/swift_resources_contracts_test.go)에서 15개 범위의 실제 URL, 이름 해석, 기본 TTL, JSON Patch와 Swift 키 인코딩을 검증합니다.
+범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. 기존 15개 범위의 실제 URL·기본 TTL·JSON Patch·Swift 키는 [scope](../api/scoped_contracts_test.go), [QoS](../api/qos_contracts_test.go), [Swift](../api/swift_resources_contracts_test.go) 테스트에서 확인합니다. 추가 범위는 [tags](../api/server_tags_contracts_test.go), [actions](../api/instance_actions_scope_test.go), [databases](../api/trove_databases_contracts_test.go), [users](../api/trove_users_contracts_test.go) HTTP 계약에서 검증합니다.

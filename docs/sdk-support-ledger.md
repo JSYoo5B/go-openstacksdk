@@ -17,6 +17,10 @@
 | Inspector 완료 대기 (`26abc05`) | [UUID·Finished/Error 계약](../api/introspection_contracts_test.go): 요청 ID 고정, typed 메시지, 완료·실패·취소·timeout | Python의 무제한 timeout/ignore_error와 Go의 유한 기본값·실패 반환을 구분 |
 | Inspector Start query 보정 | [시작 HTTP 계약](../api/introspection_start_contracts_test.go), [serializer·header 계약](../baremetalintrospection/v1/introspection/start_test.go), [감사된 호출 생성](../internal/cmd/sdkgen/audited_requests_test.go): ManageBoot nil/false/true, 확장 query, POST202, 원래 오류, native drift 거부 | Python과 같은 선택 인자 구분을 확인. Node/Resource 입력, Resource 반환, 연산별 microversion 선택 등 전체 Python Resource create 계약은 이 테스트의 검증 범위 밖 |
 | Glance metadata·직접 업로드 (`ad9d06e`) | [업로드 계약](../image/upload_test.go), [재전송·Reader 회귀 계약](../image/upload_retry_test.go): 단일 PUT, 실패 시 생성 객체 보존, caller Close 미호출 | 바이너리 자동 재인증·backoff retry, 기존 이미지의 안전한 재업로드, import/task·checksum·중복 제거는 별도 |
+| Nova 서버 tag 범위 (`7da0631`) | [문자열 집합 계약](../api/server_tags_contracts_test.go): 이름 1회 해석, 2.26 요구, escaping, nil/빈 교체, 명시 false·404·HTTP 오류 | Python Server의 tag cache/dirty state 대신 scope의 명시적인 요청·결과 사용 |
+| Trove database 범위 (`8138e64`) | [목록·생성·삭제 계약](../api/trove_databases_contracts_test.go): pinned SDK의 list 기반 fetch, 정확 이름, charset, 단일/batch 배열, 오류·삭제 대기 | credential/access 변경은 다른 리소스 동작. batch 원자성·비동기 생성 완료를 추정하지 않음 |
+| Nova action 이력 범위 (`b59edb4`) | [목록·상세·event 계약](../api/instance_actions_scope_test.go): requestID·고정 parent, 추가 JSON·헤더, pagination·cycle·취소, non-object 응답 거부 | 이름·삭제·상태 대기를 가정하지 않음. event 노출은 실제 microversion과 cloud 권한 정책을 따름 |
+| Trove user/host 범위 (`546b679`) | [계정 식별자 계약](../api/trove_users_contracts_test.go): all-host 정확 이름, WithHost와 default % ID 일관성, literal @/%·2단계 decode, 오류·삭제 대기 | password/credential 갱신, access grant/revoke와 root 관리는 별도 |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. Inspector Start query 보정의 이번 검증은 `go test -race ./api ./baremetalintrospection/... ./internal/cmd/sdkgen` 범위입니다. 그 이전 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`도 통과했습니다.
 
@@ -89,6 +93,8 @@ Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic vir
 ## 우선 구현할 차이
 
 초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
+
+현재 binding은 일반 Collection 108개, 부모 Collection 범위 18개와 별도 tag set 1개입니다. 공통 binding이 없는 72개 패키지는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
 
 | 우선 과제 | 확인한 코드 근거 | 필요한 구현과 검증 |
 |---|---|---|

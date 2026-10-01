@@ -37,3 +37,7 @@ func example(ctx context.Context, api *ports.API) error {
 이 디렉토리의 완전성은 **고정한 Gophercloud 공개 연산에 대한 API 지원**을 뜻합니다. Python openstacksdk의 리소스 모델, 이름 해석, 복합 작업, 추가 서비스 지원까지 동등하다는 뜻은 아닙니다. API 파사드와 상위 SDK 지원은 별도로 추적합니다. 인증 관련 함수와 URL 도우미도 목록에 포함되므로 연산 수는 HTTP endpoint 수와 같지 않습니다.
 
 계약 테스트는 Neutron 확장 필드와 페이지 순회, Nova의 scheduler hints, Glance의 JSON Patch, Swift의 업로드 및 다운로드 본문을 로컬 HTTP 서버에서 검증합니다. 전체 API 컴파일과 `go vet`도 수행합니다. 모든 연산의 실제 클라우드 동작을 검증한 것은 아닙니다.
+
+[공통 정책 목록](resource_inventory.json)은 일반 Collection과 부모 범위를 구분합니다. `find`는 이름 검색, `delete`는 삭제·삭제 대기, `wait`는 문자열 상태 대기 capability입니다. 이름이 없는 모델도 명시 ID의 Get/Find를 제공할 수 있습니다. `scope`와 `parent`는 library-owned 부모 고정을 기록합니다. `kind: string_set`인 Nova tags는 Collection 대신 집합 API를 제공하므로 삭제 대기·ID 조회 capability로 해석하지 않습니다. SDK의 확장 응답 모델은 `model`, 원래 Gophercloud 모델은 필요한 경우 `upstream_model`에 기록합니다.
+
+API transport 목록과 별도로 [지원 판정](sdk_reviews.json)을 보존하고 [검증기](../internal/cmd/paritycheck/README.md)로 API·테스트·문서 근거와 고정 소스를 확인합니다. 미검토 연산은 `unresolved`이며 생성된 함수 수만으로 SDK 지원을 완료 처리하지 않습니다.
