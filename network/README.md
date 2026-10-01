@@ -11,6 +11,8 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.network.networks(status="ACTIVE")` | `service.Networks.List(ctx, resource.WithStatus("ACTIVE"))` |
 | `conn.network.networks(is_router_external=True)` | `service.Networks.List(ctx, resource.WithQuery("router:external", "true"))` |
 | `conn.network.delete_network(id)` | `service.Networks.Delete(ctx, resource.ID(id))` |
+| `conn.network.find_router(name_or_id, ignore_missing=False)` | `service.API.Routers.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
+| `conn.network.find_security_group(name_or_id, project_id=projectID)` | `service.API.SecurityGroups.FindIdentity(ctx, nameOrID, resource.WithIdentityFindQuery("project_id", projectID))` |
 | `conn.network.get_port(id)` | `service.Ports.Get(ctx, id)` |
 | `conn.network.get_ip(id)` | `service.FloatingIPs.Get(ctx, id)` |
 | `conn.create_floating_ip(network="public", server=server, wait=True)` | `service.FloatingIPs.Create(ctx, request, network.WithServer(ref), network.WithWait())` |
@@ -44,6 +46,20 @@ for network, err := range service.Networks.List(ctx,
 ```
 
 추가 query를 사용해도 builder interface 구현은 필요하지 않습니다. 이름 검색은 정확한 일치를 확인하며, 같은 이름이 여러 개면 `ErrAmbiguous`를 반환합니다.
+
+## Router·Security Group 자동 조회
+
+`service.API.Routers.FindIdentity`와 `service.API.SecurityGroups.FindIdentity`는 같은
+이름·ID 문자열 옵션을 받습니다. 기본 GET400·403·404 뒤 모든 목록 페이지에서 정확한
+ID/이름을 검사하고, 같은 이름이 여러 프로젝트에 있으면 `ErrAmbiguous`를 반환합니다.
+`WithIdentityFindQuery("project_id", projectID)`로 호출자가 조회 범위를 지정할 수 있습니다.
+SDK가 프로젝트를 자동 추론하지 않으며 query는 GET과 목록에 모두 전달됩니다.
+
+반복 `fields`·tags와 확장 query는 concrete 설정의 `Query`로 전달할 수 있습니다.
+Security Group의 공통 `Resources.List/All`도 raw query를 보존하며, 로컬 소비량·첫 페이지
+옵션을 지원합니다. native typed `List`는 기존 concrete `ListOpts`를 사용합니다.
+Python 속성 별칭과 로컬 Body 필터 분류는 자동 적용하지 않습니다.
+[Python/Go 사용 예제](../docs/finding-identities.md#neutron-routersecurity-group와-project-query)를 참고하세요.
 
 ## 삭제와 대기
 

@@ -17,6 +17,8 @@
 | Neutron 포트 | `conn.network.find_port("web-port")` | `network.Ports.FindIdentity(ctx, "web-port")` |
 | Neutron 네트워크 | `conn.network.find_network("web-net")` | `network.Networks.FindIdentity(ctx, "web-net")` |
 | Neutron subnet | `conn.network.find_subnet("web-subnet")` | `network.Subnets.FindIdentity(ctx, "web-subnet")` |
+| Neutron router | `conn.network.find_router("app-router", project_id=project_id)` | `network.Routers.FindIdentity(ctx, "app-router", projectQuery)` |
+| Neutron security group | `conn.network.find_security_group("app-sg", project_id=project_id)` | `network.SecurityGroups.FindIdentity(ctx, "app-sg", projectQuery)` |
 | Keystone 프로젝트 | `conn.identity.find_project("app", domain_id=domain_id)` | `identity.Projects.FindIdentity(ctx, "app", domainQuery)` |
 | Keystone 사용자 | `conn.identity.find_user("app-user", domain_id=domain_id)` | `identity.Users.FindIdentity(ctx, "app-user", domainQuery)` |
 | Keystone 그룹 | `conn.identity.find_group("app-group", domain_id=domain_id)` | `identity.Groups.FindIdentity(ctx, "app-group", domainQuery)` |
@@ -25,8 +27,9 @@
 | Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
-위 14개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
+위 16개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
 `conn.BlockStorage(ctx).Volumes`, `conn.Image(ctx).Images`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
+Router·Security Group은 `conn.Network(ctx).API.Routers/SecurityGroups`로 접근합니다.
 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
 ID와 이름이 없는 리소스에 이 정책을 일괄 적용하지 않습니다. Senlin의 다섯
@@ -130,7 +133,7 @@ slash로 decode하지 않고 query에서 `%252F`가 됩니다. 빈 문자열, �
 caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니다. 이름 hint는 목록으로
 전환할 때만 추가하므로 GET에 자동 이름 필터를 넣지 않습니다. caller가 binding의
 이름 query key를 지정하면 자동 이름 hint로 덮어쓰지 않습니다. 기본 hint는 Nova에서
-`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 12개 binding에서는 literal
+`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 14개 binding에서는 literal
 문자열입니다. Flavor는 자동 이름 hint를 서버에 보내지 않습니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
 
 query가 없으면 기존 native Get을 사용합니다. query를 지정하면 SDK가 감사한 member
@@ -363,3 +366,57 @@ Neutron의 [find_network](https://github.com/openstack/openstacksdk/blob/ef55d7d
 [find_group](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L782),
 [find_domain](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L259),
 [find_role](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1743)도 같은 pin으로 비교했습니다.
+
+## Neutron Router·Security Group와 project query
+
+Python의 `conn.network.find_router("app-router", project_id=project_id)`와
+`conn.network.find_security_group("app-sg", project_id=project_id)`는 다음처럼 사용합니다.
+프로젝트 scope는 호출자가 지정하며, SDK가 현재 프로젝트 필터를 자동으로 넣지 않습니다.
+반복 wire query는 concrete 옵션으로 보존합니다.
+
+```go
+package example
+
+import (
+    "context"
+    "net/url"
+
+    networkv2 "gophercloudsdk/network/v2"
+    "gophercloudsdk/resource"
+)
+
+func FindNetworkExtensions(ctx context.Context, network *networkv2.Service,
+    projectID string) error {
+    filter := resource.WithIdentityFindOptions(resource.IdentityFindOpts{
+        Query: url.Values{"project_id": {projectID}, "fields": {"id", "name"}},
+    })
+    strict := resource.WithIdentityFindIgnoreMissing(false)
+    router, err := network.Routers.FindIdentity(ctx, "app-router", filter, strict)
+    if err != nil { return err }
+    group, err := network.SecurityGroups.FindIdentity(ctx, "app-sg", filter, strict)
+    if err != nil { return err }
+    _, _ = router, group
+    return nil
+}
+```
+
+두 리소스는 native GET200과 각각 `routers`·`security_groups` envelope/continuation을
+사용합니다. fallback 목록에만 literal name hint를 추가하며 caller의 name key가
+nil/빈 slice여도 덮어쓰지 않습니다. 같은 이름의 두 행은 프로젝트가 달라도 중복입니다.
+요청한 `fields`에 ID가 없어 응답 ID를 검증할 수 없다면 조회는 오류로 끝납니다.
+
+Security Group의 native `List`는 concrete `ListOpts`를 받습니다. 공통
+`Resources.List/All`은 SDK 소유 pager로 반복·빈 값·확장 wire query를 보존하고 native
+모델과 추출·페이지 링크를 사용합니다. `WithMaxItems`·`WithPaginated` 소비 옵션도
+같이 적용하며 직접 typed `List`의 API는 유지합니다. Router의 공통 목록도 raw query를
+전달합니다. 이 보정은 일반 목록의 raw status와 확장 key 전달에도 적용됩니다.
+
+Python `is_admin_state_up`·`is_distributed`·`is_ha`·`is_shared`는 각각
+wire `admin_state_up`·`distributed`·`ha`·`shared`로 직접 지정해야 합니다.
+Python의 query alias/로컬 Body 분류·descriptor 변환·conditional GET cache·상속
+continuation/session 정책까지 동일하게 구현한 것은 아닙니다. Details·AllProjects·ExtraSpecs
+옵션은 명시적 false도 첫 HTTP 전에 `ErrUnsupported`이며 자동 hidden 검색이나
+microversion 변경은 없습니다.
+
+고정 Python [find_router](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L5570)·[find_security_group](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L6598)는 문자열·ignore_missing·query를 선언합니다.
+[Router query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/router.py#L36)·[SecurityGroup query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/security_group.py#L29)의 별칭은 Go의 wire query와 구분합니다.
