@@ -47,7 +47,7 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 		t.Fatalf("registry field names: %s", registry)
 	}
 	docs := read("clustering/v1/README.md")
-	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "객체 PATCH 갱신", "47개 직접 선언", "Collection.Delete는 미지원"} {
+	for _, part := range []string{"pinned Gophercloud에 없어", "서비스 build 정보 singleton", "목록만 제공", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "객체 PATCH 갱신", "51개 직접 선언", "Collection.Delete는 미지원"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing actual SDK capability %q: %s", part, docs)
 		}

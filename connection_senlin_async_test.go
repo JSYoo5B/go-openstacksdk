@@ -117,3 +117,68 @@ func TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes(t *testi
 		t.Fatalf("explicit action fetch=%+v err=%v", action, err)
 	}
 }
+
+func TestConnectionSenlinAdoptionAndClusterRecoveryShareSelectedSource(t *testing.T) {
+	cloud := testcloud.New(t)
+	var calls atomic.Int32
+	check := func(r *http.Request, expected string) {
+		calls.Add(1)
+		body, err := io.ReadAll(r.Body)
+		if err != nil || string(body) != expected || r.Header.Get("X-Auth-Token") != "refreshed-token" || r.Header.Get("OpenStack-API-Version") != "clustering 1.7" {
+			t.Error(string(body), r.Header, err)
+		}
+	}
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/nodes/adopt", func(w http.ResponseWriter, r *http.Request) {
+		check(r, `{"identity":"physical/id","type":"os.nova.server-1.0"}`)
+		w.Header().Set("Location", "https://incidental.invalid/unrelated")
+		testcloud.JSON(w, 200, `{"node":{"id":"adopted-node","physical_id":"physical/id"}}`)
+	})
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/nodes/adopt-preview", func(w http.ResponseWriter, r *http.Request) {
+		check(r, `{"identity":"physical/id","overrides":null,"snapshot":null,"type":"os.nova.server-1.0"}`)
+		testcloud.JSON(w, 200, `{"node_preview":{"type":"os.nova.server","version":1.0,"properties":{}}}`)
+	})
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/clusters/cluster-id/actions", func(w http.ResponseWriter, r *http.Request) {
+		check(r, `{"recover":{"check_capacity":false}}`)
+		w.Header().Set("Location", "actions/recovery-action")
+		testcloud.JSON(w, 202, `{"action":"recovery-action"}`)
+	})
+	cloud.Mux.HandleFunc("POST /reverse/senlin/v1/clusters/cluster-id/ops", func(w http.ResponseWriter, r *http.Request) {
+		check(r, `{"reboot":{"filters":{"role":"worker"},"params":{"type":"SOFT"}}}`)
+		w.Header().Set("Location", "/reverse/senlin/v1/actions/reboot-action")
+		testcloud.JSON(w, 202, `{"action":"reboot-action"}`)
+	})
+	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Error("adoption/recovery implicitly fetched or followed a response", r.Method, r.URL)
+		w.WriteHeader(500)
+	})
+	conn, err := sdk.FromProvider(cloud.Provider,
+		sdk.WithEndpoint(sdk.Clustering, cloud.Server.URL+"/reverse/senlin"),
+		sdk.WithMicroversion(sdk.Clustering, "1.7"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	service, err := conn.Clustering(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cloud.Provider.SetToken("refreshed-token")
+	adopted, err := service.Nodes.Adopt(ctx, nodes.AdoptOpts{Identity: "physical/id", Type: "os.nova.server-1.0"})
+	if err != nil || adopted == nil || adopted.ID != "adopted-node" || adopted.Operation != nil || adopted.Header.Get("Location") != "https://incidental.invalid/unrelated" {
+		t.Fatal(adopted, err)
+	}
+	preview, err := service.Nodes.AdoptPreview(ctx, nodes.AdoptPreviewOpts{Identity: "physical/id", Type: "os.nova.server-1.0"})
+	if err != nil || preview == nil || string(preview.Spec.Version) != "1.0" {
+		t.Fatal(preview, err)
+	}
+	recovered, err := service.Clusters.Recover(ctx, resource.ID("cluster-id"), clusters.RecoverOpts{}, clusters.WithRecoverCheckCapacity(false))
+	if err != nil || recovered == nil || recovered.ActionID != "recovery-action" {
+		t.Fatal(recovered, err)
+	}
+	operated, err := service.Clusters.PerformOperation(ctx, resource.ID("cluster-id"), "reboot", clusters.PerformOperationOpts{},
+		clusters.WithPerformOperationFilters(map[string]string{"role": "worker"}),
+		clusters.WithPerformOperationParams(map[string]string{"type": "SOFT"}))
+	if err != nil || operated == nil || operated.ActionID != "reboot-action" || calls.Load() != 4 {
+		t.Fatal(operated, err, calls.Load())
+	}
+}
