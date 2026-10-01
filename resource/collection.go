@@ -20,17 +20,20 @@ type Adapter[T any] struct {
 	Kind string
 	// ValidateID is supplied by SDK bindings whose identifiers are not ordinary
 	// URL segments, such as Swift object keys. Such bindings also own URL escaping.
-	ValidateID   func(string) error
-	Get          func(context.Context, string) (*T, error)
-	List         func(url.Values) pagination.Pager
-	Iterate      func(context.Context, url.Values) iter.Seq2[*T, error]
-	Extract      func(pagination.Page) ([]T, error)
-	Delete       func(context.Context, string) error
-	ID           func(*T) string
-	Name         func(*T) string
-	NameQuery    func(string) string
-	NameQueryKey string
-	Status       func(*T) string
+	ValidateID func(string) error
+	Get        func(context.Context, string) (*T, error)
+	List       func(url.Values) pagination.Pager
+	Iterate    func(context.Context, url.Values) iter.Seq2[*T, error]
+	// IterateControlled lets SDK bindings apply row/page controls inside their
+	// transport iterator, before filtering and continuation processing.
+	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
+	Extract           func(pagination.Page) ([]T, error)
+	Delete            func(context.Context, string) error
+	ID                func(*T) string
+	Name              func(*T) string
+	NameQuery         func(string) string
+	NameQueryKey      string
+	Status            func(*T) string
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
@@ -102,6 +105,10 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 				return
 			}
 		}
+		if o.control.MaxItems < 0 {
+			yield(nil, invalid("maximum items must be non-negative"))
+			return
+		}
 		if o.status && c.binding.Status == nil {
 			yield(nil, c.wrap("list", ErrUnsupported))
 			return
@@ -122,8 +129,18 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			wireQuery = maps.Clone(o.query)
 			delete(wireQuery, "status")
 		}
-		if c.binding.Iterate != nil {
-			for value, err := range c.binding.Iterate(ctx, wireQuery) {
+		var iterator iter.Seq2[*T, error]
+		if c.binding.IterateControlled != nil {
+			iterator = c.binding.IterateControlled(ctx, wireQuery, o.control)
+		} else if c.binding.Iterate != nil {
+			if o.control.SinglePage {
+				yield(nil, c.wrap("list", ErrUnsupported))
+				return
+			}
+			iterator = capIterator(ctx, c.binding.Iterate(ctx, wireQuery), o.control.MaxItems)
+		}
+		if iterator != nil {
+			for value, err := range iterator {
 				if err != nil {
 					yield(nil, c.wrap("list", err))
 					return
@@ -145,24 +162,33 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 			return
 		}
 		stopped := false
+		count := 0
 		err := eachPage(ctx, c.binding.List(wireQuery), func(_ context.Context, page pagination.Page) (bool, error) {
 			items, err := c.binding.Extract(page)
 			if err != nil {
 				return false, err
 			}
 			for i := range items {
-				if o.name != nil && c.binding.Name(&items[i]) != *o.name {
-					continue
+				if err := ctx.Err(); err != nil {
+					return false, err
 				}
+				count++
+				matched := o.name == nil || c.binding.Name(&items[i]) == *o.name
 				if o.status && !strings.EqualFold(c.binding.Status(&items[i]), o.query.Get("status")) {
-					continue
+					matched = false
 				}
-				if !yield(&items[i], nil) {
+				if matched && !yield(&items[i], nil) {
 					stopped = true
 					return false, nil
 				}
+				if err := ctx.Err(); err != nil {
+					return false, err
+				}
+				if o.control.MaxItems > 0 && count >= o.control.MaxItems {
+					return false, nil
+				}
 			}
-			return true, nil
+			return !o.control.SinglePage, nil
 		})
 		if err != nil && !stopped {
 			yield(nil, c.wrap("list", err))

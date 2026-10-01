@@ -31,13 +31,32 @@ func (r Ref) Validate() error {
 }
 
 type listOptions struct {
-	name   *string
-	query  url.Values
-	status bool
+	name    *string
+	query   url.Values
+	status  bool
+	control ListControl
 }
 
 // ListOption configures a typed resource iterator. Later options win.
 type ListOption func(*listOptions) error
+
+// WithMaxItems caps rows before local name/status filtering. Zero is unlimited.
+// It is separate from WithPageSize, which controls the server's requested page.
+func WithMaxItems(maximum int) ListOption {
+	return func(o *listOptions) error {
+		o.control.MaxItems = maximum
+		return nil
+	}
+}
+
+// WithPaginated(false) reads only the first page. Bindings with opaque custom
+// iterators must explicitly support page control; native pagers already do.
+func WithPaginated(paginated bool) ListOption {
+	return func(o *listOptions) error {
+		o.control.SinglePage = !paginated
+		return nil
+	}
+}
 
 // WithName uses literal, exact name matching, including for Nova regex filters.
 func WithName(name string) ListOption {
