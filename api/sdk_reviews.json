@@ -4425,12 +4425,23 @@
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector",
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaReauthenticationKeepsBodyAndFixedUser"
           ]
+        },
+        {
+          "behavior": "Quota/class routes and version gates use a selected numeric2.N (empty means2.0); symbolic latest cannot establish the2.7 route switch and fails before lookup/HTTP. Source legacy/generic header conflicts, case-insensitive duplicate names and wrong service types are rejected before binding and on each scope operation; a blank Type requires the matching legacy header because generic alone does not establish Manila version.",
+          "tests": [
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
+          ]
         }
       ],
       "differences": [
         "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
         "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
-        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters.",
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotasets/README.md"
@@ -4492,12 +4503,23 @@
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector"
           ]
+        },
+        {
+          "behavior": "Quota/class routes and version gates use a selected numeric2.N (empty means2.0); symbolic latest cannot establish the2.7 route switch and fails before lookup/HTTP. Source legacy/generic header conflicts, case-insensitive duplicate names and wrong service types are rejected before binding and on each scope operation; a blank Type requires the matching legacy header because generic alone does not establish Manila version.",
+          "tests": [
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
+          ]
         }
       ],
       "differences": [
         "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
         "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
-        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters.",
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotasets/README.md"
@@ -4542,12 +4564,23 @@
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget",
             "api/manila_scoped_quotas_test.go:TestManilaScopedQuotaRedirectsCannotDropOrChangeSelector"
           ]
+        },
+        {
+          "behavior": "Quota/class routes and version gates use a selected numeric2.N (empty means2.0); symbolic latest cannot establish the2.7 route switch and fails before lookup/HTTP. Source legacy/generic header conflicts, case-insensitive duplicate names and wrong service types are rejected before binding and on each scope operation; a blank Type requires the matching legacy header because generic alone does not establish Manila version.",
+          "tests": [
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
+          ]
         }
       ],
       "differences": [
         "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
         "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
-        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters."
+        "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters.",
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotasets/README.md"
@@ -4574,11 +4607,22 @@
             "api/manila_quota_class_test.go:TestManilaQuotaClassRedirectCannotChangeFixedClassOrMethod",
             "api/manila_quota_class_test.go:TestManilaQuotaClassPreflightAndInFlightContextCancellation"
           ]
+        },
+        {
+          "behavior": "Quota/class routes and version gates use a selected numeric2.N (empty means2.0); symbolic latest cannot establish the2.7 route switch and fails before lookup/HTTP. Source legacy/generic header conflicts, case-insensitive duplicate names and wrong service types are rejected before binding and on each scope operation; a blank Type requires the matching legacy header because generic alone does not establish Manila version.",
+          "tests": [
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
+          ]
         }
       ],
       "differences": [
         "The SDK owns the absent native transport and fixes an explicit class name; concrete int64 pointer options and functional extensions replace mutable Python Resource inputs.",
-        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved."
+        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved.",
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotaclasssets/README.md"
@@ -4615,11 +4659,22 @@
             "api/manila_quota_class_test.go:TestManilaQuotaClassUpdateDistinguishesZeroUnlimitedAndOmitted",
             "api/manila_quota_class_test.go:TestManilaQuotaClassInvalidOptionsAndMethodSetsPreventUnsupportedRequests"
           ]
+        },
+        {
+          "behavior": "Quota/class routes and version gates use a selected numeric2.N (empty means2.0); symbolic latest cannot establish the2.7 route switch and fails before lookup/HTTP. Source legacy/generic header conflicts, case-insensitive duplicate names and wrong service types are rejected before binding and on each scope operation; a blank Type requires the matching legacy header because generic alone does not establish Manila version.",
+          "tests": [
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionConflictsFailBeforeProjectOrClassLookup",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionNativeAliasesPreserveMatchingHeadersAndRoutes",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
+            "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
+          ]
         }
       ],
       "differences": [
         "The SDK owns the absent native transport and fixes an explicit class name; concrete int64 pointer options and functional extensions replace mutable Python Resource inputs.",
-        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved."
+        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved.",
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotaclasssets/README.md"
@@ -4917,7 +4972,7 @@
       "differences": [
         "Generated native API.Create remains unchanged. The high-level scope owns concrete option snapshots and the fixed project/resource pair, requires an explicit hard limit instead of choosing an administrative default, and returns extension-preserving QuotaResource with HTTP metadata.",
         "RequestProjectID/RequestResource record the fixed input separately from server ProjectID/Resource. Numeric row IDs are re-read from raw JSON rather than rounded through the native float64 ID representation.",
-        "The pinned Python container-infrastructure proxy has no quota declaration. Additional scoped GET/PATCH/DELETE REST methods are documented and tested separately, and are not invented native or Python catalog operations."
+        "The pinned Python container-infrastructure proxy has no quota declaration. Additional scoped GET/PATCH/DELETE and paginated List/All REST methods are documented and tested separately, and are not invented native or Python catalog operations."
       ],
       "documentation": [
         "containerinfra/v1/quotas/README.md"
