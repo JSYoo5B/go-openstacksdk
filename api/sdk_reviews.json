@@ -6248,6 +6248,384 @@
       "remaining": [
         "Compare the combined-string ID-first lookup and 400/403/404 fallback to lists, plus inherited Resource input and additional list/URI parameters."
       ]
+    },
+    {
+      "operation": "python:clustering/v1/create_cluster",
+      "source_fingerprint": "b75abc1111300f795487c525fbe0593c68cc96361f1b985ef817d28de88aec57",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST201 cluster creation preserves omitted capacity/size/timeout defaults, explicit zero/-1/null and raw config/metadata, requiring name/profile_id and retaining a supplied action Location.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersCreateGetExactModelAndSubmission",
+            "api/clustering_clusters_test.go:TestClusteringClustersCreateDefaultsOmitOptionalFields",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersAcceptedMalformedObjectRetainsEvidenceWithoutResend",
+            "api/clustering_clusters_test.go:TestClusteringClustersMutationSchemasProtectCoreAndResponseFields",
+            "api/clustering_async_location_case_test.go:TestClusteringClusterMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
+            "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_cluster",
+      "source_fingerprint": "c7fe41a249ad570ffe3f3e924ef58f8170438454599c5fae440dd1ce4d82ec93",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 routes the controller identity directly and retains nullable cluster fields, exact json.Number capacity/sizes and raw config/metadata/data.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersCreateGetExactModelAndSubmission",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersExplicitSuccessCodesAndNativeErrors",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersContextAndSourceValidationBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/delete_cluster",
+      "source_fingerprint": "9a4600fbaa0a2b66cb426bbe9ccfefc1b265defc2528d4d84c475db8b412a758",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE202 returns accepted action evidence without fetching or polling; ordinary deletion has no body and ignores404 by default, force sends {\"force\":true} with strict404 by default, explicit ignore overrides both, and403/409 or invalid resolved IDs remain errors.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersDeleteNormalForceBodiesAndSubmission",
+            "api/clustering_clusters_test.go:TestClusteringClustersDeleteDefaultsIgnoreOnlyMissingAndForceIsStrict",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersDeleteAcceptsEmptyBodyButRequiresAction",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersNamedDeleteFreezesHeadersForceAndRechecksSource",
+            "api/clustering_async_location_case_test.go:TestClusteringClusterMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result.",
+        "Go WithDeleteIgnoreMissing deliberately overrides either ordinary or force defaults. Shared Resources.Delete returns ErrUnsupported because its error-only signature would discard the asynchronous Submission."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_cluster",
+      "source_fingerprint": "42cf993a84380ea1715d6a1def6026e8292071e86c43de2f042f5a20064a37d7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Object PATCH202 prepares nullable name/profile_id/timeout/config/metadata and headers before one exact-name lookup; explicit profile_only true or false requires numeric>=1.6 before lookup and again before mutation.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersUpdateNullableFieldsFalseAndAcceptedAction",
+            "api/clustering_clusters_test.go:TestClusteringClustersProfileOnlyAnyExplicitValueRequires16BeforeLookup",
+            "api/clustering_clusters_test.go:TestClusteringClustersNameUpdateFreezesBodyHeadersAndVersionGate",
+            "api/clustering_clusters_response_test.go:TestClusteringClustersOptionalPresentValuesAndRawNullRemainDistinct",
+            "api/clustering_async_location_case_test.go:TestClusteringClusterMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
+            "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Implement or deliberately map cached Resource dirty detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics; explicit PATCH inputs alone do not close that lifecycle.",
+        "Compare the full inherited Resource input/normalization and adapter-selected microversion policy; selected numeric field gates do not negotiate automatically."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/clusters",
+      "source_fingerprint": "4c6bdfe0d804400ce13aac26369afbbc363a18542042522b8d13b9e924a0abee",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy owned query options retain explicit false, sort grammar, vendor query and selected filters across linked and short-page last-wire-ID continuation; constructor snapshots and consumer mutation cannot change raw markers, and local Body subsets/aliases/exact decimal filters do not become server query.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersListShortPageFiltersAndSnapshots",
+            "api/clustering_clusters_pagination_test.go:TestClusteringClustersLocalFilterJSONTypesAndNull",
+            "api/clustering_clusters_pagination_test.go:TestClusteringClustersContinuationGuardsBreakAndCancellation",
+            "api/clustering_clusters_pagination_test.go:TestClusteringClustersSharedStatusAndSortUseActualWireQuery"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map inherited paginated, per-call base_path/headers, max_items and proxy JMESPath controls, including the pinned Python raw-row limit before local filters.",
+        "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/find_cluster",
+      "source_fingerprint": "4c983cc1a02d86a0bed2b43d569d54d8b7ac757de4f0db82e5baa0d0a083f654",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "API.Find defaults to ignored missing with caller strict override; explicit IDs use direct routes, exact Name scans all selected pages and rejects duplicate names, and errors after a candidate prevent partial success.",
+          "tests": [
+            "api/clustering_clusters_test.go:TestClusteringClustersFindAndNamedDeleteResolveOnce"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "API.Find uses ignored-missing default like the Python proxy, while shared Resources.Find is strict; explicit Name does not perform a speculative ID-first GET."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map combined-string ID-first GET and 400/403/404 list fallback, cached Resource input and inherited extra query/URI arguments; explicit ID/Name references currently separate these paths."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/create_node",
+      "source_fingerprint": "2b499332d47c3c58d3d9fd9b350af8ad84af26b2c7029c65f0f748f19fb925dc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 node creation sends required name/profile_id, omitted or explicit null/empty cluster_id/role and raw metadata, requires an action Location, and keeps Senlin ID distinct from physical_id.",
+          "tests": [
+            "api/clustering_nodes_test.go:TestClusteringNodeCreateAcceptedEnvelopeSnapshotsAndSubmission",
+            "api/clustering_nodes_test.go:TestClusteringNodeCreateDefaultsDoNotInventClusterOrRole",
+            "api/clustering_nodes_test.go:TestClusteringNodeAcceptedMalformedEvidenceNeverResends",
+            "api/clustering_nodes_test.go:TestClusteringNodePreflightRejectsImmutableFieldsAndWrongOptions",
+            "api/clustering_async_location_case_test.go:TestClusteringNodeMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
+            "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_node",
+      "source_fingerprint": "de1a48a6afcd12157e2b38eda61b737c077c71839fd94963dd32546b787dcf9b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 routes the controller identity directly; omitted/true/false details policy uses show_details and preserves precise index, physical_id, nullable ownership/timestamps and raw physical details.",
+          "tests": [
+            "api/clustering_nodes_test.go:TestClusteringNodeGetDirectIdentityAndPhysicalDetails",
+            "api/clustering_nodes_test.go:TestClusteringNodeAcceptedMalformedEvidenceNeverResends",
+            "api/clustering_nodes_test.go:TestClusteringNodeWrongSuccessCodesRemainHTTPErrors"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Omitted details sends no query and explicit true/false sends that bool; the pinned Python default details=False enters its false branch. Senlin validates deployment-specific physical details."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/delete_node",
+      "source_fingerprint": "d78f18dac5c3f8c071c65f6b9a3c05ea5e57bb8f97853b697b5b7ada34a9fcda",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE202 returns accepted action evidence without fetching or polling; ordinary deletion has no body and ignores404 by default, force sends {\"force\":true} with strict404 by default, explicit ignore overrides both, and403/409 or invalid resolved IDs remain errors.",
+          "tests": [
+            "api/clustering_nodes_test.go:TestClusteringNodeDeleteActionDefaultForceAndResponseOwnership",
+            "api/clustering_nodes_test.go:TestClusteringNodeDeleteNameLookupDefaultsMissingAndConflict",
+            "api/clustering_nodes_test.go:TestClusteringNodeMalformedActionLocationsRetainAcceptedEvidence",
+            "api/clustering_nodes_test.go:TestClusteringNodePreflightRejectsImmutableFieldsAndWrongOptions",
+            "api/clustering_async_location_case_test.go:TestClusteringNodeMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result.",
+        "Go WithDeleteIgnoreMissing deliberately overrides either ordinary or force defaults. Shared Resources.Delete returns ErrUnsupported because its error-only signature would discard the asynchronous Submission."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_node",
+      "source_fingerprint": "ca8aeec8761720cf67950b7a779413afacbfd66948e44d56b642a2ac1386f297",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Object PATCH202 prepares optional name/profile_id/role/metadata/tainted and headers before one exact-name lookup; explicit tainted false/true/null requires numeric>=1.13 before lookup and again before mutation.",
+          "tests": [
+            "api/clustering_nodes_test.go:TestClusteringNodeUpdateNameResolutionFreezesNullableInputsAndHeaders",
+            "api/clustering_nodes_test.go:TestClusteringNodeUpdateIDNoLookupAndOptionalNullEmptyObject",
+            "api/clustering_nodes_test.go:TestClusteringNodeTaintedFalseAndNullRequireExplicitVersion",
+            "api/clustering_nodes_test.go:TestClusteringNodeVersionRevalidatedAfterNameLookup",
+            "api/clustering_async_location_case_test.go:TestClusteringNodeMutationLocationHeaderCaseAndAmbiguity",
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes",
+            "api/clustering_scalar_options_test.go:TestClusteringScalarOptionsPreserveExplicitValuesAndReuse"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Accepted Location must identify one action at the selected origin and collection, including reverse-proxy prefixes; missing required, empty, ambiguous, foreign or malformed references return ResponseError without following or resending. Submission holds action identity and original response, not an invented action status or completed result."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Implement or deliberately map cached Resource dirty detection, same-value/no-change commit, deletion-to-null and response merge/reset semantics; explicit PATCH inputs alone do not close that lifecycle.",
+        "Compare the full inherited Resource input/normalization and adapter-selected microversion policy; selected numeric field gates do not negotiate automatically."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/nodes",
+      "source_fingerprint": "b915074530b0b26cfa2e920d4f6291adc332e648c695e72c0890ae7d9f73e9f8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy owned query options retain explicit false, sort grammar, vendor query and selected filters across linked and short-page last-wire-ID continuation; constructor snapshots and consumer mutation cannot change raw markers, and local Body subsets/aliases/exact decimal filters do not become server query.",
+          "tests": [
+            "api/clustering_nodes_pagination_test.go:TestClusteringNodesListWireOptionsAndRawMarkerSnapshots",
+            "api/clustering_nodes_pagination_test.go:TestClusteringNodesListPreflightAndSharedStatus"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map inherited paginated, per-call base_path/headers, max_items and proxy JMESPath controls, including the pinned Python raw-row limit before local filters.",
+        "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/find_node",
+      "source_fingerprint": "91cea2b058b03c1eae88ebe5bc528dc7e42d830976fc38a8c2351958cad01766",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "API.Find defaults to ignored missing with caller strict override; explicit IDs use direct routes, exact Name scans all selected pages and rejects duplicate names, and errors after a candidate prevent partial success.",
+          "tests": [
+            "api/clustering_nodes_test.go:TestClusteringNodeFindExplicitNamesDuplicatesAndMissingDefaults",
+            "api/clustering_nodes_pagination_test.go:TestClusteringNodesFindAcrossLinkedPages"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
+        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
+        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
+        "API.Find uses ignored-missing default like the Python proxy, while shared Resources.Find is strict; explicit Name does not perform a speculative ID-first GET."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map combined-string ID-first GET and 400/403/404 list fallback, cached Resource input and inherited extra query/URI arguments; explicit ID/Name references currently separate these paths."
+      ]
     }
   ]
 }
