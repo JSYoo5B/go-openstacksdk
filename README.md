@@ -198,7 +198,7 @@ go run ./examples/create-server -name web-01 -image ubuntu -flavor small -networ
 연결했습니다. native typed List의 기존 옵션은 유지하며 `Resources.List/All` 또는 scope의
 `List/All`에서 `resource.WithMaxItems`와 `resource.WithPaginated`를 사용합니다.
 
-원래 HTTP 오류는 보존됩니다. 403을 미존재로 취급하거나 생성으로 자동 전환하지 않습니다. `WithIgnoreMissing()`을 사용한 Find는 미존재일 때 `nil, nil`을 반환하므로 결과의 nil 여부를 확인해야 합니다.
+공통 explicit Ref 조회는 원래 HTTP 오류를 보존합니다. [Senlin의 다섯 FindIdentity](clustering/v1/finding/README.md)는 Python처럼 GET 400·403·404 후 목록 검색을 제공하며, 목록의 권한 오류나 실패를 미존재로 숨기지 않습니다. `WithIgnoreMissing()`을 사용한 Find는 미존재일 때 `nil, nil`을 반환하므로 결과의 nil 여부를 확인해야 합니다.
 
 ```go
 server, err := computeService.Servers.Find(ctx, resource.Name("web-01"))
@@ -246,3 +246,5 @@ go build ./examples/...
 ```
 
 테스트는 로컬 `httptest.Server`를 사용합니다. 실클라우드 자격 증명이 필요하지 않으며 OpenStack 리소스를 생성하지 않습니다. 테스트 환경은 localhost 포트 바인딩을 허용해야 합니다. [테스트 구성](docs/testing.md), [설계 및 확장 계획](docs/design.md)을 참고하세요.
+
+Senlin의 이름·UUID·짧은 ID 자동 조회는 `Profiles/Policies/Clusters/Nodes/Receivers.FindIdentity(ctx, identity, options...)`로 사용합니다. SDK가 GET-first·목록 fallback·정확한 ID/이름·전체 페이지 중복 검사를 담당하며 기본 미존재는 `nil, nil`입니다. [서비스별 Python/Go 사용 비교와 호출별 옵션](clustering/v1/finding/README.md)을 참고합니다.
