@@ -101,9 +101,52 @@ page 정책에 따라 cap보다 적을 수 있습니다.
 Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
-List 전체 계약은 partial입니다. Python의 name/schema/support_status Body local filters와
-unknown query 생략, per-call base_path/microversion/header, deprecated JMESPath, inherited
+List 전체 계약은 partial입니다. Python의 자동 query/Body 분류와 unknown query 생략,
+per-call base_path/microversion/header, deprecated JMESPath, inherited
 limit/marker fallback은 별도 비교 범위입니다. Go의 `WithListQuery`는 명시한 vendor query를
 실제로 전달하며 stock 서버 지원을 보장하지 않습니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_catalog_list_controls_test.go)를 참고합니다.
+
+## 타입 catalog Body 필터
+
+Python `profile_types(name="os.nova.server-1.0")`의 로컬 필터는 아래처럼 명시합니다.
+`profiletypes.WithListFilter`는 `id/name/schema/support_status`를 지원하며 alias는 없습니다.
+응답에 있는 Go 추가 `version`은 pinned Body 필터 범위가 아니므로 이 옵션에서 거부합니다.
+known Body 키의 `WithListQuery`도 거부하고, explicit vendor query의 기존 정책은 유지합니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/profiletypes"
+)
+
+func FilterProfileTypes(ctx context.Context, conn *sdk.Connection, typeName string) error {
+	service, err := conn.ClusteringV1(ctx)
+	if err != nil {
+		return err
+	}
+	for profile, err := range service.ProfileTypes.List(ctx,
+		profiletypes.WithListFilter("name", typeName),
+		profiletypes.WithListMaxItems(50), profiletypes.WithListPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(profile.Name, profile.Version)
+	}
+	return nil
+}
+```
+
+필터는 raw Body만 비교하므로 `id`가 생략된 응답에서 name을 ID로 대신 사용하지 않습니다.
+Python Resource의 alternate-ID fallback과 다른 Go 정책입니다. name으로 찾을 때는 위와 같이
+`name` 필터를 선택합니다. schema·support_status 객체는 recursive subset, 배열은 순서와 전체
+값, 숫자는 정확한 decimal 값으로 비교합니다. bool과 숫자는 다르고 scalar null은 생략과 같으며,
+빈 실제 객체는 객체 필터와 일치하지 않습니다. cap은 필터 이전 행을 세고 입력은 옵션 생성 시
+snapshot으로 소유합니다. [공통 Body 필터 정책](../listing/README.md)과
+[HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.

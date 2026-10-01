@@ -76,9 +76,57 @@ page 정책에 따라 cap보다 적을 수 있습니다.
 Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
-List 전체 계약은 partial입니다. 공유 `Resources`의 로컬 status 필터와 별도로 Python의
-state/binary/host/updated_at/disabled_reason Body 필터, unknown query 생략, per-call
+List 전체 계약은 partial입니다. 명시적인 typed Body 필터와 별도로 Python의 자동 query/Body
+분류와 unknown query 생략, per-call
 base_path/microversion/header, deprecated JMESPath와 inherited limit/marker fallback을
 계속 비교합니다. `WithListQuery`는 명시한 vendor query를 실제로 전달하는 Go 확장입니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_catalog_list_controls_test.go)를 참고합니다.
+
+## 서비스 Body 필터
+
+Python `services(state="up", disabled_reason=None)`의 로컬 비교는
+`services.WithListFilter("state", "up")`, `WithListFilter("disabled_reason", nil)`로 지정합니다.
+지원 필드는 `id/name/status/state/binary/disabled_reason/host/updated_at`이며 별도 alias는 없습니다.
+Go 모델의 추가 `topic`과 unknown 필드는 이 옵션에서 거부합니다. 필터는 wire query를
+추가하지 않으며 known Body 키를 `WithListQuery`로 보내는 것도 거부합니다.
+
+아래 함수는 Connection에 선택된 numeric Senlin microversion이 1.7 이상일 때 실행합니다.
+필터 옵션이 버전을 자동으로 변경하거나 서비스 Get을 추가하지 않습니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/clustering/v1/services"
+)
+
+func FilterServices(ctx context.Context, conn *sdk.Connection) error {
+	service, err := conn.ClusteringV1(ctx)
+	if err != nil {
+		return err
+	}
+	values, err := service.Services.All(ctx,
+		services.WithListFilter("state", "up"),
+		services.WithListFilter("disabled_reason", nil),
+		services.WithListMaxItems(50), services.WithListPaginated(false))
+	if err != nil {
+		return err
+	}
+	for _, value := range values {
+		fmt.Println(value.ID, value.Host, value.State)
+	}
+	return nil
+}
+```
+
+필터 입력은 생성 시 snapshot으로 소유하고 cap은 필터 이전의 raw 행을 셉니다.
+비교는 raw Body의 JSON 타입을 유지하고 숫자는 decimal 값으로 정확하게 비교하며 bool과
+구분합니다. scalar null은 생략과 같고 객체는 recursive subset이지만 빈 실제 객체는
+일치하지 않습니다. 공통 `Resources`의 status 필터는 기존의 별도 경로이며 이 typed 옵션이
+공통 Collection의 임의 Body 필터 선택을 추가한 것은 아닙니다. 상세한
+[공통 정책](../listing/README.md)과 [HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.
