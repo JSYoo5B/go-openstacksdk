@@ -6626,6 +6626,411 @@
       "remaining": [
         "Map combined-string ID-first GET and 400/403/404 list fallback, cached Resource input and inherited extra query/URI arguments; explicit ID/Name references currently separate these paths."
       ]
+    },
+    {
+      "operation": "python:clustering/v1/scale_in_cluster",
+      "source_fingerprint": "3a790edfc8648cdde9b3d4e89ee1e48fcc5b1e34c5cf4e814d587837edcade10",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.ScaleIn"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScaleIn sends count:null by default like the pinned proxy, preserves explicit zero/null and owned parameter extensions, and returns accepted action evidence.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/scale_out_cluster",
+      "source_fingerprint": "64030084eb496fccdeb559c2baef6f5bf8aeb822b418b5923299a22a1e7dd89b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.ScaleOut"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScaleOut sends count:null by default, preserves explicit count/zero/null and parameter extensions, and leaves scaling policy decisions to the controller.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        },
+        {
+          "behavior": "Connection shares the selected Senlin client, current authentication token, numeric version and reverse-proxy prefix across cluster scale-out, node check and action cancellation, without implicit action fetch or resubmission.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/resize_cluster",
+      "source_fingerprint": "f2d222c3bc2f9f46b86a29916ff5fb6a02e36c9437bc0e64ff90f999dbb193e5",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.Resize"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resize sends only specified adjustment_type, precise decimal number, min_size/max_size/min_step and strict fields, retaining explicit zero/false/null and server-defined size/policy constraints.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/add_nodes_to_cluster",
+      "source_fingerprint": "b27ad7e63d605adcbffabbc9cdb4c03bb819989692e649606105fe3614d9f65d",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.AddNodes"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddNodes sends a required nonempty node identity array in add_nodes; input and extension JSON are frozen before one parent name resolution, without fetching each child.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/remove_nodes_from_cluster",
+      "source_fingerprint": "a85b790806cddae1c297a4401a139db4eb887381a55a01764fcf31b5fa364e5b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.RemoveNodes"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveNodes sends del_nodes with required identities and omitted or explicit destroy_after_deletion false/true/null; any explicit destruction field requires numeric microversion>=1.4 before lookup and before mutation.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/replace_nodes_in_cluster",
+      "source_fingerprint": "b20333f743606b23b60a5a8614b5aec0281940ee3460b6c85759a3dfb547656c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/clusters.API.ReplaceNodes"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReplaceNodes sends the required old-to-new node identity map, owns mutable input and requires numeric microversion>=1.3 before lookup and again before mutation.",
+          "tests": [
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsWireDefaultsAndPresence",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsVersionPreflight",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsAcceptedResponseEvidenceAndNoResend",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsPreflightErrorsAndCancellation",
+            "api/clustering_clusters_commands_test.go:TestClusteringClusterCommandsCustomTransportSubmissionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "All six pinned cluster string proxies call strict _find with combined-string ID-first fallback. Go explicit ID/Name separates routing from exact-name resolution; node identities within membership payloads are passed directly to the controller.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/clusters/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/check_node",
+      "source_fingerprint": "ec5694ba85183732e10b3a8c1a1ee27093850899d5ba7a589c89d9c5a48341a9",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Check"
+      ],
+      "contracts": [
+        {
+          "behavior": "Check sends {check:{}} by default without inventing a version requirement; owned plugin fields/header snapshots stay inside the command parameter object.",
+          "tests": [
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsBaseDefaultsAndSubmissionOwnership",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsCheckParameterExtensionsSnapshot",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsNameLookupFreezesBodyHeadersAndGate",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsVersionPreflightAndRecheck",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsPreflightInvalidInput",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsMalformedAcceptedResponsesRetainEvidence",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsHTTPFailuresRemainOriginalErrors",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsLookupMissingAndAmbiguousNeverSubmit"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        },
+        {
+          "behavior": "Connection shares the selected Senlin client, current authentication token, numeric version and reverse-proxy prefix across cluster scale-out, node check and action cancellation, without implicit action fetch or resubmission.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/recover_node",
+      "source_fingerprint": "83361d3797254ddb848cd7e90d9487a003f2586946edb9019064b07e75e95e79",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.Recover"
+      ],
+      "contracts": [
+        {
+          "behavior": "Recover sends {recover:{}} by default, preserves omitted/empty/null operation and object/null/omitted operation_params, and freezes any explicit check false/true/null requirement>=1.6 before parent resolution.",
+          "tests": [
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsBaseDefaultsAndSubmissionOwnership",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsRecoverNullableSnapshotAndReuse",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsRecoverOperationOmittedEmptyAndNull",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsNameLookupFreezesBodyHeadersAndGate",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsVersionPreflightAndRecheck",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsPreflightInvalidInput",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsMalformedAcceptedResponsesRetainEvidence",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsHTTPFailuresRemainOriginalErrors",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsLookupMissingAndAmbiguousNeverSubmit"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/perform_operation_on_node",
+      "source_fingerprint": "f2f6d2126f376f31479f043d5cb5d22f683c3eed3ca4d50ec031591ea185f1a6",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/nodes.API.PerformOperation"
+      ],
+      "contracts": [
+        {
+          "behavior": "PerformOperation sends {operation:{params}} to nodes/{id}/ops, supports owned plugin parameters without a Resource-field blacklist, and requires numeric microversion>=1.4 before lookup and before POST.",
+          "tests": [
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsPluginParametersDoNotReplaceTargetOrEnvelope",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsNameLookupFreezesBodyHeadersAndGate",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsVersionPreflightAndRecheck",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsPreflightInvalidInput",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsMalformedAcceptedResponsesRetainEvidence",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsHTTPFailuresRemainOriginalErrors",
+            "api/clustering_nodes_commands_test.go:TestClusteringNodeCommandsLookupMissingAndAmbiguousNeverSubmit"
+          ]
+        },
+        {
+          "behavior": "Accepted command response decoding requires matching body/Location identities while retaining independent HTTP evidence on malformed body, missing/foreign/multiple/mismatched Location and header case variants. Empty command parameters remain a JSON object.",
+          "tests": [
+            "internal/senlin/command_test.go:TestCommandBodyAllowsEmptyParamsAndRetainsOwnedInputPolicy",
+            "internal/senlin/command_test.go:TestCommandResponseRequiresMatchingBodyAndLocationAndRetainsEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses context, concrete owned options and explicit ID/Name references; IDs route without a GET, while Names use one exact paginated lookup and reject ambiguity. Python mutable Resource inputs and combined-string identity selection are represented by an explicit Go caller choice.",
+        "Known parameter collisions and authentication/version/transport header replacement fail before HTTP. Plugin/vendor parameters remain nested command inputs rather than mutable Resource fields; the controller/profile owns their schema.",
+        "Selected numeric microversions replace implicit adapter negotiation. Body/header/version requirements are prepared before lookup and rechecked before mutation; default base commands do not invent an explicit-version requirement.",
+        "Published POST202 requires a top-level action string and one Location at the selected action collection identifying the same action. Go returns Submission with original Body/Header/StatusCode, never invents completion, follows the Location, fetches state or resends an accepted command. This is stricter than the pinned Python raw JSON dictionary return."
+      ],
+      "documentation": [
+        "clustering/v1/nodes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/update_action",
+      "source_fingerprint": "c5f9aab2bd492b0495951b02abf7974e765a5ac8ad73357adf0789dd760c4369",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/actions.API.Update",
+        "gophercloudsdk/clustering/v1/actions.API.Cancel"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH202 action cancellation sends {action:{status:CANCELLED}} at numeric microversion>=1.12, optional force is a query parameter, and original accepted Body/Header/StatusCode are retained without assuming an Action response schema.",
+          "tests": [
+            "api/clustering_action_update_test.go:TestClusteringActionUpdateForceQueryAndUnspecifiedResponseBody",
+            "api/clustering_action_update_test.go:TestClusteringActionUpdateFreezesBodyQueryAndHeadersBeforeNameLookup",
+            "api/clustering_action_update_test.go:TestClusteringActionUpdatePreflightAndVersionRecheck",
+            "api/clustering_action_update_test.go:TestClusteringActionUpdateOnlyAcceptsPublished202AndPreservesNativeErrors"
+          ]
+        },
+        {
+          "behavior": "Connection shares the selected Senlin client, current authentication token, numeric version and reverse-proxy prefix across cluster scale-out, node check and action cancellation, without implicit action fetch or resubmission.",
+          "tests": [
+            "connection_senlin_async_test.go:TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go Update/Cancel are stateless requests with explicit ID/Name/context, a required published CANCELLED status and optional owned Force query. Pinned Python Action has no Force field and drops unknown force attrs; Go adds the published query capability.",
+        "The published update success is202 with no declared response object schema. Go UpdateResult retains even an empty or opaque original Body/Header/StatusCode instead of fabricating an updated Action, requiring an assumed action envelope, or automatically fetching status. Location remains raw header evidence rather than command Submission identity.",
+        "Input body/query/header and selected>=1.12 requirement are frozen before exact-name resolution and revalidated before PATCH. Typed/response body collisions, force/status query replacement and authentication/version header replacement fail before HTTP."
+      ],
+      "documentation": [
+        "clustering/v1/actions/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Map inherited Resource dirty/cache/no-change commit, mutable Resource input and response merge/reset; explicit cancellation PATCH alone does not close that lifecycle.",
+        "Compare actual controller/cloud accepted response models against the pinned Python Resource commit expectation before declaring update_action result parity."
+      ]
     }
   ]
 }
