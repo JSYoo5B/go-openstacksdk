@@ -11820,6 +11820,168 @@
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker paths not fully represented by the native plural_links pager. Ordinary-list options do not provide local Body classification for FindIdentity or native typed List.",
         "Pinned Proxy._list (openstack/proxy.py:866-916) consumes the deprecated jmespath_filters expression from direct **query before delegating Resource.list. No corresponding expression filter option is provided by the ordinary Go collection."
       ]
+    },
+    {
+      "operation": "python:network/v2/networks",
+      "source_fingerprint": "f17889d3f1c3c44a767012f35f62be8f2fe911f7c9271e5727f0b59c3d154ad7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/networks.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk/network.New",
+        "gophercloudsdk/resource.WithStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct networks (openstack/network/v2/_proxy.py:3258) delegates query to Resource.list. The declared non-query Body attribute subnet_ids is now available through explicit SDK-owned ordinary Resources.List/All filters, projecting native Network.Subnets. Leaf and cached Connection.API paths retain native routes, extraction and shared provider; Network also supports the existing manual Network.Networks facade without changing its Kind or ERROR wait policy.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+          ]
+        },
+        {
+          "behavior": "String arrays compare complete ordered values with exact length and elements; native nil matches null and a present empty array remains distinct. CIDR strings are not merged or normalized. JSON/non-JSON value validation, creation snapshots, per-iteration ownership, independent concurrent reuse, bulk replacement/clear and lazy unsupported/unknown preflight remain owned by the SDK.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersAliasesSnapshotsAndConcurrentReuse",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
+          ]
+        },
+        {
+          "behavior": "Raw caps count rows before local Body/name/status filters and do not refill with matches or infer a wire limit. Explicit first-page and consumer break preserve native continuation behavior. Native plural_links, whole-current-page decoding including malformed rows beyond the cap, later HTTP failures/cycles and cancellation retain their existing terminal behavior.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersRawControlsAndConsumerBreak",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Raw subnet_ids/subnets/prefixes/status/vendor query remains independently frozen wire data without automatic alias conversion or Body classification. Native typed List and FindIdentity do not acquire the ordinary-list Body option. Trunk sub_ports remains query-mapped and is not registered as a local Body filter.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
+          ]
+        },
+        {
+          "behavior": "Explicit selectors require the audited selected []string field and JSON tag, native custom decoder/pager/extractor shapes and receiver-qualified pinned declarations. Network adds its complete list/query-builder/decoder/envelope/page/extractor hashes; SubnetPool retains its audited list/extraction hashes. Inventory owns canonical field slices and does not advertise unsupported fields or unrelated collections.",
+          "tests": [
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "The Python attribute subnet_ids and Go canonical subnets refer to one native Subnets field. Sequential canonical/alias options use canonical last-wins; bulk containing both names fails deterministically before HTTP even if values agree. Network local name/status conditions compose with the Body predicate on both generated controlled and manual native-pager paths. Native old-format and RFC3339 timestamps retain their decoder behavior.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersAliasesSnapshotsAndConcurrentReuse",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersRawControlsAndConsumerBreak",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "network/README.md",
+        "network/v2/README.md",
+        "resource/README.md"
+      ],
+      "differences": [
+        "Go explicitly selects subnets with owned local options and frozen JSON values rather than automatically consuming Python query kwargs. The native Subnets string slice collapses missing/null to nil; empty arrays remain distinct. Other unknown outer Body attributes and internally seeded descriptor state are not recovered.",
+        "The SDK compares exact ordered strings without Python descriptor coercion or CIDR normalization. JSON scalar inputs are not coerced into arrays; bool and number remain distinct. Raw query keeps caller wire names, repetitions and extensions.",
+        "max_items caps raw native rows locally without Python Resource.list's automatic limit hint. Native accepted statuses, whole-page extraction and advertised plural_links continuation remain intact; typed native List and FindIdentity are separate surfaces.",
+        "Go accepts canonical subnets and registered subnet_ids as explicit local names. The corresponding Python local attribute is subnet_ids; raw Python subnets is not that declared attribute. Bulk alias/canonical collision is rejected instead of depending on map order."
+      ],
+      "remaining": [
+        "Pinned Resource.list/QueryParameters still automatically transpose declared wire aliases, discard unknown keys and classify other non-query Body fields. Remaining fields, full descriptor/default/alias/coercion behavior and complete automatic query/Body policy require separate implementation and tests.",
+        "Network inherits NetworkResource with TagMixinNetwork. Native model decoding and explicit local filters do not provide its complete seeded Resource/unknown-Body/cache/dirty lifecycle. Native timestamp/time.Time response policies are preserved rather than claimed equivalent to all Python descriptor response semantics.",
+        "Pinned Proxy.request optional GET response cache (cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate. Direct Proxy._list fixes session to itself; adapter/session injection is an inherited Resource.list surface. Neither class declares a resource maximum microversion, so no class-specific maximum negotiation gap is claimed.",
+        "Pinned Resource._get_next_link includes RFC Link-header and limit/marker continuation paths beyond the native plural_links pager. Deprecated Proxy._list jmespath_filters (openstack/proxy.py:866-916) is consumed from direct query and has no ordinary Go expression filter option."
+      ]
+    },
+    {
+      "operation": "python:network/v2/subnet_pools",
+      "source_fingerprint": "60445ce46ef215cfdb62d1e1a97b732c6e2e424d316595c1a9a8cab3b8d8a021",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/subnetpools.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct subnet_pools (openstack/network/v2/_proxy.py:7667) delegates query to Resource.list. The declared non-query Body attribute prefixes is now available through explicit SDK-owned ordinary Resources.List/All filters, projecting native SubnetPool.Prefixes. Leaf and cached Connection.API paths retain native routes, extraction and shared provider.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+          ]
+        },
+        {
+          "behavior": "String arrays compare complete ordered values with exact length and elements; native nil matches null and a present empty array remains distinct. CIDR strings are not merged or normalized. JSON/non-JSON value validation, creation snapshots, per-iteration ownership, independent concurrent reuse, bulk replacement/clear and lazy unsupported/unknown preflight remain owned by the SDK.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersAliasesSnapshotsAndConcurrentReuse",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
+          ]
+        },
+        {
+          "behavior": "Raw caps count rows before local Body/name filters and do not refill with matches or infer a wire limit. Explicit first-page and consumer break preserve native continuation behavior. Native plural_links, whole-current-page decoding including malformed rows beyond the cap, later HTTP failures/cycles and cancellation retain their existing terminal behavior.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersRawControlsAndConsumerBreak",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Raw subnet_ids/subnets/prefixes/status/vendor query remains independently frozen wire data without automatic alias conversion or Body classification. Native typed List and FindIdentity do not acquire the ordinary-list Body option. Trunk sub_ports remains query-mapped and is not registered as a local Body filter.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
+          ]
+        },
+        {
+          "behavior": "Explicit selectors require the audited selected []string field and JSON tag, native custom decoder/pager/extractor shapes and receiver-qualified pinned declarations. Network adds its complete list/query-builder/decoder/envelope/page/extractor hashes; SubnetPool retains its audited list/extraction hashes. Inventory owns canonical field slices and does not advertise unsupported fields or unrelated collections.",
+          "tests": [
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "Native SubnetPool still requires min/max/default prefix-length fields in its accepted numeric or string forms and retains its timestamp decoder. Missing/null/bool prefix lengths and malformed timestamps remain decode errors before local Body matching; these selectors do not synthesize absent native fields or normalize a response first.",
+          "tests": [
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "network/README.md",
+        "network/v2/README.md",
+        "resource/README.md"
+      ],
+      "differences": [
+        "Go explicitly selects prefixes with owned local options and frozen JSON values rather than automatically consuming Python query kwargs. The native Prefixes string slice collapses missing/null to nil; empty arrays remain distinct. Other unknown outer Body attributes and internally seeded descriptor state are not recovered.",
+        "The SDK compares exact ordered strings without Python descriptor coercion or CIDR normalization. JSON scalar inputs are not coerced into arrays; bool and number remain distinct. Raw query keeps caller wire names, repetitions and extensions.",
+        "max_items caps raw native rows locally without Python Resource.list's automatic limit hint. Native accepted statuses, whole-page extraction and advertised plural_links continuation remain intact; typed native List and FindIdentity are separate surfaces."
+      ],
+      "remaining": [
+        "Pinned Resource.list/QueryParameters still automatically transpose declared wire aliases, discard unknown keys and classify other non-query Body fields. Remaining fields, full descriptor/default/alias/coercion behavior and complete automatic query/Body policy require separate implementation and tests.",
+        "SubnetPool inherits Resource with TagMixinNetwork. Native model decoding and explicit local filters do not provide its complete seeded Resource/unknown-Body/cache/dirty lifecycle. Native time.Time/prefix-length response policies are preserved rather than claimed equivalent to all Python descriptor response semantics.",
+        "Pinned Proxy.request optional GET response cache (cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate. Direct Proxy._list fixes session to itself; adapter/session injection is an inherited Resource.list surface. Neither class declares a resource maximum microversion, so no class-specific maximum negotiation gap is claimed.",
+        "Pinned Resource._get_next_link includes RFC Link-header and limit/marker continuation paths beyond the native plural_links pager. Deprecated Proxy._list jmespath_filters (openstack/proxy.py:866-916) is consumed from direct query and has no ordinary Go expression filter option."
+      ]
     }
   ]
 }
