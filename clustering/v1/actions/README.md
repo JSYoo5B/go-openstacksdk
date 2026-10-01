@@ -56,6 +56,9 @@ reverse-proxy/project 경로를 유지합니다. query·fragment·userinfo, 다�
 빈 ID·추가 경로·dot segment·escaped slash는 거부합니다. Python의 마지막 slash 뒤
 문자열 추출보다 엄격한 Go 정책입니다. 서버가 이미 수락한 응답의 Location 해석 실패는
 `resource.ResponseError`로 원문/헤더/status를 보존하고 mutation을 다시 보내지 않습니다.
+cluster/node 명령 응답은 최상위 action 문자열과 Location의 ID도 일치해야 합니다. 이 검사는
+Python의 response dictionary 반환보다 엄격한 Go 정책이며, 실패해도 접수된 요청을 재전송하지
+않습니다. command 매개변수와 Resource 갱신 필드는 서로 다른 범위입니다.
 
 ## action 취소 요청
 
