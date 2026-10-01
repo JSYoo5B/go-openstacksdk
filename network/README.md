@@ -15,6 +15,8 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.network.find_security_group(name_or_id, project_id=projectID)` | `service.API.SecurityGroups.FindIdentity(ctx, nameOrID, resource.WithIdentityFindQuery("project_id", projectID))` |
 | `conn.network.find_subnet_pool(name_or_id)` | `service.API.SubnetPools.FindIdentity(ctx, nameOrID)` |
 | `conn.network.find_trunk(name_or_id)` | `service.API.Trunks.FindIdentity(ctx, nameOrID)` |
+| `conn.network.find_qos_policy(name_or_id, is_shared=True)` | `service.API.QoSPolicies.FindIdentity(ctx, nameOrID, resource.WithIdentityFindQuery("shared", "true"))` |
+| `conn.network.find_address_group(name_or_id)` | `service.API.SecurityAddressGroups.FindIdentity(ctx, nameOrID)` |
 | `conn.network.get_port(id)` | `service.Ports.Get(ctx, id)` |
 | `conn.network.get_ip(id)` | `service.FloatingIPs.Get(ctx, id)` |
 | `conn.create_floating_ip(network="public", server=server, wait=True)` | `service.FloatingIPs.Create(ctx, request, network.WithServer(ref), network.WithWait())` |
@@ -71,6 +73,13 @@ Python 속성 별칭과 로컬 Body 필터 분류는 자동 적용하지 않습�
 Subnet Pool은 세 prefix 길이의 string/number decode가 필요하므로 `fields=id,name`처럼
 이 값을 제외한 응답은 오류입니다. Trunk의 native pager는 `links.next`, Subnet Pool은
 `subnetpools_links`를 따릅니다. [Python/Go 예제와 경계](../docs/finding-identities.md#neutron-subnet-pooltrunk)를 참고하세요.
+
+## QoS Policy·Address Group 자동 조회
+
+QoS Policy·Address Group의 자동 조회는 각각 `service.API.QoSPolicies.FindIdentity`와
+`service.API.SecurityAddressGroups.FindIdentity`를 사용합니다. Python의 `is_shared`는
+Go wire query `shared`로 지정하며 `rules`·`addresses`의 Body 로컬 필터를 자동 적용하지
+않습니다. [Python/Go 예제와 native 모델 경계](../docs/finding-identities.md#neutron-qos-policyaddress-group)를 참고하세요.
 
 ## 삭제와 대기
 
