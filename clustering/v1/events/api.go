@@ -88,7 +88,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Event] {
 			return senlin.Sort(query.Get("sort"), "timestamp", "level", "otype", "oname", "action", "status", "oid", "cluster_id")
 		},
 		ValidateID: senlin.Identifier,
-		Paging: rest.PagePolicy[Event]{HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
+		Paging: rest.PagePolicy[Event]{MaxItemsLimitHint: true, StopOnEmptyPage: true, HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
 			Marker: func(value *Event) (string, error) {
 				if value == nil {
 					return "", fmt.Errorf("%w: event pagination row is missing", resource.ErrInvalidOption)
@@ -105,6 +105,10 @@ func (a *API) Get(ctx context.Context, id string) (*Event, error) {
 // ListOpts supports repeated object/action filters. Nil GlobalProject omits
 // the false-default flag. Empty slices and strings omit their filters.
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	ObjectIDs     []string
@@ -125,6 +129,7 @@ func cloneOptions(value ListOpts) ListOpts {
 	value.ObjectTypes = slices.Clone(value.ObjectTypes)
 	value.Actions = slices.Clone(value.Actions)
 	value.GlobalProject = senlin.Bool(value.GlobalProject)
+	value.Paginated = senlin.Bool(value.Paginated)
 	return value
 }
 
@@ -144,6 +149,20 @@ func WithListGlobalProject(value bool) ListOption {
 	}
 }
 
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
+
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
@@ -151,6 +170,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		return nil, err
 	}
 	value := cloneOptions(config.Options)
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	if err := senlin.Sort(value.Sort, "timestamp", "level", "otype", "oname", "action", "status", "oid", "cluster_id"); err != nil {
 		return nil, err
 	}
@@ -176,7 +198,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "oid", "obj_id", "oname", "obj_name", "otype", "obj_type", "action", "cluster_id", "level", "sort", "global_project":
+		case "limit", "marker", "max_items", "paginated", "oid", "obj_id", "oname", "obj_name", "otype", "obj_type", "action", "cluster_id", "level", "sort", "global_project":
 			return nil, fmt.Errorf("%w: extension %q is a concrete event list option", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
@@ -196,7 +218,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Event,
 			yield(nil, request.Wrap("List", "clustering.events", err))
 			return
 		}
-		for value, err := range rest.List(ctx, spec(a.RawClient()), query) {
+		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if !yield(value, request.Wrap("List", "clustering.events", err)) {
 				return
 			}

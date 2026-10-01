@@ -80,7 +80,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Action] {
 			return senlin.Sort(query.Get("sort"), "name", "target", "action", "created_at", "status")
 		},
 		ValidateID: senlin.Identifier,
-		Paging: rest.PagePolicy[Action]{HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
+		Paging: rest.PagePolicy[Action]{MaxItemsLimitHint: true, StopOnEmptyPage: true, HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
 			Marker: func(value *Action) (string, error) {
 				if value == nil {
 					return "", fmt.Errorf("%w: action pagination row is missing", resource.ErrInvalidOption)
@@ -98,6 +98,10 @@ func (a *API) Get(ctx context.Context, id string) (*Action, error) {
 // ListOpts omits zero/empty parameters; GlobalProject nil leaves the false
 // server default untouched, while a non-nil false is explicitly serialized.
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	Name          string
@@ -115,6 +119,7 @@ type ListOption = request.Option[ListOpts]
 
 func cloneOptions(value ListOpts) ListOpts {
 	value.GlobalProject = senlin.Bool(value.GlobalProject)
+	value.Paginated = senlin.Bool(value.Paginated)
 	return value
 }
 
@@ -134,6 +139,20 @@ func WithListGlobalProject(value bool) ListOption {
 	}
 }
 
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
+
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
@@ -141,6 +160,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		return nil, err
 	}
 	value := cloneOptions(config.Options)
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	if err := senlin.Sort(value.Sort, "name", "target", "action", "created_at", "status"); err != nil {
 		return nil, err
 	}
@@ -158,7 +180,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "name", "target", "target_id", "action", "status", "sort", "global_project", "cluster_id":
+		case "limit", "marker", "max_items", "paginated", "name", "target", "target_id", "action", "status", "sort", "global_project", "cluster_id":
 			return nil, fmt.Errorf("%w: extension %q is a concrete action list option", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
@@ -178,7 +200,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Action
 			yield(nil, request.Wrap("List", "clustering.actions", err))
 			return
 		}
-		for value, err := range rest.List(ctx, spec(a.RawClient()), query) {
+		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if !yield(value, request.Wrap("List", "clustering.actions", err)) {
 				return
 			}
