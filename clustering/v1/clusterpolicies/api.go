@@ -114,15 +114,19 @@ func bodyName(body map[string]json.RawMessage, field string) (string, error) {
 }
 
 func (s *Scope) spec() rest.CollectionSpec[ClusterPolicy] {
+	return s.specFor(s.RawClient())
+}
+
+func (s *Scope) specFor(client *gophercloud.ServiceClient) rest.CollectionSpec[ClusterPolicy] {
 	return rest.CollectionSpec[ClusterPolicy]{
-		Client: s.RawClient(), Path: "clusters/" + url.PathEscape(s.ClusterID()) + "/policies", Kind: "clustering.clusterpolicies",
+		Client: client, Path: "clusters/" + url.PathEscape(s.ClusterID()) + "/policies", Kind: "clustering.clusterpolicies",
 		SingleKey: "cluster_policy", PluralKey: "cluster_policies", Get: true,
 		GetCodes: []int{http.StatusOK}, ListCodes: []int{http.StatusOK},
 		ID: func(value *ClusterPolicy) string { return value.PolicyID }, Name: func(value *ClusterPolicy) string { return value.PolicyName },
 		NameQuery: func(name string) string { return name }, NameQueryKey: "policy_name",
 		Metadata: func(value *ClusterPolicy) *resource.Metadata { return &value.Metadata }, ValidateID: senlin.Identifier,
 		Validate: func(ctx context.Context) error {
-			if err := senlin.Validate(ctx, s.RawClient()); err != nil {
+			if err := senlin.Validate(ctx, client); err != nil {
 				return err
 			}
 			return senlin.Identifier(s.ClusterID())
@@ -169,13 +173,17 @@ func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Clus
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*ClusterPolicy, error) bool) {
 		config, err := request.Apply(ListOpts{}, options...)
+		var client *gophercloud.ServiceClient
+		if err == nil {
+			client, err = senlin.PrepareListClient(ctx, s.RawClient(), config)
+		}
 		var query url.Values
 		var filters map[string]json.RawMessage
 		if err == nil {
 			query, err = listQuery(config)
 		}
 		if err == nil {
-			filters, err = senlin.PrepareBodyFilters(config, filterSpec)
+			filters, err = senlin.PrepareBodyFilters(senlin.ListQueryConfig(config), filterSpec)
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
@@ -183,7 +191,7 @@ func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Clus
 		}
 		control := rest.ListControl{MaxItems: config.Options.MaxItems,
 			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: false}
-		for value, err := range rest.ListWithControl(ctx, s.spec(), query, control) {
+		for value, err := range rest.ListWithControl(ctx, senlin.ListSpec(s.RawClient(), client, s.specFor), query, control) {
 			if err != nil {
 				yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
 				return

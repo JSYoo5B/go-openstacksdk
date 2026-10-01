@@ -82,7 +82,10 @@ func validateInitialQuery(query url.Values) error {
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false, filterSpec.Namespace); err != nil {
+	if err := senlin.ValidateListCapabilities(config, filterSpec.Namespace); err != nil {
+		return nil, err
+	}
+	if err := senlin.RejectListControlQuery(config.Query); err != nil {
 		return nil, err
 	}
 	if config.Options.MaxItems < 0 {
