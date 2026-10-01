@@ -4,6 +4,7 @@ import (
 	"context"
 	blockquotas "gophercloudsdk/blockstorage/v3/quotasets"
 	"gophercloudsdk/compute/v2/quotasets"
+	loadbalancerquotas "gophercloudsdk/loadbalancer/v2/quotas"
 	networkquotas "gophercloudsdk/network/v2/extensions/quotas"
 	"gophercloudsdk/resource"
 )
@@ -100,6 +101,38 @@ func (c *Connection) NetworkProjectQuotas(ctx context.Context, project resource.
 // CurrentNetworkProjectQuotas uses the recorded Keystone project scope.
 func (c *Connection) CurrentNetworkProjectQuotas(ctx context.Context) (*networkquotas.ProjectQuotaScope, error) {
 	service, err := c.NetworkV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.CurrentProject(ctx)
+}
+
+// LoadBalancerProjectQuotas fixes Octavia quotas to an explicit project ID or
+// exact Keystone project name, using a separate Identity client for names.
+func (c *Connection) LoadBalancerProjectQuotas(ctx context.Context, project resource.Ref) (*loadbalancerquotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.LoadBalancerV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Quotas.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.InProject(ctx, project, loadbalancerquotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentLoadBalancerProjectQuotas uses the recorded Keystone project scope.
+func (c *Connection) CurrentLoadBalancerProjectQuotas(ctx context.Context) (*loadbalancerquotas.ProjectQuotaScope, error) {
+	service, err := c.LoadBalancerV2(ctx)
 	if err != nil {
 		return nil, err
 	}

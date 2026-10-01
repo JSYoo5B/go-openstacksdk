@@ -27,6 +27,29 @@ type quotaConnectionCase struct {
 func quotaConnectionCases() []quotaConnectionCase {
 	return []quotaConnectionCase{
 		{
+			name: "Octavia", service: sdk.LoadBalancer, endpoint: "/octavia", quotaPath: "/octavia/v2.0/lbaas/quotas/resolved", body: `{"quota":{"project_id":"wire-project","loadbalancer":8}}`,
+			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
+				scope, err := c.LoadBalancerProjectQuotas(ctx, ref)
+				if err != nil {
+					return "", nil, err
+				}
+				return scope.ProjectID(), func(ctx context.Context) error {
+					value, err := scope.Get(ctx)
+					if err == nil && (value.ProjectID != "resolved" || string(value.Body["project_id"]) != `"wire-project"` || value.Loadbalancer != 8) {
+						return errors.New("fixed target changed")
+					}
+					return err
+				}, nil
+			},
+			current: func(c *sdk.Connection, ctx context.Context) (string, error) {
+				scope, err := c.CurrentLoadBalancerProjectQuotas(ctx)
+				if err != nil {
+					return "", err
+				}
+				return scope.ProjectID(), nil
+			},
+		},
+		{
 			name: "Cinder", service: sdk.BlockStorage, endpoint: "/cinder/v3/admin", quotaPath: "/cinder/v3/admin/os-quota-sets/resolved", body: `{"quota_set":{"id":"wire-project","volumes":8}}`,
 			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
 				scope, err := c.BlockStorageProjectQuotas(ctx, ref)
@@ -75,7 +98,7 @@ func quotaConnectionCases() []quotaConnectionCase {
 	}
 }
 
-func TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient(t *testing.T) {
+func TestConnectionServiceQuotaNamesUseSeparateIdentityClient(t *testing.T) {
 	for _, test := range quotaConnectionCases() {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -118,7 +141,7 @@ func TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient(t *testi
 	}
 }
 
-func TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation(t *testing.T) {
+func TestConnectionServiceQuotasIDAuthAndCancellation(t *testing.T) {
 	for _, test := range quotaConnectionCases() {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
