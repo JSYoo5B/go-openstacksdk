@@ -5,6 +5,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/accelerator/v2/acceleratorrequests"
 	"gophercloudsdk/accelerator/v2/deployables"
+	"gophercloudsdk/accelerator/v2/deviceprofiles"
 	"gophercloudsdk/accelerator/v2/devices"
 )
 
@@ -13,10 +14,11 @@ type Service struct {
 	Deployables         *deployables.API
 	Devices             *devices.API
 	AcceleratorRequests *acceleratorrequests.API
+	DeviceProfiles      *deviceprofiles.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, Deployables: deployables.New(client), Devices: devices.New(client), AcceleratorRequests: acceleratorrequests.New(client)}
+	return &Service{client: client, Deployables: deployables.New(client), Devices: devices.New(client), AcceleratorRequests: acceleratorrequests.New(client), DeviceProfiles: deviceprofiles.New(client)}
 }
 
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
