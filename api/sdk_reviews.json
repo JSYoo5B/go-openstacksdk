@@ -10933,6 +10933,76 @@
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
         "Pinned Role inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
       ]
+    },
+    {
+      "operation": "python:image/v2/find_image",
+      "source_fingerprint": "85abe6abd3a3f1a4e43a7b1cb85a844175b27b5f92211c215d296a798d090e44",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/images.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "The pinned direct proxy accepts a string name_or_id and ignore_missing=True. Safe strings use native GET first; only compatible GET400/403/404 fall back to the normal list, with explicit strict, 404-only and GET-only Go options. Root-object GET200 extraction preserves the native Image model, additional Properties and import/store response headers.",
+          "tests": [
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesGETContractsAndNativeModel",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesMissingDefaultsAndFallbackBoundaries"
+          ]
+        },
+        {
+          "behavior": "Only a complete successful normal-list absence triggers a second native LIST. It starts from the frozen caller query, overlays mandatory os_hidden=true, omits the automatic name hint and never repeats GET. Explicit name filters and repeated/nil/empty query-key precedence survive; caller hidden=false is overridden only for that second search.",
+          "tests": [
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListWaitsForCompleteSuccessfulAbsence",
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListPreservesCallerQueryAndMandatoryOverlay",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesHiddenPassUsesOriginalCallerQuery"
+          ]
+        },
+        {
+          "behavior": "Both searches consume all native ImagePage continuations and compare exact ID OR name. Repeated-ID duplicates, malformed whole-page native extraction, invalid result IDs, cycle, late HTTP/decode errors and cancellation remain terminal. Normal errors never start the hidden pass; list403/404 are never ignored.",
+          "tests": [
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesNormalSearchTerminalNeverRetriesHidden",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesHiddenPagesAndTerminalFailures",
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListErrorsAndCancellationAreTerminal"
+          ]
+        },
+        {
+          "behavior": "IgnoreMissing is applied only after both lists complete successfully without a match; strict absence has no suppressed GET400/403 cause. GET-only never performs either list. Unsafe names retain their literal list-only policy; SDK control keys, unsupported details/all_projects and canceled/nil context fail before HTTP.",
+          "tests": [
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesMissingDefaultsAndFallbackBoundaries",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesPreflightUnsafeNamesAndCancellation",
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListStrictAndFallbackPolicies",
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListPolicyPreflightAndOtherOperationsStayUnchanged"
+          ]
+        },
+        {
+          "behavior": "SDK policy metadata and caller options are deep snapshots, including callback mutation boundaries and concurrent reuse. Generated leaf and handwritten Image collections preserve reverse ResourceBase, original live provider token, headers, HTTP middleware and caller context across GET and both searches. Ordinary Get/List/explicit Ref lookup are unchanged.",
+          "tests": [
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListSnapshotsAndConcurrentReuse",
+            "resource/find_identity_missing_list_test.go:TestCollectionFindIdentityMissingListFreezesOriginalQueryAcrossCallbacksAndUnsafeNames",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesQuerySnapshotsAndConcurrentReuse",
+            "api/find_identity_images_test.go:TestNativeFindIdentityImagesKeepsLiveProviderHeadersAndCallerContext",
+            "connection_find_identity_image_test.go:TestConnectionImageFindIdentityHiddenSearch"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Go exposes SDK-owned concrete options and additional raw wire query on FindIdentity; the pinned direct find_image declaration (openstack/image/v2/_proxy.py:1013-1033) accepts only name_or_id and ignore_missing. Python query alias is_hidden is not automatically transposed; Go uses os_hidden. details/all_projects are not capabilities of this Image binding.",
+        "Unsafe route strings use literal list-only lookup and invalid identities/result IDs fail before further HTTP. Go keeps the native Image extractor/pager and full-page native decode policy; this does not claim Python descriptor coercion, arbitrary-precision unknown numeric fields or every inherited continuation form."
+      ],
+      "remaining": [
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that conditional response cache.",
+        "Pinned Image.find reaches Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394), which merges the internally seeded Image and applies Resource descriptors/defaults/unknown-property response rules. Native Image.GetResult extraction preserves its own Properties and import headers but does not map that entire Resource response lifecycle.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) supports RFC Link-header and limit/marker continuation paths. The two searches retain native ImagePage next/base endpoint semantics; those other inherited continuation paths and session controls are not fully mapped."
+      ]
     }
   ]
 }
