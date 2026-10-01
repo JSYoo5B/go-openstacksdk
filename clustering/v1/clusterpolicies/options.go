@@ -82,7 +82,7 @@ func validateInitialQuery(query url.Values) error {
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false); err != nil {
+	if err := request.ValidateCapabilities(config, false, true, false, filterSpec.Namespace); err != nil {
 		return nil, err
 	}
 	if config.Options.MaxItems < 0 {
@@ -104,6 +104,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 			return nil, fmt.Errorf("%w: query %q is owned by a concrete cluster policy option or response field", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
+	}
+	if err := senlin.RejectBodyFilterQuery(config.Query, filterSpec); err != nil {
+		return nil, err
 	}
 	if err := validateInitialQuery(query); err != nil {
 		return nil, err

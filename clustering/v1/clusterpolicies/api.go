@@ -170,8 +170,12 @@ func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Clus
 	return func(yield func(*ClusterPolicy, error) bool) {
 		config, err := request.Apply(ListOpts{}, options...)
 		var query url.Values
+		var filters map[string]json.RawMessage
 		if err == nil {
 			query, err = listQuery(config)
+		}
+		if err == nil {
+			filters, err = senlin.PrepareBodyFilters(config, filterSpec)
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
@@ -180,7 +184,16 @@ func (s *Scope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Clus
 		control := rest.ListControl{MaxItems: config.Options.MaxItems,
 			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: false}
 		for value, err := range rest.ListWithControl(ctx, s.spec(), query, control) {
-			if !yield(value, request.Wrap("List", "clustering.clusterpolicies", err)) {
+			if err != nil {
+				yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
+				return
+			}
+			matched, err := senlin.MatchFilters(value.Body, filters)
+			if err != nil {
+				yield(nil, request.Wrap("List", "clustering.clusterpolicies", err))
+				return
+			}
+			if matched && !yield(value, nil) {
 				return
 			}
 		}
