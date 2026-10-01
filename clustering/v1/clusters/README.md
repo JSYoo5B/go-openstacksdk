@@ -216,7 +216,51 @@ plugin의 id/status 같은 이름을 임의로 금지하지 않습니다. 잘못
 보존하고 재전송·자동 action 조회를 하지 않습니다. 이름 해석·source/version 재검사와
 header 입력 보관은 CRUD와 같은 정책입니다.
 
-이 단위 이후의 policy binding·metadata·check/recover/operation 작업, 일반 inherited
+## 상태 검사·복구·profile operation
+
+```python
+checked = conn.clustering.check_cluster("CLUSTER_ID")
+recovered = conn.clustering.recover_cluster("CLUSTER_ID", check=False, check_capacity=False)
+operated = conn.clustering.perform_operation_on_cluster(
+    "CLUSTER_ID", "reboot", filters={"role": "worker"}, params={"type": "SOFT"},
+)
+```
+
+```go
+api := clusters.New(client)
+checked, err := api.Check(ctx, resource.ID("CLUSTER_ID"))
+if err != nil { return err }
+recovered, err := api.Recover(ctx, resource.ID("CLUSTER_ID"), clusters.RecoverOpts{},
+    clusters.WithRecoverCheck(false), clusters.WithRecoverCheckCapacity(false))
+if err != nil { return err }
+operated, err := api.PerformOperation(ctx, resource.ID("CLUSTER_ID"), "reboot",
+    clusters.PerformOperationOpts{},
+    clusters.WithPerformOperationFilters(map[string]string{"role": "worker"}),
+    clusters.WithPerformOperationParams(map[string]string{"type": "SOFT"}))
+if err != nil { return err }
+fmt.Println(checked.ActionID, recovered.ActionID, operated.ActionID)
+```
+
+이 예제에는 numeric microversion 1.7 이상을 선택합니다. Check와 기본 Recover는
+`{"check":{}}`, `{"recover":{}}`를 보내며 별도 gate가 없습니다. Recover의 Operation은
+생략·빈 문자열·null, OperationParams는 생략·object·null을 보존합니다. Check를 false/null을
+포함해 명시하면 1.6 이상, CheckCapacity를 명시하면 1.7 이상이 필요합니다. pinned Python은
+서버 문서의 기본 false를 요청에 채우지 않으며 Go도 생략을 유지합니다.
+
+PerformOperation은 1.4 이상에서 `/clusters/{identity}/ops`를 사용합니다. Filters는 서버가
+operation 대상 node를 선택하는 객체이고 Params는 profile에 전달할 객체입니다. 로컬 목록
+필터로 적용하지 않습니다. 필드의 생략과 null을 구별하며 null의 허용·필터 조건·operation
+이름과 매개변수 schema는 서버가 검증합니다. 추가 plugin 필드는 내부 매개변수 객체에
+들어가며 typed 필드와 인증/version/transport header를 덮어쓸 수 없습니다.
+
+세 명령은 202의 action 문자열과 필수 Location을 같은 Submission 정책으로 검증합니다.
+명시한 ID는 GET 없이 전달하고 Name은 정확한 목록 조회로 해석합니다. pinned Python의
+세 proxy도 문자열 입력을 HTTP 조회 없이 resource ID로 사용하므로 이름 조회는 Go에서
+명시적으로 선택하는 편의 기능입니다. 이름 lookup 전에 body/header/최소 버전을 고정하고
+POST 전에 source/version을 재검사합니다. 응답 해석 실패에도 접수 요청을 재전송하거나
+action을 자동 조회하지 않습니다.
+
+이 단위 이후의 policy binding·metadata·attribute 수집 작업, 일반 inherited
 max_items/paginated/JMESPath·dirty commit/merge·ID-first Find는 별도로 추적합니다.
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `cluster.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와

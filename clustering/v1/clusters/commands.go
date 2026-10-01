@@ -18,6 +18,10 @@ import (
 // Cluster commands return the accepted action and its HTTP evidence. They do
 // not fetch or poll the action, and do not describe a completed cluster change.
 func clusterCommand[T any](ctx context.Context, a *API, ref resource.Ref, operation, key string, value T, validate func(T) (int, error), options ...request.Option[T]) (*actions.Submission, error) {
+	return clusterCommandPath(ctx, a, ref, operation, "actions", key, value, validate, options...)
+}
+
+func clusterCommandPath[T any](ctx context.Context, a *API, ref resource.Ref, operation, path, key string, value T, validate func(T) (int, error), options ...request.Option[T]) (*actions.Submission, error) {
 	client := a.RawClient()
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap(operation, "clustering.clusters", err)
@@ -54,7 +58,7 @@ func clusterCommand[T any](ctx context.Context, a *API, ref resource.Ref, operat
 	if err != nil {
 		return nil, request.Wrap(operation, "clustering.clusters", err)
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodPost, client.ServiceURL("clusters", url.PathEscape(identity), "actions"), body, headers, http.StatusAccepted)
+	response, err := rest.DoJSON(ctx, client, http.MethodPost, client.ServiceURL("clusters", url.PathEscape(identity), path), body, headers, http.StatusAccepted)
 	if err != nil {
 		return nil, request.Wrap(operation, "clustering.clusters", err)
 	}
