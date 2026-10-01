@@ -12,6 +12,8 @@ Node.ID는 Senlin node이며 PhysicalID는 실제 서버 등 underlying resource
 | `update_node(identity, **attrs)` | `Nodes.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + node와 Location |
 | `delete_node(identity, ignore_missing=True, force_delete=False)` | `Nodes.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
 | `find_node(identity, ignore_missing=True)` | `Nodes.Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+| `check_node` / `recover_node` | `Check` / `Recover` | POST `/nodes/{id}/actions`, 202 |
+| `perform_operation_on_node` | `PerformOperation` | POST `/nodes/{id}/ops`, 202, 1.4 이상 |
 
 ## 생성과 physical details
 
@@ -137,8 +139,50 @@ Python proxy wait 전체의 cached Resource/defaults와 별도로 비교합니�
 
 Get/Create/Update는 strict node envelope와 지정 success code를 검사합니다. 202의 Location이
 누락·잘못된 경우와 accepted body decode 실패는 `resource.ResponseError`에 원문을 보존하고
-생성·수정·삭제를 재전송하지 않습니다. adopt/check/recover/operation과 inherited
+생성·수정·삭제를 재전송하지 않습니다. adopt와 inherited
 max_items/paginated/JMESPath·dirty merge·ID-first Find는 별도 계약으로 계속 추적합니다.
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `node.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
 [공식 Node API](https://docs.openstack.org/api-ref/clustering/#nodes)입니다.
+
+## check·recover·plugin operation
+
+다음 예제에는 numeric microversion 1.6 이상을 선택합니다. SDK는 명령을 위해 선택한
+버전을 자동으로 올리지 않습니다.
+
+```python
+checked = conn.clustering.check_node("NODE_ID")
+recovered = conn.clustering.recover_node(
+    "NODE_ID", operation="REBOOT", operation_params={}, check=False,
+)
+performed = conn.clustering.perform_operation_on_node("NODE_ID", "reboot", type="SOFT")
+```
+
+```go
+api := nodes.New(client)
+checked, err := api.Check(ctx, resource.ID("NODE_ID"))
+if err != nil { return err }
+recovered, err := api.Recover(ctx, resource.ID("NODE_ID"), nodes.RecoverOpts{},
+    nodes.WithRecoverOperation("REBOOT"), nodes.WithRecoverOperationParams(map[string]any{}),
+    nodes.WithRecoverCheck(false))
+if err != nil { return err }
+performed, err := api.PerformOperation(ctx, resource.ID("NODE_ID"), "reboot",
+    nodes.WithPerformOperationField("type", "SOFT"))
+if err != nil { return err }
+fmt.Println(checked.ActionID, recovered.ActionID, performed.ActionID)
+```
+
+기본 Check/Recover는 빈 매개변수 object를 보내며 임의의 최소 버전을 요구하지 않습니다.
+Recover의 Check는 false/null을 포함해 명시하면 1.6 이상, PerformOperation 전체는 1.4 이상이
+필요합니다. Operation/OperationParams/Check의 생략 여부를 SDK가 관리하고 JSON 객체·정밀한
+숫자·명시한 빈 문자열·null은 보존합니다. `WithRecoverOperationNull()`도 명시 null입니다.
+null과 operation 이름·매개변수의 지원은 서비스/profile plugin이
+검증합니다. `With...Field/Header`로 추가 매개변수와 SDK 소유 외의 header를 전달합니다.
+
+명령은 최상위 action 문자열과 같은 ID를 가리키는 Location을 가진 202 응답만 Submission으로
+반환합니다. Python의 JSON dictionary 반환에 비해 엄격한 Go 정책입니다. node ID와 action ID는
+구별하며 본문/헤더/status를 보존하고 action을 자동 조회·poll하지 않습니다. 준비한 body와
+header 및 버전 조건은 이름 lookup의 변경을 받지 않으며 POST 직전에 source/version을 다시
+검사합니다. plugin 매개변수의 id/status 같은 이름은 Resource 속성 갱신으로 취급하지 않습니다.
+명시한 ID는 추가 GET 없이 route로 전달하고 `resource.Name`은 정확한 이름을 목록에서 한 번
+해석합니다. Python Resource 입력과 combined-string 식별자를 이 두 방식으로 구분합니다.
