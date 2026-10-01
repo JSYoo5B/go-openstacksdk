@@ -3,6 +3,7 @@ package addressgroups
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
 	nativefind "gophercloudsdk/internal/nativefind"
@@ -16,7 +17,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[AddressGroup] {
 	return resource.NewCollection(resource.Adapter[AddressGroup]{
-		Kind:         "addressgroups",
+		Kind:             "addressgroups",
+		BodyFilterFields: map[string]string{"addresses": "addresses"},
+		BodyFilterValue: func(v *AddressGroup, key string) (json.RawMessage, error) {
+			if v == nil {
+				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
+			}
+			switch key {
+			case "addresses":
+				return json.Marshal(v.Addresses)
+			default:
+				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+			}
+		},
 		IdentityFind: true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*AddressGroup, error) {
 			var result upstream.GetResult

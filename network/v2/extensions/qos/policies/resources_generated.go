@@ -3,6 +3,7 @@ package policies
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
 	nativefind "gophercloudsdk/internal/nativefind"
@@ -16,7 +17,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Policy] {
 	return resource.NewCollection(resource.Adapter[Policy]{
-		Kind:         "policies",
+		Kind:             "policies",
+		BodyFilterFields: map[string]string{"rules": "rules"},
+		BodyFilterValue: func(v *Policy, key string) (json.RawMessage, error) {
+			if v == nil {
+				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
+			}
+			switch key {
+			case "rules":
+				return json.Marshal(v.Rules)
+			default:
+				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+			}
+		},
 		IdentityFind: true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Policy, error) {
 			var result upstream.GetResult

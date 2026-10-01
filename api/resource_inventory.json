@@ -1091,6 +1091,9 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "rules"
+    ],
     "delete": true,
     "wait": false
   },
@@ -1152,6 +1155,9 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "addresses"
+    ],
     "delete": true,
     "wait": false
   },
