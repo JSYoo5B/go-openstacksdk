@@ -55,6 +55,7 @@ func main() {
 | openstacksdk | Go |
 |---|---|
 | `conn.shared_file_system.access_rules(share, **query)` | `rules.List(ctx, shareaccessrules.WithListQuery(...))` |
+| `access_rules(share, max_items=5, paginated=False)` | `rules.List(ctx, WithListMaxItems(5), WithListPaginated(false))`; 아래 single-response 정책 적용 |
 | `conn.shared_file_system.get_access_rule(access_id)` | `rules.Get(ctx, accessID)`; 응답의 `share_id`도 확인 |
 | `conn.shared_file_system.create_access_rule(share, **attrs)` | `rules.Allow(ctx, AllowOpts{...}, ...)` 또는 `Create` |
 | `conn.shared_file_system.delete_access_rule(access_id, share, ignore_missing=True)` | `rules.Delete(ctx, resource.ID(accessID))` |
@@ -71,8 +72,37 @@ func main() {
 
 Rule 조회·취소가 404이면 고정된 share를 조회해 부모 미존재·권한 오류를 구분합니다. 부모를 확인할 수 없으면 `ErrParentUnavailable`과 `*ParentError`를 반환하며 원본 HTTP 오류도 `errors.As`와 `gophercloud.ResponseCodeIs`로 확인할 수 있습니다. `Find`의 미존재 무시, `Delete`의 기본 정책과 `WaitDeleted` 모두 부모 실패를 숨기지 않습니다. 이 확인에는 share 조회 권한이 필요합니다. 부모가 존재하고 접근 가능한 경우에만 rule의 404를 `resource.ErrNotFound` 또는 무시 정책으로 처리합니다.
 
-`List`는 현대 endpoint의 `access_list` slice를 `iter.Seq2`로 반환하고 `All`은 비nil slice로 수집합니다. 현재 API에 없는 페이지 순회·이름·상태 필터는 추정하지 않습니다. 추가 query는 `WithListQuery`로 그대로 전송하며 서버가 의미를 검사합니다. `share_id`는 scope가 소유하므로 덮어쓸 수 없습니다. `Get`은 추가 header, `Allow`·`Deny`는 추가 body field와 header를 지원합니다. Typed core field·인증·microversion·기본 header 덮어쓰기와 지원되지 않는 query/body/argument 옵션은 요청 전에 거부합니다.
+`List`는 현대 endpoint의 `access_list` slice를 `iter.Seq2`로 반환하고 `All`은 비nil slice로 수집합니다. `WithListMaxItems(n)`은 decode·부모 검증한 raw 행을 로컬에서 제한합니다. 0은 무제한이고 음수는 lazy 순회 시 HTTP 전에 오류이며 마지막 옵션이 우선합니다. cap 뒤의 행 모델은 decode하지 않고 `break`도 후속 행을 소비하지 않습니다. 재순회마다 독립된 카운터와 요청을 사용하며 취소와 소비한 행의 오류는 페이지 원문·헤더·status와 함께 반환합니다.
+
+`WithListPaginated(false)`는 첫 응답 제어를 명시할 수 있습니다. 이 endpoint는 원래 하나의 전체 collection을 반환하므로 true와 false 모두 한 번만 GET합니다. Python의 inherited limit/marker mapping만으로 서버 페이지 순회를 추측하지 않으며 `access_list_links`나 HTTP Link를 따라가지 않습니다. cap을 wire limit hint로 보내지 않습니다. 현재 API에 없는 이름·상태 필터도 만들지 않습니다. 추가 query는 `WithListQuery`로 그대로 전송하며 서버가 의미를 검사합니다. `share_id`, `max_items`, `paginated`는 scope 또는 로컬 제어가 소유하므로 확장 query로 덮어쓸 수 없습니다. `Get`은 추가 header, `Allow`·`Deny`는 추가 body field와 header를 지원합니다. Typed core field·인증·microversion·기본 header 덮어쓰기와 지원되지 않는 query/body/argument 옵션은 요청 전에 거부합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/resource"
+    "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+)
+
+func FirstAccessRules(ctx context.Context, conn *sdk.Connection,
+    share resource.Ref) ([]*shareaccessrules.AccessRule, error) {
+    service, err := conn.SharedFileSystemV2(ctx)
+    if err != nil { return nil, err }
+    scope, err := service.ShareAccessRules.InShare(ctx, share)
+    if err != nil { return nil, err }
+    return scope.All(ctx,
+        shareaccessrules.WithListMaxItems(5),
+        shareaccessrules.WithListPaginated(false))
+}
+```
+
+선택 버전은 source service type과 실제 Manila version header가 일치하는 숫자 `2.N`이어야 합니다. `latest`는 먼저 Connection에서 범위 협상하고 숫자로 선택해야 합니다. 수동 client의 Type이 비어 있다면 matching `X-OpenStack-Manila-API-Version`이 있어야 하며 generic header만으로 조건을 증명하지 않습니다. 옵션 적용 뒤와 부모 이름 해석 뒤에도 버전을 재검사하며 client 설정을 바꾸는 custom option으로 조건을 우회할 수 없습니다.
 
 `AccessRule`은 native `ShareAccess`, 2.82 optional lock 필드, 원본 `Body`·`Header`를 보존합니다. Manila 목록 응답은 `share_id`를 생략할 수 있으므로 `ShareID`를 채워 넣지 않고 scope의 부모를 별도 `ParentShareID`로 제공합니다. 응답 변경 추적·자동 commit·metadata 수정 연산을 이 scope가 지원한다고 가정하지 않습니다. 공유 scope와 클라이언트는 동시 호출 중 설정을 변경하지 않습니다.
+
+응답 식별자는 정확한 lowercase `id`와 `share_id`만 사용합니다. `ID`나 `SHARE_ID` 같은 다른 대소문자의 확장 필드는 `Body`에 보존하지만 원래 ID·부모를 덮어쓰지 못합니다. `id`는 유효한 비어 있지 않은 문자열을 요구하고, 명시한 `share_id`의 null·잘못된 타입·경로 구분자도 거부합니다. 명시한 빈 `share_id`는 `ErrParentMismatch`입니다. List/Allow에서 `share_id`가 생략된 경우에는 scope의 부모를 합성하지 않습니다. 부모가 다른 rule은 Deny action을 전송하기 전에 거부하며, Allow 후 다른 필드의 decode가 실패해도 유효한 canonical ID가 알려졌다면 부분 결과에 유지합니다.
 
 비교 기준은 pinned [Python Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/shared_file_system/v2/_proxy.py)와 [ShareAccessRule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/shared_file_system/v2/share_access_rule.py), [Gophercloud v2.15.0 requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/sharedfilesystems/v2/shareaccessrules/requests.go) 및 [share actions](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/sharedfilesystems/v2/shares/requests.go)입니다.

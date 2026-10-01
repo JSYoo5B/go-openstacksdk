@@ -4,7 +4,7 @@
 
 현재 native pager를 사용하는 generated Collection·scope 121개와 별도 구현한 Nova instance action, Swift container·object, Trove database·user 5개는 `IterateControlled`에 연결되어 있습니다. 이 연결은 공통 `Resources`·scope 경로에 적용합니다. 기존 native API의 공개 `List` 메서드와 서비스별 typed options는 그대로이며, 그 메서드에 새로운 `WithListMaxItems` 옵션을 추가한 것은 아닙니다. Senlin의 직접 구현된 REST 목록은 자체 typed controls도 제공하지만 페이지 해석 정책은 아래 native 목록과 구분합니다.
 
-Neutron floating IP 이름 해석과 Manila access rule scope의 내부 목록 adapter는 이번 native 연결 범위에 포함하지 않습니다. 페이지 경계를 노출하지 않는 `Iterate` 전용 adapter도 공통 `WithMaxItems`로 반환 행을 제한할 수 있지만 `WithPaginated(false)`는 `resource.ErrUnsupported`입니다. 모든 내부 목록이나 native 공개 typed List의 per-call 제어까지 완료했다는 의미는 아닙니다.
+별도로 [Manila access rule scope](../sharedfilesystems/v2/shareaccessrules/README.md)는 typed `WithListMaxItems`와 `WithListPaginated`를 제공합니다. 현대 endpoint는 하나의 collection을 반환하므로 두 pagination 값 모두 한 번만 GET하며 cap을 wire limit으로 보내거나 next link를 따라가지 않습니다. 내부 scope adapter도 같은 제어 iterator를 사용합니다. Neutron floating IP 이름 해석의 private 목록은 별도입니다. 페이지 경계를 노출하지 않는 `Iterate` 전용 adapter도 공통 `WithMaxItems`로 반환 행을 제한할 수 있지만 `WithPaginated(false)`는 `resource.ErrUnsupported`입니다. 모든 내부 목록이나 native 공개 typed List의 per-call 제어까지 완료했다는 의미는 아닙니다.
 
 ## openstacksdk와 옵션 대응
 
