@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -25,6 +26,15 @@ func Collection[T any](client *gophercloud.ServiceClient, path, single, plural s
 			return Fetch[T](ctx, client, "GET", client.ServiceURL(path, url.PathEscape(id)), nil, single, metadata, 200)
 		},
 		List: func(query url.Values) pagination.Pager {
+			if query.Has("limit") || query.Has("marker") {
+				return pagination.Pager{Err: fmt.Errorf("%w: Cyborg controllers do not support caller-supplied limit/marker pagination", resource.ErrUnsupported)}
+			}
+			// Cyborg device/ARQ status is a local Collection filter. Their
+			// controllers do not accept a generic status query argument.
+			if status != nil {
+				query = maps.Clone(query)
+				delete(query, "status")
+			}
 			guarded, err := guardedClient(client)
 			if err != nil {
 				return pagination.Pager{Err: err}
