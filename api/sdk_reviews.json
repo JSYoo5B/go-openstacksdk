@@ -6542,31 +6542,67 @@
     {
       "operation": "python:clustering/v1/find_profile",
       "source_fingerprint": "f62a000a2d8b37fa894aa4843f1d642a9d1630f9c1e3282ee078795bb7013f06",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/profiles.API.Find"
+        "gophercloudsdk/clustering/v1/profiles.API.FindIdentity",
+        "gophercloudsdk/clustering/v1/profiles.API.Find",
+        "gophercloudsdk/clustering/v1/profiles.WithFindOptions",
+        "gophercloudsdk/clustering/v1/profiles.WithFindIgnoreMissing",
+        "gophercloudsdk/clustering/v1/profiles.WithFindFallback",
+        "gophercloudsdk/clustering/v1/profiles.WithFindHeader",
+        "gophercloudsdk/clustering/v1/profiles.WithFindMicroversion"
       ],
       "contracts": [
         {
-          "behavior": "The direct convenience defaults to ignored absence with a caller strict override, while explicit ID and exact Name references separate routing from name searches and reject duplicate names.",
+          "behavior": "The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.",
           "tests": [
-            "api/clustering_profiles_test.go:TestClusteringProfilesNameUpdateFindDefaultsAndAmbiguity",
-            "api/clustering_profiles_test.go:TestClusteringProfilesDeleteIgnoresOnlyAbsence"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "The default compatible policy falls back only on direct GET400/403/404;404-only and disabled fallback are owned Go selections. Native401/409/5xx, accepted-response decode/read and transport errors stay errors. Default missing returns nil,nil with strict override; list403/404 never become ignored absence, and successful empty fallback does not attach a suppressed GET403 cause.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFallbackPoliciesAndNativeStatuses",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Fallback sends a literal name query and matches exact raw lowercase id OR name, including an ID match with a different name. All advertised pages are checked after the first candidate; a second match is ambiguous even for a repeated same ID, and later errors or cancellation prevent partial success. No limit, cap, marker, or single-page hint is invented.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityScansLaterPagesForDuplicatesAndFailures",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical response id/name are validated and normalized from exact raw fields rather than case-insensitive typed aliases. Invalid identities on nonmatching consumed rows, malformed accepted envelopes and read failures retain whole-response body/header/status evidence without fallback.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot pointer/maps before HTTP; later settings win and concurrent siblings remain isolated. SDK-owned header/version/auth controls apply the same selection to GET and every fallback page while preserving live Provider tokens, original prefix, source revalidation and context cancellation. Body/query/foreign arguments, unsafe route identities, protected headers and invalid policies/versions fail before HTTP; existing explicit Ref Find stays deterministic.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityExistingExplicitReferencesRemainDeterministic"
           ]
         }
       ],
       "differences": [
-        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
-        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
-        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
-        "API.Find defaults to ignored absence, matching the Python proxy. Resources.Find retains the shared strict default; Go explicit Name searches the collection without an ID-first GET."
+        "The pinned five clustering find proxy declarations accept only name_or_id:string and ignore_missing:boolean, without arbitrary kwargs. FindIdentity maps these declared inputs to context/error and SDK-owned functional options; inherited Resource.find query/URI/cache surfaces are tracked separately from the direct proxy operation.",
+        "Default ignored absence matches the pinned Python proxy; explicit ID/Name API.Find remains available and Resources.Find keeps the shared strict default. Go additionally offers404-only and disabled fallback policies. SDK route input must be a safe single unescaped segment; other names can use existing Find(resource.Name(value)).",
+        "Go enforces the declared singular/plural envelopes and canonical safe response id plus optional string/null name. Exact raw keys override case-variant scalar shadows, unknown fields and exact numbers remain in Body, and malformed extension types may remain typed decode errors rather than Python permissive/cache mutation behavior.",
+        "FindIdentity headers and numeric microversion apply consistently to both GET and list phases; pinned Resource.find passes its per-call microversion only to GET. Go protects SDK auth/version/transport headers, rejects arbitrary lookup body/query/arguments, checks original and effective clients, and adds no Find-specific retry or cache.",
+        "All advertised continuations retain same origin, collection path and fixed name query with cycle checks. The SDK does not manufacture a wire page limit; without an explicit limit the pinned source likewise has no implicit marker fallback. Whole-page validation can report malformed rows before returning a candidate or duplicate."
       ],
       "documentation": [
         "clustering/v1/profiles/README.md",
+        "clustering/v1/finding/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Compare the combined-string ID-first lookup and 400/403/404 fallback to lists, plus inherited Resource input and additional list/URI parameters."
       ]
     },
     {
@@ -6869,30 +6905,67 @@
     {
       "operation": "python:clustering/v1/find_policy",
       "source_fingerprint": "d97e7c31122cb1e35717170770ed8a67c266a5e80f01badb1f4e151922627370",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/policies.API.Find"
+        "gophercloudsdk/clustering/v1/policies.API.FindIdentity",
+        "gophercloudsdk/clustering/v1/policies.API.Find",
+        "gophercloudsdk/clustering/v1/policies.WithFindOptions",
+        "gophercloudsdk/clustering/v1/policies.WithFindIgnoreMissing",
+        "gophercloudsdk/clustering/v1/policies.WithFindFallback",
+        "gophercloudsdk/clustering/v1/policies.WithFindHeader",
+        "gophercloudsdk/clustering/v1/policies.WithFindMicroversion"
       ],
       "contracts": [
         {
-          "behavior": "The direct convenience defaults to ignored absence with a caller strict override, while explicit ID and exact Name references separate routing from name searches and reject duplicate names.",
+          "behavior": "The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.",
           "tests": [
-            "api/clustering_policies_test.go:TestClusteringPolicyFindDefaultsAmbiguityAndDeleteConflict"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "The default compatible policy falls back only on direct GET400/403/404;404-only and disabled fallback are owned Go selections. Native401/409/5xx, accepted-response decode/read and transport errors stay errors. Default missing returns nil,nil with strict override; list403/404 never become ignored absence, and successful empty fallback does not attach a suppressed GET403 cause.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFallbackPoliciesAndNativeStatuses",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Fallback sends a literal name query and matches exact raw lowercase id OR name, including an ID match with a different name. All advertised pages are checked after the first candidate; a second match is ambiguous even for a repeated same ID, and later errors or cancellation prevent partial success. No limit, cap, marker, or single-page hint is invented.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityScansLaterPagesForDuplicatesAndFailures",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical response id/name are validated and normalized from exact raw fields rather than case-insensitive typed aliases. Invalid identities on nonmatching consumed rows, malformed accepted envelopes and read failures retain whole-response body/header/status evidence without fallback.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot pointer/maps before HTTP; later settings win and concurrent siblings remain isolated. SDK-owned header/version/auth controls apply the same selection to GET and every fallback page while preserving live Provider tokens, original prefix, source revalidation and context cancellation. Body/query/foreign arguments, unsafe route identities, protected headers and invalid policies/versions fail before HTTP; existing explicit Ref Find stays deterministic.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityExistingExplicitReferencesRemainDeterministic"
           ]
         }
       ],
       "differences": [
-        "Go takes concrete inputs, context and explicit ID/Name references instead of mutable Python Resource inputs and implicit combined-string identity guesses.",
-        "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
-        "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
-        "API.Find defaults to ignored absence, matching the Python proxy. Resources.Find retains the shared strict default; Go explicit Name searches the collection without an ID-first GET."
+        "The pinned five clustering find proxy declarations accept only name_or_id:string and ignore_missing:boolean, without arbitrary kwargs. FindIdentity maps these declared inputs to context/error and SDK-owned functional options; inherited Resource.find query/URI/cache surfaces are tracked separately from the direct proxy operation.",
+        "Default ignored absence matches the pinned Python proxy; explicit ID/Name API.Find remains available and Resources.Find keeps the shared strict default. Go additionally offers404-only and disabled fallback policies. SDK route input must be a safe single unescaped segment; other names can use existing Find(resource.Name(value)).",
+        "Go enforces the declared singular/plural envelopes and canonical safe response id plus optional string/null name. Exact raw keys override case-variant scalar shadows, unknown fields and exact numbers remain in Body, and malformed extension types may remain typed decode errors rather than Python permissive/cache mutation behavior.",
+        "FindIdentity headers and numeric microversion apply consistently to both GET and list phases; pinned Resource.find passes its per-call microversion only to GET. Go protects SDK auth/version/transport headers, rejects arbitrary lookup body/query/arguments, checks original and effective clients, and adds no Find-specific retry or cache.",
+        "All advertised continuations retain same origin, collection path and fixed name query with cycle checks. The SDK does not manufacture a wire page limit; without an explicit limit the pinned source likewise has no implicit marker fallback. Whole-page validation can report malformed rows before returning a candidate or duplicate."
       ],
       "documentation": [
         "clustering/v1/policies/README.md",
+        "clustering/v1/finding/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Compare the combined-string ID-first lookup and 400/403/404 fallback to lists, plus inherited Resource input and additional list/URI parameters."
       ]
     },
     {
@@ -7123,30 +7196,67 @@
     {
       "operation": "python:clustering/v1/find_cluster",
       "source_fingerprint": "4c983cc1a02d86a0bed2b43d569d54d8b7ac757de4f0db82e5baa0d0a083f654",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/clusters.API.Find"
+        "gophercloudsdk/clustering/v1/clusters.API.FindIdentity",
+        "gophercloudsdk/clustering/v1/clusters.API.Find",
+        "gophercloudsdk/clustering/v1/clusters.WithFindOptions",
+        "gophercloudsdk/clustering/v1/clusters.WithFindIgnoreMissing",
+        "gophercloudsdk/clustering/v1/clusters.WithFindFallback",
+        "gophercloudsdk/clustering/v1/clusters.WithFindHeader",
+        "gophercloudsdk/clustering/v1/clusters.WithFindMicroversion"
       ],
       "contracts": [
         {
-          "behavior": "API.Find defaults to ignored missing with caller strict override; explicit IDs use direct routes, exact Name scans all selected pages and rejects duplicate names, and errors after a candidate prevent partial success.",
+          "behavior": "The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.",
           "tests": [
-            "api/clustering_clusters_test.go:TestClusteringClustersFindAndNamedDeleteResolveOnce"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "The default compatible policy falls back only on direct GET400/403/404;404-only and disabled fallback are owned Go selections. Native401/409/5xx, accepted-response decode/read and transport errors stay errors. Default missing returns nil,nil with strict override; list403/404 never become ignored absence, and successful empty fallback does not attach a suppressed GET403 cause.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFallbackPoliciesAndNativeStatuses",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Fallback sends a literal name query and matches exact raw lowercase id OR name, including an ID match with a different name. All advertised pages are checked after the first candidate; a second match is ambiguous even for a repeated same ID, and later errors or cancellation prevent partial success. No limit, cap, marker, or single-page hint is invented.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityScansLaterPagesForDuplicatesAndFailures",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical response id/name are validated and normalized from exact raw fields rather than case-insensitive typed aliases. Invalid identities on nonmatching consumed rows, malformed accepted envelopes and read failures retain whole-response body/header/status evidence without fallback.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot pointer/maps before HTTP; later settings win and concurrent siblings remain isolated. SDK-owned header/version/auth controls apply the same selection to GET and every fallback page while preserving live Provider tokens, original prefix, source revalidation and context cancellation. Body/query/foreign arguments, unsafe route identities, protected headers and invalid policies/versions fail before HTTP; existing explicit Ref Find stays deterministic.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityExistingExplicitReferencesRemainDeterministic"
           ]
         }
       ],
       "differences": [
-        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
-        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
-        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "API.Find uses ignored-missing default like the Python proxy, while shared Resources.Find is strict; explicit Name does not perform a speculative ID-first GET."
+        "The pinned five clustering find proxy declarations accept only name_or_id:string and ignore_missing:boolean, without arbitrary kwargs. FindIdentity maps these declared inputs to context/error and SDK-owned functional options; inherited Resource.find query/URI/cache surfaces are tracked separately from the direct proxy operation.",
+        "Default ignored absence matches the pinned Python proxy; explicit ID/Name API.Find remains available and Resources.Find keeps the shared strict default. Go additionally offers404-only and disabled fallback policies. SDK route input must be a safe single unescaped segment; other names can use existing Find(resource.Name(value)).",
+        "Go enforces the declared singular/plural envelopes and canonical safe response id plus optional string/null name. Exact raw keys override case-variant scalar shadows, unknown fields and exact numbers remain in Body, and malformed extension types may remain typed decode errors rather than Python permissive/cache mutation behavior.",
+        "FindIdentity headers and numeric microversion apply consistently to both GET and list phases; pinned Resource.find passes its per-call microversion only to GET. Go protects SDK auth/version/transport headers, rejects arbitrary lookup body/query/arguments, checks original and effective clients, and adds no Find-specific retry or cache.",
+        "All advertised continuations retain same origin, collection path and fixed name query with cycle checks. The SDK does not manufacture a wire page limit; without an explicit limit the pinned source likewise has no implicit marker fallback. Whole-page validation can report malformed rows before returning a candidate or duplicate."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
+        "clustering/v1/finding/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Map combined-string ID-first GET and 400/403/404 list fallback, cached Resource input and inherited extra query/URI arguments; explicit ID/Name references currently separate these paths."
       ]
     },
     {
@@ -7366,31 +7476,67 @@
     {
       "operation": "python:clustering/v1/find_node",
       "source_fingerprint": "91cea2b058b03c1eae88ebe5bc528dc7e42d830976fc38a8c2351958cad01766",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/nodes.API.Find"
+        "gophercloudsdk/clustering/v1/nodes.API.FindIdentity",
+        "gophercloudsdk/clustering/v1/nodes.API.Find",
+        "gophercloudsdk/clustering/v1/nodes.WithFindOptions",
+        "gophercloudsdk/clustering/v1/nodes.WithFindIgnoreMissing",
+        "gophercloudsdk/clustering/v1/nodes.WithFindFallback",
+        "gophercloudsdk/clustering/v1/nodes.WithFindHeader",
+        "gophercloudsdk/clustering/v1/nodes.WithFindMicroversion"
       ],
       "contracts": [
         {
-          "behavior": "API.Find defaults to ignored missing with caller strict override; explicit IDs use direct routes, exact Name scans all selected pages and rejects duplicate names, and errors after a candidate prevent partial success.",
+          "behavior": "The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.",
           "tests": [
-            "api/clustering_nodes_test.go:TestClusteringNodeFindExplicitNamesDuplicatesAndMissingDefaults",
-            "api/clustering_nodes_pagination_test.go:TestClusteringNodesFindAcrossLinkedPages"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "The default compatible policy falls back only on direct GET400/403/404;404-only and disabled fallback are owned Go selections. Native401/409/5xx, accepted-response decode/read and transport errors stay errors. Default missing returns nil,nil with strict override; list403/404 never become ignored absence, and successful empty fallback does not attach a suppressed GET403 cause.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFallbackPoliciesAndNativeStatuses",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Fallback sends a literal name query and matches exact raw lowercase id OR name, including an ID match with a different name. All advertised pages are checked after the first candidate; a second match is ambiguous even for a repeated same ID, and later errors or cancellation prevent partial success. No limit, cap, marker, or single-page hint is invented.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityScansLaterPagesForDuplicatesAndFailures",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical response id/name are validated and normalized from exact raw fields rather than case-insensitive typed aliases. Invalid identities on nonmatching consumed rows, malformed accepted envelopes and read failures retain whole-response body/header/status evidence without fallback.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot pointer/maps before HTTP; later settings win and concurrent siblings remain isolated. SDK-owned header/version/auth controls apply the same selection to GET and every fallback page while preserving live Provider tokens, original prefix, source revalidation and context cancellation. Body/query/foreign arguments, unsafe route identities, protected headers and invalid policies/versions fail before HTTP; existing explicit Ref Find stays deterministic.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityExistingExplicitReferencesRemainDeterministic"
           ]
         }
       ],
       "differences": [
-        "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
-        "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
-        "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "API.Find uses ignored-missing default like the Python proxy, while shared Resources.Find is strict; explicit Name does not perform a speculative ID-first GET."
+        "The pinned five clustering find proxy declarations accept only name_or_id:string and ignore_missing:boolean, without arbitrary kwargs. FindIdentity maps these declared inputs to context/error and SDK-owned functional options; inherited Resource.find query/URI/cache surfaces are tracked separately from the direct proxy operation.",
+        "Default ignored absence matches the pinned Python proxy; explicit ID/Name API.Find remains available and Resources.Find keeps the shared strict default. Go additionally offers404-only and disabled fallback policies. SDK route input must be a safe single unescaped segment; other names can use existing Find(resource.Name(value)).",
+        "Go enforces the declared singular/plural envelopes and canonical safe response id plus optional string/null name. Exact raw keys override case-variant scalar shadows, unknown fields and exact numbers remain in Body, and malformed extension types may remain typed decode errors rather than Python permissive/cache mutation behavior.",
+        "FindIdentity headers and numeric microversion apply consistently to both GET and list phases; pinned Resource.find passes its per-call microversion only to GET. Go protects SDK auth/version/transport headers, rejects arbitrary lookup body/query/arguments, checks original and effective clients, and adds no Find-specific retry or cache.",
+        "All advertised continuations retain same origin, collection path and fixed name query with cycle checks. The SDK does not manufacture a wire page limit; without an explicit limit the pinned source likewise has no implicit marker fallback. Whole-page validation can report malformed rows before returning a candidate or duplicate."
       ],
       "documentation": [
         "clustering/v1/nodes/README.md",
+        "clustering/v1/finding/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Map combined-string ID-first GET and 400/403/404 list fallback, cached Resource input and inherited extra query/URI arguments; explicit ID/Name references currently separate these paths."
       ]
     },
     {
@@ -8234,43 +8380,67 @@
     {
       "operation": "python:clustering/v1/find_receiver",
       "source_fingerprint": "7aef248b2ab7d07e2ae49330cc8baa71236f6664f2227a606af784b82c5c4901",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "gophercloudsdk/clustering/v1/receivers.API.Find"
+        "gophercloudsdk/clustering/v1/receivers.API.FindIdentity",
+        "gophercloudsdk/clustering/v1/receivers.API.Find",
+        "gophercloudsdk/clustering/v1/receivers.WithFindOptions",
+        "gophercloudsdk/clustering/v1/receivers.WithFindIgnoreMissing",
+        "gophercloudsdk/clustering/v1/receivers.WithFindFallback",
+        "gophercloudsdk/clustering/v1/receivers.WithFindHeader",
+        "gophercloudsdk/clustering/v1/receivers.WithFindMicroversion"
       ],
       "contracts": [
         {
-          "behavior": "Find defaults to nil,nil on missing with caller override; explicit ID is direct GET and exact Name uses the shared paginated duplicate/error policy without treating HTTP403 as a missing resource.",
+          "behavior": "The declared string identity is sent to the direct controller GET without a UUID heuristic. A successful response returns immediately without a list and may resolve a name or short ID to a different canonical returned ID.",
           "tests": [
-            "api/clustering_receivers_test.go:TestClusteringReceiversSynchronousCRUDAndResponseEvidence",
-            "api/clustering_receivers_test.go:TestClusteringReceiversMessagePresenceSnapshotsAndReuse",
-            "api/clustering_receivers_test.go:TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource",
-            "api/clustering_receivers_test.go:TestClusteringReceiversUserGateResourcesBypassAndPageRecheck",
-            "api/clustering_receivers_test.go:TestClusteringReceiversLazyPagingLocalFiltersAndWireMarkers",
-            "api/clustering_receivers_test.go:TestClusteringReceiversFindDeleteMissingAmbiguousAndInvalidResolvedIDs",
-            "api/clustering_receivers_test.go:TestClusteringReceiversFindContinuationKeepsNameAndLaterPageOutcomes",
-            "api/clustering_receivers_test.go:TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence",
-            "api/clustering_receivers_test.go:TestClusteringReceiversPreflightOwnedFieldsOptionsAndContext"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields"
           ]
         },
         {
-          "behavior": "Connection exposes synchronous Receivers and asynchronous cluster policy commands with the same selected1.4, refreshed authentication token and reverse-proxy prefix. user reaches its wire query, global_project=false survives and no incidental Location/channel URL or accepted action is followed automatically.",
+          "behavior": "The default compatible policy falls back only on direct GET400/403/404;404-only and disabled fallback are owned Go selections. Native401/409/5xx, accepted-response decode/read and transport errors stay errors. Default missing returns nil,nil with strict override; list403/404 never become ignored absence, and successful empty fallback does not attach a suppressed GET403 cause.",
           "tests": [
-            "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFallbackPoliciesAndNativeStatuses",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Fallback sends a literal name query and matches exact raw lowercase id OR name, including an ID match with a different name. All advertised pages are checked after the first candidate; a second match is ambiguous even for a repeated same ID, and later errors or cancellation prevent partial success. No limit, cap, marker, or single-page hint is invented.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityRawIDOrNameMatchingAndMissingDefaults",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityScansLaterPagesForDuplicatesAndFailures",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentitySourceAndContextRecheckedBeforeFallbackAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical response id/name are validated and normalized from exact raw fields rather than case-insensitive typed aliases. Invalid identities on nonmatching consumed rows, malformed accepted envelopes and read failures retain whole-response body/header/status evidence without fallback.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityFiveFacadesDirectGETAndCanonicalFields",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityAcceptedMalformedAndConsumedRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot pointer/maps before HTTP; later settings win and concurrent siblings remain isolated. SDK-owned header/version/auth controls apply the same selection to GET and every fallback page while preserving live Provider tokens, original prefix, source revalidation and context cancellation. Body/query/foreign arguments, unsafe route identities, protected headers and invalid policies/versions fail before HTTP; existing explicit Ref Find stays deterministic.",
+          "tests": [
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityOptionsSnapshotsLastWinsAndConcurrentReuse",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPreflightProtectsIdentityAndRequestControls",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityPhasesFreezeSelectionAndReadLiveToken",
+            "api/clustering_find_identity_test.go:TestClusteringFindIdentityExistingExplicitReferencesRemainDeterministic"
           ]
         }
       ],
       "differences": [
-        "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
-        "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
-        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+        "The pinned five clustering find proxy declarations accept only name_or_id:string and ignore_missing:boolean, without arbitrary kwargs. FindIdentity maps these declared inputs to context/error and SDK-owned functional options; inherited Resource.find query/URI/cache surfaces are tracked separately from the direct proxy operation.",
+        "Default ignored absence matches the pinned Python proxy; explicit ID/Name API.Find remains available and Resources.Find keeps the shared strict default. Go additionally offers404-only and disabled fallback policies. SDK route input must be a safe single unescaped segment; other names can use existing Find(resource.Name(value)).",
+        "Go enforces the declared singular/plural envelopes and canonical safe response id plus optional string/null name. Exact raw keys override case-variant scalar shadows, unknown fields and exact numbers remain in Body, and malformed extension types may remain typed decode errors rather than Python permissive/cache mutation behavior.",
+        "FindIdentity headers and numeric microversion apply consistently to both GET and list phases; pinned Resource.find passes its per-call microversion only to GET. Go protects SDK auth/version/transport headers, rejects arbitrary lookup body/query/arguments, checks original and effective clients, and adds no Find-specific retry or cache.",
+        "All advertised continuations retain same origin, collection path and fixed name query with cycle checks. The SDK does not manufacture a wire page limit; without an explicit limit the pinned source likewise has no implicit marker fallback. Whole-page validation can report malformed rows before returning a candidate or duplicate."
       ],
       "documentation": [
         "clustering/v1/receivers/README.md",
+        "clustering/v1/finding/README.md",
         "clustering/v1/README.md"
-      ],
-      "remaining": [
-        "Implement or deliberately map Python combined-string GET-first fallback on404/400/403, Resource inputs and inherited lookup/cache policy; explicit ID/Name is only the verified Go path."
       ]
     },
     {
