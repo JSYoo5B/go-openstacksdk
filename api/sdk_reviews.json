@@ -867,6 +867,879 @@
       ]
     },
     {
+      "operation": "python:accelerator/v2/accelerator_requests",
+      "source_fingerprint": "38fe7118ba39a4b204a3bbecbf7ee9c2ad6d284072a0d0297a77645b9b98b883",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "ARQ WithStatus(bound) filters state locally and forwards explicit instance=instance, without manufacturing a status query. Explicit status=Bound still reaches the server and preserves its HTTP 400; caller limit or marker options are rejected.",
+          "tests": [
+            "api/accelerator_status_filter_test.go:TestAcceleratorStatusFilterStaysLocal"
+          ]
+        },
+        {
+          "behavior": "ARQ Get and All reject absent/empty/comma-containing response identities rather than returning an unusable request.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestReadRejectsMissingIdentity"
+          ]
+        }
+      ],
+      "differences": [
+        "Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.",
+        "Pinned Resource.list omits unknown bind_state/instance queries; Go explicitly forwards those controller filters and treats ARQ state as a local status mapping. The controller can return 423 for an instance whose ARQs are not all resolved."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.",
+        "Add direct ARQ list bind_state=resolved and combined instance/bind_state 423 observations, metadata/null fields, successful multiple items across continuation, empty linked page and break/cycle behavior before claiming the whole list operation."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/attributes",
+      "source_fingerprint": "fc3af8ee0f66cec1acdd393251f045218230382b97ac2720d8910ec16f058e0f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "All forwards deployable_id=17 and key=same, follows an explicit second-page query and keeps both distinct attribute UUIDs sharing the same key. Large database id/raw unknown values, timestamp/nulls, header and status are preserved; key/name/status capabilities fail without HTTP.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName"
+          ]
+        }
+      ],
+      "differences": [
+        "Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.",
+        "Go uses canonical UUID identity, retains numeric database id independently and never treats a potentially repeated key as a name; controller deployable_id is a numeric database ID, not deployable UUID."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/attributes/README.md"
+      ],
+      "remaining": [
+        "Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.",
+        "Add attribute list iterator-break, empty-page/cycle/foreign continuation and explicit remaining query/error observations; the successful two-page All fixture covers only the stated filtering and metadata subset."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/create_accelerator_request",
+      "source_fingerprint": "5ac3cda334c666e35ea6da18967c697d24f61db68f2e52b6b7a4b2db1104343e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Create",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.WithCreateOptions",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.WithCreateField",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST /accelerator_requests sends flat device_profile_name and explicit extension/header values. A 201 arqs array preserves both created ARQs, raw large numbers, null versus empty hostname and unknown envelope fields; envelope/item headers are independent clones.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestCreateRetainsBatch"
+          ]
+        },
+        {
+          "behavior": "Accepted empty batches are non-nil; bad items return the accepted response and every valid item including items after an invalid entry, with raw original response bytes and metadata. Malformed/root/envelope/identity failures issue one POST; nonaccepted 403 preserves the actual HTTP cause.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestCreatePartialAndErrors"
+          ]
+        },
+        {
+          "behavior": "Cancellation only after accepted 201 headers and partial body reading retains status/request-id/raw prefix plus context.Canceled, closes the response body once and bypasses RetryFunc. Malformed accepted JSON retains original whitespace and syntax cause without calling the configured retry hook.",
+          "tests": [
+            "api/accelerator_request_response_boundary_test.go:TestAcceleratorRequestAcceptedBodyCancellationRetainsResponse",
+            "api/accelerator_request_response_boundary_test.go:TestAcceleratorRequestMalformedAcceptedJSONBypassesRetryHook"
+          ]
+        },
+        {
+          "behavior": "Missing device profile, protected body/header fields, nil/query/argument options and canceled context fail before HTTP.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestPreflight"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned AcceleratorRequest.create_opts removes the request envelope, but _consume_attrs replaces any arqs response with arqs[0], discarding later created resources and failing on an empty array. Go deliberately returns the entire batch including an empty batch and partial successful items together with a decode/read error.",
+        "Go exposes RawBody and accepted HTTP metadata without cleaning up or reissuing accepted creation on decoder/read failure; it does not emulate Python mutable Resource initialization/response-state updates. Existing provider transport/auth retry hooks remain configured."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._create, Resource initialization/dirty and unknown attributes, create_opts, _transform_create_request, _translate_response and Adapter error/retry/microversion behavior before treating the entire Python create operation as mapped. Concrete body/response tests do not validate that inherited pipeline.",
+        "The explicit batch/read-failure policy is documented and well tested, but Python initialization/_consume_attrs mappings, body aliases/unknown attributes, response-envelope conversion and Adapter state/exception semantics still require a whole-operation audit rather than completion inferred from Create existence."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/create_attribute",
+      "source_fingerprint": "b4d3b17ea75dd2140b47b204399b8efda02827fdd0c1b1c570bf8cfa3bf72679",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/attributes.API.Create",
+        "gophercloudsdk/accelerator/v2/attributes.WithCreateOptions",
+        "gophercloudsdk/accelerator/v2/attributes.WithCreateField",
+        "gophercloudsdk/accelerator/v2/attributes.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST /attributes sends a flat object with explicit numeric deployable_id=0 and empty key/value, not an attribute envelope. Typed/extension options snapshot caller values and remain reusable; 201 response metadata and unknown null survive.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeCreateFlatBodyAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Bare/singular/plural-singleton accepted responses decode one attribute; null/scalar/array root, missing UUID, malformed/ambiguous/empty/multiple envelopes and wrong deployable numeric types return nil plus an error rather than choosing a batch member.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeSingletonResponseShapes"
+          ]
+        },
+        {
+          "behavior": "Protected body/header fields, unserializable extension, invalid UUID/comma IDs and canceled context fail before HTTP; actual POST 403 retains status/header/body.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeValidationAndHTTPFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned Attribute inherits Resource.create_opts and singular resource_key=attribute, so Resource._prepare_request_body envelopes the POST as {attribute: ...}; the pinned controller consumes a flat JSON object. Go sends the controller flat body and preserves explicit zero/empty fields.",
+        "The controller create returns a flat Attribute but the official API example shows an attributes array. Go accepts bare/singular/exactly-one plural representations, never silently selects a member, and rejects malformed accepted responses with nil plus an error."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/attributes/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._create, Resource initialization/dirty and unknown attributes, create_opts, _transform_create_request, _translate_response and Adapter error/retry/microversion behavior before treating the entire Python create operation as mapped. Concrete body/response tests do not validate that inherited pipeline.",
+        "Document/verify the Python default-envelope correction explicitly, and audit Resource body filtering/dirty-state/response conversion versus the typed flat-body policy. The API documentation/controller envelope disagreement is observed compatibility handling, not proof of a single canonical server response.",
+        "Add accepted in-flight attribute response cancellation/malformed-body retry-boundary tests if claiming that mutation boundary; current tests assert nil plus decoder error for malformed accepted singleton data rather than ARQ-style retained created batches."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/create_device_profile",
+      "source_fingerprint": "3bfee440d4eab586646ab6fe96d0575d6875981fcc74c1c7ca47a2ada08f991d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/deviceprofiles.API.Create",
+        "gophercloudsdk/accelerator/v2/deviceprofiles.WithCreateOptions",
+        "gophercloudsdk/accelerator/v2/deviceprofiles.WithCreateField",
+        "gophercloudsdk/accelerator/v2/deviceprofiles.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST /device_profiles sends a one-element array with original typed groups, original extension values, explicit empty description and omitted nil UUID. Options deeply snapshot nested groups/pointers/fields and remain reusable; 201 response metadata and large group numbers survive.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileCreateContractAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Invalid profile name, empty/non-object groups, unsafe UUID, unserializable extension, nil option, protected body/header fields and canceled context fail before HTTP; GET decoding rejects malformed group object types.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileCreateValidationBeforeHTTP",
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileRejectsMalformedResponseGroups"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned DeviceProfile.create_opts disables the singular request envelope and its _prepare_request_body wraps the dirty body in a one-element array; Go explicitly builds that controller array with concrete typed options and extension fields.",
+        "Go validates canonical UUID/name/group shape before HTTP, uses pointers for omitted versus explicit description/UUID and accepts bare/singular/plural-singleton responses; it has no mutable Resource dirty-state."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/deviceprofiles/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._create, Resource initialization/dirty and unknown attributes, create_opts, _transform_create_request, _translate_response and Adapter error/retry/microversion behavior before treating the entire Python create operation as mapped. Concrete body/response tests do not validate that inherited pipeline.",
+        "Profile-specific creation fixtures do not assert malformed accepted/ambiguous envelope cardinality, 403/other create HTTP errors or in-flight accepted body cancellation; singleton helper/device fixtures alone do not prove those profile create observations."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/delete_accelerator_request",
+      "source_fingerprint": "1b6da51ba1d5c9df75447d7eb0750b2e698afe7a4d71ff70a2864cd7b872d7e5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Delete",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.DeleteMany",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.DeleteByInstance",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.WithDeleteHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Single DELETE uses the collection query arqs=a1 with no body. Missing single requests are ignored by default or return ErrNotFound/HTTP404 under WithMissingError; explicit batch arqs=a1,a2 preserves strict 404 and the service-token header.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestDeleteSelectorsAndPolicy"
+          ]
+        },
+        {
+          "behavior": "DeleteByInstance sends only instance=instance plus the caller service token, returns 204 twice under the idempotent fixture, and rejects nil/duplicate/comma/empty IDs before further HTTP.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestDeleteSelectorsAndPolicy"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned inherited Resource.delete appends an ID to /accelerator_requests; the controller instead requires DELETE /accelerator_requests?arqs=uuid[,uuid] or ?instance=uuid. Go deliberately corrects this collection endpoint and exposes explicit single, batch and instance selectors.",
+        "Single deletion retains default ignore-missing; DeleteMany intentionally keeps 404 strict so partial batch non-deletion is observable. A caller may supply X-Service-Token, while the SDK does not fabricate a valid service identity or client-side authorization result."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._delete/_get_resource and Resource._raw_delete/_translate_response/Adapter behavior for Resource/dict inputs, alternate identity, response-state mutation, cache, microversion and exception classification. UUID DELETE and ignore-missing fixtures cover only the stated Go policy.",
+        "Audit and document Python member-URL correction versus inherited Resource deletion response-state behavior; add DELETE-specific 403/service-token failure, cancellation, strict 204/other-code and bound/unbound selector observations. The fixture observes header transmission, not Cyborg token validation or authorization."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/delete_attribute",
+      "source_fingerprint": "7bde85e9d4d3c4a0dbd4f81df1c8da01f27a9d8c75730dd6914063b12919f8e3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Single attribute DELETE uses its stable UUID member URL. 404 is ignored by default and WithMissingError exposes ErrNotFound plus original HTTP404; key/name inputs are unsupported and comma IDs fail before HTTP.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeWaitDeletedStableIDAndContext",
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName",
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeValidationAndHTTPFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns error directly and uses explicit UUID Ref/WithMissingError; attribute key is not a name. Python inherited delete returns/mutates its Resource and catches NotFound only when ignore_missing=True."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/attributes/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._delete/_get_resource and Resource._raw_delete/_translate_response/Adapter behavior for Resource/dict inputs, alternate identity, response-state mutation, cache, microversion and exception classification. UUID DELETE and ignore-missing fixtures cover only the stated Go policy.",
+        "Add successful strict 204, forbidden/other-code and canceled attribute DELETE assertions; current delete fixture exercises only 404 while POST/GET/waiter errors do not prove DELETE-specific observations."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/delete_device_profile",
+      "source_fingerprint": "9b49132ef7b2f1b706588a7f5aef84a39c42b9d423b240bd64472160d167fa70",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "An explicit profile name is resolved to UUID before one DELETE. Unsafe UUID/comma/name IDs fail before HTTP; duplicate names or malformed returned UUIDs never trigger deletion.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata",
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileAmbiguityAndUnsafeIDs"
+          ]
+        },
+        {
+          "behavior": "DELETE 404 is ignored by default and becomes ErrNotFound with original HTTP 404 under WithMissingError; 403 keeps actual code/header/body.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileDeleteWaitAndHTTPFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "The controller accepts either a UUID or comma-delimited profile names on DELETE; Go only sends a canonical UUID after optional exact-name resolution, preventing accidental multi-name deletion.",
+        "Go returns an error directly and uses WithMissingError to change its default ignore-missing policy; Python mutates/returns a Resource after inherited delete."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/deviceprofiles/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._delete/_get_resource and Resource._raw_delete/_translate_response/Adapter behavior for Resource/dict inputs, alternate identity, response-state mutation, cache, microversion and exception classification. UUID DELETE and ignore-missing fixtures cover only the stated Go policy.",
+        "Add profile-specific strict 204/other success-code and canceled in-flight DELETE fixtures; the current deletion failure test verifies 404/403, while waiter cancellation is a different operation."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/deployables",
+      "source_fingerprint": "fac4a384eb1f6a846a6be44c3bb279592836e30ccce46c533c2ff3889cd6a9e1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.Collection.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "A deployables GET page decodes UUID/name and raw large-number/null/unknown fields with timestamp and response metadata; breaking the iterator prevents a second page request, while exact duplicate names across the explicit next link return ErrAmbiguous.",
+          "tests": [
+            "api/accelerator_read_test.go:TestAcceleratorReadResourcesAndMetadata"
+          ]
+        },
+        {
+          "behavior": "An empty page with an explicit continuation is followed; a repeated continuation returns ErrPaginationCycle after two requests, and a foreign continuation/redirect never reaches the foreign server.",
+          "tests": [
+            "api/accelerator_boundaries_test.go:TestAcceleratorEmptyPageContinuesAndCycles",
+            "api/accelerator_read_test.go:TestAcceleratorPaginationCycleAndOrigin",
+            "api/accelerator_boundaries_test.go:TestAcceleratorRedirectOriginAndCallerPolicy"
+          ]
+        },
+        {
+          "behavior": "The shared guarded collection uses the rotated token on a later page and the actual attempted token for 401 reauthentication; configured 429 backoff and cancellation while shared reauthentication is ongoing remain observable.",
+          "tests": [
+            "api/accelerator_boundaries_test.go:TestAcceleratorGuardSharesReauthenticationAndRetries",
+            "api/accelerator_boundaries_test.go:TestAcceleratorPaginationUsesRotatedTokenAndReauthenticatesActualToken",
+            "api/accelerator_boundaries_test.go:TestAcceleratorSharedOngoingReauthWaitHonorsCancellation"
+          ]
+        }
+      ],
+      "differences": [
+        "Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.",
+        "Go adds explicit exact-name resolution and duplicate detection; Python deployables is a generic inherited list generator."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.",
+        "No deployables fixture asserts the controller filters JSON query, arbitrary name-filter local policy against Python, response Link-header behavior or supported list argument mapping."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/device_profiles",
+      "source_fingerprint": "6f15d908243831d9cbd6f42a166d8df901b006e14a0bb514f5f28af4f7ebfd4b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.Collection.Find",
+        "gophercloudsdk/resource.Collection.ResolveID"
+      ],
+      "contracts": [
+        {
+          "behavior": "Profile iteration preserves created_at, null description/updated_at, large raw unknown numbers and json.Number group values, and breaking stops pagination. Exact UUID-shaped names resolve across two pages without a name query; prefix names do not match and cross-page duplicates prevent deletion.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata",
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileAmbiguityAndUnsafeIDs"
+          ]
+        }
+      ],
+      "differences": [
+        "Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.",
+        "Go separates canonical UUID IDs from explicit names, resolves names by complete list rather than the controller direct-name endpoint introduced at 2.2, and rejects ambiguity."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/deviceprofiles/README.md"
+      ],
+      "remaining": [
+        "Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.",
+        "Audit the Python Resource inherited name property/client filter and documented explicit name mapping for profile inputs, including all controller name-query observations and max-items/continuation differences."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/devices",
+      "source_fingerprint": "234635f54edfc9ae33afda16bfed4a1fe42dc5c90aa8026684f0848fd6819680",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "At selected microversion 2.3, List forwards hostname=compute while WithStatus(ENABLED) stays off the wire and filters the returned device status locally; a device with maintaining status is excluded.",
+          "tests": [
+            "api/accelerator_status_filter_test.go:TestAcceleratorStatusFilterStaysLocal"
+          ]
+        }
+      ],
+      "differences": [
+        "Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.",
+        "Go uses UUID identity, preserves the database id independently as json.Number, and only enables device status filter/wait when selected microversion is at least 2.3; Python declares status without such a feature gate."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.",
+        "No device-list-specific fixture covers all documented type/vendor/filters query values, sorting policy, empty/linked pages or break behavior; deployable shared-transport fixtures cover implementation reuse, not the whole device list contract."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/disable_device",
+      "source_fingerprint": "963045e6cc92e8b299999046987d0b8c2f49cb8744ca6eff760a6c1b02eea8ba",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/devices.API.Disable",
+        "gophercloudsdk/accelerator/v2/devices.WithActionHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Enable sends an empty POST under /devices/d1/ with the selected accelerator 2.10 and extension header; its 200 response metadata survives. Disable uses /devices/d1/disable and its 403 retains request-id/status. Invalid selected versions, nil/body/query/argument/header-conflict options and name references fail before further HTTP.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorDeviceActions"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned Device.disable uses self.id: Resource.__getattribute__ prefers a present body id (including numeric 17 or None) over alternate uuid, so string/UUID-only inputs use devices/{uuid}/disable but existing Device/dict(id=17, uuid=d1) uses devices/17/disable. It calls raw session.post without body/refetch/response translation and returns the same Resource. Go always uses the supplied UUID Ref, checks the controller 200 response and returns metadata or a preserved HTTP error.",
+        "The controller action has no microversion gate; Go validates a selected version but does not impose the 2.3 status-field gate on actions. Header extensions are explicit and cannot overwrite authentication/content/microversion.",
+        "Pinned Proxy.request explicitly defaults raise_exc=False; actions supply no override and discard the response. The exact inherited keystoneauth Adapter/Session interpretation is not execution-audited here, so Go strict HTTP status errors are a documented transport policy rather than assumed identical Python action behavior."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "The pinned _get_resource and alternate-ID branches are inspected, including numeric-id precedence for Resource/dict inputs. Define and document that input policy difference and audit exact dependency Adapter.post forwarding/Session endpoint, auth, additional headers, selected microversion, redirect/retry and HTTP/non-HTTP error behavior for raw Adapter versus SDK Proxy; Proxy.request raise_exc=False itself is source-confirmed and must not be called unknown.",
+        "The focused combined fixture has positive Enable and forbidden Disable observations; add positive Disable and the remaining canceled/strict-success-code action cases before claiming every observed action contract complete."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/enable_device",
+      "source_fingerprint": "dca41ce8353b5f6e2b52bde486c16c5e5d7c14d1a1628f539c2d4ed2ab1a01c2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/devices.API.Enable",
+        "gophercloudsdk/accelerator/v2/devices.WithActionHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Enable sends an empty POST under /devices/d1/ with the selected accelerator 2.10 and extension header; its 200 response metadata survives. Disable uses /devices/d1/disable and its 403 retains request-id/status. Invalid selected versions, nil/body/query/argument/header-conflict options and name references fail before further HTTP.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorDeviceActions"
+          ]
+        },
+        {
+          "behavior": "Enable works at default, 2.0 and 2.2 without an artificial action microversion gate; status Wait through both API and Resources remains unsupported before any GET at those versions.",
+          "tests": [
+            "api/accelerator_boundaries_test.go:TestAcceleratorActionAndStatusVersionsAreSeparate"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned Device.enable uses self.id: Resource.__getattribute__ prefers a present body id (including numeric 17 or None) over alternate uuid, so string/UUID-only inputs use devices/{uuid}/enable but existing Device/dict(id=17, uuid=d1) uses devices/17/enable. It calls raw session.post without body/refetch/response translation and returns the same Resource. Go always uses the supplied UUID Ref, checks the controller 200 response and returns metadata or a preserved HTTP error.",
+        "The controller action has no microversion gate; Go validates a selected version but does not impose the 2.3 status-field gate on actions. Header extensions are explicit and cannot overwrite authentication/content/microversion.",
+        "Pinned Proxy.request explicitly defaults raise_exc=False; actions supply no override and discard the response. The exact inherited keystoneauth Adapter/Session interpretation is not execution-audited here, so Go strict HTTP status errors are a documented transport policy rather than assumed identical Python action behavior."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "The pinned _get_resource and alternate-ID branches are inspected, including numeric-id precedence for Resource/dict inputs. Define and document that input policy difference and audit exact dependency Adapter.post forwarding/Session endpoint, auth, additional headers, selected microversion, redirect/retry and HTTP/non-HTTP error behavior for raw Adapter versus SDK Proxy; Proxy.request raise_exc=False itself is source-confirmed and must not be called unknown.",
+        "The focused combined fixture has positive Enable and forbidden Disable observations; add positive Disable and the remaining canceled/strict-success-code action cases before claiming every observed action contract complete."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/get_accelerator_request",
+      "source_fingerprint": "279a2583e21f34fd584b4afb638b5506d3a9eab9ad4d5071d7f43de73e15e443",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Get",
+        "gophercloudsdk/resource.Collection.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "ARQ GET decodes null instance_uuid and attach_handle_info, and the state waiter polls /accelerator_requests/a1 from Initial to Bound; names and comma-containing single IDs are unsupported/invalid.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestReadAndStatePolicy"
+          ]
+        },
+        {
+          "behavior": "GET rejects responses with missing, empty or comma-containing UUID, including the matching list decode boundary.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestReadRejectsMissingIdentity"
+          ]
+        }
+      ],
+      "differences": [
+        "Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.",
+        "Go UUID identity is distinct from repeated device_profile_name and uses state for its common status mapping. Singletons require exactly one object rather than accepting the first of an arbitrary arqs response through Python _consume_attrs."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence.",
+        "Add getter-specific 404/403/metadata/header/cancellation and singular/plural-singleton response observations. The state-wait and missing-identity fixtures do not independently establish all get behavior or the inherited Python first-item decoding policy."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/get_attribute",
+      "source_fingerprint": "5011bb0d81de461518781abf7da4eb8260337e584aacf4383f86d30f1cf5a770",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Get",
+        "gophercloudsdk/resource.Collection.Find",
+        "gophercloudsdk/resource.Collection.ResolveID"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(ID) GETs the requested canonical UUID, preserves a differing returned UUID, request-id and unknown false, and ResolveID(ID) keeps the requested ID. Key/name/status references are unsupported before HTTP.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName"
+          ]
+        },
+        {
+          "behavior": "Invalid non-UUID getter input fails before HTTP; an in-flight attribute GET whose handler waits on request cancellation exposes context.DeadlineExceeded and retains that cause.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeValidationAndHTTPFailures",
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeWaitDeletedStableIDAndContext"
+          ]
+        }
+      ],
+      "differences": [
+        "Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.",
+        "Go Get is canonical-UUID-only and keeps numeric database id independently; key is not a lookup name and singleton cardinality is explicit."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/attributes/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence.",
+        "Add getter-specific 404/403 and singular/plural metadata/cardinality observations; create singleton and POST-forbidden fixtures validate different operations even though helpers are shared."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/get_deployable",
+      "source_fingerprint": "2688a99a00f76ad8c0ae6b606eaab6564c2146fbb84888681ff2b8590c1f06a1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Get",
+        "gophercloudsdk/resource.Collection.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET /deployables/p1 accepts the singular envelope, preserves HTTP 200/request-id, null parent_id and unknown false, and does not invent an omitted updated_at; unsupported delete/status operations do not become synthetic APIs.",
+          "tests": [
+            "api/accelerator_read_test.go:TestAcceleratorReadResourcesAndMetadata"
+          ]
+        }
+      ],
+      "differences": [
+        "Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.",
+        "Go Get requires an explicit UUID string; exact name lookup is a separate Ref-based Find operation."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence.",
+        "This deployable GET fixture does not independently assert its 404/403 or in-flight cancellation branches; shared transport/device fixtures cannot by themselves establish all deployable getter observations."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/get_device",
+      "source_fingerprint": "444d5f7f3b565b84d9f0296438d53be4e0edfb054b5400a18edbeab0cca7e68f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Get",
+        "gophercloudsdk/resource.Collection.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "Connection catalog type/region and normalized endpoint select /proxy/accelerator/v2/devices/d1; the actual authenticated GET sends accelerator 2.10 and keeps device UUID separate from database id 17.",
+          "tests": [
+            "api/accelerator_read_test.go:TestAcceleratorConnectionAndMicroversion"
+          ]
+        },
+        {
+          "behavior": "Device names are unsupported, unsafe IDs fail before HTTP, Find with ignore-missing returns nil for 404, and a 403 retains status/header/body. Null singleton data is rejected and a canceled GET preserves context.Canceled.",
+          "tests": [
+            "api/accelerator_read_test.go:TestAcceleratorReadFailuresAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Device GET accepts bare/singular/plural-singleton objects with request metadata and rejects empty/multiple/null arrays, both envelopes, array-root or null-root responses rather than choosing an item.",
+          "tests": [
+            "api/accelerator_singleton_test.go:TestAcceleratorSingletonEnvelopeCardinality"
+          ]
+        }
+      ],
+      "differences": [
+        "Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.",
+        "Go device identity is the UUID Ref and never its database numeric id or hostname; the numeric id remains separate returned data."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/get_device_profile",
+      "source_fingerprint": "035b7cdf0d7266c45948cc493b5477153611846092c2a59b8c5d8c79287ff0dc",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Get",
+        "gophercloudsdk/resource.Collection.Find"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(ID) requests /device_profiles/{requested UUID}, accepts a singular profile with a differing response UUID, preserves empty description/link/unknown false/request-id, and does not reinterpret a UUID-shaped explicit name as an ID.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata"
+          ]
+        },
+        {
+          "behavior": "Invalid canonical UUID GET inputs fail before HTTP, and malformed group array/object/null/scalar types are rejected during profile GET decoding.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileAmbiguityAndUnsafeIDs",
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileRejectsMalformedResponseGroups"
+          ]
+        }
+      ],
+      "differences": [
+        "Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.",
+        "The controller direct UUID-or-name GET uses name fetch starting at 2.2; Go Get is UUID-only and Find(Name) resolves exactly by List. Groups are concrete objects retaining json.Number."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/deviceprofiles/README.md"
+      ],
+      "remaining": [
+        "Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence.",
+        "Getter-specific missing/forbidden/cancellation observations and documented server direct-name versus list-resolution mapping still need explicit audit; a DELETE/WaitDeleted error fixture is not proof of every getter error policy."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/patch_accelerator_request",
+      "source_fingerprint": "a9bcd86837405106de5279bc695414c53f2ebd04f77b9fbe8d2d169369b3f9c7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Patch",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.PatchMany",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Bind",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Unbind",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.WithBindingHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Bind sends a UUID-keyed object with hostname/device_rp_uuid/instance_uuid and optional project_id to collection PATCH /accelerator_requests, with accelerator 2.10 and X-Service-Token. Unbind sends remove operations without values; 202 yields HTTP metadata and no invented resource body.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingCollectionURL"
+          ]
+        },
+        {
+          "behavior": "PatchMany snapshots two UUID-keyed patches and pointer values before a 401 reauthentication callback mutates/deletes original inputs; the second attempt still contains both original documents.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingSnapshotAndBatch"
+          ]
+        },
+        {
+          "behavior": "Unknown/replace/mixed/duplicate/incomplete binding operations, nil patches, names, protected/capability options and project_id below 2.1 fail before HTTP; an actual missing-service-token 403 keeps status/request-id.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingPreflightAndAuthorization"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned AcceleratorRequest.patch prepares a requires_id=True member URL even though its _convert_patch creates a UUID-keyed object; the Cyborg PATCH endpoint is the collection /accelerator_requests. Go corrects that endpoint and offers concrete Bind/Unbind/Patch/PatchMany documents.",
+        "Go requires add/remove binding fields and explicitly gates project_id at selected 2.1; it returns metadata for the controller empty 202, rather than a mutable Resource. Python can short-circuit an empty clean patch, derive dirty-state patches, convert field aliases and overwrites its patch microversion argument with _get_microversion.",
+        "The controller validates service-request authorization for bind/unbind and admin ownership for explicit project_id; a supplied header is only transmitted by Go, and server 403 remains observable. No client-side authorization success is inferred."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Proxy._get_resource, Resource initialization/dirty generated patch/alias conversion, _commit/_translate_response/default microversion and Adapter retry/error policy, and define the documented reduced concrete binding scope before completing the entire Python patch operation.",
+        "Add canceled binding and strict expected-code/response-body observations and verify controller 2.1 project ownership/server authorization semantics; tests verify selected-version preflight and header/403 propagation, not real service-token/admin validation."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/patch_deployable",
+      "source_fingerprint": "b37f104dff4030ae6719d8b9e1f7d35258f771f2e39fdb783711e0f7750eb2a4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/deployables.API.Patch",
+        "gophercloudsdk/accelerator/v2/deployables.API.Program",
+        "gophercloudsdk/accelerator/v2/deployables.WithProgramHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Patch resolves an exact deployable name, snapshots the caller program document before that list request mutates it, and sends one replace /program operation with the original single image to /deployables/p1/program; response unknown fields and request-id survive.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingSnapshotAndURL"
+          ]
+        },
+        {
+          "behavior": "Nil, add, non-/program and empty-image program documents fail with ErrInvalidOption before additional HTTP; Program preserves an HTTP 500 from the program endpoint.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingSnapshotAndURL",
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingHTTPError"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned Deployable.patch expands /deployables/%(id)s/program and inherited Resource._prepare_request then appends id again, yielding /deployables/{id}/program/{id}. Go deliberately uses the controller /deployables/{uuid}/program path and accepts only its concrete one-image replace /program document, not arbitrary RFC6902 patches.",
+        "Python Proxy._patch accepts an existing mutable Resource; Resource.patch can merge dirty-state patches, convert field aliases, short-circuit when no patch/dirty state and return the same Resource. Go accepts a Ref plus explicit concrete patch and returns a decoded deployable."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Audit or explicitly resolve inherited Proxy._get_resource, Resource dirty-state/generated-patch/field conversion, _commit response mutation, default/override microversion and Adapter conflict/retry/error policies. The corrected URL and explicit program document fixtures do not complete that entire Python operation.",
+        "Add direct tests for per-call programming header conflicts/capability errors, canceled programming requests, expected success-code classification and any documented remaining Resource-input mapping before promotion."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/update_accelerator_request",
+      "source_fingerprint": "c02d22baee3f39631887ce5091818be7e9c2b9b47c3394e5a08914c5e7404649",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Patch",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Bind",
+        "gophercloudsdk/accelerator/v2/acceleratorrequests.API.Unbind"
+      ],
+      "contracts": [
+        {
+          "behavior": "Bind sends a UUID-keyed object with hostname/device_rp_uuid/instance_uuid and optional project_id to collection PATCH /accelerator_requests, with accelerator 2.10 and X-Service-Token. Unbind sends remove operations without values; 202 yields HTTP metadata and no invented resource body.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingCollectionURL"
+          ]
+        },
+        {
+          "behavior": "PatchMany snapshots two UUID-keyed patches and pointer values before a 401 reauthentication callback mutates/deletes original inputs; the second attempt still contains both original documents.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingSnapshotAndBatch"
+          ]
+        },
+        {
+          "behavior": "Unknown/replace/mixed/duplicate/incomplete binding operations, nil patches, names, protected/capability options and project_id below 2.1 fail before HTTP; an actual missing-service-token 403 keeps status/request-id.",
+          "tests": [
+            "api/accelerator_request_binding_test.go:TestAcceleratorRequestBindingPreflightAndAuthorization"
+          ]
+        }
+      ],
+      "differences": [
+        "Unlike broken update_deployable, pinned deprecated update_accelerator_request emits a deprecation warning and delegates patch_accelerator_request(uuid, properties). Go exposes the current explicit binding patch API and omits this deprecated alias/warning.",
+        "Pinned AcceleratorRequest.patch prepares a requires_id=True member URL even though its _convert_patch creates a UUID-keyed object; the Cyborg PATCH endpoint is the collection /accelerator_requests. Go corrects that endpoint and offers concrete Bind/Unbind/Patch/PatchMany documents.",
+        "Go requires add/remove binding fields and explicitly gates project_id at selected 2.1; it returns metadata for the controller empty 202, rather than a mutable Resource. Python can short-circuit an empty clean patch, derive dirty-state patches, convert field aliases and overwrites its patch microversion argument with _get_microversion.",
+        "The controller validates service-request authorization for bind/unbind and admin ownership for explicit project_id; a supplied header is only transmitted by Go, and server 403 remains observable. No client-side authorization success is inferred."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Define and document and document the deprecated alias/properties argument/warning replacement policy; the current mapping table covers patch_accelerator_request but not the separate deprecated whole-operation contract.",
+        "Audit inherited Proxy._get_resource, Resource initialization/dirty generated patch/alias conversion, _commit/_translate_response/default microversion and Adapter retry/error policy, and define the documented reduced concrete binding scope before completing the entire Python patch operation.",
+        "Add canceled binding and strict expected-code/response-body observations and verify controller 2.1 project ownership/server authorization semantics; tests verify selected-version preflight and header/403 propagation, not real service-token/admin validation."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/update_deployable",
+      "source_fingerprint": "9a6ffd25f886b09e18560afaf591d9f7170d0dd9d894adfdb9640a66dbfe11d5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/accelerator/v2/deployables.API.Patch",
+        "gophercloudsdk/accelerator/v2/deployables.API.Program"
+      ],
+      "contracts": [
+        {
+          "behavior": "Patch resolves an exact deployable name, snapshots the caller program document before that list request mutates it, and sends one replace /program operation with the original single image to /deployables/p1/program; response unknown fields and request-id survive.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingSnapshotAndURL"
+          ]
+        },
+        {
+          "behavior": "Nil, add, non-/program and empty-image program documents fail with ErrInvalidOption before additional HTTP; Program preserves an HTTP 500 from the program endpoint.",
+          "tests": [
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingSnapshotAndURL",
+            "api/accelerator_actions_test.go:TestAcceleratorProgrammingHTTPError"
+          ]
+        }
+      ],
+      "differences": [
+        "Pinned deprecated update_deployable warns and calls self.update_deployable(uuid, patch) recursively, never delegating patch_deployable; this is a recursion defect. The documented Go replacement is explicit Patch/Program and does not reproduce it.",
+        "Pinned Deployable.patch expands /deployables/%(id)s/program and inherited Resource._prepare_request then appends id again, yielding /deployables/{id}/program/{id}. Go deliberately uses the controller /deployables/{uuid}/program path and accepts only its concrete one-image replace /program document, not arbitrary RFC6902 patches."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "The corrected Go programming operation is a documented replacement for the broken deprecated Python entry point, not a tested whole-operation equivalence. Define and audit the intended deprecated argument/warning/error compatibility policy rather than interpreting the recursive source as a successfully mapped inherited workflow.",
+        "Resolve the remaining patch_deployable Resource/Adapter and request-boundary contracts before using its mapping as completion evidence for the deprecated entry point."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/wait_for_delete",
+      "source_fingerprint": "6ac63f703607fd6e73eeb598910b5da6f3ea98db3ff3ae4e8f57cb89aa6947df",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.WaitDeleted"
+      ],
+      "contracts": [
+        {
+          "behavior": "Profile WaitDeleted polls the same requested UUID despite a differing response UUID and succeeds on the next 404; a pre-canceled context exposes context.Canceled.",
+          "tests": [
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileDeleteWaitAndHTTPFailures"
+          ]
+        },
+        {
+          "behavior": "Attribute WaitDeleted keeps its initial UUID, succeeds on 404, never polls after cancellation and returns context.DeadlineExceeded for a persistent pending resource under a short timeout.",
+          "tests": [
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeWaitDeletedStableIDAndContext"
+          ]
+        }
+      ],
+      "differences": [
+        "Python wait_for_delete returns the original/fetched Resource, succeeds on NotFound, a falsy fetch or status=deleted, invokes callback(progress or 0), defaults to 120 seconds and accepts wait=None forever. Go returns error, fixes UUID once, waits only for GET 404 and defaults to a finite five-minute/two-second polling policy.",
+        "The Go helper is Collection-bound with explicit ID/name resolution and parent context cancellation; it does not reproduce generic Resource cache/state/callback behavior."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md"
+      ],
+      "remaining": [
+        "Progress callback, infinite wait, status=deleted/falsy-fetch success and returned Resource contract remain unimplemented or need an explicitly documented policy mapping. Keep the whole generic Python wait operation unresolved.",
+        "Audit Python skip_cache/fetch/Resource identity/error classification and add ARQ/device-specific deletion waiter observations plus forbidden/network-error preservation, rather than counting profile/attribute tests as universal Resource support."
+      ]
+    },
+    {
+      "operation": "python:accelerator/v2/wait_for_status",
+      "source_fingerprint": "c7d34c35103e7cf83e585e7fe12304a00158beb10ddae12d356cce8ce7a4b606",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/resource.Collection.Wait"
+      ],
+      "contracts": [
+        {
+          "behavior": "ARQ Wait maps the target to case-insensitive state, observes Initial then Bound on the stable request UUID and preserves null/attach information; BindFailed returns ErrFailedState.",
+          "tests": [
+            "api/accelerator_requests_test.go:TestAcceleratorRequestReadAndStatePolicy"
+          ]
+        },
+        {
+          "behavior": "Device status wait is unsupported without selected 2.3 even while lower-version Enable succeeds; at 2.3 a response UUID different from the requested ID is returned without rewriting the requested identity. Attributes/profiles/deployables have no status waiter.",
+          "tests": [
+            "api/accelerator_boundaries_test.go:TestAcceleratorActionAndStatusVersionsAreSeparate",
+            "api/accelerator_read_test.go:TestAcceleratorReadFailuresAndIdentity",
+            "api/accelerator_read_test.go:TestAcceleratorReadResourcesAndMetadata",
+            "api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata",
+            "api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName"
+          ]
+        }
+      ],
+      "differences": [
+        "Python wait_for_status accepts an existing Resource, arbitrary status attribute, caller-defined failures, optional progress callback and wait=None forever, and can return an already-at-target Resource without fetching. Go Collection.Wait first resolves/fetches a Ref, uses the binding-selected Device.status or ARQ.state, fixed ERROR/BindFailed failures, case-insensitive comparison and finite five-minute/two-second defaults.",
+        "Go owns service-specific capability and 2.3 Device status gating; it does not implement arbitrary Resource/MRO state fetching or Python cache-bypass behavior."
+      ],
+      "documentation": [
+        "accelerator/v2/README.md",
+        "accelerator/v2/acceleratorrequests/README.md"
+      ],
+      "remaining": [
+        "Callback/progress, arbitrary attribute, configurable failure set and unbounded waiting remain unimplemented; this operation must stay unresolved regardless of successful case-insensitive/failure-state fixtures.",
+        "Audit initial-resource target short-circuit versus mandatory Go lookup, Python missing-resource failure classification, skip_cache and mutated Resource identity during polls. Add timeout/cancellation/during-poll and ERROR-state observations for status wait, rather than relying on deletion waiter fixtures."
+      ]
+    },
+    {
       "operation": "python:baremetal_introspection/v1/start_introspection",
       "source_fingerprint": "d17d61c24b9e38f5cc30035cd85f8abcf7a32ae4e6795d2436f4b24335a8f1c4",
       "status": "unresolved",

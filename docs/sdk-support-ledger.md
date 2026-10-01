@@ -81,7 +81,7 @@ go run ./internal/cmd/paritycheck -sync
 
 `-sync`는 수작업 판정을 다시 쓰지 않습니다. 검토한 원본의 fingerprint가 달라지거나 기존 연산이 없어지면 catalog 저장 전에 실패하여 기존 근거를 보존합니다. 미검토 연산도 삭제하지 않으며 저장 중 write 실패에도 기존 catalog가 남습니다. 새 소스를 다시 검토하고 판정 상태와 근거를 함께 갱신해야 합니다. `make check`도 이 검증을 실행합니다.
 
-Durable 판정은 native 암호 조회·Inspector 시작에 더해 Nova quota singleton과 Heat stack·child resource·event 조회의 소스·입력·응답·오류 계약을 연결했습니다. 대응 Python 연산은 확인한 세부 계약과 Go 정책 차이를 기록하고 미검증 inherited Resource·query·cache·dirty state 또는 wait 기능을 구체적인 `remaining`으로 남깁니다. 검증된 계약을 연결한 상태와 전체 SDK 완성도를 구분하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
+Durable 판정은 native 암호 조회·Inspector 시작에 더해 Nova quota singleton과 Heat stack·child resource·event 조회의 소스·입력·응답·오류 계약을 연결했습니다. Cyborg 직접 선언 24개에도 다섯 리소스의 실제 assertion과 구체적 남은 기능을 연결했습니다. 대응 Python 연산은 확인한 세부 계약과 Go 정책 차이를 기록하고 미검증 inherited Resource·query·cache·dirty state 또는 wait 기능을 구체적인 `remaining`으로 남깁니다. 검증된 계약을 연결한 상태와 전체 SDK 완성도를 구분하며, 생성된 함수 수를 지원 판정으로 대체하지 않습니다.
 
 ## 증거를 연결할 수 있는 기존 구현
 
