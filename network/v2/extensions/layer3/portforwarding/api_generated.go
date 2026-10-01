@@ -111,6 +111,10 @@ func (b listOptsBuilder) ToPortForwardingListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, id string, options ...ListOption) iter.Seq2[*PortForwarding, error] {
+	return a.listWithControl(ctx, id, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, id string, control resource.ListControl, options ...ListOption) iter.Seq2[*PortForwarding, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -122,10 +126,10 @@ func (a *API) List(ctx context.Context, id string, options ...ListOption) iter.S
 		return func(yield func(*PortForwarding, error) bool) { var zero *PortForwarding; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts, id), func(page pagination.Page) ([]PortForwarding, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts, id), func(page pagination.Page) ([]PortForwarding, error) {
 		values, err := upstream.ExtractPortForwardings(page)
 		return []PortForwarding(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

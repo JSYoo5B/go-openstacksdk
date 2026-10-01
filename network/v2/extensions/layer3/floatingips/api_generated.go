@@ -123,6 +123,10 @@ func (b listOptsBuilder) ToFloatingIPListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*FloatingIP, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*FloatingIP, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -134,10 +138,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Floati
 		return func(yield func(*FloatingIP, error) bool) { var zero *FloatingIP; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]FloatingIP, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]FloatingIP, error) {
 		values, err := upstream.ExtractFloatingIPs(page)
 		return []FloatingIP(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

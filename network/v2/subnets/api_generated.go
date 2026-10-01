@@ -120,6 +120,10 @@ func (b listOptsBuilder) ToSubnetListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Subnet, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -131,10 +135,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subnet
 		return func(yield func(*Subnet, error) bool) { var zero *Subnet; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Subnet, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Subnet, error) {
 		values, err := upstream.ExtractSubnets(page)
 		return []Subnet(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

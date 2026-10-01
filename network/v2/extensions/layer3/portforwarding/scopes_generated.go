@@ -36,7 +36,7 @@ func (s *PortForwardingScope) newResources() *resource.Collection[PortForwarding
 		},
 		ID:     func(v *PortForwarding) string { return fmt.Sprint(v.ID) },
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*PortForwarding, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*PortForwarding, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -45,7 +45,7 @@ func (s *PortForwardingScope) newResources() *resource.Collection[PortForwarding
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return s.api.List(ctx, s.parentID, options...)
+			return s.api.listWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 
