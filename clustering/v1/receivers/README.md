@@ -3,6 +3,8 @@
 `receivers.New(client)`가 webhook/message receiver의 생성·조회·수정·삭제·목록·이름 검색을
 제공합니다. Receiver는 동기 Resource이며 Location이나 Channel의 URL을 따라가지 않습니다.
 Action은 `CLUSTER_SCALE_OUT` 같은 명령 이름이고 비동기 action UUID가 아닙니다.
+Connection을 사용하면 `conn.Clustering(ctx)`가 반환한 서비스의 `Receivers`에서 같은 API를
+사용하며, 서비스의 인증·선택 microversion·endpoint prefix를 공유합니다.
 
 | openstacksdk | Go | HTTP 계약 |
 |---|---|---|
@@ -106,6 +108,7 @@ name/type/action/cluster_id/created_at/user와 asc/desc를 검사합니다. `Wit
 입력과 local Body 필터 외의 vendor query를 실제로 전달하며 Python의 unknown query 처리와 다른
 Go 확장입니다. `WithListFilter`는 알려진 Body 속성의 로컬 필터이며 별칭 project_id/domain_id/user_id도
 처리합니다. object subset, 배열, 정밀한 decimal 비교를 제공하고 JSON bool과 숫자는 다른 타입입니다.
+Python은 임의 sort 문자열을 서버로 전달하므로 Go의 공시된 키·방향 사전 검사는 정책 차이입니다.
 
 목록은 lazy/reusable이며 break와 취소가 후속 요청을 멈춥니다. server links/next/HTTP Link와 명시
 limit의 wire ID marker를 사용하고 짧은 nonempty page도 이어갑니다. marker는 local filter나

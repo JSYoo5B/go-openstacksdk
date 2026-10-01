@@ -87,6 +87,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/clustering_nodes_commands_test.go` | Check/Recover 기본 객체, operation 생략/empty/null·params/null·명시 check1.6·ops1.4, plugin key 범위, 입력/header snapshot·lookup 후 gate, missing/ambiguous·accepted 오류·HTTP 원인 |
 | `api/clustering_nodes_adopt_test.go` | flat Adopt/Preview POST200·1.7, physical body identity·nullable 선택 입력과 snapshot, preview 네 필드 기본 null·숫자/string/null version·정밀한 inner/outer 원문, incidental Location 미해석, custom option 이후 source/version/context 재검사·malformed200/native/read 오류 |
 | `api/clustering_cluster_health_test.go` | Check/Recover 기본 객체·check-only1.6 성공·capacity1.7·ops1.4, operation/params optional 및 server Filters 구분, lookup 전 body/header/minimum 고정·재검사, typed 충돌·202/Location 증거·native/context 오류 |
+| `api/clustering_receivers_test.go` | 동기 POST201·GET/PATCH/List200·DELETE204, webhook/message/vendor type·nullable cluster/action·raw actor/params/channel, user wire1.4·Resources/후속 page gate, lookup 전 snapshot·version 재검사, short page·로컬 filter의 wire marker, 다중 페이지 Find·strict/ignore404·accepted 증거·native/context 오류 |
+| `api/clustering_cluster_policy_commands_test.go` | policy_attach/detach/update의 required body identity·GET 생략·버전 gate 없음, enabled 생략/false/true/null·독립 snapshot, parent lookup 전 body/header 고정·source 재검사, typed/header/query 보호, strict202 action/Location·원문/native 오류 |
+| `connection_senlin_receivers_policy_test.go` | Receiver와 정책 명령의 공유 client·최신 token·선택1.4·reverse prefix, user/global_project=false, 동기 응답의 incidental Location 미해석·202 이후 추가 조회 없음 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
