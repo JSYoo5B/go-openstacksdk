@@ -133,6 +133,10 @@ func (b listOptsBuilder) ToLimitListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Limit, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Limit, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -144,10 +148,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Limit,
 		return func(yield func(*Limit, error) bool) { var zero *Limit; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Limit, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Limit, error) {
 		values, err := upstream.ExtractLimits(page)
 		return []Limit(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

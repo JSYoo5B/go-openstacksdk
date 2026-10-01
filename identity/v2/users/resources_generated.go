@@ -18,13 +18,13 @@ func (a *API) newResources() *resource.Collection[User] {
 		ID:     func(v *User) string { return fmt.Sprint(v.ID) },
 		Name:   func(v *User) string { return fmt.Sprint(v.Name) },
 		Delete: func(ctx context.Context, id string) error { _, err := a.Delete(ctx, string(id)); return err },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*User, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*User, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*User, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return a.List(ctx)
+			return a.listWithControl(ctx, control)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*User, error) {

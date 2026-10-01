@@ -134,6 +134,10 @@ func (b listOptsBuilder) ToProjectListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Project, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Project, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -145,10 +149,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Projec
 		return func(yield func(*Project, error) bool) { var zero *Project; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Project, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Project, error) {
 		values, err := upstream.ExtractProjects(page)
 		return []Project(values), err
-	})
+	}, control)
 }
 
 // ListAvailable invokes the upstream API with library-owned builders and result handling.

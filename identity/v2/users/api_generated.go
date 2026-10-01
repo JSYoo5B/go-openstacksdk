@@ -99,10 +99,14 @@ func (a *API) Get(ctx context.Context, id string) (*User, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*User, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]User, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*User, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]User, error) {
 		values, err := upstream.ExtractUsers(page)
 		return []User(values), err
-	})
+	}, control)
 }
 
 // ListRoles invokes the upstream API with library-owned builders and result handling.

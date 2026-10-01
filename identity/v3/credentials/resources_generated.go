@@ -17,7 +17,7 @@ func (a *API) newResources() *resource.Collection[Credential] {
 		Get:    func(ctx context.Context, id string) (*Credential, error) { return a.Get(ctx, string(id)) },
 		ID:     func(v *Credential) string { return fmt.Sprint(v.ID) },
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Credential, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Credential, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -26,7 +26,7 @@ func (a *API) newResources() *resource.Collection[Credential] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Credential, error) {

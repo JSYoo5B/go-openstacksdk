@@ -126,6 +126,10 @@ func (b listOptsBuilder) ToApplicationCredentialListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, userID string, options ...ListOption) iter.Seq2[*ApplicationCredential, error] {
+	return a.listWithControl(ctx, userID, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, userID string, control resource.ListControl, options ...ListOption) iter.Seq2[*ApplicationCredential, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -143,16 +147,20 @@ func (a *API) List(ctx context.Context, userID string, options ...ListOption) it
 		}
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, userID, _opts), func(page pagination.Page) ([]ApplicationCredential, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, userID, _opts), func(page pagination.Page) ([]ApplicationCredential, error) {
 		values, err := upstream.ExtractApplicationCredentials(page)
 		return []ApplicationCredential(values), err
-	})
+	}, control)
 }
 
 // ListAccessRules invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListAccessRules(ctx context.Context, userID string) iter.Seq2[*AccessRule, error] {
-	return resource.Stream(ctx, upstream.ListAccessRules(a.client, userID), func(page pagination.Page) ([]AccessRule, error) {
+	return a.listAccessRulesWithControl(ctx, userID, resource.ListControl{})
+}
+
+func (a *API) listAccessRulesWithControl(ctx context.Context, userID string, control resource.ListControl) iter.Seq2[*AccessRule, error] {
+	return resource.StreamWithControl(ctx, upstream.ListAccessRules(a.client, userID), func(page pagination.Page) ([]AccessRule, error) {
 		values, err := upstream.ExtractAccessRules(page)
 		return []AccessRule(values), err
-	})
+	}, control)
 }

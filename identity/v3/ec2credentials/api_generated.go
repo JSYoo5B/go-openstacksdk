@@ -84,8 +84,12 @@ func (a *API) Get(ctx context.Context, userID string, id string) (*Credential, e
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, userID string) iter.Seq2[*Credential, error] {
-	return resource.Stream(ctx, upstream.List(a.client, userID), func(page pagination.Page) ([]Credential, error) {
+	return a.listWithControl(ctx, userID, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, userID string, control resource.ListControl) iter.Seq2[*Credential, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, userID), func(page pagination.Page) ([]Credential, error) {
 		values, err := upstream.ExtractCredentials(page)
 		return []Credential(values), err
-	})
+	}, control)
 }

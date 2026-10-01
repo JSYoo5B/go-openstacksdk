@@ -118,6 +118,10 @@ func (b listOptsBuilder) ToRegionListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Region, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Region, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -129,10 +133,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Region
 		return func(yield func(*Region, error) bool) { var zero *Region; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Region, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Region, error) {
 		values, err := upstream.ExtractRegions(page)
 		return []Region(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

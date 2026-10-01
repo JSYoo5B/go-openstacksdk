@@ -36,13 +36,13 @@ func (s *CredentialScope) newResources() *resource.Collection[Credential] {
 		},
 		ID:     func(v *Credential) string { return fmt.Sprint(v.Access) },
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Credential, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Credential, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*Credential, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return s.api.List(ctx, s.parentID)
+			return s.api.listWithControl(ctx, s.parentID, control)
 		}})
 }
 

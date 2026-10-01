@@ -38,7 +38,7 @@ func (s *ApplicationCredentialScope) newResources() *resource.Collection[Applica
 		Name:      func(v *ApplicationCredential) string { return fmt.Sprint(v.Name) },
 		NameQuery: func(name string) string { return name },
 		Delete:    func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*ApplicationCredential, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*ApplicationCredential, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -47,7 +47,7 @@ func (s *ApplicationCredentialScope) newResources() *resource.Collection[Applica
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return s.api.List(ctx, s.parentID, options...)
+			return s.api.listWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 
@@ -81,12 +81,12 @@ func (s *AccessRuleScope) newResources() *resource.Collection[AccessRule] {
 		},
 		ID:     func(v *AccessRule) string { return fmt.Sprint(v.ID) },
 		Delete: func(ctx context.Context, id string) error { return s.api.DeleteAccessRule(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*AccessRule, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*AccessRule, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*AccessRule, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return s.api.ListAccessRules(ctx, s.parentID)
+			return s.api.listAccessRulesWithControl(ctx, s.parentID, control)
 		}})
 }

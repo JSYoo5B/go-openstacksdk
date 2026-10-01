@@ -118,6 +118,10 @@ func (b listOptsBuilder) ToEndpointListParams() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Endpoint, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Endpoint, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -129,10 +133,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Endpoi
 		return func(yield func(*Endpoint, error) bool) { var zero *Endpoint; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Endpoint, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Endpoint, error) {
 		values, err := upstream.ExtractEndpoints(page)
 		return []Endpoint(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

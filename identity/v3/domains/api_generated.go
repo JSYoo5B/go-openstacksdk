@@ -118,6 +118,10 @@ func (b listOptsBuilder) ToDomainListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Domain, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Domain, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -129,10 +133,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Domain
 		return func(yield func(*Domain, error) bool) { var zero *Domain; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Domain, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Domain, error) {
 		values, err := upstream.ExtractDomains(page)
 		return []Domain(values), err
-	})
+	}, control)
 }
 
 // ListAvailable invokes the upstream API with library-owned builders and result handling.
