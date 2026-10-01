@@ -12,6 +12,7 @@ import (
 
 type collectionRecord struct {
 	Package       string `json:"package"`
+	Source        string `json:"source,omitempty"`
 	Model         string `json:"model,omitempty"`
 	UpstreamModel string `json:"upstream_model,omitempty"`
 	Kind          string `json:"kind,omitempty"`

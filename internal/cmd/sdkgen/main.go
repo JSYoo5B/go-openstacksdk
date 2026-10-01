@@ -95,6 +95,9 @@ func main() {
 			fatal(err)
 		}
 	}
+	// SDK-owned services have no Gophercloud declaration to infer. Keep their
+	// audited policy records in the same inventory without inventing native APIs.
+	g.collections = append(g.collections, sdkOwnedCollections...)
 	if err := g.generateServices(); err != nil {
 		fatal(err)
 	}
@@ -283,7 +286,7 @@ func (g *generator) generate(path string) error {
 		return fmt.Errorf("specialized collection conflicts with inferred policies for %s", path)
 	}
 	if plan == nil {
-		if hasSpecialized && specialized.Scope == "" {
+		if hasSpecialized && specialized.Scope == "" && specialized.Kind == "" {
 			e.use("gophercloudsdk/resource")
 			e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", specialized.Model)
 		} else {

@@ -314,10 +314,14 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/quotasets",
+    "model": "QuotaResource",
+    "upstream_model": "QuotaSet",
+    "kind": "singleton",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/compute/v2/remoteconsoles",
@@ -1255,10 +1259,12 @@
   },
   {
     "package": "gophercloudsdk/orchestration/v1/stacks",
-    "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "model": "StackResource",
+    "upstream_model": "RetrievedStack",
+    "kind": "compound_identity",
+    "find": true,
+    "delete": true,
+    "wait": true
   },
   {
     "package": "gophercloudsdk/orchestration/v1/stacktemplates",
@@ -1367,10 +1373,13 @@
   },
   {
     "package": "gophercloudsdk/sharedfilesystems/v2/shareaccessrules",
+    "model": "AccessRule",
+    "upstream_model": "ShareAccess",
     "find": false,
-    "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "delete": true,
+    "wait": true,
+    "scope": "InShare",
+    "parent": "gophercloudsdk/sharedfilesystems/v2/shares"
   },
   {
     "package": "gophercloudsdk/sharedfilesystems/v2/sharenetworks",
@@ -1433,6 +1442,22 @@
     "model": "Workflow",
     "find": true,
     "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/accelerator/v2/devices",
+    "source": "sdk_owned",
+    "model": "Device",
+    "find": false,
+    "delete": false,
+    "wait": true
+  },
+  {
+    "package": "gophercloudsdk/accelerator/v2/deployables",
+    "source": "sdk_owned",
+    "model": "Deployable",
+    "find": true,
+    "delete": false,
     "wait": false
   }
 ]

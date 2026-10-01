@@ -77,9 +77,15 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	fmt.Fprintf(&out, "// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서\nservice, err := conn.%s(ctx)\nif err != nil { return err }\n", method)
 	if example != nil {
 		field := registryField(strings.TrimPrefix(example.Package, "gophercloudsdk/"+key+"/"))
-		fmt.Fprintf(&out, "for value, err := range service.%s.Resources.List(ctx) {\n    if err != nil { return err }\n    fmt.Println(value)\n}\n", field)
+		accessor := "service." + field + ".Resources"
+		finder := "service." + field
+		if example.Kind == "compound_identity" {
+			accessor += "()"
+			finder = accessor
+		}
+		fmt.Fprintf(&out, "for value, err := range %s.List(ctx) {\n    if err != nil { return err }\n    fmt.Println(value)\n}\n", accessor)
 		if example.Find {
-			fmt.Fprintf(&out, "value, err := service.%s.Find(ctx, resource.Name(\"example\"))\nif err != nil { return err }\n_ = value\n", field)
+			fmt.Fprintf(&out, "value, err := %s.Find(ctx, resource.Name(\"example\"))\nif err != nil { return err }\n_ = value\n", finder)
 		}
 	} else {
 		if parts[0] == "metric" {
@@ -106,6 +112,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			if record.Kind == "string_set" {
 				policies = append(policies, fmt.Sprintf("`%s`: 문자열 집합 조회·추가·확인·교체·삭제; Collection/상태 대기 없음", label))
 				continue
+			}
+			if record.Kind == "singleton" {
+				policies = append(policies, fmt.Sprintf("`%s`: 고정 프로젝트의 Get·Detail·Update·Reset; List/Find/Wait 없음", label))
+				continue
+			}
+			if record.Kind == "compound_identity" {
+				label = "Resources() / InStack(ctx, ref) / ForStack(identity)"
 			}
 			features := []string{"ID 조회", "목록"}
 			if record.Find {
