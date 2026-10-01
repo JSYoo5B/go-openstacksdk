@@ -11,7 +11,8 @@ import (
 )
 
 // QuotaResource retains native limits, raw quota fields and response headers.
-// ProjectID remains the request target even if the response names another ID.
+// A scope's ProjectID remains its request target even if the response names
+// another ID. ListProjects instead uses the validated project identity in the row.
 type QuotaResource struct {
 	Quota
 	ProjectID  string

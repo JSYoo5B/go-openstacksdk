@@ -12,7 +12,7 @@
 | `ignore_missing=True` | `scope.Delete(ctx, quotas.WithDeleteIgnoreMissing(true))` |
 | Keystone 프로젝트 이름 해석 | `api.InProject(ctx, resource.Name(name), quotas.WithIdentityClient(identityClient))` |
 | 인증 프로젝트 ID 전달 | `api.CurrentProject(ctx)` |
-| `quotas(**query)` | singleton과 별개인 quota collection 연산 |
+| `conn.network.quotas()` | `api.ListProjects(ctx)` / `api.AllProjects(ctx)` |
 
 ```go
 func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
@@ -76,6 +76,34 @@ GET·PUT은 native와 같은 200 성공 정책입니다. Detail은 Gophercloud�
 
 Scope의 DELETE 기본 404 정책은 엄격하며 `resource.ErrNotFound`와 원본 HTTP 원인을 보존합니다. Python `delete_quota`의 기본 `ignore_missing=True`에 대응하려면 `WithDeleteIgnoreMissing(true)`를 지정하세요. 뒤의 false 옵션으로 다시 엄격하게 설정할 수 있고, 403 등 다른 오류는 무시하지 않습니다. HTTP 오류의 code·header·body와 decode·부모 context 취소·timeout 원인은 `errors.As`와 `errors.Is`로 확인합니다.
 
-이 단위는 native Get·GetDetail·Update·Delete와 Python의 defaults endpoint에 해당합니다. Quota collection 목록, 추가 조회 query, Resource 입력·dirty-state·자동 commit은 별도 계약입니다. 존재하지 않는 생성·이름 Find·상태 Wait를 singleton에 추가하지 않습니다. 하위 `API.Get/GetDetail/Update/Delete`의 native 반환 계약은 유지합니다.
+이 단위는 native Get·GetDetail·Update·Delete, Python의 defaults endpoint, 별도 quota collection 조회를 제공합니다. Server 조회 query, Resource 입력·dirty-state·자동 commit은 별도 계약입니다. 존재하지 않는 생성·이름 Find·상태 Wait를 singleton에 추가하지 않습니다. 하위 `API.Get/GetDetail/Update/Delete`의 native 반환 계약은 유지합니다.
 
 근거: pinned [Gophercloud requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/networking/v2/extensions/quotas/requests.go), [Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py), [Python quota resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/quota.py), [Neutron quota details API](https://docs.openstack.org/api-ref/network/v2/#quotas-details-extension-quota-details). 계약 테스트는 [HTTP·입력·오류](../../../../api/neutron_project_quotas_contracts_test.go), [프로젝트 해석·인증](../../../../api/neutron_project_quotas_projects_test.go), [기본 quota 조회](../../../../api/neutron_quota_defaults_test.go)에 있습니다.
+
+## Quota override 목록
+
+`api.ListProjects(ctx)`는 `/quotas`의 단일 배열을 lazy iterator로 반환합니다. `api.AllProjects(ctx)`는 iterator를 소비해 slice로 수집하며, 오류가 있으면 부분 slice 대신 오류를 반환합니다. 목록은 quota override가 저장된 프로젝트만 포함하며 각 행의 limit에는 기본값이 합쳐집니다. 모든 Keystone 프로젝트를 열거하려면 Identity project API를 사용하세요.
+
+```go
+func listQuotaOverrides(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
+    api := quotas.New(networkClient)
+    for quota, err := range api.ListProjects(ctx, quotas.WithListProjectID("project-id"), quotas.WithListMaxItems(1)) {
+        if err != nil { return err }
+        fmt.Println(quota.ProjectID, quota.Network, quota.Port)
+        fmt.Println(quota.Header.Get("X-Openstack-Request-Id"), quota.StatusCode)
+    }
+    return nil
+}
+```
+
+이 fragment의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `gophercloudsdk/network/v2/extensions/quotas`입니다. 목록을 모두 수집하려면 `values, err := api.AllProjects(ctx)`를 사용합니다.
+
+`WithListProjectID(id)`는 정확한 프로젝트 ID의 행만 소비하는 **로컬 필터**이며 Keystone 조회나 server query를 보내지 않습니다. `WithListMaxItems(n)`은 양의 최대 소비 수이며 HTTP 응답 크기를 제한하지 않습니다. 같은 옵션이 반복되면 마지막 값이 우선합니다. iterator 생성은 HTTP나 옵션 검증을 수행하지 않고 첫 소비 시 검증·GET을 수행합니다. 호출자의 옵션 slice는 생성 시 복사합니다. `break`나 최대 소비 수에 도달하면 이후 행을 decode하지 않으며 context 취소는 방문하는 행 사이에서도 확인합니다. 로컬 필터가 제외하는 방문 행도 먼저 검증하므로 잘못된 응답을 숨기지 않습니다.
+
+각 행은 `QuotaResource`이며 native limits와 전체 행 `Body`, 복사된 `Header`, 실제 `StatusCode`를 보존합니다. 목록의 `ProjectID`는 검증한 `project_id`이고, 이것이 없을 때만 deprecated `tenant_id`를 사용합니다. 두 필드가 모두 있으면 유효한 같은 ID여야 하며 빈 값·null·잘못된 타입·안전하지 않은 경로 문자·서로 다른 ID·식별자 누락은 오류입니다. `Body`에는 응답이 제공하지 않은 identity를 추가하지 않으며 unknown limit·큰 정수·null·누락을 구분할 수 있습니다. 행과 호출 간 원문 byte slice와 header를 공유하지 않습니다. `quotas`가 없거나 null·object·scalar이거나 방문한 행이 object가 아니거나 native limit 타입이 잘못되면 오류입니다. 빈 `quotas: []`는 정상입니다.
+
+Pinned Python `quotas(**query)`는 quota별 query를 지원하지 않는다고 설명합니다. 공식 API reference에는 일반 pagination/filter 문장이 있지만 확인한 Neutron `QuotaSetsController.index`와 DB driver는 query를 읽지 않고 quota override 전체 배열을 한 번 반환합니다. 따라서 SDK는 server fields/filter/limit/marker/sort 옵션이나 자동 다음 페이지 추측을 제공하지 않습니다. Python inherited `Resource.list`의 일반 pagination 재시도와 adapter 동작을 구현한 것으로 간주하지 않습니다.
+
+응답에 인식 가능한 nonempty `quotas_links`의 `rel=next`/`href` 또는 `links.next` 문자열이 있으면 `resource.ErrUnsupported`를 반환합니다. 지원 근거가 없는 continuation을 따라가거나 부분 배열을 전체 결과로 반환하지 않습니다. 빈 next·다른 link relation·인식되지 않는 metadata 구조는 허용합니다. GET 성공 코드는 200이며 HTTP 오류의 status/header/body와 context/decode 원인은 보존합니다.
+
+서버 근거: [QuotaSetsController](https://github.com/openstack/neutron/blob/cadc448a995a30d9b18514089acd7b1770142032/neutron/extensions/quotasv2.py), [DbQuotaDriver](https://github.com/openstack/neutron/blob/cadc448a995a30d9b18514089acd7b1770142032/neutron/db/quota/driver.py), [Neutron quota API](https://docs.openstack.org/api-ref/network/v2/#quotas-extension-quotas). 계약 테스트는 [단일 배열·로컬 옵션·응답·오류·취소](../../../../api/neutron_quotas_list_test.go)에 있습니다.
