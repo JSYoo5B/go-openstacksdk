@@ -68,7 +68,8 @@
       ],
       "differences": [
         "The quota singleton exposes Reset rather than generic resource Delete; success returns ResetResponse(ProjectID, Header) instead of requiring a quota extraction from an empty DELETE body.",
-        "404 remains an error by default; optional WithResetIgnoreMissing changes only that status."
+        "404 remains an error by default; optional WithResetIgnoreMissing changes only that status.",
+        "UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
@@ -122,7 +123,8 @@
       ],
       "differences": [
         "The Go scope returns an embedded native quota model plus ProjectID, decoded raw quota fields and copied headers instead of a Result extractor; the request project remains fixed even when the response ID differs.",
-        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it."
+        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it.",
+        "UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
@@ -176,7 +178,8 @@
       ],
       "differences": [
         "The Go scope returns an embedded native quota model plus ProjectID, decoded raw quota fields and copied headers instead of a Result extractor; the request project remains fixed even when the response ID differs.",
-        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it."
+        "Malformed singleton envelopes are rejected explicitly; the scope preserves the selected Compute microversion rather than changing it.",
+        "UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
@@ -233,7 +236,8 @@
       ],
       "differences": [
         "Callers provide native concrete UpdateOpts and SDK-owned functional options rather than UpdateOptsBuilder implementations.",
-        "The scope rejects typed limits below -1 before HTTP, adds an explicit force=false option, and returns QuotaResource with the fixed project and response metadata."
+        "The scope rejects typed limits below -1 before HTTP, adds an explicit force=false option, and returns QuotaResource with the fixed project and response metadata.",
+        "UserQuotaScope is an additional high-level mapping for fixed user_id requests; the pinned native API and generated per-project method contract are unchanged."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
@@ -1923,7 +1927,10 @@
       "go_api": [
         "gophercloudsdk/compute/v2/quotasets.API.InProject",
         "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Get",
-        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Detail"
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Detail",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
+        "gophercloudsdk/compute/v2/quotasets.UserQuotaScope.Get",
+        "gophercloudsdk/compute/v2/quotasets.UserQuotaScope.Detail"
       ],
       "contracts": [
         {
@@ -1947,17 +1954,44 @@
             "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
+        },
+        {
+          "behavior": "The explicit user scope fixes the project/user pair; exact user names resolve once through the inherited or overridden separate Keystone client, explicit IDs need no lookup, and missing, ambiguous or invalid user inputs prevent Nova requests.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserNameUsesInheritedOrOverrideKeystoneClientOnce",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserLookupFailuresDoNotCallNova",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserInvalidInputsAndZeroScopeCannotResetProject"
+          ]
+        },
+        {
+          "behavior": "User Get and Detail encode exactly one user_id query, preserve the selected microversion and request headers, retain native limits/detail triples and independent raw big-integer/null fields plus copied headers, and do not expose project-only Defaults or retarget from response identities. HTTP/decode causes and explicit-user context cancellation remain observable.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserOperationsKeepQueryTargetAndRawResponse",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserErrorsKeepBothIdentitiesAndMissingPolicy",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserMalformedResponsesKeepDecodeCauses",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserContextAndCurrentProjectKeepExplicitUser"
+          ]
+        },
+        {
+          "behavior": "User reads retain the fixed query through reauthentication, backoff and retry callbacks on the original transport; Get preserves explicit auth headers when the provider has no token and can cancel while shared provider reauthentication is blocked.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRetryAndReauthKeepOneQueryAndExactBody",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserPreservesCallerRedirectRejectionAndExplicitAuthHeaders",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserCancellationDoesNotWaitForSharedReauth"
+          ]
         }
       ],
       "differences": [
         "Go returns native typed limit/detail models plus raw fields and copied headers; Python common QuotaSet flattens limit values and separates usage/reservation dictionaries.",
-        "Go references explicitly distinguish IDs from exact project names, and the scope freezes the project once."
+        "Go references explicitly distinguish IDs from exact project names, and the scope freezes the project once.",
+        "UserQuotaScope requires an explicit user reference and freezes both identities; it does not infer the current user, verify project membership, or promote project-only Defaults. Nova validates authorization and quota policy.",
+        "The user scope owns a guarded HTTP client while retaining caller transport, redirect policy and delegated provider authentication/retry behavior; this narrower tested contract does not establish parity with all inherited Python Adapter behavior."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
       ],
       "remaining": [
-        "Additional fetch query parameters, including user/user_id variants, have no scoped Go mapping.",
+        "General fetch query parameters beyond the explicit user_id scope and usage endpoint selection have no scoped Go mapping.",
         "Audit inherited common QuotaSet.fetch/Resource.fetch response normalization, cache/skip_cache behavior, descriptor coercion and maximum microversion 2.56 selection before declaring whole-operation parity."
       ]
     },
@@ -1965,12 +1999,39 @@
       "operation": "python:compute/v2/get_quota_set_defaults",
       "source_fingerprint": "9310d7d06ea44ada7f4cacbe9d3de7163facdedb4b1e4a5fe0b13808a6875e3c",
       "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Defaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "The distinct /os-quota-sets/{project}/defaults GET sends no user_id query, preserves configured 2.56/auth/custom headers and keeps the scope project separate from the response quota ID; unknown fields, large integers, nulls and independent raw/header snapshots remain available.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaDefaultsPreserveProjectAndRawResponse"
+          ]
+        },
+        {
+          "behavior": "Defaults preserves 403/404/unexpected-203 response code/body/header and the Defaults operation cause; only 404 adds ErrNotFound. Missing/null/array/scalar quota_set envelopes and wrong native limit types fail with the original decode cause.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaDefaultsPreserveHTTPAndDecodeErrors"
+          ]
+        },
+        {
+          "behavior": "A pre-canceled Defaults call makes no request, and a deadline after the request starts remains context.DeadlineExceeded.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaDefaultsRespectContext"
+          ]
+        }
+      ],
+      "differences": [
+        "Go returns native typed limits plus independent raw fields and copied headers on a fixed project scope instead of mutating a Python common QuotaSet Resource.",
+        "The Go scope retains the selected Compute microversion; it does not automatically impose the Python QuotaSet maximum microversion 2.56. That maximum is not a minimum API requirement."
+      ],
       "documentation": [
         "compute/v2/quotasets/README.md"
       ],
       "remaining": [
-        "The pinned proxy fetches /os-quota-sets/{projectID}/defaults; ProjectQuotaScope.Get uses the ordinary project endpoint and is not a defaults implementation.",
-        "Add a dedicated defaults contract and HTTP tests, then audit inherited QuotaSet/Resource response and microversion behavior."
+        "Audit inherited common QuotaSet/Resource.fetch response normalization, descriptor coercion, dict/location views and cache/skip_cache behavior; the typed/raw response is only a partial Resource mapping.",
+        "Python Project/Resource input coercion and inherited adapter/microversion selection, including the QuotaSet 2.56 maximum, remain unaudited for whole-operation parity."
       ]
     },
     {
@@ -2011,7 +2072,9 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Reset",
-        "gophercloudsdk/compute/v2/quotasets.WithResetIgnoreMissing"
+        "gophercloudsdk/compute/v2/quotasets.WithResetIgnoreMissing",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
+        "gophercloudsdk/compute/v2/quotasets.UserQuotaScope.Reset"
       ],
       "contracts": [
         {
@@ -2027,17 +2090,43 @@
             "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
+        },
+        {
+          "behavior": "User Reset sends bodyless DELETE with exactly one fixed user_id, accepts 202/204 without a follow-up request, rejects unexpected success codes, preserves both identities and HTTP causes, and ignores only an explicitly permitted 404. Invalid or zero scopes cannot fall back to project-wide Reset.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserOperationsKeepQueryTargetAndRawResponse",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserResetAccepts202And204WithoutFollowUp",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserErrorsKeepBothIdentitiesAndMissingPolicy",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserInvalidInputsAndZeroScopeCannotResetProject"
+          ]
+        },
+        {
+          "behavior": "Reset redirect fixtures reject dropped, changed or duplicate user queries, changed project/origin/method, opaque URLs and virtual-host mutation before a second unsafe request. Same-pair redirects retain the caller policy; its rejection remains in the error chain.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRedirectCannotChangeProjectUserOriginOrMethod",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRedirectKeepsSamePairAndCallerPolicy",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserPreservesCallerRedirectRejectionAndExplicitAuthHeaders"
+          ]
+        },
+        {
+          "behavior": "User Reset retains its pair and single query through reauthentication/backoff/retry, observes canceled and expired contexts, and preserves caller and HTTP timeout cancellation even when redirect policy replaces the request context.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRetryAndReauthKeepOneQueryAndExactBody",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserContextAndCurrentProjectKeepExplicitUser",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRedirectRetainsCallerAndHTTPTimeoutContexts"
+          ]
         }
       ],
       "differences": [
-        "Python returns None; Go returns ResetResponse with the project and copied headers and can explicitly ignore a 404."
+        "Python returns None; Go returns ResetResponse with the fixed project/user identities and copied headers and can explicitly ignore a 404.",
+        "UserQuotaScope is separate from ProjectQuotaScope, so a user Reset cannot promote a project-wide operation; guarded redirects reject changes to the exact request target rather than forwarding arbitrary query mutations."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
       ],
       "remaining": [
-        "The Python proxy forwards arbitrary reset query parameters through Resource.delete; the scoped Go reset does not expose them or user-scoped reset.",
-        "Audit inherited Proxy._delete/QuotaSet/Resource missing, response, adapter and microversion behavior beyond the tested no-query project reset."
+        "The Python proxy forwards arbitrary reset query parameters through Resource.delete; Go maps explicit user_id through UserQuotaScope but does not expose additional arbitrary reset query parameters.",
+        "Audit inherited Proxy._delete/QuotaSet/Resource missing, response, adapter and microversion behavior beyond the tested project and fixed-user HTTP contracts."
       ]
     },
     {
@@ -2048,7 +2137,10 @@
         "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.Update",
         "gophercloudsdk/compute/v2/quotasets.WithUpdateOptions",
         "gophercloudsdk/compute/v2/quotasets.WithUpdateField",
-        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce"
+        "gophercloudsdk/compute/v2/quotasets.WithUpdateForce",
+        "gophercloudsdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
+        "gophercloudsdk/compute/v2/quotasets.UserQuotaScope.Update",
+        "gophercloudsdk/compute/v2/quotasets.WithQuotaOptions"
       ],
       "contracts": [
         {
@@ -2064,18 +2156,44 @@
             "api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
+        },
+        {
+          "behavior": "The modern optional-user branch has an explicit fixed UserQuotaScope counterpart: exact user resolution uses the separate Keystone client once, PUT encodes one user_id, response identities cannot retarget the scope, and lookup or invalid-input failures make no Nova request.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserNameUsesInheritedOrOverrideKeystoneClientOnce",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserLookupFailuresDoNotCallNova",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserOperationsKeepQueryTargetAndRawResponse",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserInvalidInputsAndZeroScopeCannotResetProject"
+          ]
+        },
+        {
+          "behavior": "User Update reuses the SDK-owned concrete quota builder, preserves zero/unlimited and explicit force=false, snapshots extension input and independent response raw/header data, and retains exact integer PUT bodies and one fixed query across reauthentication, backoff and retries.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserOperationsKeepQueryTargetAndRawResponse",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRetryAndReauthKeepOneQueryAndExactBody"
+          ]
+        },
+        {
+          "behavior": "User Update preserves HTTP status/body/header and pair-aware missing errors, decode causes and context cancellation/deadlines; same-pair redirects retain the caller policy without adding a second user_id.",
+          "tests": [
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserErrorsKeepBothIdentitiesAndMissingPolicy",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserMalformedResponsesKeepDecodeCauses",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserContextAndCurrentProjectKeepExplicitUser",
+            "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRedirectKeepsSamePairAndCallerPolicy"
+          ]
         }
       ],
       "differences": [
         "Go uses explicit pointer-valued native inputs and functional options instead of Resource dirty-field commits and arbitrary attrs.",
-        "The Go scope returns QuotaResource retaining native values/raw decoded fields/header; Python returns a mutable normalized QuotaSet."
+        "The Go scope returns QuotaResource retaining native values/raw decoded fields/header; Python returns a mutable normalized QuotaSet.",
+        "Python modern update accepts an optional user and attrs; Go obtains an explicit UserQuotaScope before Update and does not infer membership or permit options to replace its fixed user_id.",
+        "User request guards and concrete snapshot options are additional high-level policies; they do not implement Python legacy quota objects, Resource dirty state or arbitrary commit/query behavior."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
       ],
       "remaining": [
-        "Map the optional user input and user_id update query.",
-        "Audit and map, or explicitly retire with a documented Go policy, the deprecated QuotaSet/project_id inputs and legacy query branch.",
+        "Audit and map, or explicitly retire with a documented Go policy, the deprecated QuotaSet/project_id inputs and legacy query branch; the modern explicit-user branch does not cover those paths.",
         "Audit inherited common QuotaSet body filtering of usage/reservation, unknown attrs, dirty/clean state, commit requests, descriptor coercion and microversion selection."
       ]
     },
@@ -2536,7 +2654,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -2544,7 +2662,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
           ]
         },
         {
@@ -2589,7 +2707,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -2597,7 +2715,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
           ]
         },
         {
@@ -2642,7 +2760,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -2650,7 +2768,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectUsesRecordedV3AndV2AuthenticationAndFreezesID",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCurrentProjectRejectsUnscopedManualAndInvalidAuthResults",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
           ]
         },
         {
@@ -2795,7 +2913,7 @@
           "tests": [
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient",
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -2803,7 +2921,7 @@
           "tests": [
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth",
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
           ]
         },
         {
@@ -2855,7 +2973,7 @@
           "tests": [
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient",
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaLookupFailuresPreventNetworkRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -2863,7 +2981,7 @@
           "tests": [
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectUsesRecordedV3AndV2Auth",
             "api/neutron_project_quotas_projects_test.go:TestNeutronProjectQuotaCurrentProjectRejectsMissingOrMalformedAuth",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotasIDAuthAndCancellation"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
           ]
         },
         {
@@ -3237,24 +3355,100 @@
       "operation": "python:network/v2/get_quota_default",
       "source_fingerprint": "d9c43cdb87c7c9bf105b3c6306122fd00c5e26af4feb4bf740439e6819f31e0e",
       "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.ProjectQuotaScope.Defaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "Defaults uses the distinct /quotas/{project}/default endpoint with ResourceBase/auth/configured headers, fixes ProjectID even when no identity is returned, and retains -1/zero limits, raw large extension integers/nulls and independent header/body snapshots.",
+          "tests": [
+            "api/neutron_quota_defaults_test.go:TestNeutronQuotaDefaultsUsesDistinctEndpointAndKeepsRawResponse"
+          ]
+        },
+        {
+          "behavior": "Strict 404 and 403/unexpected-201 failures retain HTTP code/body/header evidence; missing/null/array/scalar quota envelopes and wrong native limit types fail rather than returning a zero-valued resource.",
+          "tests": [
+            "api/neutron_quota_defaults_test.go:TestNeutronQuotaDefaultsPreservesHTTPAndDecodeErrors"
+          ]
+        },
+        {
+          "behavior": "Pre-canceled contexts prevent HTTP and in-flight cancellation/deadline causes remain observable.",
+          "tests": [
+            "api/neutron_quota_defaults_test.go:TestNeutronQuotaDefaultsCancellationAndPreflight"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses the already resolved project scope and returns a native typed/raw response with copied metadata instead of constructing and mutating a Python QuotaDefault URI Resource.",
+        "A missing response project identity is not inserted into raw Body; the request target is available separately as ProjectID."
+      ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
       "remaining": [
-        "Implement and test the distinct /quotas/{project}/default endpoint; ProjectQuotaScope.Get is the ordinary member endpoint and is not a defaults implementation.",
-        "Audit QuotaDefault URI/identity construction, disabled mutation/list capabilities and inherited fetch/resource/adapter behavior."
+        "Audit Python Quota/QuotaDefault Resource input conversion, URI and alternate project_id/tenant_id descriptor behavior, plural attribute coercion and disabled mutation/list capability inheritance.",
+        "Inherited Resource.fetch/cache/skip_cache/dict/location and adapter behavior remain unaudited; raw extension preservation does not implement those contracts."
       ]
     },
     {
       "operation": "python:network/v2/quotas",
       "source_fingerprint": "5160f0ad2c8f297aa8fe13f639e4d88bb909d0102f3d319c56fb5a46fd72f97a",
       "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/quotas.API.ListProjects",
+        "gophercloudsdk/network/v2/extensions/quotas.API.AllProjects",
+        "gophercloudsdk/network/v2/extensions/quotas.WithListProjectID",
+        "gophercloudsdk/network/v2/extensions/quotas.WithListMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListProjects performs no HTTP until consumed, fetches one /quotas array without query, and returns native limits plus validated project_id or legacy tenant_id, raw large/null/unknown fields and independent per-row/call headers and body snapshots.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListIsLazySinglePageAndKeepsProjectRawMetadata"
+          ]
+        },
+        {
+          "behavior": "Exact project filtering and maximum matching-item consumption are local; last options win, reused options and the iterator option-slice snapshot are independent, break/max stop before decoding later malformed rows, and malformed visited rows are not hidden by a filter.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListBreakAndLocalOptionsDoNotSendServerPaging"
+          ]
+        },
+        {
+          "behavior": "Missing/null/non-array quota collections, non-object rows, missing/empty/null/non-string/unsafe/conflicting project identities and invalid native limit types fail with retained decoder causes.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListRejectsMalformedEnvelopeRowsAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Recognized nonempty quotas_links rel=next/href or links.next strings are rejected as unsupported continuation without another request; empty/previous/unknown metadata shapes remain allowed, including unknown neighbors beside a real next link.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListSinglePageContinuationPolicyPreservesOtherMetadata"
+          ]
+        },
+        {
+          "behavior": "Nil options/clients, invalid local IDs and nonpositive local maxima fail before HTTP; 401/403/404/204/500 retain original response code/header/body evidence.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListPreflightOptionsAndHTTPFailures"
+          ]
+        },
+        {
+          "behavior": "Cancellation before or between consumption and during HTTP preserves its cause, deadlines remain observable, and AllProjects discards a partial slice after a later row error.",
+          "tests": [
+            "api/neutron_quotas_list_test.go:TestNeutronQuotasListCancellationAndPartialIteration"
+          ]
+        }
+      ],
+      "differences": [
+        "The actual Neutron quota controller and DB driver return a single array of projects with quota overrides, with default limits merged into each row; this is not a list of every Keystone project.",
+        "Pinned Proxy.quotas documents no supported quota query. Go provides local filter/consumption options and no server paging/filter/projection helpers or generic Resource.list limit/marker fallback.",
+        "Go requires safe unambiguous row identity and independent native/raw metadata; it does not return Python descriptor-backed Quota Resource objects. Recognized continuation is rejected rather than guessed or followed."
+      ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
       "remaining": [
-        "Implement an SDK-owned quota collection iterator for /quotas with project identity, response models, pagination/error/cancellation contracts; the current fixed-project scope has no list operation.",
-        "Audit inherited Quota.list and query mapping, unknown attributes, project_id/tenant_id identities and response/dict/cache behavior before mapping **query or collection results."
+        "Audit inherited Quota/Resource.list query mapping, iterator identity/alias normalization, descriptor coercion, unknown-attribute and dict/location/cache behavior before declaring whole-operation parity.",
+        "Python generic Resource pagination/body/header-link fallback, adapter behavior and arbitrary query handling are not mapped; Go intentionally follows the documented single-array server policy."
       ]
     },
     {
@@ -3269,7 +3463,7 @@
         {
           "behavior": "A named project is resolved once through a separate Keystone client before Cinder limit requests.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3277,7 +3471,7 @@
           "tests": [
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests",
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         }
       ],
@@ -3304,7 +3498,7 @@
         {
           "behavior": "A named project is resolved once, and typed/extension quota updates use the fixed project target.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3339,7 +3533,7 @@
         {
           "behavior": "A fixed project scope resets quota overrides with strict missing behavior and no automatic read.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3373,7 +3567,7 @@
         {
           "behavior": "Named project quota reads use a separate Keystone lookup; ordinary and detailed values remain distinct.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3407,7 +3601,7 @@
         {
           "behavior": "Named project quota updates preserve the resolved project and concrete optional limit/flag values.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3443,7 +3637,7 @@
         {
           "behavior": "Quota override deletion supports explicit ignore-missing after fixed project resolution.",
           "tests": [
-            "connection_project_quotas_test.go:TestConnectionStorageAndNetworkQuotaNamesUseSeparateIdentityClient"
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient"
           ]
         },
         {
@@ -3464,6 +3658,412 @@
       "remaining": [
         "Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.",
         "Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/get_quota",
+      "source_fingerprint": "02336391f2bc95b6eb2dc61bf0e7977ea3bf73c2384f6f42cf23645a7ca425eb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.InProject",
+        "gophercloudsdk/loadbalancer/v2/quotas.API.CurrentProject",
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Get",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithGetFields",
+        "gophercloudsdk.Connection.LoadBalancerProjectQuotas",
+        "gophercloudsdk.Connection.CurrentLoadBalancerProjectQuotas"
+      ],
+      "contracts": [
+        {
+          "behavior": "Scope GET uses the official /lbaas/quotas/{project} route, respects ResourceBase already ending in lbaas and preserves the generated native API.Get /quotas route without mutating the client.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaScopesCorrectNativeURLWithoutChangingGeneratedAPI",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "Repeated fields inputs are snapshotted; the scope project remains separate from response project_id and native/raw limits retain null/large extensions and independent response metadata. Non-null canonical aliases win, null canonical aliases fall back to non-null legacy values, and raw fields retain all aliases.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaAliasesKeepNativeNullFallbackAndRawFields"
+          ]
+        },
+        {
+          "behavior": "Exact project names resolve once with a separate Keystone client across pages; recorded v2/v3 authentication freezes the current project, explicit IDs avoid Identity/catalog lookup and canceled Connection scope construction preserves cancellation.",
+          "tests": [
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaProjectNameUsesSeparateIdentityClientOnce",
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaCurrentProjectRecordsAndFreezesV2V3Authentication",
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaScopePreflightAndLookupFailures",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET accepts only 200 and retains rejected HTTP code/header and 404 classification; nil/invalid fields options fail before HTTP, pre-canceled requests stop and an in-flight GET deadline preserves context.DeadlineExceeded.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The high-level Go route corrects pinned Gophercloud quota URLs that omit lbaas; generated low-level operations retain their existing route.",
+        "Go references distinguish exact Keystone names from IDs and can derive a recorded-auth scope, while the direct Python proxy accepts a project ID or Quota Resource.",
+        "Go returns native integer limits plus raw fields/copied header/status rather than Python plural descriptor properties; null and alias conflicts remain distinguishable through Body."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit Python Quota Resource input conversion, alternate project_id identity, descriptor coercion and inherited Resource.fetch response/dict/location/cache/skip_cache behavior.",
+        "Generic fetch/query and adapter/microversion contracts remain unaudited; the explicit Go fields helper and observed HTTP contracts do not establish whole-operation parity."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/update_quota",
+      "source_fingerprint": "5fb360fe5ce9750c80e28b5822065f5de5859d01dabc0f1757e00a16d1f6de90",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Update",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithQuotaOptions",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithDefaultLimit",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT binds the official project route and sends omitted/nil, zero and -1 native limits distinctly; WithDefaultLimit sends explicit null inheritance and extension values preserve creation-time JSON snapshots.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument"
+          ]
+        },
+        {
+          "behavior": "Quota options snapshot pointer values at creation and clone them when reused; exact integers and a stable final JSON body survive reauthentication and mutation of a previously applied private pointer.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSnapshotOmissionExactIntegersAndRetry"
+          ]
+        },
+        {
+          "behavior": "Invalid negative limits, nil options, core/legacy aliases, identity collisions, unserializable extensions, unsupported query/header/arguments and conflicting value/default inputs fail before HTTP; duplicate null inheritance is allowed and forged default-limit names fail.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument"
+          ]
+        },
+        {
+          "behavior": "PUT accepts 200/202 and preserves rejected HTTP code/header/404 classification; malformed accepted quota bodies retain exact bytes, status, header and decode cause without invoking the retry hook or replaying the accepted mutation.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaMalformedAcceptedResponsesRetainEvidenceWithoutRetry"
+          ]
+        },
+        {
+          "behavior": "Pre-canceled Update makes no HTTP request and cancellation during Update preserves context.Canceled.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go sends native canonical loadbalancer/healthmonitor names and explicit library-owned null inheritance options; Python Quota descriptors use load_balancer/health_monitor and plural attributes.",
+        "Go performs an explicit fixed-project update and returns a typed/raw snapshot, rather than changing and committing a Python Resource dirty state.",
+        "Go preserves native-compatible 200/202 success codes; the official Octavia PUT contract documents 202."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit Python Quota._prepare_request ID removal, Resource input/attribute coercion and inherited commit dirty-state/no-op/response normalization semantics; typed option serialization is only a partial mapping.",
+        "Inherited cache/resource-instance refresh, adapter/microversion and generic dynamic request behaviors remain unaudited; unknown extensions are delegated to the server rather than descriptor-mapped."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/delete_quota",
+      "source_fingerprint": "cd9000b43a18db19bab524b6a8a00fd9724820cc4c191ba6f92211222a1561a4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithResetIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reset DELETE targets /lbaas/quotas/{project} with no body, retains the fixed project and 204 metadata, and issues no follow-up GET to infer defaults.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "Native-compatible 202/204 are accepted; default missing policy is strict, explicit true suppresses only 404, later false restores strict behavior, and 403/500 and unexpected success codes retain response code/header causes.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Nil Reset options fail before HTTP and pre-canceled Reset contexts make no request.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires WithResetIgnoreMissing(true) for suppression.",
+        "Go returns ResetResponse metadata and keeps native-compatible 202/204 success; Python returns None and official Octavia DELETE documents 204.",
+        "The scope resets quota overrides through the corrected official route, while generated API.Delete retains its native /quotas path."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit Python Quota Resource/string input conversion and inherited Resource.delete response/cache/resource-instance and adapter behavior before whole-operation parity.",
+        "General dynamic request behavior and deletion effects on Python Resource state remain unmapped; the Go scope returns request metadata without refreshing limits."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/get_quota_default",
+      "source_fingerprint": "06f632d88a0061d57aae726a704de6565c1f0cf9d389d61c662e53cc1e70c58f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.Defaults",
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Defaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "Defaults reads global /lbaas/quotas/defaults with no project/query, returns raw large/null defaults and response headers independently of project override GET, and does not invent a project identity.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "Defaults accepts only HTTP 200, preserves rejected response code/header and strict 404 classification, and stops pre-canceled calls before HTTP.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Both API.Defaults and scope.Defaults return deployment-wide DefaultQuotaResource; a scoped call does not make the defaults project-specific.",
+        "Go returns native typed/raw limits and copied metadata rather than mutating a Python QuotaDefault Resource; native null integer values require Body to distinguish inheritance from zero."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit inherited QuotaDefault/Quota URI/capability/descriptor behavior and Resource.fetch normalization, dict/location/cache/skip_cache semantics.",
+        "Inherited Resource input/state and adapter/microversion behavior remain unaudited; the dedicated global endpoint alone is not full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/quotas",
+      "source_fingerprint": "d8d31849b5a5a333f248e3b921fb0c3a24d73d16c94b5c5e8f04b618362e1a8c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.ListProjects",
+        "gophercloudsdk/loadbalancer/v2/quotas.API.AllProjects",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithProjectListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListProjects is lazy and copies its option slice; reusable typed options independently snapshot fields and the reverse pointer. The collection serializes project_id, repeated fields, positive limit, marker and explicit server-form True/False page_reverse, and preserves missing initial filters/projections while explicit next-link paging values override them.",
+          "tests": [
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListProjectsQuerySnapshotPaginationAndRawValues",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListReverseUsesServerBooleanAndCarriesQuery"
+          ]
+        },
+        {
+          "behavior": "Relative quotas_links next URLs and empty intermediate pages are followed; rows retain native/raw large/null fields and independent metadata, and a projected-away project_id stays empty rather than being copied from a filter or auth record.",
+          "tests": [
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListProjectsQuerySnapshotPaginationAndRawValues"
+          ]
+        },
+        {
+          "behavior": "Breaking consumption skips later row/link decoding and extra HTTP; cancellation before and between rows stops consumption/continuation, and cycles, foreign origins, URL credentials and conflicting next links are rejected without refetching.",
+          "tests": [
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListBreakSkipsLaterDecodeAndNextHTTP",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListCancellationStopsAdditionalHTTP",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListCycleOriginAndConflictingLinks"
+          ]
+        },
+        {
+          "behavior": "Malformed quota envelopes/items/native fields/project identities/link shapes retain exact accepted response bytes/status/header without decode-triggered retry. Empty arrays are valid, only HTTP 200 succeeds, and rejected statuses retain HTTP code/header evidence.",
+          "tests": [
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListMalformedResponsesRetainEvidence",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListStatusPolicyAndEmptyCollection"
+          ]
+        },
+        {
+          "behavior": "Nil options, negative limit, unsafe marker/project IDs, blank fields and generic query/header/body/argument extensions fail before HTTP.",
+          "tests": [
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaListInvalidOptionsFailBeforeHTTP"
+          ]
+        }
+      ],
+      "differences": [
+        "Go exposes an explicit server-backed ProjectListOpts whitelist although pinned Proxy.quotas documents no supported resource-specific query; generic arbitrary query inputs are rejected.",
+        "Go follows recognized same-origin quotas_links continuations with cycle checks and retained initial query, instead of implementing all inherited Resource.list pagination fallbacks.",
+        "Go returns typed/raw project-quota snapshots; projected-away identities remain empty and are not constructed from request filters."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ],
+      "remaining": [
+        "Audit inherited Quota/Resource.list query mapping, descriptor/alternate-ID normalization, dict/location/cache behavior and Python resource-object ownership.",
+        "Generic Resource pagination/body/header-link and limit/marker fallback, arbitrary query and adapter/microversion behavior are not fully mapped; the tested SDK whitelist and safe next-link policy are only partial."
+      ]
+    },
+    {
+      "operation": "gophercloud:loadbalancer/v2/quotas.Get",
+      "source_fingerprint": "6c36522af1cee16cdff76f4915a34517639e79c0d147e78d5c712282a0cfcab9",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.Get",
+        "gophercloudsdk/loadbalancer/v2/quotas.API.InProject",
+        "gophercloudsdk/loadbalancer/v2/quotas.API.CurrentProject",
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Get",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithGetFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "The project scope uses the official /lbaas/quotas/{project} route and avoids duplicating an existing lbaas ResourceBase; generated API.Get keeps the pinned native /quotas route and the selected client configuration remains unchanged.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaScopesCorrectNativeURLWithoutChangingGeneratedAPI",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "Exact project names resolve once through separate Keystone pages; explicit IDs require no catalog/Identity request, recorded v2/v3 auth fixes the target, invalid/defaults-route IDs and lookup authorization failures stop quota HTTP, and Connection cancellation stays observable.",
+          "tests": [
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaProjectNameUsesSeparateIdentityClientOnce",
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaCurrentProjectRecordsAndFreezesV2V3Authentication",
+            "api/octavia_project_quotas_projects_test.go:TestOctaviaQuotaScopePreflightAndLookupFailures",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient",
+            "connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "The native Quota model is retained: non-null canonical loadbalancer/healthmonitor values override legacy aliases, null canonical values fall back to non-null legacy values, and absent/both-null aliases become native zero; raw response fields retain the exact alias/null distinctions.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaAliasesKeepNativeNullFallbackAndRawFields"
+          ]
+        },
+        {
+          "behavior": "Scope GET returns fixed ProjectID plus raw large-integer/null/extension fields and copied header/status; response project_id does not change the scope, repeated fields inputs are snapshotted and response metadata is independent across operations.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "GET keeps native HTTP 200-only success, retains rejected response code/header and adds ErrNotFound only for 404; nil/blank fields options fail before HTTP, pre-canceled GET makes no request and an in-flight deadline remains context.DeadlineExceeded.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK-owned project scope deliberately corrects the pinned native /quotas URL to official /lbaas/quotas; the generated low-level API.Get remains available with its original native URL contract.",
+        "Result extraction becomes a QuotaResource containing the unchanged native model, fixed ProjectID, exact raw Body and independent Header/StatusCode; explicit IDs, exact-name resolution and recorded-auth scope binding replace repeated project arguments.",
+        "The scope adds a concrete snapshotted fields-projection option, validates project/option inputs and rejects malformed quota objects instead of accepting the native missing/null quota extractor result. Accepted response decode errors retain raw HTTP evidence outside native retry handling."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:loadbalancer/v2/quotas.Update",
+      "source_fingerprint": "ade95b86dd850ab18089d1ec8dbd396baac6920d9fbd721b514989e90180dcb7",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.Update",
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Update",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithQuotaOptions",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithDefaultLimit",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed-project PUT uses official /lbaas/quotas/{project} with a quota envelope; native nil/zero/-1 limits stay distinct, explicit null inheritance and creation-time extension snapshots are serialized, and the updated native/raw result retains ProjectID and response metadata.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument"
+          ]
+        },
+        {
+          "behavior": "WithQuotaOptions snapshots pointer inputs at creation and returns independent application copies; exact machine-sized integers, omitted inputs and stable serialized bodies survive reauthentication and reuse after prior private pointer mutation.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSnapshotOmissionExactIntegersAndRetry"
+          ]
+        },
+        {
+          "behavior": "Typed limits below -1, nil options, core/legacy aliases, identity collisions, unserializable extensions, unsupported query/header/argument inputs and value/default conflicts fail before HTTP; duplicate default inheritance is safe and forged null-limit names fail.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument"
+          ]
+        },
+        {
+          "behavior": "PUT preserves native 200/202 success codes, original rejected response code/header and 404 classification; malformed accepted quota JSON/objects/native fields retain exact byte/header/status evidence without retrying the accepted mutation.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaMalformedAcceptedResponsesRetainEvidenceWithoutRetry"
+          ]
+        },
+        {
+          "behavior": "Pre-canceled Update prevents HTTP and cancellation during PUT remains context.Canceled.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The scope uses official /lbaas/quotas while generated API.Update continues delegating to the pinned native /quotas route.",
+        "Caller-owned UpdateOptsBuilder implementations are replaced by concrete native UpdateOpts and SDK-owned extension/default-inheritance options. Core/alias/identity protection and limits-below--1 preflight intentionally strengthen the native builder contract.",
+        "WithQuotaOptions and raw final JSON provide construction-time pointer snapshots, independent reuse and exact integer/retry bodies rather than native BuildRequestBody any/float64 conversion; explicit null limit inheritance is a scope-only input.",
+        "The scope returns native typed values plus fixed ProjectID/raw fields/copied metadata instead of an UpdateResult extractor. Accepted-body decoding preserves HTTP evidence and does not replay an already accepted mutation through the native retry hook."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
+      ]
+    },
+    {
+      "operation": "gophercloud:loadbalancer/v2/quotas.Delete",
+      "source_fingerprint": "6d76307615feee8288d5724e0faf8c3a6731aefa7558b3d86d1dc193b54fcbb8",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/quotas.API.Delete",
+        "gophercloudsdk/loadbalancer/v2/quotas.ProjectQuotaScope.Reset",
+        "gophercloudsdk/loadbalancer/v2/quotas.WithResetIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reset sends a bodyless DELETE to the official fixed-project quota route, returns ProjectID with actual 204 response metadata and performs no follow-up GET to infer limits.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults"
+          ]
+        },
+        {
+          "behavior": "Reset retains native 202/204 success; native-style strict 404 is the default, explicit ignore-missing suppresses only 404, later false restores strictness and other HTTP statuses retain original code/header causes.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Nil Reset options fail before HTTP and pre-canceled Reset retains context.Canceled without a request.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK singleton exposes Reset to remove overrides and returns ResetResponse(ProjectID, Header, StatusCode), rather than returning a DeleteResult for caller extraction or fabricating updated limits.",
+        "The scope deliberately uses official /lbaas/quotas while generated API.Delete retains the pinned native /quotas route.",
+        "Default strict missing handling preserves the native contract and additionally exposes ErrNotFound; optional WithResetIgnoreMissing changes only 404, with deterministic last-option precedence."
+      ],
+      "documentation": [
+        "loadbalancer/v2/quotas/README.md"
       ]
     }
   ]
