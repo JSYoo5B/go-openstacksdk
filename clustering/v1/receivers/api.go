@@ -131,6 +131,10 @@ func (a *API) Get(ctx context.Context, identity string) (*Receiver, error) {
 }
 
 func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, options ...UpdateOption) (*Receiver, error) {
+	return a.updateAt(ctx, ref, "receivers", value, options...)
+}
+
+func (a *API) updateAt(ctx context.Context, ref resource.Ref, path string, value UpdateOpts, options ...UpdateOption) (*Receiver, error) {
 	client := a.RawClient()
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
@@ -150,14 +154,16 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, value UpdateOpts, op
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
 	}
-	identity, err := rest.Collection(spec(client)).ResolveID(ctx, ref)
+	collection := spec(client)
+	collection.Path = path
+	identity, err := rest.Collection(collection).ResolveID(ctx, ref)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
 	}
 	if err := senlin.Validate(ctx, client); err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
 	}
-	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL("receivers", url.PathEscape(identity)), body, headers, http.StatusOK)
+	response, err := rest.DoJSON(ctx, client, http.MethodPatch, client.ServiceURL(path, url.PathEscape(identity)), body, headers, http.StatusOK)
 	if err != nil {
 		return nil, request.Wrap("Update", "clustering.receivers", err)
 	}
