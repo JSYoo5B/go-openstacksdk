@@ -1,0 +1,20 @@
+package segments
+
+import (
+	"context"
+
+	"gophercloudsdk/internal/masakari"
+	"gophercloudsdk/internal/rest"
+	"gophercloudsdk/resource"
+)
+
+// WaitForStatus requires an explicit typed string attribute because segments
+// have no status field. The default reports ErrUnsupported before HTTP.
+func (a *API) WaitForStatus(ctx context.Context, ref resource.Ref, status string, options ...resource.WaitOption) (*Segment, error) {
+	return masakari.WaitForStatus(ctx, rest.Collection(a.spec), ref, status, options...)
+}
+
+// WaitForDelete polls until HTTP 404, with a default 120-second deadline.
+func (a *API) WaitForDelete(ctx context.Context, ref resource.Ref, options ...resource.WaitOption) error {
+	return masakari.WaitForDelete(ctx, rest.Collection(a.spec), ref, false, options...)
+}
