@@ -37,14 +37,14 @@ func(ListOpts)ToListQuery()(string,error){return "",nil}`
 func TestIdentityCollectionsOnlyEnableAuditedMemberRoutes(t *testing.T) {
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path+"/"+spec.model, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")
+			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
 			if !identityCollectionEnabled(pkg, plan, spec.parents) || identityCollectionEnabled(pkg, plan, spec.parents+1) {
 				t.Fatal("audited parent arity was not preserved", spec, plan)
 			}
 			for _, drift := range []string{"numeric-model-id", "numeric-model-name", "missing-model-name", "numeric-request-id", "url-identity", "missing-name-query", "different-name-query", "wrong-model", "wrong-getter", "wrong-lister", "unrelated-package"} {
 				t.Run(drift, func(t *testing.T) {
 					altered := spec
-					fields, idType, query := "ID string;Name string", "string", "name"
+					fields, idType, query := "ID string;Name string", "string", identityExpectedNameQuery(spec)
 					switch drift {
 					case "numeric-model-id":
 						fields = "ID int;Name string"
@@ -58,6 +58,9 @@ func TestIdentityCollectionsOnlyEnableAuditedMemberRoutes(t *testing.T) {
 						fields = "SecretRef string;Name string"
 					case "missing-name-query":
 						query = ""
+						if spec.noNameQuery {
+							query = "name"
+						}
 					case "different-name-query":
 						query = "display_name"
 					case "wrong-model":
@@ -115,7 +118,7 @@ func identityAdapterEnabled(t *testing.T, source []byte) bool {
 func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *testing.T) {
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path+"/"+spec.model, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")
+			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
 			root := t.TempDir()
 			dir := filepath.Join(root, spec.path)
 			if err := os.MkdirAll(dir, 0755); err != nil {
@@ -157,7 +160,7 @@ func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *t
 			if spec.parents != 0 {
 				requireControlledCalls(t, adapter, "s.api."+spec.getter+"(ctx, s.parentID, string(id))", "s.api."+controlledListName(spec.lister)+"(ctx, s.parentID, control, options...)")
 			} else {
-				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "a.listWithControl(ctx, control, options...)")
+				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "a."+controlledListName(spec.lister)+"(ctx, control, options...)")
 			}
 			if spec.path == "compute/v2/servers" && !strings.Contains(string(emitted), "regexp.QuoteMeta(name)") {
 				t.Fatal("literal Nova name query policy was lost")
@@ -173,7 +176,7 @@ func TestIdentityCollectionsDoNotEmitCapabilitiesForUnrelatedBindings(t *testing
 		{path: "compute/v2/attachinterfaces", model: "Interface", getter: "Get", lister: "List", parents: 1},
 	} {
 		t.Run(spec.path, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")
+			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
 			e := emitter{pkg: pkg, imports: map[string]string{}}
 			e.printf("func(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
 			parents := []string(nil)

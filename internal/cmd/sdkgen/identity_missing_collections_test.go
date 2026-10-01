@@ -240,7 +240,7 @@ func TestIdentityMissingListEmitsFixedOwnedOverlayAndExplicitInventory(t *testin
 	missingCount, modesCount := 0, 0
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")
+			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
 			for _, mode := range identityListModeSpecs {
 				if mode.path == spec.path {
 					pkg, plan = identityModeFixture(t, mode, identityModeFixtureSource(mode))

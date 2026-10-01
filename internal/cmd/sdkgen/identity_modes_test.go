@@ -90,7 +90,7 @@ func TestIdentityListModesOnlyEnableAuditedConcretePagerContracts(t *testing.T) 
 			continue
 		}
 		t.Run("not-mode/"+spec.path, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", "name")
+			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
 			if identityListModeEnabled(pkg, plan) {
 				t.Fatal("identity capability leaked into list modes", spec)
 			}

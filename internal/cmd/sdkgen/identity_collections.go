@@ -20,6 +20,10 @@ type identityCollectionSpec struct {
 	getCodes                    []int
 	missingListKey              string
 	missingListValue            string
+	noNameQuery                 bool
+	listDefaultKey              string
+	listDefaultValue            string
+	extraSpecs                  bool
 }
 
 var identityCollectionSpecs = []identityCollectionSpec{
@@ -36,6 +40,7 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "dns/v2/recordsets", model: "RecordSet", getter: "Get", lister: "ListByZone", parents: 1, getSegments: []string{"zones", "$parent", "recordsets", "$id"}, getCodes: []int{200}},
 	{path: "loadbalancer/v2/pools", model: "Member", getter: "GetMember", lister: "ListMembers", parents: 1, getSegments: []string{"lbaas", "pools", "$parent", "members", "$id"}, getCodes: []int{200}},
 	{path: "image/v2/images", model: "Image", getter: "Get", lister: "List", getSegments: []string{"images", "$id"}, getCodes: []int{200}, missingListKey: "os_hidden", missingListValue: "true"},
+	{path: "compute/v2/flavors", model: "Flavor", getter: "Get", lister: "ListDetail", getSegments: []string{"flavors", "$id"}, getCodes: []int{200}, noNameQuery: true, listDefaultKey: "is_public", listDefaultValue: "None", extraSpecs: true},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -44,7 +49,7 @@ func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents
 }
 
 func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (identityCollectionSpec, bool) {
-	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.name != "Name" || plan.idIsURL || !isString(plan.getIDType) || plan.listInput == nil || !plan.listQueryBuilder || plan.nameQuery != "name" {
+	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.name != "Name" || plan.idIsURL || !isString(plan.getIDType) || plan.listInput == nil || !plan.listQueryBuilder {
 		return identityCollectionSpec{}, false
 	}
 	identifier, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.id)
@@ -59,13 +64,100 @@ func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parent
 	}
 	for _, spec := range identityCollectionSpecs {
 		if sdkPath(pkg.Path()) == spec.path && plan.modelName == spec.model && plan.getter.Name() == spec.getter && plan.lister.Name() == spec.lister && parents == spec.parents && identityGetResult(pkg, plan, parents) != nil {
-			if !identityMissingListMetadataValid(spec) {
+			if !identityMissingListMetadataValid(spec) || !identityFlavorMetadataValid(spec) || plan.nameQuery != identityExpectedNameQuery(spec) {
 				return identityCollectionSpec{}, false
 			}
 			return spec, true
 		}
 	}
 	return identityCollectionSpec{}, false
+}
+
+func identityExpectedNameQuery(spec identityCollectionSpec) string {
+	if spec.noNameQuery {
+		return ""
+	}
+	return "name"
+}
+
+// Flavor's list default and optional enrichment are deliberately separate from
+// details/all-projects modes. ListDetail is its only audited native list route.
+func identityFlavorMetadataValid(spec identityCollectionSpec) bool {
+	if spec.path != "compute/v2/flavors" {
+		return !spec.noNameQuery && spec.listDefaultKey == "" && spec.listDefaultValue == "" && !spec.extraSpecs
+	}
+	return spec.model == "Flavor" && spec.getter == "Get" && spec.lister == "ListDetail" && spec.parents == 0 && len(spec.getSegments) == 2 && spec.getSegments[0] == "flavors" && spec.getSegments[1] == "$id" && len(spec.getCodes) == 1 && spec.getCodes[0] == 200 && spec.noNameQuery && spec.listDefaultKey == "is_public" && spec.listDefaultValue == "None" && spec.extraSpecs
+}
+
+func identityFlavorEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
+	spec, ok := identityCollectionContract(pkg, plan, parents)
+	return ok && spec.extraSpecs
+}
+
+func identityFlavorSchema(pkg *types.Package, plan *collectionPlan) bool {
+	if plan.nameQuery != "" || queryTag(plan.listInput, "AccessType") != "is_public" {
+		return false
+	}
+	access, _, _ := types.LookupFieldOrMethod(plan.listInput, true, nil, "AccessType")
+	if access == nil || !isString(access.Type()) {
+		return false
+	}
+	fields, ok := plan.model.Underlying().(*types.Struct)
+	if !ok {
+		return false
+	}
+	found := false
+	for i := 0; i < fields.NumFields(); i++ {
+		if fields.Field(i).Name() == "ExtraSpecs" {
+			value, ok := fields.Field(i).Type().(*types.Map)
+			if !ok || !types.Identical(value.Key(), types.Typ[types.String]) || !types.Identical(value.Elem(), types.Typ[types.String]) || reflect.StructTag(fields.Tag(i)).Get("json") != "extra_specs" {
+				return false
+			}
+			found = true
+		}
+	}
+	if !found {
+		return false
+	}
+	page := pkg.Scope().Lookup("FlavorPage")
+	if page == nil {
+		return false
+	}
+	pageFields, ok := page.Type().Underlying().(*types.Struct)
+	if !ok || pageFields.NumFields() != 1 || !pageFields.Field(0).Embedded() || types.TypeString(pageFields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page.Type(), name)
+		if method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	extract, ok := pkg.Scope().Lookup("ExtractFlavors").(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	getter, ok := pkg.Scope().Lookup("ListExtraSpecs").(*types.Func)
+	if !ok {
+		return false
+	}
+	sig = getter.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 3 || !isContext(sig.Params().At(0).Type()) || clientParam(sig) != 1 || !isString(sig.Params().At(2).Type()) || sig.Results().Len() != 1 {
+		return false
+	}
+	result, ok := sig.Results().At(0).Type().(*types.Named)
+	if !ok || result.Obj().Pkg() != pkg || result.Obj().Name() != "ListExtraSpecsResult" {
+		return false
+	}
+	method := extractionMethod(result, "Extract")
+	if method == nil || !types.Identical(method.Results().At(0).Type(), types.NewMap(types.Typ[types.String], types.Typ[types.String])) {
+		return false
+	}
+	return true
 }
 
 // Only Glance's audited Image.find performs one additional list after a
@@ -219,6 +311,20 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"ImagePage.NextPageURL": "8af361267917a4230d811f9938d8d4b3057096263f704c7b831db46dc0b0318e",
 		"nextPageURL":           "7ac8c7e2868170732aa46e3bfa231d509eee709c214323a364e1e6e4047400f7",
 	},
+	"compute/v2/flavors": {
+		"Get":                      identityDefaultGetSHA,
+		"getURL":                   "f9856433ef837cb4589adba04a50e477e82c357dba1289e2a424ce4a88be9daf",
+		"ListDetail":               "2c2031a2f9157750ca7e57591255b3297a003f675243056e6f64ae569cefd5d4",
+		"listURL":                  "0f37919309f176c5f80901a6e0a815f2468803dc4d42bacbf55f25d316f2a81e",
+		"commonResult.Extract":     "ca85e75b9e06417e9c7bc4f2ba3287438c3dfe6e26e2cf5f26a236c1849fc033",
+		"Flavor.UnmarshalJSON":     "e90a02c1393493482f84e729304b8faa4761cadf6ad55da5b833af00a9da88ce",
+		"ExtractFlavors":           "2bfbd3cf1cb46982fd8666b499165b0c5ee2efd183c3c628ee3d9b8ca11a5110",
+		"FlavorPage.IsEmpty":       "6371bcf987b7f30157c5f5ea1df684d9d084715b3ff6b160576d510b3b541fc7",
+		"FlavorPage.NextPageURL":   "0d9fdb462fae3de233ddd9082300c49d516833cc603414059ad63e9b9b6acfd9",
+		"ListExtraSpecs":           "b18d0bb516220edefc62e35b76f98f0f7996f848ec59d7db695c14ed6a2f1625",
+		"extraSpecsListURL":        "df35511fb8f504daaf787fd8b3881157d0f38de6d2a09a47e5e747904e3595fa",
+		"extraSpecsResult.Extract": "22b06d0f0d4e5a25aa29d4b834f500363f04a517abcee559d5320121331b8d5e",
+	},
 }
 
 var identityNativeURLConstants = map[string]map[string]string{
@@ -276,6 +382,9 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if spec.missingListKey != "" && !identityImageListSchema(pkg, selected) {
 			return fmt.Errorf("audited identity collection %s.%s: native hidden query, image, pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if spec.extraSpecs && !identityFlavorSchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native access query, extra specs, pager, or extractor schema changed", spec.path, spec.model)
 		}
 		for name, want := range identityNativeDeclarations[spec.path] {
 			got, err := requestDeclarationHash(decls[name])

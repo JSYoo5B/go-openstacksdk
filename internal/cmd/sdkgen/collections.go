@@ -11,22 +11,24 @@ import (
 )
 
 type collectionRecord struct {
-	Package             string `json:"package"`
-	Source              string `json:"source,omitempty"`
-	Model               string `json:"model,omitempty"`
-	UpstreamModel       string `json:"upstream_model,omitempty"`
-	Kind                string `json:"kind,omitempty"`
-	Find                bool   `json:"find"`
-	IdentityFind        bool   `json:"identity_find,omitempty"`
-	IdentityGetQuery    bool   `json:"identity_get_query,omitempty"`
-	IdentityMissingList bool   `json:"identity_missing_list,omitempty"`
-	IdentityDetails     bool   `json:"identity_details,omitempty"`
-	IdentityAllProjects bool   `json:"identity_all_projects,omitempty"`
-	Delete              bool   `json:"delete"`
-	Wait                bool   `json:"wait"`
-	Scope               string `json:"scope,omitempty"`
-	Parent              string `json:"parent,omitempty"`
-	Issue               string `json:"issue,omitempty"`
+	Package              string `json:"package"`
+	Source               string `json:"source,omitempty"`
+	Model                string `json:"model,omitempty"`
+	UpstreamModel        string `json:"upstream_model,omitempty"`
+	Kind                 string `json:"kind,omitempty"`
+	Find                 bool   `json:"find"`
+	IdentityFind         bool   `json:"identity_find,omitempty"`
+	IdentityGetQuery     bool   `json:"identity_get_query,omitempty"`
+	IdentityMissingList  bool   `json:"identity_missing_list,omitempty"`
+	IdentityListDefaults bool   `json:"identity_list_defaults,omitempty"`
+	IdentityExtraSpecs   bool   `json:"identity_extra_specs,omitempty"`
+	IdentityDetails      bool   `json:"identity_details,omitempty"`
+	IdentityAllProjects  bool   `json:"identity_all_projects,omitempty"`
+	Delete               bool   `json:"delete"`
+	Wait                 bool   `json:"wait"`
+	Scope                string `json:"scope,omitempty"`
+	Parent               string `json:"parent,omitempty"`
+	Issue                string `json:"issue,omitempty"`
 }
 
 type collectionPlan struct {
@@ -294,6 +296,9 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		if contract.missingListKey != "" {
 			e.printf("IdentityMissingListQuery:url.Values{%q:{%q}},\n", contract.missingListKey, contract.missingListValue)
 		}
+		if contract.extraSpecs {
+			e.printf("IdentityListQueryDefaults:url.Values{%q:{%q}},\nIdentityExtraSpecs:func(ctx context.Context,value *%s)(*%s,error){return nativefind.FlavorExtraSpecs(ctx,%s.RawClient(),value)},\n", contract.listDefaultKey, contract.listDefaultValue, plan.modelName, plan.modelName, receiver)
+		}
 		if len(parents) == 0 {
 			if mode, ok := identityListModeContract(e.pkg, plan); ok {
 				e.printf("IdentityAllProjectsQuery:\"all_tenants\",\nIterateIdentity:func(ctx context.Context,q url.Values,details bool)iter.Seq2[*%s,error]{return nativefind.%s(ctx,%s.RawClient(),q,details)},\n", plan.modelName, mode.iterator, receiver)
@@ -349,7 +354,9 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.printf("if value:=q.Get(\"name\");value!=\"\"{q.Set(%q,value);q.Del(\"name\")}\n", plan.nameQuery)
 	}
 	if plan.statusQuery == "" {
-		e.printf("q.Del(\"status\")\n")
+		if !identityFlavorEnabled(e.pkg, plan, len(parents)) {
+			e.printf("q.Del(\"status\")\n")
+		}
 	} else if plan.statusQuery != "status" {
 		e.printf("if value:=q.Get(\"status\");value!=\"\"{q.Set(%q,value);q.Del(\"status\")}\n", plan.statusQuery)
 	}

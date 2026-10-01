@@ -26,6 +26,15 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		source = strings.ReplaceAll(source, "ExtractModels", "ExtractImages")
 		source += "\nfunc(ImagePage)IsEmpty()(bool,error){return false,nil}\nfunc(ImagePage)NextPageURL()(string,error){return \"\",nil}\n"
 	}
+	if spec.path == "compute/v2/flavors" {
+		source = strings.Replace(source, "type Flavor struct{ID string;Name string}", "type Flavor struct{ID string;Name string;ExtraSpecs map[string]string `json:\"extra_specs\"`}", 1)
+		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type AccessType string\ntype ListOpts struct{AccessType AccessType `q:\"is_public\"`}", 1)
+		source = strings.ReplaceAll(source, "ModelPage", "FlavorPage")
+		source = strings.Replace(source, "type FlavorPage struct{}", "type FlavorPage struct{pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", "ExtractFlavors")
+		source += "\nfunc(FlavorPage)IsEmpty()(bool,error){return false,nil}\nfunc(FlavorPage)NextPageURL()(string,error){return \"\",nil}\n"
+		source += "type ListExtraSpecsResult struct{Body any;Header http.Header;Err error}\nfunc(ListExtraSpecsResult)Extract()(map[string]string,error){return nil,nil}\nfunc ListExtraSpecs(ctx context.Context,client *gophercloud.ServiceClient,id string)ListExtraSpecsResult{return ListExtraSpecsResult{}}\n"
+	}
 	// Member uses GetMemberResult upstream; use its actual signature instead of
 	// allowing the emitter to assume every native getter returns GetResult.
 	source = strings.ReplaceAll(source, "GetResult", spec.getter+"Result")
@@ -56,6 +65,7 @@ func identityAuditPlans(spec identityCollectionSpec, plan *collectionPlan) (*col
 func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 	routes := map[string]string{
 		"compute/v2/servers":      `[]string{"servers", id}, q, []int{200, 203}`,
+		"compute/v2/flavors":      `[]string{"flavors", id}, q, []int{200}`,
 		"blockstorage/v3/volumes": `[]string{"volumes", id}, q, []int{200}`,
 		"network/v2/ports":        `[]string{"ports", id}, q, []int{200}`,
 		"network/v2/networks":     `[]string{"networks", id}, q, []int{200}`,
@@ -69,7 +79,7 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 		"loadbalancer/v2/pools":   `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
 		"image/v2/images":         `[]string{"images", id}, q, []int{200}`,
 	}
-	if len(identityCollectionSpecs) != 13 || len(identityNativeDeclarations) != 13 {
+	if len(identityCollectionSpecs) != 14 || len(identityNativeDeclarations) != 14 {
 		t.Fatal("identity opt-in inventory must remain explicit", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 	for _, spec := range identityCollectionSpecs {
@@ -171,6 +181,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 	switch spec.path {
 	case "image/v2/images":
 		return pinnedImageIdentityDeclarations(t)
+	case "compute/v2/flavors":
+		return pinnedFlavorIdentityDeclarations(t)
 	case "compute/v2/servers":
 		request = strings.Replace(defaultGet, "&r.Body, nil", "&r.Body, &gophercloud.RequestOpts{\n\t\tOkCodes: []int{200, 203},\n\t}", 1)
 		urls = `func getURL(client *gophercloud.ServiceClient, id string) string { return deleteURL(client,id) }

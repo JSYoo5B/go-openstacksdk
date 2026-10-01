@@ -283,6 +283,10 @@
     "package": "gophercloudsdk/compute/v2/flavors",
     "model": "Flavor",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
+    "identity_list_defaults": true,
+    "identity_extra_specs": true,
     "delete": true,
     "wait": false
   },
