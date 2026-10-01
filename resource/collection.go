@@ -32,6 +32,12 @@ type Adapter[T any] struct {
 	GetIdentityQuery func(context.Context, string, url.Values) (*T, error)
 	List             func(url.Values) pagination.Pager
 	Iterate          func(context.Context, url.Values) iter.Seq2[*T, error]
+	// IterateIdentity selects a detailed or summary fallback for FindIdentity.
+	// It is used only by audited bindings; ordinary List keeps its own iterator.
+	IterateIdentity func(context.Context, url.Values, bool) iter.Seq2[*T, error]
+	// IdentityAllProjectsQuery opts a binding into the typed, list-only
+	// AllProjects policy and identifies its wire query key, such as all_tenants.
+	IdentityAllProjectsQuery string
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
