@@ -43,7 +43,7 @@ func TestAcceleratorDeviceActions(t *testing.T) {
 	if !errors.As(err, &response) || response.Actual != 403 || response.ResponseHeader.Get("X-Request-Id") != "req-action" {
 		t.Fatalf("disable: %v", err)
 	}
-	for _, version := range []string{"", "2.2", "latest", "2.bad", "2.99999999999999999999999", "3.10"} {
+	for _, version := range []string{"latest", "2.bad", "2.99999999999999999999999", "3.10"} {
 		client.Microversion = version
 		if _, err := a.Enable(context.Background(), resource.ID("d1")); err == nil {
 			t.Fatalf("version accepted: %s", version)

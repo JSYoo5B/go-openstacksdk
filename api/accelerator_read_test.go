@@ -144,7 +144,9 @@ func TestAcceleratorReadFailuresAndIdentity(t *testing.T) {
 			testcloud.JSON(w, 200, `{"uuid":"response-different","id":"17","status":"enabled"}`)
 		}
 	})
-	a := devices.New(cloud.Client("accelerator", "/v2"))
+	client := cloud.Client("accelerator", "/v2")
+	client.Microversion = "2.3"
+	a := devices.New(client)
 	if _, err := a.Find(context.Background(), resource.Name("host")); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}

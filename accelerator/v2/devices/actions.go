@@ -21,7 +21,8 @@ func (a *API) Enable(ctx context.Context, device resource.Ref, options ...Action
 	return a.action(ctx, device, "enable", options...)
 }
 
-// Disable sets the device to maintaining. Both actions require Cyborg 2.3+.
+// Disable sets the device to maintaining. Unlike status fetch/wait (2.3+),
+// the controller does not microversion-gate these actions.
 func (a *API) Disable(ctx context.Context, device resource.Ref, options ...ActionOption) (*common.Metadata, error) {
 	return a.action(ctx, device, "disable", options...)
 }
@@ -30,7 +31,7 @@ func (a *API) action(ctx context.Context, device resource.Ref, action string, op
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	if err := cyborg.RequireMicroversion(a.client, 3); err != nil {
+	if err := cyborg.RequireMicroversion(a.client, 0); err != nil {
 		return nil, request.Wrap(action, "devices", err)
 	}
 	c, err := request.Apply(struct{}{}, options...)

@@ -23,11 +23,15 @@ func Collection[T any](client *gophercloud.ServiceClient, path, single, plural s
 			return Fetch[T](ctx, client, "GET", client.ServiceURL(path, url.PathEscape(id)), nil, single, metadata, 200)
 		},
 		List: func(query url.Values) pagination.Pager {
+			guarded, err := guardedClient(client)
+			if err != nil {
+				return pagination.Pager{Err: err}
+			}
 			endpoint := client.ServiceURL(path)
 			if len(query) > 0 {
 				endpoint += "?" + query.Encode()
 			}
-			return pagination.NewPager(client, endpoint, func(result pagination.PageResult) pagination.Page {
+			return pagination.NewPager(guarded, endpoint, func(result pagination.PageResult) pagination.Page {
 				return page[T]{LinkedPageBase: pagination.LinkedPageBase{PageResult: result}, plural: plural, metadata: metadata}
 			})
 		},
@@ -35,7 +39,11 @@ func Collection[T any](client *gophercloud.ServiceClient, path, single, plural s
 	}
 	if deleteURL != nil {
 		adapter.Delete = func(ctx context.Context, id string) error {
-			_, err := client.Delete(ctx, deleteURL(id), &gophercloud.RequestOpts{OkCodes: []int{204}})
+			guarded, err := guardedClient(client)
+			if err != nil {
+				return err
+			}
+			_, err = guarded.Delete(ctx, deleteURL(id), &gophercloud.RequestOpts{OkCodes: []int{204}})
 			return err
 		}
 	}
@@ -52,8 +60,15 @@ func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method
 }
 
 func fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, single string, metadata func(*T) *common.Metadata, codes ...int) (*T, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	guarded, err := guardedClient(client)
+	if err != nil {
+		return nil, err
+	}
 	var raw json.RawMessage
-	response, err := client.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, MoreHeaders: headers, OkCodes: codes})
+	response, err := guarded.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, MoreHeaders: headers, OkCodes: codes})
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +122,14 @@ func (p page[T]) extract() ([]T, error) {
 	return values, nil
 }
 
-func (p page[T]) IsEmpty() (bool, error) { values, err := p.extract(); return len(values) == 0, err }
+func (p page[T]) IsEmpty() (bool, error) {
+	values, err := p.extract()
+	if err != nil || len(values) > 0 {
+		return false, err
+	}
+	next, err := p.NextPageURL()
+	return next == "", err
+}
 
 func (p page[T]) NextPageURL() (string, error) {
 	encoded, err := json.Marshal(p.Body)

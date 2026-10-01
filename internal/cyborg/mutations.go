@@ -53,7 +53,14 @@ func Headers(extra map[string]string) (map[string]string, error) {
 }
 
 func Mutate(ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, codes ...int) (*common.Metadata, error) {
-	response, err := client.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, MoreHeaders: headers, OkCodes: codes})
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	guarded, err := guardedClient(client)
+	if err != nil {
+		return nil, err
+	}
+	response, err := guarded.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, MoreHeaders: headers, OkCodes: codes})
 	if err != nil {
 		return nil, err
 	}

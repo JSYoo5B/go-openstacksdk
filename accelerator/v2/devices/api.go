@@ -39,7 +39,11 @@ type API struct {
 }
 
 func New(client *gophercloud.ServiceClient) *API {
-	collection := cyborg.Collection(client, "devices", "device", "devices", func(v *Device) string { return v.UUID }, nil, func(v *Device) string { return v.Status }, func(v *Device) *common.Metadata { return &v.Metadata }, nil)
+	var status func(*Device) string
+	if cyborg.RequireMicroversion(client, 3) == nil {
+		status = func(v *Device) string { return v.Status }
+	}
+	collection := cyborg.Collection(client, "devices", "device", "devices", func(v *Device) string { return v.UUID }, nil, status, func(v *Device) *common.Metadata { return &v.Metadata }, nil)
 	return &API{Collection: collection, Resources: collection, client: client}
 }
 
