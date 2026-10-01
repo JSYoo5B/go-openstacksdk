@@ -4555,6 +4555,78 @@
       "remaining": [
         "Compare inherited common QuotaSet/Resource translation, fallback behavior, cached Resource/dirty-state inputs and adapter/microversion selection beyond the verified service HTTP mapping."
       ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/get_quota_class_set",
+      "source_fingerprint": "312687a48a8022d0c9be3debd7069b36c8dc163b334f41f7b164ec937413a7d2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.API.InClass",
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.QuotaClassScope.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The explicit class name is fixed without project/Keystone lookup. GET/PUT200 use legacy os-quota-class-sets through2.6 or quota-class-sets from2.7 and quota_class_set envelope; exact typed/raw values, server ID, requested class, headers/status and original HTTP/decode/context causes remain independent. No unsupported list/create/reset/delete/wait method is promoted.",
+          "tests": [
+            "api/manila_quota_class_test.go:TestManilaQuotaClassNamedScopesUseVersionedRoutesWithoutLookups",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassResponsePreservesNullOmissionAndExtensions",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassStatusAndDecodeErrorsKeepOriginalCauses",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassRedirectCannotChangeFixedClassOrMethod",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassPreflightAndInFlightContextCancellation"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK owns the absent native transport and fixes an explicit class name; concrete int64 pointer options and functional extensions replace mutable Python Resource inputs.",
+        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/quotaclasssets/README.md"
+      ],
+      "remaining": [
+        "Compare inherited Resource/proxy class-name aliases, cached Resource/dirty-state commit and adapter/microversion/query normalization beyond the verified named-class HTTP mapping."
+      ]
+    },
+    {
+      "operation": "python:shared_file_system/v2/update_quota_class_set",
+      "source_fingerprint": "c320f60d0de8fad184737edfc9f467e2d0e245d7fe96dbdb91a6d4472b48d813",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.API.InClass",
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.QuotaClassScope.Update",
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.WithQuotaOptions",
+        "gophercloudsdk/sharedfilesystems/v2/quotaclasssets.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "The explicit class name is fixed without project/Keystone lookup. GET/PUT200 use legacy os-quota-class-sets through2.6 or quota-class-sets from2.7 and quota_class_set envelope; exact typed/raw values, server ID, requested class, headers/status and original HTTP/decode/context causes remain independent. No unsupported list/create/reset/delete/wait method is promoted.",
+          "tests": [
+            "api/manila_quota_class_test.go:TestManilaQuotaClassNamedScopesUseVersionedRoutesWithoutLookups",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassResponsePreservesNullOmissionAndExtensions",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassStatusAndDecodeErrorsKeepOriginalCauses",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassRedirectCannotChangeFixedClassOrMethod",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassPreflightAndInFlightContextCancellation"
+          ]
+        },
+        {
+          "behavior": "All12 typed quota limits retain exact int64 wire values; nil/zero/-1 and deep option/extension snapshots are distinct, and force/project/user/class/core collisions or unsupported query/arguments fail before HTTP.",
+          "tests": [
+            "api/manila_quota_class_test.go:TestManilaQuotaClassAllTypedLimitsKeepExactWireValuesAndSnapshots",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassUpdateDistinguishesZeroUnlimitedAndOmitted",
+            "api/manila_quota_class_test.go:TestManilaQuotaClassInvalidOptionsAndMethodSetsPreventUnsupportedRequests"
+          ]
+        }
+      ],
+      "differences": [
+        "The SDK owns the absent native transport and fixes an explicit class name; concrete int64 pointer options and functional extensions replace mutable Python Resource inputs.",
+        "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved."
+      ],
+      "documentation": [
+        "sharedfilesystems/v2/quotaclasssets/README.md"
+      ],
+      "remaining": [
+        "Compare inherited Resource/proxy class-name aliases, cached Resource/dirty-state commit and adapter/microversion/query normalization beyond the verified named-class HTTP mapping."
+      ]
     }
   ]
 }
