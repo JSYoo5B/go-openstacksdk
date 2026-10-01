@@ -66,6 +66,10 @@ func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 	adapter.Iterate = func(ctx context.Context, query url.Values) iter.Seq2[*T, error] {
 		return List(ctx, spec, query)
 	}
+	adapter.IterateControlled = func(ctx context.Context, query url.Values, control resource.ListControl) iter.Seq2[*T, error] {
+		return ListWithControl(ctx, spec, query, ListControl{MaxItems: control.MaxItems,
+			SinglePage: control.SinglePage, LimitHint: spec.Paging.MaxItemsLimitHint})
+	}
 	if spec.Get {
 		adapter.Get = func(ctx context.Context, id string) (*T, error) {
 			if err := spec.validate(ctx); err != nil {

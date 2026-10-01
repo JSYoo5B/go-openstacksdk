@@ -34,6 +34,21 @@ type PagePolicy[T any] struct {
 	// AllowFirstLimitReduction permits only the first continuation to reduce
 	// the requested limit. That reduced limit is fixed for all later pages.
 	AllowFirstLimitReduction bool
+	// MaxItemsLimitHint allows a controlled Collection iteration to supply its
+	// max-items cap as a wire limit when the caller did not specify one.
+	MaxItemsLimitHint bool
+	// StopOnEmptyPage ignores continuations on an empty page. The default keeps
+	// supporting services which advertise a next link from an empty page.
+	StopOnEmptyPage bool
+}
+
+// ListControl limits raw, successfully decoded and validated rows before any
+// caller-side local filtering. MaxItems zero is unbounded. LimitHint is opt-in
+// because many collections do not support a limit query at all.
+type ListControl struct {
+	MaxItems   int
+	SinglePage bool
+	LimitHint  bool
 }
 
 func queryCopy(query url.Values) url.Values {
@@ -73,9 +88,23 @@ func paginationInput(query url.Values) (int, error) {
 // path, inherit omitted initial filters, and cannot replace or add filters.
 // Every page revalidates the source and uses an independently guarded request.
 func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) iter.Seq2[*T, error] {
+	return ListWithControl(ctx, spec, query, ListControl{})
+}
+
+// ListWithControl stops before decoding unconsumed rows or interpreting next
+// links after its cap. SinglePage still validates every consumed first-page row.
+// Each iteration owns its count, query snapshot and continuation guards.
+func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query url.Values, control ListControl) iter.Seq2[*T, error] {
 	initial := queryCopy(query)
+	if control.LimitHint && control.MaxItems > 0 && !initial.Has("limit") {
+		initial.Set("limit", strconv.Itoa(control.MaxItems))
+	}
 	return func(yield func(*T, error) bool) {
 		fail := func(err error) { yield(nil, err) }
+		if control.MaxItems < 0 {
+			fail(fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption))
+			return
+		}
 		if err := spec.validate(ctx); err != nil {
 			fail(err)
 			return
@@ -115,6 +144,7 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 		if marker := initial.Get("marker"); marker != "" {
 			markers[marker] = true
 		}
+		consumed := 0
 		for pageNumber := 0; ; pageNumber++ {
 			if pageNumber > 0 {
 				if err := spec.validate(ctx); err != nil {
@@ -154,12 +184,22 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 						return
 					}
 				}
+				consumed++
 				if !yield(value, nil) {
+					return
+				}
+				if control.MaxItems > 0 && consumed >= control.MaxItems {
+					if err := ctx.Err(); err != nil {
+						fail(response.Fail(err))
+					}
 					return
 				}
 			}
 			if err := ctx.Err(); err != nil {
 				fail(response.Fail(err))
+				return
+			}
+			if control.SinglePage || (spec.Paging.StopOnEmptyPage && len(items) == 0) {
 				return
 			}
 			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, pageNumber == 0 && spec.Paging.AllowFirstLimitReduction)
