@@ -24,6 +24,7 @@ type identityCollectionSpec struct {
 	listDefaultKey              string
 	listDefaultValue            string
 	extraSpecs                  bool
+	rawListIterator             string
 }
 
 var identityCollectionSpecs = []identityCollectionSpec{
@@ -41,6 +42,8 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "loadbalancer/v2/pools", model: "Member", getter: "GetMember", lister: "ListMembers", parents: 1, getSegments: []string{"lbaas", "pools", "$parent", "members", "$id"}, getCodes: []int{200}},
 	{path: "image/v2/images", model: "Image", getter: "Get", lister: "List", getSegments: []string{"images", "$id"}, getCodes: []int{200}, missingListKey: "os_hidden", missingListValue: "true"},
 	{path: "compute/v2/flavors", model: "Flavor", getter: "Get", lister: "ListDetail", getSegments: []string{"flavors", "$id"}, getCodes: []int{200}, noNameQuery: true, listDefaultKey: "is_public", listDefaultValue: "None", extraSpecs: true},
+	{path: "network/v2/extensions/layer3/routers", model: "Router", getter: "Get", lister: "List", getSegments: []string{"routers", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/security/groups", model: "SecGroup", getter: "Get", lister: "List", getSegments: []string{"security-groups", "$id"}, getCodes: []int{200}, rawListIterator: "IterateSecurityGroups"},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -49,7 +52,7 @@ func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents
 }
 
 func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (identityCollectionSpec, bool) {
-	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.name != "Name" || plan.idIsURL || !isString(plan.getIDType) || plan.listInput == nil || !plan.listQueryBuilder {
+	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.name != "Name" || plan.idIsURL || !isString(plan.getIDType) || plan.listInput == nil {
 		return identityCollectionSpec{}, false
 	}
 	identifier, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.id)
@@ -64,7 +67,10 @@ func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parent
 	}
 	for _, spec := range identityCollectionSpecs {
 		if sdkPath(pkg.Path()) == spec.path && plan.modelName == spec.model && plan.getter.Name() == spec.getter && plan.lister.Name() == spec.lister && parents == spec.parents && identityGetResult(pkg, plan, parents) != nil {
-			if !identityMissingListMetadataValid(spec) || !identityFlavorMetadataValid(spec) || plan.nameQuery != identityExpectedNameQuery(spec) {
+			if !identityMissingListMetadataValid(spec) || !identityFlavorMetadataValid(spec) || !identityRawListMetadataValid(spec) || plan.nameQuery != identityExpectedNameQuery(spec) {
+				return identityCollectionSpec{}, false
+			}
+			if plan.listQueryBuilder != (spec.rawListIterator == "") {
 				return identityCollectionSpec{}, false
 			}
 			return spec, true
@@ -78,6 +84,71 @@ func identityExpectedNameQuery(spec identityCollectionSpec) string {
 		return ""
 	}
 	return "name"
+}
+
+// SecurityGroup alone has an audited concrete native ListOpts signature. The
+// owned raw-query iterator preserves its native pager without exposing new
+// details or all-projects capabilities or changing the public native List API.
+func identityRawListMetadataValid(spec identityCollectionSpec) bool {
+	if spec.path != "network/v2/extensions/security/groups" {
+		return spec.rawListIterator == ""
+	}
+	return spec.model == "SecGroup" && spec.getter == "Get" && spec.lister == "List" && spec.parents == 0 && len(spec.getSegments) == 2 && spec.getSegments[0] == "security-groups" && spec.getSegments[1] == "$id" && len(spec.getCodes) == 1 && spec.getCodes[0] == 200 && !spec.noNameQuery && spec.rawListIterator == "IterateSecurityGroups"
+}
+
+func identityRawListEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
+	spec, ok := identityCollectionContract(pkg, plan, parents)
+	return ok && spec.rawListIterator != ""
+}
+
+func identityNeutronListSchema(pkg *types.Package, plan *collectionPlan) bool {
+	pageName, extractor := "RouterPage", "ExtractRouters"
+	if sdkPath(pkg.Path()) == "network/v2/extensions/security/groups" {
+		pageName, extractor = "SecGroupPage", "ExtractGroups"
+	}
+	page := pkg.Scope().Lookup(pageName)
+	if page == nil {
+		return false
+	}
+	fields, ok := page.Type().Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 1 || !fields.Field(0).Embedded() || types.TypeString(fields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
+		return false
+	}
+	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
+		method := extractionMethod(page.Type(), name)
+		if method == nil || !types.Identical(method.Results().At(0).Type(), result) {
+			return false
+		}
+	}
+	extract, ok := pkg.Scope().Lookup(extractor).(*types.Func)
+	if !ok {
+		return false
+	}
+	sig := extract.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 1 || sig.Results().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) || !isError(sig.Results().At(1).Type()) {
+		return false
+	}
+	if pageName == "RouterPage" {
+		into, ok := pkg.Scope().Lookup("ExtractRoutersInto").(*types.Func)
+		if !ok {
+			return false
+		}
+		sig = into.Type().(*types.Signature)
+		if sig.Variadic() || sig.Params().Len() != 2 || types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.Page" || !types.Identical(sig.Params().At(1).Type(), types.NewInterfaceType(nil, nil).Complete()) || sig.Results().Len() != 1 || !isError(sig.Results().At(0).Type()) {
+			return false
+		}
+	} else {
+		// Native groups.List must continue to receive the concrete local opts.
+		sig = plan.lister.Type().(*types.Signature)
+		if sig.Params().Len() != 2 || clientParam(sig) != 0 {
+			return false
+		}
+		opts, ok := sig.Params().At(1).Type().(*types.Named)
+		if !ok || opts.Obj().Pkg() != pkg || opts.Obj().Name() != "ListOpts" || !types.Identical(opts, plan.listInput) {
+			return false
+		}
+	}
+	return true
 }
 
 // Flavor's list default and optional enrichment are deliberately separate from
@@ -325,11 +396,37 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"extraSpecsListURL":        "df35511fb8f504daaf787fd8b3881157d0f38de6d2a09a47e5e747904e3595fa",
 		"extraSpecsResult.Extract": "22b06d0f0d4e5a25aa29d4b834f500363f04a517abcee559d5320121331b8d5e",
 	},
+	"network/v2/extensions/layer3/routers": {
+		"Get":                        "c0787d9b62a2cda3caa71d9a5deeaa3b99842417646def58aea2161caf892fb9",
+		"rootURL":                    "4f185db1078eefd1b5f5b38bd1c601bd6fccaa3c20fa99a7b85371ef7f7b8104",
+		"resourceURL":                "ca0246cf0e192c0133b2d43b9c5b577badf51c51344d3c5fc499d01a97ef54c8",
+		"List":                       "452ffb77d4836fef164e8c731d85511442433e043be2198359a7534d2def0420",
+		"ListOpts.ToRouterListQuery": "16630576a814d8e9f82bd02355bd7367745f3e7062990da4efe898e23b8dc12f",
+		"Router.UnmarshalJSON":       "5f6e06c6894b79e08121cd89520019211ab88760dd5247b4bf6a3697a55b5377",
+		"RouterPage.NextPageURL":     "4323c0d1e0740e56af094d4f0df9c943acb1f2409f2fab8fb26c6ee93fb71a9c",
+		"RouterPage.IsEmpty":         "1962b3680eb57993f0a30287f025a408eefdd5d11e55d4e28fc683a75612c3ab",
+		"ExtractRouters":             "f4a7e6f4f0ee7722ff1d297a2fb026d843cce89d137d60dd85214f0a20f29e18",
+		"ExtractRoutersInto":         "be02017c665dfc07a48940b7c44d0adc592ab754f39044fb6e0fbe77403a759e",
+		"commonResult.Extract":       "4bb6eaf3e9ca18e71322e50f621501195d9aab13ecca5a1fc7acc7f263ac6df4",
+	},
+	"network/v2/extensions/security/groups": {
+		"Get":                      "c0787d9b62a2cda3caa71d9a5deeaa3b99842417646def58aea2161caf892fb9",
+		"rootURL":                  "5a4bf90be880f0165342169abba24c6938989c185637bae8e4c5092f33ac9f3b",
+		"resourceURL":              "ff31c93c543d54044b2c72a7219311759861582c91db4787e04a5f2d3dfc060c",
+		"List":                     "5b43132cd8886b599837c8ff9268bef10f152cd644d82774471fd964d568b2e1",
+		"SecGroup.UnmarshalJSON":   "7f81c1ad2bc0435c683b7d3033de0bd391d6db90ede9478900b89ee79700f7e6",
+		"SecGroupPage.NextPageURL": "49a58e1cf6d83daa67e619f1bcd26a55428baba575a5909f51541bee417bfd6b",
+		"SecGroupPage.IsEmpty":     "06143a32b9aef0ab4b8bb63239b4a05a0c38bdfcf863fbcb7c9d92a3a6423f2b",
+		"ExtractGroups":            "e42007fd330615fa5e88a454260fee2cfd8a1c2b604d42bd4dc4ff7db325d423",
+		"commonResult.Extract":     "0593db713468ed605d0dbfce265a3003901cedcf742051a00a3e1f385ab13df2",
+	},
 }
 
 var identityNativeURLConstants = map[string]map[string]string{
-	"loadbalancer/v2/pools": {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
-	"identity/v3/roles":     {"rolePath": "roles"},
+	"network/v2/extensions/layer3/routers":  {"resourcePath": "routers"},
+	"network/v2/extensions/security/groups": {"rootPath": "security-groups"},
+	"loadbalancer/v2/pools":                 {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
+	"identity/v3/roles":                     {"rolePath": "roles"},
 }
 
 // Export data omits private URL constants. Read their literal source values,
@@ -385,6 +482,9 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if spec.extraSpecs && !identityFlavorSchema(pkg, selected) {
 			return fmt.Errorf("audited identity collection %s.%s: native access query, extra specs, pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if (spec.path == "network/v2/extensions/layer3/routers" || spec.path == "network/v2/extensions/security/groups") && !identityNeutronListSchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native concrete/builder list, pager, or extractor schema changed", spec.path, spec.model)
 		}
 		for name, want := range identityNativeDeclarations[spec.path] {
 			got, err := requestDeclarationHash(decls[name])

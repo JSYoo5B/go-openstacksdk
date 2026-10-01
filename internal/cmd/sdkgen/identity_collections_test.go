@@ -18,6 +18,9 @@ func identityCollectionFixture(t *testing.T, spec identityCollectionSpec, fields
 		getArgs = "parentID string," + getArgs
 		listArgs = ",parentID string,opts ListOptsBuilder"
 	}
+	if spec.rawListIterator != "" {
+		listArgs = ",opts ListOpts"
+	}
 	options := `type ListOpts struct{Name string ` + "`q:\"" + query + "\"`" + `}
 type ListOptsBuilder interface{ToListQuery()(string,error)}
 func(ListOpts)ToListQuery()(string,error){return "",nil}`
@@ -154,11 +157,13 @@ func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *t
 			}
 			requireControlledCalls(t, method, target+".FindIdentity(ctx, identity, options...)")
 			adapter := controlledEmittedMethod(t, emitted, "newResources")
-			if !strings.Contains(string(emitted), "config.Query[key] = append([]string(nil), values...)") || strings.Contains(string(emitted), "With"+spec.lister+"Query(key, value)") {
+			if spec.rawListIterator == "" && (!strings.Contains(string(emitted), "config.Query[key] = append([]string(nil), values...)") || strings.Contains(string(emitted), "With"+spec.lister+"Query(key, value)")) {
 				t.Fatal("native adapter collapses repeated or nil query values", string(emitted))
 			}
 			if spec.parents != 0 {
 				requireControlledCalls(t, adapter, "s.api."+spec.getter+"(ctx, s.parentID, string(id))", "s.api."+controlledListName(spec.lister)+"(ctx, s.parentID, control, options...)")
+			} else if spec.rawListIterator != "" {
+				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "nativefind."+spec.rawListIterator+"(ctx, a.RawClient(), q, control)")
 			} else {
 				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "a."+controlledListName(spec.lister)+"(ctx, control, options...)")
 			}

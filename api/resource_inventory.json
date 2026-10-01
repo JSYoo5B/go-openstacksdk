@@ -1073,6 +1073,8 @@
     "package": "gophercloudsdk/network/v2/extensions/layer3/routers",
     "model": "Router",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1153,6 +1155,8 @@
     "package": "gophercloudsdk/network/v2/extensions/security/groups",
     "model": "SecGroup",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },

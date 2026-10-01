@@ -4,7 +4,8 @@ package groups
 import (
 	context "context"
 	fmt "fmt"
-	request "gophercloudsdk/request"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
+	nativefind "gophercloudsdk/internal/nativefind"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -14,7 +15,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[SecGroup] {
 	return resource.NewCollection(resource.Adapter[SecGroup]{
-		Kind:      "groups",
+		Kind:         "groups",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*SecGroup, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"security-groups", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:       func(ctx context.Context, id string) (*SecGroup, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *SecGroup) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *SecGroup) string { return fmt.Sprint(v.Name) },
@@ -22,16 +29,16 @@ func (a *API) newResources() *resource.Collection[SecGroup] {
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*SecGroup, error] {
 			q = maps.Clone(q)
-			q.Del("status")
-			input, err := request.QueryOptions[ListOpts](q)
-			if err != nil {
-				return func(yield func(*SecGroup, error) bool) { yield(nil, err) }
-			}
-			return a.listWithControl(ctx, control, WithListOptions(input))
+			return nativefind.IterateSecurityGroups(ctx, a.RawClient(), q, control)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*SecGroup, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*SecGroup, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*SecGroup, error) {
 	return a.Resources.All(ctx, options...)

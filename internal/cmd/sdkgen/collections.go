@@ -354,7 +354,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.printf("if value:=q.Get(\"name\");value!=\"\"{q.Set(%q,value);q.Del(\"name\")}\n", plan.nameQuery)
 	}
 	if plan.statusQuery == "" {
-		if !identityFlavorEnabled(e.pkg, plan, len(parents)) {
+		if !identityFlavorEnabled(e.pkg, plan, len(parents)) && !identityRawListEnabled(e.pkg, plan, len(parents)) {
 			e.printf("q.Del(\"status\")\n")
 		}
 	} else if plan.statusQuery != "status" {
@@ -362,7 +362,10 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	}
 	list := plan.lister.Name()
 	listArgs := strings.Join(append(append([]string{"ctx"}, parents...), "control"), ",")
-	if plan.listInput == nil {
+	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok && contract.rawListIterator != "" {
+		e.use("gophercloudsdk/internal/nativefind")
+		e.printf("return nativefind.%s(ctx,%s.RawClient(),q,control)\n", contract.rawListIterator, receiver)
+	} else if plan.listInput == nil {
 		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, controlledListName(list), listArgs)
 	} else if plan.listQueryBuilder {
 		if identityCollectionEnabled(e.pkg, plan, len(parents)) {
