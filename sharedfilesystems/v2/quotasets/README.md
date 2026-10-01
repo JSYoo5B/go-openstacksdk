@@ -121,6 +121,15 @@ from its URL. An omitted microversion, or 2.6 and earlier, uses
 configured microversion of at least 2.25. `latest` delegates negotiation to the
 server. The SDK never raises the client's microversion automatically.
 
+The selected version is validated against source `MoreHeaders` before lookup
+and on every operation. Case-insensitive legacy or general version headers
+must agree with the selected version; empty selection means 2.0. Matching source
+headers are retained. Native `shared-file-system`, `sharev2` and `share` clients
+generate the required legacy Manila header. A manual client with blank `Type`
+needs an explicit matching `X-OpenStack-Manila-API-Version`; a general
+`OpenStack-API-Version` header alone does not establish the version for Manila.
+Conflicts and wrong service types fail before quota or name-lookup HTTP.
+
 Limits use exact `int64` values. Nil input is omitted, zero is sent, and -1 means
 unlimited; values below -1 fail before HTTP. `WithQuotaOptions` snapshots typed
 pointers and nested `Extra` JSON when constructed. `WithUpdateField` snapshots

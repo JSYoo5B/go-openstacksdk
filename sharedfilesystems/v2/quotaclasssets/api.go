@@ -7,11 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/fixedrequest"
+	"gophercloudsdk/internal/manilaversion"
 	"gophercloudsdk/internal/project"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
@@ -47,26 +46,15 @@ func (a *API) validate(ctx context.Context) error {
 	if a == nil {
 		return fmt.Errorf("%w: Manila quota class API is required", resource.ErrInvalidOption)
 	}
-	return project.ValidateClient(ctx, a.client)
+	if err := project.ValidateClient(ctx, a.client); err != nil {
+		return err
+	}
+	_, err := a.minorVersion()
+	return err
 }
 
 func (a *API) minorVersion() (int, error) {
-	version := a.client.Microversion
-	if version == "" {
-		return 0, nil
-	}
-	if version == "latest" {
-		return int(^uint(0) >> 1), nil
-	}
-	parts := strings.Split(version, ".")
-	if len(parts) != 2 || parts[0] != "2" {
-		return 0, fmt.Errorf("%w: Manila microversion must be 2.N or latest", resource.ErrInvalidOption)
-	}
-	minor, err := strconv.Atoi(parts[1])
-	if err != nil || minor < 0 || strconv.Itoa(minor) != parts[1] {
-		return 0, fmt.Errorf("%w: invalid Manila microversion %q", resource.ErrInvalidOption, version)
-	}
-	return minor, nil
+	return manilaversion.Minor(a.client)
 }
 
 // InClass fixes an exact class name as one unescaped URL path segment. Names

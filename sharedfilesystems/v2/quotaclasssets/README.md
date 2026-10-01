@@ -41,6 +41,16 @@ target. Omitted microversion or API 2.6 and earlier uses `os-quota-class-sets`;
 Configure the service client's microversion before sharing it across callers;
 the SDK does not upgrade it automatically.
 
+Quota classes share the project's version validation policy. Source
+`MoreHeaders` cannot override the selected version (empty selection means 2.0),
+including differently cased duplicate header names. Matching headers remain
+unchanged. The native Manila types `shared-file-system`, `sharev2` and `share`
+send the legacy version header. A manual blank `Type` needs an explicit matching
+`X-OpenStack-Manila-API-Version`; general `OpenStack-API-Version` alone is
+insufficient. Every operation validates the current source configuration before
+HTTP, so changing a source header after creating a class scope cannot bypass the
+route/version check.
+
 The scope exposes only `Get` and `Update`. Manila creates a missing named class
 through PUT if its policy permits; a separate create, delete, reset, list,
 defaults or wait operation is not part of this API. Missing class fields are
