@@ -55,10 +55,17 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 
 | 연산 | 옵션 |
 |---|---|
-| 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithMaxItems`, `WithPaginated`, `WithQuery` |
+| 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithMaxItems`, `WithPaginated`, `WithQuery`, `WithBodyFilter`, `WithBodyFilters` |
 | 조회/삭제 | `WithIgnoreMissing`, `WithMissingError` |
 | 자동 문자열 조회 | `WithIdentityFindOptions`, `WithIdentityFindIgnoreMissing`, `WithIdentityFindFallback`, `WithIdentityFindQuery`, `WithIdentityFindExtraSpecs` |
 | 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates`, `WithStatusAttribute`, `WithProgressCallback` |
+
+`WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
+로컬 비교합니다. 현재 QoS Policy의 `rules`와 Address Group의 `addresses`를 지원합니다.
+SDK가 JSON snapshot·필드 선택·배열 전체 equality를 처리하며 builder/predicate는 필요하지
+않습니다. 지원이 없는 리소스·알 수 없는 필드는 HTTP 전에 거부하고 raw query와 typed List·
+FindIdentity는 유지합니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)에
+bulk 교체·clear·nil/빈 배열·raw cap·native 숫자 정밀도의 경계를 설명합니다.
 
 페이지 크기와 로컬 행 수 제한을 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는
 크기이며 기본 List/All은 후속 페이지도 읽습니다. `WithMaxItems(250)`은 서버 응답에서 decode한

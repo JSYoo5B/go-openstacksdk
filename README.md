@@ -44,6 +44,11 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
+목록의 로컬 조건도 SDK 옵션으로 선택합니다. QoS rules·Address Group addresses는
+`resource.WithBodyFilter`/`WithBodyFilters`로 field 선택·snapshot·배열 비교를 처리합니다.
+[Python/Go 목록 비교](docs/listing.md#명시적인-native-body-필터)에 raw query·로컬 cap·nil/빈 값과
+native 응답 모델의 경계를 설명합니다.
+
 Nova 서버/flavor·Cinder v3 볼륨·Glance v2 이미지·Neutron 네트워크/subnet/포트/router/security group/subnet pool/trunk/QoS policy/address group·Keystone 프로젝트/사용자/그룹/domain/role·
 고정 zone의 Designate recordset·고정 pool의 Octavia member는 문자열을 그대로 받는 `FindIdentity`를 제공합니다.
 [서비스별 Python/Go 자동 조회 비교](docs/finding-identities.md)에 공통 기본값·옵션·오류와

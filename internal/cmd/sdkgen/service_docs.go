@@ -78,6 +78,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if key == "image/v2" {
 		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")
 	}
+	if key == "network/v2" {
+		out.WriteString("`QoSPolicies.Resources`의 `rules`와 `SecurityAddressGroups.Resources`의 `addresses`는 `resource.WithBodyFilter`/`WithBodyFilters`로 로컬에서 비교합니다. SDK가 필드 선택·JSON snapshot·배열 전체 equality를 처리하며 builder나 predicate를 구현하지 않습니다. nil/빈 배열과 raw cap 이후 비교를 구분하고 raw wire query는 자동 분류하지 않습니다. 이 옵션은 ordinary `Resources.List/All`만 받으며 native typed List·FindIdentity와 다른 리소스는 별도입니다. [Python/Go Body 필터 비교](../../docs/listing.md#명시적인-native-body-필터)를 참고합니다.\n\n")
+	}
 	switch key {
 	case "instanceha/v1":
 		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산과 [대기 정책](waiting/README.md)의 두 proxy wait 대응을 확인합니다. 네 fetch 가능한 리소스의 WaitForStatus/WaitForDelete는 무제한·ERROR 실패·2초 간격 상태 대기와 120초 삭제 대기를 제공합니다. Host·VMove는 고정 부모 범위를 유지하고 VMove GET은 1.3 이상을 재검사합니다. 전체 17개 직접 선언 연산에 대응하는 API를 제공하며 marker fallback·nullable 입력·Resource/cache의 전체 계약은 추가 비교가 필요합니다.\n\n")

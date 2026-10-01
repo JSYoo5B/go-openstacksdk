@@ -149,3 +149,73 @@ func ListMembers(ctx context.Context, conn *sdk.Connection, poolID string) error
 ```
 
 서비스별 native 범위 예제는 [Nova action](../compute/v2/instanceactions/README.md), [Swift container](../objectstorage/v1/containers/README.md), [Swift object](../objectstorage/v1/objects/README.md), [Trove database](../db/v1/databases/README.md), [Trove user](../db/v1/users/README.md)에 있습니다. 공개 Collection·scope의 HTTP 연결은 [generated 목록 계약](../api/generated_list_controls_test.go)과 [5개 native 범위 계약](../api/native_scope_list_controls_test.go)에서 검증합니다. 공통 옵션·pager 동작은 [목록 제어 테스트](../resource/list_control_test.go)와 [stream 테스트](../resource/stream_test.go)를 참고합니다.
+
+## 명시적인 native Body 필터
+
+Python의 `conn.network.qos_policies(rules=[])`와
+`conn.network.address_groups(addresses=["192.0.2.0/24"])`는 선언된 Body 속성을 로컬에서
+비교합니다. Go의 ordinary `Resources.List/All`도 다음처럼 SDK 소유 옵션을 사용합니다.
+`conn.Network(ctx).API`에서 얻는 versioned 서비스와 직접 만든 `network/v2.Service` 모두
+같은 동작입니다. caller가 builder나 predicate를 구현하지 않습니다.
+
+```go
+package examples
+
+import (
+    "context"
+
+    networkv2 "gophercloudsdk/network/v2"
+    "gophercloudsdk/resource"
+)
+
+func ListLocalMatches(ctx context.Context, service *networkv2.Service) error {
+    policies, err := service.QoSPolicies.Resources.All(ctx,
+        resource.WithBodyFilter("rules", []map[string]any{}),
+        resource.WithMaxItems(100))
+    if err != nil { return err }
+    groups, err := service.SecurityAddressGroups.Resources.All(ctx,
+        resource.WithBodyFilters(map[string]any{
+            "addresses": []string{"192.0.2.0/24"},
+        }), resource.WithPaginated(false))
+    if err != nil { return err }
+    _, _ = policies, groups
+    return nil
+}
+```
+
+두 binding은 각각 `rules`·`addresses` 한 필드만 지원합니다. 지원이 없는 binding의 명시
+옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
+첫 HTTP 전에 반환합니다. 오류는 iterator를 소비할 때 나타나며 malformed JSON·NaN 등
+원래 인코딩 오류도 error chain에 보존합니다. 잘 구성된 JSON scalar를 임의 변환하지 않으므로
+배열과 scalar는 일치하지 않습니다.
+
+`WithBodyFilter`는 기존 조건에 추가하고 같은 canonical 필드는 마지막 옵션이 이깁니다.
+`WithBodyFilters`는 전체 조건을 교체하며 nil/빈 map은 조건을 지웁니다. 명시적인 clear도
+지원 binding을 요구합니다. `WithBodyFilter("rules", nil)`은 null을 비교하는 조건입니다.
+SDK는 옵션 생성 시 값을 JSON으로 복사하고 순회별로 독립 복사하므로 caller map·slice·raw JSON
+변경과 옵션 재사용이 진행 중인 조회를 바꾸지 않습니다. SDK가 등록한 alias가 있는 경우 bulk의
+alias/canonical 중복은 결정적으로 거부하지만, 현재 두 binding은 canonical key만 등록합니다.
+
+배열은 순서·길이·원소 전체가 같아야 합니다. `rules` 배열 안의 dict도 모든 key/value가 같아야
+하므로 일부 rule 속성이나 일부 주소가 포함되는지를 검색하지 않습니다. null과 빈 배열은 다릅니다.
+JSON bool과 number를 구별하며 Python의 `False == 0`까지 적용하지 않습니다. 일반 비교 엔진의
+object 필터는 recursive subset이지만 배열 내부 object는 전체 equality이고, object 필터와
+non-object 응답은 불일치로 처리합니다.
+
+`WithMaxItems`는 로컬 필터 이전의 raw 행을 세므로 필터에서 제외된 행을 추가 페이지로 보충하지
+않습니다. `WithName`·`WithStatus`와 AND로 조합하며 두 모델은 Status가 없어 typed `WithStatus`를
+지원하지 않습니다. 첫 페이지·consumer break·후속 HTTP/decode/cycle/취소·native 전체 페이지
+decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으며, 명시 `WithQuery("rules", ...)`나
+`WithQuery("addresses", ...)`는 기존 wire 확장으로 독립 전달합니다. native typed List와
+`FindIdentity`는 이 공통 ListOption을 받지 않습니다.
+
+비교 값은 native typed 모델의 field projection입니다. 누락/null `Rules`·`Addresses`는 모두
+nil이 되지만 빈 배열은 구별됩니다. QoS `Rules`는 native `map[string]any`의 float64 decoding을
+이미 거쳤으므로 비교 엔진이 원래 wire 정수의 정밀도를 복구하지 않습니다. unknown outer Body·
+Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 제공한 것으로 확대하지
+않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
+
+고정 Python [qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L5177)·[address_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L392)의 추가 query는
+[Resource.list의 Body 분류와 비교](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2217)에 연결됩니다.
+실제 동작은 [native HTTP 계약](../api/network_body_filters_test.go), [공통 옵션·소비 계약](../resource/body_filters_test.go),
+[JSON 비교 엔진](../internal/jsonfilter/filter_test.go)에서 검증합니다.
