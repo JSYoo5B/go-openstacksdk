@@ -104,8 +104,8 @@ Get은 stateless 응답 snapshot으로 HTTP 계약을 매핑합니다. Python Re
 cache/URI 속성을 갱신하는 방식 대신 고정 scope와 독립된 모델을 반환합니다. Scope의 부모 확인
 요청과 필수 canonical response ID/parent 검증은 명시적인 Go 정책입니다.
 
-List는 partial입니다. Python의 `paginated=False`, `max_items`의 local filter 이전 raw 행 수 계산,
-per-call base path/microversion/header, deprecated JMESPath filter를 노출하지 않습니다. `id`,
+List는 partial입니다. `paginated=False`와 `max_items`의 raw 행 소비 제어는 제공하지만
+per-call base path/microversion/header와 deprecated JMESPath filter는 노출하지 않습니다. `id`,
 `policy_id`, `cluster_name`, `data` 같은 Body-only local filter와 recursive subset 비교도 제공하지
 않습니다. Python 공통 query의 초기 limit/marker와 Resource.id fallback은 stock controller의
 whitelist에 없어서 Go가 지원하지 않으며, unknown query를 버리는 Python과 명시적 vendor query를
@@ -117,3 +117,39 @@ whitelist에 없어서 Go가 지원하지 않으며, unknown query를 버리는 
 [16.0.0 router](https://github.com/openstack-archive/senlin/blob/16.0.0/senlin/api/openstack/v1/router.py).
 Pinned Python 비교는 `openstack/clustering/v1/cluster_policy.py:16–43`와
 `openstack/clustering/v1/_proxy.py:1059–1099`에 대응합니다.
+
+## 목록 소비 제어
+
+| pinned Python | Go 옵션 | 소비 정책 |
+|---|---|---|
+| `max_items=n` | `WithListMaxItems(n)` 또는 `ListOpts.MaxItems` | 로컬 필터 이전에 검증한 raw 행을 최대 n개 소비; 0은 무제한, 음수는 사전 오류 |
+| `paginated=False` | `WithListPaginated(false)` 또는 `ListOpts.Paginated` | 첫 응답만 소비하고 continuation을 처리하지 않음 |
+| 기본 `paginated=True` | nil 또는 `WithListPaginated(true)` | 페이지 순회를 허용; 뒤의 옵션이 앞의 값을 덮어씀 |
+| `limit` / `marker` | 초기 query에서 `ErrUnsupported` | stock controller의 whitelist에 없어 wire paging을 추측하지 않음 |
+
+```go
+listingAPI := clusterpolicies.New(client)
+listingScope, err := listingAPI.InCluster(ctx, resource.ID("CLUSTER_ID"))
+if err != nil { return err }
+values, err := listingScope.All(ctx, clusterpolicies.WithListMaxItems(50))
+if err != nil { return err }
+fmt.Println(len(values))
+for value, err := range listingScope.List(ctx, clusterpolicies.WithListPaginated(false)) {
+    if err != nil { return err }
+    fmt.Println(value.PolicyID)
+}
+```
+
+`MaxItems`는 로컬 cap만 적용하고 `limit` hint를 보내지 않습니다. Python Resource.list가
+max_items를 wire limit으로 사용하는 동작과 다른 Go 정책입니다. 명시적 server next link의
+marker는 고정 parent/필터를 유지하는 경우에만 허용합니다.
+
+`max_items`와 `paginated`는 서버 query로 보내지 않으며 `WithListQuery`에서 같은 이름을
+사용하면 사전 오류입니다. `WithListOptions`는 bool pointer도 snapshot으로 소유하고 재사용 시
+독립적으로 적용합니다. cap에 도달하면 뒤의 행이나 next link를 처리하지 않지만 소비한 행의
+잘못된 JSON·검증 오류는 전체 페이지 증거와 함께 반환합니다. 빈 페이지에서는 next link가
+있어도 끝냅니다. `break`, context와 매 페이지의 source/version 검사도 유지합니다.
+Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
+한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
+
+공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_catalog_list_controls_test.go)를 참고합니다.
