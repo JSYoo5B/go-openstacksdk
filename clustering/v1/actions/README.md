@@ -1,4 +1,4 @@
-# Senlin actions: Get / List
+# Senlin actions: Get / List / Update
 
 ```python
 action = conn.clustering.get_action(action_id)
@@ -57,8 +57,42 @@ reverse-proxy/project 경로를 유지합니다. query·fragment·userinfo, 다�
 문자열 추출보다 엄격한 Go 정책입니다. 서버가 이미 수락한 응답의 Location 해석 실패는
 `resource.ResponseError`로 원문/헤더/status를 보존하고 mutation을 다시 보내지 않습니다.
 
-이 단위는 `get_action`과 `actions`만 구현합니다. Action Update/Create/Delete는 제공하지
-않습니다. `Resources`의 공유 lookup/wait 기능은 Senlin proxy의 전체 mutable Resource/
+## action 취소 요청
+
+```python
+action = conn.clustering.update_action("ACTION_ID", status="CANCELLED")
+```
+
+```go
+service, err := conn.ClusteringV1(ctx)
+if err != nil { return err }
+accepted, err := service.Actions.Cancel(ctx, resource.ID("ACTION_ID"),
+    actions.WithUpdateForce(false))
+if err != nil { return err }
+fmt.Println(accepted.StatusCode, string(accepted.Body))
+action, err := service.Actions.Get(ctx, "ACTION_ID")
+if err != nil { return err }
+fmt.Println(action.ID, action.Status)
+```
+
+numeric microversion 1.12 이상을 설정합니다. `Update(ctx, ref,
+actions.UpdateOpts{Status: "CANCELLED"}, options...)`도 같은 PATCH 요청을 보냅니다.
+공식 상태 값은 CANCELLED이며 Force는 body 필드가 아닌 query입니다. 생략하면 query가 없고,
+`WithUpdateForce(false/true)`는 각각을 명시합니다. 고정한 Python Action 모델에는 force 필드가
+없어 `update_action(force=True, ...)`의 force 속성이 누락됩니다. Go 옵션은 공식 query
+기능을 제공합니다. 확장 body는 typed·응답 필드, query는 force/status, header는
+인증/version을 덮어쓰지 못합니다. 입력은 이름 lookup보다 먼저 복제하고 PATCH 직전에
+버전을 재검사합니다.
+
+공식 API는 202 성공을 명시하지만 응답 object schema를 정의하지 않습니다. Go의
+`UpdateResult`는 원문 Body·Header·StatusCode를 보존하며 비어 있거나 다른 형식의 본문도
+받습니다. command Submission과 달리 Location을 필수 action 참조로 해석하지 않습니다.
+Action 객체나 실행 상태를 만들지 않고 자동 GET·재전송도 하지 않습니다. 상태를 확인하려면
+예제처럼 별도 Get을 사용합니다. Python의 cached Resource·dirty/no-op commit과 response
+merge, 실제 cloud의 응답 모델 비교는 아직 부분 구현 과제입니다.
+
+이 단위는 `get_action`, `actions`, `update_action`에 대응하는 API를 제공합니다.
+Action Create/Delete는 제공하지 않습니다. `Resources`의 공유 lookup/wait 기능은 Senlin proxy의 전체 mutable Resource/
 wait 기본값을 구현했다는 의미가 아닙니다. 특히 service 수준 `wait_for_status` parity는
 별도 단위입니다. HTTP/accepted-response decoding 오류는 원본 응답 근거를 보존합니다.
 

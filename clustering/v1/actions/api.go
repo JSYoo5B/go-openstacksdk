@@ -1,4 +1,4 @@
-// Package actions reads Senlin asynchronous actions and their execution state.
+// Package actions reads Senlin actions and submits cancellation requests.
 package actions
 
 import (
