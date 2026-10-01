@@ -56,6 +56,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/manila_project_quotas_test.go`, `api/manila_scoped_quotas_test.go` | SDK 소유 quota transport, 2.7 경로·2.25 Detail·2.39 share type, 고정 project/user/type·Keystone 해석, exact int64·snapshot·DELETE202·selector redirect/reauth 보호 |
 | `api/manila_quota_class_test.go` | 고정 class 이름·legacy/current 경로·GET/PUT200, 12개 limit exact int64·snapshot, force/selector 거부·지원 method set·원본 HTTP/JSON/context·redirect 보호 |
 | `api/designate_project_quotas_contracts_test.go`, `api/designate_project_quotas_projects_test.go`, `api/designate_project_quotas_transport_test.go` | root quota 객체·PATCH200·DELETE204, sudo-project/all-projects header, accepted 응답 decode 증거, 고정 프로젝트·snapshot·HTTP/취소·redirect/retry/reauth 보호 |
+| `api/nova_project_limits_contracts_test.go`, `api/nova_project_limits_projects_test.go`, `api/nova_project_limits_transport_test.go` | 고정 tenant_id·reserved 0/1, native absolute·legacy rate·raw 응답·accepted 오류, Keystone/auth, redirect/retry/reauth/context |
+| `api/cinder_limits_test.go`, `connection_limits_test.go` | 3.39 필터·actual header/type 사전검사, native Get 유지, 고정 project_id·Keystone/auth, optional int64·timestamp/raw 응답·accepted read/decode 오류·Connection |
 | `api/heat_stacks_contracts_test.go` | name+ID identity, output query, summary/detail 차이, linked/marker pagination, 고정 대상 waiter·실패/삭제 완료 |
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
