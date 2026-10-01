@@ -45,6 +45,12 @@ Glance 이미지는 정상적인 일반 검색에서 찾지 못하면 원래 que
 적용한 목록을 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 추가하지 않습니다.
 오류·중복·취소는 즉시 반환하며 미존재 옵션은 두 검색이 모두 정상적으로 끝난 뒤 적용합니다.
 
+자동 조회가 활성화된 native binding은 `WithIdentityFindQuery("status", ...)`를
+모델의 Status 필드 유무와 관계없이 wire query로 보존합니다. 일반 목록의 raw
+`WithQuery("status", ...)` 단독도 응답 status의 로컬 필터를 활성화하지 않습니다.
+Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw status를 함께
+지정하면 마지막 값으로 로컬 비교합니다. cap은 로컬 필터 전에 적용합니다.
+
 ## 옵션
 
 | 연산 | 옵션 |

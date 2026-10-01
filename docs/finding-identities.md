@@ -136,6 +136,14 @@ caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니�
 `^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 14개 binding에서는 literal
 문자열입니다. Flavor는 자동 이름 hint를 서버에 보내지 않습니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
 
+명시 wire `status`는 모델에 Status 필드가 없어도 GET과 목록에 전달합니다.
+이 query만으로 응답 status를 로컬에서 필터링하지 않습니다. 자동 조회 binding의 일반
+`Resources.List/All`에서도 raw `WithQuery("status", ...)` 단독은 같은 wire 정책입니다.
+Octavia Member의 typed `WithStatus`는 기존 로컬 필터를 유지하고 wire status를 보내지
+않습니다. `WithStatus`와 raw status를 함께 쓰면 typed 필터가 활성화된 채 마지막
+값으로 로컬 비교하므로, raw query 단독과 구분합니다. 로컬 cap은 이 필터보다 먼저
+적용됩니다. 상태 필드가 없는 리소스의 typed `WithStatus`는 계속 `ErrUnsupported`입니다.
+
 query가 없으면 기존 native Get을 사용합니다. query를 지정하면 SDK가 감사한 member
 경로·성공 코드를 사용하고 같은 native `GetResult.Extract`로 응답을 해석합니다. 서비스
 client와 provider를 복제하거나 변경하지 않으며 최신 인증 token·HTTP client·기본 헤더와
