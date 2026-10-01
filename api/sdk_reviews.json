@@ -9741,6 +9741,332 @@
         "Map inherited per-call base_path/microversion/header controls and deprecated proxy JMESPath behavior beyond the tested local cap/one-response policy.",
         "Compare arbitrary Resource/cache input ownership, URI overlay and full lifecycle semantics. Strict modern2.45+ scope behavior does not implement the earlier legacy access_list action contract."
       ]
+    },
+    {
+      "operation": "python:compute/v2/find_server",
+      "source_fingerprint": "ad3b635070d3b2536a584c76cdfa1c1339eed154c061a31c6e5a671c9a994365",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/servers.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "tests": [
+            "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "The native server detail pager implements the pinned details=True default with an anchored literal name hint; details=False summary selection remains unimplemented.",
+        "Inherited Resource/session behavior and typed all_projects normalization need individual source and contract review."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/find_volume",
+      "source_fingerprint": "3a1e9e469b31f899ef470086457851b55005e52c3d66beb1967b1846ac0ecf88",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "tests": [
+            "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "The native volume detail pager implements the pinned details=True default; details=False summary selection remains unimplemented.",
+        "Inherited Resource/session behavior and typed all_projects normalization need individual source and contract review."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_port",
+      "source_fingerprint": "b4ba9a16ba5bf3a1b25618e055f16f820fceaeb69617912af001a08292b05fbb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/ports.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "tests": [
+            "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Inherited Resource **query classification/coercion and automatic per-call microversion/session selection have not been fully compared."
+      ]
+    },
+    {
+      "operation": "python:dns/v2/find_recordset",
+      "source_fingerprint": "f33161bd5b9f8b11d23b55342111dbdc18642efe050b2fec6db81e5dd1cecf60",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/dns/v2/recordsets.RecordSetScope.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "Every native/scoped contract fixture keeps its original fixed zone or pool and reverse-proxy ResourceBase through GET, fallback and continuation.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request.",
+        "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "The Go fixed zone scope accepts Ref-based parent resolution; cached Python Zone Resource inputs and inherited Resource query/session behavior require additional comparison."
+      ]
+    },
+    {
+      "operation": "python:load_balancer/v2/find_member",
+      "source_fingerprint": "148f51e5891dd84673ceb1d23ff2cbba4ffef71f0dc1f47b12d5ff9c0e23ae97",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/loadbalancer/v2/pools.MemberScope.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "Every native/scoped contract fixture keeps its original fixed zone or pool and reverse-proxy ResourceBase through GET, fallback and continuation.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request.",
+        "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "The Go fixed pool scope accepts Ref-based parent resolution; cached Python Pool Resource inputs and inherited Resource/session behavior require additional comparison."
+      ]
     }
   ]
 }
