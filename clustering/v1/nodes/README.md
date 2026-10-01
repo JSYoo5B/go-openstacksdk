@@ -139,7 +139,7 @@ Python proxy wait 전체의 cached Resource/defaults와 별도로 비교합니�
 
 Get/Create/Update는 strict node envelope와 지정 success code를 검사합니다. 202의 Location이
 누락·잘못된 경우와 accepted body decode 실패는 `resource.ResponseError`에 원문을 보존하고
-생성·수정·삭제를 재전송하지 않습니다. adopt와 inherited
+생성·수정·삭제를 재전송하지 않습니다. inherited
 max_items/paginated/JMESPath·dirty merge·ID-first Find는 별도 계약으로 계속 추적합니다.
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `node.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
@@ -186,3 +186,58 @@ header 및 버전 조건은 이름 lookup의 변경을 받지 않으며 POST 직
 검사합니다. plugin 매개변수의 id/status 같은 이름은 Resource 속성 갱신으로 취급하지 않습니다.
 명시한 ID는 추가 GET 없이 route로 전달하고 `resource.Name`은 정확한 이름을 목록에서 한 번
 해석합니다. Python Resource 입력과 combined-string 식별자를 이 두 방식으로 구분합니다.
+
+## 물리 리소스 adopt와 preview
+
+두 분기에는 numeric microversion 1.7 이상을 선택합니다. `Adopt`는 POST `/nodes/adopt`,
+`AdoptPreview`는 POST `/nodes/adopt-preview`로 flat JSON body를 보내고 각각 HTTP 200을
+받습니다. SDK는 버전을 자동으로 올리지 않습니다.
+
+```python
+node = conn.clustering.adopt_node(
+    identity="PHYSICAL_RESOURCE_ID", type="os.nova.server-1.0",
+    name="adopted_worker", snapshot=False, metadata={},
+)
+preview = conn.clustering.adopt_node(
+    preview=True, identity="PHYSICAL_RESOURCE_ID", type="os.nova.server-1.0",
+)
+```
+
+```go
+api := nodes.New(client)
+node, err := api.Adopt(ctx, nodes.AdoptOpts{
+    Identity: "PHYSICAL_RESOURCE_ID", Type: "os.nova.server-1.0",
+}, nodes.WithAdoptName("adopted_worker"), nodes.WithAdoptSnapshot(false),
+   nodes.WithAdoptMetadata(map[string]any{}))
+if err != nil { return err }
+preview, err := api.AdoptPreview(ctx, nodes.AdoptPreviewOpts{
+    Identity: "PHYSICAL_RESOURCE_ID", Type: "os.nova.server-1.0",
+})
+if err != nil { return err }
+fmt.Println(node.ID, node.PhysicalID, preview.Spec.Type, string(preview.Spec.Version))
+```
+
+Identity/Type은 필수 body 문자열이며 path identifier 제한을 적용하거나 부모 조회를 하지
+않습니다. Identity는 기존 물리 리소스의 이름 또는 ID입니다. Adopt의 Name/Role/Snapshot은
+생략·null·명시한 빈 문자열/false를 구별하고 Metadata/Overrides는 생략·null·object를 유지합니다.
+생략한 이름과 snapshot 등의 기본값, null과 profile별 속성의 의미는 서비스가 결정합니다.
+`WithAdoptOptions`, JSON 옵션과 `WithAdoptField`는 생성 시 snapshot을 만들고 재사용마다
+독립적으로 적용합니다. 추가 adopt 속성은 flat body에 들어가며 concrete 입력과 SDK 소유
+인증/version/transport header를 덮어쓸 수 없습니다.
+
+Preview는 pinned Python 구현처럼 identity/overrides/type/snapshot 네 필드만 전송합니다.
+생략한 Overrides와 Snapshot도 null로 보내며 false와 `{}`는 지정한 그대로 보존합니다.
+Python이 버리는 추가 preview 속성을 Go는 사전 오류로 처리합니다. custom Option의 Fields,
+Query, Arguments도 허용하지 않으며 `WithAdoptPreviewHeader`로 SDK 소유 외의 header를
+전달할 수 있습니다. 두 분기 모두 옵션 적용 후 POST 직전에 source/version을 재검사합니다.
+
+Adopt는 strict node envelope를 반환하고 `Operation`은 nil입니다. Location은 요구하거나
+해석하지 않으며 응답에 있으면 Header에 그대로 보존합니다. Preview는 `Spec`에 inner
+node_preview, `Body`에 전체 envelope의 raw 필드, `RawBody`에 정확한 응답 원문을 유지합니다.
+inner 추가 필드는 `Spec.Body`, Version은 숫자·문자열·null을 구별하는 RawMessage,
+Properties는 정밀한 raw JSON map입니다. 양쪽 모두 Header/StatusCode를 보존하고 자동 action
+조회나 polling을 하지 않습니다. malformed 200은 전체 원문/header/status를 가진
+`resource.ResponseError`이며 adoption 요청을 재전송하지 않습니다.
+
+근거는 pinned `node.py:143-175`, `_proxy.py:875-909`와
+[공식 Node API](https://docs.openstack.org/api-ref/clustering/#nodes)입니다.
