@@ -81,10 +81,12 @@ QoS Policy·Address Group의 자동 조회는 각각 `service.API.QoSPolicies.Fi
 Go wire query `shared`로 지정하며 `rules`·`addresses`의 Body 로컬 필터를 자동 적용하지
 않습니다. [Python/Go 예제와 native 모델 경계](../docs/finding-identities.md#neutron-qos-policyaddress-group)를 참고하세요.
 
-ordinary 목록에서는 `service.API.QoSPolicies.Resources.List/All`의 `rules`와
-`service.API.SecurityAddressGroups.Resources.List/All`의 `addresses`를
-`resource.WithBodyFilter` 또는 `WithBodyFilters`로 로컬에서 비교합니다. SDK가 field 선택과
-옵션 복사를 처리하므로 별도 predicate는 필요하지 않습니다. 배열 순서·길이·내부 dict 전체가
+ordinary 목록에서는 `service.API.QoSPolicies.Resources.List/All`의 `rules`,
+`service.API.SecurityAddressGroups.Resources.List/All`의 `addresses`,
+`service.API.SubnetPools.Resources`의 `prefixes`, `service.API.Networks.Resources`와 상위
+`service.Networks`의 `subnets`를 `resource.WithBodyFilter` 또는 `WithBodyFilters`로 로컬에서
+비교합니다. Network는 Python 속성 이름 `subnet_ids`를 `subnets`의 SDK 별칭으로 받습니다.
+SDK가 field 선택과 옵션 복사를 처리하므로 별도 predicate는 필요하지 않습니다. 배열 순서·길이·내부 dict 전체가
 일치해야 하며 raw query와는 독립적입니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)을 참고합니다.
 
 ## 삭제와 대기

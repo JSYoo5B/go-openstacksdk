@@ -61,7 +61,10 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 | 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates`, `WithStatusAttribute`, `WithProgressCallback` |
 
 `WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
-로컬 비교합니다. 현재 QoS Policy의 `rules`와 Address Group의 `addresses`를 지원합니다.
+로컬 비교합니다. 현재 QoS Policy의 `rules`, Address Group의 `addresses`, Subnet Pool의
+`prefixes`, Network의 `subnets`를 지원합니다. Network의 Python 이름 `subnet_ids`는 SDK가
+`subnets`의 별칭으로 처리하며 canonical/alias의 마지막 옵션이 이깁니다. 같은 bulk map에
+두 이름을 넣으면 `ErrInvalidOption`입니다.
 SDK가 JSON snapshot·필드 선택·배열 전체 equality를 처리하며 builder/predicate는 필요하지
 않습니다. 지원이 없는 리소스·알 수 없는 필드는 HTTP 전에 거부하고 raw query와 typed List·
 FindIdentity는 유지합니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)에

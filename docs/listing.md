@@ -154,7 +154,9 @@ func ListMembers(ctx context.Context, conn *sdk.Connection, poolID string) error
 
 Python의 `conn.network.qos_policies(rules=[])`와
 `conn.network.address_groups(addresses=["192.0.2.0/24"])`는 선언된 Body 속성을 로컬에서
-비교합니다. Go의 ordinary `Resources.List/All`도 다음처럼 SDK 소유 옵션을 사용합니다.
+비교합니다. `conn.network.subnet_pools(prefixes=["192.0.2.0/24"])`와
+`conn.network.networks(subnet_ids=["subnet-a", "subnet-b"])`도 같은 방식입니다.
+Go의 ordinary `Resources.List/All`은 다음처럼 SDK 소유 옵션을 사용합니다.
 `conn.Network(ctx).API`에서 얻는 versioned 서비스와 직접 만든 `network/v2.Service` 모두
 같은 동작입니다. caller가 builder나 predicate를 구현하지 않습니다.
 
@@ -181,9 +183,30 @@ func ListLocalMatches(ctx context.Context, service *networkv2.Service) error {
     _, _ = policies, groups
     return nil
 }
+
+func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
+    for value, err := range service.Networks.Resources.List(ctx,
+        resource.WithBodyFilter("subnet_ids", []string{"subnet-a", "subnet-b"}),
+        resource.WithStatus("ACTIVE")) {
+        if err != nil { return err }
+        _ = value
+    }
+    _, err := service.SubnetPools.Resources.All(ctx,
+        resource.WithBodyFilter("prefixes", []string{"192.0.2.0/24"}),
+        resource.WithMaxItems(100))
+    return err
+}
 ```
 
-두 binding은 각각 `rules`·`addresses` 한 필드만 지원합니다. 지원이 없는 binding의 명시
+| binding | Go canonical 필드 | SDK 별칭 | Python 로컬 필터 이름 |
+|---|---|---|---|
+| QoS Policy | `rules` | 없음 | `rules` |
+| Address Group | `addresses` | 없음 | `addresses` |
+| Subnet Pool | `prefixes` | 없음 | `prefixes` |
+| Network | `subnets` | `subnet_ids` | `subnet_ids` |
+
+각 binding은 위의 한 응답 필드를 지원합니다. 상위 `network.Service.Networks`도 같은 Network
+필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
 첫 HTTP 전에 반환합니다. 오류는 iterator를 소비할 때 나타나며 malformed JSON·NaN 등
 원래 인코딩 오류도 error chain에 보존합니다. 잘 구성된 JSON scalar를 임의 변환하지 않으므로
@@ -194,28 +217,39 @@ func ListLocalMatches(ctx context.Context, service *networkv2.Service) error {
 지원 binding을 요구합니다. `WithBodyFilter("rules", nil)`은 null을 비교하는 조건입니다.
 SDK는 옵션 생성 시 값을 JSON으로 복사하고 순회별로 독립 복사하므로 caller map·slice·raw JSON
 변경과 옵션 재사용이 진행 중인 조회를 바꾸지 않습니다. SDK가 등록한 alias가 있는 경우 bulk의
-alias/canonical 중복은 결정적으로 거부하지만, 현재 두 binding은 canonical key만 등록합니다.
+alias/canonical 중복은 결정적으로 거부합니다. Network의 `subnet_ids`와 `subnets`는 같은 필드이므로
+개별 옵션을 순서대로 지정하면 마지막 조건만 적용하고, 같은 bulk map에 넣으면 HTTP 전에 실패합니다.
 
 배열은 순서·길이·원소 전체가 같아야 합니다. `rules` 배열 안의 dict도 모든 key/value가 같아야
 하므로 일부 rule 속성이나 일부 주소가 포함되는지를 검색하지 않습니다. null과 빈 배열은 다릅니다.
 JSON bool과 number를 구별하며 Python의 `False == 0`까지 적용하지 않습니다. 일반 비교 엔진의
 object 필터는 recursive subset이지만 배열 내부 object는 전체 equality이고, object 필터와
 non-object 응답은 불일치로 처리합니다.
+문자열 배열도 전체 값이 같아야 하며 subnet ID 순서를 바꾸거나 CIDR을 병합·정규화하지 않습니다.
+Python Network의 `subnets`는 wire Body 이름이며 로컬 필터용 속성 이름은 `subnet_ids`입니다.
+Go는 SDK가 명시 등록한 두 이름을 받아 같은 native `Subnets`를 비교합니다.
 
 `WithMaxItems`는 로컬 필터 이전의 raw 행을 세므로 필터에서 제외된 행을 추가 페이지로 보충하지
-않습니다. `WithName`·`WithStatus`와 AND로 조합하며 두 모델은 Status가 없어 typed `WithStatus`를
-지원하지 않습니다. 첫 페이지·consumer break·후속 HTTP/decode/cycle/취소·native 전체 페이지
+않습니다. `WithName`·`WithStatus`와 AND로 조합하며 Network는 Status가 있지만 나머지 세 모델은
+Status가 없어 typed `WithStatus`를 지원하지 않습니다. 첫 페이지·consumer break·후속 HTTP/decode/cycle/취소·native 전체 페이지
 decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으며, 명시 `WithQuery("rules", ...)`나
-`WithQuery("addresses", ...)`는 기존 wire 확장으로 독립 전달합니다. native typed List와
+`WithQuery("addresses", ...)`·`WithQuery("prefixes", ...)`·`WithQuery("subnet_ids", ...)`·
+`WithQuery("subnets", ...)`는 기존 wire 확장으로 독립 전달하며 별칭을 자동 변환하지 않습니다. native typed List와
 `FindIdentity`는 이 공통 ListOption을 받지 않습니다.
 
 비교 값은 native typed 모델의 field projection입니다. 누락/null `Rules`·`Addresses`는 모두
-nil이 되지만 빈 배열은 구별됩니다. QoS `Rules`는 native `map[string]any`의 float64 decoding을
+nil이 되지만 빈 배열은 구별됩니다. `Prefixes`·`Subnets`도 같은 presence 한계를 갖습니다.
+Subnet Pool의 native prefix length와 timestamp, Network의 native timestamp decoder 등 다른
+필드의 decode 오류도 로컬 필터 전에 발생하며, 현재 응답 페이지 안에서 cap 뒤에 위치한
+행의 decode 오류도 숨기지 않습니다. cap으로 방문하지 않은 다음 페이지는 검사하지 않습니다.
+QoS `Rules`는 native `map[string]any`의 float64 decoding을
 이미 거쳤으므로 비교 엔진이 원래 wire 정수의 정밀도를 복구하지 않습니다. unknown outer Body·
 Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 제공한 것으로 확대하지
 않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
 
 고정 Python [qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L5177)·[address_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L392)의 추가 query는
 [Resource.list의 Body 분류와 비교](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2217)에 연결됩니다.
-실제 동작은 [native HTTP 계약](../api/network_body_filters_test.go), [공통 옵션·소비 계약](../resource/body_filters_test.go),
+Network [subnet_ids](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/network.py#L119)·Subnet Pool [prefixes](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/subnet_pool.py#L91)도 non-query Body 속성입니다.
+Trunk `sub_ports`는 query mapping에 있어 Python도 wire query로 전달하며, 이 SDK에서 로컬 필터로 등록하지 않습니다.
+실제 동작은 [native HTTP 계약](../api/network_body_filters_test.go), [Network·Subnet Pool HTTP 계약](../api/network_subnet_body_filters_test.go), [공통 옵션·소비 계약](../resource/body_filters_test.go),
 [JSON 비교 엔진](../internal/jsonfilter/filter_test.go)에서 검증합니다.

@@ -44,7 +44,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
-목록의 로컬 조건도 SDK 옵션으로 선택합니다. QoS rules·Address Group addresses는
+목록의 로컬 조건도 SDK 옵션으로 선택합니다. QoS rules·Address Group addresses·Subnet Pool prefixes·Network subnets는
 `resource.WithBodyFilter`/`WithBodyFilters`로 field 선택·snapshot·배열 비교를 처리합니다.
 [Python/Go 목록 비교](docs/listing.md#명시적인-native-body-필터)에 raw query·로컬 cap·nil/빈 값과
 native 응답 모델의 경계를 설명합니다.

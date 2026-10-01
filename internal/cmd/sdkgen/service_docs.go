@@ -79,7 +79,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")
 	}
 	if key == "network/v2" {
-		out.WriteString("`QoSPolicies.Resources`의 `rules`와 `SecurityAddressGroups.Resources`의 `addresses`는 `resource.WithBodyFilter`/`WithBodyFilters`로 로컬에서 비교합니다. SDK가 필드 선택·JSON snapshot·배열 전체 equality를 처리하며 builder나 predicate를 구현하지 않습니다. nil/빈 배열과 raw cap 이후 비교를 구분하고 raw wire query는 자동 분류하지 않습니다. 이 옵션은 ordinary `Resources.List/All`만 받으며 native typed List·FindIdentity와 다른 리소스는 별도입니다. [Python/Go Body 필터 비교](../../docs/listing.md#명시적인-native-body-필터)를 참고합니다.\n\n")
+		out.WriteString("`QoSPolicies.Resources`의 `rules`, `SecurityAddressGroups.Resources`의 `addresses`, `SubnetPools.Resources`의 `prefixes`, `Networks.Resources`의 `subnets`는 `resource.WithBodyFilter`/`WithBodyFilters`로 로컬에서 비교합니다. SDK가 필드 선택·JSON snapshot·배열 전체 equality를 처리하며 builder나 predicate를 구현하지 않습니다. Network의 Python 이름 `subnet_ids`도 `subnets`의 SDK 별칭으로 받으며 bulk에서 두 이름을 함께 지정하면 HTTP 전에 거부합니다. 상위 `network.Service.Networks`에도 같은 필터가 연결됩니다. nil/빈 배열과 raw cap 이후 비교를 구분하고 raw wire query는 자동 분류하지 않습니다. 이 옵션은 ordinary `Resources.List/All`만 받으며 native typed List·FindIdentity와 다른 리소스는 별도입니다. [Python/Go Body 필터 비교](../../docs/listing.md#명시적인-native-body-필터)를 참고합니다.\n\n")
 	}
 	switch key {
 	case "instanceha/v1":
