@@ -257,6 +257,10 @@ func (b listBandwidthLimitRulesOptsBuilder) ToBandwidthLimitRulesListQuery() (st
 
 // ListBandwidthLimitRules invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListBandwidthLimitRules(ctx context.Context, policyID string, options ...ListBandwidthLimitRulesOption) iter.Seq2[*BandwidthLimitRule, error] {
+	return a.listBandwidthLimitRulesWithControl(ctx, policyID, resource.ListControl{}, options...)
+}
+
+func (a *API) listBandwidthLimitRulesWithControl(ctx context.Context, policyID string, control resource.ListControl, options ...ListBandwidthLimitRulesOption) iter.Seq2[*BandwidthLimitRule, error] {
 	var opts BandwidthLimitRulesListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -268,10 +272,10 @@ func (a *API) ListBandwidthLimitRules(ctx context.Context, policyID string, opti
 		return func(yield func(*BandwidthLimitRule, error) bool) { var zero *BandwidthLimitRule; yield(zero, err) }
 	}
 	_opts := listBandwidthLimitRulesOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListBandwidthLimitRules(a.client, policyID, _opts), func(page pagination.Page) ([]BandwidthLimitRule, error) {
+	return resource.StreamWithControl(ctx, upstream.ListBandwidthLimitRules(a.client, policyID, _opts), func(page pagination.Page) ([]BandwidthLimitRule, error) {
 		values, err := upstream.ExtractBandwidthLimitRules(page)
 		return []BandwidthLimitRule(values), err
-	})
+	}, control)
 }
 
 type ListDSCPMarkingRulesOption = request.Option[DSCPMarkingRulesListOpts]
@@ -304,6 +308,10 @@ func (b listDSCPMarkingRulesOptsBuilder) ToDSCPMarkingRulesListQuery() (string, 
 
 // ListDSCPMarkingRules invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDSCPMarkingRules(ctx context.Context, policyID string, options ...ListDSCPMarkingRulesOption) iter.Seq2[*DSCPMarkingRule, error] {
+	return a.listDSCPMarkingRulesWithControl(ctx, policyID, resource.ListControl{}, options...)
+}
+
+func (a *API) listDSCPMarkingRulesWithControl(ctx context.Context, policyID string, control resource.ListControl, options ...ListDSCPMarkingRulesOption) iter.Seq2[*DSCPMarkingRule, error] {
 	var opts DSCPMarkingRulesListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -315,10 +323,10 @@ func (a *API) ListDSCPMarkingRules(ctx context.Context, policyID string, options
 		return func(yield func(*DSCPMarkingRule, error) bool) { var zero *DSCPMarkingRule; yield(zero, err) }
 	}
 	_opts := listDSCPMarkingRulesOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDSCPMarkingRules(a.client, policyID, _opts), func(page pagination.Page) ([]DSCPMarkingRule, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDSCPMarkingRules(a.client, policyID, _opts), func(page pagination.Page) ([]DSCPMarkingRule, error) {
 		values, err := upstream.ExtractDSCPMarkingRules(page)
 		return []DSCPMarkingRule(values), err
-	})
+	}, control)
 }
 
 type ListMinimumBandwidthRulesOption = request.Option[MinimumBandwidthRulesListOpts]
@@ -351,6 +359,10 @@ func (b listMinimumBandwidthRulesOptsBuilder) ToMinimumBandwidthRulesListQuery()
 
 // ListMinimumBandwidthRules invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListMinimumBandwidthRules(ctx context.Context, policyID string, options ...ListMinimumBandwidthRulesOption) iter.Seq2[*MinimumBandwidthRule, error] {
+	return a.listMinimumBandwidthRulesWithControl(ctx, policyID, resource.ListControl{}, options...)
+}
+
+func (a *API) listMinimumBandwidthRulesWithControl(ctx context.Context, policyID string, control resource.ListControl, options ...ListMinimumBandwidthRulesOption) iter.Seq2[*MinimumBandwidthRule, error] {
 	var opts MinimumBandwidthRulesListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -362,10 +374,10 @@ func (a *API) ListMinimumBandwidthRules(ctx context.Context, policyID string, op
 		return func(yield func(*MinimumBandwidthRule, error) bool) { var zero *MinimumBandwidthRule; yield(zero, err) }
 	}
 	_opts := listMinimumBandwidthRulesOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListMinimumBandwidthRules(a.client, policyID, _opts), func(page pagination.Page) ([]MinimumBandwidthRule, error) {
+	return resource.StreamWithControl(ctx, upstream.ListMinimumBandwidthRules(a.client, policyID, _opts), func(page pagination.Page) ([]MinimumBandwidthRule, error) {
 		values, err := upstream.ExtractMinimumBandwidthRules(page)
 		return []MinimumBandwidthRule(values), err
-	})
+	}, control)
 }
 
 type UpdateBandwidthLimitRuleOption = request.Option[UpdateBandwidthLimitRuleOpts]

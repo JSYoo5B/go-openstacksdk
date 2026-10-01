@@ -98,6 +98,10 @@ func WithListOptions(value ListOpts) ListOption { return request.WithOptions(val
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*SecGroup, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*SecGroup, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -108,10 +112,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*SecGro
 		err = request.Wrap("List", "groups", err)
 		return func(yield func(*SecGroup, error) bool) { var zero *SecGroup; yield(zero, err) }
 	}
-	return resource.Stream(ctx, upstream.List(a.client, cfg.Options), func(page pagination.Page) ([]SecGroup, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, cfg.Options), func(page pagination.Page) ([]SecGroup, error) {
 		values, err := upstream.ExtractGroups(page)
 		return []SecGroup(values), err
-	})
+	}, control)
 }
 
 type UpdateOption = request.Option[UpdateOpts]

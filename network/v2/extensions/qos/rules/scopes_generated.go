@@ -38,7 +38,7 @@ func (s *BandwidthLimitRuleScope) newResources() *resource.Collection[BandwidthL
 		Delete: func(ctx context.Context, id string) error {
 			return s.api.DeleteBandwidthLimitRule(ctx, s.parentID, string(id))
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*BandwidthLimitRule, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*BandwidthLimitRule, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListBandwidthLimitRulesOption, 0, len(q))
@@ -47,7 +47,7 @@ func (s *BandwidthLimitRuleScope) newResources() *resource.Collection[BandwidthL
 					options = append(options, WithListBandwidthLimitRulesQuery(key, value))
 				}
 			}
-			return s.api.ListBandwidthLimitRules(ctx, s.parentID, options...)
+			return s.api.listBandwidthLimitRulesWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 
@@ -93,7 +93,7 @@ func (s *DSCPMarkingRuleScope) newResources() *resource.Collection[DSCPMarkingRu
 		Delete: func(ctx context.Context, id string) error {
 			return s.api.DeleteDSCPMarkingRule(ctx, s.parentID, string(id))
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*DSCPMarkingRule, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*DSCPMarkingRule, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListDSCPMarkingRulesOption, 0, len(q))
@@ -102,7 +102,7 @@ func (s *DSCPMarkingRuleScope) newResources() *resource.Collection[DSCPMarkingRu
 					options = append(options, WithListDSCPMarkingRulesQuery(key, value))
 				}
 			}
-			return s.api.ListDSCPMarkingRules(ctx, s.parentID, options...)
+			return s.api.listDSCPMarkingRulesWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 
@@ -148,7 +148,7 @@ func (s *MinimumBandwidthRuleScope) newResources() *resource.Collection[MinimumB
 		Delete: func(ctx context.Context, id string) error {
 			return s.api.DeleteMinimumBandwidthRule(ctx, s.parentID, string(id))
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*MinimumBandwidthRule, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*MinimumBandwidthRule, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListMinimumBandwidthRulesOption, 0, len(q))
@@ -157,7 +157,7 @@ func (s *MinimumBandwidthRuleScope) newResources() *resource.Collection[MinimumB
 					options = append(options, WithListMinimumBandwidthRulesQuery(key, value))
 				}
 			}
-			return s.api.ListMinimumBandwidthRules(ctx, s.parentID, options...)
+			return s.api.listMinimumBandwidthRulesWithControl(ctx, s.parentID, control, options...)
 		}})
 }
 

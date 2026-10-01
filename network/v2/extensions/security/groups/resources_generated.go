@@ -20,14 +20,14 @@ func (a *API) newResources() *resource.Collection[SecGroup] {
 		Name:      func(v *SecGroup) string { return fmt.Sprint(v.Name) },
 		NameQuery: func(name string) string { return name },
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*SecGroup, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*SecGroup, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			input, err := request.QueryOptions[ListOpts](q)
 			if err != nil {
 				return func(yield func(*SecGroup, error) bool) { yield(nil, err) }
 			}
-			return a.List(ctx, WithListOptions(input))
+			return a.listWithControl(ctx, control, WithListOptions(input))
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*SecGroup, error) {
