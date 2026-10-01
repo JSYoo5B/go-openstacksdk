@@ -110,3 +110,38 @@ func TestMutationObjectValidationAllowsOnlyDocumentedPresenceShapes(t *testing.T
 		t.Fatalf("invalid snapshot accepted: %v", err)
 	}
 }
+
+func TestMutationFlatBodyPreservesRootFieldsAndGuards(t *testing.T) {
+	raw := json.RawMessage(`{"number":9007199254740993,"off":false}`)
+	config, err := request.Apply(mutationOpts{Spec: raw}, request.WithField[mutationOpts]("vendor", nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := FlatBody(config)
+	if err != nil || string(body) != `{"spec":{"number":9007199254740993,"off":false},"vendor":null}` {
+		t.Fatal(string(body), err)
+	}
+	raw[2] = 'X'
+	config.Fields["vendor"] = json.RawMessage(`false`)
+	if string(body) != `{"spec":{"number":9007199254740993,"off":false},"vendor":null}` {
+		t.Fatal("flat body retained mutable request input", string(body))
+	}
+	for _, option := range []request.Option[mutationOpts]{
+		request.WithField[mutationOpts]("name", "override"),
+		request.WithField[mutationOpts]("id", "invented"),
+		request.WithHeader[mutationOpts]("X-Auth-Token", "override"),
+		request.WithQuery[mutationOpts]("project", "other"),
+		request.WithArgument[mutationOpts]("target", "other"),
+	} {
+		config, err := request.Apply(mutationOpts{Metadata: json.RawMessage(`null`)}, option)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := FlatBody(config, "id"); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal("unprotected flat input", err)
+		}
+	}
+	if _, err := FlatBody(request.Config[mutationOpts]{}); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal("empty flat body accepted", err)
+	}
+}

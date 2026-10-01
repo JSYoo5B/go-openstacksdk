@@ -84,7 +84,28 @@ func CommandBody[T any](config request.Config[T], command string, forbidden ...s
 	return body(config, command, true, forbidden...)
 }
 
+// FlatBody snapshots an unwrapped attribute object. Concrete inputs and
+// SDK-owned headers retain the same protection as wrapped mutation bodies.
+func FlatBody[T any](config request.Config[T], forbidden ...string) (json.RawMessage, error) {
+	fields, err := inputBody(config, false, forbidden...)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(fields)
+}
+
 func body[T any](config request.Config[T], envelope string, allowEmpty bool, forbidden ...string) (json.RawMessage, error) {
+	fields, err := inputBody(config, allowEmpty, forbidden...)
+	if err != nil {
+		return nil, err
+	}
+	if envelope == "" {
+		return nil, fmt.Errorf("%w: Senlin resource envelope is required", resource.ErrInvalidOption)
+	}
+	return json.Marshal(map[string]any{envelope: fields})
+}
+
+func inputBody[T any](config request.Config[T], allowEmpty bool, forbidden ...string) (map[string]any, error) {
 	if err := request.ValidateCapabilities(config, true, false, true); err != nil {
 		return nil, err
 	}
@@ -117,8 +138,5 @@ func body[T any](config request.Config[T], envelope string, allowEmpty bool, for
 	if len(body) == 0 && !allowEmpty {
 		return nil, fmt.Errorf("%w: Senlin mutation requires at least one field", resource.ErrInvalidOption)
 	}
-	if envelope == "" {
-		return nil, fmt.Errorf("%w: Senlin resource envelope is required", resource.ErrInvalidOption)
-	}
-	return json.Marshal(map[string]any{envelope: body})
+	return body, nil
 }
