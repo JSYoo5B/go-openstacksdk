@@ -142,6 +142,12 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 					fail(response.Fail(err))
 					return
 				}
+				if spec.ValidateItem != nil {
+					if err := spec.ValidateItem(value); err != nil {
+						fail(response.Fail(err))
+						return
+					}
+				}
 				if !yield(value, nil) {
 					return
 				}

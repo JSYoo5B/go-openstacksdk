@@ -22,6 +22,9 @@ type CollectionSpec[T any] struct {
 	Validate                         func(context.Context) error
 	ValidateQuery                    func(context.Context, url.Values) error
 	ValidateID                       func(string) error
+	// ValidateItem checks service-specific response invariants after decoding.
+	// Failure retains the original singular response or whole list page.
+	ValidateItem                     func(*T) error
 	Get, Delete                      bool
 	GetCodes, ListCodes, DeleteCodes []int
 	Failed                           func(string) bool
@@ -69,7 +72,16 @@ func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 			if err != nil {
 				return nil, err
 			}
-			return Decode(response, spec.SingleKey, spec.Metadata)
+			value, err := Decode(response, spec.SingleKey, spec.Metadata)
+			if err != nil {
+				return nil, err
+			}
+			if spec.ValidateItem != nil {
+				if err := spec.ValidateItem(value); err != nil {
+					return nil, response.Fail(err)
+				}
+			}
+			return value, nil
 		}
 	}
 	if spec.Delete {
