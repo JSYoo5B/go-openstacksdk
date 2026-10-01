@@ -89,7 +89,7 @@ func WithListQuery(key, value string) ListOption { return request.WithQuery[List
 // List follows advertised continuation links. It never fabricates a marker
 // from type names, because the type catalog documents no marker protocol.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ProfileType, error] {
-	return senlin.List(ctx, spec(a.RawClient()), options...)
+	return senlin.ListWithBodyFilters(ctx, spec(a.RawClient()), bodyFilterSpec(), options...)
 }
 
 func (a *API) All(ctx context.Context, options ...ListOption) ([]*ProfileType, error) {
