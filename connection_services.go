@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	Accelerator            Service = "accelerator"
 	BareMetal              Service = "baremetal"
 	BareMetalIntrospection Service = "baremetal-introspection"
 	Container              Service = "application-container"
@@ -38,6 +39,7 @@ type serviceDefinition struct {
 }
 
 var serviceDefinitions = map[Service]serviceDefinition{
+	Accelerator:            {"v2", "2", map[string]clientFactory{"v2": newAcceleratorV2}},
 	Compute:                {"v2", "2", map[string]clientFactory{"v2": openstack.NewComputeV2}},
 	Network:                {"v2", "", map[string]clientFactory{"v2": openstack.NewNetworkV2}},
 	Image:                  {"v2", "", map[string]clientFactory{"v2": openstack.NewImageV2}},
