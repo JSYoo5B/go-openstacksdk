@@ -9755,10 +9755,19 @@
       ],
       "contracts": [
         {
-          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
           "tests": [
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
           ]
         },
         {
@@ -9787,24 +9796,39 @@
           ]
         },
         {
-          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "behavior": "Existing Connection high-level Server/Volume/Port/Network collections share the identity policy; repeated frozen wire filters reach both direct GET and fallback LIST, and only LIST gains the native detail/literal name hint. GET403 followed by a successful empty list obeys default/strict logical absence.",
           "tests": [
             "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
-        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned find_server (openstack/compute/v2/_proxy.py:1023-1060) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "The native server detail pager implements the pinned details=True default with an anchored literal name hint; details=False summary selection remains unimplemented.",
-        "Inherited Resource/session behavior and typed all_projects normalization need individual source and contract review."
+        "The native server detail pager provides the pinned details=True default and an anchored literal name hint; details=False must select the /servers summary fallback without changing direct member GET, and is not yet implemented.",
+        "Typed all_projects=False/True is not implemented. The pinned proxy omits false and true becomes LIST-only all_tenants via Resource.find (openstack/resource.py:2559-2563); arbitrary Go wire Query is sent to both phases and does not substitute for that typed policy.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Server._max_microversion=2.100 (openstack/compute/v2/server.py:98) participates in Resource._get_microversion/utils.maximum_supported_microversion discovery unless a session default is selected; the native helper only preserves the configured source microversion and does not implement this automatic selection."
       ]
     },
     {
@@ -9820,10 +9844,19 @@
       ],
       "contracts": [
         {
-          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
           "tests": [
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
           ]
         },
         {
@@ -9852,24 +9885,39 @@
           ]
         },
         {
-          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "behavior": "Existing Connection high-level Server/Volume/Port/Network collections share the identity policy; repeated frozen wire filters reach both direct GET and fallback LIST, and only LIST gains the native detail/literal name hint. GET403 followed by a successful empty list obeys default/strict logical absence.",
           "tests": [
             "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
-        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "The native volume detail pager implements the pinned details=True default; details=False summary selection remains unimplemented.",
-        "Inherited Resource/session behavior and typed all_projects normalization need individual source and contract review."
+        "The native volume detail pager provides the pinned details=True default; details=False must select the /volumes summary fallback without changing direct member GET, and is not yet implemented.",
+        "Typed all_projects=False/True is not implemented. The pinned proxy omits false and true becomes LIST-only all_tenants via Resource.find (openstack/resource.py:2559-2563); arbitrary Go wire Query is sent to both phases and does not substitute for that typed policy.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Volume._max_microversion=3.71 (openstack/block_storage/v3/volume.py:146) participates in Resource._get_microversion/utils.maximum_supported_microversion discovery unless a session default is selected; the native helper only preserves the configured source microversion and does not implement this automatic selection."
       ]
     },
     {
@@ -9885,10 +9933,19 @@
       ],
       "contracts": [
         {
-          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
           "tests": [
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
           ]
         },
         {
@@ -9917,23 +9974,37 @@
           ]
         },
         {
-          "behavior": "Existing Connection high-level Server/Volume/Port collections share the identity policy, native detail/literal name query, repeated frozen filters and 403-to-successful-empty missing semantics.",
+          "behavior": "Existing Connection high-level Server/Volume/Port/Network collections share the identity policy; repeated frozen wire filters reach both direct GET and fallback LIST, and only LIST gains the native detail/literal name hint. GET403 followed by a successful empty list obeys default/strict logical absence.",
           "tests": [
             "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
-        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request."
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "Inherited Resource **query classification/coercion and automatic per-call microversion/session selection have not been fully compared."
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "The pinned Port resource inherits _max_microversion=None, so this path does not negotiate a maximum solely from that resource. Caller microversion/session-default control through inherited **query still needs a separate mapping; the Go helper retains configured source settings."
       ]
     },
     {
@@ -9949,10 +10020,19 @@
       ],
       "contracts": [
         {
-          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
           "tests": [
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
           ]
         },
         {
@@ -9986,12 +10066,22 @@
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch"
           ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
-        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
         "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup."
       ],
       "documentation": [
@@ -9999,7 +10089,11 @@
         "resource/README.md"
       ],
       "remaining": [
-        "The Go fixed zone scope accepts Ref-based parent resolution; cached Python Zone Resource inputs and inherited Resource query/session behavior require additional comparison."
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned find_recordset (openstack/dns/v2/_proxy.py:337-364) accepts a zone ID or Zone Resource and passes its ID to _find. The concrete Go Ref-based zone scope keeps a fixed parent; cached parent Resource inputs and the inherited child URI/control overrides require separate mapping."
       ]
     },
     {
@@ -10015,10 +10109,19 @@
       ],
       "contracts": [
         {
-          "behavior": "Safe string identities use the unchanged native GET and accept its success codes without a list; default absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
           "tests": [
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
           ]
         },
         {
@@ -10052,20 +10155,679 @@
             "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
             "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch"
           ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
-        "Native typed getters and pagers retain their existing extraction and continuation contracts. The common helper does not manufacture accepted raw HTTP metadata; caller query controls are explicit and reserved SDK control names fail before the first request.",
-        "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup."
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.",
+        "Pinned find_member (openstack/load_balancer/v2/_proxy.py:542-569) exposes only name_or_id, pool and ignore_missing; explicit Go wire Query and fallback-policy controls are extensions."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "The Go fixed pool scope accepts Ref-based parent resolution; cached Python Pool Resource inputs and inherited Resource/session behavior require additional comparison."
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned find_member accepts a pool ID or Pool Resource and passes its ID to _find. The concrete Go Ref-based pool scope keeps a fixed parent; cached parent Resource inputs remain a separate mapping obligation."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_network",
+      "source_fingerprint": "7ff06b09db0085eeb5de8420755418616a85286be208757fb09c5a660e403531",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/networks.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Network find declaration (openstack/network/v2/_proxy.py:3214-3239) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "The cached Connection high-level Network collection uses the same dual-phase frozen query, literal name hint and default/strict logical missing policy as the generated facade.",
+          "tests": [
+            "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/network/v2/_proxy.py:3214-3239) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned Network inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_subnet",
+      "source_fingerprint": "ec8d1bb45ece98c88360153cef27482fa84b8ceea04a21d7332de75daf645095",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/subnets.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Subnet find declaration (openstack/network/v2/_proxy.py:7487-7514) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/network/v2/_proxy.py:7487-7514) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned Subnet inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_project",
+      "source_fingerprint": "4033a5eae299b5272af2840046c2fcbade38ddaff71b8cdebe57ba911eb25228",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/projects.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Project find declaration (openstack/identity/v3/_proxy.py:1063-1084) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "Explicit domain_id reaches direct GET and every fallback page; no auth-domain filter is inferred. Same names across domains remain ambiguous, including matches on different pages, and filtering never bypasses exact SDK identity checks.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1063-1084) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned Project inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_user",
+      "source_fingerprint": "6b123dcd5736c76fd69ce524855f7b67e3e1018efd64c843cc47af5e2eb22309",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/users.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned User find declaration (openstack/identity/v3/_proxy.py:1379-1400) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "Explicit domain_id reaches direct GET and every fallback page; no auth-domain filter is inferred. Same names across domains remain ambiguous, including matches on different pages, and filtering never bypasses exact SDK identity checks.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1379-1400) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned User inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_group",
+      "source_fingerprint": "aca688424b4355d80cff2374efeb32b48bd538596903e0ed33d3f9d4924e46f9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/groups.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Group find declaration (openstack/identity/v3/_proxy.py:782-803) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "Explicit domain_id reaches direct GET and every fallback page; no auth-domain filter is inferred. Same names across domains remain ambiguous, including matches on different pages, and filtering never bypasses exact SDK identity checks.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/identity/v3/_proxy.py:782-803) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned Group inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_domain",
+      "source_fingerprint": "cb66dcf1492a34ab0ed6d5c09f4dca866cc5afdc6bb5654cc48b0bf1e0f228aa",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/domains.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Domain find declaration (openstack/identity/v3/_proxy.py:259-276) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned find_domain (openstack/identity/v3/_proxy.py:259-276) accepts only string name_or_id and ignore_missing. Those direct inputs are implemented; Go Query and fallback-policy controls are extensions, not missing Python Resource inputs or **query arguments."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Domain inherits _max_microversion=None; no automatic maximum negotiation is caused by this resource. The remaining comparison is configured session/adapter policy plus the reachable cache, response translation and inherited continuation behavior above, not an undeclared Resource-input or **query API."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_role",
+      "source_fingerprint": "47cea13bc62c5aeddff00528288311bc68f61aa2cdc4a9bdce13f42bd10e7cb1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/roles.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter",
+            "api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned Role find declaration (openstack/identity/v3/_proxy.py:1743-1764) is explicitly opted into a string-ID/name binding. The original getter and query getter both accept only HTTP200; HTTP203 is terminal, with the same native singular envelope and plural linked-page format.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityIdentityAndNetworkGETStatusContracts"
+          ]
+        },
+        {
+          "behavior": "Caller wire query is frozen once and independently copied to the direct native GET and fallback LIST; repeated values, nil/empty-key precedence and custom option snapshots survive both phases. Query GET requires the explicit adapter hook before any HTTP, while no-query GET retains the original native getter.",
+          "tests": [
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookCapabilityBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookMutationsCannotChangeFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Unsafe ordinary names are literal list-only queries; exact ID OR name matching is retained even with a caller name filter, and bulk query arrays, nil/empty name-key precedence, snapshots and concurrent option reuse are preserved.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityUnsafeNamesRemainLiteralQueryOnlyAndIDMatches",
+            "api/find_identity_native_test.go:TestNativeFindIdentityQuerySnapshotsRepeatedValuesAndConcurrentReuse",
+            "resource/find_identity_test.go:TestCollectionFindIdentitySnapshotsBulkAndCapturedCustomOptions"
+          ]
+        },
+        {
+          "behavior": "All advertised native pages are consumed; duplicate rows including repeated IDs are ambiguous, and later HTTP/decode/cycle errors remain terminal. List403/404, decode, transport and context errors are never hidden by the missing policy.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityAllPagesDuplicatesAndTerminalErrorsAfterMatch",
+            "api/find_identity_native_test.go:TestNativeFindIdentityListHTTPAbsenceIsNeverIgnored",
+            "api/find_identity_native_test.go:TestNativeFindIdentityDecodeAndTransportFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Invalid options, reserved query controls, blank/control identities and canceled context fail before HTTP. Every consumed result requires a safe nonblank ID; accepted ResponseError causes and cancellation do not trigger status fallback.",
+          "tests": [
+            "api/find_identity_native_test.go:TestNativeFindIdentityValidatesOptionsInputAndContextBeforeHTTP",
+            "resource/find_identity_test.go:TestCollectionFindIdentityRespectsBindingIDPolicyAndConsumedRows",
+            "resource/find_identity_test.go:TestCollectionFindIdentityAcceptedAndNestedTerminalErrorsNeverFallback",
+            "resource/find_identity_test.go:TestCollectionFindIdentityChecksCancellationBetweenPhasesAndAfterEmptyList"
+          ]
+        },
+        {
+          "behavior": "The audited query getter preserves the native GetResult extractor and declared success codes, reverse ResourceBase, live provider token, configured headers, HTTP middleware and caller context without cloning or mutating the shared service client; native reauthentication replays the same frozen request.",
+          "tests": [
+            "internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
+            "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "Explicit domain_id reaches direct GET and every fallback page; no auth-domain filter is inferred. Same names across domains remain ambiguous, including matches on different pages, and filtering never bypasses exact SDK identity checks.",
+          "tests": [
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
+          ]
+        }
+      ],
+      "differences": [
+        "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
+        "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
+        "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1743-1764) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
+      ],
+      "remaining": [
+        "Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.",
+        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
+        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
+        "Pinned Role inherits _max_microversion=None, so this resource alone does not trigger maximum-version negotiation. Inherited caller microversion/session-default and URI/control arguments are not implemented by the wire-only Go Query map, which keeps configured source settings and rejects SDK control keys."
       ]
     }
   ]
