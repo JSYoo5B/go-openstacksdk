@@ -92,7 +92,11 @@ func WithMissingError() LookupOption {
 	return func(o *lookupOptions) error { o.ignoreMissing = false; return nil }
 }
 
-type waitOptions struct{ timeout, interval time.Duration }
+type waitOptions struct {
+	timeout, interval time.Duration
+	failureStates     []string
+	failureStatesSet  bool
+}
 type WaitOption func(*waitOptions) error
 
 func WithTimeout(timeout time.Duration) WaitOption {
@@ -101,6 +105,29 @@ func WithTimeout(timeout time.Duration) WaitOption {
 			return invalid("timeout must be positive")
 		}
 		o.timeout = timeout
+		return nil
+	}
+}
+
+// WithUnlimitedWait removes the SDK timeout. The parent context still controls
+// cancellation and deadlines. A later WithTimeout reinstates a bounded wait.
+func WithUnlimitedWait() WaitOption {
+	return func(o *waitOptions) error { o.timeout = 0; return nil }
+}
+
+// WithFailureStates replaces the service's failure predicate with exact,
+// case-insensitive states. With no states, failure-state detection is disabled.
+// It applies to Wait; WaitDeleted preserves service-specific deletion errors.
+func WithFailureStates(states ...string) WaitOption {
+	states = append([]string(nil), states...)
+	return func(o *waitOptions) error {
+		for _, state := range states {
+			if strings.TrimSpace(state) == "" {
+				return invalid("failure state must not be empty")
+			}
+		}
+		o.failureStates = states
+		o.failureStatesSet = true
 		return nil
 	}
 }

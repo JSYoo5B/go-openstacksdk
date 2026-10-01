@@ -3,7 +3,6 @@ package resource
 import (
 	"context"
 	"errors"
-	"time"
 )
 
 // WaitDeleted resolves a name once and polls its ID until Get returns 404.
@@ -16,7 +15,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(ctx, o.timeout)
+	ctx, cancel := o.context(ctx)
 	defer cancel()
 	id := ref.String()
 	if ref.IsName() {
@@ -40,12 +39,8 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		if err != nil {
 			return c.wrap("wait deleted", err)
 		}
-		timer := time.NewTimer(o.interval)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return c.wrap("wait deleted", ctx.Err())
-		case <-timer.C:
+		if err := o.pause(ctx); err != nil {
+			return c.wrap("wait deleted", err)
 		}
 	}
 }

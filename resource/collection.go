@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/pagination"
@@ -264,7 +263,7 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 	if c.binding.Status == nil {
 		return nil, c.wrap("wait", ErrUnsupported)
 	}
-	ctx, cancel := context.WithTimeout(ctx, o.timeout)
+	ctx, cancel := o.context(ctx)
 	defer cancel()
 	v, err := c.Find(ctx, ref)
 	if err != nil {
@@ -278,19 +277,21 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 		return nil, c.wrap("wait", err)
 	}
 	for {
+		if err := ctx.Err(); err != nil {
+			return nil, c.wrap("wait", err)
+		}
+		if v == nil {
+			return nil, &FailedStateError{Resource: c.binding.Kind, ID: id, Status: "missing"}
+		}
 		current := c.binding.Status(v)
 		if strings.EqualFold(current, status) {
 			return v, nil
 		}
-		if c.binding.Failed != nil && c.binding.Failed(current) {
+		if o.failed(current, c.binding.Failed) {
 			return nil, &FailedStateError{Resource: c.binding.Kind, ID: id, Status: current}
 		}
-		timer := time.NewTimer(o.interval)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return nil, c.wrap("wait", ctx.Err())
-		case <-timer.C:
+		if err := o.pause(ctx); err != nil {
+			return nil, c.wrap("wait", err)
 		}
 		v, err = c.Get(ctx, id)
 		if err != nil {

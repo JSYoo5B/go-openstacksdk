@@ -31,7 +31,7 @@ Find의 이름 검색은 현재 클라이언트의 기본 조회 범위 안에�
 |---|---|
 | 목록 | `WithName`, `WithStatus`, `WithPageSize`, `WithQuery` |
 | 조회/삭제 | `WithIgnoreMissing`, `WithMissingError` |
-| 대기 | `WithTimeout`, `WithPollInterval` |
+| 대기 | `WithTimeout`, `WithUnlimitedWait`, `WithPollInterval`, `WithFailureStates` |
 
 페이지 크기와 총 결과 수를 구분합니다. `WithPageSize(100)`은 페이지마다 서버에 요청하는 크기이며 List/All은 후속 페이지도 읽습니다. 원하는 수에서 `break`하면 추가 페이지를 가져오지 않습니다.
 
@@ -53,7 +53,9 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 
 `errors.Is`로 `ErrNotFound`, `ErrAmbiguous`, `ErrUnsupported`, `ErrInvalidOption`, `ErrFailedState`, `ErrPaginationCycle`을 구분합니다. `errors.As`로 `NotFoundError`, `AmbiguousError`, `FailedStateError`, `PaginationCycleError`, `OperationError`의 상세 정보를 확인합니다. HTTP에서 발생한 미존재는 원래 Gophercloud 오류도 보존합니다.
 
-Wait의 기본 timeout은 5분, 간격은 2초입니다. 부모 context가 더 먼저 종료되면 취소됩니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다.
+Wait의 기본 timeout은 5분, 간격은 2초입니다. `WithUnlimitedWait()`는 SDK의 timeout을 없애며 부모 context의 취소와 deadline은 유지합니다. 뒤의 `WithTimeout(...)`으로 다시 제한할 수 있습니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. `WithFailureStates("ERROR", "BROKEN")`은 이를 정확한 대소문자 무시 비교로 교체하고, 인자 없는 `WithFailureStates()`는 상태에 의한 실패 검사를 끕니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다. 서비스 조회 자체가 반환하는 실패 오류는 이 옵션으로 무시하지 않습니다.
+
+Python `resource.wait_for_status(..., failures=[], wait=None)`에 대응하는 Go 옵션은 `WithFailureStates(), WithUnlimitedWait()`입니다. Go는 응답 객체를 받아 캐시된 상태를 검사하는 대신 처음부터 HTTP로 조회하고, timeout을 HTTP 요청에도 context deadline으로 전달합니다. 이미 취소된 context에서는 목표 상태 응답도 성공으로 반환하지 않습니다.
 
 Wait는 없는 ID나 삭제된 리소스를 계속 기다리지 않고 조회 오류를 반환합니다. WaitDeleted는 이미 없는 리소스에도 성공하며, 인증 오류나 서버 오류를 삭제 완료로 처리하지 않습니다. flavor처럼 상태가 없는 리소스는 Wait/WithStatus를 요청하면 `ErrUnsupported`를 반환합니다.
 
