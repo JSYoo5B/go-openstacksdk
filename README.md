@@ -26,7 +26,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. SDK가 직접 구현한 Cyborg v2, Senlin v1, Masakari v1을 포함해 연결 가능한 서비스는 24개이며 API 버전은 26개입니다. Senlin·Masakari의 모든 Python 연산을 구현한 상태는 아닙니다. Manila quota·quota class도 SDK가 직접 구현합니다. 공통 정책은 108개 native 일반 Collection과 SDK 소유 리소스의 실제 조회·삭제·대기 capability, 부모 범위, Heat 복합 식별자·자식·이벤트, project quota·limits·Magnum project+resource quota와 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. SDK가 직접 구현한 Cyborg v2, Senlin v1, Masakari v1을 포함해 연결 가능한 서비스는 24개이며 API 버전은 26개입니다. Senlin은 69개 직접 선언 연산, Masakari는 17개에 대응하는 API를 제공합니다. 상속한 Resource 동작의 전체 비교는 계속 진행합니다. Manila quota·quota class도 SDK가 직접 구현합니다. 공통 정책은 108개 native 일반 Collection과 SDK 소유 리소스의 실제 조회·삭제·대기 capability, 부모 범위, Heat 복합 식별자·자식·이벤트, project quota·limits·Magnum project+resource quota와 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
@@ -40,7 +40,7 @@ gophercloudsdk/
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | metadata 생성·직접 업로드·선택적 대기 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
-Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, [floating IP 생성·연결](network/README.md)과 [이미지 직접 업로드](image/README.md)를 제공합니다. 응답 변경 추적과 자동 commit, floating IP 재사용·서버 생성과 자동 연결, 이미지 import 흐름과 안전한 바이너리 자동 재시도는 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다. Senlin은 [전용 상태·삭제 대기](clustering/v1/waiting/README.md)를 제공하며 기본값과 Resource 입력 차이를 설명합니다.
+Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concrete options로 사용합니다. [microversion 범위 협상](docs/microversions.md)과 [볼륨 부팅 옵션](compute/README.md)을 제공하며, [floating IP 생성·연결](network/README.md)과 [이미지 직접 업로드](image/README.md)를 제공합니다. Senlin Profile·Policy는 [변경 추적과 Commit](clustering/v1/tracking/README.md)을 제공합니다. 다른 리소스의 변경 추적, floating IP 재사용·서버 생성과 자동 연결, 이미지 import 흐름과 안전한 바이너리 자동 재시도는 계속 구현할 대상입니다. [SDK 지원 판정대장](docs/sdk-support-ledger.md)은 확인한 차이와 전체 완료의 기준을 기록합니다. Senlin은 [전용 상태·삭제 대기](clustering/v1/waiting/README.md), [고정 cluster의 policy 조회](clustering/v1/clusterpolicies/README.md), [node attribute 수집](clustering/v1/clusterattributes/README.md), [cluster metadata 관리](clustering/v1/clusters/metadata/README.md)를 제공합니다. [서버 계약 비교](docs/senlin-server-contracts.md)는 API reference와 실제 release 코드의 성공 코드·metadata 경로 차이를 기록합니다.
 
 ## 모든 서비스의 사용 문서
 

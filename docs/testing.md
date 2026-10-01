@@ -93,6 +93,11 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `connection_senlin_receivers_policy_test.go` | Receiver와 정책 명령의 공유 client·최신 token·선택1.4·reverse prefix, user/global_project=false, 동기 응답의 incidental Location 미해석·202 이후 추가 조회 없음 |
 | `api/clustering_wait_contracts_test.go` | 9개 facade·기본status/unlimited/ERROR와delete120초·실제요청deadline/override/common5분, attr preflight·target우선·4status/5nostatus 종결, callback/cancel·Name1회·고정ID·token/source/header 재검사, missing/duplicate/later403·native/transport/malformed200 증거 |
 | `connection_senlin_wait_test.go` | 공유 provider의 polling 중 token교체·선택1.13·reverse prefix, 응답 ID 변경에도 고정 route, receiver404 완료·channel/action/DELETE 미호출 |
+| `internal/senlin/tracked_test.go`, `api/clustering_lifecycle_test.go` | Profile/Policy owned cache·exact JSON equality·sticky dirty·same-value/no-op·삭제 null·부분 응답 병합·별도 response·fixed ID·실패의 dirty 보존·Refresh reset·요청 중 새 편집 보존 |
+| `api/clustering_cluster_policies_test.go`, `connection_senlin_scopes_test.go` | binding UUID와 policy route 구분·canonical parent·exact raw ID/name·초기 query와 명시 continuation 정책·snapshot/lazy break·statusless scope wait·HTTP 응답 증거·공유 token/source/version |
+| `api/clustering_cluster_attributes_test.go`, `connection_senlin_scopes_test.go` | canonical cluster·escaped JSONPath·1.2 재검사·실제200/공식202 동기 배열·raw 값/null/생략/정밀도·explicit links·list-only capability·원문 증거·공유 인증 |
+| `api/clustering_cluster_create_status_test.go` | 공식201/실제202 생성·202 필수 action Location·201 선택 참조·잘못된 accepted 증거·native success-code 오류·재전송 없음 |
+| `api/clustering_cluster_metadata_test.go`, `connection_senlin_metadata_test.go`, `internal/senlin/json_equal_test.go` | 실제 GET/PATCH·raw presence/독립 snapshot·exact-decimal no-op·nil/empty/batch삭제·고정 route/최신 token·202 action 증거·원문 오류·option/source/context 재검사·RMW 동시 변경/접수와 완료 구분 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 

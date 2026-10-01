@@ -75,8 +75,10 @@ paging을 약속하지 않습니다. `break`는 후속 페이지를 조회하지
 Pinned Python proxy는 `**query`를 받지만 `_list`에 전달하지 않습니다. Go의 `List` / `All`
 도 query나 per-request header 옵션을 노출하지 않습니다. `Resources.List`의 초기 query는
 `ErrUnsupported`입니다. 인증·endpoint prefix·선택 microversion은 source client를 공유합니다.
-Body local filters, Resource cache/lifecycle과 generic query 소비까지의 Python 동일성은 남은
-비교 범위입니다. 별도 단건 endpoint가 없는 list-only 리소스이므로 Get/Delete/상태 대기와
+직접 `ClusterAttr.list`를 호출할 때의 paginated·limit/marker·filter 전 max_items,
+per-call base_path/microversion/headers, node_id/id/attr_value Body 필터와 constructor alias/URI
+overlay는 별도의 inherited 비교 범위입니다. 이 차이는 query를 모두 무시하는
+`collect_cluster_attrs` 자체의 전달 기능 누락을 뜻하지 않습니다. 별도 단건 endpoint가 없는 list-only 리소스이므로 Get/Delete/상태 대기와
 삭제 대기는 지원하지 않습니다.
 
 잘못된 성공 envelope·행·node ID·next link는 원래 페이지 전체 body/header/status를 담은

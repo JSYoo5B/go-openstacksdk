@@ -1,6 +1,6 @@
 # Senlin 상태·삭제 대기
 
-9개 리소스 API의 `WaitForStatus`와 `WaitForDelete`는 Senlin proxy의 대기 기본값을
+9개 리소스 API와 고정 ClusterPolicy scope의 `WaitForStatus`와 `WaitForDelete`는 Senlin proxy의 대기 기본값을
 제공합니다. SDK가 조회와 polling을 담당하므로 호출자가 builder나 상태 adapter를
 구현하지 않아도 됩니다. 대기 자체에 추가 microversion gate는 없으며 각 GET의
 service type, 선택한 numeric microversion, 인증과 endpoint 검증을 재사용합니다.
@@ -30,6 +30,7 @@ service type, 선택한 numeric microversion, 인증과 endpoint 검증을 재�
 | `Actions`, `Clusters`, `Nodes`, `Events` | `status` | 404 또는 `status='deleted'` |
 | `Profiles`, `Policies`, `Receivers` | 상태 속성 없음; 문자열 속성 명시 필요 | 404 |
 | `ProfileTypes`, `PolicyTypes` | 상태 속성 없음; 문자열 속성 명시 필요 | 404 |
+| `ClusterPolicies.InCluster(ctx, ref)` | 상태 속성 없음; 문자열 속성 명시 필요 | 고정 cluster의 policy GET에서 404 |
 
 기본 status가 없는 모델의 상태 대기는 HTTP 전에 `resource.ErrUnsupported`를
 반환합니다. `WithStatusAttribute("name")`처럼 exported 문자열 필드의 JSON 이름이나
@@ -50,8 +51,10 @@ Go 필드 이름을 선택하면 상태 대기를 사용할 수 있습니다. Ty
 새 Go 대기 API는 Ref 조회를 사용합니다. `BuildInfo`도 새 polling route를 제공하지
 않습니다. pinned `get_build_info`는 `requires_id=False`를 넘기지만 Resource wait의 fetch는
 다시 기본 `requires_id=True`를 사용하여 ID 없는 정상 BuildInfo에서 InvalidRequest를 냅니다.
-부모 cluster 범위가 필요한 `ClusterPolicy` 같은 추가 Resource의 대기 surface는 이 9개
-API의 지원 범위에 포함되지 않습니다.
+[ClusterPolicy scope](../clusterpolicies/README.md)는 부모 cluster를 한 번 해석하고 같은 policy
+route에서 대기합니다. binding의 별도 `ID`로 요청 경로를 바꾸지 않으며 Name lookup은
+`PolicyID`를 사용합니다. 연결 해제는 `Clusters.DetachPolicy`로 별도 요청합니다.
+[ClusterAttributes](../clusterattributes/README.md)는 list-only여서 대기 GET을 제공하지 않습니다.
 
 ## 상태 대기 사용
 
@@ -151,5 +154,7 @@ Python Resource helper는 nullable 목표 상태와 nullable 속성, `interval=N
 [Senlin proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py#L1350),
 [Resource wait helpers](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2591),
 [timeout iterator](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/utils.py#L53)입니다.
-[HTTP 회귀 테스트](../../../api/clustering_wait_contracts_test.go)는 9개 API, 기본값과 override,
+[HTTP 회귀 테스트](../../../api/clustering_wait_contracts_test.go)는 9개 API의 기본값과 override,
 실패·삭제 종결, 이름·ID, deadline/cancel과 응답 증거를 검증합니다.
+
+[고정 ClusterPolicy HTTP 테스트](../../../api/clustering_cluster_policies_test.go)는 parent·policy ID 구분, statusless 대기, 삭제 GET과 동일 scope의 요청 재검사를 검증합니다.
