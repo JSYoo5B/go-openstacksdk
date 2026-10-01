@@ -344,3 +344,5 @@ func RenameTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, 
 ```
 
 `Value()`는 병합 cache, `Response()`는 실제 응답 필드이며 Body/Header/Operation을 각각 복사합니다. clean Commit은 HTTP를 보내지 않고, accepted revision만 clean으로 바뀝니다. 반환 Operation은 작업 접수이며 완료가 아니고 action을 자동 조회하거나 poll하지 않습니다. Refresh는 고정 ID로 GET200하고 Operation을 nil로 바꿉니다. 실패·요청 중 새 Edit의 보존, null 삭제, pending 필드의 버전 gate와 Python/Go 차이는 [비동기 변경 추적](../tracking/async/README.md)을 참고합니다.
+
+`AtBasePath(path)`는 Update·Load·Track 전용 concrete scope를 반환합니다. [경로 지정과 Python/Go 사용 비교](../scoping/README.md)에서 literal 경로와 고정 Commit/Refresh 정책을 확인합니다.
