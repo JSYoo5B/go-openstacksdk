@@ -61,7 +61,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "instanceha/v1":
 		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산·Python 대응을 확인합니다. marker fallback·nullable 입력·Resource/cache와 proxy wait의 전체 계약은 추가 비교가 필요합니다.\n\n")
 	case "clustering/v1":
-		out.WriteString("Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `Profiles`와 `Policies`는 생성·조회·목록·객체 PATCH 갱신·삭제·이름 검색과 numeric microversion 1.2 이상의 Validate를 제공합니다. optional JSON 객체는 생략/null/빈 객체를 구분하고 로컬 Body 필터는 서버 query로 보내지 않습니다. `ProfileTypes.Operations(ctx, name)`은 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [Profiles](profiles/README.md), [Policies](policies/README.md), [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 25개 직접 선언 연산에 대응하는 API를 확인합니다. cluster/node/명령·proxy wait와 Resource/cache/dirty state의 전체 계약은 아직 pending입니다.\n\n")
+		out.WriteString("Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `Profiles`와 `Policies`는 생성·조회·목록·객체 PATCH 갱신·삭제·이름 검색과 numeric microversion 1.2 이상의 Validate를 제공합니다. `Clusters`와 `Nodes`도 concrete 생성·조회·목록·갱신·삭제·이름 검색을 제공하며, 비동기 202 요청의 action 참조를 보존합니다. cluster profile_only는 1.6 이상, node tainted는 1.13 이상을 요구합니다. optional 입력은 생략/null/false/zero를 구분하고 로컬 Body 필터는 서버 query로 보내지 않습니다. `ProfileTypes.Operations(ctx, name)`은 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [Profiles](profiles/README.md), [Policies](policies/README.md), [Clusters](clusters/README.md), [Nodes](nodes/README.md), [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 37개 직접 선언 연산에 대응하는 API를 확인합니다. cluster/node 명령·cluster metadata/policy 범위·proxy wait와 Resource/cache/dirty state의 전체 계약은 아직 pending입니다.\n\n")
 	case "baremetal/v1":
 		out.WriteString("`Nodes.GetVirtualMedia`는 SDK의 `VirtualMedia` 모델에 연결한 이미지, 삽입 상태, 매체 종류를 반환합니다. [virtual media 조회 사용법](nodes/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Conductors.Resources`는 `Conductor.Hostname`을 ID와 이름으로 사용합니다. `resource.ID(\"conductor-01\")`는 직접 조회하고 `resource.Name(\"conductor-01\")`는 전체 목록에서 정확히 찾습니다. `Drivers.Resources`의 ID와 이름은 `Driver.Name`입니다. 두 리소스는 조회·목록·이름 검색만 제공하며 삭제와 상태 대기는 `ErrUnsupported`입니다. [conductor](conductors/README.md), [driver](drivers/README.md) 사용법을 참고합니다.\n\n")
@@ -159,6 +159,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			}
 			if record.Kind == "list_only" {
 				policies = append(policies, "`List/All`: 목록만 제공; 단건 조회·변경·상태 대기 없음")
+				continue
+			}
+			if record.Kind == "async_resource" {
+				policies = append(policies, "`Resources`: ID 조회, 목록, 이름 조회, 상태 대기; `API.Delete`: 비동기 action Submission 반환, Collection.Delete는 미지원")
 				continue
 			}
 			if record.Kind == "singleton" {

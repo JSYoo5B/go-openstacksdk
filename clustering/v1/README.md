@@ -13,7 +13,7 @@ clustering/v1 API는 pinned Gophercloud에 없어 SDK가 직접 구현합니다.
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 응답은 SDK의 typed 모델이며 원문 필드·HTTP 헤더·상태 코드를 함께 보존합니다. Python의 permissive flat/empty 응답 fallback과 달리 각 endpoint의 명시한 object envelope를 검증합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `Profiles`와 `Policies`는 생성·조회·목록·객체 PATCH 갱신·삭제·이름 검색과 numeric microversion 1.2 이상의 Validate를 제공합니다. optional JSON 객체는 생략/null/빈 객체를 구분하고 로컬 Body 필터는 서버 query로 보내지 않습니다. `ProfileTypes.Operations(ctx, name)`은 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [Profiles](profiles/README.md), [Policies](policies/README.md), [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 25개 직접 선언 연산에 대응하는 API를 확인합니다. cluster/node/명령·proxy wait와 Resource/cache/dirty state의 전체 계약은 아직 pending입니다.
+Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog endpoint에는 `/v1`을 추가하고 이미 있는 버전과 prefix는 보존합니다. `BuildInfo.Get(ctx)`는 singleton이며 타입 catalog의 route ID는 정확한 이름입니다. `Profiles`와 `Policies`는 생성·조회·목록·객체 PATCH 갱신·삭제·이름 검색과 numeric microversion 1.2 이상의 Validate를 제공합니다. `Clusters`와 `Nodes`도 concrete 생성·조회·목록·갱신·삭제·이름 검색을 제공하며, 비동기 202 요청의 action 참조를 보존합니다. cluster profile_only는 1.6 이상, node tainted는 1.13 이상을 요구합니다. optional 입력은 생략/null/false/zero를 구분하고 로컬 Body 필터는 서버 query로 보내지 않습니다. `ProfileTypes.Operations(ctx, name)`은 1.4 이상, `Services.List(ctx)`는 1.7 이상을 요구합니다. [Profiles](profiles/README.md), [Policies](policies/README.md), [Clusters](clusters/README.md), [Nodes](nodes/README.md), [BuildInfo](buildinfo/README.md), [ProfileTypes](profiletypes/README.md), [PolicyTypes](policytypes/README.md), [Actions](actions/README.md), [Events](events/README.md), [Services](services/README.md)에서 37개 직접 선언 연산에 대응하는 API를 확인합니다. cluster/node 명령·cluster metadata/policy 범위·proxy wait와 Resource/cache/dirty state의 전체 계약은 아직 pending입니다.
 
 ## Go 사용
 
@@ -38,7 +38,9 @@ _ = value
 |---|---|---|
 | `Actions` | [actions](actions/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 상태 대기 |
 | `BuildInfo` | [buildinfo](buildinfo/api.go) | `Get(ctx)`: 서비스 build 정보 singleton; ID·목록·변경·상태 대기 없음 |
+| `Clusters` | [clusters](clusters/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 상태 대기; `API.Delete`: 비동기 action Submission 반환, Collection.Delete는 미지원 |
 | `Events` | [events](events/api.go) | `Resources`: ID 조회, 목록 |
+| `Nodes` | [nodes](nodes/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 상태 대기; `API.Delete`: 비동기 action Submission 반환, Collection.Delete는 미지원 |
 | `Policies` | [policies](policies/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `PolicyTypes` | [policytypes](policytypes/api.go) | `Resources`: ID 조회, 목록, 이름 조회 |
 | `Profiles` | [profiles](profiles/api.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

@@ -94,6 +94,8 @@ var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/clustering/v1/policytypes", Source: "sdk_owned", Model: "PolicyType", Find: true},
 	{Package: "gophercloudsdk/clustering/v1/profiles", Source: "sdk_owned", Model: "Profile", Find: true, Delete: true},
 	{Package: "gophercloudsdk/clustering/v1/policies", Source: "sdk_owned", Model: "Policy", Find: true, Delete: true},
+	{Package: "gophercloudsdk/clustering/v1/clusters", Source: "sdk_owned", Model: "Cluster", Kind: "async_resource", Find: true, Wait: true},
+	{Package: "gophercloudsdk/clustering/v1/nodes", Source: "sdk_owned", Model: "Node", Kind: "async_resource", Find: true, Wait: true},
 	{Package: "gophercloudsdk/clustering/v1/actions", Source: "sdk_owned", Model: "Action", Find: true, Wait: true},
 	{Package: "gophercloudsdk/clustering/v1/events", Source: "sdk_owned", Model: "Event"},
 	{Package: "gophercloudsdk/clustering/v1/services", Source: "sdk_owned", Model: "Service", Kind: "list_only"},
