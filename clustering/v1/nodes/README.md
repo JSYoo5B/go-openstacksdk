@@ -9,7 +9,7 @@ Node.ID는 Senlin node이며 PhysicalID는 실제 서버 등 underlying resource
 | `create_node(**attrs)` | `Nodes.Create(ctx, opts, options...)` | POST `/nodes`, 202 + node와 Location |
 | `get_node(identity, details=False)` | `Nodes.Get(ctx, identity, options...)` | GET `/nodes/{identity}`, 200 |
 | `nodes(**query)` | `Nodes.List` / `All` | GET `/nodes`, 200 |
-| `update_node(identity, **attrs)` | `Nodes.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + node와 Location |
+| `update_node(identity, **attrs)` | `Nodes.Update(...)` / `Load/Track → Edit → Commit` | 객체 PATCH, 202 + node와 Location |
 | `delete_node(identity, ignore_missing=True, force_delete=False)` | `Nodes.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
 | `find_node(identity, ignore_missing=True)` | `Nodes.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `check_node` / `recover_node` | `Check` / `Recover` | POST `/nodes/{id}/actions`, 202 |
@@ -314,3 +314,33 @@ func FindNodeStrict(ctx context.Context, conn *sdk.Connection) (*nodes.Node, err
 ```
 
 `WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.
+
+## cached 객체의 변경 전송
+
+Python `update_node(resource)`의 dirty/no-op/응답 병합은 `TrackedNode`로 사용합니다. concrete Update 옵션을 Edit에 전달하고 Commit이 변경된 필드만 PATCH202합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/nodes"
+    "gophercloudsdk/resource"
+)
+
+func RenameTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    tracked, err := service.Nodes.Load(ctx, resource.ID("NODE_ID"))
+    if err != nil { return nil, err }
+    if err := tracked.Edit(nodes.UpdateOpts{},
+        nodes.WithUpdateName("renamed")); err != nil {
+        return nil, err
+    }
+    return tracked.Commit(ctx)
+}
+```
+
+`Value()`는 병합 cache, `Response()`는 실제 응답 필드이며 Body/Header/Operation을 각각 복사합니다. clean Commit은 HTTP를 보내지 않고, accepted revision만 clean으로 바뀝니다. 반환 Operation은 작업 접수이며 완료가 아니고 action을 자동 조회하거나 poll하지 않습니다. Refresh는 고정 ID로 GET200하고 Operation을 nil로 바꿉니다. 실패·요청 중 새 Edit의 보존, null 삭제, pending 필드의 버전 gate와 Python/Go 차이는 [비동기 변경 추적](../tracking/async/README.md)을 참고합니다.

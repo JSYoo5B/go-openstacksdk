@@ -199,3 +199,5 @@ scalar null 필터에서 같고, 빈 실제 객체는 객체 필터에 일치하
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+`submission.Snapshot()`은 nil을 유지하고 accepted Body/Header를 깊게 복사합니다. 호출자의 수정은 원래 submission에 영향을 주지 않으며 조회나 대기를 하지 않습니다. Cluster·Node [tracked handle](../tracking/async/README.md)은 이 기능으로 JSON 밖의 Operation 근거를 보존합니다.

@@ -9,7 +9,7 @@ Connection은 인증된 client와 선택한 numeric microversion을 공유합니
 | `create_cluster(**attrs)` | `Clusters.Create(ctx, opts, options...)` | POST `/clusters`, 201 또는 202 + cluster; 202는 action Location 필수 |
 | `get_cluster(identity)` | `Clusters.Get(ctx, identity)` | GET `/clusters/{identity}`, 200 |
 | `clusters(**query)` | `Clusters.List` / `All` | GET `/clusters`, 200 |
-| `update_cluster(identity, **attrs)` | `Clusters.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + cluster와 Location |
+| `update_cluster(identity, **attrs)` | `Clusters.Update(...)` / `Load/Track → Edit → Commit` | 객체 PATCH, 202 + cluster와 Location |
 | `delete_cluster(identity, ignore_missing=True, force_delete=False)` | `Clusters.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
 | `find_cluster(identity, ignore_missing=True)` | `Clusters.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `scale_in_cluster` / `scale_out_cluster` | `ScaleIn` / `ScaleOut` | POST `/clusters/{id}/actions`, 202 |
@@ -399,3 +399,35 @@ func FindClusterStrict(ctx context.Context, conn *sdk.Connection) (*clusters.Clu
 ```
 
 `WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.
+
+## cached 객체의 변경 전송
+
+Python `update_cluster(resource)`의 dirty/no-op/응답 병합은 `TrackedCluster`로 사용합니다. concrete Update 옵션을 Edit에 전달하고 Commit이 변경된 필드만 PATCH202합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/clusters"
+    "gophercloudsdk/resource"
+)
+
+func RenameTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    tracked, err := service.Clusters.Load(ctx, resource.ID("CLUSTER_ID"))
+    if err != nil { return nil, err }
+    if err := tracked.Edit(clusters.UpdateOpts{},
+        clusters.WithUpdateName("renamed")); err != nil {
+        return nil, err
+    }
+    return tracked.Commit(ctx)
+}
+```
+
+`Value()`는 병합 cache, `Response()`는 실제 응답 필드이며 Body/Header/Operation을 각각 복사합니다. clean Commit은 HTTP를 보내지 않고, accepted revision만 clean으로 바뀝니다. 반환 Operation은 작업 접수이며 완료가 아니고 action을 자동 조회하거나 poll하지 않습니다. Refresh는 고정 ID로 GET200하고 Operation을 nil로 바꿉니다. 실패·요청 중 새 Edit의 보존, null 삭제, pending 필드의 버전 gate와 Python/Go 차이는 [비동기 변경 추적](../tracking/async/README.md)을 참고합니다.
+
+`WithUpdateProfileOnlyNull()`은 stateless Update와 tracked Edit 모두에서 명시 `profile_only:null`을 보냅니다. nil pointer의 기본 생략과 다르며 false·null·삭제 모두 실제 전송 시 1.6 이상이 필요합니다. bool helper와 null helper는 뒤 옵션이 우선하고 `WithUpdateOptions` snapshot도 null presence를 보존합니다.
