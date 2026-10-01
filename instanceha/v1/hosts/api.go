@@ -75,6 +75,7 @@ func (s *SegmentScope) validateQuery(ctx context.Context, q url.Values) error {
 }
 
 func (s *SegmentScope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Host, error] {
+	options = append([]ListOption(nil), options...)
 	return func(yield func(*Host, error) bool) {
 		query, err := prepareList(options...)
 		if err != nil {

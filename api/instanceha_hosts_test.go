@@ -145,9 +145,15 @@ func TestInstanceHAHostTypedListFiltersAndRawControlAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 	fixed, kind, disabled := segmentUUID, "COMPUTE", false
-	values, err := scope.All(context.Background(), hosts.WithListOptions(hosts.ListOpts{Reserved: &disabled, OnMaintenance: &disabled, FailoverSegmentID: &fixed, Type: &kind}))
-	if err != nil {
-		t.Fatal(err)
+	options := []hosts.ListOption{hosts.WithListOptions(hosts.ListOpts{Reserved: &disabled, OnMaintenance: &disabled, FailoverSegmentID: &fixed, Type: &kind})}
+	iterator := scope.List(context.Background(), options...)
+	options[0] = hosts.WithListOptions(hosts.ListOpts{})
+	var values []*hosts.Host
+	for value, err := range iterator {
+		if err != nil {
+			t.Fatal(err)
+		}
+		values = append(values, value)
 	}
 	if len(values) != 1 || values[0].SegmentID != segmentUUID || string(values[0].ID) != `"9007199254740993"` || values[0].Reserved != nil || string(values[0].Body["reserved"]) != "null" || string(values[0].ControlAttributes) != `{"mcastport":5405,"large":9007199254740995}` {
 		t.Fatalf("values=%+v", values)

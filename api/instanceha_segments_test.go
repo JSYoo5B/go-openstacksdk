@@ -103,7 +103,9 @@ func TestInstanceHASegmentListLinksAreLazyAndKeepFilters(t *testing.T) {
 		}
 	})
 	limit, enabled, service := 1, false, "COMPUTE"
-	iterator := segments.New(client).List(context.Background(), segments.WithListOptions(segments.ListOpts{Limit: &limit, Enabled: &enabled, ServiceType: &service}))
+	options := []segments.ListOption{segments.WithListOptions(segments.ListOpts{Limit: &limit, Enabled: &enabled, ServiceType: &service})}
+	iterator := segments.New(client).List(context.Background(), options...)
+	options[0] = segments.WithListOptions(segments.ListOpts{})
 	if calls.Load() != 0 {
 		t.Fatal("iterator made eager HTTP")
 	}

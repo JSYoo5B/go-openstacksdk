@@ -43,6 +43,7 @@ func New(client *gophercloud.ServiceClient) *API {
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Segment, error] {
+	options = append([]ListOption(nil), options...)
 	return func(yield func(*Segment, error) bool) {
 		query, err := prepareList(options...)
 		if err != nil {
