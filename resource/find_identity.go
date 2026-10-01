@@ -44,6 +44,14 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
+	// Snapshot SDK-owned secondary-search policy before any callback can run.
+	missingListQuery := cloneIdentityFindOptions(IdentityFindOpts{Query: c.binding.IdentityMissingListQuery}).Query
+	for key := range missingListQuery {
+		if err := validateIdentityFindQueryKey(key); err != nil {
+			return fail(err)
+		}
+	}
+	originalQuery := cloneIdentityFindOptions(config).Query
 	if config.AllProjects != nil {
 		for key := range config.Query {
 			if strings.EqualFold(key, "all_tenants") || c.binding.IdentityAllProjectsQuery != "" && strings.EqualFold(key, c.binding.IdentityAllProjectsQuery) {
@@ -115,10 +123,40 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
+	found, err := c.findIdentityList(ctx, identity, config.Query, details)
+	if err != nil {
+		return fail(err)
+	}
+	if found == nil && len(missingListQuery) != 0 {
+		// Start from the caller's query, not the first search's automatic name
+		// or all-projects hint. The fixed SDK overlay is mandatory.
+		for key, values := range missingListQuery {
+			originalQuery[key] = append([]string(nil), values...)
+		}
+		found, err = c.findIdentityList(ctx, identity, originalQuery, details)
+		if err != nil {
+			return fail(err)
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if found == nil && !ignoreMissing {
+		// Do not attach a suppressed direct 400/403 to logical list absence.
+		return fail(&NotFoundError{Resource: kind, Reference: identity})
+	}
+	return found, nil
+}
+
+// findIdentityList observes the entire native search before reporting logical
+// absence. Both phases retain exact ID-or-name matching and late error checks.
+func (c *Collection[T]) findIdentityList(ctx context.Context, identity string, query url.Values, details bool) (*T, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	// WithName would filter out rows matching only their ID. Copy the validated
-	// wire query directly: repeated WithQuery calls would collapse multiple
-	// values and drop explicitly present keys with empty slices.
-	query := cloneIdentityFindOptions(config).Query
+	// wire query directly to retain repeated and explicitly empty values.
+	query = cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query
 	listQuery := func(options *listOptions) error {
 		options.query = cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query
 		return nil
@@ -127,8 +165,6 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	var foundID string
 	listCollection := c
 	if modeIterator := c.binding.IterateIdentity; modeIterator != nil {
-		// Reuse ordinary List validation and error wrapping without changing the
-		// shared binding or routing ordinary List through the identity modes.
 		binding := c.binding
 		binding.IterateControlled = nil
 		binding.Iterate = func(ctx context.Context, query url.Values) iter.Seq2[*T, error] {
@@ -138,33 +174,29 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	}
 	for value, err := range listCollection.List(ctx, listQuery) {
 		if err != nil {
-			return fail(err)
+			return nil, err
 		}
 		if err := ctx.Err(); err != nil {
-			return fail(err)
+			return nil, err
 		}
 		id, err := c.identityFindID(value)
 		if err != nil {
-			return fail(err)
+			return nil, err
 		}
 		name := c.binding.Name(value)
 		if err := ctx.Err(); err != nil {
-			return fail(err)
+			return nil, err
 		}
 		if id != identity && name != identity {
 			continue
 		}
 		if found != nil {
-			return fail(&AmbiguousError{Resource: kind, Name: identity, IDs: []string{foundID, id}})
+			return nil, &AmbiguousError{Resource: c.binding.Kind, Name: identity, IDs: []string{foundID, id}}
 		}
 		found, foundID = value, id
 	}
 	if err := ctx.Err(); err != nil {
-		return fail(err)
-	}
-	if found == nil && !ignoreMissing {
-		// Do not attach a suppressed direct 400/403 to logical list absence.
-		return fail(&NotFoundError{Resource: kind, Reference: identity})
+		return nil, err
 	}
 	return found, nil
 }

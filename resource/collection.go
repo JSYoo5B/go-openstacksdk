@@ -38,6 +38,10 @@ type Adapter[T any] struct {
 	// IdentityAllProjectsQuery opts a binding into the typed, list-only
 	// AllProjects policy and identifies its wire query key, such as all_tenants.
 	IdentityAllProjectsQuery string
+	// IdentityMissingListQuery requests one additional list after a complete,
+	// successful empty identity search. SDK bindings own the fixed query overlay;
+	// it never retries HTTP errors or changes ordinary Get/List/Ref lookup.
+	IdentityMissingListQuery url.Values
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
@@ -62,6 +66,9 @@ type Adapter[T any] struct {
 type Collection[T any] struct{ binding Adapter[T] }
 
 func NewCollection[T any](adapter Adapter[T]) *Collection[T] {
+	if adapter.IdentityMissingListQuery != nil {
+		adapter.IdentityMissingListQuery = cloneIdentityFindOptions(IdentityFindOpts{Query: adapter.IdentityMissingListQuery}).Query
+	}
 	return &Collection[T]{binding: adapter}
 }
 
