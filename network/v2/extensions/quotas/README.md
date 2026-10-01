@@ -1,17 +1,18 @@
 # 프로젝트별 Neutron quota
 
-`InProject(ctx, projectRef)`는 프로젝트를 한 번 확정하고 `ProjectQuotaScope`를 반환합니다. Scope의 `Get`, `Detail`, `Update`, `Delete`는 프로젝트 quota singleton을 다룹니다. `Delete`는 quota override를 지워 기본값으로 되돌리는 작업이며 프로젝트를 삭제하지 않습니다.
+`InProject(ctx, projectRef)`는 프로젝트를 한 번 확정하고 `ProjectQuotaScope`를 반환합니다. Scope의 `Get`, `Defaults`, `Detail`, `Update`, `Delete`는 프로젝트 quota singleton을 다룹니다. `Delete`는 quota override를 지워 기본값으로 되돌리는 작업이며 프로젝트를 삭제하지 않습니다.
 
 | Python openstacksdk | Go scope |
 |---|---|
 | `conn.network.get_quota(project_id)` | `scope.Get(ctx)` |
+| `conn.network.get_quota_default(project_id)` | `scope.Defaults(ctx)` |
 | `conn.network.get_quota(project_id, details=True)` | `scope.Detail(ctx)` |
 | `conn.network.update_quota(project_id, ports=0, check_limit=False)` | `scope.Update(ctx, quotas.UpdateOpts{Port: &zero}, quotas.WithUpdateCheckLimit(false))` |
 | `conn.network.delete_quota(project_id, ignore_missing=False)` | `scope.Delete(ctx)` |
 | `ignore_missing=True` | `scope.Delete(ctx, quotas.WithDeleteIgnoreMissing(true))` |
 | Keystone 프로젝트 이름 해석 | `api.InProject(ctx, resource.Name(name), quotas.WithIdentityClient(identityClient))` |
 | 인증 프로젝트 ID 전달 | `api.CurrentProject(ctx)` |
-| `get_quota_default(project)` / `quotas(**query)` | 이번 scope에서는 미지원인 별도 defaults·collection 연산 |
+| `quotas(**query)` | singleton과 별개인 quota collection 연산 |
 
 ```go
 func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
@@ -22,6 +23,10 @@ func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient)
     limits, err := scope.Get(ctx)
     if err != nil { return err }
     fmt.Println(scope.ProjectID(), limits.Network, limits.Port)
+
+    defaults, err := scope.Defaults(ctx)
+    if err != nil { return err }
+    fmt.Println(defaults.Network, defaults.Port)
 
     usage, err := scope.Detail(ctx)
     if err != nil { return err }
@@ -61,7 +66,9 @@ Connection을 사용하면 `conn.NetworkProjectQuotas(ctx, resource.ID("project-
 
 `WithUpdateField`는 옵션 생성 시 값을 JSON으로 복사합니다. Native core limit 필드와 `check_limit`을 확장 필드로 덮어쓰면 HTTP 전에 `resource.ErrInvalidOption`입니다. Query·header·알 수 없는 argument 확장은 받지 않습니다. 선택한 ServiceClient의 endpoint·ResourceBase·헤더·버전·ProviderClient 설정은 변경하지 않습니다.
 
-Get·Update의 `QuotaResource`는 native `Quota`, 고정 요청 대상 `ProjectID`, 전체 quota 객체의 `Body`, 복사된 `Header`, `StatusCode`를 제공합니다. 응답에 다른 `project_id`가 있어도 대상은 바뀌지 않습니다. Body에서 알 수 없는 필드·큰 정수·null·빈 값·누락을 구분할 수 있습니다. Detail의 `QuotaDetailResource`는 native `QuotaDetailSet`의 `Used/Reserved/Limit`과 nested 원문을 보존합니다. Native Neutron 호환 처리에 따라 문자열 `reserved` 정수도 읽고, 잘못된 문자열은 원래 decode 오류를 반환합니다. quota 객체가 없거나 null·배열·scalar이거나 알려진 필드의 타입이 잘못되면 오류입니다.
+Get·Defaults·Update의 `QuotaResource`는 native `Quota`, 고정 요청 대상 `ProjectID`, 전체 quota 객체의 `Body`, 복사된 `Header`, `StatusCode`를 제공합니다. 응답에 다른 `project_id`가 있어도 대상은 바뀌지 않습니다. Body에서 알 수 없는 필드·큰 정수·null·빈 값·누락을 구분할 수 있습니다. Detail의 `QuotaDetailResource`는 native `QuotaDetailSet`의 `Used/Reserved/Limit`과 nested 원문을 보존합니다. Native Neutron 호환 처리에 따라 문자열 `reserved` 정수도 읽고, 잘못된 문자열은 원래 decode 오류를 반환합니다. quota 객체가 없거나 null·배열·scalar이거나 알려진 필드의 타입이 잘못되면 오류입니다.
+
+`Defaults`는 `/quotas/{project}/default`에서 기본 limit을 조회합니다. 현재 override를 반환하는 `Get`이나 사용량을 반환하는 `Detail`과 별도의 HTTP 작업입니다. 기본값 응답에 프로젝트 ID가 없어도 scope의 요청 대상 `ProjectID`를 유지하며, response body에 없는 ID를 추가하지 않습니다.
 
 ## HTTP와 지원 범위
 
@@ -69,6 +76,6 @@ GET·PUT은 native와 같은 200 성공 정책입니다. Detail은 Gophercloud�
 
 Scope의 DELETE 기본 404 정책은 엄격하며 `resource.ErrNotFound`와 원본 HTTP 원인을 보존합니다. Python `delete_quota`의 기본 `ignore_missing=True`에 대응하려면 `WithDeleteIgnoreMissing(true)`를 지정하세요. 뒤의 false 옵션으로 다시 엄격하게 설정할 수 있고, 403 등 다른 오류는 무시하지 않습니다. HTTP 오류의 code·header·body와 decode·부모 context 취소·timeout 원인은 `errors.As`와 `errors.Is`로 확인합니다.
 
-이 단위는 native Get·GetDetail·Update·Delete에 해당합니다. Python의 defaults endpoint와 quota collection 목록, 추가 조회 query, Resource 입력·dirty-state·자동 commit은 별도 계약입니다. 존재하지 않는 생성·이름 Find·상태 Wait를 singleton에 추가하지 않습니다. 하위 `API.Get/GetDetail/Update/Delete`의 native 반환 계약은 유지합니다.
+이 단위는 native Get·GetDetail·Update·Delete와 Python의 defaults endpoint에 해당합니다. Quota collection 목록, 추가 조회 query, Resource 입력·dirty-state·자동 commit은 별도 계약입니다. 존재하지 않는 생성·이름 Find·상태 Wait를 singleton에 추가하지 않습니다. 하위 `API.Get/GetDetail/Update/Delete`의 native 반환 계약은 유지합니다.
 
-근거: pinned [Gophercloud requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/networking/v2/extensions/quotas/requests.go), [Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py), [Python quota resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/quota.py), [Neutron quota details API](https://docs.openstack.org/api-ref/network/v2/#quotas-details-extension-quota-details). 계약 테스트는 [HTTP·입력·오류](../../../../api/neutron_project_quotas_contracts_test.go)와 [프로젝트 해석·인증](../../../../api/neutron_project_quotas_projects_test.go)에 있습니다.
+근거: pinned [Gophercloud requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/networking/v2/extensions/quotas/requests.go), [Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py), [Python quota resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/quota.py), [Neutron quota details API](https://docs.openstack.org/api-ref/network/v2/#quotas-details-extension-quota-details). 계약 테스트는 [HTTP·입력·오류](../../../../api/neutron_project_quotas_contracts_test.go), [프로젝트 해석·인증](../../../../api/neutron_project_quotas_projects_test.go), [기본 quota 조회](../../../../api/neutron_quota_defaults_test.go)에 있습니다.
