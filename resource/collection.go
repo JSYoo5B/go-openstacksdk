@@ -65,6 +65,11 @@ type Adapter[T any] struct {
 	// BodyFilterValue projects one canonical field from the native typed model.
 	// This does not restore original wire presence or numeric precision.
 	BodyFilterValue func(*T, string) (json.RawMessage, error)
+	// IterateBodyControlled pairs native models with original row fields when
+	// an audited Body filter needs wire presence or values lost by that model.
+	// It is selected only for a nonempty prepared Body filter set.
+	IterateBodyControlled func(context.Context, url.Values, ListControl) iter.Seq2[*BodyRecord[T], error]
+	BodyFilterRecordValue func(*BodyRecord[T], string) (json.RawMessage, error)
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
@@ -171,6 +176,37 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 		if o.status && c.binding.LocalStatus {
 			wireQuery = maps.Clone(o.query)
 			delete(wireQuery, "status")
+		}
+		if len(bodyFilters) > 0 && c.binding.BodyFilterRecordValue != nil {
+			for record, err := range c.binding.IterateBodyControlled(ctx, wireQuery, o.control) {
+				if err != nil {
+					yield(nil, c.wrap("list", err))
+					return
+				}
+				if record == nil {
+					yield(nil, c.wrap("list", invalid("nil Body filter record")))
+					return
+				}
+				matched, err := c.matchBodyRecordFilters(record, bodyFilters)
+				if err != nil {
+					yield(nil, c.wrap("list", err))
+					return
+				}
+				if !matched {
+					continue
+				}
+				value := &record.Value
+				if o.name != nil && c.binding.Name(value) != *o.name {
+					continue
+				}
+				if o.status && !strings.EqualFold(c.binding.Status(value), o.query.Get("status")) {
+					continue
+				}
+				if !yield(value, nil) {
+					return
+				}
+			}
+			return
 		}
 		var iterator iter.Seq2[*T, error]
 		if c.binding.IterateControlled != nil {

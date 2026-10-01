@@ -78,7 +78,8 @@ func (c *Collection[T]) prepareBodyFilters(updates []bodyFilterUpdate) (map[stri
 		return nil, nil
 	}
 	fields := c.binding.BodyFilterFields
-	if len(fields) == 0 || c.binding.BodyFilterValue == nil {
+	rawProjection := c.binding.BodyFilterRecordValue != nil
+	if len(fields) == 0 || (c.binding.BodyFilterValue == nil && !rawProjection) || (rawProjection && c.binding.IterateBodyControlled == nil) {
 		return nil, c.wrap("list", ErrUnsupported)
 	}
 	for _, alias := range sortedBodyKeys(fields) {
@@ -119,6 +120,18 @@ func (c *Collection[T]) matchBodyFilters(value *T, filters map[string]json.RawMe
 	body := make(map[string]json.RawMessage, len(filters))
 	for _, field := range sortedBodyKeys(filters) {
 		raw, err := c.binding.BodyFilterValue(value, field)
+		if err != nil {
+			return false, fmt.Errorf("Body filter field %q: %w", field, err)
+		}
+		body[field] = raw
+	}
+	return jsonfilter.MatchFilters(body, filters)
+}
+
+func (c *Collection[T]) matchBodyRecordFilters(record *BodyRecord[T], filters map[string]json.RawMessage) (bool, error) {
+	body := make(map[string]json.RawMessage, len(filters))
+	for _, field := range sortedBodyKeys(filters) {
+		raw, err := c.binding.BodyFilterRecordValue(record, field)
 		if err != nil {
 			return false, fmt.Errorf("Body filter field %q: %w", field, err)
 		}
