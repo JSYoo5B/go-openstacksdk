@@ -148,10 +148,14 @@
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/limits",
+    "model": "LimitsResource",
+    "upstream_model": "Limits",
+    "kind": "project_limits",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/manageablevolumes",
@@ -304,10 +308,14 @@
   },
   {
     "package": "gophercloudsdk/compute/v2/limits",
+    "model": "LimitsResource",
+    "upstream_model": "Limits",
+    "kind": "project_limits",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/compute/v2/migrations",

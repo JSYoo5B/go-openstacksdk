@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 `conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
+`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.
+
 `Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.
 
 `Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.
@@ -51,7 +53,7 @@ _ = value
 | `Hypervisors` | [hypervisors](hypervisors/api_generated.go) | `Resources`: ID 조회, 목록, 상태 대기 |
 | `InstanceActions` | [instanceactions](instanceactions/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록 |
 | `KeyPairs` | [keypairs](keypairs/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
-| `Limits` | [limits](limits/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |
 | `Migrations` | [migrations](migrations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Detail·Update·Reset; List/Find/Wait 없음 |
 | `RemoteConsoles` | [remoteconsoles](remoteconsoles/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
