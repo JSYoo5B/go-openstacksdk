@@ -11654,6 +11654,172 @@
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation. Go uses the native plural_links pager and does not implement every inherited Python continuation path.",
         "This resource inherits _max_microversion=None, so no class-specific maximum negotiation gap is claimed. Inherited per-call session/microversion/header/base_path and pagination controls remain separate from frozen Go raw query, which retains configured client settings."
       ]
+    },
+    {
+      "operation": "python:network/v2/qos_policies",
+      "source_fingerprint": "a03621cff2d5cbe647200a8004a2b97ce7fc8beafa8357daf4bec70e4c32345f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/qos/policies.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct qos_policies (openstack/network/v2/_proxy.py:5177) delegates arbitrary query to Resource.list. The declared non-query Body rules can now be filtered explicitly with SDK-owned WithBodyFilter/WithBodyFilters through ordinary Resources.List/All, projecting only native QoSPolicy.Rules. The filter stays local and does not introduce a wire query, identity lookup, extra GET or caller builder/predicate.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+          ]
+        },
+        {
+          "behavior": "Each option snapshots JSON at construction and owns fresh bytes on each application. Individual filters merge with canonical last-wins; bulk filters replace the set and nil/empty bulk clears it. Native null differs from empty arrays; arrays compare full ordered values including full nested objects, while generic object filters use recursive subset semantics. Go booleans and numbers remain distinct.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativeValueSemantics",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersOptionApplicationOwnsRawBytes",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersSnapshotsBulkAliasesAndConcurrentReuse",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersPreserveNullEmptyAndExactArrayValues"
+          ]
+        },
+        {
+          "behavior": "Unknown fields, invalid JSON/non-JSON/NaN values, bulk alias conflicts and invalid descriptors fail lazily before HTTP with ErrInvalidOption and retained marshal causes. Unsupported bindings, including explicit clear, fail with ErrUnsupported. Only explicitly audited canonical fields are advertised; native schema or extraction contract drift fails generation rather than silently opting other models in.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLazyPreflightAndUnsupportedBindings",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersValidateBeforeHTTP",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "Raw-row caps run before local Body/name filters and do not refill with matching rows or infer a wire limit. Explicit first-page, page-size and consumer break retain native request/continuation behavior. Whole-page native extraction, later HTTP/decode errors, cycles and cancellation remain terminal, and projection failures retain their causes even when the name would not match.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersRawControlsNameAndConsumerBreak",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersProjectionFailuresAreTerminalAndKeepCause"
+          ]
+        },
+        {
+          "behavior": "Leaf collections and the cached Connection.Network.API retain the live provider, configured HTTP client/token/headers and native model extraction with policies_links. Raw rules/addresses/status/vendor query remains wire-only. Native typed List and FindIdentity retain their existing signatures/query behavior and do not acquire these ordinary-list Body options.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation"
+          ]
+        },
+        {
+          "behavior": "QoS rule values have already passed through native map[string]any decoding before selection. The selector preserves the resulting float64 projection rather than claiming original JSON integer precision; ordered rule arrays require complete inner-object equality and bool/number coercion is rejected.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersQoSNativeNumberProjectionAndStrictTypes"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "resource/README.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource.list classifies non-query declared Body attributes automatically. Go explicitly selects rules with owned options and an audited native selector; raw wire query retains repetitions, empty values, aliases and vendor keys. No caller-supplied builder or predicate is required.",
+        "Go comparisons use JSON value types, exact ordered array equality and bool/number separation; dict filters against non-objects return false instead of raising an attribute error. Value snapshots do not perform Python descriptor coercion.",
+        "Native Rules extraction collapses missing and null to nil, preserves a present empty array, and does not preserve every unknown outer Body attribute or internally seeded Resource state. Selecting JSON from a native model cannot recover original wire presence or numeric precision.",
+        "Raw max_items is local and does not create Python Resource.list's limit hint. Existing native accepted statuses, whole-page extraction and advertised continuation remain the contract; typed native List and FindIdentity are separate surfaces."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared query aliases, discard unknown names and automatically classify other declared non-query Body attributes. Audit and implement the remaining fields, descriptor coercion and complete automatic query/Body policy beyond these explicit selectors.",
+        "Pinned Resource.existing/_translate_response seeds descriptor/default/alias/unknown-Body state. QoSPolicy inherits Resource with TagMixin, not NetworkResource; native extraction does not provide that complete inherited Resource/cache/dirty lifecycle.",
+        "Pinned Proxy.request optional GET response caching (cache_enabled/skip_cache, openstack/proxy.py:249-263) and inherited per-call header/microversion/base_path controls remain separate from retaining configured native client settings. The direct Proxy._list fixes the session to itself; adapter/session injection belongs to the inherited Resource.list surface. This class inherits _max_microversion=None, so no class-specific maximum negotiation gap is claimed.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker paths not fully represented by the native plural_links pager. Ordinary-list options do not provide local Body classification for FindIdentity or native typed List.",
+        "Pinned Proxy._list (openstack/proxy.py:866-916) consumes the deprecated jmespath_filters expression from direct **query before delegating Resource.list. No corresponding expression filter option is provided by the ordinary Go collection."
+      ]
+    },
+    {
+      "operation": "python:network/v2/address_groups",
+      "source_fingerprint": "541504636050e8c6aa24401acf760df460c5a661219bc9cb033ff1a4137878f8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/security/addressgroups.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct address_groups (openstack/network/v2/_proxy.py:392) delegates arbitrary query to Resource.list. The declared non-query Body addresses can now be filtered explicitly with SDK-owned WithBodyFilter/WithBodyFilters through ordinary Resources.List/All, projecting only native AddressGroup.Addresses. The filter stays local and does not introduce a wire query, identity lookup, extra GET or caller builder/predicate.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+          ]
+        },
+        {
+          "behavior": "Each option snapshots JSON at construction and owns fresh bytes on each application. Individual filters merge with canonical last-wins; bulk filters replace the set and nil/empty bulk clears it. Native null differs from empty arrays; arrays compare full ordered values including full nested objects, while generic object filters use recursive subset semantics. Go booleans and numbers remain distinct.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativeValueSemantics",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersOptionApplicationOwnsRawBytes",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersSnapshotsBulkAliasesAndConcurrentReuse",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersPreserveNullEmptyAndExactArrayValues"
+          ]
+        },
+        {
+          "behavior": "Unknown fields, invalid JSON/non-JSON/NaN values, bulk alias conflicts and invalid descriptors fail lazily before HTTP with ErrInvalidOption and retained marshal causes. Unsupported bindings, including explicit clear, fail with ErrUnsupported. Only explicitly audited canonical fields are advertised; native schema or extraction contract drift fails generation rather than silently opting other models in.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLazyPreflightAndUnsupportedBindings",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersValidateBeforeHTTP",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
+          ]
+        },
+        {
+          "behavior": "Raw-row caps run before local Body/name filters and do not refill with matching rows or infer a wire limit. Explicit first-page, page-size and consumer break retain native request/continuation behavior. Whole-page native extraction, later HTTP/decode errors, cycles and cancellation remain terminal, and projection failures retain their causes even when the name would not match.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersRawControlsNameAndConsumerBreak",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersProjectionFailuresAreTerminalAndKeepCause"
+          ]
+        },
+        {
+          "behavior": "Leaf collections and the cached Connection.Network.API retain the live provider, configured HTTP client/token/headers and native model extraction with address_groups_links. Raw rules/addresses/status/vendor query remains wire-only. Native typed List and FindIdentity retain their existing signatures/query behavior and do not acquire these ordinary-list Body options.",
+          "tests": [
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "resource/README.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource.list classifies non-query declared Body attributes automatically. Go explicitly selects addresses with owned options and an audited native selector; raw wire query retains repetitions, empty values, aliases and vendor keys. No caller-supplied builder or predicate is required.",
+        "Go comparisons use JSON value types, exact ordered array equality and bool/number separation; dict filters against non-objects return false instead of raising an attribute error. Value snapshots do not perform Python descriptor coercion.",
+        "Native Addresses extraction collapses missing and null to nil, preserves a present empty array, and does not preserve every unknown outer Body attribute or internally seeded Resource state. Selecting JSON from a native model cannot recover original wire presence or numeric precision.",
+        "Raw max_items is local and does not create Python Resource.list's limit hint. Existing native accepted statuses, whole-page extraction and advertised continuation remain the contract; typed native List and FindIdentity are separate surfaces."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared query aliases, discard unknown names and automatically classify other declared non-query Body attributes. Audit and implement the remaining fields, descriptor coercion and complete automatic query/Body policy beyond these explicit selectors.",
+        "Pinned Resource.existing/_translate_response seeds descriptor/default/alias/unknown-Body state. AddressGroup inherits Resource without TagMixin, not NetworkResource; native extraction does not provide that complete inherited Resource/cache/dirty lifecycle.",
+        "Pinned Proxy.request optional GET response caching (cache_enabled/skip_cache, openstack/proxy.py:249-263) and inherited per-call header/microversion/base_path controls remain separate from retaining configured native client settings. The direct Proxy._list fixes the session to itself; adapter/session injection belongs to the inherited Resource.list surface. This class inherits _max_microversion=None, so no class-specific maximum negotiation gap is claimed.",
+        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker paths not fully represented by the native plural_links pager. Ordinary-list options do not provide local Body classification for FindIdentity or native typed List.",
+        "Pinned Proxy._list (openstack/proxy.py:866-916) consumes the deprecated jmespath_filters expression from direct **query before delegating Resource.list. No corresponding expression filter option is provided by the ordinary Go collection."
+      ]
     }
   ]
 }
