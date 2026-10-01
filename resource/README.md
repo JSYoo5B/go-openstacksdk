@@ -53,6 +53,8 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 
 `errors.Is`로 `ErrNotFound`, `ErrAmbiguous`, `ErrUnsupported`, `ErrInvalidOption`, `ErrFailedState`, `ErrPaginationCycle`을 구분합니다. `errors.As`로 `NotFoundError`, `AmbiguousError`, `FailedStateError`, `PaginationCycleError`, `OperationError`의 상세 정보를 확인합니다. HTTP에서 발생한 미존재는 원래 Gophercloud 오류도 보존합니다.
 
+SDK 소유 Cyborg·Senlin·Masakari 모델의 `Metadata.Body`는 원래 JSON 필드를 `json.RawMessage`로 보존합니다. 큰 정수를 `float64`로 바꾸지 않으며 null·빈 값·생략도 구별합니다. `Metadata.Header`와 `StatusCode`는 받아들인 응답의 HTTP 근거입니다. Senlin·Masakari의 받아들인 응답을 읽거나 해석하지 못하면 `ResponseError`가 원문·헤더·상태·cause를 보존합니다. 생성 요청이 이미 성공했을 수 있으므로 이 오류만으로 자동 재전송하지 않습니다.
+
 Wait의 기본 timeout은 5분, 간격은 2초입니다. `WithUnlimitedWait()`는 SDK의 timeout을 없애며 부모 context의 취소와 deadline은 유지합니다. 뒤의 `WithTimeout(...)`으로 다시 제한할 수 있습니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. `WithFailureStates("ERROR", "BROKEN")`은 이를 정확한 대소문자 무시 비교로 교체하고, 인자 없는 `WithFailureStates()`는 상태에 의한 실패 검사를 끕니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다. 서비스 조회 자체가 반환하는 실패 오류는 이 옵션으로 무시하지 않습니다.
 
 Python `resource.wait_for_status(..., failures=[], wait=None)`에 대응하는 Go 옵션은 `WithFailureStates(), WithUnlimitedWait()`입니다. Go는 응답 객체를 받아 캐시된 상태를 검사하는 대신 처음부터 HTTP로 조회하고, timeout을 HTTP 요청에도 context deadline으로 전달합니다. 이미 취소된 context에서는 목표 상태 응답도 성공으로 반환하지 않습니다.

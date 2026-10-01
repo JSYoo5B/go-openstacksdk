@@ -48,6 +48,8 @@ flowchart TD
 
 서비스 구현자는 `resource.Adapter[T]`에 HTTP 연산과 모델 접근 함수를 등록합니다. 이는 라이브러리 확장을 위한 등록 구조이며 애플리케이션마다 구현할 계약이 아닙니다. 이름·페이지·대기 정책은 공유 구현을 사용합니다.
 
+Gophercloud에 없는 서비스도 SDK가 concrete API를 제공합니다. Senlin과 Masakari는 private `internal/rest`의 응답·페이지·Collection 연결을 사용하고, 각 서비스가 URI·envelope·성공 코드·식별자·microversion 요구를 선언합니다. 공통 transport가 있는 것만으로 해당 서비스의 API 구현을 완료했다고 판정하지 않습니다. 페이지마다 원래 필터와 collection 경로를 고정하고, marker fallback은 실제 서비스의 wire 식별자와 명시적 페이지 크기가 있을 때만 사용합니다.
+
 ## 이름과 ID
 
 `Ref`의 내부 표현은 숨기고 `ID`와 `Name` 생성 함수를 제공합니다. ID처럼 생긴 이름, 숫자 flavor ID, 이름 중복을 모두 명시적으로 처리합니다. HTTP 403이나 통신 오류를 이름 검색 실패로 바꿔서 다시 시도하지 않습니다.
@@ -65,6 +67,8 @@ HTTP 설정과 Microversion 선택 정책은 연결 시 정합니다. 실제 협
 ## 현재 모델과 남은 작업
 
 기본 응답 모델은 Gophercloud alias입니다. 인증·virtual media·Swift처럼 여러 응답 뷰나 metadata를 보관하는 모델은 SDK에서 소유합니다. 변경 추적이 필요한 Resource 모델을 도입할 때는 기존 조회·옵션·오류 계약을 유지해야 합니다.
+
+SDK 소유 모델의 `resource.Metadata`는 추가 JSON 필드, null·생략의 차이, 정확한 숫자와 HTTP 헤더·상태 코드를 보존합니다. 서버가 수락한 응답의 read/decode 실패는 `resource.ResponseError`에 원문과 cause를 남깁니다. 이미 성공했을 수 있는 생성·갱신을 응답 해석 실패만으로 재전송하지 않습니다.
 
 1. 생성 목록과 별도로 [지원 판정](sdk-support-ledger.md)을 보존하고 Python의 상속·descriptor·Resource 표면도 추적합니다.
 2. 복합 식별자, 목록과 상세 모델 차이, list-only 자료 등 아직 공통 정책에 연결되지 않은 리소스를 실제 capability에 맞게 연결합니다.

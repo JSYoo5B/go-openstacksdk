@@ -75,12 +75,15 @@ interface. Connection creation itself does not contact service discovery endpoin
 `Connection.Microversion(ctx, service)` also lazily initializes the service client,
 then returns a copy of its selection information.
 
-For Nova, Cinder, and Manila project-scoped catalog URLs, the SDK removes the project
+For Nova, Cinder, Manila, and Masakari project-scoped catalog URLs, the SDK removes the project
 segment for discovery: `/compute/v2.1/project/` is inspected at `/compute/v2.1/`,
 then `/compute/` when the version endpoint returns 404/405 or omits advertised bounds.
 Reverse-proxy prefixes remain intact. Cinder `/volume/v3/project/` is inspected at
 `/volume/v3/`. Versioned Ironic and Magnum endpoints likewise have a root fallback.
 Unversioned discovery endpoints such as Placement's root are used directly.
+Masakari `/instance-ha/v1/project/` is inspected at `/instance-ha/v1/` and
+then `/instance-ha/`. Senlin's unversioned catalog root is extended with `/v1`
+for resource requests; discovery can fall back from that version to the root.
 
 The decoder accepts a `version` object, a `versions` array, a `versions.values`
 array, and an unenveloped version object, including `version` or `max_version`
@@ -102,10 +105,11 @@ as immutable while sharing a connection across goroutines.
 
 ## Services and Python comparison
 
-Automatic selection is limited to the services whose Gophercloud client exposes
+Automatic selection is limited to services whose API exposes
 microversion semantics: Compute v2, Block Storage v3, Bare Metal v1, Bare Metal
 Introspection v1, Container v1, Container Infrastructure v1, Placement v1, and
-Shared File System v2. It requires the cloud to advertise valid bounds. Network,
+Shared File System v2, and the SDK-owned Accelerator v2, Clustering v1 and
+Instance HA v1 services. It requires the cloud to advertise valid bounds. Network,
 Image, Identity, Object Storage, and other services without those semantics reject
 microversion options with `resource.ErrUnsupported`. A Block Storage microversion
 policy applies to v3 and cannot silently apply to `BlockStorageV2()`.

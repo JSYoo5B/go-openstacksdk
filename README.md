@@ -8,8 +8,10 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 ```text
 gophercloudsdk/
-├── connection*.go           # 인증, 설정, 22개 서비스 접근과 캐시
+├── connection*.go           # 인증, 설정, 24개 서비스 접근과 캐시
 ├── accelerator/             # SDK 소유 Cyborg v2 모델·transport
+├── clustering/              # SDK 소유 Senlin v1 조회·타입 정보
+├── instanceha/              # SDK 소유 Masakari v1 failover 리소스
 ├── compute/                 # 서버, flavor, 서버 생성 흐름
 ├── network/                 # Neutron 네트워크
 ├── image/                   # Glance 이미지
@@ -24,7 +26,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2의 다섯 리소스 API와 Manila quota·quota class API를 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 5개, 부모 Collection 범위 19개, Heat stack 복합 식별자·자식 resource·이벤트 범위, Nova·Cinder·Neutron·Octavia·Manila·Designate project quota singleton, Manila named quota class, Nova·Cinder의 읽기 전용 project limits, Magnum project+resource quota와 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. SDK가 직접 구현한 Cyborg v2, Senlin v1, Masakari v1을 포함해 연결 가능한 서비스는 24개이며 API 버전은 26개입니다. Senlin·Masakari의 모든 Python 연산을 구현한 상태는 아닙니다. Manila quota·quota class도 SDK가 직접 구현합니다. 공통 정책은 108개 native 일반 Collection과 SDK 소유 리소스의 실제 조회·삭제·대기 capability, 부모 범위, Heat 복합 식별자·자식·이벤트, project quota·limits·Magnum project+resource quota와 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
@@ -48,6 +50,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 | Bare Metal | [v1](baremetal/v1/README.md) | `BareMetal(ctx)` |
 | Bare Metal Introspection | [v1](baremetalintrospection/v1/README.md) | `BareMetalIntrospection(ctx)` |
 | Block Storage | [v2](blockstorage/v2/README.md), [v3](blockstorage/v3/README.md) | `BlockStorageV2(ctx)`, `BlockStorageV3(ctx)` |
+| Clustering (Senlin) | [v1](clustering/v1/README.md) | `Clustering(ctx)` |
 | Compute | [v2](compute/v2/README.md) | `ComputeV2(ctx)` |
 | Container | [v1](container/v1/README.md) | `Container(ctx)` |
 | Container Infra | [v1](containerinfra/v1/README.md) | `ContainerInfra(ctx)` |
@@ -55,6 +58,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 | DNS | [v2](dns/v2/README.md) | `DNS(ctx)` |
 | Identity | [v2](identity/v2/README.md), [v3](identity/v3/README.md) | `IdentityV2(ctx)`, `Identity(ctx)` |
 | Image | [v2](image/v2/README.md) | `ImageV2(ctx)` |
+| Instance HA (Masakari) | [v1](instanceha/v1/README.md) | `InstanceHA(ctx)` |
 | Key Manager | [v1](keymanager/v1/README.md) | `KeyManager(ctx)` |
 | Load Balancer | [v2](loadbalancer/v2/README.md) | `LoadBalancer(ctx)` |
 | Messaging | [v2](messaging/v2/README.md) | `Messaging(ctx)` |
