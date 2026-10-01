@@ -10,7 +10,7 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 gophercloudsdk/
 ├── connection*.go           # 인증, 설정, 24개 서비스 접근과 캐시
 ├── accelerator/             # SDK 소유 Cyborg v2 모델·transport
-├── clustering/              # SDK 소유 Senlin v1 조회·타입 정보
+├── clustering/              # SDK 소유 Senlin v1 profile·policy·조회·타입 정보
 ├── instanceha/              # SDK 소유 Masakari v1 failover 리소스
 ├── compute/                 # 서버, flavor, 서버 생성 흐름
 ├── network/                 # Neutron 네트워크
