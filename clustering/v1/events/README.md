@@ -28,8 +28,10 @@ oid/oname/otype입니다. 각 slice와 Actions는 반복 query를 보존하고 �
 명시적으로 false를 보냅니다. 추가 query는 `WithListQuery`로 보낼 수 있고 concrete 필드를
 덮어쓸 수 없습니다.
 
-Event ID와 관련 ObjectID를 구별합니다. Level은 문자열이며 GeneratedAt은 원래 timestamp
-문자열입니다. 임의 JSON인 MetaData와 추가 응답 필드는 숫자 정밀도를 유지합니다.
+Event ID와 관련 ObjectID를 구별합니다. Level은 JSON 문자열·숫자를 모두 받아 정확한
+문자열 값으로 제공하고, `Body["level"]`에는 원래 JSON 타입을 보존합니다. 큰 정수를
+float64로 바꾸지 않습니다. Python의 무타입 Body는 원래 값의 타입을 유지한다는 차이가
+있습니다. GeneratedAt은 원래 timestamp 문자열입니다. 임의 JSON인 MetaData와 추가 응답 필드는 숫자 정밀도를 유지합니다.
 `Body`는 생략/null을 구별하고 `Header`, `StatusCode`는 HTTP 근거를 담습니다.
 
 명시한 limit의 full page 뒤에는 마지막 응답 Event ID로 marker를 만들고 마지막 빈

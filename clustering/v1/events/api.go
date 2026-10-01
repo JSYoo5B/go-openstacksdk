@@ -2,6 +2,7 @@
 package events
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -53,7 +54,26 @@ type Event struct {
 
 func (value *Event) UnmarshalJSON(data []byte) error {
 	type plain Event
-	return resource.DecodeObject(data, (*plain)(value), &value.Metadata)
+	var decoded plain
+	wire := struct {
+		*plain
+		Level json.RawMessage `json:"level"`
+	}{plain: &decoded}
+	if err := resource.DecodeObject(data, &wire, &decoded.Metadata); err != nil {
+		return err
+	}
+	level := bytes.TrimSpace(wire.Level)
+	if len(level) != 0 && !bytes.Equal(level, []byte("null")) {
+		if err := json.Unmarshal(level, &decoded.Level); err != nil {
+			var number json.Number
+			if err := json.Unmarshal(level, &number); err != nil {
+				return fmt.Errorf("event level must be a JSON string or number: %w", err)
+			}
+			decoded.Level = number.String()
+		}
+	}
+	*value = Event(decoded)
+	return nil
 }
 
 func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Event] {

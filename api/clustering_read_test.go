@@ -276,7 +276,7 @@ func TestClusteringReadEventGetHTTPAndDecodeEvidence(t *testing.T) {
 		case "denied":
 			testcloud.JSON(w, 403, `{"error":"denied event"}`)
 		case "bad":
-			testcloud.JSON(w, 200, `{"event":{"level":20}}`)
+			testcloud.JSON(w, 200, `{"event":{"level":true}}`)
 		default:
 			testcloud.JSON(w, 200, `{"event":{"id":"event-response","level":"20","oid":"node-1","timestamp":"2016-10-10T12:46:36.000000","meta_data":null}}`)
 		}
@@ -292,12 +292,50 @@ func TestClusteringReadEventGetHTTPAndDecodeEvidence(t *testing.T) {
 	}
 	_, err = api.Get(context.Background(), "bad")
 	var responseError *resource.ResponseError
-	if !errors.As(err, &responseError) || responseError.StatusCode != 200 || responseError.Header.Get("X-Request-Id") != "event-error" || string(responseError.Body) != `{"event":{"level":20}}` {
+	if !errors.As(err, &responseError) || responseError.StatusCode != 200 || responseError.Header.Get("X-Request-Id") != "event-error" || string(responseError.Body) != `{"event":{"level":true}}` {
 		t.Fatal(err)
 	}
 	value, err := api.Get(context.Background(), "request-id")
 	if err != nil || value.ID != "event-response" || value.Level != "20" || string(value.MetaData) != "null" || value.GeneratedAt == nil {
 		t.Fatal(value, err)
+	}
+}
+
+func TestClusteringReadEventLevelsPreserveStringNumberNullAndOmission(t *testing.T) {
+	rows := []struct{ id, body, level, raw string }{
+		{"string", `{"id":"string","level":"20"}`, "20", `"20"`},
+		{"number", `{"id":"number","level":20}`, "20", "20"},
+		{"large", `{"id":"large","level":9007199254740993}`, "9007199254740993", "9007199254740993"},
+		{"null", `{"id":"null","level":null}`, "", "null"},
+		{"omitted", `{"id":"omitted"}`, "", ""},
+	}
+	cloud := testcloud.New(t)
+	cloud.Mux.HandleFunc("/v1/events", func(w http.ResponseWriter, r *http.Request) {
+		var bodies []string
+		for _, row := range rows {
+			bodies = append(bodies, row.body)
+		}
+		testcloud.JSON(w, 200, `{"events":[`+strings.Join(bodies, ",")+`]}`)
+	})
+	cloud.Mux.HandleFunc("/v1/events/", func(w http.ResponseWriter, r *http.Request) {
+		for _, row := range rows {
+			if strings.TrimPrefix(r.URL.Path, "/v1/events/") == row.id {
+				testcloud.JSON(w, 200, `{"event":`+row.body+`}`)
+				return
+			}
+		}
+		http.NotFound(w, r)
+	})
+	api := events.New(cloud.Client("clustering", "/v1"))
+	all, err := api.All(context.Background())
+	if err != nil || len(all) != len(rows) {
+		t.Fatalf("list: %#v %v", all, err)
+	}
+	for i, row := range rows {
+		value, err := api.Get(context.Background(), row.id)
+		if err != nil || value.Level != row.level || string(value.Body["level"]) != row.raw || all[i].Level != row.level || string(all[i].Body["level"]) != row.raw {
+			t.Fatalf("%s: get=%#v list=%#v err=%v", row.id, value, all[i], err)
+		}
 	}
 }
 
