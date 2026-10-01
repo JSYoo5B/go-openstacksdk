@@ -1,0 +1,102 @@
+package senlin
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"gophercloudsdk/request"
+	"gophercloudsdk/resource"
+)
+
+// Snapshot retains JSON presence and numbers while taking ownership of mutable
+// input. RawMessage distinguishes an omitted value, null and an empty object.
+func Snapshot[T any](value T) request.Option[T] {
+	encoded, err := json.Marshal(value)
+	return func(config *request.Config[T]) error {
+		if err != nil {
+			return fmt.Errorf("%w: Senlin options: %v", resource.ErrInvalidOption, err)
+		}
+		var copied T
+		if err := json.Unmarshal(encoded, &copied); err != nil {
+			return fmt.Errorf("%w: Senlin options: %v", resource.ErrInvalidOption, err)
+		}
+		config.Options = copied
+		return nil
+	}
+}
+
+func Required(values ...string) error {
+	for _, value := range values {
+		if strings.TrimSpace(value) == "" {
+			return fmt.Errorf("%w: required Senlin strings must not be empty", resource.ErrInvalidOption)
+		}
+	}
+	return nil
+}
+
+// Object validates an explicitly supplied, non-null object. The service owns
+// plugin-specific schemas; JSON scalars and arrays are never object inputs.
+func Object(raw json.RawMessage, field string) error {
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &object); err != nil || object == nil {
+		return fmt.Errorf("%w: Senlin %s must be a JSON object", resource.ErrInvalidOption, field)
+	}
+	return nil
+}
+
+// OptionalObject also admits absence and explicit null. Server permissions and
+// field schemas decide whether null has a meaning for the individual request.
+func OptionalObject(raw json.RawMessage, field string) error {
+	if len(raw) == 0 || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return nil
+	}
+	return Object(raw, field)
+}
+
+// Body snapshots a single resource envelope. Extensions cannot replace concrete
+// inputs, response identities or SDK-owned auth/version/transport headers.
+// Stateless updates need an explicit field; cached dirty-state no-ops belong to
+// a resource lifecycle, not this request serializer.
+func Body[T any](config request.Config[T], envelope string, forbidden ...string) (json.RawMessage, error) {
+	if err := request.ValidateCapabilities(config, true, false, true); err != nil {
+		return nil, err
+	}
+	for key := range config.Headers {
+		switch strings.ToLower(key) {
+		case "openstack-api-version", "x-auth-token", "x-service-token", "authorization", "host", "cookie", "content-type", "content-length":
+			return nil, fmt.Errorf("%w: extension header %q is owned by the SDK", resource.ErrInvalidOption, key)
+		}
+	}
+	for key := range config.Fields {
+		for _, protected := range forbidden {
+			if key == protected {
+				return nil, fmt.Errorf("%w: extension field %q is owned by the SDK", resource.ErrInvalidOption, key)
+			}
+		}
+	}
+	encoded, err := json.Marshal(config.Options)
+	if err != nil {
+		return nil, fmt.Errorf("%w: Senlin input: %v", resource.ErrInvalidOption, err)
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &fields); err != nil || fields == nil {
+		return nil, fmt.Errorf("%w: Senlin request options must describe an object", resource.ErrInvalidOption)
+	}
+	body := make(map[string]any, len(fields))
+	for key, value := range fields {
+		body[key] = value
+	}
+	body, err = request.MergeFieldsFor(body, config.Fields, config.Options)
+	if err != nil {
+		return nil, err
+	}
+	if len(body) == 0 {
+		return nil, fmt.Errorf("%w: Senlin mutation requires at least one field", resource.ErrInvalidOption)
+	}
+	if envelope == "" {
+		return nil, fmt.Errorf("%w: Senlin resource envelope is required", resource.ErrInvalidOption)
+	}
+	return json.Marshal(map[string]any{envelope: body})
+}
