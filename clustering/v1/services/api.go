@@ -69,7 +69,7 @@ func WithListQuery(key, value string) ListOption { return request.WithQuery[List
 // List has no marker fallback: the official service list declares no paging
 // parameters. Numeric microversion >=1.7 is checked before each request.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Service, error] {
-	return senlin.ListWithBodyFilters(ctx, spec(a.RawClient()), bodyFilterSpec(), options...)
+	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), options...)
 }
 
 func (a *API) All(ctx context.Context, options ...ListOption) ([]*Service, error) {

@@ -72,7 +72,7 @@ func WithListQuery(key, value string) ListOption { return request.WithQuery[List
 
 // List follows advertised same-path links without a guessed marker fallback.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*PolicyType, error] {
-	return senlin.ListWithBodyFilters(ctx, spec(a.RawClient()), bodyFilterSpec(), options...)
+	return senlin.ListWithClientBodyFilters(ctx, a.RawClient(), spec, bodyFilterSpec(), options...)
 }
 
 func (a *API) All(ctx context.Context, options ...ListOption) ([]*PolicyType, error) {
