@@ -46,6 +46,8 @@ for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
 ```
 
 에러는 `(nil, error)`로 한 번 전달하고 순회를 종료합니다. iterator를 다시 순회하면 새로운 API 요청이 시작됩니다. All 도중 오류가 발생하면 부분 결과 대신 `nil, error`를 반환합니다.
+List를 만들 때 전달한 옵션 slice를 보관하므로 caller가 나중에 slice의 옵션을 바꾸어도
+기존 iterator의 동작은 바뀌지 않습니다. 옵션 적용과 검증은 각 순회가 시작될 때 수행합니다.
 
 서버의 `next` URL 또는 marker가 이전에 요청한 페이지를 반복하면 추가 요청 전에 `ErrPaginationCycle`로 중단합니다. 같은 URL의 query 순서가 바뀌어도 반복으로 판정합니다. `PaginationCycleError.URL`에는 반복한 링크가 들어 있습니다. 이 정책은 서비스의 typed List, 공통 Collection, page 단위 iterator에 함께 적용됩니다. 소비자가 `break`하면 다음 링크 검사와 후속 요청을 하지 않습니다.
 

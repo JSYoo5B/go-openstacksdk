@@ -86,7 +86,10 @@ func (c *Collection[T]) Get(ctx context.Context, id string) (*T, error) {
 
 // List lazily streams resources across all pages. Break stops further fetches.
 // On failure it yields nil, error once, then stops. Every iteration is a fresh request.
+// The option slice is retained at construction; caller slice replacement cannot
+// change an existing iterator. Options are still applied lazily on each iteration.
 func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[*T, error] {
+	opts = append([]ListOption(nil), opts...)
 	return func(yield func(*T, error) bool) {
 		o := listOptions{query: make(url.Values)}
 		for _, apply := range opts {
