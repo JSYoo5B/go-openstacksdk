@@ -59,3 +59,45 @@ if err := scope.WaitDeleted(ctx, resource.ID("app")); err != nil { return err }
 데이터베이스 모델에 상태가 없으므로 `Wait(ctx, ref, "ACTIVE")`는 `resource.ErrUnsupported`입니다. 목록 API에 노출되지 않은 query나 page-size 옵션도 HTTP 전에 같은 오류로 처리합니다. 서비스가 제공한 pagination 링크는 자동으로 따라갑니다.
 
 이 scope는 데이터베이스 생성·조회·삭제에 한정합니다. 사용자 credential 갱신·접근 권한 관리와 데이터베이스 이름 변경은 여기서 제공하지 않습니다. [Database 서비스 README](../README.md)와 [Trove HTTP 계약 테스트](../../../api/trove_databases_contracts_test.go)를 참고하세요.
+
+## 로컬 목록 제어
+
+Python `conn.database.databases(instance, max_items=20, paginated=False)`의 읽기 범위는 Go scope에서 아래처럼 지정합니다. native 공개 `service.Databases.List(ctx, instanceID)`는 유지되며, 두 제어 옵션은 공통 `scope.List/All` 경로에서 제공합니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/resource"
+)
+
+func ListDatabases(ctx context.Context, conn *sdk.Connection, instanceID string) error {
+	service, err := conn.DatabaseV1(ctx)
+	if err != nil {
+		return err
+	}
+	scope, err := service.Databases.InInstance(ctx, resource.ID(instanceID))
+	if err != nil {
+		return err
+	}
+	databases, err := scope.All(ctx,
+		resource.WithMaxItems(20), resource.WithPaginated(false))
+	if err != nil {
+		return err
+	}
+	for _, database := range databases {
+		fmt.Println(database.Name, database.CharSet, database.Collate)
+	}
+	return nil
+}
+```
+
+`WithMaxItems(0)`은 무제한이고 음수는 iterator 순회 시 HTTP 전에 실패합니다. 마지막 옵션 값이 적용되며 매 순회마다 행 수를 새로 셉니다. cap은 `WithName`의 정확한 로컬 필터 전에 응답 행을 셉니다. cap에서 wire `limit` hint를 만들지 않으며, 지원하지 않는 초기 query와 `WithPageSize`는 계속 `resource.ErrUnsupported`입니다. 따라서 위 예제는 페이지 크기를 요청하지 않고 서버의 첫 페이지에서 최대 20개 행을 읽습니다.
+
+고정된 instance와 `CharSet/Collate` 보존은 그대로입니다. 현재 페이지 전체의 잘못된 charset 등 decode 오류는 cap 이후 행에 있어도 반환됩니다. 다음 페이지가 필요하면 기존 native linked-page continuation과 반복 링크 검사를 사용하며 별도의 origin·path guard를 추가하지 않았습니다. cap·첫 페이지·`break`·context 취소는 추가 요청을 중단합니다. 이 제어는 List/All 호출에만 적용하며 Get·Find·삭제 대기의 기본 전체 목록 검색을 바꾸지 않습니다.
+
+[공통 목록 가이드](../../../docs/listing.md)와 [native 범위 목록 HTTP 계약](../../../api/native_scope_list_controls_test.go)에서 정책과 실제 URL·부모·charset 동작을 확인합니다.

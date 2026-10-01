@@ -79,3 +79,46 @@ SDK는 요청 내부에서 명시적인 `name@host` 식별자를 구성합니다
 ## 지원 범위
 
 이 scope는 계정 목록·정확한 조회·단일/batch 생성·삭제·삭제 대기를 제공합니다. 기존 사용자의 password 변경, 이름·host 변경, 접근 권한 grant/revoke와 root 활성화는 별도 미구현입니다. `CreateOpts.Databases`는 새 계정의 초기 접근 설정이며 기존 계정의 권한 갱신을 대신하지 않습니다. 전체 Trove SDK parity를 완료했다는 의미가 아닙니다. [Database 서비스 README](../README.md)와 [Trove 사용자 HTTP 계약 테스트](../../../api/trove_users_contracts_test.go)를 참고하세요.
+
+## 목록 cap과 host 필터
+
+Python `conn.database.users(instance, max_items=20, paginated=False)`의 목록 제어는 Go에서 공통 `scope.List/All` 옵션으로 지정합니다. `users.WithHost`는 이 SDK가 제공하는 로컬 host scope입니다. native 공개 `service.Users.List(ctx, instanceID)`와 그 반환 모델은 유지됩니다.
+
+```go
+package examples
+
+import (
+	"context"
+	"fmt"
+
+	sdk "gophercloudsdk"
+	"gophercloudsdk/db/v1/users"
+	"gophercloudsdk/resource"
+)
+
+func ListUsers(ctx context.Context, conn *sdk.Connection, instanceID, host string) error {
+	service, err := conn.DatabaseV1(ctx)
+	if err != nil {
+		return err
+	}
+	scope, err := service.Users.InInstance(ctx,
+		resource.ID(instanceID), users.WithHost(host))
+	if err != nil {
+		return err
+	}
+	for user, err := range scope.List(ctx,
+		resource.WithMaxItems(20), resource.WithPaginated(false)) {
+		if err != nil {
+			return err
+		}
+		fmt.Println(user.Name, user.Host, user.Databases)
+	}
+	return nil
+}
+```
+
+cap은 응답 행을 세며 scope host 필터와 공통 `WithName`의 정확한 비교보다 먼저 적용합니다. 다른 host의 계정도 cap을 소비하므로, 첫 20행 밖에만 원하는 host가 있으면 위 결과가 비어 있을 수 있습니다. 특정 host의 결과를 20개 채우는 옵션이 아닙니다. `WithMaxItems(0)`은 무제한으로 기존 전체 host 검색을 유지하고, 음수는 iterator 순회 시 HTTP 전에 오류를 반환합니다. 같은 옵션은 마지막 값이 적용되며 각 순회는 새 요청과 0부터 시작하는 카운터를 사용합니다.
+
+native cap은 wire `limit` hint를 만들지 않습니다. 초기 query와 `WithPageSize`는 계속 `resource.ErrUnsupported`입니다. host와 instance는 scope에 고정되며 이 List/All 제어는 Get·Find·Delete·WaitDeleted의 기본 계정 해석을 바꾸지 않습니다. 현재 페이지 전체 decode에서 중첩 charset 등 잘못된 행이 발견되면 cap 이후에 있어도 오류를 반환합니다. 기존 linked-page continuation과 반복 링크 검사를 유지하며 native origin·path guard를 새로 추가하지 않았습니다. cap·첫 페이지·`break`·context 취소는 추가 요청을 중단합니다.
+
+[공통 목록 가이드](../../../docs/listing.md)와 [native 범위 목록 HTTP 계약](../../../api/native_scope_list_controls_test.go)에서 raw 행 cap, host 필터 순서와 고정 부모를 검증합니다.
