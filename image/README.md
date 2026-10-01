@@ -7,7 +7,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | openstacksdk | gophercloudsdk |
 |---|---|
 | `conn.image.get_image(id)` | `service.Images.Get(ctx, id)` |
-| `conn.image.find_image(name, ignore_missing=False)` | `service.Images.Find(ctx, resource.Name(name))` |
+| `conn.image.find_image(name_or_id, ignore_missing=False)` | `service.Images.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.image.images(status="active")` | `service.Images.List(ctx, resource.WithStatus("active"))` |
 | `conn.image.delete_image(id)` | `service.Images.Delete(ctx, resource.ID(id))` |
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
@@ -16,6 +16,16 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 조회 대상은 이미지 메타데이터이며 이미지 데이터 다운로드 자체가 아닙니다. [공식 Image API](https://docs.openstack.org/openstacksdk/latest/user/proxies/image_v2.html)
 
 ## 조회와 목록
+
+`service.Images.FindIdentity(ctx, "ubuntu")`는 ID GET부터 시도하고 GET400·403·404 뒤
+정확한 ID/이름으로 일반 목록을 검색합니다. 정상적으로 끝난 일반 목록에 없을 때만
+`os_hidden=true`인 숨김 이미지 목록을 한 번 더 검색합니다. 두 번째 검색에는 자동 이름
+필터나 추가 GET을 넣지 않습니다. 오류·중복·취소는 즉시 반환하며 기본 미존재는 `nil, nil`입니다.
+Python의 직접 `find_image`는 문자열과 `ignore_missing`을 받고, Go raw wire query는
+추가 옵션입니다. [자동 조회 예제와 옵션](../docs/finding-identities.md#glance-숨김-이미지-검색)을 참고하세요.
+
+아래 `resource.Name` 예제는 이름만 명시해 조회합니다. 자동 ID 판별과 숨김 이미지 검색이
+필요하면 위의 `FindIdentity`를 사용합니다.
 
 Python:
 

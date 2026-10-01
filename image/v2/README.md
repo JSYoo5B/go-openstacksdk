@@ -13,6 +13,10 @@ Gophercloud v2.15.0의 image/v2 API를 하나의 인증된 서비스 객체에�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Images.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
+
+Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.
+
 ## Go 사용
 
 ```go

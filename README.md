@@ -44,7 +44,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
-Nova 서버·Cinder v3 볼륨·Neutron 네트워크/subnet/포트·Keystone 프로젝트/사용자/그룹/domain/role·
+Nova 서버·Cinder v3 볼륨·Glance v2 이미지·Neutron 네트워크/subnet/포트·Keystone 프로젝트/사용자/그룹/domain/role·
 고정 zone의 Designate recordset·고정 pool의 Octavia member는 문자열을 그대로 받는 `FindIdentity`를 제공합니다.
 [서비스별 Python/Go 자동 조회 비교](docs/finding-identities.md)에 공통 기본값·옵션·오류와
 전체 서비스 사용 예제를 설명합니다.

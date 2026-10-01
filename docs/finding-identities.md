@@ -12,6 +12,7 @@
 |---|---|---|
 | Nova 서버 | `conn.compute.find_server("web-01")` | `compute.Servers.FindIdentity(ctx, "web-01")` |
 | Cinder v3 볼륨 | `conn.block_storage.find_volume("data-01")` | `storage.Volumes.FindIdentity(ctx, "data-01")` |
+| Glance v2 이미지 | `conn.image.find_image("ubuntu")` | `image.Images.FindIdentity(ctx, "ubuntu")` |
 | Neutron 포트 | `conn.network.find_port("web-port")` | `network.Ports.FindIdentity(ctx, "web-port")` |
 | Neutron 네트워크 | `conn.network.find_network("web-net")` | `network.Networks.FindIdentity(ctx, "web-net")` |
 | Neutron subnet | `conn.network.find_subnet("web-subnet")` | `network.Subnets.FindIdentity(ctx, "web-subnet")` |
@@ -23,8 +24,8 @@
 | Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
 
-위 12개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
-`conn.BlockStorage(ctx).Volumes`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
+위 13개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers`,
+`conn.BlockStorage(ctx).Volumes`, `conn.Image(ctx).Images`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
 ID와 이름이 없는 리소스에 이 정책을 일괄 적용하지 않습니다. Senlin의 다섯
@@ -127,7 +128,7 @@ slash로 decode하지 않고 query에서 `%252F`가 됩니다. 빈 문자열, �
 caller query는 첫 GET과 fallback 목록 모두에 동일하게 전달합니다. 이름 hint는 목록으로
 전환할 때만 추가하므로 GET에 자동 이름 필터를 넣지 않습니다. caller가 binding의
 이름 query key를 지정하면 자동 이름 hint로 덮어쓰지 않습니다. 기본 hint는 Nova에서
-`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 11개 binding에서는 literal
+`^`·`$`와 `regexp.QuoteMeta`로 만든 정확한 정규식, 다른 12개 binding에서는 literal
 문자열입니다. 서버가 hint를 무시해도 SDK의 ID/이름 비교는 그대로 수행합니다.
 
 query가 없으면 기존 native Get을 사용합니다. query를 지정하면 SDK가 감사한 member
@@ -192,6 +193,46 @@ func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
     volume, err := storage.Volumes.FindIdentity(ctx, "data-01", summary, allProjects, strict)
     if err != nil { return err }
     _, _ = server, volume
+    return nil
+}
+```
+
+## Glance 숨김 이미지 검색
+
+Python `conn.image.find_image("ubuntu", ignore_missing=False)`는 일반 조회에서 찾지
+못하면 숨김 이미지 목록도 검색합니다. Go의 `Images.FindIdentity`는 첫 GET과 일반
+목록이 정상적으로 끝나도 일치하는 이미지가 없을 때만 이 두 번째 검색을 실행합니다.
+GET에서 찾으면 반환하며 일반 목록은 끝까지 검사해 단일 일치가 확인되면 숨김 검색을 생략합니다. 일반 목록의
+오류·중복·취소는 숨김 검색으로 전환하지 않습니다.
+
+숨김 검색은 원래 caller query에 wire key `os_hidden=true`를 덮어쓴 LIST입니다.
+자동 이름 hint는 이 단계에 추가하지 않으므로 ID로만 일치하는 숨김 이미지도 검사합니다.
+caller가 지정한 `name` 필터와 반복 query 값은 보존합니다. 앞서 `os_hidden=false`를
+지정했어도 두 번째 검색에서는 true이며, 옵션과 원본 query는 변경하지 않습니다.
+두 검색 모두 모든 페이지의 정확한 ID/이름·중복·후속 오류를 검사하며 추가 GET은 없습니다.
+미존재 기본값·strict 옵션은 두 검색이 모두 정상적으로 끝난 뒤 적용합니다.
+`FindFallbackNever`는 기존 GET만 사용하는 정책을 유지합니다.
+
+Python의 직접 `find_image` 선언은 문자열과 `ignore_missing`만 받습니다. Go의 raw
+wire query는 추가 기능이며 Python 속성 별칭 `is_hidden`은 자동 변환하지 않습니다.
+`details`와 `all_projects`도 이 binding의 옵션이 아닙니다. 응답은 native Image 모델이며
+추가 속성은 `Properties`, 숨김 여부는 `Hidden`에서 확인합니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    imagev2 "gophercloudsdk/image/v2"
+    "gophercloudsdk/resource"
+)
+
+func FindImage(ctx context.Context, images *imagev2.Service) error {
+    image, err := images.Images.FindIdentity(ctx, "ubuntu",
+        resource.WithIdentityFindIgnoreMissing(false))
+    if err != nil { return err }
+    _, _ = image.ID, image.Hidden
     return nil
 }
 ```

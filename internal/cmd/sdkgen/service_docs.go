@@ -62,6 +62,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
 		"network/v2":      "`Networks/Subnets/Ports.FindIdentity(ctx, identity, options...)`",
 		"identity/v3":     "`Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)`",
+		"image/v2":        "`Images.FindIdentity(ctx, identity, options...)`",
 		"dns/v2":          "`RecordSets.InZone(ctx, parent)`가 반환한 scope의 `FindIdentity`",
 		"loadbalancer/v2": "`Pools.Members(ctx, parent)`가 반환한 scope의 `FindIdentity`",
 	}
@@ -70,6 +71,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "compute/v2" || key == "blockstorage/v3" {
 		out.WriteString("서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.\n\n")
+	}
+	if key == "image/v2" {
+		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")
 	}
 	switch key {
 	case "instanceha/v1":
