@@ -265,3 +265,58 @@ max_items/paginated/JMESPath·dirty commit/merge·ID-first Find는 별도로 추
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `cluster.py`, `_async_resource.py`, `_proxy.py`, `resource.py`와
 [공식 Cluster API](https://docs.openstack.org/api-ref/clustering/#clusters)입니다.
+
+## 정책 연결·해제·갱신
+
+```python
+attached = conn.clustering.attach_policy_to_cluster("CLUSTER_ID", "POLICY_ID")
+updated = conn.clustering.update_cluster_policy("CLUSTER_ID", "POLICY_ID", enabled=False)
+detached = conn.clustering.detach_policy_from_cluster("CLUSTER_ID", "POLICY_ID")
+```
+
+```go
+api := clusters.New(client)
+attached, err := api.AttachPolicy(ctx, resource.ID("CLUSTER_ID"),
+    clusters.AttachPolicyOpts{PolicyID: "POLICY_ID"})
+if err != nil { return err }
+updated, err := api.UpdatePolicy(ctx, resource.ID("CLUSTER_ID"),
+    clusters.UpdatePolicyOpts{PolicyID: "POLICY_ID"}, clusters.WithUpdatePolicyEnabled(false))
+if err != nil { return err }
+detached, err := api.DetachPolicy(ctx, resource.ID("CLUSTER_ID"),
+    clusters.DetachPolicyOpts{PolicyID: "POLICY_ID"})
+if err != nil { return err }
+fmt.Println(attached.ActionID, updated.ActionID, detached.ActionID)
+```
+
+세 연산은 POST `/clusters/{cluster}/actions`로 각각 `policy_attach`, `policy_detach`,
+`policy_update` 본문을 보내며 HTTP 202를 받습니다. 별도 microversion gate가 없고 선택한
+버전이 비어 있으면 서버 기본 버전을 사용합니다. SDK는 버전을 자동으로 올리지 않습니다.
+PolicyID는 필수 body 문자열이며 정책 이름·UUID·short ID를 그대로 전달합니다. 정책 조회나
+URL path identifier 검증을 추가하지 않습니다. 이 UpdatePolicy는 연결 관계를 갱신하며
+독립 정책 리소스의 이름이나 spec을 갱신하지 않습니다.
+
+Attach/Update의 Enabled는 생략·false·true·null을 구분합니다. SDK는 생략한 enabled의
+기본값을 요청에 채우지 않으며 `WithAttachPolicyEnabledNull`과
+`WithUpdatePolicyEnabledNull`로 null을 지정합니다. 서버가 null의 의미와 정책별 매개변수를
+검증합니다. Enabled를 생략한 Update도 policy_id를 가진 명령을 전송합니다.
+
+`With...Options`와 `With...Field`는 생성 시 입력을 snapshot으로 보관하고 재사용마다
+독립적으로 적용합니다. 추가 필드는 내부 명령 매개변수에 들어가므로 id/status/action/location
+같은 plugin 키도 전달할 수 있습니다. concrete PolicyID/Enabled와 SDK 소유 인증·version·
+transport header를 덮어쓸 수 없으며 Query/Arguments도 허용하지 않습니다. pinned Python의
+attach/update kwargs가 policy_id를 덮어쓸 수 있는 동작은 Go에서 사전 오류로 처리합니다.
+Detach는 기본 policy_id만 보내며 `WithDetachPolicyField`는 Python의 고정 본문보다 확장된
+Go 입력입니다. 확장 필드의 지원 여부는 서버가 결정합니다.
+
+Python의 세 proxy는 문자열 cluster를 `_find(..., ignore_missing=False)`로 먼저 조회합니다.
+Go의 명시적 ID는 GET 없이 전달하고 Name은 정확한 이름의 목록 조회와 중복 검사로 한 번
+해석합니다. 조회 전에 body/header를 고정하고 POST 직전에 source/version을 재검사합니다.
+반환 Submission은 action 문자열과 같은 action을 가리키는 필수 Location을 검증하고
+Body/Header/StatusCode를 보존합니다. 잘못된 accepted 응답은 원문 증거를 가진
+`resource.ResponseError`이며 요청을 재전송하거나 action을 자동 조회하지 않습니다.
+
+[API-ref의 정책 갱신 예제](https://docs.openstack.org/api-ref/clustering/#update-a-policy-on-a-cluster)는
+`update_policy`로 표기하지만 pinned `cluster.py:168-174`와
+[공식 contributor 설명](https://docs.openstack.org/senlin/ocata/developer/cluster.html#cluster-policy-bindings)은
+`policy_update`를 사용합니다. Go는 pinned 요청 이름을 따릅니다. 정책 binding Get/List와
+metadata는 별도 API 단위로 추적합니다.
