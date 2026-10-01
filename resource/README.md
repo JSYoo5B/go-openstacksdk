@@ -69,6 +69,11 @@ custom Iterate는 cap을 적용하지만 first-page 제어를 지원하지 않�
 따릅니다. Senlin의 typed 옵션·limit hint·Python과의 차이는
 [목록 제어](../clustering/v1/listing/README.md)에 있습니다.
 
+현재 생성된 버전별 API의 `Resources`도 Iterate 경로를 사용하므로 첫 페이지 제어는
+미지원입니다. 상위 Compute 서버/flavor, Image 이미지, Network 네트워크와 Block Storage
+볼륨은 native pager 경로로 지원하고, Senlin의 11개 목록은 REST 경로로 지원합니다.
+생성된 binding과 별도 scope의 페이지 제어 연결은 후속 구현 대상입니다.
+
 서버의 `next` URL 또는 marker가 이전에 요청한 페이지를 반복하면 추가 요청 전에 `ErrPaginationCycle`로 중단합니다. 같은 URL의 query 순서가 바뀌어도 반복으로 판정합니다. `PaginationCycleError.URL`에는 반복한 링크가 들어 있습니다. 이 정책은 서비스의 typed List, 공통 Collection, page 단위 iterator에 함께 적용됩니다. 소비자가 `break`하면 다음 링크 검사와 후속 요청을 하지 않습니다.
 
 ## 오류와 상태 대기

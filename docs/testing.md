@@ -82,6 +82,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/clustering_nodes_test.go`, `api/clustering_nodes_pagination_test.go` | node POST/PATCH/DELETE202·필수 action 참조, physical ID/index/details·tainted1.13, nullable 입력·snapshot·strict force404, query/로컬 필터·raw marker·다중 페이지 Find 중복/후속 오류 |
 | `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 CRUD·ScaleOut/Check/Cancel client·최신 token·1.13·reverse prefix 공유, 자동 조회 없이 submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성, Adopt/Preview/Recover/PerformOperation의 선택1.7·token·prefix 공유·incidental Location 미해석 |
 | `resource/list_options_snapshot_test.go` | native·SDK 소유 lazy iterator의 caller 옵션 slice 교체/nil·반복 iteration·잘못된 옵션 소유권과 HTTP 사전 차단 |
+| `resource/list_control_test.go`, `internal/rest/list_control_test.go` | raw cap을 name/status 필터 전에 적용, 0/음수·옵션 우선·재순회·first-page·미소비 continuation/행 생략, opt-in limit hint와 빈 페이지 종료, native whole-page 오류·소비 중 취소와 break |
+| `api/clustering_typed_list_controls_test.go`, `api/clustering_catalog_list_controls_test.go` | 11개 Senlin typed 목록의 raw cap·Body 필터 순서·snapshot·explicit limit·단일 페이지·기본값·empty-next 종료·응답 원문·source/version 재검사, binding의 로컬 cap과 초기 limit/marker 미지원 |
+| `api/clustering_resource_list_controls_test.go` | 11개 Resources binding의 List/All·로컬 name/status 필터 앞의 cap·미소비 행/link 생략·empty-next·hint/explicit size·기본 foreign guard 원문, canonical parent 1회 조회와 Services1.7 사전검사 |
 | `internal/senlin/command_test.go` | 빈 command 객체·typed key 보호·plugin 입력 snapshot, 응답 action과 필수 Location ID 일치·accepted 오류 증거·경로와 header 소유권 |
 | `api/clustering_action_update_test.go` | PATCH202·CANCELLED·1.12, force query 생략/false/true, snapshot·이름 lookup 후 source/version 검사, empty/opaque 원문·native HTTP/context 오류 |
 | `api/clustering_clusters_commands_test.go` | ScaleIn/Out count:null·정확한 Resize 숫자·optional 값, 노드 배열/map·gate1.3/1.4, parent 1회 해석·snapshot, strict202 action/Location·오류 원문·취소·재전송 없음 |
