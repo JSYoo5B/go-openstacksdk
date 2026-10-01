@@ -34,7 +34,7 @@ float64로 바꾸지 않습니다. Python의 무타입 Body는 원래 값의 타
 있습니다. GeneratedAt은 원래 timestamp 문자열입니다. 임의 JSON인 MetaData와 추가 응답 필드는 숫자 정밀도를 유지합니다.
 `Body`는 생략/null을 구별하고 `Header`, `StatusCode`는 HTTP 근거를 담습니다.
 
-명시한 limit의 full page 뒤에는 마지막 응답 Event ID로 marker를 만들고 마지막 빈
+명시한 limit이 있으면 짧은 페이지를 포함해 비어 있지 않은 페이지 뒤에 마지막 응답 Event ID로 marker를 만들고 빈
 페이지를 허용합니다. body next/links와 HTTP Link는 동일 origin/collection 경로에
 제한하고 기존 필터를 유지합니다. lazy List의 break와 context 취소는 추가 요청을
 중단합니다. 기본 limit/marker는 생략합니다.

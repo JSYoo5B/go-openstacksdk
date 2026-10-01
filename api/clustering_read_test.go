@@ -36,6 +36,56 @@ func TestClusteringReadActionNumericTimesAndResponseIdentity(t *testing.T) {
 	}
 }
 
+func TestClusteringReadShortPagesContinueUsingUnchangedWireIDs(t *testing.T) {
+	for _, plural := range []string{"actions", "events"} {
+		t.Run(plural, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var calls atomic.Int32
+			cloud.Mux.HandleFunc("GET /senlin/v1/"+plural, func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Query().Get("limit") != "5" {
+					t.Error(r.URL)
+				}
+				switch calls.Add(1) {
+				case 1:
+					if r.URL.Query().Has("marker") {
+						t.Error(r.URL)
+					}
+					testcloud.JSON(w, 200, `{"`+plural+`":[{"id":"wire-id"}]}`)
+				case 2:
+					if r.URL.Query().Get("marker") != "wire-id" {
+						t.Error(r.URL)
+					}
+					testcloud.JSON(w, 200, `{"`+plural+`":[]}`)
+				default:
+					t.Error("empty page did not stop", calls.Load())
+				}
+			})
+			client := cloud.Client("clustering", "/senlin/v1")
+			rows := 0
+			if plural == "actions" {
+				for value, err := range actions.New(client).List(context.Background(), actions.WithListOptions(actions.ListOpts{Limit: 5})) {
+					if err != nil {
+						t.Fatal(err)
+					}
+					rows++
+					value.ID = "consumer mutation"
+				}
+			} else {
+				for value, err := range events.New(client).List(context.Background(), events.WithListOptions(events.ListOpts{Limit: 5})) {
+					if err != nil {
+						t.Fatal(err)
+					}
+					rows++
+					value.ID = "consumer mutation"
+				}
+			}
+			if rows != 1 || calls.Load() != 2 {
+				t.Fatalf("rows=%d requests=%d", rows, calls.Load())
+			}
+		})
+	}
+}
+
 func TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls atomic.Int32

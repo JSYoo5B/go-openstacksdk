@@ -37,8 +37,8 @@ Sort는 `created_at:desc,name`처럼 문서화된 key와 asc/desc를 사용합�
 있지만 concrete 필드는 덮어쓸 수 없습니다. ClusterID와 추가 query의 지원은 deployment가
 검증합니다.
 
-기본 limit 0은 생략합니다. 명시한 limit의 full page에는 마지막 **응답 Action ID**를
-marker로 사용하고 마지막 빈 페이지를 허용합니다. body next/links 및 HTTP Link도
+기본 limit 0은 생략합니다. 명시한 limit이 있으면 짧은 페이지를 포함해 비어 있지 않은
+페이지의 마지막 **응답 Action ID**를 marker로 사용하고 빈 페이지에서 멈춥니다. body next/links 및 HTTP Link도
 지원하며 origin/경로와 기존 필터를 고정하고 cycle을 거부합니다. List는 lazy이며 break와
 context 취소 후 추가 요청을 하지 않습니다.
 

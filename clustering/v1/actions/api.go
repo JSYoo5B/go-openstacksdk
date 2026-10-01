@@ -80,7 +80,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Action] {
 			return senlin.Sort(query.Get("sort"), "name", "target", "action", "created_at", "status")
 		},
 		ValidateID: senlin.Identifier,
-		Paging: rest.PagePolicy[Action]{HTTPLink: true, MarkerFallback: true,
+		Paging: rest.PagePolicy[Action]{HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
 			Marker: func(value *Action) (string, error) {
 				if value == nil {
 					return "", fmt.Errorf("%w: action pagination row is missing", resource.ErrInvalidOption)
