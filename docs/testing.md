@@ -79,7 +79,12 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `internal/senlin/async_test.go`, `api/clustering_async_location_case_test.go` | 선택한 action collection·origin·reverse prefix, required/empty/중복·대소문자 Location, accepted 원문/헤더/status 보존, 조회·재전송 없음 |
 | `api/clustering_clusters_test.go`, `api/clustering_clusters_response_test.go`, `api/clustering_clusters_pagination_test.go` | cluster POST201·PATCH/DELETE202, raw 숫자·생략/null·profile_only1.6, 이름 해석 전 snapshot·source 재검사, 일반/force404 차이, malformed 응답·짧은 페이지·로컬 필터·취소 |
 | `api/clustering_nodes_test.go`, `api/clustering_nodes_pagination_test.go` | node POST/PATCH/DELETE202·필수 action 참조, physical ID/index/details·tainted1.13, nullable 입력·snapshot·strict force404, query/로컬 필터·raw marker·다중 페이지 Find 중복/후속 오류 |
-| `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 client·최신 token·1.13 공유, submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성 |
+| `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 CRUD·ScaleOut/Check/Cancel client·최신 token·1.13·reverse prefix 공유, 자동 조회 없이 submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성 |
+| `resource/list_options_snapshot_test.go` | native·SDK 소유 lazy iterator의 caller 옵션 slice 교체/nil·반복 iteration·잘못된 옵션 소유권과 HTTP 사전 차단 |
+| `internal/senlin/command_test.go` | 빈 command 객체·typed key 보호·plugin 입력 snapshot, 응답 action과 필수 Location ID 일치·accepted 오류 증거·경로와 header 소유권 |
+| `api/clustering_action_update_test.go` | PATCH202·CANCELLED·1.12, force query 생략/false/true, snapshot·이름 lookup 후 source/version 검사, empty/opaque 원문·native HTTP/context 오류 |
+| `api/clustering_clusters_commands_test.go` | ScaleIn/Out count:null·정확한 Resize 숫자·optional 값, 노드 배열/map·gate1.3/1.4, parent 1회 해석·snapshot, strict202 action/Location·오류 원문·취소·재전송 없음 |
+| `api/clustering_nodes_commands_test.go` | Check/Recover 기본 객체, operation 생략/empty/null·params/null·명시 check1.6·ops1.4, plugin key 범위, 입력/header snapshot·lookup 후 gate, missing/ambiguous·accepted 오류·HTTP 원인 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
