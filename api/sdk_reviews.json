@@ -4999,19 +4999,44 @@
             "api/clustering_read_test.go:TestClusteringReadShortPagesContinueUsingUnchangedWireIDs",
             "internal/rest/list_short_page_test.go:TestListShortPageMarkerPolicyUsesWireRowsAndStopsOnEmptyPage"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
-        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/actions/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
-        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+        "Compare inherited Body-only local filtering, field/query normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration.",
+        "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
     {
@@ -5035,19 +5060,44 @@
             "api/clustering_read_test.go:TestClusteringReadShortPagesContinueUsingUnchangedWireIDs",
             "internal/rest/list_short_page_test.go:TestListShortPageMarkerPolicyUsesWireRowsAndStopsOnEmptyPage"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
-        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/events/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
-        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+        "Compare inherited Body-only local filtering, field/query normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration.",
+        "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
     {
@@ -5244,18 +5294,39 @@
             "api/clustering_discovery_test.go:TestClusteringDiscoveryCatalogLinksPreserveExtensionsAndNoMarkerFallback",
             "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard"
           ]
+        },
+        {
+          "behavior": "MaxItems supplies a wire-limit hint only when no explicit limit exists, caps validated rows locally and zero is unlimited. Paginated=False consumes the first response; bool pointers/query inputs are owned across lazy repeated iterations and later options win. Cap/single/empty stops skip unused decoding or continuation errors while unbounded row/link errors and per-page selected-version guards retain accepted-page evidence.",
+          "tests": [
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsHintsCapsAndSnapshots",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsStopBeforeUnusedRowsAndLinks",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsPreflightAndPageVersions"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
-        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/policytypes/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, local Body filters and query omission, paginated=false, max_items, base_path and JSONPath consumption; the official type catalog declares no paging query protocol."
+        "Compare inherited limit/marker fallback, name/schema/support_status Body-only local filters, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. The official type catalog declares no paging query protocol; local cap/first-page controls and opt-in wire-limit hints are now tested."
       ]
     },
     {
@@ -5273,18 +5344,39 @@
             "api/clustering_discovery_test.go:TestClusteringDiscoveryCatalogLinksPreserveExtensionsAndNoMarkerFallback",
             "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard"
           ]
+        },
+        {
+          "behavior": "MaxItems supplies a wire-limit hint only when no explicit limit exists, caps validated rows locally and zero is unlimited. Paginated=False consumes the first response; bool pointers/query inputs are owned across lazy repeated iterations and later options win. Cap/single/empty stops skip unused decoding or continuation errors while unbounded row/link errors and per-page selected-version guards retain accepted-page evidence.",
+          "tests": [
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsHintsCapsAndSnapshots",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsStopBeforeUnusedRowsAndLinks",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsPreflightAndPageVersions"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
-        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/profiletypes/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, local Body filters and query omission, paginated=false, max_items, base_path and JSONPath consumption; the official type catalog declares no paging query protocol."
+        "Compare inherited limit/marker fallback, name/schema/support_status Body-only local filters, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. The official type catalog declares no paging query protocol; local cap/first-page controls and opt-in wire-limit hints are now tested."
       ]
     },
     {
@@ -5301,19 +5393,41 @@
           "tests": [
             "api/clustering_read_test.go:TestClusteringReadServicesVersionGateAndLocalStatusFilter"
           ]
+        },
+        {
+          "behavior": "MaxItems supplies a wire-limit hint only when no explicit limit exists, caps validated rows locally and zero is unlimited. Paginated=False consumes the first response; bool pointers/query inputs are owned across lazy repeated iterations and later options win. Cap/single/empty stops skip unused decoding or continuation errors while unbounded row/link errors and per-page selected-version guards retain accepted-page evidence.",
+          "tests": [
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsHintsCapsAndSnapshots",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsStopBeforeUnusedRowsAndLinks",
+            "api/clustering_catalog_list_controls_test.go:TestClusteringCatalogListControlsPreflightAndPageVersions"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links. Services retains its numeric1.7 preflight gate even with list controls.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsServicesVersionGateBeforeHTTP"
+          ]
         }
       ],
       "differences": [
         "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
-        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/services/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
-        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+        "Compare inherited state/binary/host/updated_at/disabled_reason Body filters, field/query normalization, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath controls. Generic local status filtering is distinct from this remaining Body filter surface.",
+        "Compare inherited limit/marker fallback and the controller default/capped limit; Services has no documented paging query protocol. Numeric1.7+, local cap/first-page behavior and opt-in limit hints are tested."
       ]
     },
     {
@@ -6021,6 +6135,28 @@
             "api/clustering_profiles_test.go:TestClusteringProfilesLocalJSONFilterTypesArraysAndNull",
             "api/clustering_profiles_test.go:TestClusteringProfilesPaginationGuardsAndConsumerControl"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
@@ -6028,14 +6164,17 @@
         "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
         "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
         "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
-        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters."
+        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/profiles/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited paginated, base_path, max_items and proxy JMESPath controls, including the pinned Python raw-row counting rule before local filters.",
+        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
         "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
       ]
     },
@@ -6293,6 +6432,28 @@
             "api/clustering_policies_test.go:TestClusteringPolicyListDefaultBreakAndInvalidExtensions",
             "api/clustering_policies_test.go:TestClusteringPolicyNameGrammarAndInFlightListCancellation"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
@@ -6300,14 +6461,17 @@
         "The documented envelope is strict; raw fields, exact JSON numbers and accepted-response HTTP evidence are preserved rather than Python flat/empty fallback decoding and cached Resource mutation.",
         "Numeric selected microversions and protected body/query/header extensions replace implicit adapter negotiation; optional JSON values preserve omission, null and empty objects and the deployment validates null support.",
         "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
-        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters."
+        "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/policies/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited paginated, base_path, max_items and proxy JMESPath controls, including the pinned Python raw-row counting rule before local filters.",
+        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
         "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
       ]
     },
@@ -6493,20 +6657,45 @@
             "api/clustering_clusters_pagination_test.go:TestClusteringClustersContinuationGuardsBreakAndCancellation",
             "api/clustering_clusters_pagination_test.go:TestClusteringClustersSharedStatusAndSortUseActualWireQuery"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
         "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
         "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions."
+        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited paginated, per-call base_path/headers, max_items and proxy JMESPath controls, including the pinned Python raw-row limit before local filters.",
+        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
         "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
       ]
     },
@@ -6681,20 +6870,45 @@
             "api/clustering_nodes_pagination_test.go:TestClusteringNodesListWireOptionsAndRawMarkerSnapshots",
             "api/clustering_nodes_pagination_test.go:TestClusteringNodesListPreflightAndSharedStatus"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go uses concrete owned options, context and explicit ID/Name references rather than mutable Python Resource input; With scalar/null helpers preserve omission, explicit zero/false/empty and null without requiring caller builders.",
         "Documented singular envelopes and success codes are strict; raw HTTP/header/body evidence and exact JSON numbers are retained instead of Python permissive fallback decoding or cached Resource mutation.",
         "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
-        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions."
+        "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/nodes/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited paginated, per-call base_path/headers, max_items and proxy JMESPath controls, including the pinned Python raw-row limit before local filters.",
+        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
         "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
       ]
     },
@@ -7488,20 +7702,45 @@
           "tests": [
             "connection_senlin_receivers_policy_test.go:TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource"
           ]
+        },
+        {
+          "behavior": "MaxItems counts validated wire rows before local filtering and zero is unlimited; positive caps supply a limit hint only when no explicit limit exists. Paginated=False consumes the first response, reusable options own bool pointers and later options win. Reaching a cap or an empty page stops before unused rows/continuations while defaults, context and next-page source guards remain active.",
+          "tests": [
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSevenFacadesCountRawRowsBeforeFilters",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsSinglePageIgnoresUnneededContinuation",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsLimitHintLastWinsAndExactBoundary",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsOwnPaginatedPointersAndOverrideOrder",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsZeroUnlimitedTrueOverridesFalseAndEmptyStops",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsNegativeAndReservedQueryFailBeforeHTTP",
+            "api/clustering_typed_list_controls_test.go:TestClusteringTypedListControlsConsumerBreakAndNextPageSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
         "Go uses stateless owned concrete options/context and explicit ID/Name references instead of Python mutable Resource input. Nonempty vendor receiver types pass through to the controller, known webhook inputs require cluster/action and no Python CLI default type or unproved message microversion gate is invented.",
         "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
-        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions."
+        "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/receivers/README.md",
-        "clustering/v1/README.md"
+        "clustering/v1/README.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Implement or deliberately map inherited max_items/paginated control, raw-row consumption and JMESPath semantics; a common iterator/local subset filter is not the full Python list contract.",
-        "Compare per-call base_path/header/query consumption and arbitrary Python sort strings; Go currently checks the published sort key/direction set and provides documented vendor query extensions."
+        "Map deprecated proxy JMESPath semantics beyond the tested max_items/paginated controls and known local Body subset filters.",
+        "Compare per-call base_path/microversion/header/query consumption and arbitrary Python sort strings; Go currently checks the published sort key/direction set and provides documented vendor query extensions."
       ]
     },
     {
@@ -8047,6 +8286,22 @@
             "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExplicitLinksKeepParentAndSource",
             "api/clustering_cluster_policies_test.go:TestClusteringClusterPoliciesExactNameIgnoresCaseFoldedExtensions"
           ]
+        },
+        {
+          "behavior": "Binding MaxItems is a local raw-row cap without a wire-limit hint; Paginated=False consumes the first response. Snapshot bool pointers, later-option precedence and zero-unlimited defaults remain independent across lazy repeated iterations. Raw control query keys and initial limit/marker fail before list HTTP, while cap/empty stops ignore unused invalid rows/links and uncapped row errors retain whole-page evidence.",
+          "tests": [
+            "api/clustering_catalog_list_controls_test.go:TestClusteringBindingListControlsStayLocalAndOwnSnapshots"
+          ]
+        },
+        {
+          "behavior": "Public Resources.List/All forwards raw-row caps and first-response controls into the service iterator before applicable local name/status filters, retains per-row HTTP evidence and selected origin guards, and honors the binding limit-hint policy. Empty pages terminate even with invalid next links. Binding caps supply no wire-limit hint and initial page size remains unsupported.",
+          "tests": [
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsCapRawRowsBeforeLocalFilters",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsSinglePage",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsEmptyIgnoresContinuation",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
+            "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
+          ]
         }
       ],
       "differences": [
@@ -8054,16 +8309,19 @@
         "Senlin16.0.0 ClusterPolicyController.index whitelists enabled, policy_name, policy_type and sort. Go rejects initial limit/marker even through Resources and follows only same-origin, same-parent collection links preserving initial filters; advertised deployment markers remain allowed. This intentionally does not simulate unsupported stock-server pagination.",
         "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/header/secondary-argument options and concrete-query collisions; stock Senlin vendor support is not promised.",
         "Go requires a cluster_policies array, separate valid canonical raw identities and a matching parent, preserving unknown/null/raw JSON fields. Python Resource.list wraps non-array collections, removes self and overlays URI fields on row dictionaries; Go stores fixed URIClusterID separately and uses PolicyID only as the collection identity callback.",
-        "Published filters use concrete typed inputs and grammar-checked sort, while null/omission and exact numbers remain visible in Body rather than being hidden by Python Resource bool/dict descriptor conversions."
+        "Published filters use concrete typed inputs and grammar-checked sort, while null/omission and exact numbers remain visible in Body rather than being hidden by Python Resource bool/dict descriptor conversions.",
+        "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. Unlike Python Resource.list max_items, the binding cap sends no limit hint because the audited stock controller whitelists only enabled/policy_name/policy_type/sort.",
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
       ],
       "documentation": [
         "clustering/v1/clusterpolicies/README.md",
-        "docs/senlin-server-contracts.md"
+        "docs/senlin-server-contracts.md",
+        "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map the inherited controls forwarded by this proxy: paginated=False first-response termination, max_items counting raw rows before local filtering and adding a wire limit, per-call base_path/microversion/headers, and the deprecated proxy JMESPath filter (proxy.py:866-928; resource.py:2155-2358).",
+        "Map per-call base_path/microversion/headers and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls now limit raw rows locally, with no stock-unsupported wire-limit hint (proxy.py:866-928; resource.py:2155-2358).",
         "Map known Body-only local filters such as id, policy_id, cluster_name and recursive data subsets, including Python scalar equality, missing-as-None and empty-dictionary behavior; these are not current Go server-query options (resource.py:2222-2267,2322-2338).",
-        "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them (resource.py:271-299,657-669,2371-2440)."
+        "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them (resource.py:271-299,657-669,2362-2440)."
       ]
     },
     {
