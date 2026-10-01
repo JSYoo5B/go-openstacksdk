@@ -13,7 +13,7 @@ Gophercloud v2.15.0의 containerinfra/v1 API를 하나의 인증된 서비스 �
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-`conn.ContainerInfraProjectQuotas(ctx, project)`와 `CurrentContainerInfraProjectQuotas(ctx)`로 프로젝트를 고정한 뒤 `ForResource(quotas.Cluster)`로 quota를 선택합니다. Get/Create/PATCH Update/DELETE와 explicit hard limit, Python에 quota 선언이 없는 차이는 [quota 사용법](quotas/README.md)을 참고합니다.
+`conn.ContainerInfraProjectQuotas(ctx, project)`와 `CurrentContainerInfraProjectQuotas(ctx)`로 프로젝트를 고정한 뒤 `ForResource(quotas.Cluster)`로 quota를 선택합니다. Get/Create/PATCH Update/DELETE와 explicit hard limit, API.List/All의 페이지 순회·all_tenants 보존, Python에 quota 선언이 없는 차이는 [quota 사용법](quotas/README.md)을 참고합니다.
 
 ## Go 사용
 
@@ -40,7 +40,7 @@ _ = value
 | `Clusters` | [clusters](clusters/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `ClusterTemplates` | [clustertemplates](clustertemplates/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `NodeGroups` | [nodegroups](nodegroups/api_generated.go) | `InCluster(ctx, parent)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
-| `Quotas` | [quotas](quotas/api_generated.go) | `InProject(ctx, parent).ForResource(name)`: 고정 프로젝트+resource의 Get·Create·Update·Delete; 이름 Find·Wait 없음 |
+| `Quotas` | [quotas](quotas/api_generated.go) | `InProject(ctx, parent).ForResource(name)`: 고정 프로젝트+resource의 Get·Create·Update·Delete; `API.List/All`: quota 페이지 목록; 이름 Find·Wait 없음 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

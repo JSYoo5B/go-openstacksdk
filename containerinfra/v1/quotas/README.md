@@ -13,11 +13,13 @@ Magnum quota의 요청 대상은 프로젝트 ID와 리소스 이름의 쌍입�
 | hard limit 2로 갱신 | `scope.Update(ctx, quotas.WithHardLimit(2))` |
 | explicit quota 삭제 | `scope.Delete(ctx)` |
 | 없는 quota의 삭제 허용 | `scope.Delete(ctx, quotas.WithDeleteIgnoreMissing(true))` |
+| quota 페이지 순회 | `api.List(ctx, quotas.WithListOptions(...))` |
+| 모든 프로젝트의 quota | `api.All(ctx, quotas.WithListAllTenants(true))` |
 | concrete 옵션 snapshot | `quotas.WithQuotaCreateOptions(quotas.QuotaCreateOpts{HardLimit: &limit})` |
 | concrete 갱신 옵션 snapshot | `quotas.WithQuotaUpdateOptions(quotas.QuotaUpdateOpts{HardLimit: &limit})` |
 | 추가 서버 필드 | `quotas.WithQuotaCreateField("vendor", value)` |
 
-pinned openstacksdk의 `container_infrastructure_management.v1.Proxy`에는 quota model과 quota proxy method가 없습니다. 따라서 이 표에는 존재하지 않는 Python quota 호출을 대응시키지 않습니다. Python에서 이 서비스의 quota를 사용하려면 REST 호출 또는 별도 Magnum client가 필요합니다. Go의 새 scope는 Gophercloud의 native quota Create 계약을 SDK가 직접 관리합니다.
+pinned openstacksdk의 `container_infrastructure_management.v1.Proxy`에는 quota model과 quota proxy method가 없습니다. 따라서 이 표에는 존재하지 않는 Python quota 호출을 대응시키지 않습니다. Python에서 이 서비스의 quota를 사용하려면 REST 호출 또는 별도 Magnum client가 필요합니다. Go SDK는 Gophercloud의 native quota Create와 추가 REST 조회·갱신·삭제·목록 계약을 관리합니다.
 
 ```go
 func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
@@ -77,6 +79,33 @@ Magnum은 explicit quota가 없는 프로젝트의 Get에 deployment hard limit�
 
 Delete의 기본 404 정책은 엄격합니다. `WithDeleteIgnoreMissing(true)`는 404만 숨기며 뒤의 false 옵션으로 엄격하게 되돌릴 수 있습니다. 403·500 등의 오류는 숨기지 않습니다. 이 정책은 pinned Python의 quota 기본값에 대응한다는 뜻이 아닙니다. 해당 Python quota API가 존재하지 않습니다.
 
-현재 scope는 quota Create·Get·PATCH Update·Delete를 제공합니다. 공식 Magnum API의 페이지 목록은 별도 구현이 남아 있습니다. quota 이름 Find·상태 Wait는 제공하지 않으며 Python Resource의 dirty-state·자동 commit·cache와 같다고 주장하지 않습니다. pinned Python에 quota 선언이 없다는 사실도 Magnum REST 전체 지원을 의미하지 않습니다.
+## 페이지 목록
 
-근거: [pinned native Create](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/requests.go), [native quota model](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/results.go), [pinned Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/container_infrastructure_management/v1/_proxy.py), [공식 Magnum quota API](https://docs.openstack.org/api-ref/container-infrastructure-management/#magnum-quota-api), [server controller의 GET fallback·PATCH·DELETE](https://github.com/openstack/magnum/blob/master/magnum/api/controllers/v1/quota.py). 이 추가 REST 계약은 별도 server SHA에 고정한 inventory가 아니며 native·Python 선언의 완전 지원 수치에 포함하지 않습니다. [생성·인증 테스트](../../../api/magnum_quota_create_test.go)와 [조회·갱신·삭제·오류 테스트](../../../api/magnum_quota_operations_test.go)가 동작을 검증합니다.
+```go
+import (
+    "context"
+    "fmt"
+    "gophercloudsdk/containerinfra/v1/quotas"
+)
+
+func listQuotas(ctx context.Context, api *quotas.API) error {
+    for quota, err := range api.List(ctx,
+        quotas.WithListOptions(quotas.ListOpts{Limit: 100}),
+        quotas.WithListAllTenants(true),
+    ) {
+        if err != nil { return err }
+        fmt.Println(quota.ID, quota.ProjectID, quota.Resource, quota.HardLimit)
+    }
+    return nil
+}
+```
+
+List는 `/quotas`의 `quotas` 배열과 top-level `next` 링크를 사용하며, All은 같은 iterator를 모읍니다. collection 행의 `RequestProjectID`·`RequestResource`는 빈 값입니다. 실제 서버 identity는 `ID`·`ProjectID`·`Resource`에서 읽고 unknown/null 필드·큰 숫자·페이지별 HTTP header/status를 보존합니다.
+
+기본 sort는 `id`/`asc`이며 Limit 0은 페이지 크기를 생략해 서버 기본값을 사용합니다. 서버가 설정한 최대 크기로 limit을 줄이면 첫 continuation에서 그 크기를 채택하고 이후 고정합니다. Marker는 project ID가 아닌 양의 정수 quota row ID이며 문자열로 정확하게 전달합니다. `AllTenants == nil`은 서버 기본 false를 사용하고, `WithListAllTenants(false/true)`는 값을 명시합니다. 권한은 서버가 검증합니다. `WithListOptions`의 pointer는 생성 시 snapshot을 보관하고 반복 적용할 때 복사합니다. core query는 concrete 옵션으로만 지정하며 `WithListQuery`는 추가 필드를 전달합니다.
+
+Magnum의 next 링크는 `all_tenants`를 누락할 수 있습니다. SDK는 원래 flag와 확장 query를 유지하며 marker만 전진시킵니다. 링크가 origin·collection path·sort·tenant flag·확장 query를 바꾸거나 page limit을 늘리면 거절합니다. 반복 marker는 cycle 오류입니다. `break`는 남은 행 decode와 다음 페이지 요청을 중단하며, 취소와 페이지 오류는 원래 원인·수락된 응답 증거를 보존합니다.
+
+quota 이름 Find·상태 Wait는 제공하지 않습니다. Python Resource의 dirty-state·자동 commit·cache는 별도 계약이며, 추가 REST 구현은 pinned Python에 없는 quota API에 대한 지원입니다. server SHA별 capability inventory는 아직 별도로 구축하지 않았습니다.
+
+근거: [pinned native Create](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/requests.go), [native quota model](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/containerinfra/v1/quotas/results.go), [pinned Python proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/container_infrastructure_management/v1/_proxy.py), [공식 Magnum quota API](https://docs.openstack.org/api-ref/container-infrastructure-management/#magnum-quota-api), [server quota controller](https://github.com/openstack/magnum/blob/master/magnum/api/controllers/v1/quota.py), [collection next](https://github.com/openstack/magnum/blob/master/magnum/api/controllers/v1/collection.py), [server limit validation](https://github.com/openstack/magnum/blob/master/magnum/api/utils.py). 이 추가 REST 계약은 별도 server SHA에 고정한 inventory가 아니며 native·Python 선언의 완전 지원 수치에 포함하지 않습니다. [생성·인증](../../../api/magnum_quota_create_test.go), [조회·갱신·삭제·오류](../../../api/magnum_quota_operations_test.go), [페이지 목록](../../../api/magnum_quota_list_test.go) 테스트가 동작을 검증합니다.

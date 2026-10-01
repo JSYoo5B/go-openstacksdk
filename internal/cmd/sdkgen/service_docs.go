@@ -72,7 +72,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "dns/v2":
 		out.WriteString("`conn.DNSProjectQuotas(ctx, project)`와 `CurrentDNSProjectQuotas(ctx)`는 Designate quota의 프로젝트를 고정합니다. Get/PATCH Update/DELETE Reset과 sudo-project·all-projects header는 [quota 사용법](quotas/README.md)을 참고합니다. 별도 defaults endpoint나 프로젝트 quota 목록은 제공하지 않습니다.\n\n")
 	case "containerinfra/v1":
-		out.WriteString("`conn.ContainerInfraProjectQuotas(ctx, project)`와 `CurrentContainerInfraProjectQuotas(ctx)`로 프로젝트를 고정한 뒤 `ForResource(quotas.Cluster)`로 quota를 선택합니다. Get/Create/PATCH Update/DELETE와 explicit hard limit, Python에 quota 선언이 없는 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
+		out.WriteString("`conn.ContainerInfraProjectQuotas(ctx, project)`와 `CurrentContainerInfraProjectQuotas(ctx)`로 프로젝트를 고정한 뒤 `ForResource(quotas.Cluster)`로 quota를 선택합니다. Get/Create/PATCH Update/DELETE와 explicit hard limit, API.List/All의 페이지 순회·all_tenants 보존, Python에 quota 선언이 없는 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
 	case "db/v1":
 		out.WriteString("`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.\n\n")
 	case "objectstorage/v1":
@@ -156,7 +156,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				continue
 			}
 			if record.Kind == "project_resource_quota" {
-				policies = append(policies, "`InProject(ctx, parent).ForResource(name)`: 고정 프로젝트+resource의 Get·Create·Update·Delete; 이름 Find·Wait 없음")
+				policies = append(policies, "`InProject(ctx, parent).ForResource(name)`: 고정 프로젝트+resource의 Get·Create·Update·Delete; `API.List/All`: quota 페이지 목록; 이름 Find·Wait 없음")
 				continue
 			}
 			if record.Kind == "compound_identity" {
