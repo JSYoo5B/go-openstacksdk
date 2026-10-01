@@ -21,7 +21,10 @@ type CollectionSpec[T any] struct {
 	Metadata                         func(*T) *resource.Metadata
 	Validate                         func(context.Context) error
 	ValidateQuery                    func(context.Context, url.Values) error
-	ValidateID                       func(string) error
+	// ValidateInitialQuery applies only to caller input, before the first HTTP
+	// request. ValidateQuery also checks server-provided continuation queries.
+	ValidateInitialQuery func(context.Context, url.Values) error
+	ValidateID           func(string) error
 	// ValidateItem checks service-specific response invariants after decoding.
 	// Failure retains the original singular response or whole list page.
 	ValidateItem                     func(*T) error

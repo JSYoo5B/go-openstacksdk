@@ -80,6 +80,12 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 			fail(err)
 			return
 		}
+		if spec.ValidateInitialQuery != nil {
+			if err := spec.ValidateInitialQuery(ctx, queryCopy(initial)); err != nil {
+				fail(err)
+				return
+			}
+		}
 		if spec.PluralKey == "" || spec.Metadata == nil {
 			fail(fmt.Errorf("%w: list envelope and metadata are required", resource.ErrInvalidOption))
 			return

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sync/atomic"
 	"testing"
 
@@ -86,5 +87,48 @@ func TestListValidateItemKeepsConsumerBreakLazy(t *testing.T) {
 	}
 	if calls.Load() != 1 || validations.Load() != 1 {
 		t.Fatalf("calls/validation=%d/%d", calls.Load(), validations.Load())
+	}
+}
+
+func TestListInitialQueryPolicyDoesNotRejectServerContinuation(t *testing.T) {
+	var calls, initialChecks, pageChecks atomic.Int32
+	spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		if r.URL.Query().Get("owner") != "fixed" {
+			t.Errorf("query validation changed initial filters: %s", r.URL)
+		}
+		if r.URL.Query().Get("marker") == "" {
+			writeList(w, `{"items":[{"id":"first"}],"next":"?marker=server-token"}`)
+		} else if r.URL.Query().Get("marker") == "server-token" {
+			writeList(w, `{"items":[{"id":"second"}]}`)
+		} else {
+			t.Errorf("unexpected continuation: %s", r.URL)
+		}
+	})
+	cause := errors.New("caller marker unsupported")
+	spec.ValidateInitialQuery = func(_ context.Context, query url.Values) error {
+		initialChecks.Add(1)
+		if query.Has("marker") {
+			return cause
+		}
+		query.Set("owner", "changed callback copy")
+		return nil
+	}
+	spec.ValidateQuery = func(context.Context, url.Values) error { pageChecks.Add(1); return nil }
+	stream := List(context.Background(), spec, url.Values{"owner": {"fixed"}, "marker": {"caller-token"}})
+	if calls.Load() != 0 || initialChecks.Load() != 0 {
+		t.Fatal("creating list eagerly validated or fetched")
+	}
+	for value, err := range stream {
+		if value != nil || !errors.Is(err, cause) {
+			t.Fatalf("value=%v error=%v", value, err)
+		}
+	}
+	if calls.Load() != 0 || initialChecks.Load() != 1 || pageChecks.Load() != 0 {
+		t.Fatalf("invalid query counts HTTP/initial/page=%d/%d/%d", calls.Load(), initialChecks.Load(), pageChecks.Load())
+	}
+	values, err := collectList(context.Background(), spec, url.Values{"owner": {"fixed"}})
+	if err != nil || len(values) != 2 || values[1].ID != "second" || calls.Load() != 2 || initialChecks.Load() != 2 || pageChecks.Load() != 2 {
+		t.Fatalf("values=%v error=%v HTTP/initial/page=%d/%d/%d", values, err, calls.Load(), initialChecks.Load(), pageChecks.Load())
 	}
 }
