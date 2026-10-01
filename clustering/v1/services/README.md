@@ -78,7 +78,7 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 
 List 전체 계약은 partial입니다. 명시적인 typed Body 필터와 별도로 Python의 자동 query/Body
 분류와 unknown query 생략, per-call
-base_path/microversion/header, deprecated JMESPath와 inherited limit/marker fallback을
+base_path, deprecated JMESPath와 inherited limit/marker fallback을
 계속 비교합니다. `WithListQuery`는 명시한 vendor query를 실제로 전달하는 Go 확장입니다.
 
 공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_catalog_list_controls_test.go)를 참고합니다.
@@ -130,3 +130,11 @@ func FilterServices(ctx context.Context, conn *sdk.Connection) error {
 일치하지 않습니다. 공통 `Resources`의 status 필터는 기존의 별도 경로이며 이 typed 옵션이
 공통 Collection의 임의 Body 필터 선택을 추가한 것은 아닙니다. 상세한
 [공통 정책](../listing/README.md)과 [HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.

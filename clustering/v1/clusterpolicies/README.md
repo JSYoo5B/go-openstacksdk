@@ -81,10 +81,9 @@ Python의 `is_enabled` alias는 Go의 Enabled에 대응하고 wire key는 `enabl
 
 `WithListQuery`는 custom deployment query의 명시적 opt-in입니다. Stock Senlin은 unknown query를
 400으로 거부하므로 vendor query 지원을 보장하지 않습니다. concrete 옵션, fixed parent/응답 ID,
-SDK alias와 initial pagination key는 확장 query로 덮어쓸 수 없습니다. List의 body Fields와
-per-request Headers는 지원하지 않습니다. Source client의 인증·endpoint prefix·선택
-microversion은 일반 Senlin 요청 정책을 공유합니다. Secondary Arguments는 아래의 SDK 소유
-로컬 Body 필터 namespace만 지원합니다.
+SDK alias와 initial pagination key는 확장 query로 덮어쓸 수 없습니다. List의 body Fields는 지원하지 않습니다. `WithListHeader`와 `WithListMicroversion`으로
+목록 호출의 헤더·숫자 버전을 지정하고 source client의 인증·endpoint prefix는 공유합니다.
+Secondary Arguments는 SDK 소유 로컬 Body 필터와 목록 microversion만 지원합니다.
 
 ## 대기와 Python Resource 차이
 
@@ -106,7 +105,7 @@ cache/URI 속성을 갱신하는 방식 대신 고정 scope와 독립된 모델�
 요청과 필수 canonical response ID/parent 검증은 명시적인 Go 정책입니다.
 
 List는 partial입니다. `paginated=False`와 `max_items`의 raw 행 소비 제어는 제공하지만
-per-call base path/microversion/header와 deprecated JMESPath filter는 노출하지 않습니다.
+per-call base path와 deprecated JMESPath filter는 노출하지 않습니다.
 Python의 자동 query/Body 분류도 적용하지 않습니다. Python 공통 query의 초기 limit/marker는
 stock controller의 whitelist에 없어 Go가 지원하지 않습니다. Resource.id fallback 대신 raw Body
 필터를 사용하며, unknown query를 버리는 Python과 명시적 vendor query를
@@ -208,3 +207,11 @@ binding ID를 PolicyID로 대체하지 않습니다. 필수 `id/policy_id/cluste
 빈 실제 객체는 객체 필터와 매칭하지 않습니다. 기존 initial limit/marker unsupported·no hint·
 source recheck와 continuation guard는 그대로입니다. [공통 정책](../listing/README.md)과
 [Body 필터 HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.

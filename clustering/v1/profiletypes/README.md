@@ -102,7 +102,7 @@ Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 
 한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
 
 List 전체 계약은 partial입니다. Python의 자동 query/Body 분류와 unknown query 생략,
-per-call base_path/microversion/header, deprecated JMESPath, inherited
+per-call base_path, deprecated JMESPath, inherited
 limit/marker fallback은 별도 비교 범위입니다. Go의 `WithListQuery`는 명시한 vendor query를
 실제로 전달하며 stock 서버 지원을 보장하지 않습니다.
 
@@ -150,3 +150,11 @@ Python Resource의 alternate-ID fallback과 다른 Go 정책입니다. name으�
 빈 실제 객체는 객체 필터와 일치하지 않습니다. cap은 필터 이전 행을 세고 입력은 옵션 생성 시
 snapshot으로 소유합니다. [공통 Body 필터 정책](../listing/README.md)과
 [HTTP 계약](../../../api/clustering_body_filters_test.go)을 참고합니다.
+
+## 목록 호출별 헤더와 버전
+
+`WithListHeader(key, value)`와 `WithListMicroversion("1.7")`은 이 패키지의 typed `List` /
+`All`에만 적용합니다. 기본값은 source client 설정이며 명시 옵션은 공유 클라이언트를
+수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
+[Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
+`headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
