@@ -17,6 +17,8 @@ Senlin은 `clustering` service type을 사용합니다. 버전 없는 catalog en
 
 11개 typed 목록과 대응 Resources의 [Senlin 목록 제어](listing/README.md)는 `WithListMaxItems`/`WithListPaginated` 및 `resource.WithMaxItems`/`resource.WithPaginated`를 제공합니다. MaxItems는 로컬 필터 이전의 raw 행 소비량을 제한하고 0은 무제한이며, Paginated=false는 첫 응답만 소비합니다. 명시 wire limit은 보존하고 cap에 도달하면 다음 행과 continuation을 처리하지 않습니다. ClusterPolicies는 cap을 로컬에만 적용하고 초기 limit/marker를 거부합니다. 나머지 10개 목록은 명시 limit이 없으면 cap을 limit hint로 보내며 type catalog와 Services의 hint 지원은 deployment가 판정합니다. 빈 페이지에서는 next link가 있어도 끝냅니다. 이 소비 제어의 구현과 전체 list 선언의 완료 판정은 별개이며 per-call base_path/microversion/header, JMESPath와 리소스별 Body/query/fallback 차이는 추가 비교 범위입니다.
 
+11개 typed List/All은 패키지별 `WithListFilter(key, value)`로 pinned known Body 필드를 로컬에서 비교합니다. JSON snapshot·필드 alias·정확한 숫자·재귀 object subset을 SDK가 처리하며 builder interface는 필요하지 않습니다. concrete 옵션은 서버 query를 선택하고 WithListFilter는 raw cap·ID 검증 뒤의 로컬 비교를 선택합니다. Go 모델의 추가 필드나 URI 속성을 자동으로 필터에 포함하지 않고 raw Body 키를 WithListQuery로 보내는 것을 거부합니다. 공통 Resources에는 Name/Status 옵션을 유지하며 임의 Body 필터를 추가하지 않습니다. [Body 필터와 Python 차이](listing/README.md#명시적인-raw-body-필터)를 참고합니다.
+
 ## Go 사용
 
 ```go
