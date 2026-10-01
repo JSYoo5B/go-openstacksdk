@@ -2,6 +2,8 @@
 
 부모와 자식 ID를 매번 조합하는 대신 부모를 한 번 지정한 객체를 사용합니다. 이름을 지정하면 정확한 이름 검색과 중복 검사를 수행합니다. ID를 지정하면 부모 조회 요청 없이 그 ID를 보관합니다. 부모가 실제로 없는 경우 후속 리소스 요청의 404를 그대로 처리합니다.
 
+Heat stack은 API가 name+ID를 모두 요구하므로 예외입니다. `Stacks.InStack(ctx, resource.ID(id))`도 Heat identity GET으로 이름을 확인합니다. 두 값을 이미 알고 있으면 `Stacks.ForStack(stacks.StackIdentity{Name: name, ID: id})`로 조회 없이 고정합니다. Nova project quota는 부모 리소스 목록이 아닌 singleton이며, `conn.ProjectQuotas`가 별도 Keystone client로 프로젝트 이름을 해석합니다.
+
 ```go
 dns, err := conn.DNS(ctx)
 if err != nil { return err }
@@ -29,6 +31,9 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Nova volume attachment | `compute.VolumeAttachments.InServer(ctx, server)` | volume ID |
 | Nova instance action | `compute.InstanceActions.InServer(ctx, server)` | request ID |
 | Nova server tags | `compute.Tags.InServer(ctx, server)` | 태그 문자열 집합 |
+| Nova project quota | `conn.ProjectQuotas(ctx, project)` / `CurrentProjectQuotas(ctx)` | 고정 project ID; Get·Detail·Update·Reset |
+| Heat stack | `orchestration.Stacks.InStack(ctx, ref)` / `ForStack(identity)` | stack name + UUID |
+| Manila share access rule | `shared.ShareAccessRules.InShare(ctx, share)` | access ID; 응답 share ID 검증 |
 | Trove database | `database.Databases.InInstance(ctx, instance)` | 데이터베이스 이름 |
 | Trove user | `database.Users.InInstance(ctx, instance)` | 사용자·host 식별자 (서비스 설명 참조) |
 | Magnum node group | `magnum.NodeGroups.InCluster(ctx, cluster)` | UUID |

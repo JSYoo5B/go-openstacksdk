@@ -21,6 +21,10 @@
 | Trove database 범위 (`8138e64`) | [목록·생성·삭제 계약](../api/trove_databases_contracts_test.go): pinned SDK의 list 기반 fetch, 정확 이름, charset, 단일/batch 배열, 오류·삭제 대기 | credential/access 변경은 다른 리소스 동작. batch 원자성·비동기 생성 완료를 추정하지 않음 |
 | Nova action 이력 범위 (`b59edb4`) | [목록·상세·event 계약](../api/instance_actions_scope_test.go): requestID·고정 parent, 추가 JSON·헤더, pagination·cycle·취소, non-object 응답 거부 | 이름·삭제·상태 대기를 가정하지 않음. event 노출은 실제 microversion과 cloud 권한 정책을 따름 |
 | Trove user/host 범위 (`546b679`) | [계정 식별자 계약](../api/trove_users_contracts_test.go): all-host 정확 이름, WithHost와 default % ID 일관성, literal @/%·2단계 decode, 오류·삭제 대기 | password/credential 갱신, access grant/revoke와 root 관리는 별도 |
+| Cyborg Device·Deployable (`1eaf547`, `acd97e1`) | [조회 계약](../api/accelerator_read_test.go), [action/program 계약](../api/accelerator_actions_test.go): SDK 소유 연결·microversion·UUID·응답 JSON/헤더, pagination·break·cycle·origin, 실제 program URL·입력 snapshot | device profiles·ARQs·attributes, Python Resource 입력·자동 버전 선택·dirty state·wait callback은 별도. [사용법과 source pin](../accelerator/v2/README.md) |
+| Nova project quota (`41e5053`, `5f64488`) | [singleton 계약](../api/project_quotas_contracts_test.go), [Connection 계약](../connection_quotas_test.go): ID 고정, 별도 Keystone 이름 해석, recorded v2/v3 auth, zero/-1/force false, raw limit/detail 응답·Reset | defaults·user quota·query, Python cloud의 force=True 기본과 별도 quota 서비스는 추가 단위. [사용법](../compute/v2/quotasets/README.md) |
+| Heat stack (`11bbdf6`, `51d873e`) | [복합 식별자 계약](../api/heat_stacks_contracts_test.go): canonical name+ID, resolve_outputs False, summary/detail 구분, marker/linked cycle, *_FAILED·삭제 완료·고정 pair 대기 | child stackresources/stackevents, 생성·adopt·preview·template·snapshot 등 추가 stack workflow는 별도. [사용법](../orchestration/v1/stacks/README.md) |
+| Manila share access scope | [share/rule/action 계약](../api/share_access_rules_scope_test.go):2.45 조회·parent 일치, 부모404/403 구분, allow/deny·2.82 locks, 취소·waiter |2.45 이전 legacy scope와 lock/unlock 별도 연산·다른 share 복합 작업은 추가 단위 |
 
 이 표는 특정 계약의 검증 기록이며 전체 Python 연산을 `supported`로 판정한 목록이 아닙니다. Inspector Start query 보정의 이번 검증은 `go test -race ./api ./baremetalintrospection/... ./internal/cmd/sdkgen` 범위입니다. 그 이전 구현을 함께 포함한 전체 `go test -race -timeout 60s ./...`와 `go vet ./...`도 통과했습니다.
 
@@ -94,7 +98,7 @@ Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic vir
 
 초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
 
-현재 binding은 일반 Collection 108개, 부모 Collection 범위 18개와 별도 tag set 1개입니다. 공통 binding이 없는 72개 패키지는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
+현재 binding은 native 일반 Collection 108개, SDK 소유 Cyborg Collection 2개, 부모 Collection 범위 19개, Heat 복합 식별자 정책 1개, Nova quota singleton 1개와 별도 tag set 1개입니다. 공통 binding이 없는 native 패키지 69개는 계속 조사 대상이며, binding의 추가만으로 대응 Python 연산 전체를 지원 완료로 판정하지 않습니다. 아래 표는 초기 조사 우선순위이며 완료한 세부 계약과 현재 남은 범위는 위 증거 표에 기록합니다.
 
 | 우선 과제 | 확인한 코드 근거 | 필요한 구현과 검증 |
 |---|---|---|

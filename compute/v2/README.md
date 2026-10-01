@@ -51,7 +51,7 @@ _ = value
 | `KeyPairs` | [keypairs](keypairs/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Limits` | [limits](limits/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Migrations` | [migrations](migrations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `QuotaSets` | [quotasets](quotasets/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Detail·Update·Reset; List/Find/Wait 없음 |
 | `RemoteConsoles` | [remoteconsoles](remoteconsoles/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SecurityGroups` | [secgroups](secgroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `ServerGroups` | [servergroups](servergroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

@@ -40,7 +40,7 @@ _ = value
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SecurityServices` | [securityservices](securityservices/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `ShareAccessRules` | [shareaccessrules](shareaccessrules/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `ShareAccessRules` | [shareaccessrules](shareaccessrules/api_generated.go) | `InShare(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `ShareNetworks` | [sharenetworks](sharenetworks/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Shares` | [shares](shares/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Sharetransfers` | [sharetransfers](sharetransfers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

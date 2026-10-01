@@ -8,7 +8,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 ```text
 gophercloudsdk/
-├── connection*.go           # 인증, 설정, 21개 서비스 접근과 캐시
+├── connection*.go           # 인증, 설정, 22개 서비스 접근과 캐시
+├── accelerator/             # SDK 소유 Cyborg v2 모델·transport
 ├── compute/                 # 서버, flavor, 서버 생성 흐름
 ├── network/                 # Neutron 네트워크
 ├── image/                   # Glance 이미지
@@ -23,7 +24,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-전체 API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 공통 리소스 정책은 108개 일반 Collection과 18개 부모 Collection 범위에 적용하며, 서버 tag는 별도 문자열 집합 범위로 제공합니다. 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2 Device·Deployable을 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 2개, 부모 Collection 범위 19개, Heat 복합 식별자 정책, Nova project quota singleton과 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 
@@ -43,6 +44,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 | 서비스 | API 버전 문서 | Connection |
 |---|---|---|
+| Accelerator (Cyborg) | [v2](accelerator/v2/README.md) | `Accelerator(ctx)` |
 | Bare Metal | [v1](baremetal/v1/README.md) | `BareMetal(ctx)` |
 | Bare Metal Introspection | [v1](baremetalintrospection/v1/README.md) | `BareMetalIntrospection(ctx)` |
 | Block Storage | [v2](blockstorage/v2/README.md), [v3](blockstorage/v3/README.md) | `BlockStorageV2(ctx)`, `BlockStorageV3(ctx)` |
@@ -66,6 +68,8 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 | Workflow | [v2](workflow/v2/README.md) | `Workflow(ctx)` |
 
 각 문서에는 openstacksdk와의 입력·결과 형식 비교, 실제 서비스 필드, API 패키지 링크, 이름 조회·삭제·대기가 적용되는 리소스를 기록합니다. DNS zone이나 Octavia pool의 자식 리소스는 [부모 범위를 지정](docs/scoped-resources.md)해서 사용합니다.
+
+Heat는 `orchestration.Stacks.InStack(ctx, ref)` 또는 이름·ID가 모두 있는 `ForStack(identity)`로 대상을 고정합니다. Manila access rule은 `shared.ShareAccessRules.InShare(ctx, share)`에서 부모를 검증합니다. Nova quota는 `conn.ProjectQuotas(ctx, resource.Name("tenant"))`가 Keystone을 통한 이름 해석을 맡고, `CurrentProjectQuotas(ctx)`는 기록된 Keystone project 인증 결과를 사용합니다. quota에는 List/Find/Wait가 없습니다.
 
 ## openstacksdk와 전체 사용 방식 비교
 
