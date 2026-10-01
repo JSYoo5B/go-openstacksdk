@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"iter"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,6 +44,23 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
+	if config.AllProjects != nil {
+		for key := range config.Query {
+			if strings.EqualFold(key, "all_tenants") || c.binding.IdentityAllProjectsQuery != "" && strings.EqualFold(key, c.binding.IdentityAllProjectsQuery) {
+				return fail(invalid("typed all-projects conflicts with raw query %q", key))
+			}
+		}
+		if c.binding.IdentityAllProjectsQuery == "" {
+			return fail(ErrUnsupported)
+		}
+		if err := validateIdentityFindQueryKey(c.binding.IdentityAllProjectsQuery); err != nil {
+			return fail(err)
+		}
+	}
+	if config.Details != nil && c.binding.IterateIdentity == nil {
+		return fail(ErrUnsupported)
+	}
+	details := config.Details == nil || *config.Details
 	ignoreMissing := config.IgnoreMissing == nil || *config.IgnoreMissing
 	safeRoute := safeIdentityFindRoute(identity) && c.validateID(identity) == nil
 	if err := ctx.Err(); err != nil {
@@ -76,8 +94,11 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	}
 	// A successful list observation is required before treating absence as
 	// ignorable. List HTTP failures are never suppressed by IgnoreMissing.
-	if c.binding.IterateControlled == nil && c.binding.Iterate == nil && (c.binding.List == nil || c.binding.Extract == nil) {
+	if c.binding.IterateIdentity == nil && c.binding.IterateControlled == nil && c.binding.Iterate == nil && (c.binding.List == nil || c.binding.Extract == nil) {
 		return fail(ErrUnsupported)
+	}
+	if config.AllProjects != nil && *config.AllProjects {
+		config.Query.Set(c.binding.IdentityAllProjectsQuery, "true")
 	}
 	if c.binding.NameQuery != nil {
 		key := c.binding.NameQueryKey
@@ -104,7 +125,18 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	}
 	var found *T
 	var foundID string
-	for value, err := range c.List(ctx, listQuery) {
+	listCollection := c
+	if modeIterator := c.binding.IterateIdentity; modeIterator != nil {
+		// Reuse ordinary List validation and error wrapping without changing the
+		// shared binding or routing ordinary List through the identity modes.
+		binding := c.binding
+		binding.IterateControlled = nil
+		binding.Iterate = func(ctx context.Context, query url.Values) iter.Seq2[*T, error] {
+			return modeIterator(ctx, query, details)
+		}
+		listCollection = NewCollection(binding)
+	}
+	for value, err := range listCollection.List(ctx, listQuery) {
 		if err != nil {
 			return fail(err)
 		}

@@ -8,12 +8,16 @@ import (
 )
 
 // IdentityFindOpts configures automatic ID-or-name lookup. A nil IgnoreMissing
-// defaults to true. Query contains only service-specific GET and list fields;
-// transport, pagination controls and local filters are not FindIdentity inputs.
+// defaults to true. Details defaults to true and AllProjects to false; explicit
+// values require a binding that supports those list-only policies. Query contains
+// service-specific GET and list fields; transport, pagination controls and local
+// filters are not FindIdentity inputs.
 type IdentityFindOpts struct {
 	IgnoreMissing *bool
 	Fallback      FindFallbackPolicy
 	Query         url.Values
+	Details       *bool
+	AllProjects   *bool
 }
 
 // IdentityFindOption configures an identity lookup. Later options win.
@@ -45,6 +49,27 @@ func WithIdentityFindFallback(value FindFallbackPolicy) IdentityFindOption {
 	}
 }
 
+// WithIdentityFindDetails selects detailed or summary list fallback. The direct
+// member GET is unchanged. Explicit values require an audited mode iterator.
+func WithIdentityFindDetails(value bool) IdentityFindOption {
+	return func(options *IdentityFindOpts) error {
+		copy := value
+		options.Details = &copy
+		return nil
+	}
+}
+
+// WithIdentityFindAllProjects adds the audited cross-project query only to list
+// fallback when true. Explicit false still requires that binding capability.
+// An explicit value cannot be combined with a raw all_tenants query key.
+func WithIdentityFindAllProjects(value bool) IdentityFindOption {
+	return func(options *IdentityFindOpts) error {
+		copy := value
+		options.AllProjects = &copy
+		return nil
+	}
+}
+
 // WithIdentityFindQuery supplies a wire query field to GET and list fallback.
 // A direct GET with query requires an audited SDK query hook; unsupported
 // bindings reject it before HTTP. List-only names do not require that hook.
@@ -68,6 +93,14 @@ func cloneIdentityFindOptions(value IdentityFindOpts) IdentityFindOpts {
 	if value.IgnoreMissing != nil {
 		ignored := *value.IgnoreMissing
 		copy.IgnoreMissing = &ignored
+	}
+	if value.Details != nil {
+		details := *value.Details
+		copy.Details = &details
+	}
+	if value.AllProjects != nil {
+		allProjects := *value.AllProjects
+		copy.AllProjects = &allProjects
 	}
 	copy.Query = make(url.Values, len(value.Query))
 	for key, values := range value.Query {
@@ -110,7 +143,7 @@ func validateIdentityFindQueryKey(key string) error {
 		}
 	}
 	switch strings.ToLower(key) {
-	case "max_items", "paginated", "base_path", "list_base_path", "jmespath_filters", "headers", "microversion", "allow_unknown_params", "ignore_missing", "fallback":
+	case "max_items", "paginated", "base_path", "list_base_path", "jmespath_filters", "headers", "microversion", "allow_unknown_params", "ignore_missing", "fallback", "details", "all_projects":
 		return invalid("identity find query %q is an SDK control", key)
 	}
 	return nil
