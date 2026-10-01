@@ -230,6 +230,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		fmt.Fprintf(&out, "| `%s` | [%s](%s/%s) | %s |\n", registryField(path), path, path, apiFile, policy)
 	}
 	out.WriteString("\n공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.\n\n")
+	for _, record := range g.collections {
+		if record.Source != "" || record.Model == "" || record.Kind != "" || !strings.HasPrefix(record.Package, "gophercloudsdk/"+key+"/") {
+			continue
+		}
+		out.WriteString("native pager에 연결된 `Resources.List/All`과 부모 scope의 `List/All`은 `resource.WithMaxItems(n)`과 `resource.WithPaginated(false)`로 raw 행 소비량과 첫 페이지를 제어합니다. cap은 로컬 name/status 및 Trove 사용자 host 필터 전에 적용합니다. 0은 무제한이며 음수는 lazy 순회 시 HTTP 전에 오류입니다. native 경로는 cap을 wire limit hint로 보내지 않고 명시 페이지 크기·query·header를 보존합니다. 페이지 전체 extraction 때문에 cap 뒤 malformed 행도 오류를 낼 수 있습니다. 기존 native typed `List`의 작업별 옵션은 유지하며, 공통 소비 옵션은 Collection/scope에 전달합니다. [서비스별 Python/Go 목록 비교](../../docs/listing.md)에서 실제 binding과 continuation 정책을 확인합니다.\n\n")
+		break
+	}
 	out.WriteString("## 변경 요청\n\n리소스 API의 Create/Update에 concrete options를 전달합니다. 기본 필드는 typed options로 지정하고 추가 필드는 `With...Field`로 지정합니다. query와 header도 해당 연산이 제공하는 `With...` 함수를 사용합니다. 기본 필드·헤더 덮어쓰기와 지원되지 않는 확장 방식은 요청 전에 거부합니다. 요청 builder interface는 SDK가 구현합니다.\n\n")
 	out.WriteString("부모가 필요한 연산은 [범위 객체](../../docs/scoped-resources.md)를 사용합니다. 범위 객체가 제공하는 Create/Update에도 같은 concrete options를 사용합니다. 응답 변경 추적이나 Python cloud의 모든 복합 작업은 이 API 참조 페이지의 지원 범위를 뜻하지 않습니다.\n\n")
 	out.WriteString("전체 비교 기준은 [openstacksdk 목록](../../api/openstacksdk/README.md), Go API 호출은 [전체 API 설명](../../api/README.md), 실행·검증은 [프로젝트 README](../../README.md)를 참고합니다.\n")
