@@ -9751,7 +9751,9 @@
         "gophercloudsdk/resource.WithIdentityFindOptions",
         "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
         "gophercloudsdk/resource.WithIdentityFindFallback",
-        "gophercloudsdk/resource.WithIdentityFindQuery"
+        "gophercloudsdk/resource.WithIdentityFindQuery",
+        "gophercloudsdk/resource.WithIdentityFindDetails",
+        "gophercloudsdk/resource.WithIdentityFindAllProjects"
       ],
       "contracts": [
         {
@@ -9808,7 +9810,58 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
             "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
-            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesPreserveSourceClientAndContext"
+          ]
+        },
+        {
+          "behavior": "Details defaults to true; false selects the summary fallback route and true selects the detail fallback route, without changing direct member GET. A successful GET returns immediately even in summary mode; ordinary List keeps its original adapter, and summary rows are not followed by implicit detail GETs.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesSelectFallbackWithoutChangingGETOrList",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityTypedModesKeepSuccessfulMemberGET",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesRoutesFrozenQueriesAndLiveSource",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesDefaultsRoutesAndListOnlyFlags"
+          ]
+        },
+        {
+          "behavior": "Typed AllProjects defaults to false: nil/false omits the automatic cross-project field, and true adds all_tenants=true only to fallback LIST. Raw all_tenants with no typed value remains a dual-phase wire extension. Explicit typed values conflict with any case-insensitive raw all_tenants key presence, including nil/empty/repeated values, independently of option order; raw details/all_projects and unsupported explicit false/true fail before HTTP, including GET-only policy.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityTypedAllProjectsIsListOnlyAndRawQueryRemainsDualPhase",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesPreflightUnsupportedAndConflicts",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesDefaultsRoutesAndListOnlyFlags",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesConflictsAndCapabilitiesBeforeHTTP",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesFallbackPoliciesNativeCodesAndRawScopeExtension"
+          ]
+        },
+        {
+          "behavior": "Details/AllProjects/IgnoreMissing pointers and query arrays are independently snapshotted at option construction and after custom option application. Last scalar option wins; a bulk option replaces all fields. Captured configuration mutations during GET cannot change fallback mode/query, and shared options and mode iterators can be reused concurrently.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesSelectFallbackWithoutChangingGETOrList",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesFreezeBulkAndCapturedOptions",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModeOptionsCanBeReusedConcurrently",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesReusableAndConcurrentIndependentSnapshots",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesOwnedSnapshotsLastWinsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Both fallback modes retain native page codes and whole-page extraction. Duplicate rows and later HTTP/decode/read/transport/cycle errors remain terminal after a match; consumer break does not inspect continuation, context cancellation remains terminal, and native linked continuation behavior is preserved instead of inventing a stricter route or new response evidence.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesPreserveAllPageErrorsAndCancellation",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModeIteratorCancellationIsTerminal",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesNativeCodesAndWholePageErrors",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesBreakCancellationAndPreflight",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesCyclesForeignLinksAndLaterFailure",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesTransportAndAcceptedReadErrorsStayTerminal",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesSummaryPagesDuplicatesAndTerminalFailures",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesFallbackPoliciesNativeCodesAndRawScopeExtension"
+          ]
+        },
+        {
+          "behavior": "Only the two audited Nova/Cinder bindings expose details/all-projects modes. Generated identity hooks use the owned mode iterator while retaining ordinary Get/List controls; inventory records both capabilities only for those bindings. Native List/ListSimple URL/page/extractor body, signature, page schema and receiver-qualified declaration drift are rejected before emission.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesOnlyEnableAuditedConcretePagerContracts",
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesEmitFallbackOnlyAndExplicitInventory",
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesNativeDeclarationAndReceiverGuards"
           ]
         }
       ],
@@ -9816,15 +9869,14 @@
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned find_server (openstack/compute/v2/_proxy.py:1023-1060) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy."
+        "Pinned find_server (openstack/compute/v2/_proxy.py:1023-1060) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy. The owned Details and AllProjects options now implement those typed defaults and explicit changes: summary/detail is fallback-only, true is LIST-only all_tenants=true, and false omits the automatic query field.",
+        "Typed mode options require explicit audited binding capabilities, including explicit false. The SDK rejects typed/raw cross-project conflicts and does not infer a details fetch for summary matches or modify ordinary List; this Go option-ownership policy makes ambiguous inputs fail before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "The native server detail pager provides the pinned details=True default and an anchored literal name hint; details=False must select the /servers summary fallback without changing direct member GET, and is not yet implemented.",
-        "Typed all_projects=False/True is not implemented. The pinned proxy omits false and true becomes LIST-only all_tenants via Resource.find (openstack/resource.py:2559-2563); arbitrary Go wire Query is sent to both phases and does not substitute for that typed policy.",
         "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
         "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
@@ -9840,7 +9892,9 @@
         "gophercloudsdk/resource.WithIdentityFindOptions",
         "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
         "gophercloudsdk/resource.WithIdentityFindFallback",
-        "gophercloudsdk/resource.WithIdentityFindQuery"
+        "gophercloudsdk/resource.WithIdentityFindQuery",
+        "gophercloudsdk/resource.WithIdentityFindDetails",
+        "gophercloudsdk/resource.WithIdentityFindAllProjects"
       ],
       "contracts": [
         {
@@ -9897,7 +9951,58 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication",
             "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
-            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+            "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesPreserveSourceClientAndContext"
+          ]
+        },
+        {
+          "behavior": "Details defaults to true; false selects the summary fallback route and true selects the detail fallback route, without changing direct member GET. A successful GET returns immediately even in summary mode; ordinary List keeps its original adapter, and summary rows are not followed by implicit detail GETs.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesSelectFallbackWithoutChangingGETOrList",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityTypedModesKeepSuccessfulMemberGET",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesRoutesFrozenQueriesAndLiveSource",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesDefaultsRoutesAndListOnlyFlags"
+          ]
+        },
+        {
+          "behavior": "Typed AllProjects defaults to false: nil/false omits the automatic cross-project field, and true adds all_tenants=true only to fallback LIST. Raw all_tenants with no typed value remains a dual-phase wire extension. Explicit typed values conflict with any case-insensitive raw all_tenants key presence, including nil/empty/repeated values, independently of option order; raw details/all_projects and unsupported explicit false/true fail before HTTP, including GET-only policy.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityTypedAllProjectsIsListOnlyAndRawQueryRemainsDualPhase",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesPreflightUnsupportedAndConflicts",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesDefaultsRoutesAndListOnlyFlags",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesConflictsAndCapabilitiesBeforeHTTP",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesFallbackPoliciesNativeCodesAndRawScopeExtension"
+          ]
+        },
+        {
+          "behavior": "Details/AllProjects/IgnoreMissing pointers and query arrays are independently snapshotted at option construction and after custom option application. Last scalar option wins; a bulk option replaces all fields. Captured configuration mutations during GET cannot change fallback mode/query, and shared options and mode iterators can be reused concurrently.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesSelectFallbackWithoutChangingGETOrList",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesFreezeBulkAndCapturedOptions",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModeOptionsCanBeReusedConcurrently",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesReusableAndConcurrentIndependentSnapshots",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesOwnedSnapshotsLastWinsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Both fallback modes retain native page codes and whole-page extraction. Duplicate rows and later HTTP/decode/read/transport/cycle errors remain terminal after a match; consumer break does not inspect continuation, context cancellation remains terminal, and native linked continuation behavior is preserved instead of inventing a stricter route or new response evidence.",
+          "tests": [
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModesPreserveAllPageErrorsAndCancellation",
+            "resource/find_identity_modes_test.go:TestCollectionFindIdentityModeIteratorCancellationIsTerminal",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesNativeCodesAndWholePageErrors",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesBreakCancellationAndPreflight",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesCyclesForeignLinksAndLaterFailure",
+            "internal/nativefind/list_modes_test.go:TestNativeIdentityListModesTransportAndAcceptedReadErrorsStayTerminal",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesSummaryPagesDuplicatesAndTerminalFailures",
+            "api/find_identity_modes_test.go:TestNativeFindIdentityModesFallbackPoliciesNativeCodesAndRawScopeExtension"
+          ]
+        },
+        {
+          "behavior": "Only the two audited Nova/Cinder bindings expose details/all-projects modes. Generated identity hooks use the owned mode iterator while retaining ordinary Get/List controls; inventory records both capabilities only for those bindings. Native List/ListSimple URL/page/extractor body, signature, page schema and receiver-qualified declaration drift are rejected before emission.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesOnlyEnableAuditedConcretePagerContracts",
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesEmitFallbackOnlyAndExplicitInventory",
+            "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesNativeDeclarationAndReceiverGuards"
           ]
         }
       ],
@@ -9905,15 +10010,14 @@
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy."
+        "Pinned find_volume (openstack/block_storage/v3/_proxy.py:855-893) declares details/all_projects rather than **query; Go wire Query is an extra capability and is not the Python list-only all_projects policy. The owned Details and AllProjects options now implement those typed defaults and explicit changes: summary/detail is fallback-only, true is LIST-only all_tenants=true, and false omits the automatic query field.",
+        "Typed mode options require explicit audited binding capabilities, including explicit false. The SDK rejects typed/raw cross-project conflicts and does not infer a details fetch for summary matches or modify ordinary List; this Go option-ownership policy makes ambiguous inputs fail before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
         "resource/README.md"
       ],
       "remaining": [
-        "The native volume detail pager provides the pinned details=True default; details=False must select the /volumes summary fallback without changing direct member GET, and is not yet implemented.",
-        "Typed all_projects=False/True is not implemented. The pinned proxy omits false and true becomes LIST-only all_tenants via Resource.find (openstack/resource.py:2559-2563); arbitrary Go wire Query is sent to both phases and does not substitute for that typed policy.",
         "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
         "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
