@@ -133,6 +133,10 @@ func (b listOptsBuilder) ToHypervisorListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Hypervisor, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Hypervisor, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -144,8 +148,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Hyperv
 		return func(yield func(*Hypervisor, error) bool) { var zero *Hypervisor; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Hypervisor, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Hypervisor, error) {
 		values, err := upstream.ExtractHypervisors(page)
 		return []Hypervisor(values), err
-	})
+	}, control)
 }

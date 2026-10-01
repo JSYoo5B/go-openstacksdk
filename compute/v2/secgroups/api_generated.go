@@ -158,10 +158,14 @@ func (a *API) Get(ctx context.Context, id string) (*SecurityGroup, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*SecurityGroup, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]SecurityGroup, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*SecurityGroup, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]SecurityGroup, error) {
 		values, err := upstream.ExtractSecurityGroups(page)
 		return []SecurityGroup(values), err
-	})
+	}, control)
 }
 
 // ListByServer invokes the upstream API with library-owned builders and result handling.

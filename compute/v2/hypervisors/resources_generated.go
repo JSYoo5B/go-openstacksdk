@@ -22,7 +22,7 @@ func (a *API) newResources() *resource.Collection[Hypervisor] {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Hypervisor, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Hypervisor, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			options := make([]ListOption, 0, len(q))
@@ -31,7 +31,7 @@ func (a *API) newResources() *resource.Collection[Hypervisor] {
 					options = append(options, WithListQuery(key, value))
 				}
 			}
-			return a.List(ctx, options...)
+			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Hypervisor, error) {

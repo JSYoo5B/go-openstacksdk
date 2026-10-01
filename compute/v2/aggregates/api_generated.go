@@ -120,10 +120,14 @@ func (a *API) Get(ctx context.Context, aggregateID int) (*Aggregate, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Aggregate, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Aggregate, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Aggregate, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Aggregate, error) {
 		values, err := upstream.ExtractAggregates(page)
 		return []Aggregate(values), err
-	})
+	}, control)
 }
 
 type RemoveHostOption = request.Option[RemoveHostOpts]

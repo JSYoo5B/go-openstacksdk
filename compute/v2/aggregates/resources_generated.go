@@ -31,13 +31,13 @@ func (a *API) newResources() *resource.Collection[Aggregate] {
 			}
 			return a.Delete(ctx, parsed)
 		},
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Aggregate, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Aggregate, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*Aggregate, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return a.List(ctx)
+			return a.listWithControl(ctx, control)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Aggregate, error) {

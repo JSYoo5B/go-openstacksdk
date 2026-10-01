@@ -43,10 +43,14 @@ func (a *API) Get(ctx context.Context, alias string) (*Extension, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*Extension, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]Extension, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*Extension, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]Extension, error) {
 		values, err := upstream.ExtractExtensions(page)
 		return []Extension(values), err
-	})
+	}, control)
 }
 
 // ListExtensionURL invokes the upstream API with library-owned builders and result handling.

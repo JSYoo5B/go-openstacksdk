@@ -36,13 +36,13 @@ func (s *VolumeAttachmentScope) newResources() *resource.Collection[VolumeAttach
 		},
 		ID:     func(v *VolumeAttachment) string { return fmt.Sprint(v.VolumeID) },
 		Delete: func(ctx context.Context, id string) error { return s.api.Delete(ctx, s.parentID, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*VolumeAttachment, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*VolumeAttachment, error] {
 			q = maps.Clone(q)
 			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*VolumeAttachment, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
-			return s.api.List(ctx, s.parentID)
+			return s.api.listWithControl(ctx, s.parentID, control)
 		}})
 }
 

@@ -450,6 +450,10 @@ func (b listOptsBuilder) ToServerListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Server, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Server, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -461,10 +465,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Server
 		return func(yield func(*Server, error) bool) { var zero *Server; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Server, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Server, error) {
 		values, err := upstream.ExtractServers(page)
 		return []Server(values), err
-	})
+	}, control)
 }
 
 // ListAddresses invokes the upstream API with library-owned builders and result handling.

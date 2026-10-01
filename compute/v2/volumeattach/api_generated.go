@@ -85,8 +85,12 @@ func (a *API) Get(ctx context.Context, serverID string, volumeID string) (*Volum
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, serverID string) iter.Seq2[*VolumeAttachment, error] {
-	return resource.Stream(ctx, upstream.List(a.client, serverID), func(page pagination.Page) ([]VolumeAttachment, error) {
+	return a.listWithControl(ctx, serverID, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, serverID string, control resource.ListControl) iter.Seq2[*VolumeAttachment, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, serverID), func(page pagination.Page) ([]VolumeAttachment, error) {
 		values, err := upstream.ExtractVolumeAttachments(page)
 		return []VolumeAttachment(values), err
-	})
+	}, control)
 }
