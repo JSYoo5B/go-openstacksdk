@@ -4985,7 +4985,9 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/actions.API.List",
         "gophercloudsdk/clustering/v1/actions.API.All",
-        "gophercloudsdk/clustering/v1/actions.WithListFilter"
+        "gophercloudsdk/clustering/v1/actions.WithListFilter",
+        "gophercloudsdk/clustering/v1/actions.WithListHeader",
+        "gophercloudsdk/clustering/v1/actions.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -5050,6 +5052,32 @@
           "tests": [
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersNestedSubsetsExactNumbersArraysAndBooleans"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -5058,7 +5086,9 @@
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/actions/README.md",
@@ -5066,7 +5096,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare automatic Body/query classification and field/descriptor normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration. Explicit local raw Body filters and their aliases are implemented separately.",
+        "Compare automatic Body/query classification and field/descriptor normalization, per-call base_path and deprecated proxy JMESPath controls before closing the whole list declaration. Explicit local raw Body filters and their aliases are implemented separately.",
         "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
@@ -5077,7 +5107,9 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/events.API.List",
         "gophercloudsdk/clustering/v1/events.API.All",
-        "gophercloudsdk/clustering/v1/events.WithListFilter"
+        "gophercloudsdk/clustering/v1/events.WithListFilter",
+        "gophercloudsdk/clustering/v1/events.WithListHeader",
+        "gophercloudsdk/clustering/v1/events.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -5148,6 +5180,32 @@
           "tests": [
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersEventLevelUsesRawJSONRatherThanTypedString"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -5156,7 +5214,9 @@
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/events/README.md",
@@ -5164,7 +5224,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare automatic Body/query classification and descriptor defaults/coercion, per-call base_path/microversion/headers and deprecated proxy JMESPath controls before closing the whole list declaration. Raw Event.level filtering intentionally does not reuse the typed string conversion.",
+        "Compare automatic Body/query classification and descriptor defaults/coercion, per-call base_path and deprecated proxy JMESPath controls before closing the whole list declaration. Raw Event.level filtering intentionally does not reuse the typed string conversion.",
         "Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested."
       ]
     },
@@ -5354,7 +5414,9 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/policytypes.API.List",
         "gophercloudsdk/clustering/v1/policytypes.API.All",
-        "gophercloudsdk/clustering/v1/policytypes.WithListFilter"
+        "gophercloudsdk/clustering/v1/policytypes.WithListFilter",
+        "gophercloudsdk/clustering/v1/policytypes.WithListHeader",
+        "gophercloudsdk/clustering/v1/policytypes.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -5415,6 +5477,32 @@
           "tests": [
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -5423,7 +5511,9 @@
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/policytypes/README.md",
@@ -5431,7 +5521,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
+        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
       ]
     },
     {
@@ -5441,7 +5531,9 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/profiletypes.API.List",
         "gophercloudsdk/clustering/v1/profiletypes.API.All",
-        "gophercloudsdk/clustering/v1/profiletypes.WithListFilter"
+        "gophercloudsdk/clustering/v1/profiletypes.WithListFilter",
+        "gophercloudsdk/clustering/v1/profiletypes.WithListHeader",
+        "gophercloudsdk/clustering/v1/profiletypes.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -5502,6 +5594,32 @@
           "tests": [
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -5510,7 +5628,9 @@
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/profiletypes/README.md",
@@ -5518,7 +5638,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path/microversion/headers and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
+        "Compare inherited limit/marker fallback, unknown-query omission, automatic Body/query classification and descriptor/alternate-ID normalization, per-call base_path and deprecated proxy JMESPath consumption. Explicit raw id/name/schema/support_status filters are tested, with no raw id-to-name fallback; the official type catalog declares no paging query protocol."
       ]
     },
     {
@@ -5528,7 +5648,9 @@
       "go_api": [
         "gophercloudsdk/clustering/v1/services.API.List",
         "gophercloudsdk/clustering/v1/services.API.All",
-        "gophercloudsdk/clustering/v1/services.WithListFilter"
+        "gophercloudsdk/clustering/v1/services.WithListFilter",
+        "gophercloudsdk/clustering/v1/services.WithListHeader",
+        "gophercloudsdk/clustering/v1/services.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -5584,6 +5706,39 @@
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersServicesVersionGateOnFilteredContinuation",
             "internal/senlin/catalog_filter_test.go:TestBodyFilterCatalogFacadesUseRawFieldsAndOwnNamespaces"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
+        },
+        {
+          "behavior": "Services>=1.7 and Receiver user>=1.4 gates evaluate the effective per-call client, allowing documented explicit upgrades and rejecting downgrades/default resets without changing source configuration.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestEffectiveVersionGates",
+            "internal/senlin/list_request_test.go:TestListRequestRevalidatesSourceBeforeContinuationAndGatesEffectiveVersion"
+          ]
         }
       ],
       "differences": [
@@ -5592,7 +5747,9 @@
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. The inherited positive-cap limit hint is deployment-dependent because the official catalog/service endpoint declares no limit/marker protocol; Go still does not invent an ID marker fallback.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/services/README.md",
@@ -5600,7 +5757,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Compare automatic Body/query classification, descriptor normalization, unknown-query omission, per-call base_path/microversion/headers and deprecated proxy JMESPath controls. Explicit local id/name/state/binary/host/updated_at/disabled_reason/status filters are implemented independently of common status filtering.",
+        "Compare automatic Body/query classification, descriptor normalization, unknown-query omission, per-call base_path and deprecated proxy JMESPath controls. Explicit local id/name/state/binary/host/updated_at/disabled_reason/status filters are implemented independently of common status filtering.",
         "Compare inherited limit/marker fallback and the controller default/capped limit; Services has no documented paging query protocol. Numeric1.7+, filtered continuation revalidation, local cap/first-page behavior and opt-in limit hints are tested."
       ]
     },
@@ -6299,7 +6456,9 @@
       "source_fingerprint": "f5780d484e189d8e4d151d7eeecb43c09035b345c09401216bb76a889af6614d",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/profiles.API.List"
+        "gophercloudsdk/clustering/v1/profiles.API.List",
+        "gophercloudsdk/clustering/v1/profiles.WithListHeader",
+        "gophercloudsdk/clustering/v1/profiles.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -6331,6 +6490,32 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -6340,7 +6525,9 @@
         "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
         "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/profiles/README.md",
@@ -6348,7 +6535,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
+        "Map inherited per-call base_path and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
         "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
       ]
     },
@@ -6595,7 +6782,9 @@
       "source_fingerprint": "5e4b27b208807f9c9a4e3860163783886d6c1d67110facf32c3527702529f7fd",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/policies.API.List"
+        "gophercloudsdk/clustering/v1/policies.API.List",
+        "gophercloudsdk/clustering/v1/policies.WithListHeader",
+        "gophercloudsdk/clustering/v1/policies.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -6628,6 +6817,32 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -6637,7 +6852,9 @@
         "Explicit WithListFilter selects known local Body fields. JSON booleans stay distinct from numbers, decimal numbers compare exactly without float64, and non-object actual values fail object-subset filters without Python attribute errors.",
         "Go keeps continuation links on the same collection origin/path, retains original filters and selected limits, and guards URL/marker cycles rather than following arbitrary Python next-link parameters.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/policies/README.md",
@@ -6645,7 +6862,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
+        "Map inherited per-call base_path and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.",
         "Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission."
       ]
     },
@@ -6820,7 +7037,9 @@
       "source_fingerprint": "4c6bdfe0d804400ce13aac26369afbbc363a18542042522b8d13b9e924a0abee",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/clusters.API.List"
+        "gophercloudsdk/clustering/v1/clusters.API.List",
+        "gophercloudsdk/clustering/v1/clusters.WithListHeader",
+        "gophercloudsdk/clustering/v1/clusters.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -6853,6 +7072,32 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -6861,7 +7106,9 @@
         "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
         "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/clusters/README.md",
@@ -6869,7 +7116,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
+        "Map inherited per-call base_path and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
         "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
       ]
     },
@@ -7035,7 +7282,9 @@
       "source_fingerprint": "b915074530b0b26cfa2e920d4f6291adc332e648c695e72c0890ae7d9f73e9f8",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/nodes.API.List"
+        "gophercloudsdk/clustering/v1/nodes.API.List",
+        "gophercloudsdk/clustering/v1/nodes.WithListHeader",
+        "gophercloudsdk/clustering/v1/nodes.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -7066,6 +7315,32 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
         }
       ],
       "differences": [
@@ -7074,7 +7349,9 @@
         "The selected numeric microversion and protected field/query/header extensions are explicit; null field support remains deployment-defined and no unverified force version gate is invented.",
         "Known local Body filters support recursive object subsets, arrays and exact decimal comparison while keeping JSON boolean and numeric types distinct; arbitrary vendor query keys are explicit server extensions.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/nodes/README.md",
@@ -7082,7 +7359,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map inherited per-call base_path/microversion/headers and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
+        "Map inherited per-call base_path and deprecated proxy JMESPath controls; the tested local cap counts raw rows before local filters and paginated=False stops at the first response.",
         "Compare full inherited Resource field normalization/defaults and query consumption; explicit Go vendor queries currently reach the server rather than Python unknown-key omission."
       ]
     },
@@ -7854,7 +8131,9 @@
       "source_fingerprint": "038bd64486ab36f9144f579769291dfbd7122167903101ca4def11e3c73a5f83",
       "status": "unresolved",
       "go_api": [
-        "gophercloudsdk/clustering/v1/receivers.API.List"
+        "gophercloudsdk/clustering/v1/receivers.API.List",
+        "gophercloudsdk/clustering/v1/receivers.WithListHeader",
+        "gophercloudsdk/clustering/v1/receivers.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -7898,6 +8177,39 @@
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsLimitHintAndExplicitPageSize",
             "api/clustering_resource_list_controls_test.go:TestClusteringResourceListControlsElevenBindingsDefaultForeignGuard"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
+        },
+        {
+          "behavior": "Services>=1.7 and Receiver user>=1.4 gates evaluate the effective per-call client, allowing documented explicit upgrades and rejecting downgrades/default resets without changing source configuration.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestEffectiveVersionGates",
+            "internal/senlin/list_request_test.go:TestListRequestRevalidatesSourceBeforeContinuationAndGatesEffectiveVersion"
+          ]
         }
       ],
       "differences": [
@@ -7905,7 +8217,9 @@
         "Published201/200 strict receiver/receivers envelopes and204 deletion are enforced. Exact JSON Body, Header and StatusCode are retained, nullable action/cluster fields remain distinct from a Senlin action UUID, and channel or incidental Location URLs are never followed.",
         "Owned extension fields/query/headers are explicit Go capabilities rather than Python silently consuming unknown Resource attributes. Concrete/readonly fields and SDK authentication/version/transport headers are protected; null and deployment plugin semantics stay server decisions.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count.",
-        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation."
+        "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/receivers/README.md",
@@ -7914,7 +8228,7 @@
       ],
       "remaining": [
         "Map deprecated proxy JMESPath semantics beyond the tested max_items/paginated controls and known local Body subset filters.",
-        "Compare per-call base_path/microversion/header/query consumption and arbitrary Python sort strings; Go currently checks the published sort key/direction set and provides documented vendor query extensions."
+        "Compare per-call base_path and full query consumption and arbitrary Python sort strings; Go currently checks the published sort key/direction set and provides documented vendor query extensions."
       ]
     },
     {
@@ -8443,7 +8757,9 @@
         "gophercloudsdk/clustering/v1/clusterpolicies.API.InCluster",
         "gophercloudsdk/clustering/v1/clusterpolicies.Scope.List",
         "gophercloudsdk/clustering/v1/clusterpolicies.Scope.All",
-        "gophercloudsdk/clustering/v1/clusterpolicies.WithListFilter"
+        "gophercloudsdk/clustering/v1/clusterpolicies.WithListFilter",
+        "gophercloudsdk/clustering/v1/clusterpolicies.WithListHeader",
+        "gophercloudsdk/clustering/v1/clusterpolicies.WithListMicroversion"
       ],
       "contracts": [
         {
@@ -8511,18 +8827,52 @@
           "tests": [
             "api/clustering_body_filters_test.go:TestClusteringBodyFiltersRawCatalogIDDoesNotFallbackAndBindingValidationPrecedesFilter"
           ]
+        },
+        {
+          "behavior": "Typed List/All owns explicit per-call header and numeric microversion selection without changing the source client. Canonical case-insensitive caller headers override source defaults; reusable option slices and config maps are snapshotted for independent traversals and concurrent sibling calls.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestElevenFacadesWireAndSourceOwnership",
+            "api/clustering_list_request_test.go:TestClusteringListRequestHeadersCasePrecedenceAndConfigSnapshot",
+            "api/clustering_list_request_test.go:TestClusteringListRequestIteratorsReuseAndConcurrentSiblings",
+            "internal/senlin/list_request_test.go:TestListRequestConcurrentCallsKeepHeadersVersionsAndSharedConfiguration"
+          ]
+        },
+        {
+          "behavior": "All pages retain the selected per-call headers/version while authenticated requests use the shared provider live token, including reauthentication replay. Per-page source validation and accepted/native error evidence remain intact; unused rows/links still stop at the existing local cap or first-page boundary.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestPagesFreezeSelectionAndReadLiveProviderToken",
+            "api/clustering_list_request_test.go:TestClusteringListRequestSourceRecheckCancellationAndErrorEvidence",
+            "internal/senlin/list_request_test.go:TestListRequestHeadersVersionAndLiveAuthRemainFixedAcrossPagesAndReauth",
+            "internal/senlin/list_request_test.go:TestListRequestControlsKeepRawCapSinglePageAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Inherited request-control names cannot become vendor query keys through either public query helpers or custom config injection. SDK-owned authentication/version/transport headers, malformed numeric selections, latest, stale explicit source version headers and foreign arguments fail before list HTTP.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestReservedQueriesAndUnsupportedCapabilities",
+            "api/clustering_list_request_test.go:TestClusteringListRequestProtectedHeadersInvalidVersionsAndSourceConflicts",
+            "internal/senlin/list_request_test.go:TestListRequestPreflightKeepsKindAndRejectsControlBypasses"
+          ]
+        },
+        {
+          "behavior": "Per-call list settings retain the once-resolved canonical cluster and apply only to child list requests; the parent resolution and later scoped Get continue using source settings.",
+          "tests": [
+            "api/clustering_list_request_test.go:TestClusteringListRequestBindingScopeAndOtherOperationsUnchanged"
+          ]
         }
       ],
       "differences": [
         "Go confirms and fixes a canonical parent through explicit ID/Name references instead of Python _proxy.py:1078-1081 extracting the supplied cluster ID and interpolating it directly.",
         "Senlin16.0.0 ClusterPolicyController.index whitelists enabled, policy_name, policy_type and sort. Go rejects initial limit/marker even through Resources and follows only same-origin, same-parent collection links preserving initial filters; advertised deployment markers remain allowed. This intentionally does not simulate unsupported stock-server pagination.",
-        "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/header/foreign-argument options and accepts the owned local filter namespace through WithListFilter and concrete-query collisions; stock Senlin vendor support is not promised.",
+        "WithListQuery is a protected, explicit deployment extension and reaches the server; pinned Resource.list discards unknown query keys. Go rejects body/foreign-argument options and accepts owned local-filter and per-call request namespaces through WithListFilter and concrete-query collisions; stock Senlin vendor support is not promised.",
         "Go requires a cluster_policies array, separate valid canonical raw identities and a matching parent, preserving unknown/null/raw JSON fields. Python Resource.list wraps non-array collections, removes self and overlays URI fields on row dictionaries; Go stores fixed URIClusterID separately and uses PolicyID only as the collection identity callback.",
         "Published filters use concrete typed inputs and grammar-checked sort, while null/omission and exact numbers remain visible in Body rather than being hidden by Python Resource bool/dict descriptor conversions.",
         "Go list controls require a non-negative integer MaxItems and optional bool Paginated; max_items/paginated are local option names and cannot be emitted through raw query extensions. Caps count wire rows before local filters, own their state per iteration and do not turn an upper consumption bound into a guaranteed result count. Unlike Python Resource.list max_items, the binding cap sends no limit hint because the audited stock controller whitelists only enabled/policy_name/policy_type/sort.",
         "At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.",
         "Go separates concrete server query inputs from explicit WithListFilter raw Body inputs rather than automatically partitioning Python keyword arguments. Query-capable fields can also be selected for local filtering; only known pinned fields and owned namespaces are accepted.",
-        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation."
+        "Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.",
+        "Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.",
+        "A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options."
       ],
       "documentation": [
         "clustering/v1/clusterpolicies/README.md",
@@ -8530,7 +8880,7 @@
         "clustering/v1/listing/README.md"
       ],
       "remaining": [
-        "Map per-call base_path/microversion/headers and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls limit raw rows locally with no stock-unsupported wire-limit hint.",
+        "Map per-call base_path and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls limit raw rows locally with no stock-unsupported wire-limit hint.",
         "Compare automatic Body/query classification, descriptor defaults/coercion, Python scalar equality and Resource.id alternate-policy_id behavior. Explicit raw Body filters are implemented but Go validates required binding identity before any filter and keeps JSON booleans distinct from numbers.",
         "Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them."
       ]
