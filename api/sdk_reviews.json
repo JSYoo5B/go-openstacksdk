@@ -11003,6 +11003,100 @@
         "Pinned Image.find reaches Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394), which merges the internally seeded Image and applies Resource descriptors/defaults/unknown-property response rules. Native Image.GetResult extraction preserves its own Properties and import headers but does not map that entire Resource response lifecycle.",
         "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) supports RFC Link-header and limit/marker continuation paths. The two searches retain native ImagePage next/base endpoint semantics; those other inherited continuation paths and session controls are not fully mapped."
       ]
+    },
+    {
+      "operation": "python:compute/v2/find_flavor",
+      "source_fingerprint": "2899de1ae5a47757a5c2418c095691c28bcb38e5cdec88c6fabc7fb5831296c4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/flavors.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback",
+        "gophercloudsdk/resource.WithIdentityFindQuery",
+        "gophercloudsdk/resource.WithIdentityFindExtraSpecs"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct find_flavor accepts a string, ignore_missing=True, keyword get_extra_specs=False and query. Safe identities use native GET200 with the flavor envelope and native model/Swap decoding; compatible GET400/403/404 may fall back, with explicit strict, 404-only and GET-only Go policies.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsGETAndExtraSpecsPresence",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsMissingPoliciesAndUnsafeNames",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsPreflightAndNativeGETFailures"
+          ]
+        },
+        {
+          "behavior": "Fallback uses native /flavors/detail and all FlavorPage continuations without an automatic name hint. SDK list-only is_public=None is added only for an absent caller key; direct GET remains the frozen caller query. Repeated and explicit nil/empty query keys retain precedence and raw wire extensions remain observable.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsListDefaultsAndCallerQuery",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsLookupClosesBeforeEnrichment"
+          ]
+        },
+        {
+          "behavior": "Extra specs enrichment defaults to false. Explicit true enriches only a validated direct GET or a fully consumed unique ID-or-name match whose inline ExtraSpecs is nil/empty. It uses the returned canonical ID for native GET200 /os-extra_specs without caller query, clones the Flavor/model map and replaces fetched specs. Nonempty inline specs, missing lookup, ambiguity and late failures produce no enrichment request.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsGETAndExtraSpecsPresence",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsLookupClosesBeforeEnrichment",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsUsesResolvedIDAndOwnsReturnedModel",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsInlineAndNativeNilEmptyDefaults",
+            "connection_find_identity_flavor_test.go:TestConnectionFlavorFindIdentityExtraSpecs"
+          ]
+        },
+        {
+          "behavior": "Extra-specs GET403/404, undeclared status, typed decode, read/transport errors and cancellation remain terminal without another lookup or IgnoreMissing suppression. Native missing/null extra_specs wrappers remain nil maps; the separate GET is not incorrectly gated at inline-field introduction microversion2.61.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsEnrichmentFailuresAreTerminal",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsNativeFailuresRemainTerminal",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsKeepsLiveProviderVersionAndContext"
+          ]
+        },
+        {
+          "behavior": "Bulk/custom options, bool pointers and query maps are frozen across callback phases and concurrent reuse. Generated leaf and handwritten Flavor collections retain the original provider, live token/headers/microversion/HTTP middleware/context and reverse ResourceBase. Extra-spec maps are independent; invalid controls, unsupported capabilities and unsafe GET-only names fail before HTTP.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsSnapshotsConcurrentReuseAndLastWins",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsKeepsLiveProviderVersionAndContext",
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsPreflightAndNativeGETFailures",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsSharesLiveSourceAndFreezesInput",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsRejectsInvalidInputAndCancellationBeforeHTTP",
+            "internal/nativefind/flavor_specs_test.go:TestNativeFlavorExtraSpecsConcurrentCallsReturnIndependentMaps"
+          ]
+        },
+        {
+          "behavior": "SDK-owned list default maps, bool options and enrichment callback are frozen before user/native callbacks; caller nil/empty keys retain precedence. Extra-specs capability and reserved controls fail before HTTP, callback errors/results remain terminal, and ordinary lookup plus secondary-search defaults remain isolated.",
+          "tests": [
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsDefaultsOnlyAffectIdentityLists",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsCapabilityAndQueryPreflight",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsEnrichesValidatedUniqueSuccess",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsListFailuresAndAbsenceNeverEnrich",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsErrorsAndInvalidResultsAreTerminal",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsSnapshotsMetadataOptionsAndCallback",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsConcurrentOwnedOptionReuse",
+            "resource/find_identity_extra_specs_test.go:TestCollectionFindIdentityExtraSpecsDefaultsPreserveOrdinaryAndSecondarySearches"
+          ]
+        },
+        {
+          "behavior": "The generated Flavor Resources bridge corrects ordinary raw status forwarding as well as identity fallback. Ordinary All and explicit Name Find consume their native pages without implicit is_public=None, identity enrichment or extra member GET.",
+          "tests": [
+            "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsOrdinaryCollectionsRetainQueryWithoutIdentityPolicies"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "compute/README.md",
+        "compute/v2/README.md"
+      ],
+      "differences": [
+        "Go exposes SDK-owned typed GetExtraSpecs options and explicit raw wire query. Python list transposes min_ram/min_disk aliases and automatically classifies declared Body fields; Go uses minRam/minDisk and preserves explicit wire extensions instead. Raw get_extra_specs is an SDK control, not a service query.",
+        "Go explicit nil/empty query slices retain key presence, suppress list defaults and omit the wire value; pinned Flavor.list instead converts missing or Python None is_public to the string None. Native missing/null fetched extra_specs remains a nil map, whereas Python fetch_extra_specs defaults a missing wrapper to an empty dict.",
+        "The lookup keeps strict safe nonblank result-ID validation, native Flavor/Swap extraction and native full-page pagination. Details/AllProjects options are unsupported on Flavor; its actual list override has no details parameter, and its default base_path is /flavors/detail. Ordinary Get/List/explicit Ref lookup do not gain identity list defaults or enrichment. The generated Flavor Resources list bridge also fixes whole-map forwarding: ordinary List/All now preserve raw status instead of dropping it."
+      ],
+      "remaining": [
+        "Pinned Flavor.__getattribute__ (openstack/compute/v2/flavor.py:81-98) falls back from id to name to original_name. The native Flavor alias and strict safe-ID validation do not provide that entire Resource identity/alias response behavior.",
+        "Pinned Flavor._max_microversion=2.61 (openstack/compute/v2/flavor.py:48) participates in Resource._get_microversion and fetch_extra_specs automatic selection unless a session default is selected. Native lookup/enrichment preserves configured microversion and does not implement this automatic discovery.",
+        "Pinned Proxy.request and Resource.fetch/_translate_response (openstack/proxy.py:209-268; openstack/resource.py:1780-1828,1338-1394) provide conditional GET cache, seeded Resource merge and descriptor/default/unknown-field conversion that are not fully mapped to this stateless native result lifecycle.",
+        "Pinned Resource.list/_get_next_link (openstack/resource.py:2217-2234,2359-2436) includes query alias/Body local classification, RFC Link-header and limit/marker continuation and per-call session/path controls. Native FlavorPage and fixed detailed-list policy do not implement all of those inherited paths."
+      ]
     }
   ]
 }
