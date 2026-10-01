@@ -50,6 +50,9 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/project_quotas_contracts_test.go`, `api/nova_project_quotas_precision_test.go`, `connection_quotas_test.go` | 고정 project quota, 별도 Keystone 이름 조회·auth scope, zero/-1/force false, singleton 결과·오류·Reset |
 | `api/cinder_project_quotas_contracts_test.go`, `api/cinder_project_quotas_responses_test.go` | Cinder defaults·usage query·DELETE200, 별도 Keystone·recorded auth·고정 target, typed/Extra deep snapshot·core 충돌·큰 정수·raw 응답·오류 |
 | `api/neutron_project_quotas_contracts_test.go`, `api/neutron_project_quotas_projects_test.go`, `connection_project_quotas_test.go` | Neutron details.json·check_limit false·DELETE202/204, 서비스별 Connection 연결·이름/인증/취소, 응답 metadata·snapshot·큰 정수·malformed·권한 오류 |
+| `api/nova_quota_defaults_users_test.go` | 별도 project defaults, 고정 project+user·Keystone user 해석, 사용자 query·retry/reauth snapshot·redirect 범위 보호, 취소·malformed·HTTP 원인 |
+| `api/neutron_quota_defaults_test.go`, `api/neutron_quotas_list_test.go` | 별도 defaults, 단일 override 목록·검증된 project/tenant identity, lazy break·로컬 filter/한도·옵션 소유권·continuation 거부·raw metadata·취소 |
+| `api/octavia_project_quotas_contracts_test.go`, `api/octavia_project_quotas_projects_test.go`, `api/octavia_project_quotas_list_test.go` | 공식 lbaas 경로·전역 defaults 구분·null 상속·native alias, lazy pagination·필터 보존·True/False·cycle/origin·decode 원문, Connection 프로젝트 해석 |
 | `api/heat_stacks_contracts_test.go` | name+ID identity, output query, summary/detail 차이, linked/marker pagination, 고정 대상 waiter·실패/삭제 완료 |
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
