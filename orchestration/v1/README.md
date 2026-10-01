@@ -37,8 +37,8 @@ _ = value
 | `APIVersions` | [apiversions](apiversions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `BuildInfo` | [buildinfo](buildinfo/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Resourcetypes` | [resourcetypes](resourcetypes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `StackEvents` | [stackevents](stackevents/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `StackResources` | [stackresources](stackresources/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `StackEvents` | [stackevents](stackevents/api_generated.go) | `InStack(ctx, ref) / ForStack(identity)`: stack/resource별 이벤트 목록·resource_name+eventID 단건 조회; 이름 Find·변경·대기 없음 |
+| `StackResources` | [stackresources](stackresources/api_generated.go) | `InStack(ctx, ref) / ForStack(identity)`: resource_name 조회·목록·이름 해석·metadata·health·대기; nested 실제 owner 검증 |
 | `Stacks` | [stacks](stacks/api_generated.go) | `Resources() / InStack(ctx, ref) / ForStack(identity)`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `StackTemplates` | [stacktemplates](stacktemplates/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 

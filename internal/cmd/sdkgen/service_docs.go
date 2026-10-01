@@ -120,6 +120,14 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			if record.Kind == "compound_identity" {
 				label = "Resources() / InStack(ctx, ref) / ForStack(identity)"
 			}
+			if record.Kind == "event_log" {
+				policies = append(policies, "`InStack(ctx, ref) / ForStack(identity)`: stack/resource별 이벤트 목록·resource_name+eventID 단건 조회; 이름 Find·변경·대기 없음")
+				continue
+			}
+			if record.Kind == "compound_child" {
+				policies = append(policies, "`InStack(ctx, ref) / ForStack(identity)`: resource_name 조회·목록·이름 해석·metadata·health·대기; nested 실제 owner 검증")
+				continue
+			}
 			features := []string{"ID 조회", "목록"}
 			if record.Find {
 				features = append(features, "이름 조회")

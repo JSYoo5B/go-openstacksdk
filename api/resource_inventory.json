@@ -1245,17 +1245,25 @@
   },
   {
     "package": "gophercloudsdk/orchestration/v1/stackevents",
+    "model": "EventResource",
+    "upstream_model": "Event",
+    "kind": "event_log",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InStack",
+    "parent": "gophercloudsdk/orchestration/v1/stacks"
   },
   {
     "package": "gophercloudsdk/orchestration/v1/stackresources",
-    "find": false,
+    "model": "ResourceView",
+    "upstream_model": "Resource",
+    "kind": "compound_child",
+    "find": true,
     "delete": false,
-    "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "wait": true,
+    "scope": "InStack",
+    "parent": "gophercloudsdk/orchestration/v1/stacks"
   },
   {
     "package": "gophercloudsdk/orchestration/v1/stacks",
@@ -1459,5 +1467,29 @@
     "find": true,
     "delete": false,
     "wait": false
+  },
+  {
+    "package": "gophercloudsdk/accelerator/v2/deviceprofiles",
+    "source": "sdk_owned",
+    "model": "DeviceProfile",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/accelerator/v2/attributes",
+    "source": "sdk_owned",
+    "model": "Attribute",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/accelerator/v2/acceleratorrequests",
+    "source": "sdk_owned",
+    "model": "AcceleratorRequest",
+    "find": false,
+    "delete": true,
+    "wait": true
   }
 ]

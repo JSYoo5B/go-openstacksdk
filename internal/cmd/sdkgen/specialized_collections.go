@@ -6,6 +6,14 @@ var specializedCollections = map[string]collectionRecord{
 	upstreamModule + "/openstack/orchestration/v1/stacks": {
 		Package: "gophercloudsdk/orchestration/v1/stacks", Model: "StackResource", UpstreamModel: "RetrievedStack", Kind: "compound_identity", Find: true, Delete: true, Wait: true,
 	},
+	upstreamModule + "/openstack/orchestration/v1/stackresources": {
+		Package: "gophercloudsdk/orchestration/v1/stackresources", Model: "ResourceView", UpstreamModel: "Resource", Kind: "compound_child", Find: true, Wait: true,
+		Scope: "InStack", Parent: "gophercloudsdk/orchestration/v1/stacks",
+	},
+	upstreamModule + "/openstack/orchestration/v1/stackevents": {
+		Package: "gophercloudsdk/orchestration/v1/stackevents", Model: "EventResource", UpstreamModel: "Event", Kind: "event_log",
+		Scope: "InStack", Parent: "gophercloudsdk/orchestration/v1/stacks",
+	},
 	upstreamModule + "/openstack/sharedfilesystems/v2/shareaccessrules": {
 		Package: "gophercloudsdk/sharedfilesystems/v2/shareaccessrules", Model: "AccessRule", UpstreamModel: "ShareAccess", Delete: true, Wait: true,
 		Scope: "InShare", Parent: "gophercloudsdk/sharedfilesystems/v2/shares",
@@ -44,4 +52,7 @@ var specializedCollections = map[string]collectionRecord{
 var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/accelerator/v2/devices", Source: "sdk_owned", Model: "Device", Wait: true},
 	{Package: "gophercloudsdk/accelerator/v2/deployables", Source: "sdk_owned", Model: "Deployable", Find: true},
+	{Package: "gophercloudsdk/accelerator/v2/deviceprofiles", Source: "sdk_owned", Model: "DeviceProfile", Find: true, Delete: true},
+	{Package: "gophercloudsdk/accelerator/v2/attributes", Source: "sdk_owned", Model: "Attribute", Delete: true},
+	{Package: "gophercloudsdk/accelerator/v2/acceleratorrequests", Source: "sdk_owned", Model: "AcceleratorRequest", Delete: true, Wait: true},
 }
