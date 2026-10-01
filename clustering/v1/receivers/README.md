@@ -13,7 +13,7 @@ Connection을 사용하면 `conn.Clustering(ctx)`가 반환한 서비스의 `Rec
 | `update_receiver(identity, **attrs)` | `Update(ctx, ref, opts, options...)` | PATCH, 200 + receiver |
 | `delete_receiver(identity, ignore_missing=True)` | `Delete(ctx, ref, options...)` | DELETE, 204 |
 | `receivers(**query)` | `List` / `All` | GET `/receivers`, 200 + receivers |
-| `find_receiver(identity, ignore_missing=True)` | `Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+| `find_receiver(identity, ignore_missing=True)` | `FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 
 ## 생성과 응답
 
@@ -135,7 +135,7 @@ Get은 controller identity를 직접 보냅니다. Find/Update/Delete는 `resour
 API.Find는 기본 미존재 `nil,nil`, Resources.Find는 strict이고 `resource.WithMissingError()` /
 `resource.WithIgnoreMissing()`으로 변경합니다. Delete는 기본 미존재를 무시하고 strict 옵션을
 제공하며 Name에서 얻은 wire ID를 검사한 뒤 한 번 삭제합니다. 403/409나 잘못된 응답 ID를
-미존재로 취급하지 않습니다. Python Find의 ID-first와 400/403/404 fallback 전체는 미결입니다.
+미존재로 취급하지 않습니다. 문자열의 GET-first와 400/403/404 목록 fallback은 별도 `FindIdentity`가 처리합니다. [자동 조회](../finding/README.md)를 참고합니다.
 Receiver에는 status polling 계약이 없으므로 Resources에 status binding을 만들지 않습니다.
 
 근거는 pinned openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
@@ -190,3 +190,27 @@ Go 확장이며 Python unknown query 생략과 구별합니다.
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+## 문자열 이름/ID 자동 조회
+
+Python `find_receiver(identity, ignore_missing=False)`는 `FindIdentity`와 `WithFindIgnoreMissing(false)`로 호출합니다. SDK가 GET-first, literal 이름 query, 모든 advertised 페이지의 정확한 ID/이름 일치와 중복·후속 오류를 처리합니다. 기본 미존재는 `nil, nil`이며 아래 예제는 strict입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/receivers"
+)
+
+func FindReceiverStrict(ctx context.Context, conn *sdk.Connection) (*receivers.Receiver, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    return service.Receivers.FindIdentity(ctx, "scale_out",
+        receivers.WithFindIgnoreMissing(false))
+}
+```
+
+`WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.

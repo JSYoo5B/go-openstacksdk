@@ -11,7 +11,7 @@ Connection은 인증된 client와 선택한 numeric microversion을 공유합니
 | `clusters(**query)` | `Clusters.List` / `All` | GET `/clusters`, 200 |
 | `update_cluster(identity, **attrs)` | `Clusters.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + cluster와 Location |
 | `delete_cluster(identity, ignore_missing=True, force_delete=False)` | `Clusters.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
-| `find_cluster(identity, ignore_missing=True)` | `Clusters.Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+| `find_cluster(identity, ignore_missing=True)` | `Clusters.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `scale_in_cluster` / `scale_out_cluster` | `ScaleIn` / `ScaleOut` | POST `/clusters/{id}/actions`, 202 |
 | `resize_cluster` | `Resize` | 같은 경로, `resize` 매개변수 |
 | `add_nodes_to_cluster` / `remove_nodes_from_cluster` | `AddNodes` / `RemoveNodes` | 같은 경로, `add_nodes` / `del_nodes` |
@@ -122,7 +122,7 @@ marker를 지원하며 빈 페이지에서 멈춥니다. consumer가 모델을 �
 사용하고, collection origin/path와 필터를 유지하며 순환·취소·break를 처리합니다.
 API.Find는 미존재를 기본적으로 `nil, nil`로 반환하고 `resource.WithMissingError()`로
 변경합니다. Resources.Find는 공통 strict 기본값을 사용합니다. Name은 정확한 검색이며
-중복을 오류로 반환합니다. Python의 combined-string ID-first GET fallback은 별도 과제입니다.
+중복을 오류로 반환합니다. `FindIdentity`의 GET-first·400/403/404 목록 fallback은 [자동 조회](../finding/README.md)에서 설명합니다.
 
 ## 비동기 삭제
 
@@ -375,3 +375,27 @@ Go 확장이며 Python unknown query 생략과 구별합니다.
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+## 문자열 이름/ID 자동 조회
+
+Python `find_cluster(identity, ignore_missing=False)`는 `FindIdentity`와 `WithFindIgnoreMissing(false)`로 호출합니다. SDK가 GET-first, literal 이름 query, 모든 advertised 페이지의 정확한 ID/이름 일치와 중복·후속 오류를 처리합니다. 기본 미존재는 `nil, nil`이며 아래 예제는 strict입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/clusters"
+)
+
+func FindClusterStrict(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    return service.Clusters.FindIdentity(ctx, "workers",
+        clusters.WithFindIgnoreMissing(false))
+}
+```
+
+`WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.

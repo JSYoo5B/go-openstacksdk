@@ -11,7 +11,7 @@ Node.ID는 Senlin node이며 PhysicalID는 실제 서버 등 underlying resource
 | `nodes(**query)` | `Nodes.List` / `All` | GET `/nodes`, 200 |
 | `update_node(identity, **attrs)` | `Nodes.Update(ctx, ref, opts, options...)` | 객체 PATCH, 202 + node와 Location |
 | `delete_node(identity, ignore_missing=True, force_delete=False)` | `Nodes.Delete(ctx, ref, options...)` | DELETE, 202 + action Submission |
-| `find_node(identity, ignore_missing=True)` | `Nodes.Find(ctx, ref, options...)` | 명시 ID 조회 또는 정확한 Name 검색 |
+| `find_node(identity, ignore_missing=True)` | `Nodes.FindIdentity(ctx, identity, options...)` | GET 후 400·403·404 목록 fallback, 정확 ID 또는 이름 검색 |
 | `check_node` / `recover_node` | `Check` / `Recover` | POST `/nodes/{id}/actions`, 202 |
 | `perform_operation_on_node` | `PerformOperation` | POST `/nodes/{id}/ops`, 202, 1.4 이상 |
 
@@ -290,3 +290,27 @@ Go 확장이며 Python unknown query 생략과 구별합니다.
 수정하지 않습니다. 실제 wire 헤더·버전 선택, 재순회·페이지·인증 정책과 Python 비교 예제는
 [Senlin 목록 호출 옵션](../listing/README.md#목록-호출별-헤더와-버전)을 참고합니다.
 `headers`, `microversion`, `base_path`를 `WithListQuery`로 전달하면 HTTP 전에 오류입니다.
+
+## 문자열 이름/ID 자동 조회
+
+Python `find_node(identity, ignore_missing=False)`는 `FindIdentity`와 `WithFindIgnoreMissing(false)`로 호출합니다. SDK가 GET-first, literal 이름 query, 모든 advertised 페이지의 정확한 ID/이름 일치와 중복·후속 오류를 처리합니다. 기본 미존재는 `nil, nil`이며 아래 예제는 strict입니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/clustering/v1/nodes"
+)
+
+func FindNodeStrict(ctx context.Context, conn *sdk.Connection) (*nodes.Node, error) {
+    service, err := conn.Clustering(ctx)
+    if err != nil { return nil, err }
+    return service.Nodes.FindIdentity(ctx, "worker_1",
+        nodes.WithFindIgnoreMissing(false))
+}
+```
+
+`WithFindFallback`로 404-only·GET-only 정책을 선택하고 `WithFindHeader`·`WithFindMicroversion`으로 GET과 fallback의 동일한 호출 설정을 지정합니다. 원본 client·다른 호출은 변경하지 않습니다. [공통 FindIdentity 계약과 Python/Go 차이](../finding/README.md)에 입력 segment 정책·응답 canonical ID·오류 근거·옵션 snapshot을 설명합니다. 기존 `Find(ctx, resource.ID/Name(...))`는 명시한 경로와 기존 옵션을 유지합니다.
