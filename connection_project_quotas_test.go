@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	tokens "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	sdk "gophercloudsdk"
+	infraquotas "gophercloudsdk/containerinfra/v1/quotas"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/resource"
 )
@@ -26,6 +27,33 @@ type quotaConnectionCase struct {
 
 func quotaConnectionCases() []quotaConnectionCase {
 	return []quotaConnectionCase{
+		{
+			name: "Magnum", service: sdk.ContainerInfra, endpoint: "/magnum/v1", quotaPath: "/magnum/v1/quotas/resolved/Cluster", body: `{"id":1,"project_id":"wire-project","resource":"Cluster","hard_limit":8}`,
+			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {
+				parent, err := c.ContainerInfraProjectQuotas(ctx, ref)
+				if err != nil {
+					return "", nil, err
+				}
+				scope, err := parent.ForResource(infraquotas.Cluster)
+				if err != nil {
+					return "", nil, err
+				}
+				return parent.ProjectID(), func(ctx context.Context) error {
+					value, err := scope.Get(ctx)
+					if err == nil && (value.RequestProjectID != "resolved" || value.RequestResource != infraquotas.Cluster || value.ProjectID != "wire-project" || value.HardLimit != 8) {
+						return errors.New("fixed quota pair changed")
+					}
+					return err
+				}, nil
+			},
+			current: func(c *sdk.Connection, ctx context.Context) (string, error) {
+				scope, err := c.CurrentContainerInfraProjectQuotas(ctx)
+				if err != nil {
+					return "", err
+				}
+				return scope.ProjectID(), nil
+			},
+		},
 		{
 			name: "Manila", service: sdk.SharedFileSystem, endpoint: "/manila/v2/admin", quotaPath: "/manila/v2/admin/quota-sets/resolved", body: `{"quota_set":{"id":"wire-project","shares":8}}`,
 			bind: func(c *sdk.Connection, ctx context.Context, ref resource.Ref) (string, func(context.Context) error, error) {

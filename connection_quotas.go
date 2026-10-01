@@ -4,6 +4,7 @@ import (
 	"context"
 	blockquotas "gophercloudsdk/blockstorage/v3/quotasets"
 	"gophercloudsdk/compute/v2/quotasets"
+	infraquotas "gophercloudsdk/containerinfra/v1/quotas"
 	dnsquotas "gophercloudsdk/dns/v2/quotas"
 	loadbalancerquotas "gophercloudsdk/loadbalancer/v2/quotas"
 	networkquotas "gophercloudsdk/network/v2/extensions/quotas"
@@ -199,6 +200,38 @@ func (c *Connection) DNSProjectQuotas(ctx context.Context, project resource.Ref)
 // CurrentDNSProjectQuotas uses the recorded Keystone project.
 func (c *Connection) CurrentDNSProjectQuotas(ctx context.Context) (*dnsquotas.ProjectQuotaScope, error) {
 	service, err := c.DNSV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.CurrentProject(ctx)
+}
+
+// ContainerInfraProjectQuotas fixes the project before choosing a Magnum quota
+// resource with ForResource. Exact project names use a separate Keystone client.
+func (c *Connection) ContainerInfraProjectQuotas(ctx context.Context, project resource.Ref) (*infraquotas.ProjectQuotaScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.ContainerInfraV1(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Quotas.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Quotas.InProject(ctx, project, infraquotas.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentContainerInfraProjectQuotas uses the recorded Keystone project.
+func (c *Connection) CurrentContainerInfraProjectQuotas(ctx context.Context) (*infraquotas.ProjectQuotaScope, error) {
+	service, err := c.ContainerInfraV1(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -46,6 +46,10 @@ var specializedCollections = map[string]collectionRecord{
 		Package: "gophercloudsdk/blockstorage/v3/limits", Model: "LimitsResource", UpstreamModel: "Limits", Kind: "project_limits",
 		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
 	},
+	upstreamModule + "/openstack/containerinfra/v1/quotas": {
+		Package: "gophercloudsdk/containerinfra/v1/quotas", Model: "QuotaResource", UpstreamModel: "Quotas", Kind: "project_resource_quota",
+		Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects",
+	},
 	upstreamModule + "/openstack/objectstorage/v1/containers": {
 		Package: "gophercloudsdk/objectstorage/v1/containers", Model: "ContainerResource", UpstreamModel: "Container", Find: true, Delete: true,
 	},

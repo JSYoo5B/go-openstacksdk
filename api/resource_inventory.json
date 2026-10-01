@@ -442,10 +442,14 @@
   },
   {
     "package": "gophercloudsdk/containerinfra/v1/quotas",
+    "model": "QuotaResource",
+    "upstream_model": "Quotas",
+    "kind": "project_resource_quota",
     "find": false,
     "delete": false,
     "wait": false,
-    "issue": "requires a scoped or specialized resource binding"
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
     "package": "gophercloudsdk/db/v1/configurations",
