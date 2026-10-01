@@ -12,6 +12,18 @@ the actual singleton operations. Quotas do not have `List`, `Find`, or `Wait`.
 | Quota resource fetch using `/defaults` | `scope.Defaults(ctx)` |
 | Quota resource fetch using `/detail`, API 2.25+ | `scope.Detail(ctx)` |
 
+The Manila API also supports a fixed user or share type within a project. The
+pinned Python proxy does not expose these as separate scope helpers; passing
+`user_id` or `share_type` to its `get_quota_set` does not forward those queries.
+The Go scopes call the documented REST selectors directly.
+
+| Manila REST operation | Go SDK |
+| --- | --- |
+| `GET/PUT/DELETE /quota-sets/{project}?user_id={user}` | `scope.InUser(ctx, resource.ID(user))`, then `Get`/`Update`/`Reset` |
+| `GET /quota-sets/{project}/detail?user_id={user}` | `userScope.Detail(ctx)` |
+| `GET/PUT/DELETE /quota-sets/{project}?share_type={type}` | `scope.InShareType(ctx, resource.ID(type))`, then `Get`/`Update`/`Reset` |
+| `GET /quota-sets/{project}/detail?share_type={type}` | `typeScope.Detail(ctx)` |
+
 Python's pinned `get_quota_set(project, **query)` implementation calls `fetch`
 without forwarding `query`. This SDK uses the documented `/detail` operation
 for usage, reservations and limits rather than inventing `usage=true`.
@@ -53,6 +65,54 @@ Keystone v3 client supplied through `WithIdentityClient`. Exact names are resolv
 across all pages; missing, ambiguous or invalid IDs fail before a Manila request.
 `CurrentProject(ctx)` reads the recorded Keystone v2/v3 authentication result.
 Manual-token, domain and system authentication need an explicit project ID.
+
+`InUser` inherits the project's Keystone client for exact user names and accepts
+a `WithIdentityClient` override. `InShareType` resolves exact names using the
+Manila service's existing share-type resource collection. Both explicit child
+IDs avoid lookup HTTP. Share-type scopes require API 2.39 before a name lookup
+or any quota operation; user detail requires API 2.25. The server enforces the
+microversions for individual newer quota fields.
+
+```go
+import (
+    "context"
+
+    "github.com/gophercloud/gophercloud/v2"
+    "gophercloudsdk/resource"
+    "gophercloudsdk/sharedfilesystems/v2/quotasets"
+)
+
+func manageScopedQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
+    parent, err := quotasets.New(client).InProject(ctx, resource.ID("project-id"))
+    if err != nil {
+        return err
+    }
+    user, err := parent.InUser(ctx, resource.ID("user-id"))
+    if err != nil {
+        return err
+    }
+    count := int64(10)
+    if _, err := user.Update(ctx, quotasets.UpdateOpts{Shares: &count}); err != nil {
+        return err
+    }
+    shareType, err := parent.InShareType(ctx, resource.Name("gold")) // API 2.39+
+    if err != nil {
+        return err
+    }
+    quota, err := shareType.Get(ctx)
+    if err != nil {
+        return err
+    }
+    _ = quota.ShareTypeID // resolved target, separate from quota.ID
+    return nil
+}
+```
+
+Child scopes use composition with a private binding, so they cannot expose a
+project-wide reset through embedded methods. They expose `Get`, `Detail`,
+`Update` and `Reset`; defaults remain a project operation. Their fixed query
+contains exactly one of `user_id` and `share_type`. Share networks are quotas
+for projects/users and cannot be updated through a share-type scope.
 
 The endpoint's catalog project and the target quota project remain distinct.
 The configured service client's resource base is retained; no project is guessed
