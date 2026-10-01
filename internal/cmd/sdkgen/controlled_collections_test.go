@@ -164,12 +164,12 @@ func(ListMembersOpts)ToMembersListQuery()(string,error){return "",nil}`
 	if nodeText(private.Type.Params.List[1].Type) != "string" || nodeText(private.Type.Params.List[2].Type) != "resource.ListControl" {
 		t.Fatalf("parent/control signature changed:\n%s", emitted)
 	}
-	for _, fragment := range []string{`s.api.GetMember(ctx, s.parentID, string(id))`, `s.api.listMembersWithControl(ctx, s.parentID, control, options...)`, `q.Del("status")`, `v.ProvisioningStatus`} {
+	for _, fragment := range []string{`s.api.GetMember(ctx, s.parentID, string(id))`, `s.api.listMembersWithControl(ctx, s.parentID, control, options...)`, `LocalStatus: true`, `v.ProvisioningStatus`} {
 		if !strings.Contains(string(adapter), fragment) {
 			t.Fatalf("member scope lost %q:\n%s", fragment, adapter)
 		}
 	}
-	if strings.Contains(string(adapter), "s.api.ListMembers(") {
+	if strings.Contains(string(adapter), "s.api.ListMembers(") || strings.Contains(string(adapter), `q.Del("status")`) {
 		t.Fatalf("member scope bypasses controls:\n%s", adapter)
 	}
 }

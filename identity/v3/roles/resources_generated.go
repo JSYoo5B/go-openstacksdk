@@ -30,7 +30,6 @@ func (a *API) newResources() *resource.Collection[Role] {
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Role, error] {
 			q = maps.Clone(q)
-			q.Del("status")
 			options := []ListOption{func(config *request.Config[ListOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {

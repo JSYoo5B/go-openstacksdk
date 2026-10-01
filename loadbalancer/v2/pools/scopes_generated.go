@@ -51,10 +51,10 @@ func (s *MemberScope) newResources() *resource.Collection[Member] {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
-		Delete: func(ctx context.Context, id string) error { return s.api.DeleteMember(ctx, s.parentID, string(id)) },
+		LocalStatus: true,
+		Delete:      func(ctx context.Context, id string) error { return s.api.DeleteMember(ctx, s.parentID, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Member, error] {
 			q = maps.Clone(q)
-			q.Del("status")
 			options := []ListMembersOption{func(config *request.Config[ListMembersOpts]) error {
 				config.Query = make(url.Values, len(q))
 				for key, values := range q {

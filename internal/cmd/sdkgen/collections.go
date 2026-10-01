@@ -331,6 +331,9 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	}
 	if plan.status != "" {
 		e.printf("Status:func(v *%s)string{return fmt.Sprint(v.%s)},\nFailed:func(status string)bool{status=strings.ToLower(status);return strings.HasPrefix(status,\"error\")||strings.HasSuffix(status,\"fail\")||strings.HasSuffix(status,\"failed\")||status==\"killed\"},\n", plan.modelName, plan.status)
+		if identityCollectionEnabled(e.pkg, plan, len(parents)) && plan.statusQuery == "" {
+			e.printf("LocalStatus:true,\n")
+		}
 	}
 	if plan.deleter != nil {
 		policy := returnPolicy(plan.deleter.Type().(*types.Signature))
@@ -354,7 +357,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.printf("if value:=q.Get(\"name\");value!=\"\"{q.Set(%q,value);q.Del(\"name\")}\n", plan.nameQuery)
 	}
 	if plan.statusQuery == "" {
-		if !identityFlavorEnabled(e.pkg, plan, len(parents)) && !identityRawListEnabled(e.pkg, plan, len(parents)) {
+		if !identityCollectionEnabled(e.pkg, plan, len(parents)) {
 			e.printf("q.Del(\"status\")\n")
 		}
 	} else if plan.statusQuery != "status" {
