@@ -65,10 +65,11 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
 | `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
 | `api/share_access_rules_scope_test.go`, `api/share_access_rules_errors_test.go` | Manila2.45/2.82 access rule 조회·action·잠금, share 일치·부모404/403 보존, 취소·waiter |
-| `resource/metadata_test.go`, `internal/rest/response_test.go`, `internal/rest/list_test.go` | 추가 JSON·null·생략·정확한 숫자, 응답 header 소유권·accepted 오류 증거, 고정 URL·retry/reauth·origin, lazy break·marker/link 순환·query 보존·명시 paging 정책 |
+| `resource/metadata_test.go`, `internal/rest/response_test.go`, `internal/rest/list_test.go`, `internal/rest/collection_validation_test.go` | 추가 JSON·null·생략·정확한 숫자, 응답 header 소유권·accepted 오류 증거, 고정 URL·retry/reauth·origin, lazy break·marker/link 순환·query 보존·명시 paging 정책, 서비스 row invariant 실패의 단건·전체 page 증거 |
 | `connection_sdk_owned_test.go`, `connection_sdk_resources_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Senlin·Masakari catalog root/version/project/proxy, raw escaped tenant·Masakari discovery, 공유 인증·캐시·취소·microversion, typed 서비스 연결·singleton/list-only 생성 정책 |
 | `api/instanceha_segments_test.go`, `api/instanceha_hosts_test.go` | segment UUID·DB ID 구별, enabled1.2·false·snapshot, 고정 segment host·부모 이름 1회 해석, POST202/201·PUT200·DELETE204, exact 이름·페이지·HTTP 오류·취소 |
 | `api/instanceha_notifications_test.go`, `api/instanceha_vmoves_test.go` | notification UUID·payload/timestamp, raw workflow 숫자, 고정 notification scope·VM move1.3, 상태 polling·실패·취소, 부모와 server identity 구별·accepted 응답 증거 |
+| `api/instanceha_wait_contracts_test.go` | 네 Masakari waiter facade의 UUID 경로·고정 부모·상태 없는 모델, 실제 outgoing deadline과 기본값·override, 버전 재검사·삭제 GET·실패 목록·취소·오류 원문 |
 | `api/clustering_discovery_test.go`, `api/clustering_read_test.go` | build-info singleton·type 이름/schema·profile ops1.4, action epoch/target·event level string/숫자/null/생략·큰 정수·반복 filter snapshot, service1.7/list-only, 페이지·strict envelope·HTTP 오류 |
 | `internal/rest/list_short_page_test.go`, `api/clustering_read_test.go` | 명시 limit에서 짧은 페이지 뒤에도 wire ID marker 유지, consumer 모델 변경·break·no-limit·빈 페이지·순환 정책 |
 | `internal/senlin/mutation_test.go`, `internal/senlin/filter_test.go`, `internal/senlin/query_test.go` | wrapped/flat body·optional JSON 생략/null/빈 객체, snapshot·원문 숫자·SDK 소유 field/header 보호, 로컬 재귀 subset·배열·타입·정확한 decimal/거대 지수 비교, sort grammar와 별도 key allowlist |
@@ -90,7 +91,6 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/clustering_receivers_test.go` | 동기 POST201·GET/PATCH/List200·DELETE204, webhook/message/vendor type·nullable cluster/action·raw actor/params/channel, user wire1.4·Resources/후속 page gate, lookup 전 snapshot·version 재검사, short page·로컬 filter의 wire marker, 다중 페이지 Find·strict/ignore404·accepted 증거·native/context 오류 |
 | `api/clustering_cluster_policy_commands_test.go` | policy_attach/detach/update의 required body identity·GET 생략·버전 gate 없음, enabled 생략/false/true/null·독립 snapshot, parent lookup 전 body/header 고정·source 재검사, typed/header/query 보호, strict202 action/Location·원문/native 오류 |
 | `connection_senlin_receivers_policy_test.go` | Receiver와 정책 명령의 공유 client·최신 token·선택1.4·reverse prefix, user/global_project=false, 동기 응답의 incidental Location 미해석·202 이후 추가 조회 없음 |
-
 | `api/clustering_wait_contracts_test.go` | 9개 facade·기본status/unlimited/ERROR와delete120초·실제요청deadline/override/common5분, attr preflight·target우선·4status/5nostatus 종결, callback/cancel·Name1회·고정ID·token/source/header 재검사, missing/duplicate/later403·native/transport/malformed200 증거 |
 | `connection_senlin_wait_test.go` | 공유 provider의 polling 중 token교체·선택1.13·reverse prefix, 응답 ID 변경에도 고정 route, receiver404 완료·channel/action/DELETE 미호출 |
 

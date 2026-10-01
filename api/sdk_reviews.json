@@ -7765,6 +7765,102 @@
         "Provide parent-scoped ClusterPolicy wait APIs after the fixed-cluster binding resource is implemented; nine flat fetchable APIs do not cover that Resource surface.",
         "Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path."
       ]
+    },
+    {
+      "operation": "python:instance_ha/v1/wait_for_status",
+      "source_fingerprint": "dcfa6ceb0c608162bff41b263913033344b46c64a6c2472d6765851a270ff4f8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/notifications.API.WaitForStatus",
+        "gophercloudsdk/instanceha/v1/segments.API.WaitForStatus",
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.WaitForStatus",
+        "gophercloudsdk/instanceha/v1/vmoves.NotificationScope.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "Four typed facades preserve fixed UUID routes, parent scopes and actual HTTP evidence. Notification and VMove use status, while Segment and Host require an explicit exported string attribute before status polling. Deletion observes404 or declared deleted status without submitting DELETE or following Location.",
+          "tests": [
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures"
+          ]
+        },
+        {
+          "behavior": "Instance-ha proxy status defaults are unlimited SDK time, ERROR-only failures and2-second intervals, with target precedence and caller replacement. Delete defaults to120seconds. Actual outgoing request deadlines prove parent/override policy while Resources.Wait keeps5minutes. VMove polling rechecks1.3 before every GET; callbacks and errors stop further requests.",
+          "tests": [
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Explicit Ref returns fresh typed models rather than mutating a cached Python Resource; WaitForDelete returns error instead of the original Resource pointer. Segment/Host names use exact lookup once, while Notification/VMove name lookup is unsupported.",
+        "Go uses notification_uuid/uuid route identities rather than database id, preserves fixed parent scope and never retargets polling from response IDs. Pinned inherited Python Resource identity behavior is documented separately.",
+        "Go requires nonempty status, positive intervals and exported typed string attributes. Nullable Python targets/attributes, interval None/zero, arbitrary Resource/custom attrs and falsy successful fetches have distinct semantics.",
+        "HTTP contexts carry deadlines and cancellation priority. Strict success-envelope decoding preserves ResponseError evidence and does not trigger an automatic resend; nested workflow progress is not synthesized as a top-level callback percentage."
+      ],
+      "documentation": [
+        "instanceha/v1/waiting/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Complete comparison and implementation of cached Resource immediate-return/fetch mutation lifecycle, arbitrary Resource/custom typed attribute inputs and deletion original-resource return; this review verifies the documented stateless UUID Ref polling path."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/wait_for_delete",
+      "source_fingerprint": "79816ec64e4f83dbfbcfd7c00fc68af7cf69ba1329353e6e657466b7f6777633",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/notifications.API.WaitForDelete",
+        "gophercloudsdk/instanceha/v1/segments.API.WaitForDelete",
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.WaitForDelete",
+        "gophercloudsdk/instanceha/v1/vmoves.NotificationScope.WaitForDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Four typed facades preserve fixed UUID routes, parent scopes and actual HTTP evidence. Notification and VMove use status, while Segment and Host require an explicit exported string attribute before status polling. Deletion observes404 or declared deleted status without submitting DELETE or following Location.",
+          "tests": [
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures"
+          ]
+        },
+        {
+          "behavior": "Instance-ha proxy status defaults are unlimited SDK time, ERROR-only failures and2-second intervals, with target precedence and caller replacement. Delete defaults to120seconds. Actual outgoing request deadlines prove parent/override policy while Resources.Wait keeps5minutes. VMove polling rechecks1.3 before every GET; callbacks and errors stop further requests.",
+          "tests": [
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement",
+            "api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Explicit Ref returns fresh typed models rather than mutating a cached Python Resource; WaitForDelete returns error instead of the original Resource pointer. Segment/Host names use exact lookup once, while Notification/VMove name lookup is unsupported.",
+        "Go uses notification_uuid/uuid route identities rather than database id, preserves fixed parent scope and never retargets polling from response IDs. Pinned inherited Python Resource identity behavior is documented separately.",
+        "Go requires nonempty status, positive intervals and exported typed string attributes. Nullable Python targets/attributes, interval None/zero, arbitrary Resource/custom attrs and falsy successful fetches have distinct semantics.",
+        "HTTP contexts carry deadlines and cancellation priority. Strict success-envelope decoding preserves ResponseError evidence and does not trigger an automatic resend; nested workflow progress is not synthesized as a top-level callback percentage."
+      ],
+      "documentation": [
+        "instanceha/v1/waiting/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Complete comparison and implementation of cached Resource immediate-return/fetch mutation lifecycle, arbitrary Resource/custom typed attribute inputs and deletion original-resource return; this review verifies the documented stateless UUID Ref polling path."
+      ]
     }
   ]
 }
