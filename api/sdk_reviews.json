@@ -9863,6 +9863,13 @@
             "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesEmitFallbackOnlyAndExplicitInventory",
             "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesNativeDeclarationAndReceiverGuards"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
@@ -10004,6 +10011,13 @@
             "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesEmitFallbackOnlyAndExplicitInventory",
             "internal/cmd/sdkgen/identity_modes_test.go:TestIdentityListModesNativeDeclarationAndReceiverGuards"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
@@ -10092,6 +10106,13 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
@@ -10179,6 +10200,13 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal",
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
+          ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
         }
       ],
@@ -10269,6 +10297,19 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
+        },
+        {
+          "behavior": "Fixed-pool Member uses existing LocalStatus policy for typed WithStatus: wire status is omitted, filtering remains local and raw cap precedes that filter. Raw WithQuery(status) alone remains wire-only. Combining typed and raw status keeps the activated local filter and compares the final option value in either order.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityMemberWireAndTypedStatusRemainSeparate"
+          ]
         }
       ],
       "differences": [
@@ -10276,7 +10317,8 @@
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
         "The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.",
-        "Pinned find_member (openstack/load_balancer/v2/_proxy.py:542-569) exposes only name_or_id, pool and ignore_missing; explicit Go wire Query and fallback-policy controls are extensions."
+        "Pinned find_member (openstack/load_balancer/v2/_proxy.py:542-569) exposes only name_or_id, pool and ignore_missing; explicit Go wire Query and fallback-policy controls are extensions.",
+        "The fixed Member collection now forwards explicit raw wire status while typed WithStatus retains local filtering. Mixed typed/raw status uses the last value for the activated local filter; it is not the wire-only policy of raw query alone."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10362,6 +10404,13 @@
           "behavior": "The cached Connection high-level Network collection uses the same dual-phase frozen query, literal name hint and default/strict logical missing policy as the generated facade.",
           "tests": [
             "connection_find_identity_test.go:TestConnectionFindIdentitySharesPolicyAcrossHighLevelResources"
+          ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
         }
       ],
@@ -10451,13 +10500,21 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned declaration (openstack/network/v2/_proxy.py:7487-7514) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+        "Pinned declaration (openstack/network/v2/_proxy.py:7487-7514) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10545,13 +10602,21 @@
           "tests": [
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned declaration (openstack/identity/v3/_proxy.py:1063-1084) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1063-1084) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10639,13 +10704,21 @@
           "tests": [
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned declaration (openstack/identity/v3/_proxy.py:1379-1400) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1379-1400) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10733,13 +10806,21 @@
           "tests": [
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned declaration (openstack/identity/v3/_proxy.py:782-803) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+        "Pinned declaration (openstack/identity/v3/_proxy.py:782-803) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10821,13 +10902,21 @@
             "internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP",
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned find_domain (openstack/identity/v3/_proxy.py:259-276) accepts only string name_or_id and ignore_missing. Those direct inputs are implemented; Go Query and fallback-policy controls are extensions, not missing Python Resource inputs or **query arguments."
+        "Pinned find_domain (openstack/identity/v3/_proxy.py:259-276) accepts only string name_or_id and ignore_missing. Those direct inputs are implemented; Go Query and fallback-policy controls are extensions, not missing Python Resource inputs or **query arguments.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10914,13 +11003,21 @@
           "tests": [
             "api/find_identity_identity_network_test.go:TestNativeFindIdentityKeystoneDomainFiltersAndCrossDomainDuplicates"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
-        "Pinned declaration (openstack/identity/v3/_proxy.py:1743-1764) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors."
+        "Pinned declaration (openstack/identity/v3/_proxy.py:1743-1764) forwards **query into Resource.find/fetch. Go provides frozen wire query in both phases without silently inferring a domain or converting Body descriptors.",
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
       ],
       "documentation": [
         "docs/finding-identities.md",
@@ -10986,6 +11083,13 @@
             "api/find_identity_images_test.go:TestNativeFindIdentityImagesQuerySnapshotsAndConcurrentReuse",
             "api/find_identity_images_test.go:TestNativeFindIdentityImagesKeepsLiveProviderHeadersAndCallerContext",
             "connection_find_identity_image_test.go:TestConnectionImageFindIdentityHiddenSearch"
+          ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
         }
       ],
@@ -11079,6 +11183,13 @@
           "tests": [
             "api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsOrdinaryCollectionsRetainQueryWithoutIdentityPolicies"
           ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
+          ]
         }
       ],
       "documentation": [
@@ -11142,6 +11253,13 @@
           "behavior": "Ordinary Resources.List/All preserve explicit raw status/fields/shared/vendor query and native paging while MaxItems applies before local name filtering and Paginated(false) stops continuation without a wire limit. Explicit Ref ID/Name lookup remains separate, with no automatic identity defaults or member lookup added to ordinary lists.",
           "tests": [
             "api/find_identity_network_extensions_test.go:TestNativeFindIdentityNetworkExtensionsOrdinaryCollectionsQueriesAndControls"
+          ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
         }
       ],
@@ -11219,6 +11337,13 @@
             "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsContinuationAndFailuresAreTerminal",
             "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsInvalidSourceContextAndControlBeforeHTTP",
             "internal/nativefind/security_groups_test.go:TestNativeSecurityGroupsConcurrentReuseHasOwnedRowsAndQuery"
+          ]
+        },
+        {
+          "behavior": "Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.",
+          "tests": [
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
+            "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
         }
       ],
