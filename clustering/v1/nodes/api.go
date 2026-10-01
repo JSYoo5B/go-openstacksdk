@@ -46,7 +46,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Node] {
 		Metadata: func(value *Node) *resource.Metadata { return &value.Metadata },
 		Validate: func(ctx context.Context) error { return senlin.Validate(ctx, client) }, ValidateID: senlin.Identifier,
 		ValidateQuery: func(_ context.Context, query url.Values) error { return senlin.SortGrammar(query.Get("sort")) },
-		Paging: rest.PagePolicy[Node]{HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true, Marker: func(value *Node) (string, error) {
+		Paging: rest.PagePolicy[Node]{MaxItemsLimitHint: true, StopOnEmptyPage: true, HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true, Marker: func(value *Node) (string, error) {
 			if value == nil {
 				return "", fmt.Errorf("%w: missing node pagination row", resource.ErrInvalidOption)
 			}
@@ -194,7 +194,7 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, 
 			yield(nil, request.Wrap("List", "clustering.nodes", err))
 			return
 		}
-		for value, err := range rest.List(ctx, spec(a.RawClient()), query) {
+		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if err != nil {
 				yield(nil, request.Wrap("List", "clustering.nodes", err))
 				return

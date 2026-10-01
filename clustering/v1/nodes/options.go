@@ -32,6 +32,10 @@ type UpdateOpts struct {
 type GetOpts struct{ Details *bool }
 
 type ListOpts struct {
+	// MaxItems counts wire rows before local filtering; zero is unlimited.
+	MaxItems int
+	// Paginated nil uses all pages; an explicit false returns one page.
+	Paginated     *bool
 	Limit         int
 	Marker        string
 	Name          string
@@ -97,8 +101,23 @@ func WithUpdateHeader(key, value string) UpdateOption {
 func WithDeleteHeader(key, value string) DeleteOption {
 	return request.WithHeader[DeleteOpts](key, value)
 }
-func WithGetHeader(key, value string) GetOption  { return request.WithHeader[GetOpts](key, value) }
-func WithGetQuery(key, value string) GetOption   { return request.WithQuery[GetOpts](key, value) }
+func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
+func WithGetQuery(key, value string) GetOption  { return request.WithQuery[GetOpts](key, value) }
+
+// WithListMaxItems limits wire rows before local filtering. Zero is unlimited.
+func WithListMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+// WithListPaginated controls continuation without changing server query fields.
+func WithListPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
+
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func WithGetDetails(value bool) GetOption {
@@ -137,6 +156,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		return nil, err
 	}
 	value := config.Options
+	if value.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: max items must be non-negative", resource.ErrInvalidOption)
+	}
 	if err := senlin.SortGrammar(value.Sort); err != nil {
 		return nil, err
 	}
@@ -157,7 +179,7 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 	}
 	for key, values := range config.Query {
 		switch key {
-		case "limit", "marker", "name", "cluster_id", "status", "sort", "global_project", "show_details", "details", "data", "metadata", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at", "init_at", "physical_id", "profile_id", "profile_name", "index", "role", "status_reason", "dependents", "tainted":
+		case "limit", "marker", "max_items", "paginated", "name", "cluster_id", "status", "sort", "global_project", "show_details", "details", "data", "metadata", "id", "project", "project_id", "domain", "domain_id", "user", "user_id", "created_at", "updated_at", "init_at", "physical_id", "profile_id", "profile_name", "index", "role", "status_reason", "dependents", "tainted":
 			return nil, fmt.Errorf("%w: query %q is a concrete option or local node filter", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
