@@ -71,20 +71,30 @@ func writeGo(root, path string, source []byte) error {
 
 func (g *generator) generateServices() error {
 	groups := map[string]map[string]bool{}
-	for _, operation := range g.inventory.Operations {
-		path := strings.TrimPrefix(operation.SDKPackage, "gophercloudsdk/")
+	addPackage := func(packagePath string) {
+		path := strings.TrimPrefix(packagePath, "gophercloudsdk/")
 		parts := strings.Split(path, "/")
 		if len(parts) < 3 || !strings.HasPrefix(parts[1], "v") {
-			continue
+			return
 		}
 		if _, ok := serviceSpecs[parts[0]]; !ok {
-			continue
+			return
 		}
 		key := strings.Join(parts[:2], "/")
 		if groups[key] == nil {
 			groups[key] = map[string]bool{}
 		}
 		groups[key][strings.Join(parts[2:], "/")] = true
+	}
+	for _, operation := range g.inventory.Operations {
+		addPackage(operation.SDKPackage)
+	}
+	// A manual API can extend a registered service without inventing a native
+	// operation. Independent services such as Cyborg keep their manual registry.
+	for _, record := range g.collections {
+		if record.Source == "sdk_owned" {
+			addPackage(record.Package)
+		}
 	}
 	keys := []string{}
 	for key := range groups {
