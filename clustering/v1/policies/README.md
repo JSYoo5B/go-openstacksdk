@@ -120,6 +120,47 @@ Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반
 
 `Policy.Spec`/`Data`는 JSON 숫자를 보존하며 embedded `resource.Metadata`의 `Body`/`Header`/`StatusCode`는 unknown/null/생략 및 HTTP 증거를 보존합니다. wire project/domain/user는 각각 Go ProjectID/DomainID/UserID입니다. 단건 응답은 `policy` 객체 envelope를 요구하며 Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 오류는 `resource.ResponseError`에 원문·header·status를 남기고 mutation을 재전송하지 않습니다.
 
-Policy update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 paginated/base_path/max_items, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 리소스 갱신과 cluster의 policy 연결은 별도 API 계약이며 직접 연산 7개와 Python proxy 전체 계약 완료를 구분합니다.
+Policy update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 per-call base_path/microversion/header, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 리소스 갱신과 cluster의 policy 연결은 별도 API 계약이며 직접 연산 7개와 Python proxy 전체 계약 완료를 구분합니다.
 
 근거: [고정 Policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/policy.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_policies_test.go), [응답 경계 계약](../../../api/clustering_policies_response_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
+
+## 목록 소비 제어
+
+| pinned Python | Go 옵션 | 소비 정책 |
+|---|---|---|
+| `max_items=n` | `WithListMaxItems(n)` 또는 `ListOpts.MaxItems` | 로컬 필터 이전에 검증한 raw 행을 최대 n개 소비; 0은 무제한, 음수는 사전 오류 |
+| `paginated=False` | `WithListPaginated(false)` 또는 `ListOpts.Paginated` | 첫 응답만 소비하고 continuation을 처리하지 않음 |
+| 기본 `paginated=True` | nil 또는 `WithListPaginated(true)` | 페이지 순회를 허용; 뒤의 옵션이 앞의 값을 덮어씀 |
+| `limit=n` | `WithListOptions(ListOpts{Limit: n})` | 양수는 wire page limit; 로컬 cap과 독립 |
+
+```go
+listingAPI := policies.New(client)
+values, err := listingAPI.All(ctx,
+    policies.WithListOptions(policies.ListOpts{Limit: 20}),
+    policies.WithListMaxItems(50))
+if err != nil { return err }
+fmt.Println(len(values))
+for value, err := range listingAPI.List(ctx, policies.WithListPaginated(false)) {
+    if err != nil { return err }
+    fmt.Println(value.ID)
+}
+```
+
+명시한 wire limit이 없으면 양의 `MaxItems`를 limit hint로 보냅니다. 명시 limit은 그대로
+유지하고 로컬 cap은 응답이 그 limit보다 커도 적용합니다. 반환 수는 로컬 필터나 서버의
+page 정책에 따라 cap보다 적을 수 있습니다.
+
+`max_items`와 `paginated`는 서버 query로 보내지 않으며 `WithListQuery`에서 같은 이름을
+사용하면 사전 오류입니다. `WithListOptions`는 bool pointer도 snapshot으로 소유하고 재사용 시
+독립적으로 적용합니다. cap에 도달하면 뒤의 행이나 next link를 처리하지 않지만 소비한 행의
+잘못된 JSON·검증 오류는 전체 페이지 증거와 함께 반환합니다. 빈 페이지에서는 next link가
+있어도 끝냅니다. `break`, context와 매 페이지의 source/version 검사도 유지합니다.
+Pinned Python은 정확한 page 경계에서 cap 검사를 다음 raw 행까지 미뤄 continuation GET을
+한 번 더 할 수 있지만 Go는 cap 직후 끝냅니다.
+
+List 전체 계약은 partial입니다. 알려진 `WithListFilter`의 raw JSON 비교와 별도로 Python
+Resource field/default/alias 정규화 및 query 소비, per-call base_path/microversion/header와
+deprecated JMESPath는 계속 비교합니다. `WithListQuery`는 vendor query를 실제로 전달하는
+Go 확장이며 Python unknown query 생략과 구별합니다.
+
+공통 소비 정책과 남은 차이는 [Senlin 목록 제어](../listing/README.md), 실제 HTTP 근거는 [목록 제어 테스트](../../../api/clustering_typed_list_controls_test.go)를 참고합니다.
