@@ -26,10 +26,11 @@ func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client, API: blockstorageapi.New(client), Volumes: resource.NewCollection[Volume](resource.Adapter[Volume]{
-		Kind:    "volume",
-		Get:     func(ctx context.Context, id string) (*Volume, error) { return volumes.Get(ctx, client, id).Extract() },
-		List:    func(q url.Values) pagination.Pager { return volumes.List(client, query.Adapter(q)) },
-		Extract: volumes.ExtractVolumes,
+		Kind:         "volume",
+		IdentityFind: true,
+		Get:          func(ctx context.Context, id string) (*Volume, error) { return volumes.Get(ctx, client, id).Extract() },
+		List:         func(q url.Values) pagination.Pager { return volumes.List(client, query.Adapter(q)) },
+		Extract:      volumes.ExtractVolumes,
 		Delete: func(ctx context.Context, id string) error {
 			return volumes.Delete(ctx, client, id, volumes.DeleteOpts{}).ExtractErr()
 		},
