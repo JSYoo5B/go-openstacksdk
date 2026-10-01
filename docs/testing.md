@@ -75,6 +75,11 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/clustering_profiles_test.go`, `api/clustering_policies_test.go`, `connection_sdk_resources_test.go` | profile/policy CRUD·객체 PATCH·Validate1.2, spec/metadata snapshot·null/빈 객체·숫자, 이름/ID·미존재·중복·409, 로컬 Body 필터·페이지·accepted 오류·인증/버전 공유 |
 | `api/clustering_mutation_recheck_test.go`, `api/clustering_profiles_update_snapshot_test.go`, `api/clustering_policies_response_test.go` | custom option·이름 lookup 이후 source/version 재검사, 준비한 body/header 소유권, Get/Validate accepted malformed 응답 증거·재전송 없음·미선언 success code 거부 |
 | `resource/delete_identity_test.go` | 이름 조회 응답의 빈/공백/다른 종류 ID를 binding 정책으로 검사해 collection 경로 삭제를 막고, 유효한 ID는 한 번 해석 후 삭제 |
+| `request/optional_test.go`, `api/clustering_scalar_options_test.go` | typed 값의 생략/null/false/zero·빈 문자열 구분, 실패한 decode에서 이전 값 보존, With 함수 재사용과 caller config 변경 후 독립 요청 |
+| `internal/senlin/async_test.go`, `api/clustering_async_location_case_test.go` | 선택한 action collection·origin·reverse prefix, required/empty/중복·대소문자 Location, accepted 원문/헤더/status 보존, 조회·재전송 없음 |
+| `api/clustering_clusters_test.go`, `api/clustering_clusters_response_test.go`, `api/clustering_clusters_pagination_test.go` | cluster POST201·PATCH/DELETE202, raw 숫자·생략/null·profile_only1.6, 이름 해석 전 snapshot·source 재검사, 일반/force404 차이, malformed 응답·짧은 페이지·로컬 필터·취소 |
+| `api/clustering_nodes_test.go`, `api/clustering_nodes_pagination_test.go` | node POST/PATCH/DELETE202·필수 action 참조, physical ID/index/details·tainted1.13, nullable 입력·snapshot·strict force404, query/로컬 필터·raw marker·다중 페이지 Find 중복/후속 오류 |
+| `connection_senlin_async_test.go`, `internal/cmd/sdkgen/sdk_owned_services_test.go` | Clusters/Nodes/Actions의 client·최신 token·1.13 공유, submission 후 명시 action 조회, 비동기 결과를 버리는 Collection.Delete 미지원 정책과 재생성 |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
 
