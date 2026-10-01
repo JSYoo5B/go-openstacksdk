@@ -166,7 +166,10 @@ func WithListPaginated(value bool) ListOption {
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false, filterSpec.Namespace); err != nil {
+	if err := senlin.ValidateListCapabilities(config, filterSpec.Namespace); err != nil {
+		return nil, err
+	}
+	if err := senlin.RejectListControlQuery(config.Query); err != nil {
 		return nil, err
 	}
 	value := cloneOptions(config.Options)
@@ -213,19 +216,23 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Event,
 	options = append([]ListOption(nil), options...)
 	return func(yield func(*Event, error) bool) {
 		config, err := request.Apply(ListOpts{}, options...)
+		var client *gophercloud.ServiceClient
+		if err == nil {
+			client, err = senlin.PrepareListClient(ctx, a.RawClient(), config)
+		}
 		var query url.Values
 		var filters map[string]json.RawMessage
 		if err == nil {
 			query, err = listQuery(config)
 		}
 		if err == nil {
-			filters, err = senlin.PrepareBodyFilters(config, filterSpec)
+			filters, err = senlin.PrepareBodyFilters(senlin.ListQueryConfig(config), filterSpec)
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", "clustering.events", err))
 			return
 		}
-		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
+		for value, err := range rest.ListWithControl(ctx, senlin.ListSpec(a.RawClient(), client, spec), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
 			if err != nil {
 				yield(nil, request.Wrap("List", "clustering.events", err))
 				return
