@@ -26,8 +26,12 @@ type Adapter[T any] struct {
 	// URL segments, such as Swift object keys. Such bindings also own URL escaping.
 	ValidateID func(string) error
 	Get        func(context.Context, string) (*T, error)
-	List       func(url.Values) pagination.Pager
-	Iterate    func(context.Context, url.Values) iter.Seq2[*T, error]
+	// GetIdentityQuery applies a frozen service query to the direct GET phase of
+	// FindIdentity. An audited binding must supply it when that phase has query
+	// fields; ordinary Get and query-free FindIdentity keep using Get.
+	GetIdentityQuery func(context.Context, string, url.Values) (*T, error)
+	List             func(url.Values) pagination.Pager
+	Iterate          func(context.Context, url.Values) iter.Seq2[*T, error]
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
