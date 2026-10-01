@@ -48,8 +48,12 @@ func Collection[T any](client *gophercloud.ServiceClient, path, single, plural s
 }
 
 func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, single string, metadata func(*T) *common.Metadata, codes ...int) (*T, error) {
+	return fetch[T](ctx, client, method, endpoint, body, nil, single, metadata, codes...)
+}
+
+func fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, single string, metadata func(*T) *common.Metadata, codes ...int) (*T, error) {
 	var raw json.RawMessage
-	response, err := client.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, OkCodes: codes})
+	response, err := client.Request(ctx, method, endpoint, &gophercloud.RequestOpts{JSONBody: body, JSONResponse: &raw, MoreHeaders: headers, OkCodes: codes})
 	if err != nil {
 		return nil, err
 	}
