@@ -53,7 +53,7 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[PolicyType] {
 		Metadata:   func(value *PolicyType) *resource.Metadata { return &value.Metadata },
 		Validate:   func(ctx context.Context) error { return senlin.Validate(ctx, client) },
 		ValidateID: senlin.Identifier,
-		Paging:     rest.PagePolicy[PolicyType]{HTTPLink: true},
+		Paging:     rest.PagePolicy[PolicyType]{HTTPLink: true, MaxItemsLimitHint: true, StopOnEmptyPage: true},
 	}
 }
 
@@ -65,7 +65,9 @@ func (a *API) Get(ctx context.Context, name string) (*PolicyType, error) {
 type ListOpts = senlin.ListOpts
 type ListOption = senlin.ListOption
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
+func WithListOptions(value ListOpts) ListOption  { return senlin.Snapshot(value) }
+func WithListMaxItems(value int) ListOption      { return senlin.WithMaxItems(value) }
+func WithListPaginated(value bool) ListOption    { return senlin.WithPaginated(value) }
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 // List follows advertised same-path links without a guessed marker fallback.

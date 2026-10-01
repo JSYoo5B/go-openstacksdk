@@ -54,14 +54,16 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[Service] {
 		Metadata:   func(value *Service) *resource.Metadata { return &value.Metadata },
 		Validate:   func(ctx context.Context) error { return senlin.RequireVersion(ctx, client, 7) },
 		ValidateID: senlin.Identifier,
-		Paging:     rest.PagePolicy[Service]{HTTPLink: true},
+		Paging:     rest.PagePolicy[Service]{HTTPLink: true, MaxItemsLimitHint: true, StopOnEmptyPage: true},
 	}
 }
 
 type ListOpts = senlin.ListOpts
 type ListOption = senlin.ListOption
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
+func WithListOptions(value ListOpts) ListOption  { return senlin.Snapshot(value) }
+func WithListMaxItems(value int) ListOption      { return senlin.WithMaxItems(value) }
+func WithListPaginated(value bool) ListOption    { return senlin.WithPaginated(value) }
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 // List has no marker fallback: the official service list declares no paging

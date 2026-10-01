@@ -16,15 +16,29 @@ import (
 	"gophercloudsdk/resource"
 )
 
-// ListOpts reflects the limit/marker options inherited by Python Resource.
-// A zero Limit and empty Marker omit them. Type catalogs do not document these
-// query parameters; deployments decide whether they support them.
+// ListOpts reflects inherited Python Resource list controls. MaxItems and
+// Paginated are local controls; a positive cap may supply a limit hint for
+// catalogs that opt in. A zero Limit and empty Marker omit those wire options.
 type ListOpts struct {
-	Limit  int
-	Marker string
+	Limit     int
+	Marker    string
+	MaxItems  int
+	Paginated *bool
 }
 
 type ListOption = request.Option[ListOpts]
+
+func WithMaxItems(value int) ListOption {
+	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
+}
+
+func WithPaginated(value bool) ListOption {
+	return func(config *request.Config[ListOpts]) error {
+		copy := value
+		config.Options.Paginated = &copy
+		return nil
+	}
+}
 
 func Validate(ctx context.Context, client *gophercloud.ServiceClient) error {
 	if err := ctx.Err(); err != nil {
@@ -102,6 +116,9 @@ func Query(config request.Config[ListOpts]) (url.Values, error) {
 	if config.Options.Limit < 0 {
 		return nil, fmt.Errorf("%w: page limit must be non-negative", resource.ErrInvalidOption)
 	}
+	if config.Options.MaxItems < 0 {
+		return nil, fmt.Errorf("%w: maximum items must be non-negative", resource.ErrInvalidOption)
+	}
 	query := make(url.Values)
 	if config.Options.Limit != 0 {
 		query.Set("limit", strconv.Itoa(config.Options.Limit))
@@ -113,7 +130,7 @@ func Query(config request.Config[ListOpts]) (url.Values, error) {
 		query.Set("marker", config.Options.Marker)
 	}
 	for key, values := range config.Query {
-		if key == "limit" || key == "marker" {
+		if key == "limit" || key == "marker" || key == "max_items" || key == "paginated" {
 			return nil, fmt.Errorf("%w: extension %q is a concrete list option", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
@@ -134,7 +151,9 @@ func List[T any](ctx context.Context, spec rest.CollectionSpec[T], options ...Li
 			yield(nil, request.Wrap("List", spec.Kind, err))
 			return
 		}
-		for value, err := range rest.List(ctx, spec, query) {
+		control := rest.ListControl{MaxItems: config.Options.MaxItems,
+			SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}
+		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
 			if !yield(value, request.Wrap("List", spec.Kind, err)) {
 				return
 			}
