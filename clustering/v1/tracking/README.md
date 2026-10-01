@@ -141,3 +141,5 @@ SDK가 소유합니다. context·서비스·선택 버전·옵션 검증은 clea
 `TestClusteringTrackedCommitFailureKeepsDirtyAndResponseEvidence`,
 `TestClusteringTrackedRefreshMergeResetAndFailurePreservesChanges`,
 `TestClusteringTrackedNewEditsSurviveCommitAndRefreshInFlight`입니다.
+
+Cluster·Node도 SDK 소유 Track/Load·Edit·Commit·Refresh를 제공합니다. PATCH202의 Operation과 cached/actual Response, null·pending 버전 gate, 고정 경로는 [Cluster·Node 비동기 변경 추적](async/README.md)에 별도 설명합니다.
