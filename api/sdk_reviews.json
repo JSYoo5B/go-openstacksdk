@@ -4627,6 +4627,246 @@
       "remaining": [
         "Compare inherited Resource/proxy class-name aliases, cached Resource/dirty-state commit and adapter/microversion/query normalization beyond the verified named-class HTTP mapping."
       ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/limits.Get",
+      "source_fingerprint": "7e5386851add3fb77f6e2075b7ce318e6aa682441ffdebf6bc9d3a505526e89f",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/compute/v2/limits.API.Fetch",
+        "gophercloudsdk/compute/v2/limits.API.InProject",
+        "gophercloudsdk/compute/v2/limits.API.CurrentProject",
+        "gophercloudsdk/compute/v2/limits.ProjectLimitsScope.Get",
+        "gophercloudsdk/compute/v2/limits.WithGetReserved"
+      ],
+      "contracts": [
+        {
+          "behavior": "Implicit Fetch sends no tenant query and reports no guessed project; exact names bind once through a separate Keystone client, IDs need no lookup, and CurrentProject fixes recorded v2/v3 authentication independently of later auth changes.",
+          "tests": [
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsProjectIDsAreLazyAndExactNamesUseSeparateKeystoneOnce",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsProjectLookupFailuresNeverCallCompute",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsCurrentProjectFreezesRecordedKeystoneV2AndV3Scope",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsCurrentProjectRejectsMissingUnscopedAndMalformedAuth",
+            "connection_limits_test.go:TestConnectionProjectLimitsSeparateIdentityAndFixQueries"
+          ]
+        },
+        {
+          "behavior": "GET200 preserves native absolute integers plus the missing legacy rate groups/rules, exact raw next-available timestamps, nested extension/null/omission and independent body/header/status; strict invalid limits/rate JSON retains accepted HTTP bytes and original cause.",
+          "tests": [
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchExplicitTenantAndLargeTypedIntegers",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsNullEmptyAndOmittedFieldsRemainDistinct",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsDecodeFailuresRetainAcceptedHTTPBodyHeaderAndStatus"
+          ]
+        },
+        {
+          "behavior": "WithGetReserved maps bool to integer0/1 for both native and SDK Get; raw query values retain Nova integer/noninteger server semantics. Fixed scopes reject tenant_id/project_id overrides and duplicates before HTTP.",
+          "tests": [
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsReservedHelperUsesIntegersAndRawQueryKeepsNativeValues",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFixedScopeRejectsIdentityOverridesBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Tenant query/method/path/origin remain fixed across redirects/retry/reauth with source transport/auth preserved; native status/body/header, caller retry/transport errors and context during header/body/shared auth are retained without fallback.",
+          "tests": [
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRetriesAndReauthKeepSingleTenantQueryAndSourceTransport",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRedirectCannotDropProjectChangeOriginOrMethod",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRetryAndTransportFailuresPreserveSourceErrorsWithoutFallback",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsCanceledCallerDoesNotWaitForSharedReauth",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsHTTPFailuresRetainOriginalEvidenceAndOperation",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsContextOwnsHeaderWaitAndPartialBodyRead"
+          ]
+        }
+      ],
+      "differences": [
+        "Native generated Get remains unchanged. SDK Fetch/scope return LimitsResource with native absolute data, SDK-owned legacy Rate, raw fields and HTTP metadata; Go context/error are explicit.",
+        "Fetch without tenant query retains server current-project behavior and leaves ProjectID empty; a scope explicitly fixes tenant_id even for recorded current authentication and does not provide list/change/wait methods.",
+        "Current Nova v2.1 reports empty rate data. SDK rate models only preserve historical/returned data; they do not enforce limits or restore the removed legacy Nova v2 API."
+      ],
+      "documentation": [
+        "compute/v2/limits/README.md"
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_limits",
+      "source_fingerprint": "b0d53414ee2aa3198d6fd907bca9765d5f3ebd318f3d06a69cc5ee21ebe4b1f1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/limits.API.Fetch",
+        "gophercloudsdk/compute/v2/limits.API.InProject",
+        "gophercloudsdk/compute/v2/limits.API.CurrentProject",
+        "gophercloudsdk/compute/v2/limits.ProjectLimitsScope.Get",
+        "gophercloudsdk/compute/v2/limits.WithGetReserved"
+      ],
+      "contracts": [
+        {
+          "behavior": "Implicit Fetch sends no tenant query and reports no guessed project; exact names bind once through a separate Keystone client, IDs need no lookup, and CurrentProject fixes recorded v2/v3 authentication independently of later auth changes.",
+          "tests": [
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsProjectIDsAreLazyAndExactNamesUseSeparateKeystoneOnce",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsProjectLookupFailuresNeverCallCompute",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsCurrentProjectFreezesRecordedKeystoneV2AndV3Scope",
+            "api/nova_project_limits_projects_test.go:TestNovaLimitsCurrentProjectRejectsMissingUnscopedAndMalformedAuth",
+            "connection_limits_test.go:TestConnectionProjectLimitsSeparateIdentityAndFixQueries"
+          ]
+        },
+        {
+          "behavior": "GET200 preserves native absolute integers plus the missing legacy rate groups/rules, exact raw next-available timestamps, nested extension/null/omission and independent body/header/status; strict invalid limits/rate JSON retains accepted HTTP bytes and original cause.",
+          "tests": [
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchExplicitTenantAndLargeTypedIntegers",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsNullEmptyAndOmittedFieldsRemainDistinct",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsDecodeFailuresRetainAcceptedHTTPBodyHeaderAndStatus"
+          ]
+        },
+        {
+          "behavior": "WithGetReserved maps bool to integer0/1 for both native and SDK Get; raw query values retain Nova integer/noninteger server semantics. Fixed scopes reject tenant_id/project_id overrides and duplicates before HTTP.",
+          "tests": [
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsReservedHelperUsesIntegersAndRawQueryKeepsNativeValues",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsFixedScopeRejectsIdentityOverridesBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Tenant query/method/path/origin remain fixed across redirects/retry/reauth with source transport/auth preserved; native status/body/header, caller retry/transport errors and context during header/body/shared auth are retained without fallback.",
+          "tests": [
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRetriesAndReauthKeepSingleTenantQueryAndSourceTransport",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRedirectCannotDropProjectChangeOriginOrMethod",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsRetryAndTransportFailuresPreserveSourceErrorsWithoutFallback",
+            "api/nova_project_limits_transport_test.go:TestNovaLimitsCanceledCallerDoesNotWaitForSharedReauth",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsHTTPFailuresRetainOriginalEvidenceAndOperation",
+            "api/nova_project_limits_contracts_test.go:TestNovaLimitsContextOwnsHeaderWaitAndPartialBodyRead"
+          ]
+        }
+      ],
+      "differences": [
+        "Native generated Get remains unchanged. SDK Fetch/scope return LimitsResource with native absolute data, SDK-owned legacy Rate, raw fields and HTTP metadata; Go context/error are explicit.",
+        "Fetch without tenant query retains server current-project behavior and leaves ProjectID empty; a scope explicitly fixes tenant_id even for recorded current authentication and does not provide list/change/wait methods.",
+        "Current Nova v2.1 reports empty rate data. SDK rate models only preserve historical/returned data; they do not enforce limits or restore the removed legacy Nova v2 API.",
+        "Python project_id input alias maps to tenant_id; Go uses InProject or native GetOpts.TenantID and rejects the unsupported wire alias."
+      ],
+      "documentation": [
+        "compute/v2/limits/README.md"
+      ],
+      "remaining": [
+        "Compare inherited Resource fetch/cache/skip_cache/session/adapter selection, Python aliases and dynamically typed query inputs beyond the verified singleton HTTP mapping."
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/limits.Get",
+      "source_fingerprint": "871e4bf5657c95fae06896ba66093dd999879bb37e0a5b4166bdd4e6a85be6b0",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/limits.API.Fetch",
+        "gophercloudsdk/blockstorage/v3/limits.API.InProject",
+        "gophercloudsdk/blockstorage/v3/limits.API.CurrentProject",
+        "gophercloudsdk/blockstorage/v3/limits.ProjectLimitsScope.Get",
+        "gophercloudsdk/blockstorage/v3/limits.WithGetOptions",
+        "gophercloudsdk/blockstorage/v3/limits.WithGetQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unfiltered Fetch/native Get preserve implicit authenticated-project behavior at3.0. An explicit project filter or scope requires actual selected3.39+ before lookup/HTTP; conflicting source headers, wrong service types or a blank type without matching Cinder version headers cannot bypass that gate.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsImplicitFetchWorksAtLegacyVersionAndNativeGetRemains",
+            "api/cinder_limits_test.go:TestCinderLimitsProjectFilteringRequires339BeforeIdentityOrHTTP",
+            "api/cinder_limits_test.go:TestCinderLimitsVersionHeadersCannotOverrideSelectedMicroversion"
+          ]
+        },
+        {
+          "behavior": "Exact project names resolve once with a separate Keystone client; IDs require no lookup, recorded v2/v3 authentication freezes project identity, and fixed project_id query cannot be replaced, duplicated, emptied or aliased to tenant_id.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsExactProjectNamesUseSeparateKeystoneOnce",
+            "api/cinder_limits_test.go:TestCinderLimitsRecordedAuthenticationFreezesProjectAndRejectsManualTokens",
+            "api/cinder_limits_test.go:TestCinderLimitsQueryInputsCannotWidenFixedProject",
+            "connection_limits_test.go:TestConnectionProjectLimitsExplicitIDsRecordedAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET200 retains ten optional exact int64 absolute fields plus typed rate groups/rules with numeric/string/null raw next-available timestamps, nested extensions, null/omission and independent headers/status. Malformed accepted JSON and partial body reads retain HTTP bytes/metadata and original causes.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsResponseKeepsExactOptionalAbsoluteAndRateValues",
+            "api/cinder_limits_test.go:TestCinderLimitsNullAndOmittedSectionsRemainDistinct",
+            "api/cinder_limits_test.go:TestCinderLimitsMalformedSuccessRetainsRawBodyHeaderStatusAndCause",
+            "api/cinder_limits_test.go:TestCinderLimitsPartialReadRetainsAcceptedHTTPMetadata"
+          ]
+        },
+        {
+          "behavior": "Project query never drops during redirect/retry/reauth; native HTTP status/body/header and ErrNotFound remain available, context cancellation is preserved, and the scope exposes only a read method.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsStrictHTTPStatusAnd404PreserveNativeCause",
+            "api/cinder_limits_test.go:TestCinderLimitsRedirectsCannotDropProjectAndReauthenticationKeepsQuery",
+            "api/cinder_limits_test.go:TestCinderLimitsScopeOnlyFetchesAndPreservesContextCancellation"
+          ]
+        }
+      ],
+      "differences": [
+        "Native generated Get and its native return model remain unchanged. SDK Fetch/scope use optional int64 absolute fields, raw timestamp/rate models, raw fields and HTTP metadata; Go context/error are explicit.",
+        "Cinder project filtering requires3.39 and the SDK preserves the configured source version/headers instead of automatically upgrading. Conflicting header/type configurations fail before HTTP.",
+        "Fetch without query leaves ProjectID empty and uses server current-project behavior. Project scopes send one fixed project_id query and have no list/change/wait methods."
+      ],
+      "documentation": [
+        "blockstorage/v3/limits/README.md"
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_limits",
+      "source_fingerprint": "99194e02c126e2824b8116b8604166abcd1d8fbb7ee069082a2ab852fecbea5f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/limits.API.Fetch",
+        "gophercloudsdk/blockstorage/v3/limits.API.InProject",
+        "gophercloudsdk/blockstorage/v3/limits.API.CurrentProject",
+        "gophercloudsdk/blockstorage/v3/limits.ProjectLimitsScope.Get",
+        "gophercloudsdk/blockstorage/v3/limits.WithGetOptions",
+        "gophercloudsdk/blockstorage/v3/limits.WithGetQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unfiltered Fetch/native Get preserve implicit authenticated-project behavior at3.0. An explicit project filter or scope requires actual selected3.39+ before lookup/HTTP; conflicting source headers, wrong service types or a blank type without matching Cinder version headers cannot bypass that gate.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsImplicitFetchWorksAtLegacyVersionAndNativeGetRemains",
+            "api/cinder_limits_test.go:TestCinderLimitsProjectFilteringRequires339BeforeIdentityOrHTTP",
+            "api/cinder_limits_test.go:TestCinderLimitsVersionHeadersCannotOverrideSelectedMicroversion"
+          ]
+        },
+        {
+          "behavior": "Exact project names resolve once with a separate Keystone client; IDs require no lookup, recorded v2/v3 authentication freezes project identity, and fixed project_id query cannot be replaced, duplicated, emptied or aliased to tenant_id.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsExactProjectNamesUseSeparateKeystoneOnce",
+            "api/cinder_limits_test.go:TestCinderLimitsRecordedAuthenticationFreezesProjectAndRejectsManualTokens",
+            "api/cinder_limits_test.go:TestCinderLimitsQueryInputsCannotWidenFixedProject",
+            "connection_limits_test.go:TestConnectionProjectLimitsExplicitIDsRecordedAuthAndCancellation"
+          ]
+        },
+        {
+          "behavior": "GET200 retains ten optional exact int64 absolute fields plus typed rate groups/rules with numeric/string/null raw next-available timestamps, nested extensions, null/omission and independent headers/status. Malformed accepted JSON and partial body reads retain HTTP bytes/metadata and original causes.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsResponseKeepsExactOptionalAbsoluteAndRateValues",
+            "api/cinder_limits_test.go:TestCinderLimitsNullAndOmittedSectionsRemainDistinct",
+            "api/cinder_limits_test.go:TestCinderLimitsMalformedSuccessRetainsRawBodyHeaderStatusAndCause",
+            "api/cinder_limits_test.go:TestCinderLimitsPartialReadRetainsAcceptedHTTPMetadata"
+          ]
+        },
+        {
+          "behavior": "Project query never drops during redirect/retry/reauth; native HTTP status/body/header and ErrNotFound remain available, context cancellation is preserved, and the scope exposes only a read method.",
+          "tests": [
+            "api/cinder_limits_test.go:TestCinderLimitsStrictHTTPStatusAnd404PreserveNativeCause",
+            "api/cinder_limits_test.go:TestCinderLimitsRedirectsCannotDropProjectAndReauthenticationKeepsQuery",
+            "api/cinder_limits_test.go:TestCinderLimitsScopeOnlyFetchesAndPreservesContextCancellation"
+          ]
+        }
+      ],
+      "differences": [
+        "Native generated Get and its native return model remain unchanged. SDK Fetch/scope use optional int64 absolute fields, raw timestamp/rate models, raw fields and HTTP metadata; Go context/error are explicit.",
+        "Cinder project filtering requires3.39 and the SDK preserves the configured source version/headers instead of automatically upgrading. Conflicting header/type configurations fail before HTTP.",
+        "Fetch without query leaves ProjectID empty and uses server current-project behavior. Project scopes send one fixed project_id query and have no list/change/wait methods.",
+        "Pinned Python Limits caps its Resource maximum at3.39 and accepts a Project Resource; Go takes explicit references and retains selected versions above3.39 rather than reproducing automatic Resource version selection."
+      ],
+      "documentation": [
+        "blockstorage/v3/limits/README.md"
+      ],
+      "remaining": [
+        "Compare inherited Resource/session/cache/adapter selection, Project Resource inputs and automatic maximum microversion selection beyond the verified singleton HTTP mapping."
+      ]
     }
   ]
 }
