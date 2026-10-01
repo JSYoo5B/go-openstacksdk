@@ -22,7 +22,7 @@ if err != nil { return err }
 spec := map[string]any{
     "type": "os.nova.server",
     "version": "1.0",
-    "properties": map[string]any{"name": "worker", "flavor": "m1.small"},
+    "properties": map[string]any{"name": "worker", "flavor": "FLAVOR_ID", "image": "IMAGE_ID"},
 }
 profile, err := service.Profiles.Create(ctx, profiles.CreateOpts{Name: "worker_template"},
     profiles.WithCreateSpec(spec),
@@ -31,14 +31,15 @@ if err != nil { return err }
 fmt.Println(profile.ID, profile.UserMetadata, profile.Header)
 ```
 
-name은 ASCII 문자로 시작하고 ASCII 문자·숫자·`_`·`.`·`-`로 구성하는 255자 미만 값입니다. spec은 필수 JSON 객체이며 plugin의 properties schema는 Senlin 서버가 검사합니다. `WithCreateSpec`, `WithCreateMetadata`, `With...Options`는 생성 시 입력을 깊게 복사하고 재사용할 때 새 복사본을 만듭니다. 정확한 큰 정수와 소수는 `json.Number` 또는 `json.RawMessage`를 사용합니다.
+name은 ASCII 문자로 시작하고 ASCII 문자·숫자·`_`·`.`·`-`로 구성하는 255자 미만 값입니다. spec은 필수 JSON 객체이며 plugin의 properties schema는 Senlin 서버가 검사합니다. 예제의 FLAVOR_ID/IMAGE_ID는 실제 클라우드 값으로 교체합니다. [Nova profile spec](https://docs.openstack.org/senlin/2023.2/user/profile_types/nova.html)을 참고합니다. `WithCreateSpec`, `WithCreateMetadata`, `With...Options`는 생성 시 입력을 깊게 복사하고 재사용할 때 새 복사본을 만듭니다. 정확한 큰 정수와 소수는 `json.Number` 또는 `json.RawMessage`를 사용합니다.
 
 ```go
 service, err := conn.Clustering(ctx)
 if err != nil { return err }
 checked, err := service.Profiles.Validate(ctx, profiles.ValidateOpts{},
     profiles.WithValidateSpec(map[string]any{
-        "type": "os.nova.server", "version": "1.0", "properties": map[string]any{},
+        "type": "os.nova.server", "version": "1.0",
+        "properties": map[string]any{"flavor": "FLAVOR_ID", "image": "IMAGE_ID"},
     }))
 if err != nil { return err }
 fmt.Println(checked.Spec, checked.Body["id"])

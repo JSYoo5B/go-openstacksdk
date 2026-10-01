@@ -22,20 +22,27 @@ if err != nil { return err }
 policy, err := service.Policies.Create(ctx, policies.CreateOpts{Name: "scale_workers"},
     policies.WithCreateSpec(map[string]any{
         "type": "senlin.policy.scaling", "version": "1.0",
-        "properties": map[string]any{"event": "CLUSTER_SCALE_OUT"},
+        "properties": map[string]any{
+            "event": "CLUSTER_SCALE_OUT",
+            "adjustment": map[string]any{"type": "CHANGE_IN_CAPACITY", "number": 1},
+        },
     }))
 if err != nil { return err }
 fmt.Println(policy.ID, policy.Spec, policy.Header)
 ```
 
-name은 ASCII 문자로 시작하고 ASCII 문자·숫자·`_`·`.`·`-`로 구성하는 255자 미만 값입니다. spec은 필수 JSON 객체이며 plugin schema는 서버가 검사합니다. `WithCreateSpec`, `WithValidateSpec`, `With...Options`는 입력을 생성 시 깊게 snapshot하고 재사용할 때 새 복사본을 만듭니다. `json.Number` 또는 `json.RawMessage`로 큰 정수와 소수를 정확히 전송할 수 있습니다. spec의 nil/null/배열/scalar는 요청 전에 거부하며 빈 객체의 실제 schema 허용은 서버가 판정합니다.
+name은 ASCII 문자로 시작하고 ASCII 문자·숫자·`_`·`.`·`-`로 구성하는 255자 미만 값입니다. spec은 필수 JSON 객체이며 plugin schema는 서버가 검사합니다. 예제의 event/adjustment 형식은 [Scaling policy 1.0](https://docs.openstack.org/senlin/pike/user/policy_types/scaling.html)을 참고합니다. `WithCreateSpec`, `WithValidateSpec`, `With...Options`는 입력을 생성 시 깊게 snapshot하고 재사용할 때 새 복사본을 만듭니다. `json.Number` 또는 `json.RawMessage`로 큰 정수와 소수를 정확히 전송할 수 있습니다. spec의 nil/null/배열/scalar는 요청 전에 거부하며 빈 객체의 실제 schema 허용은 서버가 판정합니다.
 
 ```go
 service, err := conn.Clustering(ctx)
 if err != nil { return err }
 checked, err := service.Policies.Validate(ctx, policies.ValidateOpts{},
     policies.WithValidateSpec(map[string]any{
-        "type": "senlin.policy.scaling", "version": "1.0", "properties": map[string]any{},
+        "type": "senlin.policy.scaling", "version": "1.0",
+        "properties": map[string]any{
+            "event": "CLUSTER_SCALE_OUT",
+            "adjustment": map[string]any{"type": "CHANGE_IN_CAPACITY", "number": 1},
+        },
     }))
 if err != nil { return err }
 fmt.Println(checked.Spec, checked.Body["id"])
@@ -84,7 +91,7 @@ typed server query는 limit/marker/name/type/sort/global_project입니다. 0/빈
 
 Get은 이름·UUID·짧은 ID를 직접 컨트롤러로 전달합니다. `resource.ID(value)`는 UUID 모양을 추측하지 않고 직접 route를 지정합니다. `resource.Name(value)`는 전체 목록에서 정확히 해석하며 중복은 오류입니다. `API.Find`는 기본 미존재 무시이고 `resource.WithMissingError()`로 바꿀 수 있습니다. `Resources.Find`의 공통 기본값은 미존재 오류입니다. Python combined-string Find의 ID-first GET과 400/403/404 후 목록 fallback은 아직 별도 비교 범위입니다.
 
-Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반환합니다. 403·409 등의 오류를 숨기지 않으며 목록에서 찾은 ID가 없으면 collection 경로로 DELETE하지 않습니다. Delete는 error를 반환하고 Python의 mutable deleted Resource를 반환하지 않습니다.
+Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반환합니다. 403·409 등의 오류를 숨기지 않으며 목록에서 찾은 ID가 없으면 collection 경로로 DELETE하지 않습니다. Go Delete는 error를, Python proxy는 None을 반환합니다. 상속한 Resource 삭제 lifecycle은 별도 계약입니다.
 
 ## 응답과 남은 범위
 
