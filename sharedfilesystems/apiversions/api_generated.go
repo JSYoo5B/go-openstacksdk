@@ -40,8 +40,12 @@ func (a *API) Get(ctx context.Context, v string) (*APIVersion, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*APIVersion, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]APIVersion, error) {
+	return a.listWithControl(ctx, resource.ListControl{})
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl) iter.Seq2[*APIVersion, error] {
+	return resource.StreamWithControl(ctx, upstream.List(a.client), func(page pagination.Page) ([]APIVersion, error) {
 		values, err := upstream.ExtractAPIVersions(page)
 		return []APIVersion(values), err
-	})
+	}, control)
 }

@@ -69,6 +69,10 @@ func (b listOptsBuilder) ToMessageListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Message, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Message, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -80,8 +84,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Messag
 		return func(yield func(*Message, error) bool) { var zero *Message; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Message, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Message, error) {
 		values, err := upstream.ExtractMessages(page)
 		return []Message(values), err
-	})
+	}, control)
 }

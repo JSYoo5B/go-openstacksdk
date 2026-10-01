@@ -276,6 +276,10 @@ func (b listDetailOptsBuilder) ToShareListQuery() (string, error) {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Share, error] {
+	return a.listDetailWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Share, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -287,10 +291,10 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 		return func(yield func(*Share, error) bool) { var zero *Share; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Share, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Share, error) {
 		values, err := upstream.ExtractShares(page)
 		return []Share(values), err
-	})
+	}, control)
 }
 
 // ListExportLocations invokes the upstream API with library-owned builders and result handling.

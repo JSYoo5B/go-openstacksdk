@@ -204,6 +204,10 @@ func (b listDetailOptsBuilder) ToTransferListQuery() (string, error) {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Transfer, error] {
+	return a.listDetailWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Transfer, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -215,8 +219,8 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Transfer, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Transfer, error) {
 		values, err := upstream.ExtractTransfers(page)
 		return []Transfer(values), err
-	})
+	}, control)
 }

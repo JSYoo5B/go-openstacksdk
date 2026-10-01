@@ -187,6 +187,10 @@ func (b listOptsBuilder) ToShareTypeListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ShareType, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*ShareType, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -198,10 +202,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*ShareT
 		return func(yield func(*ShareType, error) bool) { var zero *ShareType; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]ShareType, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]ShareType, error) {
 		values, err := upstream.ExtractShareTypes(page)
 		return []ShareType(values), err
-	})
+	}, control)
 }
 
 type RemoveAccessOption = request.Option[AccessOpts]

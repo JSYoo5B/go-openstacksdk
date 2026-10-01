@@ -185,6 +185,10 @@ func (b listDetailOptsBuilder) ToReplicaListQuery() (string, error) {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Replica, error] {
+	return a.listDetailWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Replica, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -196,10 +200,10 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 		return func(yield func(*Replica, error) bool) { var zero *Replica; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Replica, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Replica, error) {
 		values, err := upstream.ExtractReplicas(page)
 		return []Replica(values), err
-	})
+	}, control)
 }
 
 // ListExportLocations invokes the upstream API with library-owned builders and result handling.
