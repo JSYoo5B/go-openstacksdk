@@ -17,6 +17,8 @@ Gophercloud v2.15.0의 sharedfilesystems/v2 API를 하나의 인증된 서비스
 
 `service.QuotaClassSets.InClass(ctx, "default")`는 class 이름을 고정해 Get/Update를 제공합니다. 프로젝트 해석이나 List/Reset은 없으며 [quota class 사용법](quotaclasssets/README.md)에 Python 대응과 typed limit·확장 입력을 설명합니다.
 
+`ShareAccessRules.InShare(ctx, share)`의 typed scope 목록은 `WithListMaxItems(n)`과 `WithListPaginated(false)`로 소비량을 제어합니다. 현대 access endpoint는 한 collection을 반환하므로 next link를 따르거나 cap을 wire limit으로 보내지 않습니다. 숫자 2.45 이상과 실제 Manila service type/version header를 재검사하며 canonical lowercase 응답 ID·부모를 보호합니다. [access rule 사용법과 Python 비교](shareaccessrules/README.md)에서 Allow/Deny·대기·응답 증거와 차이를 확인합니다.
+
 ## Go 사용
 
 ```go
