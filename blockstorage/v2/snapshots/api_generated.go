@@ -118,6 +118,10 @@ func (b listOptsBuilder) ToSnapshotListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Snapshot, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Snapshot, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -129,10 +133,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Snapsh
 		return func(yield func(*Snapshot, error) bool) { var zero *Snapshot; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Snapshot, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Snapshot, error) {
 		values, err := upstream.ExtractSnapshots(page)
 		return []Snapshot(values), err
-	})
+	}, control)
 }
 
 type UpdateMetadataOption = request.Option[UpdateMetadataOpts]

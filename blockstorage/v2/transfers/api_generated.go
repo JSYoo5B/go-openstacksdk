@@ -163,6 +163,10 @@ func (b listOptsBuilder) ToTransferListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transfer, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Transfer, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -174,8 +178,8 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transf
 		return func(yield func(*Transfer, error) bool) { var zero *Transfer; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Transfer, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Transfer, error) {
 		values, err := upstream.ExtractTransfers(page)
 		return []Transfer(values), err
-	})
+	}, control)
 }

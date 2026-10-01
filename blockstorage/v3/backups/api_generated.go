@@ -235,6 +235,10 @@ func (b listDetailOptsBuilder) ToBackupListDetailQuery() (string, error) {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.Seq2[*Backup, error] {
+	return a.listDetailWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listDetailWithControl(ctx context.Context, control resource.ListControl, options ...ListDetailOption) iter.Seq2[*Backup, error] {
 	var opts ListDetailOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -246,10 +250,10 @@ func (a *API) ListDetail(ctx context.Context, options ...ListDetailOption) iter.
 		return func(yield func(*Backup, error) bool) { var zero *Backup; yield(zero, err) }
 	}
 	_opts := listDetailOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Backup, error) {
+	return resource.StreamWithControl(ctx, upstream.ListDetail(a.client, _opts), func(page pagination.Page) ([]Backup, error) {
 		values, err := upstream.ExtractBackups(page)
 		return []Backup(values), err
-	})
+	}, control)
 }
 
 type ResetStatusOption = request.Option[ResetStatusOpts]

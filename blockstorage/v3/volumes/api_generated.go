@@ -453,6 +453,10 @@ func (b listOptsBuilder) ToVolumeListQuery() (string, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume, error] {
+	return a.listWithControl(ctx, resource.ListControl{}, options...)
+}
+
+func (a *API) listWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*Volume, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
@@ -464,10 +468,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Volume
 		return func(yield func(*Volume, error) bool) { var zero *Volume; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.Stream(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Volume, error) {
+	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Volume, error) {
 		values, err := upstream.ExtractVolumes(page)
 		return []Volume(values), err
-	})
+	}, control)
 }
 
 type ReImageOption = request.Option[ReImageOpts]

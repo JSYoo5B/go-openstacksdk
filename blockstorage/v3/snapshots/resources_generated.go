@@ -25,7 +25,7 @@ func (a *API) newResources() *resource.Collection[Snapshot] {
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
-		Iterate: func(ctx context.Context, q url.Values) iter.Seq2[*Snapshot, error] {
+		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Snapshot, error] {
 			q = maps.Clone(q)
 			options := make([]ListDetailOption, 0, len(q))
 			for key, values := range q {
@@ -33,7 +33,7 @@ func (a *API) newResources() *resource.Collection[Snapshot] {
 					options = append(options, WithListDetailQuery(key, value))
 				}
 			}
-			return a.ListDetail(ctx, options...)
+			return a.listDetailWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Snapshot, error) {
