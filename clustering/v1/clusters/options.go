@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"gophercloudsdk/internal/senlin"
 	"gophercloudsdk/request"
@@ -27,12 +28,53 @@ type CreateOpts struct {
 // UpdateOpts exposes mutable fields only. Optional scalar fields distinguish
 // absence, null and a value. Any explicit ProfileOnly requires microversion 1.6.
 type UpdateOpts struct {
-	Name        request.Optional[string] `json:"name,omitzero"`
-	ProfileID   request.Optional[string] `json:"profile_id,omitzero"`
-	Timeout     request.Optional[int]    `json:"timeout,omitzero"`
-	Config      json.RawMessage          `json:"config,omitempty"`
-	Metadata    json.RawMessage          `json:"metadata,omitempty"`
-	ProfileOnly *bool                    `json:"profile_only,omitempty"`
+	Name            request.Optional[string] `json:"name,omitzero"`
+	ProfileID       request.Optional[string] `json:"profile_id,omitzero"`
+	Timeout         request.Optional[int]    `json:"timeout,omitzero"`
+	Config          json.RawMessage          `json:"config,omitempty"`
+	Metadata        json.RawMessage          `json:"metadata,omitempty"`
+	ProfileOnly     *bool                    `json:"profile_only,omitempty"`
+	profileOnlyNull bool
+}
+
+// MarshalJSON preserves an explicit profile_only null without changing the
+// existing pointer input used for bool values and omission.
+func (value UpdateOpts) MarshalJSON() ([]byte, error) {
+	type plain UpdateOpts
+	encoded, err := json.Marshal(plain(value))
+	if err != nil || !value.profileOnlyNull || value.ProfileOnly != nil {
+		return encoded, err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		return nil, err
+	}
+	fields["profile_only"] = json.RawMessage("null")
+	return json.Marshal(fields)
+}
+
+// UnmarshalJSON also keeps null presence when WithUpdateOptions snapshots a
+// previously decoded input. JSON bool values still use the public pointer.
+func (value *UpdateOpts) UnmarshalJSON(encoded []byte) error {
+	type plain UpdateOpts
+	var decoded plain
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		return err
+	}
+	*value = UpdateOpts(decoded)
+	for key := range fields {
+		if strings.EqualFold(key, "profile_only") {
+			// The plain decoder determines the last value across JSON aliases.
+			// A nil pointer with a present field therefore means explicit null.
+			value.profileOnlyNull = decoded.ProfileOnly == nil
+			break
+		}
+	}
+	return nil
 }
 
 // DeleteOpts defaults to ignoring absence for ordinary deletion and requiring
@@ -92,6 +134,17 @@ func WithUpdateProfileOnly(value bool) UpdateOption {
 	return func(config *request.Config[UpdateOpts]) error {
 		copy := value
 		config.Options.ProfileOnly = &copy
+		config.Options.profileOnlyNull = false
+		return nil
+	}
+}
+
+// WithUpdateProfileOnlyNull assigns an explicit null, including when the cached
+// field is absent. Sending it requires microversion 1.6 like a bool value.
+func WithUpdateProfileOnlyNull() UpdateOption {
+	return func(config *request.Config[UpdateOpts]) error {
+		config.Options.ProfileOnly = nil
+		config.Options.profileOnlyNull = true
 		return nil
 	}
 }

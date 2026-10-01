@@ -115,7 +115,7 @@ func (a *API) Update(ctx context.Context, ref resource.Ref, opts UpdateOpts, opt
 		err = senlin.OptionalObject(config.Options.Metadata, "metadata")
 	}
 	minimum := 0
-	if config.Options.ProfileOnly != nil {
+	if config.Options.ProfileOnly != nil || config.Options.profileOnlyNull {
 		minimum = 6
 	}
 	if err == nil {

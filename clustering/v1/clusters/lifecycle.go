@@ -252,7 +252,7 @@ func clusterCommitHeaders(options []UpdateOption) (map[string]string, error) {
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
-	if err == nil && (config.Options.Name.IsSet() || config.Options.ProfileID.IsSet() || config.Options.Timeout.IsSet() || len(config.Options.Config) > 0 || len(config.Options.Metadata) > 0 || config.Options.ProfileOnly != nil) {
+	if err == nil && (config.Options.Name.IsSet() || config.Options.ProfileID.IsSet() || config.Options.Timeout.IsSet() || len(config.Options.Config) > 0 || len(config.Options.Metadata) > 0 || config.Options.ProfileOnly != nil || config.Options.profileOnlyNull) {
 		err = fmt.Errorf("%w: Commit options only support headers; call Edit for body changes", resource.ErrInvalidOption)
 	}
 	if err == nil {
