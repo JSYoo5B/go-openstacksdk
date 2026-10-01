@@ -180,3 +180,50 @@ func EqualJSON(left, right json.RawMessage) (bool, error) {
 	}
 	return equalFilterJSON(actual, expected), nil
 }
+
+// IntegerJSON normalizes an exact integer response number or decimal integer
+// string. Integral decimal/exponent JSON numbers are accepted without float64
+// conversion or expanding large exponents. Null remains null. This conversion
+// is for audited response descriptors; caller filters are never coerced.
+func IntegerJSON(raw json.RawMessage) (json.RawMessage, error) {
+	value, err := filterJSON(raw)
+	if err != nil {
+		return nil, err
+	}
+	if value == nil {
+		return json.RawMessage("null"), nil
+	}
+	var number json.Number
+	switch value := value.(type) {
+	case json.Number:
+		number = value
+	case string:
+		text := strings.TrimSpace(value)
+		digits := text
+		if strings.HasPrefix(digits, "+") || strings.HasPrefix(digits, "-") {
+			digits = digits[1:]
+		}
+		if digits == "" || strings.IndexFunc(digits, func(r rune) bool { return r < '0' || r > '9' }) >= 0 {
+			return nil, fmt.Errorf("response string %q is not a decimal integer", value)
+		}
+		var integer big.Int
+		if _, ok := integer.SetString(text, 10); !ok {
+			return nil, fmt.Errorf("response string %q is not a decimal integer", value)
+		}
+		number = json.Number(integer.String())
+	default:
+		return nil, fmt.Errorf("response value of type %T is not an integer", value)
+	}
+	canonical := canonicalFilterNumber(number)
+	if canonical.exponent.Sign() < 0 {
+		return nil, fmt.Errorf("response number %q is not an integer", number)
+	}
+	text := canonical.digits
+	if canonical.negative {
+		text = "-" + text
+	}
+	if canonical.exponent.Sign() != 0 {
+		text += "e" + canonical.exponent.String()
+	}
+	return json.RawMessage(text), nil
+}
