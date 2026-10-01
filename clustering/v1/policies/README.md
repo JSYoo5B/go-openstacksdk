@@ -7,7 +7,7 @@
 | `create_policy(name=..., spec=...)` | `Policies.Create(ctx, CreateOpts, options...)` | POST `/policies`, 201 |
 | `get_policy(identity)` | `Policies.Get(ctx, identity)` | GET `/policies/{identity}`, 200 |
 | `policies(**query)` | `Policies.List/All(ctx, options...)` | GET `/policies`, 200 |
-| `update_policy(policy, name=...)` | `Policies.Update(ctx, ref, UpdateOpts, options...)` | 객체 PATCH `/policies/{identity}`, 200 |
+| `update_policy(policy, name=...)` | `Policies.Update(...)` 또는 `Load/Track → Edit → Commit` | 객체 PATCH `/policies/{identity}`, 200; tracked는 dirty 필드만 보내고 clean이면 HTTP 없음 |
 | `delete_policy(policy, ignore_missing=True)` | `Policies.Delete(ctx, ref, options...)` | DELETE, 204; 기본 미존재 무시 |
 | `find_policy(identity, ignore_missing=True)` | `Policies.Find(ctx, ref, options...)` | 명시한 ID 또는 정확한 이름 검색 |
 | `validate_policy(spec=...)` | `Policies.Validate(ctx, ValidateOpts, options...)` | POST `/policies/validate`, 200; 숫자 1.2 이상 |
@@ -62,7 +62,30 @@ fmt.Println(renamed.ID, renamed.Name)
 
 갱신 core 필드는 name입니다. spec/type/data/identity/소유자/타임스탬프는 core 갱신 필드가 아닙니다. body와 header는 이름 조회 전에 고정하고 정확한 이름을 한 번 해석한 ID로 객체 PATCH합니다. 명시 ID는 조회를 생략합니다. 추가 서버 field/header는 작업별 `With...Field/Header`를 사용하며 core와 SDK 소유 auth/version/transport 헤더 덮어쓰기는 거부합니다.
 
-Go Update는 stateless 요청이며 빈 갱신을 요청 전에 거부합니다. Python의 기존 Resource 변경 추적, 같은 값/no-change에서 HTTP 생략, 응답 병합과 dirty reset은 남은 과제입니다. 이름 null 갱신이나 readonly 필드를 Python의 일반 attrs처럼 직렬화한 것으로 처리하지 않습니다.
+Go Update는 stateless 요청이며 빈 갱신을 요청 전에 거부합니다. 변경 추적은 SDK 소유 `TrackedPolicy`로 사용하며 앱 개발자가 builder나 lifecycle interface를 구현할 필요가 없습니다.
+
+```python
+policy = conn.clustering.get_policy("POLICY_ID")
+policy.name = "scale_out_workers"
+policy = conn.clustering.update_policy(policy)
+```
+
+```go
+service, err := conn.Clustering(ctx)
+if err != nil { return err }
+tracked, err := service.Policies.Load(ctx, resource.ID("POLICY_ID"))
+if err != nil { return err }
+if err := tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName("scale_out_workers")); err != nil {
+    return err
+}
+policy, err := tracked.Commit(ctx)
+if err != nil { return err }
+fmt.Println(policy.Name, tracked.Dirty(), tracked.Response().Body)
+```
+
+기존 모델은 `service.Policies.Track(policy)`로 감쌀 수 있습니다. 같은 현재 값의 대입과 clean Commit은 HTTP를 생략하지만 `A → B → A`는 dirty로 남습니다. `RemoveName()`은 캐시에서 name을 제거하고 다음 Commit에 `name:null`을 남깁니다. null 허용은 서버 schema가 판정하며 readonly spec/type/data/소유자 등은 core 갱신 필드가 아닙니다.
+
+성공 응답은 캐시에 필드별로 병합하고 nested 객체는 전체 교체합니다. 생략한 전송 필드도 clean으로 바뀌며 HTTP 처리 중 새 Edit은 보존합니다. `Value()`는 병합 캐시, `Response()`는 마지막 성공 응답의 필드인 독립 snapshot입니다. Track은 입력 Body를 기준으로 하고 Body 없는 수동 모델은 HTTP 증거를 만들지 않는 로컬 seed입니다. 요청 ID는 고정하며 실패는 dirty를 유지하고 accepted 응답 오류에서도 자동 재전송하지 않습니다. `Refresh`로 서버 상태를 확인할 수 있습니다. [전체 Python/Go 변경 추적 계약](../tracking/README.md)을 참고합니다.
 
 ## 목록·검색·삭제
 
@@ -97,6 +120,6 @@ Delete는 기본 404만 무시하고 `resource.WithMissingError()`로 404도 반
 
 `Policy.Spec`/`Data`는 JSON 숫자를 보존하며 embedded `resource.Metadata`의 `Body`/`Header`/`StatusCode`는 unknown/null/생략 및 HTTP 증거를 보존합니다. wire project/domain/user는 각각 Go ProjectID/DomainID/UserID입니다. 단건 응답은 `policy` 객체 envelope를 요구하며 Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 오류는 `resource.ResponseError`에 원문·header·status를 남기고 mutation을 재전송하지 않습니다.
 
-상속한 paginated/base_path/max_items, per-call microversion/header, proxy JMESPath와 Resource field normalization/cache/dirty lifecycle은 남은 비교·구현 범위입니다. 리소스 생성·갱신과 cluster에 policy를 연결하는 연산은 별도 API 계약입니다. 직접 연산 7개를 제공한 상태와 Python proxy 전체 계약 완료를 구분합니다.
+Policy update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 paginated/base_path/max_items, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 리소스 갱신과 cluster의 policy 연결은 별도 API 계약이며 직접 연산 7개와 Python proxy 전체 계약 완료를 구분합니다.
 
-근거: [고정 Policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/policy.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_policies_test.go), [응답 경계 계약](../../../api/clustering_policies_response_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
+근거: [고정 Policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/policy.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_policies_test.go), [응답 경계 계약](../../../api/clustering_policies_response_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).

@@ -7,7 +7,7 @@
 | `create_profile(name=..., spec=..., metadata=...)` | `Profiles.Create(ctx, CreateOpts, options...)` | POST `/profiles`, 201 |
 | `get_profile(identity)` | `Profiles.Get(ctx, identity)` | GET `/profiles/{identity}`, 200 |
 | `profiles(**query)` | `Profiles.List/All(ctx, options...)` | GET `/profiles`, 200 |
-| `update_profile(profile, **attrs)` | `Profiles.Update(ctx, ref, UpdateOpts, options...)` | 객체 PATCH `/profiles/{identity}`, 200 |
+| `update_profile(profile, **attrs)` | `Profiles.Update(...)` 또는 `Load/Track → Edit → Commit` | 객체 PATCH `/profiles/{identity}`, 200; tracked는 dirty 필드만 보내고 clean이면 HTTP 없음 |
 | `delete_profile(profile, ignore_missing=True)` | `Profiles.Delete(ctx, ref, options...)` | DELETE, 204; 기본 미존재 무시 |
 | `find_profile(identity, ignore_missing=True)` | `Profiles.Find(ctx, ref, options...)` | 명시한 ID 또는 정확한 이름 검색 |
 | `validate_profile(spec=...)` | `Profiles.Validate(ctx, ValidateOpts, options...)` | POST `/profiles/validate`, 200; 숫자 1.2 이상 |
@@ -59,7 +59,7 @@ if err != nil { return err }
 fmt.Println(updated.ID, updated.UserMetadata)
 ```
 
-갱신 가능한 core 필드는 name과 metadata입니다. spec/type/identity/소유자/타임스탬프는 core 갱신 필드가 아닙니다. name은 `UpdateOpts{Name: &name}`으로 지정합니다. 추가 서버 확장은 `WithUpdateField`로 지정하고 core 필드 덮어쓰기는 거부합니다. body와 header는 이름 조회 전에 고정하며 정확한 이름을 한 번 해석한 ID로 PATCH합니다.
+갱신 가능한 core 필드는 name과 metadata입니다. spec/type/identity/소유자/타임스탬프는 core 갱신 필드가 아닙니다. name은 `WithUpdateName(name)` 또는 `UpdateOpts{Name: &name}`으로 지정합니다. 추가 서버 확장은 `WithUpdateField`로 지정하고 core 필드 덮어쓰기는 거부합니다. body와 header는 이름 조회 전에 고정하며 정확한 이름을 한 번 해석한 ID로 PATCH합니다.
 
 | metadata 입력 | 전송 의미 |
 |---|---|
@@ -68,7 +68,35 @@ fmt.Println(updated.ID, updated.UserMetadata)
 | `WithUpdateMetadata(map[string]any{})` | 명시 빈 객체 |
 | `WithUpdateMetadata(map[string]any{...})` | 지정한 객체 |
 
-서버의 metadata null 허용 여부와 의미는 deployment가 결정합니다. SDK가 null을 전송할 수 있다는 사실만으로 삭제나 초기화 성공을 보장하지 않습니다. Go Update는 명시적인 stateless 요청이며 빈 갱신을 요청 전에 거부합니다. Python의 기존 Resource 변경 추적, 같은 값/no-change에서 HTTP 생략, 응답 병합과 dirty reset은 아직 별도 과제입니다.
+서버의 metadata null 허용 여부와 의미는 deployment가 결정합니다. SDK가 null을 전송할 수 있다는 사실만으로 삭제나 초기화 성공을 보장하지 않습니다. Go Update는 명시적인 stateless 요청이며 빈 갱신을 요청 전에 거부합니다.
+
+변경 추적은 SDK 소유 `TrackedProfile`로 사용합니다. 앱 개발자가 lifecycle interface나 builder를 구현할 필요가 없습니다.
+
+```python
+profile = conn.clustering.get_profile("PROFILE_ID")
+profile.name = "renamed_template"
+profile.metadata = {"role": "worker"}
+profile = conn.clustering.update_profile(profile)
+```
+
+```go
+service, err := conn.Clustering(ctx)
+if err != nil { return err }
+tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
+if err != nil { return err }
+if err := tracked.Edit(profiles.UpdateOpts{},
+    profiles.WithUpdateName("renamed_template"),
+    profiles.WithUpdateMetadata(map[string]any{"role": "worker"})); err != nil {
+    return err
+}
+profile, err := tracked.Commit(ctx)
+if err != nil { return err }
+fmt.Println(profile.Name, tracked.Dirty(), tracked.Response().Body)
+```
+
+기존 모델은 `service.Profiles.Track(profile)`로 감쌀 수 있습니다. 같은 현재 값의 대입과 clean Commit은 HTTP를 생략하지만 `A → B → A`는 dirty로 남습니다. `RemoveName`·`RemoveMetadata`는 캐시 필드 삭제와 null PATCH를 구분해 처리하며 서버의 null 허용은 별도입니다. 성공 응답은 필드별로 캐시에 병합하고 nested 객체는 전체 교체하며, 응답에서 생략한 전송 필드도 clean으로 바뀝니다. HTTP 처리 중 새 Edit은 보존합니다.
+
+`Value()`는 병합 캐시 snapshot, `Response()`는 마지막 성공 응답의 필드 snapshot입니다. Track 입력의 Body가 있으면 typed 필드보다 우선하며 수동 Body 없는 모델은 HTTP 증거를 만들지 않는 로컬 seed입니다. 요청 ID는 고정하고 getter 모델이나 입력을 변경해도 handle은 바뀌지 않습니다. 실패 시 dirty를 유지하며 accepted 응답 오류 후 SDK가 자동 재전송하지 않습니다. `Refresh`로 서버 상태를 확인할 수 있습니다. [전체 Python/Go 변경 추적 계약](../tracking/README.md)을 참고합니다.
 
 ## 목록과 이름
 
@@ -99,6 +127,6 @@ Get은 컨트롤러의 이름·UUID·짧은 ID를 직접 받습니다. `resource
 
 결과의 wire `metadata`는 `Profile.UserMetadata`이며 HTTP 증거인 embedded `resource.Metadata`와 구분합니다. spec과 사용자 metadata는 raw JSON 숫자를 보존하고 `Body`는 null/생략·unknown 필드, `Header`/`StatusCode`는 HTTP 응답을 보존합니다. 단건 응답은 `profile` 객체 envelope를 요구합니다. Python의 flat/empty fallback을 적용하지 않습니다. 승인된 mutation의 decode/read 실패는 `resource.ResponseError`에 원문·header·status를 남기며 mutation을 재전송하지 않습니다. Delete는 ignored404 외의 권한·사용 중 오류를 숨기지 않으며, 찾은 응답 ID가 없으면 삭제 요청을 보내지 않습니다.
 
-상속한 paginated/base_path/max_items, per-call microversion/header, proxy JMESPath와 Resource field normalization/cache/dirty lifecycle은 남은 비교·구현 범위입니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
+Profile update의 dirty/no-op/null 삭제/응답 병합과 reset은 [tracked lifecycle](../tracking/README.md)로 제공하며 사용법과 테스트 근거를 기준으로 Go mapping 판정합니다. readonly 보호, snapshot 반환, strict envelope와 선택 client의 버전·인증 소유권은 문서화한 Go 정책입니다. 상속한 목록의 paginated/base_path/max_items, proxy JMESPath와 combined-string Find fallback은 남은 비교·구현 범위입니다. 직접 연산 7개가 제공된 상태와 Python proxy 전체 계약 완료를 구분합니다.
 
-근거: [고정 Profile](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/profile.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_profiles_test.go), [lookup snapshot 회귀](../../../api/clustering_profiles_update_snapshot_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
+근거: [고정 Profile](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/profile.py), [고정 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/clustering/v1/_proxy.py), [공식 API](https://docs.openstack.org/api-ref/clustering/). [HTTP 계약](../../../api/clustering_profiles_test.go), [lookup snapshot 회귀](../../../api/clustering_profiles_update_snapshot_test.go), [tracked HTTP 회귀](../../../api/clustering_lifecycle_test.go), [지원 판정](../../../docs/sdk-support-ledger.md).
