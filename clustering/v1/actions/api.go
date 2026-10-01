@@ -156,7 +156,7 @@ func WithListPaginated(value bool) ListOption {
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {
-	if err := request.ValidateCapabilities(config, false, true, false); err != nil {
+	if err := request.ValidateCapabilities(config, false, true, false, filterSpec.Namespace); err != nil {
 		return nil, err
 	}
 	value := cloneOptions(config.Options)
@@ -185,6 +185,9 @@ func listQuery(config request.Config[ListOpts]) (url.Values, error) {
 		}
 		query[key] = append([]string(nil), values...)
 	}
+	if err := senlin.RejectBodyFilterQuery(config.Query, filterSpec); err != nil {
+		return nil, err
+	}
 	return query, nil
 }
 
@@ -193,15 +196,28 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Action
 	return func(yield func(*Action, error) bool) {
 		config, err := request.Apply(ListOpts{}, options...)
 		var query url.Values
+		var filters map[string]json.RawMessage
 		if err == nil {
 			query, err = listQuery(config)
+		}
+		if err == nil {
+			filters, err = senlin.PrepareBodyFilters(config, filterSpec)
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", "clustering.actions", err))
 			return
 		}
 		for value, err := range rest.ListWithControl(ctx, spec(a.RawClient()), query, rest.ListControl{MaxItems: config.Options.MaxItems, SinglePage: config.Options.Paginated != nil && !*config.Options.Paginated, LimitHint: true}) {
-			if !yield(value, request.Wrap("List", "clustering.actions", err)) {
+			if err != nil {
+				yield(nil, request.Wrap("List", "clustering.actions", err))
+				return
+			}
+			matched, err := senlin.MatchFilters(value.Body, filters)
+			if err != nil {
+				yield(nil, request.Wrap("List", "clustering.actions", err))
+				return
+			}
+			if matched && !yield(value, nil) {
 				return
 			}
 		}
