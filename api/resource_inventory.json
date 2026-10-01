@@ -1540,5 +1540,48 @@
     "find": false,
     "delete": true,
     "wait": true
+  },
+  {
+    "package": "gophercloudsdk/instanceha/v1/segments",
+    "source": "sdk_owned",
+    "model": "Segment",
+    "find": true,
+    "delete": true,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/instanceha/v1/hosts",
+    "source": "sdk_owned",
+    "model": "Host",
+    "find": true,
+    "delete": true,
+    "wait": false,
+    "scope": "InSegment",
+    "parent": "gophercloudsdk/instanceha/v1/segments"
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/buildinfo",
+    "source": "sdk_owned",
+    "model": "BuildInfo",
+    "kind": "service_info",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/profiletypes",
+    "source": "sdk_owned",
+    "model": "ProfileType",
+    "find": true,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/clustering/v1/policytypes",
+    "source": "sdk_owned",
+    "model": "PolicyType",
+    "find": true,
+    "delete": false,
+    "wait": false
   }
 ]

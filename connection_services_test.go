@@ -43,10 +43,12 @@ func TestEveryServiceUsesSharedCatalogPolicyAndProvider(t *testing.T) {
 		service sdk.Service
 		get     func(context.Context) (*gophercloud.ServiceClient, error)
 	}{
+		{sdk.Accelerator, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.Accelerator(ctx)) }},
 		{sdk.Compute, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.ComputeV2(ctx)) }},
 		{sdk.Network, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.NetworkV2(ctx)) }},
 		{sdk.Image, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.ImageV2(ctx)) }},
 		{sdk.BlockStorage, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.BlockStorageV3(ctx)) }},
+		{sdk.Clustering, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.Clustering(ctx)) }},
 		{sdk.BareMetal, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.BareMetal(ctx)) }},
 		{sdk.BareMetalIntrospection, func(ctx context.Context) (*gophercloud.ServiceClient, error) {
 			return raw(c.BareMetalIntrospection(ctx))
@@ -56,6 +58,7 @@ func TestEveryServiceUsesSharedCatalogPolicyAndProvider(t *testing.T) {
 		{sdk.Database, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.Database(ctx)) }},
 		{sdk.DNS, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.DNS(ctx)) }},
 		{sdk.Identity, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.Identity(ctx)) }},
+		{sdk.InstanceHA, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.InstanceHA(ctx)) }},
 		{sdk.KeyManager, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.KeyManager(ctx)) }},
 		{sdk.LoadBalancer, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.LoadBalancer(ctx)) }},
 		{sdk.Messaging, func(ctx context.Context) (*gophercloud.ServiceClient, error) { return raw(c.Messaging(ctx)) }},

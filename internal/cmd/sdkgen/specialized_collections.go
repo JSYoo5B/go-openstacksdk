@@ -85,4 +85,9 @@ var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/accelerator/v2/deviceprofiles", Source: "sdk_owned", Model: "DeviceProfile", Find: true, Delete: true},
 	{Package: "gophercloudsdk/accelerator/v2/attributes", Source: "sdk_owned", Model: "Attribute", Delete: true},
 	{Package: "gophercloudsdk/accelerator/v2/acceleratorrequests", Source: "sdk_owned", Model: "AcceleratorRequest", Delete: true, Wait: true},
+	{Package: "gophercloudsdk/instanceha/v1/segments", Source: "sdk_owned", Model: "Segment", Find: true, Delete: true},
+	{Package: "gophercloudsdk/instanceha/v1/hosts", Source: "sdk_owned", Model: "Host", Find: true, Delete: true, Scope: "InSegment", Parent: "gophercloudsdk/instanceha/v1/segments"},
+	{Package: "gophercloudsdk/clustering/v1/buildinfo", Source: "sdk_owned", Model: "BuildInfo", Kind: "service_info"},
+	{Package: "gophercloudsdk/clustering/v1/profiletypes", Source: "sdk_owned", Model: "ProfileType", Find: true},
+	{Package: "gophercloudsdk/clustering/v1/policytypes", Source: "sdk_owned", Model: "PolicyType", Find: true},
 }

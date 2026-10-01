@@ -16,6 +16,7 @@ var serviceSpecs = map[string]serviceSpec{
 	"baremetal":              {"BareMetal", "BareMetal", "v1"},
 	"baremetalintrospection": {"BareMetalIntrospection", "BareMetalIntrospection", "v1"},
 	"blockstorage":           {"BlockStorage", "BlockStorage", "v3"},
+	"clustering":             {"Clustering", "Clustering", "v1"},
 	"compute":                {"Compute", "Compute", "v2"},
 	"container":              {"Container", "Container", "v1"},
 	"containerinfra":         {"ContainerInfra", "ContainerInfra", "v1"},
@@ -23,6 +24,7 @@ var serviceSpecs = map[string]serviceSpec{
 	"dns":                    {"DNS", "DNS", "v2"},
 	"identity":               {"Identity", "Identity", "v3"},
 	"image":                  {"Image", "Image", "v2"},
+	"instanceha":             {"InstanceHA", "InstanceHA", "v1"},
 	"keymanager":             {"KeyManager", "KeyManager", "v1"},
 	"loadbalancer":           {"LoadBalancer", "LoadBalancer", "v2"},
 	"messaging":              {"Messaging", "Messaging", "v2"},
@@ -38,7 +40,7 @@ var serviceSpecs = map[string]serviceSpec{
 
 func registryField(path string) string {
 	words := map[string]string{
-		"nodegroups": "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo",
+		"nodegroups": "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo", "profiletypes": "ProfileTypes", "policytypes": "PolicyTypes", "vmoves": "VMoves",
 		"apiversions": "APIVersions", "servergroups": "ServerGroups", "keypairs": "KeyPairs", "secgroups": "SecurityGroups", "instanceactions": "InstanceActions", "remoteconsoles": "RemoteConsoles", "attachinterfaces": "AttachInterfaces", "volumeattach": "VolumeAttachments", "availabilityzones": "AvailabilityZones", "quotasets": "QuotaSets", "quotaclasssets": "QuotaClassSets",
 		"extensions": "", "layer3": "", "bgp": "BGP", "qos": "QoS", "fwaas_v2": "Firewall", "vpnaas": "VPN", "taas": "TaaS", "networkipavailabilities": "NetworkIPAvailabilities", "rbacpolicies": "RBACPolicies", "subnetpools": "SubnetPools", "addressscopes": "AddressScopes", "floatingips": "FloatingIPs", "extraroutes": "ExtraRoutes", "portforwarding": "PortForwarding", "bgpvpns": "BGPVPNs", "attributestags": "AttributeTags", "tapmirrors": "TapMirrors", "addressgroups": "AddressGroups", "endpointgroups": "EndpointGroups", "siteconnections": "SiteConnections", "ipsecpolicies": "IPsecPolicies", "ikepolicies": "IKEPolicies", "ruletypes": "RuleTypes",
 		"flavorprofiles": "FlavorProfiles", "l7policies": "L7Policies", "l7rules": "L7Rules", "loadbalancers": "LoadBalancers", "volumetypes": "VolumeTypes", "volumetransfers": "VolumeTransfers", "volumegroups": "VolumeGroups", "group_types": "GroupTypes", "recordsets": "RecordSets", "imagedata": "ImageData", "imageimport": "ImageImport", "roleassignments": "RoleAssignments", "registeredlimits": "RegisteredLimits", "applicationcredentials": "ApplicationCredentials", "domainconfigs": "DomainConfigs", "domainroles": "DomainRoles", "projectroles": "ProjectRoles", "userpassword": "UserPassword", "trusts": "Trusts", "portgroups": "PortGroups", "bulkdelete": "BulkDelete", "softwareconfigs": "SoftwareConfigs", "softwaredeployments": "SoftwareDeployments", "stacktemplates": "StackTemplates", "sharetypes": "ShareTypes", "sharenetworks": "ShareNetworks", "shareinstances": "ShareInstances", "sharereplicas": "ShareReplicas", "sharesnapshots": "ShareSnapshots", "sharegroups": "ShareGroups", "sharegroup_types": "ShareGroupTypes", "sharegroup_snapshots": "ShareGroupSnapshots", "securityservices": "SecurityServices", "shareaccessrules": "ShareAccessRules", "resourceproviders": "ResourceProviders", "resourceclasses": "ResourceClasses", "allocationcandidates": "AllocationCandidates", "crontriggers": "CronTriggers", "clustertemplates": "ClusterTemplates", "clusterstacks": "ClusterStacks",
