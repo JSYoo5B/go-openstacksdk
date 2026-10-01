@@ -33,6 +33,8 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Nova server tags | `compute.Tags.InServer(ctx, server)` | 태그 문자열 집합 |
 | Nova project quota | `conn.ProjectQuotas(ctx, project)` / `CurrentProjectQuotas(ctx)` | 고정 project ID; Get·Detail·Update·Reset |
 | Heat stack | `orchestration.Stacks.InStack(ctx, ref)` / `ForStack(identity)` | stack name + UUID |
+| Heat stack resource | `orchestration.StackResources.InStack(ctx, ref)` / `ForStack(identity)` | 실제 소속 stack pair + resource_name |
+| Heat stack event | `orchestration.StackEvents.InStack(ctx, ref)` → `ForResource(name)` | stack pair + resource_name + event ID |
 | Manila share access rule | `shared.ShareAccessRules.InShare(ctx, share)` | access ID; 응답 share ID 검증 |
 | Trove database | `database.Databases.InInstance(ctx, instance)` | 데이터베이스 이름 |
 | Trove user | `database.Users.InInstance(ctx, instance)` | 사용자·host 식별자 (서비스 설명 참조) |
@@ -54,6 +56,8 @@ Compute/Network/Image의 전체 API 객체는 `conn.ComputeV2(ctx)`, `conn.Netwo
 Collection 기반 범위 객체는 Get/Find/List/All/Delete/Wait/WaitDeleted/ResolveID를 공유합니다. 이름·삭제·상태가 없는 모델은 해당 기능에 `ErrUnsupported`를 반환합니다. Delete는 기본적으로 404를 무시하며 `WithMissingError()`로 엄격한 동작을 선택합니다. Create/Update는 원래 API에 해당 연산이 있는 범위에 제공됩니다.
 
 서버 tag 범위는 Collection 대신 Add/Check/List/Replace/Remove/RemoveAll을 제공하는 문자열 집합입니다. microversion 2.26 이상을 요구하며 nil·빈 교체 목록은 집합을 비웁니다. [tag의 선택적 404 정책](../compute/v2/tags/README.md)을 참고합니다. Nova action은 requestID로만 조회하고 이름·삭제·상태 대기는 지원하지 않습니다. SDK의 [ActionResource](../compute/v2/instanceactions/README.md)는 목록·상세와 event의 추가 필드·원본 JSON·헤더를 보존합니다.
+
+Heat [자식 리소스](../orchestration/v1/stackresources/README.md)는 logical/physical ID 대신 `resource_name`으로 조회하고 nested 항목의 실제 소속을 검증합니다. Metadata·health 변경·상태 대기를 제공하며 없는 생성·삭제를 만들지 않습니다. [이벤트](../orchestration/v1/stackevents/README.md)는 stack 전체 또는 resource별 목록과 resource-scoped 단건 GET을 제공하는 읽기 전용 범위입니다. 이벤트 이름 Find·변경·대기는 없습니다. 두 범위 모두 이미 아는 canonical stack pair를 `ForStack`으로 고정할 수 있습니다.
 
 Trove의 [database](../db/v1/databases/README.md)와 [user](../db/v1/users/README.md)는 pinned native/Python SDK가 fetch를 노출하지 않아 Get을 같은 instance의 목록 검색으로 제공합니다. 단일 Create와 CreateBatch 모두 배열 본문으로 요청하고 error를 반환합니다. 자식 상태 대기는 제공하지 않습니다. 응답이 없는 비동기 생성의 완료나 batch 원자성을 추정하지 않습니다.
 

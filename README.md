@@ -24,7 +24,7 @@ gophercloudsdk/
 └── docs/                    # 설계와 테스트 설명
 ```
 
-고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2 Device·Deployable을 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 2개, 부모 Collection 범위 19개, Heat 복합 식별자 정책, Nova project quota singleton과 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
+고정한 Gophercloud API는 **21개 서비스의 23개 API 버전**, **194개 리소스 패키지**, **1,126개 공개 연산**을 제공합니다. 여기에 SDK가 직접 구현한 Cyborg v2의 다섯 리소스 API를 추가해 연결 가능한 서비스는 22개입니다. 공통 정책은 108개 native 일반 Collection, Cyborg Collection 5개, 부모 Collection 범위 19개, Heat stack 복합 식별자·자식 resource·이벤트 범위, Nova project quota singleton과 별도 server tag 집합에 적용합니다. native 연산 수에는 인증 함수와 URL 도우미도 포함되며 HTTP endpoint 수를 뜻하지 않습니다. [API 설명](api/README.md), [공통 정책 지원 목록](api/resource_inventory.json), [openstacksdk 비교 기준](api/openstacksdk/README.md)에서 범위를 확인합니다.
 
 아래 표는 추가 이름 해석과 서버 생성 흐름을 제공하는 기존 상위 서비스의 범위입니다. 모든 API와 공통 정책은 이어지는 버전별 서비스 패키지에 있습니다.
 

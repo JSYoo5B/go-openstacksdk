@@ -43,8 +43,12 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `api/instance_actions_scope_test.go` | requestID 조회, 목록·상세·event 확장 및 원본 JSON/헤더, pagination·break·cycle·취소 |
 | `api/trove_databases_contracts_test.go`, `api/trove_users_contracts_test.go` | instance 1회 해석, 목록 기반 exact 조회, 단일/batch 배열 Create, 이름 인코딩·미존재 삭제·대기 |
 | `api/accelerator_read_test.go`, `api/accelerator_actions_test.go`, `api/accelerator_boundaries_test.go` | SDK 소유 Cyborg 연결·microversion·UUID, 응답 JSON/헤더, 목록 중단·cycle·origin, enable/disable·program payload, 빈 페이지 continuation, redirect 경계·최신 token·재인증/취소와 사전 검증 |
+| `api/accelerator_profiles_test.go`, `api/accelerator_attributes_test.go`, `api/accelerator_singleton_test.go`, `api/accelerator_status_filter_test.go` | 프로필 exact 이름·UUID 삭제·array-one 생성, attribute key/ID 구별·flat 생성, singleton 응답 cardinality, snapshot·로컬 상태 필터와 명시 query 보존 |
+| `api/accelerator_requests_test.go`, `api/accelerator_request_binding_test.go`, `api/accelerator_request_response_boundary_test.go` | ARQ 전체 batch·부분 해석·raw bytes·오류 보존, state 대기, collection PATCH202·service token·2.1 project gate, single/batch/instance DELETE204 selector, accepted201 body 취소·decode 오류에서 무재시도·body close |
 | `api/project_quotas_contracts_test.go`, `connection_quotas_test.go` | 고정 project quota, 별도 Keystone 이름 조회·auth scope, zero/-1/force false, singleton 결과·오류·Reset |
 | `api/heat_stacks_contracts_test.go` | name+ID identity, output query, summary/detail 차이, linked/marker pagination, 고정 대상 waiter·실패/삭제 완료 |
+| `api/heat_stackresources_contracts_test.go`, `api/heat_stackresources_responses_test.go` | resource_name/논리·물리 ID 구별, nested owner·health false·metadata·대기, raw 필드·큰 숫자·독립 header·malformed 목록 거부 |
+| `api/heat_stackevents_scope_test.go`, `api/heat_stackevents_pagination_test.go` | stack/resource 이벤트 경로·typed query·marker·cycle·break·취소, resource-scoped 단건 GET·raw 필드·독립 header |
 | `api/share_access_rules_scope_test.go`, `api/share_access_rules_errors_test.go` | Manila2.45/2.82 access rule 조회·action·잠금, share 일치·부모404/403 보존, 취소·waiter |
 
 페이지 테스트는 서로 다른 페이지의 같은 이름을 검사합니다. `break` 테스트는 다음 페이지 요청 횟수가 0인지 확인합니다. 시간 관련 테스트는 짧은 SDK timeout을 사용하고 `errors.Is(context.DeadlineExceeded)`를 검사합니다. 특정 실행 시간과 동일하다고 가정하지 않습니다.
