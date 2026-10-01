@@ -4977,6 +4977,810 @@
       "documentation": [
         "containerinfra/v1/quotas/README.md"
       ]
+    },
+    {
+      "operation": "python:clustering/v1/actions",
+      "source_fingerprint": "83f130d549be554829cb8859e454064ba59f54e82396467aabc7e204005b2b84",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/actions.API.List",
+        "gophercloudsdk/clustering/v1/actions.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete/default query values and defensive snapshots preserve service-specific filters, raw responses and actual list capability.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/actions/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
+        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/events",
+      "source_fingerprint": "cb8633f4861c7955ea66d6277d89df423c945cba8240d3622d3ffa4e3b08b35d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/events.API.List",
+        "gophercloudsdk/clustering/v1/events.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete/default query values and defensive snapshots preserve service-specific filters, raw responses and actual list capability.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadEventRepeatedFiltersSnapshotAndExactBody"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/events/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
+        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_action",
+      "source_fingerprint": "6a55348eb1c7620f8a58ed974197187b6dce8556a0b35e9521be15aab9b6faf1",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/actions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Direct GET200 retains resource ID distinct from target/object ID, exact typed/raw fields and accepted response evidence.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadActionNumericTimesAndResponseIdentity"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/actions/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_build_info",
+      "source_fingerprint": "9d6c2521f410593539a7313508f2bed72c9ec739206c405bf8d9a0ee020ca17a",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/buildinfo.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The build-info singleton has no fabricated ID or body and retains separate API/engine revisions, large raw values and accepted HTTP evidence.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryBuildInfoSingletonAndRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Native403/404, invalid accepted resource bodies, canceled contexts and changed redirect targets preserve errors and prevent unauthorized extra HTTP.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPAndDecodeErrorsRetainEvidence",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryInvalidInputsCancelAndRedirectBeforeSecondRequest"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/buildinfo/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_event",
+      "source_fingerprint": "16ccc3e4f69dfb28ec040c34c53fb7295e992998c7b994440420faee1094c1cc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/events.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Direct GET200 retains resource ID distinct from target/object ID, exact typed/raw fields and accepted response evidence.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadEventGetHTTPAndDecodeEvidence"
+          ]
+        },
+        {
+          "behavior": "Event levels accept JSON string and exact number forms; null/omission and the original JSON type remain visible without float64 conversion.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadEventLevelsPreserveStringNumberNullAndOmission"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed.",
+        "Python level is an untyped Body value; Go Level is its exact string/number lexeme and Body retains the original JSON type."
+      ],
+      "documentation": [
+        "clustering/v1/events/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_policy_type",
+      "source_fingerprint": "357a5b6df0654d0c29141d5ea2b505b582c3b53097c99d850f9dc210797bbdeb",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policytypes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact policy type names form the detail route and typed schemas, raw support status and independent response version are preserved.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryTypeNamePathsAndIndependentVersion"
+          ]
+        },
+        {
+          "behavior": "Native403/404, invalid accepted resource bodies, canceled contexts and changed redirect targets preserve errors and prevent unauthorized extra HTTP.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPAndDecodeErrorsRetainEvidence",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryInvalidInputsCancelAndRedirectBeforeSecondRequest"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/policytypes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/get_profile_type",
+      "source_fingerprint": "ae044e8e14a3db15405bdcc85951de2a0bd303f407de86d4f6924aa157dbe28b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiletypes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Dotted/versioned profile type names form one protected route segment; list Name/Version are not synthesized into a different detail ID.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryTypeNamePathsAndIndependentVersion"
+          ]
+        },
+        {
+          "behavior": "Native403/404, invalid accepted resource bodies, canceled contexts and changed redirect targets preserve errors and prevent unauthorized extra HTTP.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPAndDecodeErrorsRetainEvidence",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryInvalidInputsCancelAndRedirectBeforeSecondRequest"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/profiletypes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/list_profile_type_operations",
+      "source_fingerprint": "298eff8c6a62e95d6747c33cfd039f75ebc09fe076611475264f94f536672b1a",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiletypes.API.Operations"
+      ],
+      "contracts": [
+        {
+          "behavior": "The flat operations catalog retains arbitrary schemas and requires actual numeric microversion>=1.4 before HTTP without upgrading the shared client.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryOperationsVersionSchemaAndRawEnvelope"
+          ]
+        },
+        {
+          "behavior": "Native403/404, invalid accepted resource bodies, canceled contexts and changed redirect targets preserve errors and prevent unauthorized extra HTTP.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPAndDecodeErrorsRetainEvidence",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryInvalidInputsCancelAndRedirectBeforeSecondRequest"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/profiletypes/README.md",
+        "clustering/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/policy_types",
+      "source_fingerprint": "0689f008aee932985e53f540e374b77d4e6ebd4da851748e6e96c07e719460ad",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/policytypes.API.List",
+        "gophercloudsdk/clustering/v1/policytypes.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Catalog lists follow inherited body/header links within their origin/path with sticky filters and lazy breaks; no undocumented marker fallback is inferred from type names.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryCatalogLinksPreserveExtensionsAndNoMarkerFallback",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/policytypes/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare inherited limit/marker fallback, local Body filters and query omission, paginated=false, max_items, base_path and JSONPath consumption; the official type catalog declares no paging query protocol."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/profile_types",
+      "source_fingerprint": "aa6642b0fb6bdd28eb4a3ae910ba6452db6de715ca5580829273d3ee5726ef0b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/profiletypes.API.List",
+        "gophercloudsdk/clustering/v1/profiletypes.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Catalog lists follow inherited body/header links within their origin/path with sticky filters and lazy breaks; no undocumented marker fallback is inferred from type names.",
+          "tests": [
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryCatalogLinksPreserveExtensionsAndNoMarkerFallback",
+            "api/clustering_discovery_test.go:TestClusteringDiscoveryHTTPLinksBreakAndTargetGuard"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/profiletypes/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare inherited limit/marker fallback, local Body filters and query omission, paginated=false, max_items, base_path and JSONPath consumption; the official type catalog declares no paging query protocol."
+      ]
+    },
+    {
+      "operation": "python:clustering/v1/services",
+      "source_fingerprint": "cdd64d46bc9a6da103354a249d0639c8e254a779dcc13ab4a0af6fda341a89ca",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/clustering/v1/services.API.List",
+        "gophercloudsdk/clustering/v1/services.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete/default query values and defensive snapshots preserve service-specific filters, raw responses and actual list capability.",
+          "tests": [
+            "api/clustering_read_test.go:TestClusteringReadServicesVersionGateAndLocalStatusFilter"
+          ]
+        }
+      ],
+      "differences": [
+        "Go takes explicit type-name strings or concrete options with context/error and returns typed snapshots retaining raw JSON and HTTP evidence.",
+        "Go validates the documented endpoint-specific envelope instead of Python permissive flat/empty response fallback; resources are fetched through the API rather than mutated and implicitly committed."
+      ],
+      "documentation": [
+        "clustering/v1/services/README.md",
+        "clustering/v1/README.md"
+      ],
+      "remaining": [
+        "Compare inherited local Body filtering/query consumption, paginated/base_path/max_items and JSONPath parameters before closing the whole list declaration.",
+        "Verify controller default/capped limit and no-link fallback policy for this resource; Services has no documented paging query and numeric1.7 is explicitly required."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/create_host",
+      "source_fingerprint": "8897ebf0384911e529bbe8de546cb997cb8181b1ac4f1159f574abb49447bd17",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/hosts.API.InSegment",
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed parent UUID and tenant prefix survive POST201/GET200/DELETE204; exact names resolve once and optional false/raw IDs remain distinct.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostFixedSegmentCRUDAndExactName"
+          ]
+        },
+        {
+          "behavior": "Parent overrides and changed source version headers fail before HTTP; missing-delete defaults, deletion waits and other native HTTP causes remain observable.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostScopeRejectsParentOverridesBeforeHTTP",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostChangedSourceVersionRejectsAllScopeRequests",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostDeletionWaitPreserves404AndOtherFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Go InSegment resolves a canonical UUID or exact name once and retains the URI parent independently of body fields; subsequent operations use concrete options and context.",
+        "Create uses the documented control_attributes string while responses retain string/object raw JSON; the documented host envelope and accepted HTTP evidence are validated."
+      ],
+      "documentation": [
+        "instanceha/v1/hosts/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/create_notification",
+      "source_fingerprint": "54bf38a29a2ca8dcbc7f6b13d3ff4846415abd9ff7e6a3e0b9a8989abcf81bf9",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/notifications.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 snapshots the object payload and preserves notification UUID, exact raw IDs and nested number/string workflow progress.",
+          "tests": [
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationCreateSnapshotsPayloadAndPreservesWorkflowJSON"
+          ]
+        },
+        {
+          "behavior": "GET and accepted JSON failures retain HTTP evidence; unsupported names/mutations and invalid payloads fail before HTTP, and the real status getter remains context-aware.",
+          "tests": [
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationAcceptedDecodeAndHTTPErrorsKeepEvidence",
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationRejectsNamesMutationsAndInvalidPayloadBeforeHTTP",
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationWaitUsesRealStatusAndContext"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses canonical notification_uuid references without a name heuristic; notification database ID and all nested progress JSON remain separate.",
+        "Concrete Go create inputs require a hostname, generated-time string and snapshotted JSON object payload; raw responses and strict documented envelopes replace mutable Python Resource/permissive decode behavior."
+      ],
+      "documentation": [
+        "instanceha/v1/notifications/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/create_segment",
+      "source_fingerprint": "37cf89449aa4ecdc5eb6b595de4612dc9723cd8543c5b0119b2e458c8e42f362",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/segments.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "The segment UUID is distinct from the exact raw database ID; POST202, GET200, PUT200 and DELETE204 preserve the versioned tenant root and typed values.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentCRUDPreservesPrefixUUIDAndTypedBody"
+          ]
+        },
+        {
+          "behavior": "Core/read-only fields and version headers are protected before lookup; enabled requires numeric1.2 and accepted mutation decode failure preserves the response without resend.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentVersionPreflightAppliesToEveryEntryPoint",
+            "api/instanceha_segments_test.go:TestInstanceHASegmentProtectedExtensionsFailBeforeNameLookup",
+            "api/instanceha_segments_test.go:TestInstanceHASegmentAcceptedDecodeErrorRetainsMutationEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete options, context and explicit ID/Name references; Get takes a canonical UUID, while exact names are resolved by the shared Collection.",
+        "The documented singular envelope is required; raw fields and accepted response evidence are retained instead of Python permissive flat/empty decoding and a mutable Resource."
+      ],
+      "documentation": [
+        "instanceha/v1/segments/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Explicit description:null cannot yet be expressed: nil pointer omits the concrete field and extensions protect that core field.",
+        "Compare Python attribute normalization, nullable/core values and create/dirty-commit semantics before closing the whole mutation declaration."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/delete_host",
+      "source_fingerprint": "a4984fce9c5bd04d935d331ce9dd668e656ac5cf2d168646b833c21f87203602",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/hosts.API.InSegment",
+        "gophercloudsdk/resource.Collection.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed parent UUID and tenant prefix survive POST201/GET200/DELETE204; exact names resolve once and optional false/raw IDs remain distinct.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostFixedSegmentCRUDAndExactName"
+          ]
+        },
+        {
+          "behavior": "Parent overrides and changed source version headers fail before HTTP; missing-delete defaults, deletion waits and other native HTTP causes remain observable.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostScopeRejectsParentOverridesBeforeHTTP",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostChangedSourceVersionRejectsAllScopeRequests",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostDeletionWaitPreserves404AndOtherFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Go InSegment resolves a canonical UUID or exact name once and retains the URI parent independently of body fields; subsequent operations use concrete options and context.",
+        "Create uses the documented control_attributes string while responses retain string/object raw JSON; the documented host envelope and accepted HTTP evidence are validated."
+      ],
+      "documentation": [
+        "instanceha/v1/hosts/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/delete_segment",
+      "source_fingerprint": "e91cf58a6f530c7707121f15b9147c6f3e62f041fa5bb1e06bb4d73c3c1eb7c8",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/segments.New",
+        "gophercloudsdk/resource.Collection.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "The segment UUID is distinct from the exact raw database ID; POST202, GET200, PUT200 and DELETE204 preserve the versioned tenant root and typed values.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentCRUDPreservesPrefixUUIDAndTypedBody"
+          ]
+        },
+        {
+          "behavior": "Missing delete is ignored by default, strict404 and other HTTP failures retain native causes, and canceled Get or database-ID routing fails.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentMissingPolicyAndOriginalHTTPCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete options, context and explicit ID/Name references; Get takes a canonical UUID, while exact names are resolved by the shared Collection.",
+        "The documented singular envelope is required; raw fields and accepted response evidence are retained instead of Python permissive flat/empty decoding and a mutable Resource."
+      ],
+      "documentation": [
+        "instanceha/v1/segments/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/get_host",
+      "source_fingerprint": "beaad3f0173a057194e941d685dba61096af57092603b37ad93ada9486924b90",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/hosts.API.InSegment",
+        "gophercloudsdk/resource.Collection.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The fixed parent UUID and tenant prefix survive POST201/GET200/DELETE204; exact names resolve once and optional false/raw IDs remain distinct.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostFixedSegmentCRUDAndExactName"
+          ]
+        },
+        {
+          "behavior": "Parent overrides and changed source version headers fail before HTTP; missing-delete defaults, deletion waits and other native HTTP causes remain observable.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostScopeRejectsParentOverridesBeforeHTTP",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostChangedSourceVersionRejectsAllScopeRequests",
+            "api/instanceha_hosts_test.go:TestInstanceHAHostDeletionWaitPreserves404AndOtherFailures"
+          ]
+        }
+      ],
+      "differences": [
+        "Go InSegment resolves a canonical UUID or exact name once and retains the URI parent independently of body fields; subsequent operations use concrete options and context.",
+        "Create uses the documented control_attributes string while responses retain string/object raw JSON; the documented host envelope and accepted HTTP evidence are validated."
+      ],
+      "documentation": [
+        "instanceha/v1/hosts/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/get_notification",
+      "source_fingerprint": "43182e8fc8b82f1f602d8d6b6b43e99dfec65a8602613c6dbe8edc87f76f5114",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/notifications.New",
+        "gophercloudsdk/resource.Collection.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST202 snapshots the object payload and preserves notification UUID, exact raw IDs and nested number/string workflow progress.",
+          "tests": [
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationCreateSnapshotsPayloadAndPreservesWorkflowJSON"
+          ]
+        },
+        {
+          "behavior": "GET and accepted JSON failures retain HTTP evidence; unsupported names/mutations and invalid payloads fail before HTTP, and the real status getter remains context-aware.",
+          "tests": [
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationAcceptedDecodeAndHTTPErrorsKeepEvidence",
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationRejectsNamesMutationsAndInvalidPayloadBeforeHTTP",
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationWaitUsesRealStatusAndContext"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses canonical notification_uuid references without a name heuristic; notification database ID and all nested progress JSON remain separate.",
+        "Concrete Go create inputs require a hostname, generated-time string and snapshotted JSON object payload; raw responses and strict documented envelopes replace mutable Python Resource/permissive decode behavior."
+      ],
+      "documentation": [
+        "instanceha/v1/notifications/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/get_segment",
+      "source_fingerprint": "88fd0fc2999c8c27de82ca5857ee151dde866fccdebea18abf1f3be775065396",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/segments.New",
+        "gophercloudsdk/resource.Collection.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "The segment UUID is distinct from the exact raw database ID; POST202, GET200, PUT200 and DELETE204 preserve the versioned tenant root and typed values.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentCRUDPreservesPrefixUUIDAndTypedBody"
+          ]
+        },
+        {
+          "behavior": "Missing delete is ignored by default, strict404 and other HTTP failures retain native causes, and canceled Get or database-ID routing fails.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentMissingPolicyAndOriginalHTTPCause"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete options, context and explicit ID/Name references; Get takes a canonical UUID, while exact names are resolved by the shared Collection.",
+        "The documented singular envelope is required; raw fields and accepted response evidence are retained instead of Python permissive flat/empty decoding and a mutable Resource."
+      ],
+      "documentation": [
+        "instanceha/v1/segments/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/get_vmove",
+      "source_fingerprint": "ada0d3401a41212300d8fd3c788974145adacf83c0601280350e8b4476fb675d",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/vmoves.API.InNotification",
+        "gophercloudsdk/resource.Collection.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET200 uses plural notifications and the fixed parent/root; actual server fields/raw IDs are decoded independently.",
+          "tests": [
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMoveFixedNotificationGetAndTypedList"
+          ]
+        },
+        {
+          "behavior": "Numeric1.3/name/source-header gates precede HTTP; missing UUID is preserved and actual status waits remain available.",
+          "tests": [
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMoveMinimumVersionAndNamesFailBeforeHTTP",
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMoveChangedVersionAndParentQueryCannotEscapeScope",
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMoveMissingUUIDRemainsMissingAndWaitUsesRealStatus"
+          ]
+        }
+      ],
+      "differences": [
+        "Go fixes a canonical notification UUID before issuing any VMove operation and checks actual numeric microversion>=1.3; Python proxy does not make that gate explicit.",
+        "instance_uuid/name map to ServerID/ServerName; missing response UUID stays missing rather than being synthesized from the database ID, and the fixed NotificationID remains independent.",
+        "Go uses concrete options, context and strict documented envelopes with raw HTTP evidence instead of a mutable Python Resource and permissive flat/empty decoding."
+      ],
+      "documentation": [
+        "instanceha/v1/vmoves/README.md",
+        "instanceha/v1/README.md"
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/hosts",
+      "source_fingerprint": "cfdd48c48d2e3d4b99248987667e049fcfd0f07596fd545ca8343c0b83a7fcae",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.List",
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Scoped typed filters and option-slice snapshots retain the fixed parent, false values, raw control attributes and exact database IDs.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostTypedListFiltersAndRawControlAttributes"
+          ]
+        }
+      ],
+      "differences": [
+        "Go InSegment resolves a canonical UUID or exact name once and retains the URI parent independently of body fields; subsequent operations use concrete options and context.",
+        "Create uses the documented control_attributes string while responses retain string/object raw JSON; the documented host envelope and accepted HTTP evidence are validated."
+      ],
+      "documentation": [
+        "instanceha/v1/hosts/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Verify the database-ID/UUID server marker and implement required no-link fallback.",
+        "Map inherited local Body/query filtering and paginated/base_path/max_items/JSONPath consumption."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/notifications",
+      "source_fingerprint": "ade5550d1be8d80de5f61524f602804eb83955aa1ce053df86b0e476c237c125",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/notifications.API.List",
+        "gophercloudsdk/instanceha/v1/notifications.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Typed generated-since/source/type/status filters follow actual body/header pages and reusable lazy iterators snapshot their option slice.",
+          "tests": [
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationListTypedAliasesAndHTTPPagination",
+            "api/instanceha_notifications_test.go:TestInstanceHANotificationIteratorSnapshotsOptionSlice"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses canonical notification_uuid references without a name heuristic; notification database ID and all nested progress JSON remain separate.",
+        "Concrete Go create inputs require a hostname, generated-time string and snapshotted JSON object payload; raw responses and strict documented envelopes replace mutable Python Resource/permissive decode behavior."
+      ],
+      "documentation": [
+        "instanceha/v1/notifications/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Verify wire marker identity and required no-link fallback instead of assuming canonical SDK UUIDs.",
+        "Map inherited paginated/base_path/max_items/JSONPath and local query filtering/consumption."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/segments",
+      "source_fingerprint": "d7805f056544e2970e76b68b68fa2974574c65c9aeb4c46039d19f4c95626a1d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/segments.API.List",
+        "gophercloudsdk/instanceha/v1/segments.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "The lazy typed iterator snapshots its option slice, follows actual continuation links and retains enabled/service filters; exact name matching rejects duplicates.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentListLinksAreLazyAndKeepFilters",
+            "api/instanceha_segments_test.go:TestInstanceHASegmentTypedAllAndAmbiguousName"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete options, context and explicit ID/Name references; Get takes a canonical UUID, while exact names are resolved by the shared Collection.",
+        "The documented singular envelope is required; raw fields and accepted response evidence are retained instead of Python permissive flat/empty decoding and a mutable Resource."
+      ],
+      "documentation": [
+        "instanceha/v1/segments/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Verify the server marker identity and implement required no-link fallback without substituting the SDK UUID for the database wire ID.",
+        "Map inherited paginated/base_path/max_items/JSONPath and local Body filtering/query consumption rather than treating every Python query keyword as a server extension."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/update_host",
+      "source_fingerprint": "151ad562458ce3d50d8132c69eaff0be4454d10ca1c9b106c6745a2d8ba2dc1d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/hosts.SegmentScope.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT200 updates only the concrete fields in the fixed segment, retaining optional false and response raw metadata.",
+          "tests": [
+            "api/instanceha_hosts_test.go:TestInstanceHAHostFixedSegmentCRUDAndExactName"
+          ]
+        }
+      ],
+      "differences": [
+        "Go InSegment resolves a canonical UUID or exact name once and retains the URI parent independently of body fields; subsequent operations use concrete options and context.",
+        "Create uses the documented control_attributes string while responses retain string/object raw JSON; the documented host envelope and accepted HTTP evidence are validated."
+      ],
+      "documentation": [
+        "instanceha/v1/hosts/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Verify the controller control_attributes update schema; that field currently remains an explicit server-validated extension.",
+        "Compare nullable/core attribute normalization and empty/dirty Resource commit semantics before closing the whole update declaration."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/update_segment",
+      "source_fingerprint": "32cbd311c5feac340802c48b4ac357f2259081381758d89ca62d3b5746632924",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/segments.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "The segment UUID is distinct from the exact raw database ID; POST202, GET200, PUT200 and DELETE204 preserve the versioned tenant root and typed values.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentCRUDPreservesPrefixUUIDAndTypedBody"
+          ]
+        },
+        {
+          "behavior": "Core/read-only fields and version headers are protected before lookup; enabled requires numeric1.2 and accepted mutation decode failure preserves the response without resend.",
+          "tests": [
+            "api/instanceha_segments_test.go:TestInstanceHASegmentVersionPreflightAppliesToEveryEntryPoint",
+            "api/instanceha_segments_test.go:TestInstanceHASegmentProtectedExtensionsFailBeforeNameLookup",
+            "api/instanceha_segments_test.go:TestInstanceHASegmentAcceptedDecodeErrorRetainsMutationEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Go uses concrete options, context and explicit ID/Name references; Get takes a canonical UUID, while exact names are resolved by the shared Collection.",
+        "The documented singular envelope is required; raw fields and accepted response evidence are retained instead of Python permissive flat/empty decoding and a mutable Resource."
+      ],
+      "documentation": [
+        "instanceha/v1/segments/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Explicit description:null cannot yet be expressed: nil pointer omits the concrete field and extensions protect that core field.",
+        "Compare Python attribute normalization, nullable/core values and create/dirty-commit semantics before closing the whole mutation declaration."
+      ]
+    },
+    {
+      "operation": "python:instance_ha/v1/vmoves",
+      "source_fingerprint": "6bd951ae100f6017c2c45a32b29c6c370833ec149b663ebf09db1bcbccb7f87b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/instanceha/v1/vmoves.NotificationScope.List",
+        "gophercloudsdk/instanceha/v1/vmoves.NotificationScope.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Typed pages retain the fixed notification and version; next links cannot cross parents, every page revalidates version, and lazy options are snapshotted.",
+          "tests": [
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMovePaginationRejectsAnotherParentAndRechecksVersion",
+            "api/instanceha_vmoves_test.go:TestInstanceHAVMoveIteratorSnapshotsOptionSlice"
+          ]
+        }
+      ],
+      "differences": [
+        "Go fixes a canonical notification UUID before issuing any VMove operation and checks actual numeric microversion>=1.3; Python proxy does not make that gate explicit.",
+        "instance_uuid/name map to ServerID/ServerName; missing response UUID stays missing rather than being synthesized from the database ID, and the fixed NotificationID remains independent.",
+        "Go uses concrete options, context and strict documented envelopes with raw HTTP evidence instead of a mutable Python Resource and permissive flat/empty decoding."
+      ],
+      "documentation": [
+        "instanceha/v1/vmoves/README.md",
+        "instanceha/v1/README.md"
+      ],
+      "remaining": [
+        "Verify the server wire marker and required no-link fallback for VMove rows, including responses that omit UUID.",
+        "Map inherited paginated/base_path/max_items/JSONPath and local query/filter consumption."
+      ]
     }
   ]
 }
