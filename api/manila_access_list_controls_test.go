@@ -90,6 +90,7 @@ func TestManilaAccessListControlsCapBeforeLaterDecode(t *testing.T) {
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	for value, err := range scope.List(ctx, shareaccessrules.WithListMaxItems(1)) {
 		if err != nil || value.ID != "first" {
 			t.Fatalf("value=%+v err=%v", value, err)
