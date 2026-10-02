@@ -16,9 +16,9 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	sdk "gophercloudsdk"
+	"gophercloudsdk/compute/v2/servers"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/keymanager/v1/containers"
-	"gophercloudsdk/keymanager/v1/orders"
 	"gophercloudsdk/resource"
 )
 
@@ -342,7 +342,7 @@ func TestKeyManagerContainerListFiltersSnapshotsAndLazyPreflight(t *testing.T) {
 					t.Fatal(observations, calls.Load())
 				}
 			}
-			if _, err := orders.New(api.RawClient()).Resources.All(context.Background(), resource.WithFilters(nil)); !errors.Is(err, resource.ErrUnsupported) {
+			if _, err := servers.New(api.RawClient()).Resources.All(context.Background(), resource.WithFilters(nil)); !errors.Is(err, resource.ErrUnsupported) {
 				t.Fatal(err)
 			}
 		})
