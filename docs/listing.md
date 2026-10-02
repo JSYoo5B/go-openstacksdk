@@ -238,15 +238,15 @@ decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으�
 `WithQuery("subnets", ...)`는 기존 wire 확장으로 독립 전달하며 별칭을 자동 변환하지 않습니다. native typed List와
 `FindIdentity`는 이 공통 ListOption을 받지 않습니다.
 
-처음 네 binding의 비교 값은 native typed 모델의 field projection입니다. 누락/null `Rules`·`Addresses`는 모두
-nil이 되지만 빈 배열은 구별됩니다. `Prefixes`·`Subnets`도 같은 presence 한계를 갖습니다.
+Subnet Pool의 `Prefixes`와 Network의 `Subnets` 비교 값은 native typed 모델의 field projection입니다.
+누락/null 배열은 모두 nil이 되지만 빈 배열은 구별됩니다. QoS와 Address Group은 원문 행의 필드를 비교합니다.
 Subnet Pool의 native prefix length와 timestamp, Network의 native timestamp decoder 등 다른
 필드의 decode 오류도 로컬 필터 전에 발생하며, 현재 응답 페이지 안에서 cap 뒤에 위치한
 행의 decode 오류도 숨기지 않습니다. cap으로 방문하지 않은 다음 페이지는 검사하지 않습니다.
-QoS `Rules`는 native `map[string]any`의 float64 decoding을
-이미 거쳤으므로 비교 엔진이 원래 wire 정수의 정밀도를 복구하지 않습니다. unknown outer Body·
-Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 제공한 것으로 확대하지
-않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
+QoS `Rules`는 원문 JSON의 숫자로 비교하지만 반환 `map[string]any`는 native float64 decoding을
+유지합니다. rule 배열 안의 null map·null 필드는 기존 native map도 보존하던 값이며 추가 개선으로
+주장하지 않습니다. 선택한 원문 필드의 비교가 전체 unknown Body·Python descriptor/default/alias/coercion을
+제공하지는 않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
 
 ### Subnet의 속성 이름 분류
 
@@ -295,6 +295,28 @@ raw `status`도 기존대로 서버에 전달하지만 모델에 Status가 없�
 [AddressGroup 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)에
 Python/Go 예제, 이름과 프로젝트 필터, 원문·native 결과 및 plural-links 페이지 경계를 설명합니다.
 [AST manifest](../api/openstacksdk/resources/network/v2/address_group.json)는 고정 소스를 검증합니다.
+
+### QoS Policy의 속성 이름 분류
+
+`QoSPolicies.Resources.List/All`은 `resource.WithFilter`/`WithFilters`로 canonical query15개와
+로컬 Body2개를 분류합니다. `is_shared`→`shared`, `any_tags`→`tags-any`,
+`not_tags`→`not-tags`, `not_any_tags`→`not-tags-any`의 별칭을 포함한19개 이름을 받습니다.
+같은 bulk의 canonical 값이 우선하며 `false`·null·빈 배열도 선택값입니다. `id`·`name`·
+`description`·`project_id`·`is_default`·태그는 서버 query입니다. 응답의 native 필드가 다른 값이어도
+해당 query를 로컬 predicate로 다시 적용하지 않습니다.
+
+`rules`와 deprecated `tenant_id`는 native 전체 페이지 디코드 뒤 원본 JSON에서 비교합니다.
+`tenant_id`는 `project_id`의 query 별칭이나 로컬 fallback이 아닙니다. missing/null과 빈 문자열을
+구분하며 알려진 tenant ID의 non-null non-string 응답은 native 오류입니다. rule 배열은 전체 순서·길이·
+내부 object의 모든 필드를 비교하고 큰 숫자를 정확하게 구분합니다. 반환 Policy의 `Rules`는 기존
+float64 decoding을 유지합니다. typed 모델의 timestamp·revision number는 Python QoSPolicy에 선언된
+필터가 아니므로 알 수 없는 semantic 이름으로 버립니다. `WithName`의 hint+로컬 이름 비교와
+raw status query·typed List·FindIdentity는 각각 유지합니다.
+
+[QoS Policy Python/Go 사용법](../network/v2/extensions/qos/policies/listing/README.md)에 전체 필터·
+충돌·원문 비교·plural-links continuation·로컬 cap을 설명합니다. [AST manifest](../api/openstacksdk/resources/network/v2/qos_policy.json)는
+Resource+TagMixin의 선언과 SHA6·AST18을 검증합니다. Python의 list coercion·Resource/default/alias/cache/session·
+상속 continuation·deprecated JMESPath와 Proxy conflicting attrs 처리는 추가 비교 범위입니다.
 
 ### Secret의 속성 이름 분류
 

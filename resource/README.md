@@ -63,7 +63,7 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 `WithFilter`/`WithFilters`는 감사된 속성 이름을 서버 query 또는 로컬 Body 조건으로
 분류합니다. 현재 Subnet의 query 24개·로컬 Body 9개, Secret의 query 12개·로컬 Body 12개,
 Container의 query 2개·로컬 Body 10개, Order의 query 2개·로컬 Body 14개,
-AddressGroup의 query 8개·로컬 Body 3개에
+AddressGroup의 query 8개·로컬 Body 3개, QoS Policy의 query 15개·로컬 Body 2개에
 연결되어 있고 다른 binding은 clear를 포함해 `ErrUnsupported`입니다. 개별 옵션은 같은 target의 마지막 값이 이기고,
 한 bulk map의 query canonical 이름은 wire 별칭보다 우선합니다. bulk 교체/clear는 semantic
 조건만 바꾸며 최종 선택값만 검증합니다. 알 수 없는 이름은 버리고 raw query·명시 Body와
@@ -72,13 +72,17 @@ AddressGroup의 query 8개·로컬 Body 3개에
 [Secret Python/Go 사용법](../keymanager/v1/secrets/listing/README.md)과
 [Container Python/Go 사용법](../keymanager/v1/containers/listing/README.md)과
 [Order Python/Go 사용법](../keymanager/v1/orders/listing/README.md)과
-[AddressGroup Python/Go 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)에 설명합니다.
+[AddressGroup Python/Go 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)과
+[QoS Policy Python/Go 사용법](../network/v2/extensions/qos/policies/listing/README.md)에 설명합니다.
 
 `WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
 로컬 비교합니다. 현재 QoS Policy의 `rules`, Address Group의 `addresses`, Subnet Pool의
 `prefixes`, Network의 `subnets`를 지원합니다. Network의 Python 이름 `subnet_ids`는 SDK가
 `subnets`의 별칭으로 처리하며 canonical/alias의 마지막 옵션이 이깁니다. 같은 bulk map에
 두 이름을 넣으면 `ErrInvalidOption`입니다.
+QoS Policy는 `rules`·`tenant_id`를 원본 행에서 비교합니다. native `Rules`의 float64 반환값을
+유지하면서 로컬 조건은 원래 숫자 정밀도로 비교합니다. `is_shared`·`name`·`id`·`project_id`·태그는
+서버 query이며 `tenant_id`가 `project_id`의 query 별칭이 되지는 않습니다.
 AddressGroup은 `id`·`tenant_id`·`addresses`를 원본 행에서 비교합니다. `name`·`project_id`는
 semantic 서버 query이므로 로컬 Body 조건에 포함하지 않습니다. 기존 `WithName`은 별도의
 서버 hint와 로컬 이름 조건을 제공하며 semantic `name`과 동시에 지정하면 충돌 오류입니다.

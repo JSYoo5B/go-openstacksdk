@@ -104,6 +104,12 @@ query 8개와 로컬 Body 3개를 분류합니다. `name`·`project_id`는 서�
 [AddressGroup Python/Go 사용법](v2/extensions/security/addressgroups/listing/README.md)에
 필드 선택과 이름 hint·raw query·페이지 경계의 차이를 설명합니다.
 
+`service.API.QoSPolicies.Resources`는 query 15개와 로컬 Body 2개를 분류합니다.
+`is_shared`→`shared`와 태그 query 별칭을 포함한 19개 이름을 받으며 bulk에서는 canonical 값이 우선합니다.
+`rules`·deprecated `tenant_id`는 원문에서 비교하며 `name`·`id`·`project_id`·`is_default`·태그는
+서버 query입니다. rule의 큰 숫자 비교와 native float64 반환값을 구분합니다.
+[QoS Policy Python/Go 사용법](v2/extensions/qos/policies/listing/README.md)에 옵션·응답·페이지 차이를 설명합니다.
+
 ## 삭제와 대기
 
 ```go

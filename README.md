@@ -52,6 +52,9 @@ Subnet은 [선언된 query 24개·로컬 필드 9개](network/v2/subnets/README.
 AddressGroup은 [query 8개·로컬 필드 3개](network/v2/extensions/security/addressgroups/listing/README.md)를
 분류합니다. `project_id`는 서버 query이고 `tenant_id`는 원본 응답의 로컬 조건입니다.
 `id`·`addresses`도 원문으로 비교하며 기존 이름 조회와 native 결과 모델을 유지합니다.
+QoS Policy는 [query 15개·로컬 필드 2개](network/v2/extensions/qos/policies/listing/README.md)를
+분류합니다. `is_shared`·태그 이름을 wire query로 변환하고 `rules`·`tenant_id`는 원문으로 비교합니다.
+큰 rule 숫자는 정확하게 비교하며 반환값은 기존 typed Policy입니다.
 
 Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
