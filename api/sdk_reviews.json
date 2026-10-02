@@ -16231,6 +16231,931 @@
         "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
         "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
       ]
+    },
+    {
+      "operation": "python:compute/v2/wait_for_server",
+      "source_fingerprint": "f7f159eedbf6fff71e3615392f4903a2513d0e266012a28cee85bfb3733cddf0",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute/v2/servers.API.WaitForServer",
+        "gophercloudsdk/compute/v2/servers.API.WaitForServerState",
+        "gophercloudsdk/compute.Servers.WaitForServer",
+        "gophercloudsdk/compute.Servers.WaitForServerState"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForServer supplies ACTIVE, exact case-insensitive ERROR, two-second polling and120-second SDK timeout. WaitForServerState keeps the same server-specific timeout with an explicit target; it is distinct from unlimited generic Compute WaitForState. The returned model is the actual native observation, not a cached supplied Python Resource.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "Target state comparison precedes failure comparison. WithFailureStates replaces the exact case-insensitive default list, and an empty list disables state failure checks. error_deleting/error_extending, failed or killed are not inferred as additional service failures. Captured failure-state values remain independent of later caller slice mutations.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitExactFailuresReplacementAndTargetPrecedence",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsExactFailuresAndCallerOverrides"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Fresh lookup failures remain errors rather than a successful target model. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/wait_for_status",
+      "source_fingerprint": "ba2c8bcd08be7d234d2e251c7ecc181a3ecf9f51c1b36780ff3c7e3cc7854a27",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.WaitForState",
+        "gophercloudsdk/compute/v2/servers.API.WaitForState",
+        "gophercloudsdk/compute.Servers.WaitForState"
+      ],
+      "contracts": [
+        {
+          "behavior": "Generic service WaitForState requires a target and applies exact case-insensitive ERROR, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "Target state comparison precedes failure comparison. WithFailureStates replaces the exact case-insensitive default list, and an empty list disables state failure checks. error_deleting/error_extending, failed or killed are not inferred as additional service failures. Captured failure-state values remain independent of later caller slice mutations.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitExactFailuresReplacementAndTargetPrecedence",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsExactFailuresAndCallerOverrides"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Fresh lookup failures remain errors rather than a successful target model. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/wait_for_delete",
+      "source_fingerprint": "7308653e716fff322aaf02f03539cd17a71c1e871f145972e07301d96548b5ed",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.WaitForDelete",
+        "gophercloudsdk/compute/v2/servers.API.WaitForDelete",
+        "gophercloudsdk/compute.Servers.WaitForDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Deletion waiting sends GET observations and optional initial Name resolution only, never a DELETE request. Name is resolved once without reporting its resolution List to the callback, then the first fixed-ID GET and later nonterminal GETs can report progress. Changed response IDs cannot retarget the poll.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Terminal failures remain failures rather than deletion completion. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/wait_for_status",
+      "source_fingerprint": "357e0a80b2ffd1547b719a73a94c6be7ccaabec09f14199a81b43960468d7731",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WaitForState",
+        "gophercloudsdk/blockstorage.WaitForAvailable",
+        "gophercloudsdk/blockstorage/v2/volumes.API.WaitForState",
+        "gophercloudsdk/blockstorage/v2/volumes.API.WaitForAvailable",
+        "gophercloudsdk/blockstorage/v2/snapshots.API.WaitForState",
+        "gophercloudsdk/blockstorage/v2/snapshots.API.WaitForAvailable"
+      ],
+      "contracts": [
+        {
+          "behavior": "Cinder WaitForState requires a target and WaitForAvailable supplies available; both apply exact case-insensitive error, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "Target state comparison precedes failure comparison. WithFailureStates replaces the exact case-insensitive default list, and an empty list disables state failure checks. error_deleting/error_extending, failed or killed are not inferred as additional service failures. Captured failure-state values remain independent of later caller slice mutations.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitExactFailuresReplacementAndTargetPrecedence",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsExactFailuresAndCallerOverrides"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Fresh lookup failures remain errors rather than a successful target model. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "blockstorage/v2/volumes/README.md",
+        "blockstorage/v2/snapshots/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/wait_for_delete",
+      "source_fingerprint": "ba6ca867f786e107fa497d66bbe864862c97749b032f788dc98bdebba54426aa",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WaitForDelete",
+        "gophercloudsdk/blockstorage/v2/volumes.API.WaitForDelete",
+        "gophercloudsdk/blockstorage/v2/snapshots.API.WaitForDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Deletion waiting sends GET observations and optional initial Name resolution only, never a DELETE request. Name is resolved once without reporting its resolution List to the callback, then the first fixed-ID GET and later nonterminal GETs can report progress. Changed response IDs cannot retarget the poll.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Terminal failures remain failures rather than deletion completion. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "blockstorage/v2/volumes/README.md",
+        "blockstorage/v2/snapshots/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/wait_for_status",
+      "source_fingerprint": "3318f44e07cbb590791f555d5a282629b15a8828da46c7cf0b1b81e8263436ec",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WaitForState",
+        "gophercloudsdk/blockstorage.WaitForAvailable",
+        "gophercloudsdk/blockstorage/v3/volumes.API.WaitForState",
+        "gophercloudsdk/blockstorage/v3/volumes.API.WaitForAvailable",
+        "gophercloudsdk/blockstorage/v3/snapshots.API.WaitForState",
+        "gophercloudsdk/blockstorage/v3/snapshots.API.WaitForAvailable"
+      ],
+      "contracts": [
+        {
+          "behavior": "Cinder WaitForState requires a target and WaitForAvailable supplies available; both apply exact case-insensitive error, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "Target state comparison precedes failure comparison. WithFailureStates replaces the exact case-insensitive default list, and an empty list disables state failure checks. error_deleting/error_extending, failed or killed are not inferred as additional service failures. Captured failure-state values remain independent of later caller slice mutations.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitExactFailuresReplacementAndTargetPrecedence",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsExactFailuresAndCallerOverrides"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Fresh lookup failures remain errors rather than a successful target model. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/v3/snapshots/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/wait_for_delete",
+      "source_fingerprint": "6e3f8e456a2a18dc479fe899c2e542fb7334953d74b76c991b198b86a1a32c18",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WaitForDelete",
+        "gophercloudsdk/blockstorage/v3/volumes.API.WaitForDelete",
+        "gophercloudsdk/blockstorage/v3/snapshots.API.WaitForDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Deletion waiting sends GET observations and optional initial Name resolution only, never a DELETE request. Name is resolved once without reporting its resolution List to the callback, then the first fixed-ID GET and later nonterminal GETs can report progress. Changed response IDs cannot retarget the poll.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Terminal failures remain failures rather than deletion completion. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/v3/snapshots/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:image/v2/wait_for_status",
+      "source_fingerprint": "86e408b241acc86147bd605a8f54c73c42167a7fbafeea0b129c9db2d24ac0dc",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.WaitForState",
+        "gophercloudsdk/image/v2/images.API.WaitForState"
+      ],
+      "contracts": [
+        {
+          "behavior": "Generic service WaitForState requires a target and applies exact case-insensitive ERROR, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "Target state comparison precedes failure comparison. WithFailureStates replaces the exact case-insensitive default list, and an empty list disables state failure checks. error_deleting/error_extending, failed or killed are not inferred as additional service failures. Captured failure-state values remain independent of later caller slice mutations.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitExactFailuresReplacementAndTargetPrecedence",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsExactFailuresAndCallerOverrides"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Fresh lookup failures remain errors rather than a successful target model. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "image/v2/images/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
+    },
+    {
+      "operation": "python:image/v2/wait_for_delete",
+      "source_fingerprint": "5c42df677e6638138685553f9d86bb114a401a0033e82c43b24c4673e240f95c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.WaitForDelete",
+        "gophercloudsdk/image/v2/images.API.WaitForDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Deletion waiting sends GET observations and optional initial Name resolution only, never a DELETE request. Name is resolved once without reporting its resolution List to the callback, then the first fixed-ID GET and later nonterminal GETs can report progress. Changed response IDs cannot retarget the poll.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges"
+          ]
+        },
+        {
+          "behavior": "SDK defaults are prepended and concrete caller resource.WaitOption values apply last. WithUnlimitedWait removes a finite default, a later positive WithTimeout reinstates a bound, and parent context deadlines and cancellation remain effective. No application status adapter or polling builder is required.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
+        },
+        {
+          "behavior": "The default polling interval is two seconds and a positive caller interval replaces it. Nil context or collection, invalid refs/targets/options, unsupported selected attributes and canceled context fail without HTTP. Callback cancellation and active-fetch cancellation stop before any further poll.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening",
+            "internal/servicewait/wait_test.go:TestServiceWaitPreflightAndCallerCancellationBeforeAnotherFetch",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsPreflightAndCallerCancellation"
+          ]
+        },
+        {
+          "behavior": "Status selection uses an exported string field and can also select deletion completion. Server canonical integer progress reports native values; absent canonical progress reports zero. Cinder-v3 Snapshot uses the noncanonical os-extended-snapshot-attributes:progress string tag, so callback reports zero without parsing that string. Successful terminal, failure and HTTP-error observations do not invoke the callback.",
+          "tests": [
+            "internal/servicewait/wait_test.go:TestServiceWaitReusableCallerOptionsRemainOwnedAndSelectAttributes",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsStatusAttributesAndNativeProgressLimits",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs",
+            "resource/wait_attributes_test.go:TestWaitProgressOmitsSuccessFailureAndHTTPError"
+          ]
+        },
+        {
+          "behavior": "Explicit ID is stable even when response ID differs. Existing Name lookup resolves once, retains the native list/name-query boundary, and state waiting reports its initial List observation before fixed-ID GETs. Selected ResourceBase/reverse prefix, configured ordinary headers/microversion, caller context/middleware and the original live Provider token remain in use; no response-driven route or model synthesis occurs.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsNameBindingLiveClientAndProgress",
+            "resource/wait_identity_test.go:TestWaitKeepsExplicitIDWhenResponseIdentityChanges",
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Terminal failures remain failures rather than deletion completion. The shared read gate preserves original terminal URL/accepted-response/JSON/read/context causes even when nested native404 or adapter-owned ErrNotFound is discoverable. Actual direct403 or transport-wrapped404 terminates the service deletion observation after one request. Successful missing state fetches return a nonpanic error; successful nil deletion fetches complete.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors",
+            "resource/read_errors_test.go:TestReadErrorsNeverAddMissingToTerminalDirectOrQueryCauses",
+            "resource/read_errors_test.go:TestReadErrorsDefendIgnoreMissingAndWaitAgainstAdapterPrewrappedTerminalCauses",
+            "resource/wait_policy_test.go:TestWaitMissingSuccessfulResponseDoesNotPanic",
+            "resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback"
+          ]
+        },
+        {
+          "behavior": "Existing common Collection.Wait/WaitDeleted and generated WaitFor/WaitForDeletion retain their five-minute deadline and original binding failure predicate. Native WaitForStatus retains its error-only callable and native predicate-first behavior, including original caller context; source one-second/exact-case behavior is not replaced by this service policy. This is preservation evidence, not a separate native-operation status promotion.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.",
+          "tests": [
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
+            "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/service-waits.md",
+        "image/v2/images/README.md"
+      ],
+      "differences": [
+        "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
+        "Python nullable status/descriptor access and arbitrary progress values differ from Go exported string/integer model fields. Cinder-v3 Snapshot progress is a native string under os-extended-snapshot-attributes:progress, which does not match the canonical progress selector; callback reports zero without coercing that string. Other absent progress is also reported as zero. Successful missing/null native status fields may already collapse during typed decoding.",
+        "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
+        "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
+        "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+      ],
+      "remaining": [
+        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
+        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
+        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+      ]
     }
   ]
 }
