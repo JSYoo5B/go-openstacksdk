@@ -8,6 +8,7 @@
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| 공통 GET의 미존재·terminal 원인 분리 | [원인 행렬](../resource/read_errors_test.go), [native HTTP 소비자](../resource/terminal_read_consumers_test.go): ordinary/query GET의 실제 404, URL·accepted 응답·JSON/read·context 원인 보존, adapter의 기존 미존재 원인을 가진 terminal 오류에서 Find-ignore·WaitDeleted 성공 차단 | DELETE의 미존재 정책, Python Resource cache/상속 fetch 계약 전체는 별도. 기존 276개 리뷰와 catalog 판정은 변경하지 않음. [공통 오류 정책](../resource/README.md) |
 | 페이지 순환 중단 (`b5af42b`) | [네 가지 공통 iterator 테스트](../resource/pagination_test.go), [Swift marker 테스트](../api/pagination_contracts_test.go): 자기 링크·A→B→A·query 순서·반복 marker, 오류 한 번 전달, break 이후 링크 검사 생략 | 서버가 계속 다른 URL로 중복 데이터를 반환하는 경우를 일반적으로 deduplicate하지 않음 |
 | 선택적 microversion 교집합 협상 (`ba63bde`) | [HTTP discovery 테스트](../microversion_test.go): 인증, project/reverse-proxy 경로, 숫자 비교, 명시 버전 우선, 헤더, 동시 캐시, 취소·재시도 | [문서화한 Go 선택 정책](microversions.md)은 Python의 자동 기본값과 다름. 모든 연산의 필드 capability를 자동 판정하지 않음 |
 | 기존 볼륨 부팅 (`350e511`) | [Compute 계약](../compute/boot_volume_test.go), [Connection과 Cinder 연결](../connection_boot_volume_test.go): ID 조회 생략, 정확 이름, 모호성, 삭제 기본값, 실패 시 생성 서버 보존 | cloud `create_server` 전체의 floating IP·추가 볼륨·snapshot 부팅은 별도 |
