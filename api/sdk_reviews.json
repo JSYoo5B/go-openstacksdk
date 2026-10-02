@@ -11982,6 +11982,89 @@
         "Pinned Proxy.request optional GET response cache (cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate. Direct Proxy._list fixes session to itself; adapter/session injection is an inherited Resource.list surface. Neither class declares a resource maximum microversion, so no class-specific maximum negotiation gap is claimed.",
         "Pinned Resource._get_next_link includes RFC Link-header and limit/marker continuation paths beyond the native plural_links pager. Deprecated Proxy._list jmespath_filters (openstack/proxy.py:866-916) is consumed from direct query and has no ordinary Go expression filter option."
       ]
+    },
+    {
+      "operation": "python:network/v2/subnets",
+      "source_fingerprint": "0418ae6bfbb93e4b18f6cc8e2bd4182340c044acbeb43b9e701f68ec11e2ef5f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/subnets.New",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All nine declared non-query Body fields are explicitly filterable in ordinary Resources.List/All through leaf and cached Connection.Network.API paths. Native extraction completes first, then original rows are paired by count and index without extra HTTP or ID lookup. The public native model alias is retained.",
+          "tests": [
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersNineFieldsAndOriginalValues",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount"
+          ]
+        },
+        {
+          "behavior": "Raw JSON preserves precision beyond float64, unknown pool/route keys, null array elements, missing/null versus empty values and original accepted timestamp text. Untyped prefixlen values keep number/string/bool/fraction/object/array types; no response string-to-number coercion is applied. Generic object filters use recursive subset and arrays require full ordered values.",
+          "tests": [
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersExactNumbersAndUntypedPrefix",
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersNineFieldsAndOriginalValues",
+            "internal/jsonfilter/integer_test.go:TestIntegerJSONPreservesExactValueAndBoundedExponentMemory"
+          ]
+        },
+        {
+          "behavior": "Construction snapshots, per-iteration ownership, independent concurrent reuse, canonical last-wins, bulk replacement/clear and prefix_length alias conflicts are owned by the SDK. Clear/no-filter selects the original typed iterator. Unknown/unsupported/non-JSON options fail lazily before HTTP.",
+          "tests": [
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersSnapshotsAliasesAndConcurrentReuse",
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersLazyPreflightAndCapabilities",
+            "resource/body_record_test.go:TestCollectionBodyRecordLaneIsSelectedOnlyForPreparedFilters"
+          ]
+        },
+        {
+          "behavior": "Raw controls apply before local Body/name filters without refilling matches. First-page, early break, native plural links, later HTTP failures, cycle/foreign continuation and cancellation remain terminal. Valid untyped prefix JSON beyond the cap is not rejected or normalized.",
+          "tests": [
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersControlsAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Native modeled array/pool/route/timestamp/revision errors are observable from the whole current page even beyond the cap or a name mismatch, retaining native causes. Raw query stays wire-only, typed status remains unsupported, and native typed List/FindIdentity plus the existing QoS float64 projection are unchanged.",
+          "tests": [
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersNativeWholePageFailures",
+            "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersWireAndNativeIsolation",
+            "resource/body_record_test.go:TestBodyRecordFieldNormalizationPresenceAndCauses"
+          ]
+        },
+        {
+          "behavior": "Generation fails closed on exact native Subnet/nested-field schema, custom decoder, own linked-page methods, extractor and receiver-qualified native/pagination declaration hashes including the UseNumber decoding proof. Only nine canonical Subnet fields are inventoried; existing four typed Body bindings and twenty identity/query capabilities remain intact.",
+          "tests": [
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
+            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/subnets/README.md",
+        "docs/listing.md",
+        "resource/README.md",
+        "network/README.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Go selects declared local Body attributes explicitly with SDK-owned options and snapshots; raw WithQuery remains independent wire data. No caller builder or predicate is required. prefix_length is an explicit alias of raw prefixlen, and bulk canonical/alias conflicts fail deterministically before HTTP.",
+        "Original page rows preserve unknown nested fields, JSON null elements, timestamp text, missing/null and exact numbers for local comparison; returned values remain native typed Subnets. Go distinguishes bool and number, requires exact ordered arrays/full inner objects and does not perform Python scalar-to-list coercion.",
+        "The untyped Python prefix_length Body descriptor is preserved as raw JSON rather than inventing integer validation or converting response strings into numbers. revision_number is inherited type=int, but the native whole-page int decoder is retained first, so numeric strings/fractional/exponent spellings remain native decode boundaries.",
+        "Native accepted statuses, full-current-page extraction and advertised subnets_links remain intact. max_items caps consumed raw rows locally without an inferred Python limit hint. Native typed List, FindIdentity and the prior four typed Body projections retain their existing behavior."
+      ],
+      "remaining": [
+        "Pinned Resource.list and QueryParameters still transpose declared query aliases, discard unknown names and classify declared local Body attributes automatically. Implement the complete semantic query/Body option policy and remaining descriptor/default/list coercion behavior beyond this explicit all-nine-field binding.",
+        "Subnet inherits NetworkResource with TagMixin. Original row projection does not provide the complete seeded Resource, project/tenant response alias fallback, unknown-Body/cache/dirty lifecycle or Python descriptor response model. Returned native Subnets still normalize timestamps and nested modeled values.",
+        "Pinned Proxy.request optional GET response cache(cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate from configured native client retention. Direct Proxy._list fixes session to itself; adapter/session injection belongs to inherited Resource.list. Subnet inherits _max_microversion=None rather than a class-specific maximum negotiation policy.",
+        "Pinned Resource._get_next_link has RFC Link-header and limit/marker continuation paths beyond the native subnets_links pager. Deprecated Proxy._list jmespath_filters is consumed from direct query and has no ordinary Go expression-filter option. FindIdentity/native typed List do not acquire these ordinary Body options."
+      ]
     }
   ]
 }
