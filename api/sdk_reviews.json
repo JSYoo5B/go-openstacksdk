@@ -13424,6 +13424,149 @@
         "Deprecated Proxy._list jmespath_filters and its special __conflicting_attrs recovery branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify those branches have not drifted, but do not claim runtime mapping.",
         "Eager Python formatter/property execution, scalar-to-list/default behavior and all Python urlsplit edges remain distinct from selected-only raw projection plus native decoding. Generic response error/default/schema and old explicit-Ref lookup contracts are not completed by this ordinary list unit; complete Container Find/CRUD coverage must be reviewed independently without inferring an unsupported update method."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/orders",
+      "source_fingerprint": "071da12f667bce3d856b546b0c0c8168108a3c252fe606452d2458d30a013fc4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/orders.New",
+        "gophercloudsdk/keymanager/v1/orders.API.All",
+        "gophercloudsdk/keymanager/v1/orders.API.Find",
+        "gophercloudsdk/keymanager/v1/orders.API.Remove",
+        "gophercloudsdk/keymanager/v1/orders.API.WaitFor",
+        "gophercloudsdk/keymanager/v1/orders.API.WaitForDeletion",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.KeyManagerV1"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordinary Orders.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: inherited limit and marker are the two canonical and accepted query names, and all fourteen non-query Body properties are supported. Inherited top-level name is local and never inferred from Meta.Name; meta compares original response JSON. Both the generated leaf and cached Connection.KeyManagerV1 facade use the same descriptor without caller builders or predicates.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersEntireDescriptor",
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersPassiveIdentityAndRawName",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersSharedFacadeAndDistinctReferences"
+          ]
+        },
+        {
+          "behavior": "Semantic query scalars encode strings, lowercase bools and exact JSON-number text; flat scalar arrays preserve repeated order and omit null elements. Null/empty arrays retain key presence. Unknown semantic names such as offset or algorithm are discarded even when their values cannot encode as JSON; selected invalid JSON, objects/nested query arrays, nine reserved source controls and same-wire or same-Body destination collisions fail lazily before HTTP. Owned nested/query snapshots permit independent concurrent reuse; last-wins and bulk replace/clear affect only semantic state and validate only final selected values.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersOptionsQueriesAndPreflight",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersPreflightAndRawNameNamespace",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear"
+          ]
+        },
+        {
+          "behavior": "All fourteen local values project from the original row after native extraction. created_at/updated_at retain created/updated text, and raw meta retains unknown keys, original nested arrays and exact large numbers. Missing/null differ from empty arrays and objects. Objects recursively match subsets of nonempty actual objects; an empty filter matches a nonempty actual object, while an empty actual object rejects object filtering. Arrays match full ordered length and object contents. Decimal equality is exact, with bool/number and string/number distinctions.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersEntireDescriptor",
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersRawMetaAndExactJSON",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersSharedFacadeAndDistinctReferences",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersArraysCompareExactly",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersExactDecimalNumbersAndHugeExponents",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersDeliberatelyDistinguishesBooleansAndNumbers"
+          ]
+        },
+        {
+          "behavior": "Passive id gives literal raw key presence priority, including null/empty/numeric/object values; absent id falls back to the full order_ref, not secret_ref or a path suffix. Distinct order_id and secret_id apply HREFToUUID-style final-path projection to order_ref and secret_ref respectively. Missing/null bypass formatting, percent escapes and literal Unicode/space remain, query/fragment are excluded and trailing slash gives an empty string. Invalid selected formatters are terminal before common status predicates; unselected references are not formatted or followed and no native model ID/name is synthesized.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersPassiveIdentityAndRawName",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersSharedFacadeAndDistinctReferences",
+            "internal/jsonfilter/reference_test.go:TestReferenceLastComponentPassiveSpelling",
+            "internal/jsonfilter/reference_test.go:TestReferenceLastComponentErrors"
+          ]
+        },
+        {
+          "behavior": "The package-specific native Collection identity callback now selects OrderRef rather than SecretRef, with exact model/signature/tag guards and actual compiled native type evidence; generic reference priority is unchanged. This is a metadata callback correction, not evidence of a previously wrong HTTP route. Explicit-ID Find/Remove/Wait/WaitDeleted already keep the requested order route even when response references change or point elsewhere. Name Ref operations remain unsupported before HTTP because native Order has no top-level Name; Meta.Name is not promoted.",
+          "tests": [
+            "internal/cmd/sdkgen/order_identity_collections_test.go:TestOrderCollectionIdentityUsesOrderRefWithoutChangingGenericPriority",
+            "internal/cmd/sdkgen/order_identity_collections_test.go:TestOrderCollectionIdentityRejectsAmbiguousNativeShapeDrift",
+            "internal/cmd/sdkgen/order_identity_collections_test.go:TestOrderCollectionIdentityAcceptsActualPinnedCompiledTypeGraph",
+            "api/keymanager_order_identity_test.go:TestKeyManagerOrderIdentityExplicitRoutesIgnorePassiveReferences",
+            "api/keymanager_order_identity_test.go:TestKeyManagerOrderIdentityNameUnsupportedWithoutHTTP"
+          ]
+        },
+        {
+          "behavior": "Native whole-page extraction precedes raw matching and cap consumption. Thirteen Order fields, six Meta fields, strict Meta.BitLength integer and both custom timestamp decoders preserve known-field failures beyond a cap. A consumed null row is invalid only on the Body-filter lane; query-only null rows retain the native zero-model result. After native extraction succeeds a cap/break can skip a later selected null row or formatter. MaxItems counts raw rows before Body/status matching without refill or a wire-limit hint; first-page and break stop before continuation, and All returns nil on terminal errors.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersControlsAndNativeFailures",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths"
+          ]
+        },
+        {
+          "behavior": "Ordinary native listing accepts HTTP200/204/300 and rejects201. Successfully parsed204 is empty, but an application/json empty204 yields native EOF before IsEmpty. Only top-level next supplies continuation; links.next is ignored, foreign advertised URLs are followed and matching duplicate rows remain ordinary list rows. Later HTTP/decode/foreign-request errors, cycles and cancellation remain terminal. The original shared ProviderClient, live token, configured headers/current microversion, middleware and reverse prefix are retained across pages.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersNativeStatusAndSurfaceIsolation",
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersPagingAndLiveSource",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersSharedFacadeAndDistinctReferences"
+          ]
+        },
+        {
+          "behavior": "Semantic Body status compares exact original JSON while WithStatus retains case-insensitive local matching. Both normal and raw-filter adapters preserve baseline raw status-query removal and forward other complete repeated/nil/empty query values. Raw name/offset remain wire extensions separate from semantic local name; WithName remains unsupported rather than becoming a Meta.Name hint. Typed API.List keeps its independent native query contract and this ordinary-list unit enables neither heuristic FindIdentity nor secret/detail follow-up requests.",
+          "tests": [
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersOptionsQueriesAndPreflight",
+            "api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersNativeStatusAndSurfaceIsolation",
+            "connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersPreflightAndRawNameNamespace",
+            "api/keymanager_order_identity_test.go:TestKeyManagerOrderIdentityNameUnsupportedWithoutHTTP"
+          ]
+        },
+        {
+          "behavior": "Generation requires the checked-in Order manifest and a live audited -openstacksdk-source checkout. Seven source SHA-256 files are validated before isolated AST-only extraction and full manifest comparison, including parser minor version, C3 MRO, inherited query/default declarations, unknown-discard/canonical precedence, literal/alternate id access, both independent HREF formatter declarations and meta=dict/_convert_type proof. Twenty-five AST anchors preserve distinct property metadata without importing OpenStackSDK. Missing, stale or changed source/manifest proof fails closed; Subnet/Secret/Container extraction remains unchanged.",
+          "tests": [
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderPythonFilterManifestKeepsInheritedQueriesAndTwoReferenceProperties",
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderPythonFilterPinnedSourceRequiresDualFormatterDictAndInheritedDefaultProof"
+          ]
+        },
+        {
+          "behavior": "The semantic plan requires exact native Order13/Meta6/ListOpts2 field/type/tag shapes, pointer receivers for both decoders, the value query builder, own linked-page/extractor contracts and fourteen receiver-qualified native/pagination declaration hashes, including UseNumber and original GetBody pairing. A real compiled export-graph regression validates actual model methods and route/selection. Generated raw selectors and both query bridges retain property names and prior Subnet/Secret/Container function ASTs; explicit Body and semantic inventory capabilities are distinct, Body bindings are eight, semantic bindings four and native identity opt-ins remain twenty.",
+          "tests": [
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderBodyFilterNativeContractRejectsModelMetaDecoderPagerAndSourceDrift",
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderSemanticFilterEmissionKeepsRawPropertiesQuerySnapshotsAndPriorBindings",
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderRawPageDependencyLoaderPreservesExactNumbersAndOriginalRows",
+            "internal/cmd/sdkgen/order_filters_test.go:TestOrderBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/listing/README.md",
+        "keymanager/v1/README.md",
+        "resource/README.md",
+        "docs/listing.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "Go uses concrete SDK-owned semantic and explicit Body options. Semantic name is the inherited top-level raw property and never Meta.Name; raw name is a separate wire extension. Because the native Order model has no top-level Name, common WithName and Name Ref lookup remain unsupported and no heuristic FindIdentity is introduced.",
+        "Individual semantic options use last-wins targets and bulk replace/clear affects only semantic state; final selected values alone are validated. Same-destination wire/Body namespace collisions fail instead of permissive kwargs merging. Null/empty query values retain presence without URL values, flat scalar arrays become repeated values, booleans are lowercase, JSON numbers retain text and unknown semantic keys are discarded. Reserved controls do not imply inherited per-call controls are all implemented.",
+        "Comparisons retain raw timestamps and metadata/unknown values, but results remain native Order13/Meta6 models with parsed timestamps, strict integer/string fields and no top-level raw name/id/unknown metadata projection. Whole-page native decoding can fail before a cap or local mismatch stops iteration. Python meta=dict conversion can replace nonobject values with an empty dict; native Meta decoding instead rejects incompatible objects/scalars first.",
+        "Exact decimal JSON matching distinguishes bools from numbers and strings from numbers. Recursive subsets preserve Python empty-actual-object truthiness; nonobject actual values are nonmatches rather than potential attribute-access errors. Arrays require exact ordered values and full nested object keys rather than recursive object subsets inside arrays.",
+        "Literal/full order_ref id, order_id and secret_id stay distinct passive properties. Only selected Go formatters run, whereas Python construction/to_dict may format unselected references. Go preserves percent/path spelling without UUID validation or HTTP, but url.Parse rejects some authorities accepted by Python urlsplit and leading-control normalization differs.",
+        "The native identity callback selects its own OrderRef and still returns a path component, separate from passive semantic id. Explicit-ID routes were already fixed to the caller ID; the callback change is not presented as a reproduced HTTP retargeting fix or as Python full-reference input/Resource identity parity.",
+        "Native200/204/300, top-level-next continuation and foreign URL following remain. application/json empty204 can fail with native EOF. Local caps do not infer a Python wire limit; first-page/break stop before continuation and All discards partial results on terminal failure. No same-origin/fixed-query or synthetic marker/offset continuation policy is added.",
+        "Native typed List/Get/Create/Delete and explicit-ID policies remain independent of the semantic list lane. Raw status queries keep their previous suppression; semantic Body status is exact JSON while common WithStatus is case-insensitive. Source/native/manifest drift fails closed, without extending these list tests into unsupported update endpoint claims."
+      ],
+      "remaining": [
+        "Complete Python Resource Body/URI defaults, property coercion, seeded unknown attributes, mutable dict/resource state and returned projection remain beyond full declared classification. Native models omit raw top-level name/id/unknown metadata and normalize dates; raw comparison does not provide cache/dirty lifecycle or full Python response properties.",
+        "Pinned Proxy.request optional GET caching(cache_enabled/skip_cache), resource/session injection and inherited per-call headers/microversion/base_path/allow_unknown_params controls remain distinct from retaining configured native clients. Proxy._list fixes session to itself; Order inherits _max_microversion=None and has no new maximum negotiation policy.",
+        "Resource._get_next_link supports body links/orders_links, RFC Link headers and truthy limit/marker fallback beyond native top-level next. Python continuation-query merging and markers derived from dynamic Resource.id remain different from native advertised URL/cycle behavior; full inherited pagination remains open.",
+        "Deprecated Proxy._list jmespath_filters and its __conflicting_attrs recovery branch(openstack/proxy.py:896-902) remain outside this declared semantic API. Source hashing verifies those branches but does not map their runtime behavior.",
+        "Full eager Python formatter/dict-default behavior, urlsplit edge cases and generic response error/default/schema handling are not completed by selected-only raw matching plus native extraction. Full-reference/Resource inputs, heuristic/name lookup and complete Order CRUD/lifecycle require independent review; this list proof makes no unsupported PUT/update_order determination."
+      ]
     }
   ]
 }
