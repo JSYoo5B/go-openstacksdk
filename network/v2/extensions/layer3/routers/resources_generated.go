@@ -3,8 +3,10 @@ package routers
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -17,8 +19,23 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Router] {
 	return resource.NewCollection(resource.Adapter[Router]{
-		Kind:         "routers",
-		IdentityFind: true,
+		Kind:             "routers",
+		BodyFilterFields: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "enable_ndp_proxy": "enable_ndp_proxy", "evpn_vni": "evpn_vni", "external_gateway_info": "external_gateway_info", "revision": "revision", "revision_number": "revision", "routes": "routes", "tenant_id": "tenant_id", "updated_at": "updated_at"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Router], key string) (json.RawMessage, error) {
+			return routerBodyFilterValue(record, key)
+		},
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Router], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "flavor_id": "flavor_id", "id": "id", "is_admin_state_up": "admin_state_up", "is_distributed": "distributed", "is_ha": "ha", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "status": "status", "tags": "tags"}, Body: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "enable_ndp_proxy": "enable_ndp_proxy", "evpn_vni": "evpn_vni", "external_gateway_info": "external_gateway_info", "revision_number": "revision", "routes": "routes", "tenant_id": "tenant_id", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Router, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"routers", id}, q, []int{200}, &result.Body)
@@ -45,6 +62,22 @@ func (a *API) newResources() *resource.Collection[Router] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Router], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "routers", err)
+		return func(yield func(*resource.BodyRecord[Router], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Router, error) {
+		values, err := upstream.ExtractRouters(page)
+		return []Router(values), err
+	}, "routers", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Router, error) {
 	return a.Resources.Find(ctx, ref, options...)
