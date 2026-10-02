@@ -11747,78 +11747,142 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/network/v2/extensions/security/addressgroups.New",
+        "gophercloudsdk/network/v2/extensions/security/addressgroups.API.All",
+        "gophercloudsdk/network/v2/extensions/security/addressgroups.API.List",
         "gophercloudsdk/resource.Collection.List",
         "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
         "gophercloudsdk/resource.WithBodyFilter",
         "gophercloudsdk/resource.WithBodyFilters",
         "gophercloudsdk/resource.WithMaxItems",
         "gophercloudsdk/resource.WithPaginated",
-        "gophercloudsdk/resource.WithQuery"
+        "gophercloudsdk/resource.WithPageSize",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.Network",
+        "gophercloudsdk.Connection.NetworkV2"
       ],
       "contracts": [
         {
-          "behavior": "Pinned direct address_groups (openstack/network/v2/_proxy.py:392) delegates arbitrary query to Resource.list. The declared non-query Body addresses can now be filtered explicitly with SDK-owned WithBodyFilter/WithBodyFilters through ordinary Resources.List/All, projecting only native AddressGroup.Addresses. The filter stays local and does not introduce a wire query, identity lookup, extra GET or caller builder/predicate.",
+          "behavior": "Ordinary AddressGroup.Resources.List/All now classify the entire pinned direct declaration through SDK-owned WithFilter/WithFilters: eight canonical and accepted query attributes, three non-query Body attributes id/tenant_id/addresses and nine reserved list controls. AddressGroup directly inherits Resource without NetworkResource or TagMixin. Query name/description/project_id are server-only; no exact local name/project predicate, implicit GET or caller builder is added. Generated leaf and cached Network/NetworkV2 facades share the descriptor.",
           "tests": [
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersEntireQueryDescriptor",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant"
           ]
         },
         {
-          "behavior": "Each option snapshots JSON at construction and owns fresh bytes on each application. Individual filters merge with canonical last-wins; bulk filters replace the set and nil/empty bulk clears it. Native null differs from empty arrays; arrays compare full ordered values including full nested objects, while generic object filters use recursive subset semantics. Go booleans and numbers remain distinct.",
+          "behavior": "Semantic query values encode scalar strings, lowercase booleans and original JSON-number text; flat scalar arrays preserve repeated order while omitting null elements. Null and empty arrays emit no URL values but retain key presence. Unknown semantic names and their encoding errors are discarded; selected maps/nested query arrays fail. The deprecated tenant_id remains a local property: project_id's response descriptor alias does not introduce a tenant_id query alias.",
           "tests": [
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativeValueSemantics",
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersEntireQueryDescriptor",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding"
+          ]
+        },
+        {
+          "behavior": "All three local selectors read original row JSON after native extraction. Literal raw id presence/null/empty stays independent of native typed identity. tenant_id has no fallback to project_id and preserves exact large numbers and unknown nested objects despite being absent from the native model. Missing/null match null, empty strings and arrays remain distinct; arrays compare complete ordered length and elements without CIDR normalization, and objects recursively match subsets of nonempty actual objects. Decimal equality is exact and booleans remain distinct from numbers.",
+          "tests": [
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "resource/body_record_test.go:TestBodyRecordFieldNormalizationPresenceAndCauses",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersArraysCompareExactly",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersExactDecimalNumbersAndHugeExponents",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersDeliberatelyDistinguishesBooleansAndNumbers",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativeValueSemantics"
+          ]
+        },
+        {
+          "behavior": "Matching no longer projects the native Addresses slice: a raw null address element stays null for comparison although the returned native []string decodes that element as an empty string. Returned rows still use the unchanged five-field native model, including independent ProjectID, rather than filter values or a synthetic raw model. Entire address arrays missing/null both match null; ordered values, length and empty arrays remain explicit. Native id/name/description/project_id string types and addresses string-array decoding remain authoritative.",
+          "tests": [
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersRawBodyDescriptorAndPresence",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersControlsAndNativeWholePageFailures",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "Options own nested JSON/query snapshots for independent concurrent reuse. Individual semantic options are last-wins; bulk replace/nil/empty clear affect only semantic state and validate only final selected values, allowing superseded encoding errors to disappear. Same-wire semantic/raw/name/page-size and same-Body semantic/explicit destinations fail lazily before HTTP, including null/empty/equal values. Reserved controls, selected invalid values, unsupported bindings and canceled contexts yield terminal preflight errors. Raw query and explicit Body namespaces remain independent when their destination kinds differ.",
+          "tests": [
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersPreflightAndNativeNameHint",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear",
             "resource/body_filters_test.go:TestCollectionBodyFiltersOptionApplicationOwnsRawBytes",
-            "resource/body_filters_test.go:TestCollectionBodyFiltersSnapshotsBulkAliasesAndConcurrentReuse",
-            "resource/body_filters_test.go:TestCollectionBodyFiltersPreserveNullEmptyAndExactArrayValues"
+            "resource/body_filters_test.go:TestCollectionBodyFiltersSnapshotsBulkAliasesAndConcurrentReuse"
           ]
         },
         {
-          "behavior": "Unknown fields, invalid JSON/non-JSON/NaN values, bulk alias conflicts and invalid descriptors fail lazily before HTTP with ErrInvalidOption and retained marshal causes. Unsupported bindings, including explicit clear, fail with ErrUnsupported. Only explicitly audited canonical fields are advertised; native schema or extraction contract drift fails generation rather than silently opting other models in.",
+          "behavior": "Native whole-page extraction precedes raw matching and cap consumption, so malformed known fields after a cap remain terminal with native decode causes. A null row consumed by the Body lane is invalid, while query-only null rows preserve the native zero model and an empty object remains valid. After extraction succeeds a cap or early break can avoid consuming a later null row or continuation. MaxItems counts raw rows before local Body/name predicates without refill or an inferred wire limit; first-page and break stop before continuation, and All returns nil on terminal errors.",
           "tests": [
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersLazyPreflightAndUnsupportedBindings",
-            "resource/body_filters_test.go:TestCollectionBodyFiltersValidateBeforeHTTP",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
-          ]
-        },
-        {
-          "behavior": "Raw-row caps run before local Body/name filters and do not refill with matching rows or infer a wire limit. Explicit first-page, page-size and consumer break retain native request/continuation behavior. Whole-page native extraction, later HTTP/decode errors, cycles and cancellation remain terminal, and projection failures retain their causes even when the name would not match.",
-          "tests": [
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersRawControlsNameAndConsumerBreak",
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersControlsAndNativeWholePageFailures",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount",
+            "resource/body_record_test.go:TestCollectionBodyRecordLaneIsSelectedOnlyForPreparedFilters",
             "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths",
-            "resource/body_filters_test.go:TestCollectionBodyFiltersProjectionFailuresAreTerminalAndKeepCause"
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersRawControlsNameAndConsumerBreak",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation"
           ]
         },
         {
-          "behavior": "Leaf collections and the cached Connection.Network.API retain the live provider, configured HTTP client/token/headers and native model extraction with address_groups_links. Raw rules/addresses/status/vendor query remains wire-only. Native typed List and FindIdentity retain their existing signatures/query behavior and do not acquire these ordinary-list Body options.",
+          "behavior": "Ordinary native listing retains HTTP200/204/300 and rejects201. A successfully parsed204 is empty, while empty application/json204 retains native EOF. address_groups_links rel=next supplies continuation; top-level links.next alone is ignored, matching duplicates remain ordinary list rows and foreign advertised URLs retain native following. Later HTTP/decode/foreign errors, cycles and cancellation remain terminal. Configured headers/current microversion, shared ProviderClient/live token, HTTP middleware, context and ResourceBase reverse prefix remain in use across pages.",
           "tests": [
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces",
-            "api/network_body_filters_test.go:TestNetworkBodyFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersPagingLiveSourceAndNativeStatus",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersSharedFacadesAndRawTenant",
             "api/network_body_filters_test.go:TestNetworkBodyFiltersNativePageErrorsAndLateCancellation"
+          ]
+        },
+        {
+          "behavior": "Ordinary raw WithQuery preserves complete wire queries, including id/tenant_id/addresses/status/vendor keys, separately from semantic classification. Existing WithName retains a server hint plus exact local predicate; semantic queried name remains server-only. WithStatus stays unsupported because the native model has no Status, while raw status stays wire-only on both normal and Body lanes. Generated native typed List and existing FindIdentity keep their separate signatures/raw query policy and do not acquire ambient semantic or Body options.",
+          "tests": [
+            "api/address_group_list_filters_test.go:TestAddressGroupListFiltersNativeAndIdentitySurfaceIsolation",
+            "connection_address_group_filters_test.go:TestConnectionAddressGroupFiltersPreflightAndNativeNameHint",
+            "api/network_body_filters_test.go:TestNetworkBodyFiltersLocalWireAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "Generation requires the checked-in AddressGroup manifest and a live audited -openstacksdk-source checkout. Five exact source SHA files are validated before isolated AST-only extraction and full manifest comparison, including parser minor version, direct Resource C3 MRO, pagination defaults, declared query/Body classification, unknown discard and canonical precedence. Sixteen AST anchors independently prove project_id's descriptor alias, deprecated tenant_id, list-typed addresses and inherited ID/accessor behavior; no SDK imports or fabricated tenant query alias are used. Missing/stale source or manifest fails closed and prior four manifests retain their exact bytes.",
+          "tests": [
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupPythonFilterManifestKeepsQueryAndLocalTenantIdentity",
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupPythonFilterPinnedSourceRequiresLiveAliasAndCoercionProof"
+          ]
+        },
+        {
+          "behavior": "The raw semantic plan requires exact native AddressGroup5/ListOpts9/Link2 field/type/tag shapes, no own model methods, the value query-builder signature and own linked-page/extractor contracts. Fourteen receiver-qualified native/root/pagination declaration hashes guard routes, native extraction, original GetBody pairing and UseNumber precision. Emission retains complete repeat/nil/empty query maps on both lanes, raw status policy, prior audited bindings and distinct explicit-Body/semantic inventory. Identity opt-ins remain twenty, Body bindings eight and semantic bindings five.",
+          "tests": [
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupBodyFilterNativeContractRejectsModelBuilderPagerAndSourceDrift",
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupSemanticFilterEmissionPreservesRawFieldsAndExistingBindings",
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupRawDependencyLoaderPreservesNumbersAndNativeLinkHelpers",
+            "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods"
           ]
         }
       ],
       "documentation": [
-        "docs/listing.md",
-        "resource/README.md",
+        "network/v2/extensions/security/addressgroups/listing/README.md",
+        "network/v2/README.md",
         "network/README.md",
-        "network/v2/README.md"
+        "resource/README.md",
+        "docs/listing.md",
+        "internal/cmd/sdkgen/README.md"
       ],
       "differences": [
-        "Python Resource.list classifies non-query declared Body attributes automatically. Go explicitly selects addresses with owned options and an audited native selector; raw wire query retains repetitions, empty values, aliases and vendor keys. No caller-supplied builder or predicate is required.",
-        "Go comparisons use JSON value types, exact ordered array equality and bool/number separation; dict filters against non-objects return false instead of raising an attribute error. Value snapshots do not perform Python descriptor coercion.",
-        "Native Addresses extraction collapses missing and null to nil, preserves a present empty array, and does not preserve every unknown outer Body attribute or internally seeded Resource state. Selecting JSON from a native model cannot recover original wire presence or numeric precision.",
-        "Raw max_items is local and does not create Python Resource.list's limit hint. Existing native accepted statuses, whole-page extraction and advertised continuation remain the contract; typed native List and FindIdentity are separate surfaces."
+        "Complete declared classification is provided through concrete SDK-owned semantic and explicit Body options. Query name/description/project_id stay server-only and tenant_id remains local, distinct from project_id's descriptor alias. WithName has its own hint and local predicate; raw query keys are explicit wire extensions and semantic filtering does not change typed List or FindIdentity.",
+        "Individual semantic options use last-wins targets and bulk replace/clear affects only semantic state. Only final selected values are validated, while explicit Body errors keep their own behavior. Equal/null/empty same-destination collisions fail rather than permissive kwargs merging. Query scalar arrays become repeated values, null elements are omitted, booleans are lowercase, JSON numbers retain text and unknown semantic names/errors are discarded.",
+        "Matching retains original id/tenant_id/addresses values and exact large unknown tenant JSON; returned values remain the five-field native model. Raw null array elements differ from the native empty-string projection. Python addresses(type=list) may wrap non-list response values into lists; the native decoder instead rejects incompatible known fields before matching and before a cap.",
+        "Exact JSON equality distinguishes bools from numbers and strings from numbers. Recursive object subsets preserve the pinned empty-actual-object nonmatch; nonobject actual values are nonmatches rather than potential Python attribute-access errors. Arrays require complete order/length/element equality and do not normalize CIDRs or apply object-subset matching inside arrays.",
+        "Native200/204/300, plural-links continuation and foreign URL following remain intact. Empty application/json204 can fail with native EOF. Local caps count raw rows like the pinned implementation but do not infer its wire limit; first-page/break stop before continuation and All discards partial rows on terminal failures. No same-origin/fixed-query or synthesized marker policy is added.",
+        "Raw Body selectors run only for consumed selected fields after native whole-page decoding. A consumed null row is invalid on the Body lane; query-only null rows preserve the native zero model. SDK comparisons do not replace Python Resource defaults/alias/unknown response state or provide a tracked/cache lifecycle. Source/manifest/native drift fails closed without activating additional native resources or identity capabilities."
       ],
       "remaining": [
-        "Pinned Resource.list and QueryParameters (openstack/resource.py:2217-2234,310-389) transpose declared query aliases, discard unknown names and automatically classify other declared non-query Body attributes. Audit and implement the remaining fields, descriptor coercion and complete automatic query/Body policy beyond these explicit selectors.",
-        "Pinned Resource.existing/_translate_response seeds descriptor/default/alias/unknown-Body state. AddressGroup inherits Resource without TagMixin, not NetworkResource; native extraction does not provide that complete inherited Resource/cache/dirty lifecycle.",
-        "Pinned Proxy.request optional GET response caching (cache_enabled/skip_cache, openstack/proxy.py:249-263) and inherited per-call header/microversion/base_path controls remain separate from retaining configured native client settings. The direct Proxy._list fixes the session to itself; adapter/session injection belongs to the inherited Resource.list surface. This class inherits _max_microversion=None, so no class-specific maximum negotiation gap is claimed.",
-        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker paths not fully represented by the native plural_links pager. Ordinary-list options do not provide local Body classification for FindIdentity or native typed List.",
-        "Pinned Proxy._list (openstack/proxy.py:866-916) consumes the deprecated jmespath_filters expression from direct **query before delegating Resource.list. No corresponding expression filter option is provided by the ordinary Go collection."
+        "Complete mutable Python Resource state, Body/URI defaults/coercion, seeded unknown attrs, project_id descriptor fallback/alias projection and returned Resource properties remain beyond declared list classification. AddressGroup directly inherits Resource without TagMixin or NetworkResource; raw matching does not add its complete cache/dirty lifecycle or permissive response model.",
+        "Pinned Proxy.request optional GET caching(cache_enabled/skip_cache), resource/session injection and inherited per-call header/microversion/base_path/allow_unknown_params controls remain separate from retaining configured native clients. Direct Proxy._list fixes the session to itself; AddressGroup inherits _max_microversion=None and no class-specific maximum negotiation gap is claimed.",
+        "Resource._get_next_link includes address_groups_links/body links, RFC Link headers and truthy limit/marker fallback beyond the native plural-links pager. Python continuation-query merging, dynamic Resource.id markers and max_items limit hints/page-end observations remain different from native advertised URL/cycle behavior; complete inherited continuation remains open.",
+        "Deprecated Proxy._list jmespath_filters and its __conflicting_attrs restoration branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify these branches but do not map their runtime behavior.",
+        "Native schema/status/whole-page/empty204 error behavior and selected raw JSON equality do not complete Python list-descriptor coercion or generic response error/default policy. Ordinary semantic options intentionally do not implement local Body classification for native typed List or FindIdentity; those inherited Resource contracts require independent review."
       ]
     },
     {
