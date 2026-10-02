@@ -161,3 +161,12 @@ native `ExtractMetadata`의 unchecked assertion은 [안전한 helper](../../snap
 숫자 정밀도, 원래 오류, 옵션 소유권과 explicit Get을 검증합니다. [연산 목록](../../../api/gophercloud_inventory.json)의
 `result_policy: sdk_snapshot_metadata_object`는 이 두 결과 해석만 표시하며 Snapshot CRUD의 반환형이나
 Python의 metadata merge·cache 정책을 확장하지 않습니다.
+
+Cinder Volume·Snapshot v2/v3의 수동 `MetadataIn` 범위는 [등록 규칙](cinder_metadata_scopes.go)이
+네 기존 collection의 ID·Name·Get·List binding을 확인해 `metadata_scope`에 기록합니다.
+별도 collection·native 연산을 생성하지 않고 다른 서비스나 Backup으로 추론하지 않습니다.
+[등록 회귀](cinder_metadata_scopes_test.go)는 실제 compiled native 타입으로 네 binding과
+기존 Snapshot 결과 해석·Volume image metadata API·버전별 capability 문서를 확인하며,
+부모 binding의 변경·누락과 감사하지 않은 리소스를 거부합니다. 요청 실행과 metadata 응답은
+[공통 SDK 구현](../../cindermetadata/scope.go), [네 HTTP binding](../../../api/cinder_metadata_scopes_test.go),
+[Python/Go 사용법](../../../blockstorage/metadata/README.md)에서 별도로 검증합니다.

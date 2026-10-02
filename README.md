@@ -81,6 +81,8 @@ Snapshot v2/v3의 `UpdateMetadata`는 실제 `metadata` 응답을 `map[string]an
 [v2 사용법](blockstorage/v2/snapshots/README.md)과 [v3 사용법](blockstorage/v3/snapshots/README.md)에
 반환형 변경과 native PUT 교체·Python POST 병합의 차이를 설명합니다.
 
+Volume·Snapshot v2/v3의 `MetadataIn(ctx, ref)`는 고정된 리소스의 메타데이터를 Get·Merge·Replace·DeleteKeys로 관리합니다. v3는 `conn.VolumeMetadata`와 `conn.SnapshotMetadata`로 바로 범위를 만들 수 있습니다. SDK가 문자열 map과 헤더 옵션, 빈 입력·전체 삭제·순서별 부분 성공을 처리하고 실제 응답을 반환합니다. [공통 metadata 사용법](blockstorage/metadata/README.md)과 [서버 계약 비교](docs/cinder-metadata-server-contracts.md)에 Python 대응·ETag·Backup의 경로 차이를 설명합니다.
+
 Trunk는 [query 14개·로컬 필드 2개](network/v2/extensions/trunks/listing/README.md)를
 분류합니다. `project_id`·`sub_ports`·`status`는 서버 조건이며 `id`·`tenant_id`만 원문에서
 비교합니다. SDK가 admin state·태그 별칭과 옵션 snapshot을 처리하고 기존 이름·상태 필터와

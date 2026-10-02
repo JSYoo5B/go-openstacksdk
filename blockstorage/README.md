@@ -11,6 +11,9 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.block_storage.volumes(status="available")` | `service.Volumes.List(ctx, resource.WithStatus("available"))` |
 | `conn.block_storage.wait_for_status(volume, status="available", wait=300)` | `service.Volumes.Wait(ctx, resource.ID(volume.ID), "available", resource.WithTimeout(5*time.Minute))` |
 | `conn.block_storage.delete_volume(id)` | `service.Volumes.Delete(ctx, resource.ID(id))` |
+| `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
+| `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
+| `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
 
 SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Python의 `force`·`cascade` 삭제 옵션은 현재 상위 계층에 노출하지 않았습니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
 
@@ -72,3 +75,5 @@ native options의 nil/빈 Metadata map은 `omitempty`로 생략되며, core 필�
 [v3 사용법](v3/snapshots/README.md)에 반환형 변경과 Python의 POST 병합·캐시 차이를 설명합니다.
 
 [blockstorage_test.go](blockstorage_test.go)는 Cinder의 실패 상태 패턴과 microversion 헤더를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.
+
+Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)`로 고정합니다. v3는 `conn.VolumeMetadata`·`conn.SnapshotMetadata`가 공유 클라이언트를 연결합니다. Get은 실제 map을 조회하고 Merge는 POST 병합, Replace는 PUT 전체 교체를 실행합니다. nil/빈 map도 명시적인 객체를 보내며 DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음입니다. 문자열 map·header 옵션·순서별 부분 성공과 Python Resource/cache 차이는 [공통 사용법](metadata/README.md), [v3 Volume](v3/volumes/README.md)·[Snapshot](v3/snapshots/README.md)을 참고합니다. [서버 계약](../docs/cinder-metadata-server-contracts.md)은 Cinder의 ETag와 Backup 경로 차이를 고정 소스로 설명합니다.
