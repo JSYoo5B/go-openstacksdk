@@ -54,6 +54,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. ")
 	}
 	out.WriteString("수정한 응답이 자동 저장되지는 않습니다.\n\n")
+	if key == "compute/v2" || key == "blockstorage/v2" || key == "blockstorage/v3" || key == "image/v2" {
+		out.WriteString("감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.\n\n")
+	}
 	if parts[0] == "metric" {
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")
 	}
@@ -293,6 +296,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			policies = append(policies, fmt.Sprintf("`%s`: %s", label, strings.Join(features, ", ")))
 			if record.MetadataScope != "" {
 				policies = append(policies, fmt.Sprintf("`%s(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답", record.MetadataScope))
+			}
+			if record.ServiceWait != "" {
+				policies = append(policies, "`WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션")
 			}
 		}
 		policy := strings.Join(policies, "; ")
