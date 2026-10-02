@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the audited Subnet filter contract without importing OpenStack.
+"""Extract audited Subnet or Secret filters without importing OpenStack.
 
 Only Python's standard-library AST is used. The source checkout is data, never
 executed; unexpected expression shapes fail rather than becoming guessed fields.
@@ -42,6 +42,46 @@ ANCHORS = (
     ("openstack/proxy.py", "Proxy._list"),
     ("openstack/network/v2/_proxy.py", "Proxy.subnets"),
 )
+SECRET_RESOURCE = "openstack.key_manager.v1.secret.Secret"
+SECRET_FILES = (
+    "openstack/key_manager/v1/secret.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/key_manager/v1/_proxy.py",
+    "openstack/key_manager/v1/_format.py",
+    "openstack/format.py",
+)
+SECRET_ANCHORS = (
+    ("openstack/key_manager/v1/secret.py", "Secret"),
+    ("openstack/key_manager/v1/secret.py", "Secret._query_mapping"),
+    ("openstack/key_manager/v1/secret.py", "Secret.secret_id"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "Resource._alternate_id"),
+    ("openstack/resource.py", "Resource._get_id"),
+    ("openstack/resource.py", "Resource.__init__"),
+    ("openstack/resource.py", "Resource._attributes_iterator"),
+    ("openstack/resource.py", "Resource._attr_to_dict"),
+    ("openstack/resource.py", "Resource.to_dict"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/key_manager/v1/_proxy.py", "Proxy.secrets"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
+    ("openstack/format.py", "Formatter"),
+)
+TARGETS = {
+    "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
+    "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
+               "gophercloudsdk/keymanager/v1/secrets"),
+}
 
 
 def assignment(node):
@@ -54,14 +94,14 @@ def assignment(node):
 
 
 class Source:
-    def __init__(self, root):
+    def __init__(self, root, files=FILES):
         self.raw = {}
         self.trees = {}
         self.modules = {}
         self.imports = {}
         self.classes = {}
         self.attributes = {}
-        for path in FILES:
+        for path in files:
             raw = (root / path).read_bytes()
             module = path[:-3].replace("/", ".")
             tree = ast.parse(raw, filename=path)
@@ -212,9 +252,36 @@ def implementation_policies(source):
     return "discard", "canonical_client_name_wins"
 
 
-def extract(root):
-    source = Source(root)
-    attrs = source.effective_attributes(RESOURCE)
+def secret_body_accessors(source, attrs, body):
+    """Keep Resource.id separate from the formatted alternate-ID descriptor."""
+    if body.get("id") != {"field": "id", "response_type": None}:
+        raise ValueError("unsupported Secret literal ID descriptor")
+    module, descriptor, _ = attrs["secret_id"]
+    alternate = [keyword.value for keyword in descriptor.keywords
+                 if keyword.arg == "alternate_id"]
+    if len(alternate) != 1 or source.literal(module, alternate[0]) is not True:
+        raise ValueError("unsupported Secret alternate ID descriptor")
+    formatter = "openstack.key_manager.v1._format.HREFToUUID"
+    if body.get("secret_id") != {"field": "secret_ref", "response_type": formatter}:
+        raise ValueError("unsupported Secret alternate ID formatter")
+    if body.get("secret_ref") != {"field": "secret_ref", "response_type": None}:
+        raise ValueError("unsupported Secret reference descriptor")
+    formatter_class = source.classes[formatter]
+    if (len(formatter_class.bases) != 1
+            or source.resolve(formatter.rpartition(".")[0], formatter_class.bases[0])
+            != "openstack.format.Formatter"):
+        raise ValueError("unsupported Secret formatter base")
+    # Resource.__getattribute__ reads the stored literal ID before consulting
+    # the alternate wire field. It does not apply HREFToUUID to that fallback.
+    # Separate AST anchors prove both access paths and the to_dict projection.
+    body["id"]["response_accessor"] = "resource_id"
+    body["secret_id"]["formatter"] = formatter
+
+
+def extract(root, target="subnet"):
+    resource, files, anchors, sdk_package = TARGETS[target]
+    source = Source(root, files)
+    attrs = source.effective_attributes(resource)
     module, query_call, _ = attrs["_query_mapping"]
     if not isinstance(query_call, ast.Call) or source.resolve(module, query_call.func) != "openstack.resource.QueryParameters":
         raise ValueError("unsupported query mapping declaration")
@@ -281,6 +348,8 @@ def extract(root):
         (body if kind.endswith(".Body") else uri)[name] = {
             "field": field, "response_type": response_type
         }
+    if target == "secret":
+        secret_body_accessors(source, attrs, body)
     resource_controls = control_arguments(
         source.anchor("openstack/resource.py", "Resource.list"), {"cls"}
     )
@@ -289,7 +358,7 @@ def extract(root):
     )
     unknown_filters, query_collision = implementation_policies(source)
     proof = []
-    for path, symbol in ANCHORS:
+    for path, symbol in anchors:
         node = source.anchor(path, symbol)
         proof.append({
             "source": path, "symbol": symbol,
@@ -299,12 +368,12 @@ def extract(root):
             ).encode("utf-8")).hexdigest(),
         })
     return {
-        "schema_version": 1, "source_pin": PIN, "resource": RESOURCE,
-        "sdk_package": "gophercloudsdk/network/v2/subnets",
+        "schema_version": 1, "source_pin": PIN, "resource": resource,
+        "sdk_package": sdk_package,
         "base_path": source.literal(*attrs["base_path"][:2]),
         "envelope": source.literal(*attrs["resources_key"][:2]),
-        "class_bases": [ast.unparse(base) for base in source.classes[RESOURCE].bases],
-        "mro": source.mro(RESOURCE),
+        "class_bases": [ast.unparse(base) for base in source.classes[resource].bases],
+        "mro": source.mro(resource),
         "query": query, "query_formats": formats, "body": body, "uri": uri,
         "unknown_filters": unknown_filters,
         "query_collision": query_collision,
@@ -328,9 +397,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=pathlib.Path, required=True)
     parser.add_argument("--output", type=pathlib.Path)
+    parser.add_argument("--target", choices=tuple(TARGETS))
+    parser.add_argument("--resource", choices=tuple(spec[0] for spec in TARGETS.values()))
     args = parser.parse_args()
+    target = args.target
+    if args.resource:
+        resource_target = next(name for name, spec in TARGETS.items()
+                               if spec[0] == args.resource)
+        if target is not None and target != resource_target:
+            parser.error("--resource and --target select different resources")
+        target = resource_target
     try:
-        data = json.dumps(extract(args.source), indent=2, sort_keys=True) + "\n"
+        data = json.dumps(extract(args.source, target or "subnet"), indent=2, sort_keys=True) + "\n"
     except (OSError, SyntaxError, ValueError, KeyError, TypeError, AttributeError) as error:
         parser.exit(1, "Python filter source: " + str(error) + "\n")
     if args.output:
