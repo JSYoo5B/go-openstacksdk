@@ -157,6 +157,10 @@ func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *t
 			}
 			requireControlledCalls(t, method, target+".FindIdentity(ctx, identity, options...)")
 			adapter := controlledEmittedMethod(t, emitted, "newResources")
+			if spec.path == networkSDKPath {
+				requireControlledCalls(t, adapter, "resource.NewCollection(a.ResourceAdapter())")
+				adapter = controlledEmittedMethod(t, emitted, "ResourceAdapter")
+			}
 			if spec.rawListIterator == "" && (!strings.Contains(string(emitted), "config.Query[key] = append([]string(nil), values...)") || strings.Contains(string(emitted), "With"+spec.lister+"Query(key, value)")) {
 				t.Fatal("native adapter collapses repeated or nil query values", string(emitted))
 			}

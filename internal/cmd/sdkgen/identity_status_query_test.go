@@ -9,8 +9,9 @@ func TestIdentityAuditedBindingsRetainRawStatusWithoutInferringTypedStatus(t *te
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path, func(t *testing.T) {
 			pkg, plan := identityQueryFixture(t, spec, identityQueryFixtureSource(spec))
-			if plan.statusQuery != "" || plan.status != "" || !identityCollectionEnabled(pkg, plan, spec.parents) {
-				t.Fatal("fixture must isolate audited raw status preservation", plan)
+			nativeNetworkStatus := spec.path == networkSDKPath
+			if !identityCollectionEnabled(pkg, plan, spec.parents) || (nativeNetworkStatus && (plan.status != "Status" || plan.statusQuery != "status")) || (!nativeNetworkStatus && (plan.status != "" || plan.statusQuery != "")) {
+				t.Fatal("fixture must preserve audited native status ownership", plan)
 			}
 			e := emitter{pkg: pkg, imports: map[string]string{}}
 			parents := []string(nil)
@@ -25,7 +26,7 @@ func TestIdentityAuditedBindingsRetainRawStatusWithoutInferringTypedStatus(t *te
 				t.Fatal(err)
 			}
 			body := string(source)
-			if strings.Contains(body, `q.Del("status")`) || strings.Contains(body, `q.Set("status"`) || strings.Contains(body, "LocalStatus:") || strings.Contains(body, "Status:") {
+			if strings.Contains(body, `q.Del("status")`) || strings.Contains(body, `q.Set("status"`) || strings.Contains(body, "LocalStatus:") || (!nativeNetworkStatus && strings.Contains(body, "Status:")) {
 				t.Fatal("raw status was discarded or invented a typed status capability", body)
 			}
 			if spec.rawListIterator != "" {

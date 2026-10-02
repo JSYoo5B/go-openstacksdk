@@ -187,7 +187,11 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 		if identity.model == "Network" {
 			copy := spec
 			copy.fields = append([]bodyFilterCollectionField(nil), spec.fields...)
-			copy.fields[0].aliases = nil
+			for i := range copy.fields {
+				if copy.fields[i].key == "subnets" {
+					copy.fields[i].aliases = nil
+				}
+			}
 			if bodyFilterCollectionMetadataValid(copy) {
 				t.Fatal("Python subnet_ids alias was silently removed")
 			}
@@ -199,7 +203,7 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 				"wrong resource key shape":               strings.Replace(base, "ResourceKey()string{return \"networks\"}", "ResourceKey()int{return 0}", 1),
 				"wrong whole page extractor":             strings.Replace(base, "([]Network,error)", "([]string,error)", 1),
 				"typed slice destination":                strings.Replace(base, "ExtractNetworksInto(r pagination.Page,v any)", "ExtractNetworksInto(r pagination.Page,v []Network)", 1),
-				"typed member destination":               strings.Replace(base, "func(GetResult)ExtractInto(v any)", "func(GetResult)ExtractInto(v Network)", 1),
+				"typed member destination":               strings.Replace(base, "func(commonResult)ExtractInto(v any)", "func(commonResult)ExtractInto(v Network)", 1),
 			} {
 				t.Run(identity.model+"/"+name, func(t *testing.T) {
 					if changed == base {
@@ -289,13 +293,15 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				}
 			}
 			if spec.rawRecord {
-				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" {
+				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" || identity.model == "Network" {
 					body := string(source)
 					selector, envelope, extractor, kind := "addressGroupBodyFilterValue", "address_groups", "ExtractGroups", "addressgroups"
 					if identity.model == "Policy" {
 						selector, envelope, extractor, kind = "qosPolicyBodyFilterValue", "policies", "ExtractPolicies", "policies"
 					} else if identity.model == "SubnetPool" {
 						selector, envelope, extractor, kind = "subnetPoolBodyFilterValue", "subnetpools", "ExtractSubnetPools", "subnetpools"
+					} else if identity.model == "Network" {
+						selector, envelope, extractor, kind = "networkBodyFilterValue", "networks", "ExtractNetworks", "networks"
 					}
 					for _, required := range []string{"BodyFilterRecordValue:", selector + "(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"` + envelope + `", control)`, "upstream." + extractor + "(page)"} {
 						if !strings.Contains(body, required) {
@@ -441,7 +447,7 @@ func TestBodyFilterCollectionStillRequiresPinnedNativeContracts(t *testing.T) {
 				if _, err := (&generator{meta: map[string]metadata{}}).identityPaginationDeclarations(pkg.Path()); err == nil {
 					t.Fatal("raw page guard accepted missing dependency metadata")
 				}
-				if result, err := sdkGenerator.identityPaginationDeclarations(upstreamModule + "/openstack/networking/v2/networks"); err != nil || len(result) != 0 {
+				if result, err := sdkGenerator.identityPaginationDeclarations(upstreamModule + "/openstack/networking/v2/ports"); err != nil || len(result) != 0 {
 					t.Fatal("raw page dependency loading leaked into typed lane", result, err)
 				}
 				// A new JSON parser without UseNumber or a copied/mapped GetBody
