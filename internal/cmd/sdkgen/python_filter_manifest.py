@@ -257,8 +257,68 @@ SUBNET_POOL_ANCHORS = (
     ("openstack/proxy.py", "Proxy._list"),
     ("openstack/network/v2/_proxy.py", "Proxy.subnet_pools"),
 )
+NETWORK_RESOURCE = "openstack.network.v2.network.Network"
+NETWORK_FILES = (
+    "openstack/network/v2/network.py",
+    "openstack/network/v2/_base.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+# Full classification/default/accessor anchors include inherited revision,
+# bool None handling and query-mapped False defaults. Hash coverage of a
+# continuation branch does not claim its runtime implementation.
+NETWORK_ANCHORS = (
+    ('openstack/network/v2/network.py', 'Network'),
+    ('openstack/network/v2/network.py', 'Network._query_mapping'),
+    ('openstack/network/v2/network.py', 'Network.availability_zone_hints'),
+    ('openstack/network/v2/network.py', 'Network.availability_zones'),
+    ('openstack/network/v2/network.py', 'Network.created_at'),
+    ('openstack/network/v2/network.py', 'Network.dns_domain'),
+    ('openstack/network/v2/network.py', 'Network.is_default'),
+    ('openstack/network/v2/network.py', 'Network.mtu'),
+    ('openstack/network/v2/network.py', 'Network.pvlan'),
+    ('openstack/network/v2/network.py', 'Network.qos_policy_id'),
+    ('openstack/network/v2/network.py', 'Network.segments'),
+    ('openstack/network/v2/network.py', 'Network.subnet_ids'),
+    ('openstack/network/v2/network.py', 'Network.updated_at'),
+    ('openstack/network/v2/network.py', 'Network.is_vlan_transparent'),
+    ('openstack/network/v2/network.py', 'Network.is_vlan_qinq'),
+    ('openstack/resource.py', 'Resource'),
+    ('openstack/resource.py', 'Resource.id'),
+    ('openstack/resource.py', 'Resource.name'),
+    ('openstack/resource.py', 'Resource._max_microversion'),
+    ('openstack/resource.py', 'Resource.__init__'),
+    ('openstack/resource.py', 'Resource._attributes_iterator'),
+    ('openstack/resource.py', 'Resource._collect_attrs'),
+    ('openstack/resource.py', 'Resource.__getattribute__'),
+    ('openstack/resource.py', 'Resource.__getitem__'),
+    ('openstack/resource.py', 'Resource._alternate_id'),
+    ('openstack/resource.py', 'Resource.to_dict'),
+    ('openstack/resource.py', 'Resource.list'),
+    ('openstack/resource.py', 'Resource._get_next_link'),
+    ('openstack/resource.py', 'QueryParameters.__init__'),
+    ('openstack/resource.py', 'QueryParameters._validate'),
+    ('openstack/resource.py', 'QueryParameters._transpose'),
+    ('openstack/fields.py', '_BaseComponent.__init__'),
+    ('openstack/fields.py', '_BaseComponent.__get__'),
+    ('openstack/fields.py', '_convert_type'),
+    ('openstack/proxy.py', 'Proxy._list'),
+    ('openstack/network/v2/_proxy.py', 'Proxy.networks'),
+    ('openstack/common/tag.py', 'TagMixin'),
+    ('openstack/common/tag.py', 'TagMixin._tag_query_parameters'),
+    ('openstack/common/tag.py', 'TagMixin.tags'),
+    ('openstack/network/v2/_base.py', 'NetworkResource'),
+    ('openstack/network/v2/_base.py', 'NetworkResource.revision_number'),
+    ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
+    ('openstack/resource.py', 'ResourceMixinProtocol'),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
+    "network": (NETWORK_RESOURCE, NETWORK_FILES, NETWORK_ANCHORS,
+                "gophercloudsdk/network/v2/networks"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
                "gophercloudsdk/keymanager/v1/secrets"),
     "container": (CONTAINER_RESOURCE, CONTAINER_FILES, CONTAINER_ANCHORS,
@@ -490,6 +550,111 @@ def order_body_accessors(source, attrs, body):
     body["secret_id"]["formatter"] = formatter
 
 
+def network_body_descriptors(source, attrs, body):
+    """Prove exact declared response defaults without widening query names."""
+    expected = {
+        "availability_zone_hints": ("availability_zone_hints", "list", None),
+        "availability_zones": ("availability_zones", "list", None),
+        "created_at": ("created_at", None, None),
+        "description": ("description", None, None),
+        "dns_domain": ("dns_domain", None, None),
+        "id": ("id", None, None),
+        "ipv4_address_scope_id": ("ipv4_address_scope", None, None),
+        "ipv6_address_scope_id": ("ipv6_address_scope", None, None),
+        "is_admin_state_up": ("admin_state_up", "bool", None),
+        "is_default": ("is_default", "bool", None),
+        "is_port_security_enabled": ("port_security_enabled", "bool", False),
+        "is_router_external": ("router:external", "bool", False),
+        "is_shared": ("shared", "bool", None),
+        "is_vlan_qinq": ("vlan_qinq", "bool", None),
+        "is_vlan_transparent": ("vlan_transparent", "bool", None),
+        "mtu": ("mtu", "int", None),
+        "name": ("name", None, None),
+        "project_id": ("project_id", None, None),
+        "provider_network_type": ("provider:network_type", None, None),
+        "provider_physical_network": ("provider:physical_network", None, None),
+        "provider_segmentation_id": ("provider:segmentation_id", None, None),
+        "pvlan": ("pvlan", "bool", None),
+        "qos_policy_id": ("qos_policy_id", None, None),
+        "revision_number": ("revision_number", "int", None),
+        "segments": ("segments", "list", None),
+        "status": ("status", None, None),
+        "subnet_ids": ("subnets", "list", None),
+        "tags": ("tags", "list", []),
+        "updated_at": ("updated_at", None, None),
+    }
+    actual = {}
+    for name, (module, descriptor, _) in attrs.items():
+        if not isinstance(descriptor, ast.Call):
+            continue
+        if source.resolve(module, descriptor.func) not in {
+            "openstack.resource.Body", "openstack.fields.Body"
+        }:
+            continue
+        if len(descriptor.args) != 1:
+            raise ValueError("unsupported Network response field name")
+        keywords = [keyword.arg for keyword in descriptor.keywords]
+        if (len(keywords) != len(set(keywords))
+                or set(keywords) - {"type", "default"}):
+            raise ValueError("unsupported Network descriptor options")
+        typed = next((keyword.value for keyword in descriptor.keywords
+                      if keyword.arg == "type"), None)
+        response_type = (source.resolve(module, typed).removeprefix("builtins.")
+                         if typed is not None else None)
+        default = next((keyword.value for keyword in descriptor.keywords
+                        if keyword.arg == "default"), None)
+        actual[name] = (source.literal(module, descriptor.args[0]), response_type,
+                        source.literal(module, default) if default else None)
+    if actual != expected:
+        raise ValueError("unsupported Network declared response descriptors")
+    init = source.anchor("openstack/fields.py", "_BaseComponent.__init__")
+    args = init.args.posonlyargs + init.args.args
+    defaults = dict(zip((arg.arg for arg in args[-len(init.args.defaults):]),
+                        init.args.defaults))
+    for name, expected_default in (("default", None), ("coerce_to_default", False),
+                                   ("alternate_id", False), ("list_type", None)):
+        if source.literal("openstack.fields", defaults[name]) is not expected_default:
+            raise ValueError("unsupported Network implicit descriptor default")
+    getter = source.anchor("openstack/fields.py", "_BaseComponent.__get__")
+    null_returns = [node for node in getter.body if isinstance(node, ast.If)
+                    and isinstance(node.test, ast.Compare)
+                    and isinstance(node.test.left, ast.Name)
+                    and node.test.left.id == "value"
+                    and len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.Is)
+                    and len(node.test.comparators) == 1
+                    and isinstance(node.test.comparators[0], ast.Constant)
+                    and node.test.comparators[0].value is None]
+    if (len(null_returns) != 1 or len(null_returns[0].body) != 1
+            or not isinstance(null_returns[0].body[0], ast.Return)
+            or not isinstance(null_returns[0].body[0].value, ast.Constant)
+            or null_returns[0].body[0].value.value is not None):
+        raise ValueError("unsupported Network None response shortcut")
+    conversion = source.anchor("openstack/fields.py", "_convert_type")
+    bool_branches = [node for node in ast.walk(conversion) if isinstance(node, ast.If)
+                     and isinstance(node.test, ast.Call)
+                     and isinstance(node.test.func, ast.Name)
+                     and node.test.func.id == "issubclass"
+                     and len(node.test.args) == 2
+                     and isinstance(node.test.args[0], ast.Name)
+                     and node.test.args[0].id == "data_type"
+                     and isinstance(node.test.args[1], ast.Name)
+                     and node.test.args[1].id == "bool"]
+    if len(bool_branches) != 1 or ast.dump(bool_branches[0].body[0]) != ast.dump(
+        ast.Return(value=ast.Call(func=ast.Name(id="data_type", ctx=ast.Load()),
+                                 args=[ast.Name(id="value", ctx=ast.Load())], keywords=[]))
+    ) or len(bool_branches[0].body) != 1:
+        raise ValueError("unsupported Network boolean conversion")
+    expected_local = {name: {"field": field, "response_type": response_type}
+                      for name, (field, response_type, _) in expected.items()
+                      if name in {"availability_zone_hints", "availability_zones",
+                                  "created_at", "dns_domain", "is_default",
+                                  "is_vlan_qinq", "is_vlan_transparent", "mtu", "pvlan",
+                                  "qos_policy_id", "revision_number", "segments",
+                                  "subnet_ids", "updated_at"}}
+    if body != expected_local:
+        raise ValueError("unsupported Network local Body classification")
+
+
 def extract(root, target="subnet"):
     resource, files, anchors, sdk_package = TARGETS[target]
     source = Source(root, files)
@@ -560,7 +725,9 @@ def extract(root, target="subnet"):
         (body if kind.endswith(".Body") else uri)[name] = {
             "field": field, "response_type": response_type
         }
-    if target == "secret":
+    if target == "network":
+        network_body_descriptors(source, attrs, body)
+    elif target == "secret":
         keymanager_body_accessors(source, attrs, body, "Secret", "secret_id", "secret_ref")
     elif target == "container":
         keymanager_body_accessors(source, attrs, body, "Container", "container_id", "container_ref")
