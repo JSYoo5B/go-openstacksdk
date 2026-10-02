@@ -311,6 +311,25 @@ Python scalar-to-list coercion·응답 타입·pagination의 경계를 설명합
 [Container AST manifest](../api/openstacksdk/resources/key_manager/v1/container.json)는
 상속 query defaults와 ID 접근을 포함해 생성 시 현재 소스를 검증합니다.
 
+### Order의 속성 이름 분류
+
+`Orders.Resources.List/All`은 Python `conn.key_manager.orders(**query)`의 상속 query
+`limit`·`marker`와 로컬 Body 속성 14개를 분류합니다. 최상위 원문 `name`은 중첩
+`meta.name`과 별개이며, `meta`는 원문 객체의 추가 필드·정확한 숫자·중첩 조건을 비교합니다.
+native Order에 최상위 Name이 없으므로 공통 `WithName`과 이름 Ref 조회는 지원하지 않습니다.
+
+`id`는 literal id의 존재를 우선하고 없을 때 전체 `order_ref`를 사용합니다. `order_id`는
+order 참조, `secret_id`는 secret 참조의 마지막 path 부분이며 서로 다른 accessor입니다.
+두 참조는 조건 비교에만 쓰고 요청으로 따라가지 않습니다. ID 기반 조회·삭제·대기는
+호출자의 ID로 고정된 order 경로를 사용하며 응답 참조가 바뀌어도 같은 경로를 유지합니다.
+
+원문 timestamp와 metadata 비교에는 native Order·Meta의 전체 페이지 디코드가 먼저
+적용됩니다. 잘못된 Meta 정수나 timestamp도 로컬 cap 뒤에서 오류가 될 수 있습니다.
+[Order 목록 사용법](../keymanager/v1/orders/listing/README.md)에 Python/Go 예제와 native
+응답 모델·dict coercion·페이지 경계를 설명합니다.
+[Order AST manifest](../api/openstacksdk/resources/key_manager/v1/order.json)는 두 formatter와
+metadata 속성을 포함해 생성 시 현재 고정 소스를 검증합니다.
+
 ### Subnet의 원본 응답 필터
 
 Python `conn.network.subnets(prefix_length=24, dns_nameservers=["192.0.2.53"])`에 대응하는

@@ -62,14 +62,15 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 
 `WithFilter`/`WithFilters`는 감사된 속성 이름을 서버 query 또는 로컬 Body 조건으로
 분류합니다. 현재 Subnet의 query 24개·로컬 Body 9개, Secret의 query 12개·로컬 Body 12개,
-Container의 query 2개·로컬 Body 10개에
+Container의 query 2개·로컬 Body 10개, Order의 query 2개·로컬 Body 14개에
 연결되어 있고 다른 binding은 clear를 포함해 `ErrUnsupported`입니다. 개별 옵션은 같은 target의 마지막 값이 이기고,
 한 bulk map의 query canonical 이름은 wire 별칭보다 우선합니다. bulk 교체/clear는 semantic
 조건만 바꾸며 최종 선택값만 검증합니다. 알 수 없는 이름은 버리고 raw query·명시 Body와
 같은 target을 지정하면 HTTP 전에 `ErrInvalidOption`입니다. 선언·reserved controls·인코딩은
 [Subnet Python/Go 사용법](../network/v2/subnets/README.md)과
 [Secret Python/Go 사용법](../keymanager/v1/secrets/listing/README.md)과
-[Container Python/Go 사용법](../keymanager/v1/containers/listing/README.md)에 설명합니다.
+[Container Python/Go 사용법](../keymanager/v1/containers/listing/README.md)과
+[Order Python/Go 사용법](../keymanager/v1/orders/listing/README.md)에 설명합니다.
 
 `WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
 로컬 비교합니다. 현재 QoS Policy의 `rules`, Address Group의 `addresses`, Subnet Pool의
@@ -83,6 +84,9 @@ Secret은 timestamp의 속성 이름과 raw wire 이름을 구분하고 literal 
 Container는 `name`·timestamp·참조·중첩 배열 등 10개 로컬 속성을 비교합니다. `id`는 literal
 필드가 없을 때 전체 `container_ref`를 사용하며 `container_id`는 마지막 path 부분입니다.
 `secret_refs`·`consumers`는 원문 배열의 순서와 추가 필드까지 비교하고 native Container를 반환합니다.
+Order는 최상위 `name`, 원문 `meta`와 timestamp 등 14개 로컬 속성을 비교합니다. 전체
+`id`/`order_ref`와 두 formatted 속성 `order_id`·`secret_id`를 각각 선택합니다.
+native `Meta.Name`은 중첩 metadata이며 공통 `WithName`이나 이름 조회에 연결하지 않습니다.
 SDK가 JSON snapshot·필드 선택·배열 전체 equality를 처리하며 builder/predicate는 필요하지
 않습니다. 지원이 없는 리소스·알 수 없는 필드는 HTTP 전에 거부하고 raw query와 typed List·
 FindIdentity는 유지합니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)에

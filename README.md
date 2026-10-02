@@ -71,6 +71,10 @@ metadata 전용 옵션, 텍스트·바이너리 결과와 실패 시 응답 보�
 10개를 분류합니다. `name`은 로컬 조건이며 원문 `secret_refs`·`consumers` 배열도 비교합니다.
 [Container 목록 비교](keymanager/v1/containers/listing/README.md)에 `WithName`·raw query와의
 차이, `id`·`container_id` 및 native decoder의 경계를 설명합니다.
+`Orders.Resources.List/All`은 서버의 `limit`·`marker`와 로컬 Body 속성 14개를 분류합니다.
+최상위 `name`과 `meta.name`, 전체 `id`와 별도 `order_id`·`secret_id`를 구분하며 원문
+metadata도 비교합니다. [Order 목록 비교](keymanager/v1/orders/listing/README.md)에
+사용 예제와 native 응답 모델·ID 조회의 경계를 설명합니다.
 Zaqar는 `conn.MessagingV2(ctx)`의 `Subscriptions.InQueue(ctx, queueName)`으로 queue를 고정하고
 구독 생성·조회·목록·삭제를 제공합니다. [Subscription 비교](messaging/v2/subscriptions/README.md)에
 Client-ID·project header·TTL 기본값·marker 순회와 Python/Go 사용법을 설명합니다.
