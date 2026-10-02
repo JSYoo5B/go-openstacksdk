@@ -1,6 +1,7 @@
 package imagedata
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -210,8 +211,18 @@ func decodeStageImage(response *rest.Response, queued bool) (*images.Image, erro
 	if fields == nil {
 		return nil, response.Fail(fmt.Errorf("response must be a JSON object"))
 	}
-	var image images.Image
-	if err := json.Unmarshal(response.Body, &image); err != nil {
+	var body map[string]any
+	decoder := json.NewDecoder(bytes.NewReader(response.Body))
+	decoder.UseNumber()
+	if err := decoder.Decode(&body); err != nil {
+		return nil, response.Fail(err)
+	}
+	// Native extraction projects import-method and store-id headers into the
+	// model. Its mutable decoding map stays separate from the actual raw body.
+	var native images.GetResult
+	native.Body, native.Header = body, response.Header.Clone()
+	image, err := native.Extract()
+	if err != nil {
 		return nil, response.Fail(err)
 	}
 	if queued {
@@ -227,7 +238,7 @@ func decodeStageImage(response *rest.Response, queued bool) (*images.Image, erro
 			return nil, response.Fail(stageInvalid("image must have exact queued status"))
 		}
 	}
-	return &image, nil
+	return image, nil
 }
 
 // borrowedStageReader masks close, seek, length and replay interfaces. The

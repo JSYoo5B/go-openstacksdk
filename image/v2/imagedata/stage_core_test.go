@@ -1,17 +1,21 @@
 package imagedata
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
+	nativeimages "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 	"gophercloudsdk/image/v2/images"
 	"gophercloudsdk/resource"
 )
@@ -375,6 +379,72 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 				}
 			} else if result != nil || requests != 1 {
 				t.Fatalf("invented acknowledgement %#v requests%d", result, requests)
+			}
+		})
+	}
+}
+
+func TestStageCoreGETHeaderProjectionMatchesNativeAndPreservesRawEvidence(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		body    string
+		headers http.Header
+	}{
+		{"header-override-csv-last", `{"id":"response-decoy","status":"uploading","openstack-image-import-methods":"body-method","openstack-image-store-ids":"body-store","vendor":9007199254740993}`, http.Header{
+			"Openstack-Image-Import-Methods": {"ignored-first", "glance-direct, web-download,glance-download"}, "Openstack-Image-Store-Ids": {"ignored-first", "fast,reliable"},
+		}},
+		{"body-capabilities-no-header", `{"status":"uploading","openstack-image-import-methods":"body-one, body-two","openstack-image-store-ids":"body-store"}`, make(http.Header)},
+		{"header-overrides-incompatible-body-type", `{"status":"uploading","openstack-image-import-methods":false,"openstack-image-store-ids":123}`, http.Header{
+			"openstack-image-import-methods": {"glance-direct"}, "OPENSTACK-IMAGE-STORE-IDS": {"fast"},
+		}},
+		{"last-empty-replaces-body", `{"status":"uploading","openstack-image-import-methods":"body-method","openstack-image-store-ids":"body-store"}`, http.Header{
+			"Openstack-Image-Import-Methods": {"glance-direct", ""}, "Openstack-Image-Store-Ids": {"fast", ""},
+		}},
+		{"invalid-body-without-header", `{"status":"uploading","openstack-image-import-methods":false}`, make(http.Header)},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var native nativeimages.GetResult
+			decoder := json.NewDecoder(bytes.NewBufferString(test.body))
+			decoder.UseNumber()
+			if err := decoder.Decode(&native.Body); err != nil {
+				t.Fatal(err)
+			}
+			native.Header = test.headers.Clone()
+			want, nativeErr := native.Extract()
+			var calls int
+			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+				calls++
+				if calls == 1 {
+					// Initial native extraction must also apply headers before its
+					// full model validation, while queued remains a raw body check.
+					response := stageCoreResponse(200, `{"status":"queued","openstack-image-import-methods":false}`)
+					response.Header.Set("OpenStack-Image-Import-Methods", "glance-direct")
+					return response, nil
+				}
+				if calls == 2 {
+					return stageCoreResponse(204, "actual stage proof"), nil
+				}
+				response := stageCoreResponse(200, test.body)
+				response.Header = test.headers.Clone()
+				return response, nil
+			}))
+			result, err := New(client).StageImage(context.Background(), resource.ID("fixed"), strings.NewReader("data"))
+			if result == nil || calls != 3 || result.ImageID != "fixed" || result.StatusCode != 200 || string(result.Body) != test.body || !reflect.DeepEqual(result.Header, test.headers) || result.Acknowledgement == nil || string(result.Acknowledgement.Body) != "actual stage proof" {
+				t.Fatalf("lost actual evidence: %#v %v calls%d", result, err, calls)
+			}
+			if nativeErr == nil {
+				if err != nil || !reflect.DeepEqual(result.Image, want) {
+					t.Fatalf("native model mismatch: got%#v want%#v error%v", result.Image, want, err)
+				}
+			} else {
+				var evidence *resource.ResponseError
+				var decodeCause *json.UnmarshalTypeError
+				if result.Image != nil || !errors.As(err, &evidence) || evidence.StatusCode != 200 || string(evidence.Body) != test.body || !errors.As(err, &decodeCause) {
+					t.Fatalf("native failure lost evidence: %#v %v proof%#v", result, err, evidence)
+				}
+			}
+			if !reflect.DeepEqual(test.headers, result.Header) || string(result.Body) != test.body {
+				t.Fatal("native header projection mutated original response evidence")
 			}
 		})
 	}
