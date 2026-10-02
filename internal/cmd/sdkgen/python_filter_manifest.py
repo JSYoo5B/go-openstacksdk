@@ -424,8 +424,58 @@ SECURITY_GROUP_ANCHORS = (
     ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
     ('openstack/resource.py', 'ResourceMixinProtocol'),
 )
+TRUNK_RESOURCE = "openstack.network.v2.trunk.Trunk"
+TRUNK_FILES = (
+    "openstack/network/v2/trunk.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+# Trunk uses Resource + TagMixin, not NetworkResource. Native timestamps and
+# revision_number must not become semantic descriptors. Sub_ports is queried.
+TRUNK_ANCHORS = (
+    ('openstack/network/v2/trunk.py', 'Trunk'),
+    ('openstack/network/v2/trunk.py', 'Trunk._query_mapping'),
+    ('openstack/network/v2/trunk.py', 'Trunk.name'),
+    ('openstack/network/v2/trunk.py', 'Trunk.project_id'),
+    ('openstack/network/v2/trunk.py', 'Trunk.tenant_id'),
+    ('openstack/network/v2/trunk.py', 'Trunk.description'),
+    ('openstack/network/v2/trunk.py', 'Trunk.is_admin_state_up'),
+    ('openstack/network/v2/trunk.py', 'Trunk.port_id'),
+    ('openstack/network/v2/trunk.py', 'Trunk.status'),
+    ('openstack/network/v2/trunk.py', 'Trunk.sub_ports'),
+    ('openstack/resource.py', 'Resource'),
+    ('openstack/resource.py', 'Resource.id'),
+    ('openstack/resource.py', 'Resource.name'),
+    ('openstack/resource.py', 'Resource._max_microversion'),
+    ('openstack/resource.py', 'Resource.__init__'),
+    ('openstack/resource.py', 'Resource._attributes_iterator'),
+    ('openstack/resource.py', 'Resource._collect_attrs'),
+    ('openstack/resource.py', 'Resource.__getattribute__'),
+    ('openstack/resource.py', 'Resource.__getitem__'),
+    ('openstack/resource.py', 'Resource._alternate_id'),
+    ('openstack/resource.py', 'Resource.to_dict'),
+    ('openstack/resource.py', 'Resource.list'),
+    ('openstack/resource.py', 'Resource._get_next_link'),
+    ('openstack/resource.py', 'QueryParameters.__init__'),
+    ('openstack/resource.py', 'QueryParameters._validate'),
+    ('openstack/resource.py', 'QueryParameters._transpose'),
+    ('openstack/fields.py', '_BaseComponent.__init__'),
+    ('openstack/fields.py', '_BaseComponent.__get__'),
+    ('openstack/fields.py', '_convert_type'),
+    ('openstack/proxy.py', 'Proxy._list'),
+    ('openstack/network/v2/_proxy.py', 'Proxy.trunks'),
+    ('openstack/common/tag.py', 'TagMixin'),
+    ('openstack/common/tag.py', 'TagMixin._tag_query_parameters'),
+    ('openstack/common/tag.py', 'TagMixin.tags'),
+    ('openstack/resource.py', 'ResourceMixinProtocol'),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
+    "trunk": (TRUNK_RESOURCE, TRUNK_FILES, TRUNK_ANCHORS,
+              "gophercloudsdk/network/v2/extensions/trunks"),
     "network": (NETWORK_RESOURCE, NETWORK_FILES, NETWORK_ANCHORS,
                 "gophercloudsdk/network/v2/networks"),
     "router": (ROUTER_RESOURCE, ROUTER_FILES, ROUTER_ANCHORS,
@@ -980,6 +1030,103 @@ def security_group_body_descriptors(source, attrs, body, query):
         raise ValueError("unsupported SecurityGroup None response shortcut")
 
 
+def trunk_body_descriptors(source, attrs, body, query):
+    """Keep query-mapped subports distinct from raw id and deprecated tenant."""
+    expected = {
+        "id": ("id", None, None, {}),
+        "name": ("name", None, None, {}),
+        "project_id": ("project_id", None, None, {"alias": "tenant_id"}),
+        "tenant_id": ("tenant_id", None, None, {"deprecated": True}),
+        "description": ("description", None, None, {}),
+        "is_admin_state_up": ("admin_state_up", "bool", None, {}),
+        "port_id": ("port_id", None, None, {}),
+        "status": ("status", None, None, {}),
+        "sub_ports": ("sub_ports", "list", None, {}),
+        "tags": ("tags", "list", [], {}),
+    }
+    actual = {}
+    for name, (module, descriptor, _) in attrs.items():
+        if not isinstance(descriptor, ast.Call):
+            continue
+        if source.resolve(module, descriptor.func) not in {
+            "openstack.resource.Body", "openstack.fields.Body"
+        }:
+            continue
+        if len(descriptor.args) != 1:
+            raise ValueError("unsupported Trunk response field name")
+        options = [keyword.arg for keyword in descriptor.keywords]
+        if (len(options) != len(set(options))
+                or set(options) - {"type", "default", "alias", "deprecated"}):
+            raise ValueError("unsupported Trunk descriptor options")
+        typed = next((keyword.value for keyword in descriptor.keywords
+                      if keyword.arg == "type"), None)
+        response_type = (source.resolve(module, typed).removeprefix("builtins.")
+                         if typed is not None else None)
+        default = next((keyword.value for keyword in descriptor.keywords
+                        if keyword.arg == "default"), None)
+        additional = {keyword.arg: source.literal(module, keyword.value)
+                      for keyword in descriptor.keywords
+                      if keyword.arg not in {"type", "default"}}
+        actual[name] = (source.literal(module, descriptor.args[0]), response_type,
+                        source.literal(module, default) if default else None,
+                        additional)
+    if actual != expected:
+        raise ValueError("unsupported Trunk declared response descriptors")
+    expected_query = {name: name for name in (
+        "name", "description", "fields", "port_id", "status", "sub_ports",
+        "project_id", "limit", "marker", "tags"
+    )}
+    expected_query.update({
+        "is_admin_state_up": "admin_state_up", "any_tags": "tags-any",
+        "not_tags": "not-tags", "not_any_tags": "not-tags-any",
+    })
+    if query != expected_query:
+        raise ValueError("unsupported Trunk query classification")
+    expected_local = {
+        name: {"field": field, "response_type": response_type}
+        for name, (field, response_type, _, _) in expected.items()
+        if name not in query
+    }
+    if body != expected_local:
+        raise ValueError("unsupported Trunk local Body classification")
+    if source.mro(TRUNK_RESOURCE) != [
+        TRUNK_RESOURCE, "openstack.resource.Resource", "builtins.dict",
+        "openstack.common.tag.TagMixin", "openstack.resource.ResourceMixinProtocol",
+        "typing.Protocol",
+    ]:
+        raise ValueError("unsupported Trunk inheritance")
+    for name, expected_value in {
+        "base_path": "/trunks", "resource_key": "trunk",
+        "resources_key": "trunks", "allow_list": True,
+        "_allow_unknown_attrs_in_body": True,
+        "_store_unknown_attrs_as_properties": False, "_max_microversion": None,
+    }.items():
+        if source.literal(*attrs[name][:2]) != expected_value:
+            raise ValueError("unsupported Trunk inherited resource policy")
+    init = source.anchor("openstack/fields.py", "_BaseComponent.__init__")
+    args = init.args.posonlyargs + init.args.args
+    defaults = dict(zip((arg.arg for arg in args[-len(init.args.defaults):]),
+                        init.args.defaults))
+    for name, expected_default in (("default", None), ("coerce_to_default", False),
+                                   ("alternate_id", False), ("list_type", None)):
+        if source.literal("openstack.fields", defaults[name]) is not expected_default:
+            raise ValueError("unsupported Trunk implicit descriptor default")
+    getter = source.anchor("openstack/fields.py", "_BaseComponent.__get__")
+    null_returns = [node for node in getter.body if isinstance(node, ast.If)
+                    and isinstance(node.test, ast.Compare)
+                    and isinstance(node.test.left, ast.Name)
+                    and node.test.left.id == "value"
+                    and len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.Is)
+                    and len(node.test.comparators) == 1
+                    and isinstance(node.test.comparators[0], ast.Constant)
+                    and node.test.comparators[0].value is None]
+    if (len(null_returns) != 1 or len(null_returns[0].body) != 1
+            or not isinstance(null_returns[0].body[0], ast.Return)
+            or not isinstance(null_returns[0].body[0].value, ast.Constant)
+            or null_returns[0].body[0].value.value is not None):
+        raise ValueError("unsupported Trunk None response shortcut")
+
+
 def extract(root, target="subnet"):
     resource, files, anchors, sdk_package = TARGETS[target]
     source = Source(root, files)
@@ -1050,7 +1197,9 @@ def extract(root, target="subnet"):
         (body if kind.endswith(".Body") else uri)[name] = {
             "field": field, "response_type": response_type
         }
-    if target == "network":
+    if target == "trunk":
+        trunk_body_descriptors(source, attrs, body, query)
+    elif target == "network":
         network_body_descriptors(source, attrs, body)
     elif target == "router":
         router_body_descriptors(source, attrs, body, query)
