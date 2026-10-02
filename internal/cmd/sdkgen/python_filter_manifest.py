@@ -315,10 +315,68 @@ NETWORK_ANCHORS = (
     ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
     ('openstack/resource.py', 'ResourceMixinProtocol'),
 )
+ROUTER_RESOURCE = "openstack.network.v2.router.Router"
+ROUTER_FILES = (
+    "openstack/network/v2/router.py",
+    "openstack/network/v2/_base.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+# Router overrides inherited revision_number with raw revision. Project's
+# response alias does not widen QueryParameters to local tenant_id. Include
+# separate own descriptors plus inherited/default/accessor source evidence.
+ROUTER_ANCHORS = (
+    ('openstack/network/v2/router.py', 'Router'),
+    ('openstack/network/v2/router.py', 'Router._query_mapping'),
+    ('openstack/network/v2/router.py', 'Router.availability_zone_hints'),
+    ('openstack/network/v2/router.py', 'Router.availability_zones'),
+    ('openstack/network/v2/router.py', 'Router.created_at'),
+    ('openstack/network/v2/router.py', 'Router.enable_ndp_proxy'),
+    ('openstack/network/v2/router.py', 'Router.evpn_vni'),
+    ('openstack/network/v2/router.py', 'Router.external_gateway_info'),
+    ('openstack/network/v2/router.py', 'Router.project_id'),
+    ('openstack/network/v2/router.py', 'Router.tenant_id'),
+    ('openstack/network/v2/router.py', 'Router.revision_number'),
+    ('openstack/network/v2/router.py', 'Router.routes'),
+    ('openstack/network/v2/router.py', 'Router.updated_at'),
+    ('openstack/resource.py', 'Resource'),
+    ('openstack/resource.py', 'Resource.id'),
+    ('openstack/resource.py', 'Resource.name'),
+    ('openstack/resource.py', 'Resource._max_microversion'),
+    ('openstack/resource.py', 'Resource.__init__'),
+    ('openstack/resource.py', 'Resource._attributes_iterator'),
+    ('openstack/resource.py', 'Resource._collect_attrs'),
+    ('openstack/resource.py', 'Resource.__getattribute__'),
+    ('openstack/resource.py', 'Resource.__getitem__'),
+    ('openstack/resource.py', 'Resource._alternate_id'),
+    ('openstack/resource.py', 'Resource.to_dict'),
+    ('openstack/resource.py', 'Resource.list'),
+    ('openstack/resource.py', 'Resource._get_next_link'),
+    ('openstack/resource.py', 'QueryParameters.__init__'),
+    ('openstack/resource.py', 'QueryParameters._validate'),
+    ('openstack/resource.py', 'QueryParameters._transpose'),
+    ('openstack/fields.py', '_BaseComponent.__init__'),
+    ('openstack/fields.py', '_BaseComponent.__get__'),
+    ('openstack/fields.py', '_convert_type'),
+    ('openstack/proxy.py', 'Proxy._list'),
+    ('openstack/network/v2/_proxy.py', 'Proxy.routers'),
+    ('openstack/common/tag.py', 'TagMixin'),
+    ('openstack/common/tag.py', 'TagMixin._tag_query_parameters'),
+    ('openstack/common/tag.py', 'TagMixin.tags'),
+    ('openstack/network/v2/_base.py', 'NetworkResource'),
+    ('openstack/network/v2/_base.py', 'NetworkResource.revision_number'),
+    ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
+    ('openstack/resource.py', 'ResourceMixinProtocol'),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "network": (NETWORK_RESOURCE, NETWORK_FILES, NETWORK_ANCHORS,
                 "gophercloudsdk/network/v2/networks"),
+    "router": (ROUTER_RESOURCE, ROUTER_FILES, ROUTER_ANCHORS,
+               "gophercloudsdk/network/v2/extensions/layer3/routers"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
                "gophercloudsdk/keymanager/v1/secrets"),
     "container": (CONTAINER_RESOURCE, CONTAINER_FILES, CONTAINER_ANCHORS,
@@ -655,6 +713,123 @@ def network_body_descriptors(source, attrs, body):
         raise ValueError("unsupported Network local Body classification")
 
 
+def router_body_descriptors(source, attrs, body, query):
+    """Keep overridden response keys and deprecated tenant scope independent."""
+    expected = {
+        "availability_zone_hints": ("availability_zone_hints", "list", None, {}),
+        "availability_zones": ("availability_zones", "list", None, {}),
+        "created_at": ("created_at", None, None, {}),
+        "description": ("description", None, None, {}),
+        "enable_ndp_proxy": ("enable_ndp_proxy", "bool", None, {}),
+        "evpn_vni": ("evpn_vni", "int", None, {}),
+        "external_gateway_info": ("external_gateway_info", "dict", None, {}),
+        "flavor_id": ("flavor_id", None, None, {}),
+        "id": ("id", None, None, {}),
+        "is_admin_state_up": ("admin_state_up", "bool", None, {}),
+        "is_distributed": ("distributed", "bool", None, {}),
+        "is_ha": ("ha", "bool", None, {}),
+        "name": ("name", None, None, {}),
+        "project_id": ("project_id", None, None, {"alias": "tenant_id"}),
+        "revision_number": ("revision", "int", None, {}),
+        "routes": ("routes", "list", None, {}),
+        "status": ("status", None, None, {}),
+        "tags": ("tags", "list", [], {}),
+        "tenant_id": ("tenant_id", None, None, {"deprecated": True}),
+        "updated_at": ("updated_at", None, None, {}),
+    }
+    actual = {}
+    for name, (module, descriptor, _) in attrs.items():
+        if not isinstance(descriptor, ast.Call):
+            continue
+        if source.resolve(module, descriptor.func) not in {
+            "openstack.resource.Body", "openstack.fields.Body"
+        }:
+            continue
+        if len(descriptor.args) != 1:
+            raise ValueError("unsupported Router response field name")
+        options = [keyword.arg for keyword in descriptor.keywords]
+        if (len(options) != len(set(options))
+                or set(options) - {"type", "default", "alias", "deprecated"}):
+            raise ValueError("unsupported Router descriptor options")
+        typed = next((keyword.value for keyword in descriptor.keywords
+                      if keyword.arg == "type"), None)
+        response_type = (source.resolve(module, typed).removeprefix("builtins.")
+                         if typed is not None else None)
+        default = next((keyword.value for keyword in descriptor.keywords
+                        if keyword.arg == "default"), None)
+        additional = {keyword.arg: source.literal(module, keyword.value)
+                      for keyword in descriptor.keywords
+                      if keyword.arg not in {"type", "default"}}
+        actual[name] = (source.literal(module, descriptor.args[0]), response_type,
+                        source.literal(module, default) if default else None,
+                        additional)
+    if actual != expected:
+        raise ValueError("unsupported Router declared response descriptors")
+    expected_query = {name: name for name in (
+        "description", "fields", "flavor_id", "id", "name", "status",
+        "project_id", "sort_key", "sort_dir", "limit", "marker", "tags"
+    )}
+    expected_query.update({
+        "is_admin_state_up": "admin_state_up", "is_distributed": "distributed",
+        "is_ha": "ha", "any_tags": "tags-any", "not_tags": "not-tags",
+        "not_any_tags": "not-tags-any",
+    })
+    if query != expected_query:
+        raise ValueError("unsupported Router query classification")
+    expected_local = {
+        name: {"field": field, "response_type": response_type}
+        for name, (field, response_type, _, _) in expected.items()
+        if name not in query
+    }
+    if body != expected_local:
+        raise ValueError("unsupported Router local Body classification")
+    if source.mro(ROUTER_RESOURCE) != [
+        ROUTER_RESOURCE, "openstack.network.v2._base.NetworkResource",
+        "openstack.resource.Resource", "builtins.dict",
+        "openstack.network.v2._base.TagMixinNetwork",
+        "openstack.common.tag.TagMixin", "openstack.resource.ResourceMixinProtocol",
+        "typing.Protocol",
+    ]:
+        raise ValueError("unsupported Router inheritance")
+    init = source.anchor("openstack/fields.py", "_BaseComponent.__init__")
+    args = init.args.posonlyargs + init.args.args
+    defaults = dict(zip((arg.arg for arg in args[-len(init.args.defaults):]),
+                        init.args.defaults))
+    for name, expected_default in (("default", None), ("coerce_to_default", False),
+                                   ("alternate_id", False), ("list_type", None)):
+        if source.literal("openstack.fields", defaults[name]) is not expected_default:
+            raise ValueError("unsupported Router implicit descriptor default")
+    getter = source.anchor("openstack/fields.py", "_BaseComponent.__get__")
+    null_returns = [node for node in getter.body if isinstance(node, ast.If)
+                    and isinstance(node.test, ast.Compare)
+                    and isinstance(node.test.left, ast.Name)
+                    and node.test.left.id == "value"
+                    and len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.Is)
+                    and len(node.test.comparators) == 1
+                    and isinstance(node.test.comparators[0], ast.Constant)
+                    and node.test.comparators[0].value is None]
+    if (len(null_returns) != 1 or len(null_returns[0].body) != 1
+            or not isinstance(null_returns[0].body[0], ast.Return)
+            or not isinstance(null_returns[0].body[0].value, ast.Constant)
+            or null_returns[0].body[0].value.value is not None):
+        raise ValueError("unsupported Router None response shortcut")
+    conversion = source.anchor("openstack/fields.py", "_convert_type")
+    bool_branches = [node for node in ast.walk(conversion) if isinstance(node, ast.If)
+                     and isinstance(node.test, ast.Call)
+                     and isinstance(node.test.func, ast.Name)
+                     and node.test.func.id == "issubclass"
+                     and len(node.test.args) == 2
+                     and isinstance(node.test.args[0], ast.Name)
+                     and node.test.args[0].id == "data_type"
+                     and isinstance(node.test.args[1], ast.Name)
+                     and node.test.args[1].id == "bool"]
+    if len(bool_branches) != 1 or ast.dump(bool_branches[0].body[0]) != ast.dump(
+        ast.Return(value=ast.Call(func=ast.Name(id="data_type", ctx=ast.Load()),
+                                 args=[ast.Name(id="value", ctx=ast.Load())], keywords=[]))
+    ) or len(bool_branches[0].body) != 1:
+        raise ValueError("unsupported Router boolean conversion")
+
+
 def extract(root, target="subnet"):
     resource, files, anchors, sdk_package = TARGETS[target]
     source = Source(root, files)
@@ -727,6 +902,8 @@ def extract(root, target="subnet"):
         }
     if target == "network":
         network_body_descriptors(source, attrs, body)
+    elif target == "router":
+        router_body_descriptors(source, attrs, body, query)
     elif target == "secret":
         keymanager_body_accessors(source, attrs, body, "Secret", "secret_id", "secret_ref")
     elif target == "container":

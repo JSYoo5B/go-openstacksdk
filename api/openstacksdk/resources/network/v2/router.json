@@ -1,0 +1,423 @@
+{
+  "base_path": "/routers",
+  "body": {
+    "availability_zone_hints": {
+      "field": "availability_zone_hints",
+      "response_type": "list"
+    },
+    "availability_zones": {
+      "field": "availability_zones",
+      "response_type": "list"
+    },
+    "created_at": {
+      "field": "created_at",
+      "response_type": null
+    },
+    "enable_ndp_proxy": {
+      "field": "enable_ndp_proxy",
+      "response_type": "bool"
+    },
+    "evpn_vni": {
+      "field": "evpn_vni",
+      "response_type": "int"
+    },
+    "external_gateway_info": {
+      "field": "external_gateway_info",
+      "response_type": "dict"
+    },
+    "revision_number": {
+      "field": "revision",
+      "response_type": "int"
+    },
+    "routes": {
+      "field": "routes",
+      "response_type": "list"
+    },
+    "tenant_id": {
+      "field": "tenant_id",
+      "response_type": null
+    },
+    "updated_at": {
+      "field": "updated_at",
+      "response_type": null
+    }
+  },
+  "class_bases": [
+    "_base.NetworkResource",
+    "_base.TagMixinNetwork"
+  ],
+  "counts": {
+    "accepted_query": 24,
+    "canonical_query": 18,
+    "local_body": 10
+  },
+  "envelope": "routers",
+  "mro": [
+    "openstack.network.v2.router.Router",
+    "openstack.network.v2._base.NetworkResource",
+    "openstack.resource.Resource",
+    "builtins.dict",
+    "openstack.network.v2._base.TagMixinNetwork",
+    "openstack.common.tag.TagMixin",
+    "openstack.resource.ResourceMixinProtocol",
+    "typing.Protocol"
+  ],
+  "proof": {
+    "ast_algorithm": "sha256(ast.dump(node, annotate_fields=True, include_attributes=False).encode(\"utf-8\"))",
+    "files": {
+      "openstack/common/tag.py": "c86f1d41fc1ed139366f163e4d5dfb7a37b15380dda05c3382c47dd7bafaa59e",
+      "openstack/fields.py": "dc557f53c445bb20cbc4dfddf44fb7dd4e3080f97a3bfa087b82f16f242d55cd",
+      "openstack/network/v2/_base.py": "70981b01c16f24f656291068f808e97a5f9f309cfcda535a03056eccb54acc00",
+      "openstack/network/v2/_proxy.py": "e409ee081f8b9c44903a1b81a4d9f9590c59f9f947aa686f960a5171ab1a6b58",
+      "openstack/network/v2/router.py": "fdb6589856a606bbd173f52eb1d549e2028eca9dd6bd9dddd3c76d8efe3ae1f8",
+      "openstack/proxy.py": "1eff2aa3ff960c7086fc7f8d2722b3c7d3f72316f58b25505491319213869a46",
+      "openstack/resource.py": "a3dc108ff184cf2928513a4c1e33295b85a5e485bc30b104e5b7e030dfdeb2e0"
+    },
+    "nodes": [
+      {
+        "ast_sha256": "e5e80ab6211638e919e48d5befe50571396ab99498dfbdc28de2d81570782abc",
+        "end_line": 255,
+        "line": 23,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router"
+      },
+      {
+        "ast_sha256": "740749ec8c147edb751b5a39c9e55da3757d6e146672f40115902a2d88cbaebc",
+        "end_line": 50,
+        "line": 36,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router._query_mapping"
+      },
+      {
+        "ast_sha256": "50401bf707cabcb5d90bca54a74afd425a581944533ae4bd3660f1dc57031747",
+        "end_line": 57,
+        "line": 55,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.availability_zone_hints"
+      },
+      {
+        "ast_sha256": "1000b2ef62e50fdaf9e6c4802cbbbc7de70fded4f4f5d7328f9b85a529874a25",
+        "end_line": 60,
+        "line": 60,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.availability_zones"
+      },
+      {
+        "ast_sha256": "7ebf29f7642dabde5a73561193862741dca7004c0e6a52285fa0a6994565ae67",
+        "end_line": 62,
+        "line": 62,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.created_at"
+      },
+      {
+        "ast_sha256": "527ab31eac63ff46c37c1df487fb2d5855527de3e3f9ce4ef4a935f69b0b1f2a",
+        "end_line": 66,
+        "line": 66,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.enable_ndp_proxy"
+      },
+      {
+        "ast_sha256": "0a81285586b1ee9caa74f6d85e8f20bf1d2bdd19961aec91ad1340632c10b978",
+        "end_line": 69,
+        "line": 69,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.evpn_vni"
+      },
+      {
+        "ast_sha256": "4e51e4f6a7f974ed81a4506b1fb35e0103560d708e5c5f79f80a1874c1deb36e",
+        "end_line": 71,
+        "line": 71,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.external_gateway_info"
+      },
+      {
+        "ast_sha256": "4f3705ac86ebc828f07ad1c8053f5c00adf358c457243e5f4dd69e460adec3ef",
+        "end_line": 86,
+        "line": 86,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.project_id"
+      },
+      {
+        "ast_sha256": "8362cc8982ba6d47d5877d1872923606d2a3cb73b6bf172f21f2c4cb4b84b62d",
+        "end_line": 88,
+        "line": 88,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.tenant_id"
+      },
+      {
+        "ast_sha256": "5f34cf30d57df2fb40f932fb488f91fc218e51575bb41d7a6087575f413cdf8f",
+        "end_line": 90,
+        "line": 90,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.revision_number"
+      },
+      {
+        "ast_sha256": "1cc32c53d965232c86f80397221651198083a90ebd569f01c473cc34deb820c1",
+        "end_line": 92,
+        "line": 92,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.routes"
+      },
+      {
+        "ast_sha256": "ac8895849f87b87e7f2290eee28ecdb21e1d5f5d40ad7b06b93d5b7b35e5b1bb",
+        "end_line": 96,
+        "line": 96,
+        "source": "openstack/network/v2/router.py",
+        "symbol": "Router.updated_at"
+      },
+      {
+        "ast_sha256": "305f1d5b1b006dd18ec5cddeb0d6673de3cde77e00bf9502fef7ccc3a52b4855",
+        "end_line": 2582,
+        "line": 430,
+        "source": "openstack/resource.py",
+        "symbol": "Resource"
+      },
+      {
+        "ast_sha256": "dfc7c99d202a3c467327b2d4859057e49268c2156ae07226e3701ce82c4443fd",
+        "end_line": 449,
+        "line": 449,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.id"
+      },
+      {
+        "ast_sha256": "bd3bef77824d46756a3fbe4cf25a3a6b275c8524e410b5cb4c8ee4911df046cf",
+        "end_line": 452,
+        "line": 452,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.name"
+      },
+      {
+        "ast_sha256": "4a77399c475a9101169552714c1625f6bffa216ebf62c9f4dd4fea0d8035c129",
+        "end_line": 504,
+        "line": 504,
+        "source": "openstack/resource.py",
+        "symbol": "Resource._max_microversion"
+      },
+      {
+        "ast_sha256": "189c76128c620acb973d82bb341710aaf11074881c965023ff5871317a8ecaa9",
+        "end_line": 608,
+        "line": 538,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.__init__"
+      },
+      {
+        "ast_sha256": "a1344bcf04cf50670ba240a6971609ea16e3bddf14097ac3ad1810394e598c70",
+        "end_line": 625,
+        "line": 611,
+        "source": "openstack/resource.py",
+        "symbol": "Resource._attributes_iterator"
+      },
+      {
+        "ast_sha256": "ee1bdd41b07d2ced9271648666e65b2849fe20120197c16e8505352c30343997",
+        "end_line": 841,
+        "line": 808,
+        "source": "openstack/resource.py",
+        "symbol": "Resource._collect_attrs"
+      },
+      {
+        "ast_sha256": "91b26ee6b385cc09329b02e6928a869ea5586d44e1e84868763ceb80606ab0e4",
+        "end_line": 684,
+        "line": 656,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.__getattribute__"
+      },
+      {
+        "ast_sha256": "f25fb7ddbed9d9a60c6b9167e0286d16cda673f9534f7fd02e00903e51c71be9",
+        "end_line": 714,
+        "line": 686,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.__getitem__"
+      },
+      {
+        "ast_sha256": "036b7454d51512314944c20224b9e8727c643d2c7d1a3d3ec14e086f39e1d199",
+        "end_line": 1014,
+        "line": 1001,
+        "source": "openstack/resource.py",
+        "symbol": "Resource._alternate_id"
+      },
+      {
+        "ast_sha256": "a07f3842054d859adfb7afc2d2414467533abd1deaa18df8e1902d558905770a",
+        "end_line": 1189,
+        "line": 1112,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.to_dict"
+      },
+      {
+        "ast_sha256": "87817f4adeb9404971e664155b136da2c16b9ae29b715c8b348dabac7b8cd1be",
+        "end_line": 2359,
+        "line": 2155,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.list"
+      },
+      {
+        "ast_sha256": "d299a1b6b42db4563157f933e25944f963205b94745cd4987fc68f6c41add3bf",
+        "end_line": 2436,
+        "line": 2362,
+        "source": "openstack/resource.py",
+        "symbol": "Resource._get_next_link"
+      },
+      {
+        "ast_sha256": "1173ce94b0986c9f1b11e2d8b46dc673fbe1ece550da965e5ae85fed0bde9154",
+        "end_line": 299,
+        "line": 272,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters.__init__"
+      },
+      {
+        "ast_sha256": "f206c066fc5ee949936926d27df0cb346033dccf91f46cb673155f0e246cdcc2",
+        "end_line": 340,
+        "line": 301,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._validate"
+      },
+      {
+        "ast_sha256": "d514f3d47c626bc06d183504ba9bda4273eed601aaf972cf993c21be5bff2e50",
+        "end_line": 387,
+        "line": 342,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._transpose"
+      },
+      {
+        "ast_sha256": "c4dd759c4f8b6dedf9f3d8fbac24e2b0a5b4efd030ce85a12488449d696fcbf9",
+        "end_line": 206,
+        "line": 156,
+        "source": "openstack/fields.py",
+        "symbol": "_BaseComponent.__init__"
+      },
+      {
+        "ast_sha256": "69240cc8cc5a068ef1e13a2ce380a6abed6fdb2fde1545317b0250ebbdb42a18",
+        "end_line": 256,
+        "line": 208,
+        "source": "openstack/fields.py",
+        "symbol": "_BaseComponent.__get__"
+      },
+      {
+        "ast_sha256": "3ba05f6db1bdcebfa98d3cf997bf9ff58fa057958f63f980f85d7938acdae1aa",
+        "end_line": 136,
+        "line": 86,
+        "source": "openstack/fields.py",
+        "symbol": "_convert_type"
+      },
+      {
+        "ast_sha256": "13e21d7c05845ae309bea4901e05ee4d1b07b11a36223610e2ddc1e1f409e9f0",
+        "end_line": 916,
+        "line": 866,
+        "source": "openstack/proxy.py",
+        "symbol": "Proxy._list"
+      },
+      {
+        "ast_sha256": "8a43060e929e76f8a234b26b7a397be196559025e4fdcea7e64e23411fcb22d7",
+        "end_line": 5628,
+        "line": 5610,
+        "source": "openstack/network/v2/_proxy.py",
+        "symbol": "Proxy.routers"
+      },
+      {
+        "ast_sha256": "3e53bc1f46fa78655725aafd47e500a7f5f87ee8b16c164785025a64e548d3bf",
+        "end_line": 142,
+        "line": 28,
+        "source": "openstack/common/tag.py",
+        "symbol": "TagMixin"
+      },
+      {
+        "ast_sha256": "d2c101685e417977b8d2f46550ce8ee2b0722e8b6444a28ba2688c80cc5afd93",
+        "end_line": 34,
+        "line": 29,
+        "source": "openstack/common/tag.py",
+        "symbol": "TagMixin._tag_query_parameters"
+      },
+      {
+        "ast_sha256": "6da6cf78985efc35893fd871430390fa8ff05b96651b55a8366578d0041ff896",
+        "end_line": 38,
+        "line": 38,
+        "source": "openstack/common/tag.py",
+        "symbol": "TagMixin.tags"
+      },
+      {
+        "ast_sha256": "0102ff33a635ae77b3bf3d2098f0ecf2175673cb48ac27073e9f24c24a9150e9",
+        "end_line": 50,
+        "line": 23,
+        "source": "openstack/network/v2/_base.py",
+        "symbol": "NetworkResource"
+      },
+      {
+        "ast_sha256": "48524bd104238b6e8f802177e4f965989eadc5a32bfabfeb8adf750157c8cbe9",
+        "end_line": 25,
+        "line": 25,
+        "source": "openstack/network/v2/_base.py",
+        "symbol": "NetworkResource.revision_number"
+      },
+      {
+        "ast_sha256": "4f88bbefa3a9dca2f4a2aae57fecc540fbd4e8b109a6915c0e392156f1fca4ca",
+        "end_line": 66,
+        "line": 53,
+        "source": "openstack/network/v2/_base.py",
+        "symbol": "TagMixinNetwork"
+      },
+      {
+        "ast_sha256": "8fb2dd5f7c17a089f32b241d07038cbb793f26776281d7ddbac410c6aa908cbb",
+        "end_line": 403,
+        "line": 390,
+        "source": "openstack/resource.py",
+        "symbol": "ResourceMixinProtocol"
+      }
+    ],
+    "python_parser": "3.14"
+  },
+  "query": {
+    "any_tags": "tags-any",
+    "description": "description",
+    "fields": "fields",
+    "flavor_id": "flavor_id",
+    "id": "id",
+    "is_admin_state_up": "admin_state_up",
+    "is_distributed": "distributed",
+    "is_ha": "ha",
+    "limit": "limit",
+    "marker": "marker",
+    "name": "name",
+    "not_any_tags": "not-tags-any",
+    "not_tags": "not-tags",
+    "project_id": "project_id",
+    "sort_dir": "sort_dir",
+    "sort_key": "sort_key",
+    "status": "status",
+    "tags": "tags"
+  },
+  "query_collision": "canonical_client_name_wins",
+  "query_formats": {},
+  "reserved": [
+    "allow_unknown_params",
+    "base_path",
+    "headers",
+    "jmespath_filters",
+    "max_items",
+    "microversion",
+    "paginated",
+    "resource_type",
+    "session"
+  ],
+  "resource": "openstack.network.v2.router.Router",
+  "schema_version": 1,
+  "sdk_package": "gophercloudsdk/network/v2/extensions/layer3/routers",
+  "source_controls": {
+    "proxy_list": [
+      "resource_type",
+      "paginated",
+      "base_path",
+      "jmespath_filters"
+    ],
+    "resource_list": [
+      "session",
+      "paginated",
+      "base_path",
+      "allow_unknown_params",
+      "microversion",
+      "headers",
+      "max_items"
+    ]
+  },
+  "source_pin": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "unknown_filters": "discard",
+  "uri": {}
+}
