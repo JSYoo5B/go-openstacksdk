@@ -179,6 +179,37 @@ ADDRESS_GROUP_ANCHORS = (
     ("openstack/proxy.py", "Proxy._list"),
     ("openstack/network/v2/_proxy.py", "Proxy.address_groups"),
 )
+QOS_POLICY_RESOURCE = "openstack.network.v2.qos_policy.QoSPolicy"
+QOS_POLICY_FILES = (
+    "openstack/network/v2/qos_policy.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+QOS_POLICY_ANCHORS = (
+    ("openstack/network/v2/qos_policy.py", "QoSPolicy"),
+    ("openstack/network/v2/qos_policy.py", "QoSPolicy._query_mapping"),
+    # Query aliases come from QueryParameters, independently of the
+    # project_id response fallback and deprecated tenant_id local property.
+    ("openstack/network/v2/qos_policy.py", "QoSPolicy.project_id"),
+    ("openstack/network/v2/qos_policy.py", "QoSPolicy.tenant_id"),
+    ("openstack/network/v2/qos_policy.py", "QoSPolicy.rules"),
+    ("openstack/common/tag.py", "TagMixin._tag_query_parameters"),
+    ("openstack/common/tag.py", "TagMixin.tags"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/network/v2/_proxy.py", "Proxy.qos_policies"),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
@@ -190,6 +221,8 @@ TARGETS = {
     "address_group": (ADDRESS_GROUP_RESOURCE, ADDRESS_GROUP_FILES,
                       ADDRESS_GROUP_ANCHORS,
                       "gophercloudsdk/network/v2/extensions/security/addressgroups"),
+    "qos_policy": (QOS_POLICY_RESOURCE, QOS_POLICY_FILES, QOS_POLICY_ANCHORS,
+                   "gophercloudsdk/network/v2/extensions/qos/policies"),
 }
 
 
