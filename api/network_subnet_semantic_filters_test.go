@@ -398,9 +398,9 @@ func TestNetworkSubnetSemanticFiltersRawAndNativeSurfaceIsolation(t *testing.T) 
 			}
 		})
 	}
-	// Network and SubnetPool retain their explicit Body-only policy.
+	// Network retains its explicit Body-only policy.
 	for _, f := range networkSubnetBodyFixtures() {
-		if f.name != "network-leaf" && f.name != "subnet-pool-leaf" {
+		if f.name != "network-leaf" {
 			continue
 		}
 		t.Run("explicit-body-only/"+f.name, func(t *testing.T) {
