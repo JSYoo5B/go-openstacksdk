@@ -83,6 +83,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Subnets.Resources`는 선언된 로컬 Body 필드 9개도 지원합니다. allocation pools·DNS nameservers·host routes·service types·timestamp·prefix length·tenant ID·revision number를 원본 페이지 행으로 비교하며 typed Subnet을 반환합니다. `prefix_length`는 `prefixlen`의 SDK 별칭이고 native 전체 페이지 디코드가 먼저 적용됩니다. [Subnet Python/Go 사용법](subnets/README.md)에 숫자 정밀도·누락/null·native decoder 경계를 설명합니다.\n\n")
 		out.WriteString("`Subnets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python 속성 이름을 서버 query 24개 또는 로컬 Body 9개로 자동 분류합니다. query의 wire 별칭을 포함한 30개 이름, bulk canonical 우선·최종값 검증·semantic 전체 교체/clear·JSON snapshot을 SDK가 처리합니다. raw query·명시 Body·page/name hint와 같은 target을 지정하면 HTTP 전에 오류이며, 알 수 없는 semantic 이름은 버립니다. 현재 이 분류는 Subnet에 연결되어 있고 [고정 Python AST manifest](../../api/openstacksdk/resources/network/v2/subnet.json)의 현재 소스 검증을 통과해야 생성됩니다. 전체 Resource/cache·상속 continuation/session·Proxy conflicting attrs·JMESPath 조건은 별도입니다. [Subnet 사용법](subnets/README.md)을 참고하세요.\n\n")
 	}
+	if key == "keymanager/v1" {
+		out.WriteString("Barbican의 native API와 함께 SDK가 직접 구현한 `SecretStores`와 `Quotas`를 제공합니다. `SecretStores.List/All`, `GetGlobalDefault`, `GetPreferred`는 목록과 두 고정 selector의 조회이며 자동 fallback·CRUD·상태 대기를 추가하지 않습니다. `Quotas.Get`은 현재 인증된 프로젝트의 effective quota이고 `Quotas.InProject(ctx, resource.ID(projectID))`는 고정 프로젝트의 Get·Update·Delete입니다. Update는 설정 교체 PUT204이고 삭제는 override 초기화 DELETE204이며 둘 다 자동 재조회하지 않습니다. 반환 acknowledgement는 실제 빈 응답·header·status이며 Python의 seeded Resource와 구분합니다. [SecretStore Python/Go 사용법](secretstores/README.md)과 [Quota Python/Go 사용법](quotas/README.md)에 marker·nullable 응답·정수 입력·기본값 및 남은 Resource/cache 계약을 설명합니다.\n\n")
+	}
 	switch key {
 	case "instanceha/v1":
 		out.WriteString("Masakari는 `instance-ha` service type을 사용합니다. catalog의 `/v1/{project}`와 reverse-proxy prefix를 보존합니다. route ID는 UUID이며 별도 데이터베이스 ID는 원문으로 보존합니다. `Segments`의 `enabled` 요청은 numeric microversion 1.2 이상, `VMoves.InNotification(ctx, ref)`는 1.3 이상을 요구합니다. [Segments](segments/README.md), [고정 Segment의 Hosts](hosts/README.md), [Notifications](notifications/README.md), [고정 Notification의 VMoves](vmoves/README.md)에서 15개 실제 리소스 연산과 [대기 정책](waiting/README.md)의 두 proxy wait 대응을 확인합니다. 네 fetch 가능한 리소스의 WaitForStatus/WaitForDelete는 무제한·ERROR 실패·2초 간격 상태 대기와 120초 삭제 대기를 제공합니다. Host·VMove는 고정 부모 범위를 유지하고 VMove GET은 1.3 이상을 재검사합니다. 전체 17개 직접 선언 연산에 대응하는 API를 제공하며 marker fallback·nullable 입력·Resource/cache의 전체 계약은 추가 비교가 필요합니다.\n\n")
@@ -186,6 +189,14 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			}
 			if record.Kind == "service_info" {
 				policies = append(policies, "`Get(ctx)`: 서비스 build 정보 singleton; ID·목록·변경·상태 대기 없음")
+				continue
+			}
+			if record.Kind == "store_defaults" {
+				policies = append(policies, "`List/All`, `GetGlobalDefault`, `GetPreferred`: 목록·두 고정 조회; Resources·CRUD·Find·Wait 없음")
+				continue
+			}
+			if record.Kind == "effective_project_quota" {
+				policies = append(policies, "`Get(ctx)`: 인증된 프로젝트 effective quota; `InProject(ctx, ID)`: Get·교체 Update·override Delete, 목록·Find·Wait 없음")
 				continue
 			}
 			if record.Kind == "list_only" {

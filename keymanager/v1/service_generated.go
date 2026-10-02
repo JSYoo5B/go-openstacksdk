@@ -6,24 +6,30 @@ import (
 	resource0 "gophercloudsdk/keymanager/v1/acls"
 	resource1 "gophercloudsdk/keymanager/v1/containers"
 	resource2 "gophercloudsdk/keymanager/v1/orders"
-	resource3 "gophercloudsdk/keymanager/v1/secrets"
+	resource3 "gophercloudsdk/keymanager/v1/quotas"
+	resource4 "gophercloudsdk/keymanager/v1/secrets"
+	resource5 "gophercloudsdk/keymanager/v1/secretstores"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client     *gophercloud.ServiceClient
-	Acls       *resource0.API
-	Containers *resource1.API
-	Orders     *resource2.API
-	Secrets    *resource3.API
+	client       *gophercloud.ServiceClient
+	Acls         *resource0.API
+	Containers   *resource1.API
+	Orders       *resource2.API
+	Quotas       *resource3.API
+	Secrets      *resource4.API
+	SecretStores *resource5.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		Acls:       resource0.New(client),
-		Containers: resource1.New(client),
-		Orders:     resource2.New(client),
-		Secrets:    resource3.New(client),
+		Acls:         resource0.New(client),
+		Containers:   resource1.New(client),
+		Orders:       resource2.New(client),
+		Quotas:       resource3.New(client),
+		Secrets:      resource4.New(client),
+		SecretStores: resource5.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

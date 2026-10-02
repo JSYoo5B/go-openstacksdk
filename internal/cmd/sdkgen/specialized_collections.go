@@ -78,6 +78,8 @@ var specializedCollections = map[string]collectionRecord{
 // These resources are implemented directly against documented service and
 // pinned Python contracts. Source distinguishes them from native models.
 var sdkOwnedCollections = []collectionRecord{
+	{Package: "gophercloudsdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
+	{Package: "gophercloudsdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
 	{Package: "gophercloudsdk/sharedfilesystems/v2/quotasets", Source: "sdk_owned", Model: "QuotaResource", Kind: "singleton", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
 	{Package: "gophercloudsdk/sharedfilesystems/v2/quotaclasssets", Source: "sdk_owned", Model: "QuotaClassResource", Kind: "named_singleton", Scope: "InClass"},
 	{Package: "gophercloudsdk/accelerator/v2/devices", Source: "sdk_owned", Model: "Device", Wait: true},

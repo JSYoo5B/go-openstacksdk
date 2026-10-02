@@ -41,6 +41,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
 | `resource/filters_test.go`, `api/network_subnet_semantic_filters_test.go` | Subnet query24/accepted30·Body9 자동 분류, bulk canonical nil/false/empty·최종 선택값 검증·snapshot/동시 재사용, unknown/reserved·namespace 충돌/clear·server-only name, raw/native isolation·cap/terminal 페이지 오류 |
 | `internal/cmd/sdkgen/python_filters_test.go` | 고정 Python SHA7·isolated AST/C3/inherited 선언 재추출·15개 AST proof·전체 manifest drift 거부, native raw Body gate·Subnet-only 생성 및 inventory |
+| `api/keymanager_secretstores_test.go`, `api/keymanager_quotas_test.go` | Barbican 목록·두 고정 selector·quota 네 연산, full-ref/raw-id marker·canonical JSON·snapshot·page guard, optional 정수·교체 PUT204·raw GET 정밀도·실제 404와 전송/read 원인 구별 |
+| `connection_keymanager_sdk_owned_test.go`, `internal/cmd/sdkgen/keymanager_services_test.go` | SDK 소유 API·native API가 같은 cached ServiceClient/provider 사용, 최신 token·ResourceBase·고정 프로젝트·추가 GET/fallback 없음·cached 취소, 실제 capability만 Service/inventory/docs에 연결 |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |
 | `internal/cmd/paritycheck/reviews_test.go` | catalog 추가 시 기존 판정 보존, 원본 입력 drift 거부, API·테스트·문서 근거, 중복 ID/JSON key와 불완전 지원 판정 거부 |
 | `api/server_tags_contracts_test.go` | 서버 1회 해석, 2.26 요구, tag escaping, nil/빈 교체·명시 false·404 정책과 원래 HTTP 오류 |

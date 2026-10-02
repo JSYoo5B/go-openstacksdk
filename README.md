@@ -49,6 +49,12 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 Subnet은 [선언된 query 24개·로컬 필드 9개](network/v2/subnets/README.md)를
 `resource.WithFilter`/`WithFilters`로 자동 분류합니다. Python 이름의 query 변환과 원본
 응답 비교를 SDK가 처리하며, 값 복사·bulk 교체·충돌 검사도 같은 옵션에서 제공합니다.
+
+Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
+`Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
+SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증거를 처리합니다.
+[SecretStore 비교](keymanager/v1/secretstores/README.md)와
+[Quota 비교](keymanager/v1/quotas/README.md)에 Python/Go 사용법과 범위를 설명합니다.
 [Python/Go 목록 비교](docs/listing.md#명시적인-native-body-필터)에 raw query·로컬 cap·nil/빈 값과
 native 응답 모델의 경계를 설명합니다.
 

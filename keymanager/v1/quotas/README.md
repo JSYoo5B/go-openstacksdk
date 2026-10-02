@@ -49,6 +49,9 @@ func Configure(ctx context.Context, client *gophercloud.ServiceClient, projectID
 
 `Update`는 다섯 override를 교체합니다. `secrets`, `orders`, `containers`, `consumers`, `cas` 중 생략한 값은 서버 기본값으로 돌아갑니다. 현재 값을 읽거나 생략한 값을 보충하는 GET은 없습니다. 빈 `UpdateOpts{}`는 `{"project_quotas":{}}`를 전송하며, 기존 override 전체를 기본값으로 돌리는 요청입니다. `0`과 `-1`은 명시적으로 전송됩니다. 공개 integer schema에 minimum이 없으므로 SDK는 `-2` 같은 값을 임의로 거부하지 않으며, 정책 해석은 서버가 결정합니다.
 
+고정 Python Resource는 변경된 속성이 없는 empty update에서 HTTP 요청을 생략할 수 있습니다.
+Go의 빈 `UpdateOpts{}`는 명시적인 전체 override 초기화 PUT을 제출하므로, 이 차이를 고려해 사용합니다.
+
 Python quota 속성은 untyped입니다. Go의 변경 입력은 stock Barbican validator에 맞춰 `request.Optional[int64]`로 제한합니다. 명시적 null, bool, 소수, 숫자 문자열과 알려지지 않은 body 필드는 요청 전에 거부합니다. 전송 가능한 정수 범위는 `int64`이며, 응답 조회에는 이 제한을 적용하지 않습니다. `WithUpdateOptions`는 입력을 소유한 snapshot으로 교체하고, 이후의 옵션이 같은 필드의 값을 바꿉니다. 헤더 옵션은 대소문자를 구분하지 않고 마지막 값이 적용됩니다.
 
 조회 결과의 다섯 필드는 `json.RawMessage`입니다. 생략은 nil, JSON null은 `null` 바이트로 구분하며, 큰 숫자와 알려지지 않은 응답 필드를 보존합니다. `Body`에는 실제 envelope 내부 객체 전체가, `Data`에는 추가 필드가 들어갑니다. `Header`와 `StatusCode`는 실제 GET 응답의 증거입니다. 잘못된 envelope나 객체 타입, accepted 응답의 decode/read 오류는 `resource.ResponseError`에 상태·헤더·읽힌 body를 보존합니다.

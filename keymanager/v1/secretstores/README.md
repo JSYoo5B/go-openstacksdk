@@ -77,7 +77,7 @@ func ListNonDefaultBackends(ctx context.Context, client *gophercloud.ServiceClie
 true이면 계속 순회하고 false이면 첫 페이지만 읽습니다. 이 두 값은 URL로 보내지
 않으며 raw query의 `max_items`·`paginated` 등의 SDK control 이름도 거부합니다.
 
-MaxItems가 있고 limit이 없으면 limit hint를 보냅니다. 명시적 limit이 있을 때만
+MaxItems가 있고 limit이 없으면 limit hint를 보냅니다. 명시적 limit 또는 이 hint가 있을 때만
 링크 없는 비어 있지 않은 페이지에서 marker fallback을 사용하며, 짧은 페이지도
 계속합니다. Limit이 없으면 광고된 링크만 따르고 빈 페이지는 종료합니다.
 이는 pinned Python Resource의 순회 전략이며 Barbican 서버가 marker pagination을

@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 keymanager/v1 API를 하나의 인증된 서비스 객체
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+Barbican의 native API와 함께 SDK가 직접 구현한 `SecretStores`와 `Quotas`를 제공합니다. `SecretStores.List/All`, `GetGlobalDefault`, `GetPreferred`는 목록과 두 고정 selector의 조회이며 자동 fallback·CRUD·상태 대기를 추가하지 않습니다. `Quotas.Get`은 현재 인증된 프로젝트의 effective quota이고 `Quotas.InProject(ctx, resource.ID(projectID))`는 고정 프로젝트의 Get·Update·Delete입니다. Update는 설정 교체 PUT204이고 삭제는 override 초기화 DELETE204이며 둘 다 자동 재조회하지 않습니다. 반환 acknowledgement는 실제 빈 응답·header·status이며 Python의 seeded Resource와 구분합니다. [SecretStore Python/Go 사용법](secretstores/README.md)과 [Quota Python/Go 사용법](quotas/README.md)에 marker·nullable 응답·정수 입력·기본값 및 남은 Resource/cache 계약을 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -37,7 +39,9 @@ _ = value
 | `Acls` | [acls](acls/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Containers` | [containers](containers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Orders` | [orders](orders/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
+| `Quotas` | [quotas](quotas/api.go) | `Get(ctx)`: 인증된 프로젝트 effective quota; `InProject(ctx, ID)`: Get·교체 Update·override Delete, 목록·Find·Wait 없음 |
 | `Secrets` | [secrets](secrets/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `SecretStores` | [secretstores](secretstores/api.go) | `List/All`, `GetGlobalDefault`, `GetPreferred`: 목록·두 고정 조회; Resources·CRUD·Find·Wait 없음 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

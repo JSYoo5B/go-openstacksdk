@@ -1599,6 +1599,26 @@
     "wait": false
   },
   {
+    "package": "gophercloudsdk/keymanager/v1/secretstores",
+    "source": "sdk_owned",
+    "model": "SecretStore",
+    "kind": "store_defaults",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/keymanager/v1/quotas",
+    "source": "sdk_owned",
+    "model": "Quota",
+    "kind": "effective_project_quota",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InProject",
+    "parent": "gophercloudsdk/identity/v3/projects"
+  },
+  {
     "package": "gophercloudsdk/sharedfilesystems/v2/quotasets",
     "source": "sdk_owned",
     "model": "QuotaResource",
