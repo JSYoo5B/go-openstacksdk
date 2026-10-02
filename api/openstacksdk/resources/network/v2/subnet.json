@@ -1,0 +1,243 @@
+{
+  "base_path": "/subnets",
+  "body": {
+    "allocation_pools": {
+      "field": "allocation_pools",
+      "response_type": "list"
+    },
+    "created_at": {
+      "field": "created_at",
+      "response_type": null
+    },
+    "dns_nameservers": {
+      "field": "dns_nameservers",
+      "response_type": "list"
+    },
+    "host_routes": {
+      "field": "host_routes",
+      "response_type": "list"
+    },
+    "prefix_length": {
+      "field": "prefixlen",
+      "response_type": null
+    },
+    "revision_number": {
+      "field": "revision_number",
+      "response_type": "int"
+    },
+    "service_types": {
+      "field": "service_types",
+      "response_type": "list"
+    },
+    "tenant_id": {
+      "field": "tenant_id",
+      "response_type": null
+    },
+    "updated_at": {
+      "field": "updated_at",
+      "response_type": null
+    }
+  },
+  "class_bases": [
+    "_base.NetworkResource",
+    "_base.TagMixinNetwork"
+  ],
+  "counts": {
+    "accepted_query": 30,
+    "canonical_query": 24,
+    "local_body": 9
+  },
+  "envelope": "subnets",
+  "mro": [
+    "openstack.network.v2.subnet.Subnet",
+    "openstack.network.v2._base.NetworkResource",
+    "openstack.resource.Resource",
+    "builtins.dict",
+    "openstack.network.v2._base.TagMixinNetwork",
+    "openstack.common.tag.TagMixin",
+    "openstack.resource.ResourceMixinProtocol",
+    "typing.Protocol"
+  ],
+  "proof": {
+    "ast_algorithm": "sha256(ast.dump(node, annotate_fields=True, include_attributes=False).encode(\"utf-8\"))",
+    "files": {
+      "openstack/common/tag.py": "c86f1d41fc1ed139366f163e4d5dfb7a37b15380dda05c3382c47dd7bafaa59e",
+      "openstack/fields.py": "dc557f53c445bb20cbc4dfddf44fb7dd4e3080f97a3bfa087b82f16f242d55cd",
+      "openstack/network/v2/_base.py": "70981b01c16f24f656291068f808e97a5f9f309cfcda535a03056eccb54acc00",
+      "openstack/network/v2/_proxy.py": "e409ee081f8b9c44903a1b81a4d9f9590c59f9f947aa686f960a5171ab1a6b58",
+      "openstack/network/v2/subnet.py": "a23a33b8f8baedf74a44fab67827c1f02b8941eed9eae44d0beb5050166b6c00",
+      "openstack/proxy.py": "1eff2aa3ff960c7086fc7f8d2722b3c7d3f72316f58b25505491319213869a46",
+      "openstack/resource.py": "a3dc108ff184cf2928513a4c1e33295b85a5e485bc30b104e5b7e030dfdeb2e0"
+    },
+    "nodes": [
+      {
+        "ast_sha256": "a6539258091e60c50984f27540fb72006924d55079db4d23943e9c6422d653d8",
+        "end_line": 103,
+        "line": 17,
+        "source": "openstack/network/v2/subnet.py",
+        "symbol": "Subnet"
+      },
+      {
+        "ast_sha256": "2129fb9769fb875e02a0c0114410a6461536217b72f8483aa1c43e9ea78c7962",
+        "end_line": 50,
+        "line": 30,
+        "source": "openstack/network/v2/subnet.py",
+        "symbol": "Subnet._query_mapping"
+      },
+      {
+        "ast_sha256": "d2c101685e417977b8d2f46550ce8ee2b0722e8b6444a28ba2688c80cc5afd93",
+        "end_line": 34,
+        "line": 29,
+        "source": "openstack/common/tag.py",
+        "symbol": "TagMixin._tag_query_parameters"
+      },
+      {
+        "ast_sha256": "6da6cf78985efc35893fd871430390fa8ff05b96651b55a8366578d0041ff896",
+        "end_line": 38,
+        "line": 38,
+        "source": "openstack/common/tag.py",
+        "symbol": "TagMixin.tags"
+      },
+      {
+        "ast_sha256": "48524bd104238b6e8f802177e4f965989eadc5a32bfabfeb8adf750157c8cbe9",
+        "end_line": 25,
+        "line": 25,
+        "source": "openstack/network/v2/_base.py",
+        "symbol": "NetworkResource.revision_number"
+      },
+      {
+        "ast_sha256": "dfc7c99d202a3c467327b2d4859057e49268c2156ae07226e3701ce82c4443fd",
+        "end_line": 449,
+        "line": 449,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.id"
+      },
+      {
+        "ast_sha256": "bd3bef77824d46756a3fbe4cf25a3a6b275c8524e410b5cb4c8ee4911df046cf",
+        "end_line": 452,
+        "line": 452,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.name"
+      },
+      {
+        "ast_sha256": "1173ce94b0986c9f1b11e2d8b46dc673fbe1ece550da965e5ae85fed0bde9154",
+        "end_line": 299,
+        "line": 272,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters.__init__"
+      },
+      {
+        "ast_sha256": "f206c066fc5ee949936926d27df0cb346033dccf91f46cb673155f0e246cdcc2",
+        "end_line": 340,
+        "line": 301,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._validate"
+      },
+      {
+        "ast_sha256": "d514f3d47c626bc06d183504ba9bda4273eed601aaf972cf993c21be5bff2e50",
+        "end_line": 387,
+        "line": 342,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._transpose"
+      },
+      {
+        "ast_sha256": "87817f4adeb9404971e664155b136da2c16b9ae29b715c8b348dabac7b8cd1be",
+        "end_line": 2359,
+        "line": 2155,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.list"
+      },
+      {
+        "ast_sha256": "69240cc8cc5a068ef1e13a2ce380a6abed6fdb2fde1545317b0250ebbdb42a18",
+        "end_line": 256,
+        "line": 208,
+        "source": "openstack/fields.py",
+        "symbol": "_BaseComponent.__get__"
+      },
+      {
+        "ast_sha256": "3ba05f6db1bdcebfa98d3cf997bf9ff58fa057958f63f980f85d7938acdae1aa",
+        "end_line": 136,
+        "line": 86,
+        "source": "openstack/fields.py",
+        "symbol": "_convert_type"
+      },
+      {
+        "ast_sha256": "13e21d7c05845ae309bea4901e05ee4d1b07b11a36223610e2ddc1e1f409e9f0",
+        "end_line": 916,
+        "line": 866,
+        "source": "openstack/proxy.py",
+        "symbol": "Proxy._list"
+      },
+      {
+        "ast_sha256": "dafcc9c92ce2f8d68a85d0c5b21f8dea1a50850702c870a407e479d4f19eb303",
+        "end_line": 7548,
+        "line": 7527,
+        "source": "openstack/network/v2/_proxy.py",
+        "symbol": "Proxy.subnets"
+      }
+    ],
+    "python_parser": "3.14"
+  },
+  "query": {
+    "any_tags": "tags-any",
+    "cidr": "cidr",
+    "description": "description",
+    "dns_publish_fixed_ip": "dns_publish_fixed_ip",
+    "fields": "fields",
+    "gateway_ip": "gateway_ip",
+    "id": "id",
+    "ip_version": "ip_version",
+    "ipv6_address_mode": "ipv6_address_mode",
+    "ipv6_ra_mode": "ipv6_ra_mode",
+    "is_dhcp_enabled": "enable_dhcp",
+    "limit": "limit",
+    "marker": "marker",
+    "name": "name",
+    "network_id": "network_id",
+    "not_any_tags": "not-tags-any",
+    "not_tags": "not-tags",
+    "project_id": "project_id",
+    "segment_id": "segment_id",
+    "sort_dir": "sort_dir",
+    "sort_key": "sort_key",
+    "subnet_pool_id": "subnetpool_id",
+    "tags": "tags",
+    "use_default_subnet_pool": "use_default_subnetpool"
+  },
+  "query_collision": "canonical_client_name_wins",
+  "query_formats": {},
+  "reserved": [
+    "allow_unknown_params",
+    "base_path",
+    "headers",
+    "jmespath_filters",
+    "max_items",
+    "microversion",
+    "paginated",
+    "resource_type",
+    "session"
+  ],
+  "resource": "openstack.network.v2.subnet.Subnet",
+  "schema_version": 1,
+  "sdk_package": "gophercloudsdk/network/v2/subnets",
+  "source_controls": {
+    "proxy_list": [
+      "resource_type",
+      "paginated",
+      "base_path",
+      "jmespath_filters"
+    ],
+    "resource_list": [
+      "session",
+      "paginated",
+      "base_path",
+      "allow_unknown_params",
+      "microversion",
+      "headers",
+      "max_items"
+    ]
+  },
+  "source_pin": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "unknown_filters": "discard",
+  "uri": {}
+}

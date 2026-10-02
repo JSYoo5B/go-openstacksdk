@@ -11,25 +11,28 @@ import (
 )
 
 type collectionRecord struct {
-	Package              string   `json:"package"`
-	Source               string   `json:"source,omitempty"`
-	Model                string   `json:"model,omitempty"`
-	UpstreamModel        string   `json:"upstream_model,omitempty"`
-	Kind                 string   `json:"kind,omitempty"`
-	Find                 bool     `json:"find"`
-	IdentityFind         bool     `json:"identity_find,omitempty"`
-	IdentityGetQuery     bool     `json:"identity_get_query,omitempty"`
-	IdentityMissingList  bool     `json:"identity_missing_list,omitempty"`
-	IdentityListDefaults bool     `json:"identity_list_defaults,omitempty"`
-	IdentityExtraSpecs   bool     `json:"identity_extra_specs,omitempty"`
-	IdentityDetails      bool     `json:"identity_details,omitempty"`
-	IdentityAllProjects  bool     `json:"identity_all_projects,omitempty"`
-	BodyFilterFields     []string `json:"body_filter_fields,omitempty"`
-	Delete               bool     `json:"delete"`
-	Wait                 bool     `json:"wait"`
-	Scope                string   `json:"scope,omitempty"`
-	Parent               string   `json:"parent,omitempty"`
-	Issue                string   `json:"issue,omitempty"`
+	Package              string            `json:"package"`
+	Source               string            `json:"source,omitempty"`
+	Model                string            `json:"model,omitempty"`
+	UpstreamModel        string            `json:"upstream_model,omitempty"`
+	Kind                 string            `json:"kind,omitempty"`
+	Find                 bool              `json:"find"`
+	IdentityFind         bool              `json:"identity_find,omitempty"`
+	IdentityGetQuery     bool              `json:"identity_get_query,omitempty"`
+	IdentityMissingList  bool              `json:"identity_missing_list,omitempty"`
+	IdentityListDefaults bool              `json:"identity_list_defaults,omitempty"`
+	IdentityExtraSpecs   bool              `json:"identity_extra_specs,omitempty"`
+	IdentityDetails      bool              `json:"identity_details,omitempty"`
+	IdentityAllProjects  bool              `json:"identity_all_projects,omitempty"`
+	BodyFilterFields     []string          `json:"body_filter_fields,omitempty"`
+	SemanticQueryFilters map[string]string `json:"semantic_query_filters,omitempty"`
+	SemanticBodyFilters  map[string]string `json:"semantic_body_filters,omitempty"`
+	SemanticReserved     []string          `json:"semantic_reserved,omitempty"`
+	Delete               bool              `json:"delete"`
+	Wait                 bool              `json:"wait"`
+	Scope                string            `json:"scope,omitempty"`
+	Parent               string            `json:"parent,omitempty"`
+	Issue                string            `json:"issue,omitempty"`
 }
 
 type collectionPlan struct {
@@ -260,7 +263,7 @@ func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl,
 }
 
 func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) error {
-	e := emitter{pkg: pkg, imports: map[string]string{}}
+	e := emitter{pkg: pkg, imports: map[string]string{}, pythonFilters: g.pythonFilterFor(pkg, plan)}
 	e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
 	emitCollectionAdapter(&e, plan, "a", nil)
 	e.printf("}\n")
@@ -293,6 +296,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	arguments := func(id string) string { return strings.Join(append(append([]string{"ctx"}, parents...), id), ",") }
 	e.printf("resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\n", plan.modelName, e.pkg.Name())
 	emitBodyFilterCollection(e, plan, len(parents))
+	emitPythonFilterDescriptor(e, plan, len(parents))
 	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok {
 		e.printf("IdentityFind:true,\n")
 		emitIdentityGetQuery(e, plan, receiver, parents, contract)

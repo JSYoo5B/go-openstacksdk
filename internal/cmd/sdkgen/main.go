@@ -42,19 +42,25 @@ type inventory struct {
 	Operations []operation `json:"operations"`
 }
 type generator struct {
-	meta        map[string]metadata
-	importer    types.Importer
-	root        string
-	inventory   inventory
-	collections []collectionRecord
+	meta          map[string]metadata
+	importer      types.Importer
+	root          string
+	inventory     inventory
+	collections   []collectionRecord
+	pythonFilters *pythonFilterManifest
 }
 
 func main() {
 	metadataPath := flag.String("metadata", "", "go list -deps -export -json ./openstack/... output")
 	output := flag.String("output", ".", "SDK module root")
+	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet semantic filters)")
 	flag.Parse()
 	if *metadataPath == "" {
 		fatal(fmt.Errorf("-metadata is required"))
+	}
+	pythonFilters, err := loadPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
 	}
 	file, err := os.Open(*metadataPath)
 	if err != nil {
@@ -74,7 +80,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -139,6 +145,7 @@ type emitter struct {
 	imports         map[string]string
 	sourceImports   map[string]*types.Package
 	controlledLists map[string]bool
+	pythonFilters   *pythonFilterManifest
 	body            bytes.Buffer
 }
 
@@ -291,6 +298,9 @@ func (g *generator) generate(path string) error {
 	if err := validateBodyFilterCollectionContracts(pkg, plan); err != nil {
 		return err
 	}
+	if err := g.validatePythonFilterPlan(pkg, plan); err != nil {
+		return err
+	}
 	if err := validateIdentityListModeContracts(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
@@ -330,7 +340,8 @@ func (g *generator) generate(path string) error {
 	} else {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), Delete: plan.deleter != nil, Wait: plan.status != ""})
+		filter := g.pythonFilterFor(pkg, plan)
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != ""})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {

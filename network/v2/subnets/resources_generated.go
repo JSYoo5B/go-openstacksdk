@@ -43,7 +43,8 @@ func (a *API) newResources() *resource.Collection[Subnet] {
 			}}
 			return a.listBodyWithControl(ctx, control, options...)
 		},
-		IdentityFind: true,
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "cidr": "cidr", "description": "description", "dns_publish_fixed_ip": "dns_publish_fixed_ip", "fields": "fields", "gateway_ip": "gateway_ip", "id": "id", "ip_version": "ip_version", "ipv6_address_mode": "ipv6_address_mode", "ipv6_ra_mode": "ipv6_ra_mode", "is_dhcp_enabled": "enable_dhcp", "limit": "limit", "marker": "marker", "name": "name", "network_id": "network_id", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "segment_id": "segment_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "subnet_pool_id": "subnetpool_id", "tags": "tags", "use_default_subnet_pool": "use_default_subnetpool"}, Body: map[string]string{"allocation_pools": "allocation_pools", "created_at": "created_at", "dns_nameservers": "dns_nameservers", "host_routes": "host_routes", "prefix_length": "prefixlen", "revision_number": "revision_number", "service_types": "service_types", "tenant_id": "tenant_id", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Subnet, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"subnets", id}, q, []int{200}, &result.Body)
