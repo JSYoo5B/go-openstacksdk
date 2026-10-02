@@ -428,6 +428,9 @@ func (g *generator) generate(path string) error {
 	if err := g.validateGlanceStage(pkg); err != nil {
 		return err
 	}
+	if err := validateGlanceCreateImportTypes(pkg); err != nil {
+		return err
+	}
 	names := []string{}
 	for _, name := range pkg.Scope().Names() {
 		fn, ok := pkg.Scope().Lookup(name).(*types.Func)
