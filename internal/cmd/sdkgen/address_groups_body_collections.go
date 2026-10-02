@@ -86,22 +86,29 @@ func validateAddressGroupBodyNativeDeclarations(pkg *types.Package, decls map[st
 	return nil
 }
 
-// The native pager and extractor use these two root-package helpers directly.
-// Limit source loading to AddressGroup and the reviewed declarations only.
-func (g *generator) addressGroupBodyRootDeclarations(path string) (map[string]*ast.FuncDecl, error) {
-	if sdkPath(path) != addressGroupSDKPath {
+// The two audited Neutron raw lanes use the reviewed root-package helpers.
+// Limit source loading to their exact targets and extraction declarations.
+func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.FuncDecl, error) {
+	wanted := map[string]bool{"ExtractNextURL": true, "Result.ExtractInto": true}
+	label := "audited AddressGroup body collection"
+	switch sdkPath(path) {
+	case addressGroupSDKPath:
+	case qosPolicySDKPath:
+		label = "audited QoSPolicy body collection"
+		wanted["Result.ExtractIntoSlicePtr"] = true
+		wanted["Result.extractIntoPtr"] = true
+	default:
 		return nil, nil
 	}
 	source, ok := g.meta[upstreamModule]
 	if !ok || source.Dir == "" || len(source.GoFiles) == 0 {
-		return nil, fmt.Errorf("audited AddressGroup body collection: native extraction dependency metadata missing")
+		return nil, fmt.Errorf("%s: native extraction dependency metadata missing", label)
 	}
-	wanted := map[string]bool{"ExtractNextURL": true, "Result.ExtractInto": true}
 	result := map[string]*ast.FuncDecl{}
 	for _, name := range source.GoFiles {
 		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(source.Dir, name), nil, 0)
 		if err != nil {
-			return nil, fmt.Errorf("audited AddressGroup body collection: native extraction dependency: %w", err)
+			return nil, fmt.Errorf("%s: native extraction dependency: %w", label, err)
 		}
 		for _, declaration := range file.Decls {
 			fn, ok := declaration.(*ast.FuncDecl)
@@ -110,29 +117,45 @@ func (g *generator) addressGroupBodyRootDeclarations(path string) (map[string]*a
 			}
 			key := "gophercloud." + identityDeclarationKey(fn)
 			if result[key] != nil {
-				return nil, fmt.Errorf("audited AddressGroup body collection: duplicate extraction declaration %s", key)
+				return nil, fmt.Errorf("%s: duplicate extraction declaration %s", label, key)
 			}
 			result[key] = fn
 		}
 	}
 	if len(result) != len(wanted) {
-		return nil, fmt.Errorf("audited AddressGroup body collection: native extraction declarations missing")
+		return nil, fmt.Errorf("%s: native extraction declarations missing", label)
 	}
 	return result, nil
 }
 
+// Retain the AddressGroup-only helper boundary for existing callers/tests.
+func (g *generator) addressGroupBodyRootDeclarations(path string) (map[string]*ast.FuncDecl, error) {
+	if sdkPath(path) != addressGroupSDKPath {
+		return nil, nil
+	}
+	return g.bodyRecordRootDeclarations(path)
+}
+
 func emitAddressGroupBodyRecordAdapter(e *emitter, plan *collectionPlan) {
+	emitNeutronBodyRecordAdapter(e, plan, "addressGroupBodyFilterValue")
+}
+
+func emitNeutronBodyRecordAdapter(e *emitter, plan *collectionPlan, selector string) {
 	e.use("gophercloudsdk/request")
-	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return addressGroupBodyFilterValue(record,key)},\n", plan.modelName)
+	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return %s(record,key)},\n", plan.modelName, selector)
 	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
 	e.printf("options:=[]ListOption{func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
 }
 
 func emitAddressGroupBodyFilterList(e *emitter, plan *collectionPlan) {
+	emitNeutronBodyFilterList(e, plan, "addressgroups", "address_groups", "ExtractGroups")
+}
+
+func emitNeutronBodyFilterList(e *emitter, plan *collectionPlan, kind, envelope, extractor string) {
 	e.use("gophercloudsdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
 	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
-	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",\"addressgroups\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
-	e.printf("_opts:=listOptsBuilder{base:cfg.Options,config:cfg}\nreturn resource.BodyStreamWithControl(ctx,upstream.List(a.client,_opts),func(page pagination.Page)([]%s,error){values,err:=upstream.ExtractGroups(page);return []%s(values),err},\"address_groups\",control)\n}\n", plan.modelName, plan.modelName)
+	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",%q,err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", kind, plan.modelName)
+	e.printf("_opts:=listOptsBuilder{base:cfg.Options,config:cfg}\nreturn resource.BodyStreamWithControl(ctx,upstream.List(a.client,_opts),func(page pagination.Page)([]%s,error){values,err:=upstream.%s(page);return []%s(values),err},%q,control)\n}\n", plan.modelName, extractor, plan.modelName, envelope)
 }

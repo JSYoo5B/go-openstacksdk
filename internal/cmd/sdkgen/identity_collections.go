@@ -399,6 +399,11 @@ func (g *generator) identityPaginationDeclarations(path string) (map[string]*ast
 		wanted["PageResultFrom"] = true
 		wanted["PageResultFromParsed"] = true
 		wanted["LinkedPageBase.GetBody"] = true
+	case "network/v2/extensions/qos/policies":
+		label = "audited QoSPolicy body collection"
+		wanted["PageResultFrom"] = true
+		wanted["PageResultFromParsed"] = true
+		wanted["LinkedPageBase.GetBody"] = true
 	case "keymanager/v1/containers":
 		label = "audited Container body collection"
 		wanted["PageResultFrom"] = true

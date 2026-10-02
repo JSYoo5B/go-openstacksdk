@@ -52,12 +52,13 @@ type generator struct {
 	containerPythonFilters    *pythonFilterManifest
 	orderPythonFilters        *pythonFilterManifest
 	addressGroupPythonFilters *pythonFilterManifest
+	qosPolicyPythonFilters    *pythonFilterManifest
 }
 
 func main() {
 	metadataPath := flag.String("metadata", "", "go list -deps -export -json ./openstack/... output")
 	output := flag.String("output", ".", "SDK module root")
-	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet, Secret, Container, Order and AddressGroup semantic filters)")
+	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet, Secret, Container, Order, AddressGroup and QoSPolicy semantic filters)")
 	flag.Parse()
 	if *metadataPath == "" {
 		fatal(fmt.Errorf("-metadata is required"))
@@ -82,6 +83,10 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
+	qosPolicyPythonFilters, err := loadQoSPolicyPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
+	}
 	file, err := os.Open(*metadataPath)
 	if err != nil {
 		fatal(err)
@@ -100,7 +105,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters, qosPolicyPythonFilters: qosPolicyPythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -312,7 +317,7 @@ func (g *generator) generate(path string) error {
 	for key, decl := range dependencyDeclarations {
 		nativeDecls[key] = decl
 	}
-	rootDeclarations, err := g.addressGroupBodyRootDeclarations(pkg.Path())
+	rootDeclarations, err := g.bodyRecordRootDeclarations(pkg.Path())
 	if err != nil {
 		return err
 	}
@@ -335,6 +340,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateAddressGroupBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
+	if err := validateQoSPolicyBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	if err := g.validatePythonFilterPlan(pkg, plan); err != nil {

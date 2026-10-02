@@ -131,6 +131,12 @@ func emitSubnetBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 // Called once after newResources is closed, so the raw-row helper remains a
 // private SDK method and the native public List options/signature do not change.
 func emitBodyFilterList(e *emitter, plan *collectionPlan) {
+	if sdkPath(e.pkg.Path()) == qosPolicySDKPath {
+		if _, ok := bodyFilterCollectionContract(e.pkg, plan, 0); ok {
+			emitQoSPolicyBodyFilterList(e, plan)
+		}
+		return
+	}
 	spec, ok := bodyFilterCollectionContract(e.pkg, plan, 0)
 	if !ok || !spec.rawRecord {
 		return

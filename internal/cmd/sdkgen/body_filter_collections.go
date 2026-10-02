@@ -20,7 +20,7 @@ type bodyFilterCollectionSpec struct {
 // These body-only Python filters are audited against the pinned native models.
 // Other body fields and native collections remain unsupported until reviewed.
 var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
-	{path: "network/v2/extensions/qos/policies", model: "Policy", fields: []bodyFilterCollectionField{{key: "rules", member: "Rules"}}},
+	{path: qosPolicySDKPath, model: "Policy", rawRecord: true, fields: qosPolicyBodyCollectionFields()},
 	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", rawRecord: true, fields: addressGroupBodyCollectionFields()},
 	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", fields: []bodyFilterCollectionField{{key: "prefixes", member: "Prefixes"}}},
 	{path: "network/v2/networks", model: "Network", fields: []bodyFilterCollectionField{{key: "subnets", member: "Subnets", aliases: []string{"subnet_ids"}}}},
@@ -31,6 +31,9 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == qosPolicySDKPath {
+		return qosPolicyBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == addressGroupSDKPath {
 		return addressGroupBodyCollectionMetadataValid(spec)
 	}
@@ -57,8 +60,6 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 		return false
 	}
 	switch spec.path {
-	case "network/v2/extensions/qos/policies":
-		return spec.model == "Policy" && field.key == "rules" && field.member == "Rules"
 	case "network/v2/extensions/subnetpools":
 		return spec.model == "SubnetPool" && field.key == "prefixes" && field.member == "Prefixes"
 	case "network/v2/networks":
@@ -80,7 +81,7 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 	case "network/v2/extensions/security/addressgroups":
 		return addressGroupBodyNativeSchema(pkg, plan)
 	case "network/v2/extensions/qos/policies":
-		return identityQoSAddressSchema(pkg, plan)
+		return qosPolicyBodyNativeSchema(pkg, plan)
 	case "network/v2/extensions/subnetpools":
 		if !identityPoolTrunkSchema(pkg, plan) {
 			return false
@@ -157,7 +158,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == addressGroupSDKPath {
+		if spec.path == qosPolicySDKPath {
+			emitQoSPolicyBodyRecordAdapter(e, plan)
+		} else if spec.path == addressGroupSDKPath {
 			emitAddressGroupBodyRecordAdapter(e, plan)
 		} else if spec.path == "keymanager/v1/orders" {
 			emitKeyManagerBodyRecordAdapter(e, plan, "orderBodyFilterValue")
