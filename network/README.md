@@ -117,6 +117,17 @@ Python prefix length 이름을 wire 필드로 연결하고 정수 응답에는 �
 native 모델의 필수 prefix length 디코드와 timestamp 디코드는 로컬 비교보다 먼저 수행합니다.
 [Subnet Pool Python/Go 사용법](v2/extensions/subnetpools/listing/README.md)에 전체 이름과 Python 정수 변환의 차이를 설명합니다.
 
+`service.Networks`와 `service.API.Networks.Resources`는 `resource.WithFilter`/`WithFilters`로
+query 23개와 로컬 Body 14개를 분류합니다. query는 wire 별칭을 포함해 35개 이름을 받으며
+`name`·`status`·`id`는 서버 조건입니다. 기존 `WithName`의 정확한 로컬 이름 비교와
+`WithStatus`의 대소문자 무시 로컬 비교는 별도로 유지합니다. provider·address scope·확장 query도
+builder 없이 전달하고 원문 `subnet_ids`·availability zone·segments·timestamp를 비교합니다.
+네 boolean 응답은 null을 보존한 truthiness로, `mtu`·`revision_number`는 정확한 정수 정책으로
+비교합니다. 반환값은 기존 native Network이며 전체 페이지의 알려진 필드 디코드가 먼저 수행됩니다.
+`Networks.ResourceAdapter()`는 두 SDK facade를 조립하는 독립 메타데이터를 제공하며 일반 호출자는
+collection 옵션을 사용합니다. 상위 facade의 `network` 오류 이름과 정확한 `ERROR` 상태 대기는
+유지합니다. [Network Python/Go 사용법](v2/networks/listing/README.md)에 전체 필터와 변환·충돌·페이지 차이를 설명합니다.
+
 ## 삭제와 대기
 
 ```go

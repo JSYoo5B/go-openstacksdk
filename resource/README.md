@@ -97,6 +97,13 @@ Subnet Pool은 `id`·`tenant_id`·prefix 배열·두 timestamp·다섯 정수 �
 native 전체 페이지 디코드를 먼저 적용하며 prefix 배열의 null 요소는 원문으로 비교하지만
 반환 `Prefixes`의 해당 요소는 native 빈 문자열입니다. 정수 변환과 timestamp의 경계는
 [Subnet Pool 사용법](../network/v2/extensions/subnetpools/listing/README.md)에 설명합니다.
+Network는 query 23개·accepted 이름 35개와 로컬 Body 14개를 분류합니다. `name`·`status`·`id`는
+서버 조건이고 `WithName`·`WithStatus`가 요청한 로컬 비교는 별도로 유지합니다. `subnet_ids`를
+원문 `subnets`에 연결해 null 요소를 비교하며 typed 반환 배열의 null→빈 문자열 변환은 유지합니다.
+네 boolean의 응답 truthiness는 missing/null을 null로 보존하고 caller 조건은 변환하지 않습니다.
+`mtu`·`revision_number`에는 정확한 정수 정책을 사용하고 나머지 여덟 필드는 원문 JSON입니다.
+같은 정책을 상위 `Network(ctx).Networks`와 versioned `Networks.Resources`에서 사용합니다.
+[Network 사용법](../network/v2/networks/listing/README.md)에 Python 변환·native decoder·상태 query의 차이를 설명합니다.
 Secret은 timestamp의 속성 이름과 raw wire 이름을 구분하고 literal `id`·전체 `secret_ref`·
 별도의 `secret_id` formatter 결과를 비교합니다. 로컬 필드 12개를 원문 행에서 선택하고 native Secret을 반환합니다.
 Container는 `name`·timestamp·참조·중첩 배열 등 10개 로컬 속성을 비교합니다. `id`는 literal

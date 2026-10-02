@@ -203,16 +203,16 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 | QoS Policy | `rules` | 없음 | `rules` |
 | Address Group | `addresses` | 없음 | `addresses` |
 | Subnet Pool | 아래 10개 필드 | prefix length의 Python 이름 3개 | 아래 설명 참고 |
-| Network | `subnets` | `subnet_ids` | `subnet_ids` |
+| Network | 아래 14개 필드 | `subnet_ids`·`is_vlan_qinq`·`is_vlan_transparent` | 아래 설명 참고 |
 | Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-QoS Policy·Address Group·Subnet Pool·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
+QoS Policy·Address Group·Subnet Pool·Network·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
 상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
 첫 HTTP 전에 반환합니다. 오류는 iterator를 소비할 때 나타나며 malformed JSON·NaN 등
-원래 인코딩 오류도 error chain에 보존합니다. 잘 구성된 JSON scalar를 임의 변환하지 않으므로
-배열과 scalar는 일치하지 않습니다.
+원래 인코딩 오류도 error chain에 보존합니다. 일반 JSON 필드는 scalar를 임의 변환하지 않으므로
+배열과 scalar는 일치하지 않습니다. 감사한 boolean·정수 응답 descriptor의 변환은 아래에 별도로 설명합니다.
 
 `WithBodyFilter`는 기존 조건에 추가하고 같은 canonical 필드는 마지막 옵션이 이깁니다.
 `WithBodyFilters`는 전체 조건을 교체하며 nil/빈 map은 조건을 지웁니다. 명시적인 clear도
@@ -229,7 +229,7 @@ object 필터는 recursive subset이지만 배열 내부 object는 전체 equali
 non-object 응답은 불일치로 처리합니다.
 문자열 배열도 전체 값이 같아야 하며 subnet ID 순서를 바꾸거나 CIDR을 병합·정규화하지 않습니다.
 Python Network의 `subnets`는 wire Body 이름이며 로컬 필터용 속성 이름은 `subnet_ids`입니다.
-Go는 SDK가 명시 등록한 두 이름을 받아 같은 native `Subnets`를 비교합니다.
+Go는 명시 Body 옵션에서 두 이름을 받아 같은 원문 `subnets`를 비교합니다.
 
 `WithMaxItems`는 로컬 필터 이전의 raw 행을 세므로 필터에서 제외된 행을 추가 페이지로 보충하지
 않습니다. `WithName`·`WithStatus`와 AND로 조합하며 Network는 Status가 있지만 나머지 모델은
@@ -239,8 +239,10 @@ decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으�
 `WithQuery("subnets", ...)`는 기존 wire 확장으로 독립 전달하며 별칭을 자동 변환하지 않습니다. native typed List와
 `FindIdentity`는 이 공통 ListOption을 받지 않습니다.
 
-Network의 `Subnets` 비교 값은 native typed 모델의 field projection입니다.
-누락/null 배열은 모두 nil이 되지만 빈 배열은 구별됩니다. QoS·Address Group·Subnet Pool은 원문 행의 필드를 비교합니다.
+Network도 QoS·Address Group·Subnet Pool처럼 원문 행의 필드를 비교합니다.
+`subnets`의 누락/null은 null로 비교하고 빈 배열은 구별합니다. 배열의 null 요소도 원문으로
+비교하지만 반환 native `Subnets`의 해당 요소는 빈 문자열입니다. 기존 typed projection을
+사용하던 명시 `subnets/subnet_ids` 조건도 이 원문 선택 정책을 따릅니다.
 Subnet Pool의 native prefix length와 timestamp, Network의 native timestamp decoder 등 다른
 필드의 decode 오류도 로컬 필터 전에 발생하며, 현재 응답 페이지 안에서 cap 뒤에 위치한
 행의 decode 오류도 숨기지 않습니다. cap으로 방문하지 않은 다음 페이지는 검사하지 않습니다.
@@ -248,6 +250,55 @@ QoS `Rules`는 원문 JSON의 숫자로 비교하지만 반환 `map[string]any`�
 유지합니다. rule 배열 안의 null map·null 필드는 기존 native map도 보존하던 값이며 추가 개선으로
 주장하지 않습니다. 선택한 원문 필드의 비교가 전체 unknown Body·Python descriptor/default/alias/coercion을
 제공하지는 않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
+
+### Network의 속성 이름 분류
+
+`Networks.Resources.List/All`과 상위 `Network(ctx).Networks`는 Python
+`conn.network.networks(**query)`의 query 23개와 로컬 Body 14개를 분류합니다. query는
+wire 별칭을 포함한 35개 이름을 받고 `name`·`status`·`id`는 서버 조건입니다. 기존
+`WithName`은 이름 hint와 정확한 로컬 이름 비교를, `WithStatus`는 status hint와 대소문자를
+무시한 로컬 비교를 유지합니다. raw `WithQuery("status", ...)`만 지정하면 로컬 상태 비교는
+추가하지 않습니다. 두 목록 경로 모두 wire status를 보존합니다.
+`WithStatus`로 로컬 비교를 활성화한 뒤 raw status를 덮어쓰면 마지막 wire 값이 로컬 비교의
+기준도 됩니다. 기존 옵션 순서 정책을 유지합니다.
+
+| 로컬 속성 | 응답 선택 정책 |
+|---|---|
+| `is_default`·`is_vlan_qinq`·`is_vlan_transparent`·`pvlan` | missing/null 보존, boolean truthiness |
+| `mtu`·`revision_number` | 정확한 signed 정수 |
+| `availability_zone_hints`·`availability_zones`·`created_at`·`updated_at`·`dns_domain`·`qos_policy_id`·`segments`·`subnet_ids` | 원문 JSON |
+
+semantic 이름 `subnet_ids`·`is_vlan_qinq`·`is_vlan_transparent`는 각각 원문
+`subnets`·`vlan_qinq`·`vlan_transparent`에 연결합니다. 명시 Body 옵션은 세 쌍의 이름을 모두
+받지만 raw 이름은 semantic 옵션에서 알 수 없는 이름입니다. `tenant_id`도 이 Python 선언의
+semantic 조건이 아니며 `project_id`로 변환하지 않습니다. raw query는 독립적으로 전달합니다.
+alias 우선·bulk 교체·snapshot·reserved controls·최종값 검증·target 충돌은 공통 옵션 정책을 따릅니다.
+
+네 boolean 응답의 null은 false로 채우지 않습니다. 숫자 0·빈 문자열·빈 배열·빈 object는 false,
+그 외 nonzero/nonempty 값은 true이고 문자열 `"false"`도 true입니다. 숫자는 float64 변환 없이
+정확한 zero/nonzero로 비교하므로 극단적으로 작은 지수가 Python JSON float에서 0으로
+underflow되는 경우와 다릅니다. caller 조건은 변환하지 않으며 bool/number도 구별합니다.
+두 정수는 정확한 integral number와 signed decimal string 응답을 변환하고 fractional·bool·
+배열·object는 거부합니다. native revision number의 int 디코드는 먼저 적용합니다. Python의
+bool-as-int·float 절삭·digit-only string 및 default 0 처리를 모두 재현하지 않습니다.
+나머지 필드는 원문 값이며 Python list descriptor의 scalar wrapping도 적용하지 않습니다.
+
+native 모델의 알려진 필드는 cap·로컬 비교보다 먼저 페이지 전체를 디코드합니다. query-only
+null 행은 native zero model일 수 있고, 선택한 Body 조건이 소비하는 null 행은 오류입니다.
+cap·break로 소비하지 않는 행의 로컬 변환이나 다음 페이지를 검사하지 않습니다. native
+`networks_links` continuation·client/provider·timestamp decoding과 반환 모델은 유지합니다.
+native typed List·FindIdentity·Get/Delete는 semantic 옵션과 독립적입니다. SDK가 제공하는 새
+`ResourceAdapter()`를 상위 facade에 조립하며 metadata map은 각각 복사합니다. 상위 facade의
+singular `network` 오류 이름과 exact `ERROR` waiter는 기존 정책입니다.
+
+[Network Python/Go 예제](../network/v2/networks/listing/README.md),
+[HTTP 7개 그룹](../api/network_list_filters_test.go),
+[Connection·adapter·waiter 3개 그룹](../connection_network_filters_test.go),
+[boolean 응답 변환](../internal/jsonfilter/boolean_test.go)에서 이 계약을 검증합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/network.json)는 source SHA 7개·AST 43개를,
+[생성기 검증](../internal/cmd/sdkgen/network_filters_test.go)은 native 함수 선언 28개와
+NoZ timestamp 상수 1개를 확인합니다. Resource/cache·revision if-match·Proxy lifecycle 전체는
+별도 구현 대상입니다.
 
 ### Subnet의 속성 이름 분류
 

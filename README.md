@@ -58,6 +58,11 @@ QoS Policy는 [query 15개·로컬 필드 2개](network/v2/extensions/qos/polici
 Subnet Pool은 [query 16개·로컬 필드 10개](network/v2/extensions/subnetpools/listing/README.md)를
 분류합니다. prefix length의 Python 이름을 변환하고 `id`·`tenant_id`·timestamp·prefix 배열을
 원문으로 비교합니다. 정수 응답은 정확한 정수 정책을 사용하며 반환값은 기존 typed SubnetPool입니다.
+Network도 [query 23개·로컬 필드 14개](network/v2/networks/listing/README.md)를 분류합니다.
+`is_shared`·provider·address scope·태그 이름을 query로 변환하고 `subnet_ids`·확장 필드·timestamp는
+원문 응답에서 비교합니다. boolean 응답의 truthiness와 두 정수 속성의 정확한 변환을 SDK가
+처리하며, `conn.Network(ctx).Networks`와 versioned `Networks.Resources`에 같은 옵션을 사용합니다.
+기존 이름 검색·상태 대기·native 반환 모델도 유지합니다.
 
 Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
