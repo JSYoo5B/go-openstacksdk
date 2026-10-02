@@ -823,6 +823,45 @@
     "package": "gophercloudsdk/keymanager/v1/containers",
     "model": "Container",
     "find": true,
+    "body_filter_fields": [
+      "consumers",
+      "container_id",
+      "container_ref",
+      "created_at",
+      "id",
+      "name",
+      "secret_refs",
+      "status",
+      "type",
+      "updated_at"
+    ],
+    "semantic_query_filters": {
+      "limit": "limit",
+      "marker": "marker"
+    },
+    "semantic_body_filters": {
+      "consumers": "consumers",
+      "container_id": "container_id",
+      "container_ref": "container_ref",
+      "created_at": "created_at",
+      "id": "id",
+      "name": "name",
+      "secret_refs": "secret_refs",
+      "status": "status",
+      "type": "type",
+      "updated_at": "updated_at"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
+    ],
     "delete": true,
     "wait": true
   },
