@@ -86,13 +86,16 @@ func validateAddressGroupBodyNativeDeclarations(pkg *types.Package, decls map[st
 	return nil
 }
 
-// The two audited Neutron raw lanes use the reviewed root-package helpers.
+// The audited Neutron raw lanes use their reviewed root-package helpers.
 // Limit source loading to their exact targets and extraction declarations.
 func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.FuncDecl, error) {
 	wanted := map[string]bool{"ExtractNextURL": true, "Result.ExtractInto": true}
 	label := "audited AddressGroup body collection"
 	switch sdkPath(path) {
 	case addressGroupSDKPath:
+	case subnetPoolSDKPath:
+		label = "audited SubnetPool body collection"
+		wanted["JSONRFC3339NoZ.UnmarshalJSON"] = true
 	case qosPolicySDKPath:
 		label = "audited QoSPolicy body collection"
 		wanted["Result.ExtractIntoSlicePtr"] = true
@@ -105,10 +108,19 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 		return nil, fmt.Errorf("%s: native extraction dependency metadata missing", label)
 	}
 	result := map[string]*ast.FuncDecl{}
+	noZConstants := 0
 	for _, name := range source.GoFiles {
 		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(source.Dir, name), nil, 0)
 		if err != nil {
 			return nil, fmt.Errorf("%s: native extraction dependency: %w", label, err)
+		}
+		if sdkPath(path) == subnetPoolSDKPath {
+			if value, found := identitySourceConstants(file)["RFC3339NoZ"]; found {
+				if value != "2006-01-02T15:04:05" {
+					return nil, fmt.Errorf("%s: native RFC3339NoZ constant changed", label)
+				}
+				noZConstants++
+			}
 		}
 		for _, declaration := range file.Decls {
 			fn, ok := declaration.(*ast.FuncDecl)
@@ -124,6 +136,9 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 	}
 	if len(result) != len(wanted) {
 		return nil, fmt.Errorf("%s: native extraction declarations missing", label)
+	}
+	if sdkPath(path) == subnetPoolSDKPath && noZConstants != 1 {
+		return nil, fmt.Errorf("%s: native RFC3339NoZ constant missing or duplicated", label)
 	}
 	return result, nil
 }
