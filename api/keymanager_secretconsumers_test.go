@@ -175,6 +175,37 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 	if calls.Load() != 7 {
 		t.Fatal(calls.Load())
 	}
+	for _, status := range []int{404, 200} {
+		t.Run(fmt.Sprintf("canceled-after-native-status-%d", status), func(t *testing.T) {
+			observed := testcloud.New(t)
+			client := secretConsumersClient(observed)
+			scope := secretConsumersScope(t, client)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			var requests atomic.Int32
+			body := secretConsumerMutation
+			client.HTTPClient.Transport = secretConsumerRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+				requests.Add(1)
+				cancel()
+				return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"canceled-status"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+			})
+			value, err := scope.Delete(ctx, input)
+			if value != nil || !errors.Is(err, context.Canceled) || requests.Load() != 1 {
+				t.Fatal("canceled response was suppressed or resent", value, err, requests.Load())
+			}
+			if status == 404 {
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-ID") != "canceled-status" {
+					t.Fatal("native404 evidence lost", err)
+				}
+			} else {
+				var accepted *resource.ResponseError
+				if !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Request-ID") != "canceled-status" {
+					t.Fatal("accepted200 cancellation evidence lost", err)
+				}
+			}
+		})
+	}
 	for _, body := range []string{`null`, `[]`, `{`, `{"consumers":{}}`, `{"consumers":[null]}`, `{"consumers":[{"service":false}]}`} {
 		t.Run(body, func(t *testing.T) {
 			bad := testcloud.New(t)
@@ -527,6 +558,53 @@ func TestKeyManagerSecretConsumersContinuationGuardsAndTerminalFailures(t *testi
 }
 
 func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
+	for _, location := range []string{"source", "custom-config"} {
+		for _, conflict := range []bool{false, true} {
+			t.Run(fmt.Sprintf("header-case-%s-conflict-%t", location, conflict), func(t *testing.T) {
+				cloud := testcloud.New(t)
+				client := secretConsumersClient(cloud)
+				scope := secretConsumersScope(t, client)
+				var calls atomic.Int32
+				cloud.Mux.HandleFunc(secretConsumersPath, func(w http.ResponseWriter, r *http.Request) {
+					calls.Add(1)
+					if r.Header.Get("X-Trace") != "first" {
+						t.Error(r.Header)
+					}
+					testcloud.JSON(w, 200, secretConsumerMutation)
+				})
+				headers := map[string]string{"X-Trace": "first", "x-trace": "first"}
+				if conflict {
+					headers["x-trace"] = "second"
+				}
+				var create []secretconsumers.CreateOption
+				var remove []secretconsumers.DeleteOption
+				if location == "source" {
+					client.MoreHeaders = headers
+				} else {
+					create = append(create, func(config *request.Config[secretconsumers.ConsumerOpts]) error { config.Headers = headers; return nil })
+					remove = append(remove, func(config *request.Config[secretconsumers.DeleteOpts]) error { config.Headers = headers; return nil })
+				}
+				input := secretconsumers.ConsumerOpts{Service: "image", ResourceType: "image", ResourceID: "id"}
+				created, createErr := scope.Create(context.Background(), input, create...)
+				deleted, deleteErr := scope.Delete(context.Background(), input, remove...)
+				if conflict {
+					if created != nil || deleted != nil || !errors.Is(createErr, resource.ErrInvalidOption) || !errors.Is(deleteErr, resource.ErrInvalidOption) || calls.Load() != 0 {
+						t.Fatal(created, deleted, createErr, deleteErr, calls.Load())
+					}
+					if location == "source" {
+						if rows, err := scope.All(context.Background()); rows != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
+							t.Fatal(rows, err, calls.Load())
+						}
+					}
+				} else if createErr != nil || deleteErr != nil || created == nil || deleted == nil || created.StatusCode != 200 || deleted.StatusCode != 200 || calls.Load() != 2 {
+					t.Fatal(created, deleted, createErr, deleteErr, calls.Load())
+				}
+				if headers["X-Trace"] != "first" || (conflict && headers["x-trace"] != "second") || (!conflict && headers["x-trace"] != "first") {
+					t.Fatal("caller header map changed", headers)
+				}
+			})
+		}
+	}
 	cloud := testcloud.New(t)
 	client := secretConsumersClient(cloud)
 	client.MoreHeaders = map[string]string{"X-Project-Id": "unchanged"}

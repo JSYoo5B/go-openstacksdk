@@ -156,6 +156,11 @@ func (s *SecretScope) Delete(ctx context.Context, opts ConsumerOpts, options ...
 		return nil, request.Wrap("Delete", kind, err)
 	}
 	response, err := rest.DoJSON(ctx, s.client, http.MethodDelete, s.endpoint(), json.RawMessage(body), maps.Clone(config.Headers), http.StatusOK)
+	// A native HTTP error can arrive after a custom transport cancels the
+	// caller. Preserve both observations before missing suppression.
+	if err != nil && ctx.Err() != nil {
+		err = errors.Join(err, ctx.Err())
+	}
 	var transport *url.Error
 	var accepted *resource.ResponseError
 	if ignoreMissing && !errors.As(err, &transport) && !errors.As(err, &accepted) && !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) {

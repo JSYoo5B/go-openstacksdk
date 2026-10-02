@@ -154,11 +154,17 @@ func prepareList(options []ListOption) (url.Values, rest.ListControl, error) {
 }
 
 func validateHeaders(headers map[string]string) error {
+	seen := make(map[string]string, len(headers))
 	for key, value := range headers {
 		if strings.TrimSpace(key) == "" || strings.ContainsAny(key, " \t\r\n:") || strings.ContainsAny(value, "\r\n") {
 			return fmt.Errorf("%w: invalid consumer header", resource.ErrInvalidOption)
 		}
-		switch strings.ToLower(key) {
+		canonical := strings.ToLower(key)
+		if previous, exists := seen[canonical]; exists && previous != value {
+			return fmt.Errorf("%w: conflicting case variants of header %q", resource.ErrInvalidOption, key)
+		}
+		seen[canonical] = value
+		switch canonical {
 		case "x-auth-token", "x-service-token", "authorization", "host", "cookie", "content-type", "content-length", "openstack-api-version":
 			return fmt.Errorf("%w: header %q is owned by the SDK", resource.ErrInvalidOption, key)
 		}
