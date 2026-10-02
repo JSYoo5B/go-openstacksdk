@@ -17,8 +17,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/testcloud"
+	"gophercloudsdk/network/v2/extensions/layer3/routers"
 	"gophercloudsdk/network/v2/extensions/security/addressgroups"
-	"gophercloudsdk/network/v2/networks"
 	"gophercloudsdk/resource"
 )
 
@@ -335,7 +335,7 @@ func TestAddressGroupListFiltersLazyPreflightAndNamespaceCollisions(t *testing.T
 			if values != nil || !errors.Is(err, context.Canceled) || calls.Load() != 1 {
 				t.Fatal("cancellation was hidden or performed HTTP", values, err, calls.Load())
 			}
-			_, err = networks.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
+			_, err = routers.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
 			if !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 1 {
 				t.Fatal("unrelated explicit Body binding gained semantics", err, calls.Load())
 			}
