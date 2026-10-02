@@ -11991,6 +11991,8 @@
         "gophercloudsdk/network/v2/subnets.New",
         "gophercloudsdk/resource.Collection.List",
         "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
         "gophercloudsdk/resource.WithBodyFilter",
         "gophercloudsdk/resource.WithBodyFilters",
         "gophercloudsdk/resource.WithMaxItems",
@@ -12015,7 +12017,7 @@
           ]
         },
         {
-          "behavior": "Construction snapshots, per-iteration ownership, independent concurrent reuse, canonical last-wins, bulk replacement/clear and prefix_length alias conflicts are owned by the SDK. Clear/no-filter selects the original typed iterator. Unknown/unsupported/non-JSON options fail lazily before HTTP.",
+          "behavior": "Explicit WithBodyFilter/WithBodyFilters own construction snapshots, per-iteration values, independent concurrent reuse, canonical last-wins, bulk replacement/clear and prefix_length alias conflicts. Clearing explicit Body conditions selects the original typed iterator. Unknown/unsupported/non-JSON explicit Body options fail lazily before HTTP; semantic options have their separate unknown-discard policy.",
           "tests": [
             "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersSnapshotsAliasesAndConcurrentReuse",
             "api/network_subnet_raw_body_filters_test.go:TestNetworkSubnetRawBodyFiltersLazyPreflightAndCapabilities",
@@ -12044,6 +12046,57 @@
             "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
             "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
           ]
+        },
+        {
+          "behavior": "Ordinary Resources.List/All classify the complete pinned Subnet semantic attribute set through SDK-owned WithFilter/WithFilters: 24 canonical query attributes and 30 accepted canonical/wire spellings, plus all nine declared non-query Body attributes. Query name/id/tags remain server-only. prefix_length selects original prefixlen JSON, tenant_id and revision_number stay local despite native query tags, and raw prefixlen is not a semantic attribute. Both generated leaf and cached Connection.Network.API paths use the same descriptor.",
+          "tests": [
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersEntireQueryDescriptor",
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersNineLocalBodyClassifications",
+            "resource/filters_test.go:TestSemanticFiltersDescriptorGateAndWireAliasBodyOverlap"
+          ]
+        },
+        {
+          "behavior": "Individual semantic options are last-wins by destination; bulk WithFilters replaces only the semantic namespace and canonical Python query names beat their wire aliases even for nil, false and empty values. Nil/empty bulk maps clear semantic filters. Input snapshots, copied iteration state and concurrent reuse are owned by the SDK, and only final selected values are validated: overwritten or discarded encoding errors do not become terminal failures.",
+          "tests": [
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersEncodingAndCanonicalPrecedence",
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersSnapshotsReplacementAndConcurrentReuse",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues"
+          ]
+        },
+        {
+          "behavior": "Semantic query scalars encode as strings, lowercase booleans and exact JSON number text; flat scalar arrays preserve repeated order while null elements produce no URL value. A selected null or empty array still retains presence for precedence/collision checks. Unknown semantic names are discarded without validating their captured value. Selected query objects/nested arrays/invalid JSON fail lazily before HTTP, and all nine source list-control names are reserved for dedicated options or return unsupported.",
+          "tests": [
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersEncodingAndCanonicalPrecedence",
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersUnknownReservedAndNamespaceCollisions",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration"
+          ]
+        },
+        {
+          "behavior": "Raw WithQuery and explicit WithBodyFilter namespaces remain independent. Same-wire semantic query/raw query/page-size or WithName-hint collisions, and same-canonical semantic/explicit Body collisions, fail before HTTP in either option order even for identical or null values. Clearing semantic options leaves raw/explicit Body options intact. Native typed List and FindIdentity do not acquire semantic options, and unaudited bindings reject even a semantic clear.",
+          "tests": [
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersUnknownReservedAndNamespaceCollisions",
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersRawAndNativeSurfaceIsolation",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear",
+            "resource/filters_test.go:TestSemanticFiltersDescriptorGateAndWireAliasBodyOverlap"
+          ]
+        },
+        {
+          "behavior": "Combined semantic query and raw local Body conditions retain native paging and whole-page extraction. Raw max-items caps apply before local matches without refill or a wire limit hint; single-page/early break stop before continuation. Query fields on advertised continuation links remain intact and later HTTP/cycle/cancellation or native typed-row errors remain terminal, including a malformed typed row beyond the cap.",
+          "tests": [
+            "api/network_subnet_semantic_filters_test.go:TestNetworkSubnetSemanticFiltersControlsAndTerminalPages"
+          ]
+        },
+        {
+          "behavior": "Semantic generation requires -openstacksdk-source and the independent checked-in api/openstacksdk/resources/network/v2/subnet.json manifest. Seven reviewed live-source SHA-256 hashes are checked before isolated AST-only extraction; C3 MRO, inherited declarations, pagination defaults, tag aliases, unknown-discard/canonical-precedence policy, all descriptors and nine controls are re-extracted and compared with the complete manifest and fifteen AST anchors. Parser minor-version or source/manifest drift fails closed before generation. The existing full native raw-Body gate remains required; semantic query/body/reserved inventory is distinct from explicit canonical Body metadata and emitted only for Subnet.",
+          "tests": [
+            "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterExtractionIndependentMROQueryAndBody",
+            "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterExtractionDetectsInheritedAndImplementationDrift",
+            "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterManifestCannotReplaceLiveSourceProof",
+            "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterDescriptorSelectiveEmissionAndInventory",
+            "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterPinnedCheckoutVerification"
+          ]
         }
       ],
       "documentation": [
@@ -12054,16 +12107,20 @@
         "network/v2/README.md"
       ],
       "differences": [
-        "Go selects declared local Body attributes explicitly with SDK-owned options and snapshots; raw WithQuery remains independent wire data. No caller builder or predicate is required. prefix_length is an explicit alias of raw prefixlen, and bulk canonical/alias conflicts fail deterministically before HTTP.",
+        "Go provides SDK-owned WithFilter/WithFilters for complete declared semantic classification, without caller builders or predicates, while WithBodyFilter/WithBodyFilters remain explicit local options and WithQuery remains independent wire data. Python canonical query names win in a bulk map; individual Go options use last-wins and nil/empty bulk replacement clears only semantic state. prefix_length is the semantic Python attribute; explicit Body options also accept raw prefixlen, which is unknown and discarded in the semantic namespace.",
         "Original page rows preserve unknown nested fields, JSON null elements, timestamp text, missing/null and exact numbers for local comparison; returned values remain native typed Subnets. Go distinguishes bool and number, requires exact ordered arrays/full inner objects and does not perform Python scalar-to-list coercion.",
         "The untyped Python prefix_length Body descriptor is preserved as raw JSON rather than inventing integer validation or converting response strings into numbers. revision_number is inherited type=int, but the native whole-page int decoder is retained first, so numeric strings/fractional/exponent spellings remain native decode boundaries.",
-        "Native accepted statuses, full-current-page extraction and advertised subnets_links remain intact. max_items caps consumed raw rows locally without an inferred Python limit hint. Native typed List, FindIdentity and the prior four typed Body projections retain their existing behavior."
+        "Native accepted statuses, full-current-page extraction and advertised subnets_links remain intact. max_items caps consumed raw rows locally without an inferred Python limit hint. Native typed List, FindIdentity and the prior four typed Body projections retain their existing behavior.",
+        "Go defines scalar/repeated query encoding explicitly: booleans are lowercase, JSON number text is preserved, null elements are omitted and empty/null query values retain option presence without URL values. Query objects and nested arrays are rejected; no Subnet CSV format or native-q-tag-derived classification is inferred. Unknown semantic attributes are discarded, while explicit unknown Body options are errors and raw wire extensions remain caller-controlled.",
+        "Semantic query name is a server filter rather than a local exact-name predicate. WithName retains its query hint and local exact match; duplicate ownership of the same query or Body destination is rejected across semantic/raw/page/hint/explicit namespaces, including equal values. This is an intentional Go conflict policy rather than permissive Python kwargs merging.",
+        "An explicit semantic clear still requires an audited descriptor. Reserved session/paginated/base_path/allow_unknown_params/microversion/headers/max_items/resource_type/jmespath_filters names are not treated as field payloads. Generation additionally requires a live audited Python source checkout and its recorded AST parser minor version."
       ],
       "remaining": [
-        "Pinned Resource.list and QueryParameters still transpose declared query aliases, discard unknown names and classify declared local Body attributes automatically. Implement the complete semantic query/Body option policy and remaining descriptor/default/list coercion behavior beyond this explicit all-nine-field binding.",
-        "Subnet inherits NetworkResource with TagMixin. Original row projection does not provide the complete seeded Resource, project/tenant response alias fallback, unknown-Body/cache/dirty lifecycle or Python descriptor response model. Returned native Subnets still normalize timestamps and nested modeled values.",
+        "Complete Python Body/URI descriptor response defaults, project/tenant alias fallback and descriptor coercion remain beyond the covered complete query/Body classification. Local comparison keeps Go exact JSON type/array policies and returned values are still native typed Subnets rather than fully seeded Python Resources.",
+        "Subnet inherits NetworkResource with TagMixinNetwork. Original row pairing and semantic classification do not provide the complete seeded Resource, unknown-Body/cache/dirty lifecycle or Python descriptor response model. Returned native Subnets still normalize timestamps and nested modeled values.",
         "Pinned Proxy.request optional GET response cache(cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate from configured native client retention. Direct Proxy._list fixes session to itself; adapter/session injection belongs to inherited Resource.list. Subnet inherits _max_microversion=None rather than a class-specific maximum negotiation policy.",
-        "Pinned Resource._get_next_link has RFC Link-header and limit/marker continuation paths beyond the native subnets_links pager. Deprecated Proxy._list jmespath_filters is consumed from direct query and has no ordinary Go expression-filter option. FindIdentity/native typed List do not acquire these ordinary Body options."
+        "Pinned Resource._get_next_link has RFC Link-header and limit/marker continuation paths beyond the native subnets_links pager. Deprecated Proxy._list jmespath_filters is consumed from direct query and has no ordinary Go expression-filter option. FindIdentity/native typed List do not acquire these ordinary Body options.",
+        "Pinned Proxy._list restores its special __conflicting_attrs dictionary into kwargs before Resource.list (openstack/proxy.py:896-902). The semantic declared-field API does not implement that recovery branch; its source hash is verification evidence rather than a claim that every inherited Proxy branch is mapped."
       ]
     }
   ]
