@@ -24,9 +24,9 @@ import (
 )
 
 // Pinned Resource.list separates QoSPolicy.rules and AddressGroup.addresses
-// from wire query fields. These SDK-owned options filter native model snapshots:
-// nil native slices collapse missing/null, and QoS map numbers already passed
-// through native float64 decoding. Raw WithQuery remains an independent wire
+// from wire query fields. These SDK-owned options compare original row fields
+// after native whole-page decoding; returned QoS map numbers remain float64.
+// Raw WithQuery remains an independent wire
 // extension; typed API.List and FindIdentity do not acquire ambient filters.
 type networkBodyFilterAccess struct {
 	networkExtensionAccess
@@ -550,8 +550,8 @@ func TestNetworkBodyFiltersQoSNativeNumberProjectionAndStrictTypes(t *testing.T)
 			})
 			access := f.open(t, networkQoSAddressesClient(cloud))
 			for _, tc := range []struct{ filter, id string }{
-				{`[{"quota":9007199254740993}]`, ""},
-				{`[{"quota":9007199254740992}]`, "rounded"},
+				{`[{"quota":9007199254740993}]`, "rounded"},
+				{`[{"quota":9007199254740992}]`, ""},
 				{`[{"flag":false}]`, "bool"},
 				{`[{"flag":0}]`, "number"},
 				{`[{"quota":1.2e3}]`, "decimal"},

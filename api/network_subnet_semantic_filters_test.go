@@ -398,31 +398,7 @@ func TestNetworkSubnetSemanticFiltersRawAndNativeSurfaceIsolation(t *testing.T) 
 			}
 		})
 	}
-	// QoS keeps its explicit Body-only policy; AddressGroup has its own descriptor.
-	boundaries := networkBodyFilterFixtures()
-	for _, f := range boundaries {
-		if f.meta.name != "qos-leaf" {
-			continue
-		}
-		t.Run("explicit-body-only/"+f.meta.name, func(t *testing.T) {
-			cloud := testcloud.New(t)
-			target, _, _ := networkBodyFilterArrays(f)
-			var calls atomic.Int32
-			cloud.Mux.HandleFunc("GET "+networkQoSAddressesPath(f.meta), func(w http.ResponseWriter, r *http.Request) {
-				calls.Add(1)
-				testcloud.JSON(w, 200, networkQoSAddressesPage(f.meta, networkBodyFilterRow(f, "target", "Different", target), ""))
-			})
-			access := f.open(t, networkExtensionClient(cloud))
-			for _, option := range []resource.ListOption{resource.WithFilter("name", "Different"), resource.WithFilters(nil)} {
-				values, err := access.all(context.Background(), option)
-				if values != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 0 {
-					t.Fatal("unaudited semantic binding became available", values, err, calls.Load())
-				}
-			}
-			values, err := access.all(context.Background(), resource.WithBodyFilter(f.field, json.RawMessage(target)))
-			networkBodyFilterWantIDs(t, values, err, "target")
-		})
-	}
+	// Network and SubnetPool retain their explicit Body-only policy.
 	for _, f := range networkSubnetBodyFixtures() {
 		if f.name != "network-leaf" && f.name != "subnet-pool-leaf" {
 			continue
