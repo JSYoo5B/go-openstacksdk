@@ -869,6 +869,53 @@
     "package": "gophercloudsdk/keymanager/v1/orders",
     "model": "Order",
     "find": false,
+    "body_filter_fields": [
+      "created_at",
+      "creator_id",
+      "id",
+      "meta",
+      "name",
+      "order_id",
+      "order_ref",
+      "secret_id",
+      "secret_ref",
+      "status",
+      "sub_status",
+      "sub_status_message",
+      "type",
+      "updated_at"
+    ],
+    "semantic_query_filters": {
+      "limit": "limit",
+      "marker": "marker"
+    },
+    "semantic_body_filters": {
+      "created_at": "created_at",
+      "creator_id": "creator_id",
+      "id": "id",
+      "meta": "meta",
+      "name": "name",
+      "order_id": "order_id",
+      "order_ref": "order_ref",
+      "secret_id": "secret_id",
+      "secret_ref": "secret_ref",
+      "status": "status",
+      "sub_status": "sub_status",
+      "sub_status_message": "sub_status_message",
+      "type": "type",
+      "updated_at": "updated_at"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
+    ],
     "delete": true,
     "wait": true
   },

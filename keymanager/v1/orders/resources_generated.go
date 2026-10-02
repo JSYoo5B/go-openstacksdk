@@ -3,7 +3,11 @@ package orders
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -15,8 +19,25 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Order] {
 	return resource.NewCollection(resource.Adapter[Order]{
-		Kind: "orders",
-		Get:  func(ctx context.Context, id string) (*Order, error) { return a.Get(ctx, string(id)) },
+		Kind:             "orders",
+		BodyFilterFields: map[string]string{"created_at": "created_at", "creator_id": "creator_id", "id": "id", "meta": "meta", "name": "name", "order_id": "order_id", "order_ref": "order_ref", "secret_id": "secret_id", "secret_ref": "secret_ref", "status": "status", "sub_status": "sub_status", "sub_status_message": "sub_status_message", "type": "type", "updated_at": "updated_at"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Order], key string) (json.RawMessage, error) {
+			return orderBodyFilterValue(record, key)
+		},
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Order], error] {
+			q = maps.Clone(q)
+			q.Del("status")
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"limit": "limit", "marker": "marker"}, Body: map[string]string{"created_at": "created_at", "creator_id": "creator_id", "id": "id", "meta": "meta", "name": "name", "order_id": "order_id", "order_ref": "order_ref", "secret_id": "secret_id", "secret_ref": "secret_ref", "status": "status", "sub_status": "sub_status", "sub_status_message": "sub_status_message", "type": "type", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		Get:              func(ctx context.Context, id string) (*Order, error) { return a.Get(ctx, string(id)) },
 		ID: func(v *Order) string {
 			parsed, err := url.Parse(v.OrderRef)
 			if err != nil {
@@ -33,14 +54,31 @@ func (a *API) newResources() *resource.Collection[Order] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Order, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Order], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "orders", err)
+		return func(yield func(*resource.BodyRecord[Order], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Order, error) {
+		values, err := upstream.ExtractOrders(page)
+		return []Order(values), err
+	}, "orders", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Order, error) {
 	return a.Resources.Find(ctx, ref, options...)
