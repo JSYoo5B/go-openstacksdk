@@ -51,3 +51,5 @@ API transport 목록과 별도로 [지원 판정](sdk_reviews.json)을 보존하
 Compute Server·Cinder v2/v3 Volume/Snapshot·Image v2 Image의 `WaitForState/WaitForDelete`는 [서비스별 대기 기본값](../docs/service-waits.md)을 적용합니다. `resource_inventory.json`의 `service_wait`는 감사한 기존 여섯 collection에만 기록하며 native `WaitForStatus`나 공통 `WaitFor/WaitForDeletion`을 교체하지 않습니다.
 
 Glance v2 Task의 `task_wait: WaitForTask`는 기존 ID-only collection의 [Task 대기와 396 재생성](../image/v2/tasks/README.md)을 표시합니다. `WaitForTask/WaitForTaskState`는 전용 concrete 옵션으로 success·failure·120초·2초 기본값을 적용하고, 정확한 396 실패에서 받은 type/input으로만 재생성해 같은 시간 제한으로 새 ID를 조회합니다. 실제 응답과 생성 증거를 오류와 함께 반환하며 native Task Get/Create/List와 공통 waiter는 유지합니다. Task Name·Delete capability를 추가하지 않습니다.
+
+Glance의 [SDK import 제출](../image/v2/imageimport/README.md)은 `ImageImport.ImportImage(ctx, ref, options...)`와 이미 보유한 native Image를 받는 `ImportKnownImage`를 제공합니다. format 사전검증, method·원격 소스·root 저장소 목록과 생략/false 옵션, 확장 필드를 SDK가 조립하고 실제 202 응답을 반환합니다. 단일 저장소는 호환 헤더만 보내 복수 목록과 구분합니다. import는 Collection이 아니므로 기존 inventory의 미적용 행과 native Create/Get을 유지합니다. stage·이미지 생성·완료 대기는 별도 호출입니다.
