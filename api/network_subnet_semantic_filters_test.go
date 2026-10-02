@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -399,10 +398,10 @@ func TestNetworkSubnetSemanticFiltersRawAndNativeSurfaceIsolation(t *testing.T) 
 			}
 		})
 	}
-	// Other audited explicit Body bindings do not gain a semantic descriptor.
+	// QoS keeps its explicit Body-only policy; AddressGroup has its own descriptor.
 	boundaries := networkBodyFilterFixtures()
 	for _, f := range boundaries {
-		if !strings.HasSuffix(f.meta.name, "leaf") {
+		if f.meta.name != "qos-leaf" {
 			continue
 		}
 		t.Run("explicit-body-only/"+f.meta.name, func(t *testing.T) {
