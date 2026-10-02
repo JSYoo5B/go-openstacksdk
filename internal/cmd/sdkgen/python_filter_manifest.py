@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract audited Subnet or Secret filters without importing OpenStack.
+"""Extract audited Subnet, Secret or Container filters without importing OpenStack.
 
 Only Python's standard-library AST is used. The source checkout is data, never
 executed; unexpected expression shapes fail rather than becoming guessed fields.
@@ -77,10 +77,49 @@ SECRET_ANCHORS = (
     ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
     ("openstack/format.py", "Formatter"),
 )
+CONTAINER_RESOURCE = "openstack.key_manager.v1.container.Container"
+CONTAINER_FILES = (
+    "openstack/key_manager/v1/container.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/key_manager/v1/_proxy.py",
+    "openstack/key_manager/v1/_format.py",
+    "openstack/format.py",
+)
+CONTAINER_ANCHORS = (
+    ("openstack/key_manager/v1/container.py", "Container"),
+    # Container has no own query mapping: prove the effective inherited
+    # QueryParameters() declaration and its limit/marker defaults separately.
+    ("openstack/resource.py", "Resource._query_mapping"),
+    ("openstack/key_manager/v1/container.py", "Container.container_id"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "Resource._alternate_id"),
+    ("openstack/resource.py", "Resource._get_id"),
+    ("openstack/resource.py", "Resource.__init__"),
+    ("openstack/resource.py", "Resource._attributes_iterator"),
+    ("openstack/resource.py", "Resource._attr_to_dict"),
+    ("openstack/resource.py", "Resource.to_dict"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/key_manager/v1/_proxy.py", "Proxy.containers"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
+    ("openstack/format.py", "Formatter"),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
                "gophercloudsdk/keymanager/v1/secrets"),
+    "container": (CONTAINER_RESOURCE, CONTAINER_FILES, CONTAINER_ANCHORS,
+                  "gophercloudsdk/keymanager/v1/containers"),
 }
 
 
@@ -252,30 +291,30 @@ def implementation_policies(source):
     return "discard", "canonical_client_name_wins"
 
 
-def secret_body_accessors(source, attrs, body):
+def keymanager_body_accessors(source, attrs, body, label, alternate_id, ref):
     """Keep Resource.id separate from the formatted alternate-ID descriptor."""
     if body.get("id") != {"field": "id", "response_type": None}:
-        raise ValueError("unsupported Secret literal ID descriptor")
-    module, descriptor, _ = attrs["secret_id"]
+        raise ValueError("unsupported " + label + " literal ID descriptor")
+    module, descriptor, _ = attrs[alternate_id]
     alternate = [keyword.value for keyword in descriptor.keywords
                  if keyword.arg == "alternate_id"]
     if len(alternate) != 1 or source.literal(module, alternate[0]) is not True:
-        raise ValueError("unsupported Secret alternate ID descriptor")
+        raise ValueError("unsupported " + label + " alternate ID descriptor")
     formatter = "openstack.key_manager.v1._format.HREFToUUID"
-    if body.get("secret_id") != {"field": "secret_ref", "response_type": formatter}:
-        raise ValueError("unsupported Secret alternate ID formatter")
-    if body.get("secret_ref") != {"field": "secret_ref", "response_type": None}:
-        raise ValueError("unsupported Secret reference descriptor")
+    if body.get(alternate_id) != {"field": ref, "response_type": formatter}:
+        raise ValueError("unsupported " + label + " alternate ID formatter")
+    if body.get(ref) != {"field": ref, "response_type": None}:
+        raise ValueError("unsupported " + label + " reference descriptor")
     formatter_class = source.classes[formatter]
     if (len(formatter_class.bases) != 1
             or source.resolve(formatter.rpartition(".")[0], formatter_class.bases[0])
             != "openstack.format.Formatter"):
-        raise ValueError("unsupported Secret formatter base")
+        raise ValueError("unsupported " + label + " formatter base")
     # Resource.__getattribute__ reads the stored literal ID before consulting
     # the alternate wire field. It does not apply HREFToUUID to that fallback.
     # Separate AST anchors prove both access paths and the to_dict projection.
     body["id"]["response_accessor"] = "resource_id"
-    body["secret_id"]["formatter"] = formatter
+    body[alternate_id]["formatter"] = formatter
 
 
 def extract(root, target="subnet"):
@@ -349,7 +388,9 @@ def extract(root, target="subnet"):
             "field": field, "response_type": response_type
         }
     if target == "secret":
-        secret_body_accessors(source, attrs, body)
+        keymanager_body_accessors(source, attrs, body, "Secret", "secret_id", "secret_ref")
+    elif target == "container":
+        keymanager_body_accessors(source, attrs, body, "Container", "container_id", "container_ref")
     resource_controls = control_arguments(
         source.anchor("openstack/resource.py", "Resource.list"), {"cls"}
     )
