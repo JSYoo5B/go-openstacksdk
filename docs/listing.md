@@ -293,6 +293,24 @@ native 전체 페이지 디코드와 원문 비교의 순서, JSON 타입 및 pa
 차이를 설명합니다. [Secret AST manifest](../api/openstacksdk/resources/key_manager/v1/secret.json)는
 생성 시 현재 고정 소스의 checksum과 독립 AST 재추출 결과를 확인합니다.
 
+### Container의 속성 이름 분류
+
+`Containers.Resources.List/All`은 Python `conn.key_manager.containers(**query)`의
+상속 query `limit`·`marker`와 로컬 Body 속성 10개를 분류합니다. `name`은 원본 응답을
+비교하며, 기존 `WithName`은 서버 hint와 로컬 비교를 함께 지정합니다. `WithQuery("name", ...)`과
+`WithQuery("offset", ...)`은 별도의 wire 확장이고 semantic `offset`은 버립니다.
+
+`id`는 literal id의 존재를 우선하고 없을 때 전체 `container_ref`를 사용합니다.
+`container_id`는 passive HREF accessor의 마지막 path 부분을 비교합니다. `created_at`·
+`updated_at`은 timestamp 원문이며 `secret_refs`·`consumers`는 순서·추가 필드를 포함한
+원문 배열 전체를 비교합니다. native 전체 페이지 디코드가 먼저 적용되므로 잘못된 중첩
+배열이나 timestamp를 로컬 조건 또는 행 수 제한으로 숨기지 않습니다.
+
+[Container 목록 사용법](../keymanager/v1/containers/listing/README.md)에 전체 속성 이름과
+Python scalar-to-list coercion·응답 타입·pagination의 경계를 설명합니다.
+[Container AST manifest](../api/openstacksdk/resources/key_manager/v1/container.json)는
+상속 query defaults와 ID 접근을 포함해 생성 시 현재 소스를 검증합니다.
+
 ### Subnet의 원본 응답 필터
 
 Python `conn.network.subnets(prefix_length=24, dns_nameservers=["192.0.2.53"])`에 대응하는

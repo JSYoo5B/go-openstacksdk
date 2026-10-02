@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 keymanager/v1 API를 하나의 인증된 서비스 객체
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Containers.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 상속 query `limit`·`marker`와 로컬 Body 속성 10개를 분류합니다. `name`은 로컬 조건이며 기존 `WithName`의 서버 hint와 구분합니다. timestamp·참조·중첩 배열을 원본 행에서 비교하며 `id`는 literal id 또는 전체 container_ref이고 `container_id`는 별도의 HREF accessor입니다. native 전체 페이지 디코드 뒤 typed Container를 반환합니다. [Container 목록 Python/Go 사용법](containers/listing/README.md)에 raw name/offset 확장·반복 query·원문 배열·고정 소스 검증과 응답 모델 경계를 설명합니다.
+
 `Secrets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python 속성 이름을 서버 query 12개 또는 로컬 Body 12개로 자동 분류합니다. `algorithm`은 wire `alg`로 보내며 두 이름을 한 bulk에 지정하면 canonical 값이 우선합니다. `created_at`·`updated_at`·`expires_at`은 timestamp 원문을, `id`는 literal id 또는 전체 secret_ref를, `secret_id`는 별도의 HREF accessor 결과를 비교합니다. native 전체 페이지 디코드 뒤 원문 행을 비교하고 typed Secret을 반환합니다. [Secret 목록 Python/Go 사용법](secrets/listing/README.md)에 반복 query·JSON snapshot·충돌·로컬 cap·응답 모델 경계와 고정 소스 검증을 설명합니다.
 
 `Secrets.FindIdentity(ctx, identity, options...)`는 안전한 ID의 metadata·조건부 payload 조회를 먼저 시도하고, 기본 HTTP400·403·404 뒤에는 이름 hint를 넣은 metadata 목록 전체에서 정확한 ID 또는 이름을 찾습니다. 목록 결과에는 payload를 추가 조회하지 않습니다. `resource.WithIdentityFindIgnoreMissing(false)`와 `WithIdentityFindFallback`으로 미존재·fallback 정책을 선택합니다. raw query·details·all-projects·extra-specs 옵션은 지원하지 않습니다. 응답의 원문 id/secret_ref는 비교에만 쓰며 요청 경로로 따라가지 않습니다. [Secret 자동 조회 Python/Go 사용법](secrets/finding/README.md)에 nullable ID·중복·offset 순회·고정 서비스 설정과 Python 기본 status 처리 차이를 설명합니다. native `Secrets.Resources`는 기존 metadata collection입니다.

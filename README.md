@@ -67,6 +67,10 @@ metadata 전용 옵션, 텍스트·바이너리 결과와 실패 시 응답 보�
 `Secrets.Resources.List/All`은 `resource.WithFilter/WithFilters`의 Python 속성 이름을
 서버 query 또는 원문 응답 필터로 자동 분류합니다. [Secret 목록 비교](keymanager/v1/secrets/listing/README.md)에
 `algorithm` 별칭, timestamp 원문과 `id`·`secret_id`의 서로 다른 비교 규칙을 설명합니다.
+`Containers.Resources.List/All`도 같은 옵션으로 서버의 `limit`·`marker`와 로컬 Body 속성
+10개를 분류합니다. `name`은 로컬 조건이며 원문 `secret_refs`·`consumers` 배열도 비교합니다.
+[Container 목록 비교](keymanager/v1/containers/listing/README.md)에 `WithName`·raw query와의
+차이, `id`·`container_id` 및 native decoder의 경계를 설명합니다.
 Zaqar는 `conn.MessagingV2(ctx)`의 `Subscriptions.InQueue(ctx, queueName)`으로 queue를 고정하고
 구독 생성·조회·목록·삭제를 제공합니다. [Subscription 비교](messaging/v2/subscriptions/README.md)에
 Client-ID·project header·TTL 기본값·marker 순회와 Python/Go 사용법을 설명합니다.

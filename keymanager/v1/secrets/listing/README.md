@@ -155,8 +155,8 @@ Its `bit_length` is an int, `content_types` is `map[string]string`, references
 and declared strings are typed, and timestamps require the native format.
 Malformed known fields anywhere in that page remain terminal, even beyond a
 raw cap. The raw lane can preserve exact matching for fields the native model
-does not expose, but cannot undo a native decoding failure. A consumed null
-list row is rejected as invalid; an empty object remains a valid row with
+does not expose, but cannot undo a native decoding failure. A null list row
+consumed by a Body-filter iterator is rejected as invalid; an empty object remains a valid row with
 missing attributes. Cap/break can avoid consuming a later null row or selected
 formatter, after native whole-page decoding succeeds.
 
