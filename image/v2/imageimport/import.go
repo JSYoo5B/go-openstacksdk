@@ -59,25 +59,16 @@ func (a *API) importImage(ctx context.Context, ref resource.Ref, seed *importIma
 			return nil, wrap(err)
 		}
 	}
-	policy, err := parseImportOpts(options)
+	policy, err := a.PrepareImportOptions(ctx, options...)
 	if err != nil {
 		return nil, wrap(err)
 	}
 	if err := validateImportSource(ctx, source); err != nil {
 		return nil, wrap(err)
 	}
-	headers, err := importHeaders(source.MoreHeaders, true, source.Microversion)
+	headers, err := preparedImportHeaders(source.MoreHeaders, source.Microversion, policy)
 	if err != nil {
 		return nil, wrap(err)
-	}
-	for key, value := range policy.Headers {
-		headers[key] = value
-	}
-	if policy.Store != nil {
-		headers["X-Image-Meta-Store"] = *policy.Store
-	}
-	if _, exists := headers["X-Image-Meta-Store"]; exists && (len(policy.Stores) > 0 || policy.AllStores != nil && *policy.AllStores) {
-		return nil, wrap(importInvalid("source store header conflicts with Stores or AllStores"))
 	}
 	client := *source
 	client.MoreHeaders = headers
