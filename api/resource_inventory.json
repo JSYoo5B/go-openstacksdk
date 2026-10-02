@@ -1422,6 +1422,46 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "created_at",
+      "security_group_rules",
+      "updated_at"
+    ],
+    "semantic_query_filters": {
+      "any_tags": "tags-any",
+      "description": "description",
+      "fields": "fields",
+      "id": "id",
+      "is_shared": "shared",
+      "limit": "limit",
+      "marker": "marker",
+      "name": "name",
+      "not_any_tags": "not-tags-any",
+      "not_tags": "not-tags",
+      "project_id": "project_id",
+      "revision_number": "revision_number",
+      "sort_dir": "sort_dir",
+      "sort_key": "sort_key",
+      "stateful": "stateful",
+      "tags": "tags",
+      "tenant_id": "tenant_id"
+    },
+    "semantic_body_filters": {
+      "created_at": "created_at",
+      "security_group_rules": "security_group_rules",
+      "updated_at": "updated_at"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
+    ],
     "delete": true,
     "wait": false
   },

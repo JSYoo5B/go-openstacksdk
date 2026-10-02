@@ -3,9 +3,11 @@ package groups
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	nativefind "gophercloudsdk/internal/nativefind"
+	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
@@ -15,8 +17,23 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[SecGroup] {
 	return resource.NewCollection(resource.Adapter[SecGroup]{
-		Kind:         "groups",
-		IdentityFind: true,
+		Kind:             "groups",
+		BodyFilterFields: map[string]string{"created_at": "created_at", "security_group_rules": "security_group_rules", "updated_at": "updated_at"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[SecGroup], key string) (json.RawMessage, error) {
+			return securityGroupBodyFilterValue(record, key)
+		},
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[SecGroup], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "id": "id", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "revision_number": "revision_number", "sort_dir": "sort_dir", "sort_key": "sort_key", "stateful": "stateful", "tags": "tags", "tenant_id": "tenant_id"}, Body: map[string]string{"created_at": "created_at", "security_group_rules": "security_group_rules", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*SecGroup, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"security-groups", id}, q, []int{200}, &result.Body)
@@ -31,6 +48,18 @@ func (a *API) newResources() *resource.Collection[SecGroup] {
 			q = maps.Clone(q)
 			return nativefind.IterateSecurityGroups(ctx, a.RawClient(), q, control)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[SecGroup], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "groups", err)
+		return func(yield func(*resource.BodyRecord[SecGroup], error) bool) { yield(nil, err) }
+	}
+	return nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*SecGroup, error) {
 	return a.Resources.Find(ctx, ref, options...)
