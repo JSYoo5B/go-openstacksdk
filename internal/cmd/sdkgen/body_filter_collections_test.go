@@ -278,20 +278,24 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				}
 			}
 			if spec.rawRecord {
-				if identity.model == "AddressGroup" {
+				if identity.model == "AddressGroup" || identity.model == "Policy" {
 					body := string(source)
-					for _, required := range []string{"BodyFilterRecordValue:", "addressGroupBodyFilterValue(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"address_groups", control)`, "upstream.ExtractGroups(page)"} {
+					selector, envelope, extractor, kind := "addressGroupBodyFilterValue", "address_groups", "ExtractGroups", "addressgroups"
+					if identity.model == "Policy" {
+						selector, envelope, extractor, kind = "qosPolicyBodyFilterValue", "policies", "ExtractPolicies", "policies"
+					}
+					for _, required := range []string{"BodyFilterRecordValue:", selector + "(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"` + envelope + `", control)`, "upstream." + extractor + "(page)"} {
 						if !strings.Contains(body, required) {
-							t.Fatal("AddressGroup raw projection missing", required, body)
+							t.Fatal("Neutron raw projection missing", required, body)
 						}
 					}
 					for _, forbidden := range []string{"BodyFilterValue:", "json.Marshal(", "record.Value", `q.Del("status")`, "WithListQuery("} {
 						if strings.Contains(body, forbidden) {
-							t.Fatal("AddressGroup query/projection policy changed", forbidden, body)
+							t.Fatal("Neutron query/projection policy changed", forbidden, body)
 						}
 					}
 					helper := controlledEmittedMethod(t, source, "listBodyWithControl")
-					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "addressgroups", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractGroups(page)")
+					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "`+kind+`", err)`, "upstream.List(a.client, _opts)", "upstream."+extractor+"(page)")
 					return
 				}
 				if fields["BodyFilterValue"] != nil {

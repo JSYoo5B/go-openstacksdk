@@ -95,6 +95,7 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 			source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
 			source = strings.ReplaceAll(source, "ListOptsBuilder", "PolicyListOptsBuilder")
 			source = strings.ReplaceAll(source, "ToListQuery", "ToPolicyListQuery")
+			source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;TenantID string `q:\"tenant_id\"`;ProjectID string `q:\"project_id\"`;Name string `q:\"name\"`;Description string `q:\"description\"`;IsDefault *bool `q:\"is_default\"`;Shared *bool `q:\"shared\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`;Tags string `q:\"tags\"`;TagsAny string `q:\"tags-any\"`;NotTags string `q:\"not-tags\"`;NotTagsAny string `q:\"not-tags-any\"`;RevisionNumber *int `q:\"revision_number\"`}", 1)
 			source += "\nfunc ExtractPolicysInto(r pagination.Page,v any)error{return nil}\n"
 		} else {
 			source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;Name string `q:\"name\"`;Description string `q:\"description\"`;ProjectID string `q:\"project_id\"`;Addresses []string `q:\"addresses\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`}", 1)
