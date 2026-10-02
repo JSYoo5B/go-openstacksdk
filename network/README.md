@@ -148,6 +148,16 @@ SDK 소유 pager가 concrete native ListOpts로 표현할 수 없는 반복·nil
 기존 `WithName`은 로컬 이름 비교를 유지하고 `WithStatus`는 미지원이며 raw status는 전달합니다.
 [Security Group Python/Go 사용법](v2/extensions/security/groups/listing/README.md)에 전체 이름·입력·native 응답·페이지 차이를 설명합니다.
 
+`service.API.Trunks.Resources`와 `conn.NetworkV2(ctx).Trunks.Resources`는
+query 14개·accepted 이름 18개와 로컬 Body 2개를 분류합니다. admin state·태그 별칭은 서버
+query로 변환하고 `id`·`tenant_id`는 원문 JSON에서 비교합니다. `project_id`와 로컬 tenant는
+독립적이며 `sub_ports`·이름·상태는 서버 조건입니다. native에만 있는 timestamp와 revision은
+semantic 이름으로 받지 않습니다. 기존 `WithName`의 정확한 이름 비교와 `WithStatus`의 최종
+query 값에 대한 대소문자 무시 비교를 유지하며 raw status 단독은 로컬 조건이 아닙니다.
+native 전체 페이지의 RFC3339 timestamp·nested Subport 디코드가 필터와 cap보다 먼저 수행됩니다.
+[Trunk Python/Go 사용법](v2/extensions/trunks/listing/README.md)에 전체 이름과
+`links.next` 페이지 순회, null·native 응답·호출별 옵션 차이를 설명합니다.
+
 ## 삭제와 대기
 
 ```go

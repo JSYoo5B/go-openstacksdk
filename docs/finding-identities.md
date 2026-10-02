@@ -486,7 +486,11 @@ typed `List`와 명시 Ref 조회는 유지합니다. Details·AllProjects·Extr
 지원하지 않으며 부모 조회·hidden 검색·추가 GET·microversion 변경을 자동 추가하지 않습니다.
 
 고정 Python [find_subnet_pool](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7621)·[find_trunk](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7869)는 문자열·ignore_missing=True·query를 선언합니다.
-[SubnetPool query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/subnet_pool.py#L34)·[Trunk query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/trunk.py#L33)의 별칭·Body 로컬 필터와 Resource descriptor/cache/session 정책은 별도 비교 범위입니다.
+[SubnetPool query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/subnet_pool.py#L34)·[Trunk query mapping](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/trunk.py#L33)의 별칭은
+`WithIdentityFindQuery`에서 wire 이름으로 직접 지정합니다. ordinary `Resources.List/All`의
+자동 query/Body 분류는 [Subnet Pool 사용법](../network/v2/extensions/subnetpools/listing/README.md)과
+[Trunk 사용법](../network/v2/extensions/trunks/listing/README.md)을 따릅니다. Find의 query가
+ordinary 목록 옵션으로 자동 바뀌지 않으며 Resource descriptor/cache/session 전체는 추가 비교 범위입니다.
 
 ## Neutron QoS Policy·Address Group
 

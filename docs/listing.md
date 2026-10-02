@@ -206,9 +206,10 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 | Network | 아래 14개 필드 | `subnet_ids`·`is_vlan_qinq`·`is_vlan_transparent` | 아래 설명 참고 |
 | Router | 아래 10개 필드 | `revision_number` → `revision` | 아래 설명 참고 |
 | Security Group | `created_at`·`updated_at`·`security_group_rules` | 없음 | canonical 이름과 같음 |
+| Trunk | `id`·`tenant_id` | 없음 | canonical 이름과 같음 |
 | Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-QoS Policy·Address Group·Subnet Pool·Network·Router·Security Group·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
+QoS Policy·Address Group·Subnet Pool·Network·Router·Security Group·Trunk·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
 상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
@@ -387,6 +388,44 @@ clear·최종값 검증·namespace 충돌은 공통 옵션 정책을 따릅니�
 [SDK 소유 raw pager](../internal/nativefind/security_group_bodies_test.go)에서 이 계약을 검증합니다.
 [AST manifest](../api/openstacksdk/resources/network/v2/security_group.json)는 source SHA 7개·AST 39개를,
 [생성기 검증](../internal/cmd/sdkgen/security_group_filters_test.go)은 native 함수 21개와 상수 2개를
+확인합니다. 전체 Resource/cache·descriptor coercion·session·상속 continuation과 Proxy/JMESPath는
+계속 구현할 대상입니다.
+
+### Trunk의 속성 이름 분류
+
+`Trunks.Resources.List/All`은 Python `conn.network.trunks(**query)`의 canonical query 14개와
+wire 별칭을 포함한 18개 이름, non-query Body 2개를 분류합니다. query는 description·fields·
+is_admin_state_up→admin_state_up·limit·marker·name·port_id·project_id·status·sub_ports·tags와
+세 태그 별칭입니다. 원문 `id`·`tenant_id`만 JSON으로 로컬 비교합니다. `project_id`의 response
+alias는 로컬 tenant를 query 별칭으로 바꾸지 않습니다. semantic tenant와 raw
+`WithQuery("tenant_id", ...)`, semantic id와 raw `WithQuery("id", ...)`는 각각 독립적으로
+지정할 수 있습니다. query-only sub_ports와 bool에는 로컬 배열 비교나 truthiness를 추가하지 않습니다.
+
+Trunk는 Resource와 TagMixin을 상속하며 NetworkResource를 상속하지 않습니다. native에 있는
+created_at·updated_at·revision_number는 이 Python 클래스의 semantic 이름이 아니므로 버립니다.
+기존 `WithName`은 서버 hint와 정확한 로컬 이름 조건을 추가하고 `WithStatus`는 최종 status
+query 값과 대소문자를 무시해 비교합니다. semantic name/status와 해당 기존 옵션을 동시에
+지정하면 충돌 오류입니다. raw status 단독과 semantic status 단독은 서버 조건만 지정합니다.
+
+native Trunk·Subport·time.Time의 알려진 필드를 페이지 전체에서 먼저 디코드합니다.
+timestamp는 RFC3339를 요구하며 NoZ 형식을 추가하지 않습니다. 뒤 행의 잘못된 nested
+segmentation_id·bool·timestamp는 앞 행에서 cap에 도달해도 오류입니다. null Subport 요소는
+native zero struct를 유지합니다. missing/null id·tenant는 원문 null 조건으로 비교하며 빈
+문자열과 구분합니다. query-only null 행은 native zero Trunk지만 소비한 Body-filter null 행은
+`ErrInvalidOption`입니다. 빈 object는 유효하며 cap/break 이후 미소비 로컬 조건은 검사하지 않습니다.
+
+목록은 기존 native 200/204/300과 inherited `LinkedPageBase.NextPageURL`을 유지합니다.
+top-level `links.next`만 다음 페이지로 처리하며 trunks_links·top-level next·HTTP Link를
+새로 해석하지 않습니다. foreign next도 native 정책대로 따르고 잘못된 next 타입·순환·후속
+HTTP/decode/취소는 terminal 오류입니다. marker fallback·limit hint·origin 제한을 추가하지 않습니다.
+같은 cached client의 `Network(ctx).API.Trunks.Resources`와 `NetworkV2(ctx).Trunks.Resources`에
+옵션을 재사용할 수 있으며 typed List·Get/Delete·FindIdentity·subport 변경 API는 유지합니다.
+
+[Trunk Python/Go 예제](../network/v2/extensions/trunks/listing/README.md),
+[HTTP 7개 그룹](../api/trunk_list_filters_test.go),
+[Connection 2개 그룹](../connection_trunk_filters_test.go)가 옵션과 native 응답 경계를 검증합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/trunk.json)는 source SHA 6개·AST 35개를,
+[생성기 검증](../internal/cmd/sdkgen/trunk_filters_test.go)은 native 함수 20개와 resourcePath 상수를
 확인합니다. 전체 Resource/cache·descriptor coercion·session·상속 continuation과 Proxy/JMESPath는
 계속 구현할 대상입니다.
 

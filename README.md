@@ -76,6 +76,11 @@ Security Group은 [query 17개·로컬 필드 3개](network/v2/extensions/securi
 보존하고 기존 typed Security Group을 반환합니다. SDK가 concrete native 목록의 raw query도
 처리하므로 호출자가 builder를 구현하지 않습니다.
 
+Trunk는 [query 14개·로컬 필드 2개](network/v2/extensions/trunks/listing/README.md)를
+분류합니다. `project_id`·`sub_ports`·`status`는 서버 조건이며 `id`·`tenant_id`만 원문에서
+비교합니다. SDK가 admin state·태그 별칭과 옵션 snapshot을 처리하고 기존 이름·상태 필터와
+typed Trunk 반환값을 유지합니다.
+
 Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
 SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증거를 처리합니다.
