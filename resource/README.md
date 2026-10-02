@@ -64,7 +64,8 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 분류합니다. 현재 Subnet의 query 24개·로컬 Body 9개, Secret의 query 12개·로컬 Body 12개,
 Container의 query 2개·로컬 Body 10개, Order의 query 2개·로컬 Body 14개,
 AddressGroup의 query 8개·로컬 Body 3개, QoS Policy의 query 15개·로컬 Body 2개,
-Subnet Pool의 query 16개·로컬 Body 10개에
+Subnet Pool의 query 16개·로컬 Body 10개, Network의 query 23개·로컬 Body 14개,
+Router의 query 18개·로컬 Body 10개에
 연결되어 있고 다른 binding은 clear를 포함해 `ErrUnsupported`입니다. 개별 옵션은 같은 target의 마지막 값이 이기고,
 한 bulk map의 query canonical 이름은 wire 별칭보다 우선합니다. bulk 교체/clear는 semantic
 조건만 바꾸며 최종 선택값만 검증합니다. 알 수 없는 이름은 버리고 raw query·명시 Body와
@@ -75,7 +76,9 @@ Subnet Pool의 query 16개·로컬 Body 10개에
 [Order Python/Go 사용법](../keymanager/v1/orders/listing/README.md)과
 [AddressGroup Python/Go 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)과
 [QoS Policy Python/Go 사용법](../network/v2/extensions/qos/policies/listing/README.md)과
-[Subnet Pool Python/Go 사용법](../network/v2/extensions/subnetpools/listing/README.md)에 설명합니다.
+[Subnet Pool Python/Go 사용법](../network/v2/extensions/subnetpools/listing/README.md)과
+[Network Python/Go 사용법](../network/v2/networks/listing/README.md)과
+[Router Python/Go 사용법](../network/v2/extensions/layer3/routers/listing/README.md)에 설명합니다.
 
 `WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
 로컬 비교합니다. 현재 QoS Policy의 `rules`, Address Group의 `addresses`, Subnet Pool의
@@ -104,6 +107,15 @@ Network는 query 23개·accepted 이름 35개와 로컬 Body 14개를 분류합�
 `mtu`·`revision_number`에는 정확한 정수 정책을 사용하고 나머지 여덟 필드는 원문 JSON입니다.
 같은 정책을 상위 `Network(ctx).Networks`와 versioned `Networks.Resources`에서 사용합니다.
 [Network 사용법](../network/v2/networks/listing/README.md)에 Python 변환·native decoder·상태 query의 차이를 설명합니다.
+Router는 query 18개·accepted 이름 24개와 로컬 Body 10개를 분류합니다. `name`·`status`·`id`는
+서버 조건이며 `WithName`·`WithStatus`의 기존 로컬 비교는 별도로 유지합니다.
+semantic `revision_number`와 명시 Body의 `revision`·`revision_number`는 원문 `revision`을
+선택합니다. native 모델의 `RevisionNumber`는 별도의 `revision_number` 응답을 읽으며
+누락된 `revision`을 대신하지 않습니다. `enable_ndp_proxy`는 null을 보존한 boolean truthiness,
+`evpn_vni`·`revision`은 정확한 정수, 나머지 일곱 필드는 원문 JSON으로 비교합니다.
+`tenant_id`는 로컬 조건이고 `project_id`는 query입니다. gateway·routes의 unknown 필드와
+null 요소는 비교에 보존하며 반환값은 native Router입니다.
+[Router 사용법](../network/v2/extensions/layer3/routers/listing/README.md)에 변환·페이지 경계를 설명합니다.
 Secret은 timestamp의 속성 이름과 raw wire 이름을 구분하고 literal `id`·전체 `secret_ref`·
 별도의 `secret_id` formatter 결과를 비교합니다. 로컬 필드 12개를 원문 행에서 선택하고 native Secret을 반환합니다.
 Container는 `name`·timestamp·참조·중첩 배열 등 10개 로컬 속성을 비교합니다. `id`는 literal

@@ -204,9 +204,10 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 | Address Group | `addresses` | 없음 | `addresses` |
 | Subnet Pool | 아래 10개 필드 | prefix length의 Python 이름 3개 | 아래 설명 참고 |
 | Network | 아래 14개 필드 | `subnet_ids`·`is_vlan_qinq`·`is_vlan_transparent` | 아래 설명 참고 |
+| Router | 아래 10개 필드 | `revision_number` → `revision` | 아래 설명 참고 |
 | Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-QoS Policy·Address Group·Subnet Pool·Network·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
+QoS Policy·Address Group·Subnet Pool·Network·Router·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
 상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
@@ -299,6 +300,55 @@ singular `network` 오류 이름과 exact `ERROR` waiter는 기존 정책입니�
 [생성기 검증](../internal/cmd/sdkgen/network_filters_test.go)은 native 함수 선언 28개와
 NoZ timestamp 상수 1개를 확인합니다. Resource/cache·revision if-match·Proxy lifecycle 전체는
 별도 구현 대상입니다.
+
+### Router의 속성 이름 분류
+
+`Routers.Resources.List/All`은 Python `conn.network.routers(**query)`의 query 18개와
+로컬 Body 10개를 분류합니다. `is_admin_state_up`→`admin_state_up`, `is_distributed`→`distributed`,
+`is_ha`→`ha`와 태그 별칭을 포함한 24개 query 이름을 받습니다. `name`·`status`·`id`는
+서버 조건입니다. `WithName`은 정확한 로컬 이름 비교를, `WithStatus`는 대소문자를 무시한
+로컬 상태 비교를 별도로 활성화합니다. raw status만 지정하면 로컬 조건을 추가하지 않습니다.
+두 목록 경로 모두 wire status를 보존하며 `WithStatus`가 활성화되어 있으면 뒤의 raw status
+옵션이 바꾼 최종 wire 값이 로컬 비교 기준이 됩니다.
+
+| 로컬 속성 | 응답 선택 정책 |
+|---|---|
+| `enable_ndp_proxy` | missing/null 보존, boolean truthiness |
+| `evpn_vni`·`revision_number` | 정확한 signed 정수; `revision_number`는 raw `revision` 선택 |
+| `availability_zone_hints`·`availability_zones`·`created_at`·`updated_at`·`external_gateway_info`·`routes`·`tenant_id` | 원문 JSON |
+
+Python Router는 상속한 revision descriptor를 덮어씁니다. 따라서 semantic `revision_number`와
+명시 Body의 `revision`·`revision_number`는 원문 `revision`을 비교하며 native Router의
+`RevisionNumber`가 읽는 응답 `revision_number`로 fallback하지 않습니다. raw 이름 `revision`은
+semantic 옵션에서 알 수 없는 이름으로 버리지만 명시 Body와 raw query는 각각 받습니다.
+`tenant_id`는 로컬 조건이고 `project_id`는 query입니다. project descriptor의 response alias로
+tenant query 별칭을 추가하지 않습니다. canonical 우선·bulk 교체·clear·snapshot·최종값 검증·
+reserved controls·query/Body target 충돌은 공통 옵션 정책을 따릅니다.
+
+응답 boolean은 missing/null을 false로 채우지 않습니다. 빈 값·0은 false, nonempty/nonzero는
+true이며 문자열 `"false"`도 true입니다. caller 값은 변환하지 않습니다. 정확한 숫자 truthiness는
+극단적인 지수의 Python float underflow와 다를 수 있습니다. 두 정수는 integral number와
+signed decimal string을 변환하고 fractional·bool·배열·object는 거부합니다. Python의
+bool-as-int·float 절삭·digit-only string 정책을 모두 재현하지 않습니다. 나머지 필드는 원문
+JSON이며 Python list wrapping·dict coercion을 적용하지 않습니다.
+
+gateway·routes의 unknown nested 필드와 큰 숫자·null 요소는 원문 비교에 남지만 반환값은
+native Router입니다. native `[]Route`·`[]ExternalFixedIP`의 null 요소는 zero struct이며
+`AvailabilityZoneHints`의 null 요소는 빈 문자열입니다. 알려진 nested 필드·`revision_number`와
+timestamp 디코드는 cap·로컬 비교보다 먼저 전체 페이지에 적용됩니다. 두 timestamp의
+NoZ→RFC3339 재시도는 native 정책이며 혼합 형식은 실패할 수 있습니다. query-only null 행은
+native zero model일 수 있고 Body 조건이 소비하는 null 행은 오류입니다. cap·break 이후의
+로컬 변환과 다음 페이지는 검사하지 않습니다. native `routers_links` continuation·client/provider와
+typed List·FindIdentity·Get/Delete·interface 변경 API는 유지합니다.
+
+`Network(ctx).API.Routers.Resources`와 `NetworkV2(ctx).Routers.Resources`는 캐시된 같은 client를
+사용합니다. [Router Python/Go 예제](../network/v2/extensions/layer3/routers/listing/README.md),
+[HTTP 7개 그룹](../api/router_list_filters_test.go),
+[Connection 2개 그룹](../connection_router_filters_test.go)에서 이 계약을 검증합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/router.json)는 source SHA 7개·AST 41개를,
+[생성기 검증](../internal/cmd/sdkgen/router_filters_test.go)은 native 함수 23개와 resource path·
+NoZ timestamp 상수 2개를 확인합니다. 전체 Python Resource/cache·revision if-match·Proxy lifecycle은
+계속 구현할 대상입니다.
 
 ### Subnet의 속성 이름 분류
 

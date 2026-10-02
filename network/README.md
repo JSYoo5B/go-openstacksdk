@@ -128,6 +128,16 @@ builder 없이 전달하고 원문 `subnet_ids`·availability zone·segments·ti
 collection 옵션을 사용합니다. 상위 facade의 `network` 오류 이름과 정확한 `ERROR` 상태 대기는
 유지합니다. [Network Python/Go 사용법](v2/networks/listing/README.md)에 전체 필터와 변환·충돌·페이지 차이를 설명합니다.
 
+`service.API.Routers.Resources`와 `conn.NetworkV2(ctx).Routers.Resources`는 같은 client와
+`resource.WithFilter`/`WithFilters` 옵션으로 query 18개·로컬 Body 10개를 분류합니다.
+bool query 세 개와 태그 별칭을 포함한 24개 이름을 받으며 `name`·`status`·`id`는 서버 조건입니다.
+gateway·routes·availability zone·timestamp·deprecated tenant ID는 원문에서 비교합니다.
+`enable_ndp_proxy`의 응답 truthiness와 `evpn_vni`·`revision`의 정확한 정수 변환을 SDK가 처리합니다.
+Python `revision_number`는 원문 `revision`을 선택합니다. native `RevisionNumber`의 응답 필드
+`revision_number`는 별도이며 전체 페이지의 native 디코드가 로컬 비교보다 먼저 수행됩니다.
+기존 이름·상태 조건과 native typed List·FindIdentity·Get·interface 변경 API는 유지합니다.
+[Router Python/Go 사용법](v2/extensions/layer3/routers/listing/README.md)에 전체 필터와 raw 응답 차이를 설명합니다.
+
 ## 삭제와 대기
 
 ```go
