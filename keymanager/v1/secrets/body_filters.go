@@ -3,9 +3,8 @@ package secrets
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strings"
 
+	"gophercloudsdk/internal/jsonfilter"
 	"gophercloudsdk/resource"
 )
 
@@ -48,24 +47,9 @@ func secretBodyReferenceID(fields map[string]json.RawMessage) (json.RawMessage, 
 	if err != nil {
 		return nil, err
 	}
-	var ref *string
-	if err := json.Unmarshal(raw, &ref); err != nil {
-		return nil, fmt.Errorf("%w: secret_ref formatter: %w", resource.ErrInvalidOption, err)
-	}
-	if ref == nil {
-		// Property.__get__ bypasses the formatter when the value is None.
-		return json.RawMessage("null"), nil
-	}
-	// Escape '%' only for parsing so Path retains the original spelling,
-	// including literal Unicode/space and existing %xx escapes. Python's
-	// HREFToUUID uses urlsplit(...).path.split('/')[-1], not UUID parsing.
-	parsed, err := url.Parse(strings.ReplaceAll(*ref, "%", "%25"))
+	value, err := jsonfilter.ReferenceLastComponent(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%w: secret_ref formatter: %w", resource.ErrInvalidOption, err)
 	}
-	if parsed.Scheme == "" || parsed.Host == "" && parsed.User == nil || parsed.Path == "" {
-		return nil, fmt.Errorf("%w: secret_ref formatter requires scheme, authority and path", resource.ErrInvalidOption)
-	}
-	path := parsed.Path
-	return json.Marshal(path[strings.LastIndexByte(path, '/')+1:])
+	return value, nil
 }
