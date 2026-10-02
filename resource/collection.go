@@ -130,7 +130,7 @@ func (c *Collection[T]) Get(ctx context.Context, id string) (*T, error) {
 		return nil, c.wrap("get", ErrUnsupported)
 	}
 	v, err := c.binding.Get(ctx, id)
-	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+	if !terminalReadError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		err = &NotFoundError{Resource: c.binding.Kind, Reference: id, Cause: err}
 	}
 	if err != nil {
@@ -355,7 +355,7 @@ func (c *Collection[T]) Find(ctx context.Context, ref Ref, opts ...LookupOption)
 	}
 	if !ref.byName {
 		v, err := c.Get(ctx, ref.value)
-		if o.ignoreMissing && errors.Is(err, ErrNotFound) {
+		if o.ignoreMissing && !terminalReadError(err) && errors.Is(err, ErrNotFound) {
 			return nil, nil
 		}
 		return v, err

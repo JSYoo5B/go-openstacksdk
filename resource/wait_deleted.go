@@ -45,7 +45,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		if ctx.Err() != nil {
 			return c.wrap("wait deleted", ctx.Err())
 		}
-		if errors.Is(err, ErrNotFound) {
+		if !terminalReadError(err) && errors.Is(err, ErrNotFound) {
 			return nil
 		}
 		if err != nil {

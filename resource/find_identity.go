@@ -2,9 +2,6 @@ package resource
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"io"
 	"iter"
 	"net/http"
 	"net/url"
@@ -252,7 +249,7 @@ func (c *Collection[T]) getIdentity(ctx context.Context, identity string, query 
 		return nil, err
 	}
 	value, err := c.binding.GetIdentityQuery(ctx, identity, cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query)
-	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+	if !terminalReadError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		err = &NotFoundError{Resource: c.binding.Kind, Reference: identity, Cause: err}
 	}
 	if err != nil {
@@ -303,14 +300,7 @@ func (c *Collection[T]) identityFindID(value *T) (string, error) {
 }
 
 func identityFindTerminalError(err error) bool {
-	var accepted *ResponseError
-	var transport *url.Error
-	var syntax *json.SyntaxError
-	var typed *json.UnmarshalTypeError
-	var target *json.InvalidUnmarshalError
-	return errors.As(err, &accepted) || errors.As(err, &transport) || errors.As(err, &syntax) || errors.As(err, &typed) || errors.As(err, &target) ||
-		errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) ||
-		errors.Is(err, ErrInvalidOption) || errors.Is(err, ErrUnsupported)
+	return terminalReadError(err)
 }
 
 func identityFindCanFallback(err error, policy FindFallbackPolicy) bool {
