@@ -35,7 +35,26 @@ func containerBodyNativeSchema(pkg *types.Package, plan *collectionPlan) bool {
 			return false
 		}
 		nested, ok := object.Type().(*types.Named)
-		if !ok || nested.NumMethods() != 0 || !rawBodyFieldsMatch(nested, "json", fields) {
+		if !ok || !rawBodyFieldsMatch(nested, "json", fields) {
+			return false
+		}
+		if name == "ConsumerRef" {
+			if nested.NumMethods() != 0 {
+				return false
+			}
+			continue
+		}
+		// SecretRef is also the native create/delete reference request builder.
+		// Its one ordinary builder method does not replace JSON row decoding.
+		if nested.NumMethods() != 1 || nested.Method(0).Name() != "ToContainerSecretRefMap" {
+			return false
+		}
+		sig := nested.Method(0).Type().(*types.Signature)
+		if !types.Identical(sig.Recv().Type(), nested) || sig.Variadic() || sig.Params().Len() != 0 || sig.Results().Len() != 2 || !isError(sig.Results().At(1).Type()) {
+			return false
+		}
+		body := types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+		if !types.Identical(sig.Results().At(0).Type(), body) {
 			return false
 		}
 	}

@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"go/ast"
+	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -123,6 +125,11 @@ func TestContainerBodyFilterNativeContractRejectsNestedModelsDecoderPagerAndSour
 		"extra-raw-id":                  {"type Container struct{", "type Container struct{ID string;"},
 		"decoder-removed":               {"func(*Container)UnmarshalJSON([]byte)error{return nil}", ""},
 		"decoder-input":                 {"UnmarshalJSON([]byte)", "UnmarshalJSON(string)"},
+		"request-builder-missing":       {"func(SecretRef)ToContainerSecretRefMap()(map[string]any,error){return nil,nil}", ""},
+		"request-builder-result":        {"ToContainerSecretRefMap()(map[string]any,error)", "ToContainerSecretRefMap()(map[string]string,error)"},
+		"request-builder-pointer":       {"func(SecretRef)ToContainerSecretRefMap", "func(*SecretRef)ToContainerSecretRefMap"},
+		"request-builder-named-map-key": {"ToContainerSecretRefMap()(map[string]any,error)", "ToContainerSecretRefMap()(map[NamedString]any,error)"},
+		"request-builder-named-map":     {"ToContainerSecretRefMap()(map[string]any,error)", "ToContainerSecretRefMap()(NamedMap,error)"},
 		"native-name-hint":              {"Name string `q:\"name\"`", "Name string `q:\"pattern\"`"},
 		"inherited-next":                {"func(ContainerPage)NextPageURL()(string,error){return \"\",nil}", ""},
 		"page-state":                    {"ContainerPage struct{pagination.LinkedPageBase}", "ContainerPage struct{extra bool;pagination.LinkedPageBase}"},
@@ -130,6 +137,12 @@ func TestContainerBodyFilterNativeContractRejectsNestedModelsDecoderPagerAndSour
 	} {
 		t.Run(name, func(t *testing.T) {
 			source := strings.Replace(containerFilterNativeFixtureSource, pair[0], pair[1], 1)
+			if name == "request-builder-named-map-key" {
+				source += "\ntype NamedString string\n"
+			}
+			if name == "request-builder-named-map" {
+				source += "\ntype NamedMap map[string]any\n"
+			}
 			if source == containerFilterNativeFixtureSource {
 				t.Fatal("mutation not applied")
 			}
@@ -142,7 +155,12 @@ func TestContainerBodyFilterNativeContractRejectsNestedModelsDecoderPagerAndSour
 			}
 		})
 	}
-	for name, tail := range map[string]string{"nested-decoder": "\nfunc(*ConsumerRef)UnmarshalJSON([]byte)error{return nil}", "body-override": "\nfunc(ContainerPage)GetBody()any{return nil}"} {
+	alias := strings.Replace(containerFilterNativeFixtureSource, "ToContainerSecretRefMap()(map[string]any,error)", "ToContainerSecretRefMap()(BodyAlias,error)", 1) + "\ntype BodyAlias = map[string]interface{}\n"
+	aliasPkg, aliasPlan := containerFilterNativeFixture(t, alias)
+	if !containerBodyNativeSchema(aliasPkg, aliasPlan) {
+		t.Fatal("equivalent map alias rejected")
+	}
+	for name, tail := range map[string]string{"nested-decoder": "\nfunc(*ConsumerRef)UnmarshalJSON([]byte)error{return nil}", "secret-ref-decoder": "\nfunc(*SecretRef)UnmarshalJSON([]byte)error{return nil}", "body-override": "\nfunc(ContainerPage)GetBody()any{return nil}"} {
 		t.Run(name, func(t *testing.T) {
 			p, pl := containerFilterNativeFixture(t, containerFilterNativeFixtureSource+tail)
 			if containerBodyNativeSchema(p, pl) {
@@ -394,6 +412,88 @@ func TestContainerRawPageDependencyLoaderRequiresExactNumbersAndOriginalBody(t *
 	}
 }
 
+// The generator consumes compiled native exports. This check uses the same
+// audited source metadata as generation, so declarations outside results.go
+// cannot be accidentally omitted from a convenient model fixture.
+func TestContainerBodyFilterAcceptsRealPinnedNativeTypeGraphAndBuilderMethod(t *testing.T) {
+	path := os.Getenv("GOPHERCLOUD_METADATA")
+	if path == "" {
+		path = "/private/tmp/gophercloudsdk-upstream-packages.json"
+	}
+	file, err := os.Open(path)
+	if os.IsNotExist(err) {
+		t.Skip("compiled pinned native metadata not present; pass GOPHERCLOUD_METADATA")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	meta := map[string]metadata{}
+	decoder := json.NewDecoder(file)
+	for {
+		var entry metadata
+		if err := decoder.Decode(&entry); err == io.EOF {
+			break
+		} else if err != nil {
+			t.Fatal(err)
+		}
+		meta[entry.ImportPath] = entry
+	}
+	path = upstreamModule + "/openstack/keymanager/v1/containers"
+	m, ok := meta[path]
+	if !ok || m.Dir == "" || m.Export == "" {
+		t.Fatal("native Container source/export metadata missing")
+	}
+	compiled := importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
+		entry, ok := meta[path]
+		if !ok || entry.Export == "" {
+			return nil, os.ErrNotExist
+		}
+		return os.Open(entry.Export)
+	})
+	pkg, err := compiled.Import(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decls, native := map[string]*ast.FuncDecl{}, map[string]*ast.FuncDecl{}
+	for _, name := range m.GoFiles {
+		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(m.Dir, name), nil, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, declaration := range file.Decls {
+			if fn, ok := declaration.(*ast.FuncDecl); ok {
+				native[identityDeclarationKey(fn)] = fn
+				if fn.Recv == nil && ast.IsExported(fn.Name.Name) {
+					decls[fn.Name.Name] = fn
+				}
+			}
+		}
+	}
+	plan, err := identifyCollectionBinding(pkg, decls, extractorsByPage(pkg, decls))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := validateBodyFilterCollectionContracts(pkg, plan); err != nil {
+		t.Fatal(err)
+	}
+	g := generator{meta: meta}
+	dependencies, err := g.identityPaginationDeclarations(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, declaration := range dependencies {
+		native[name] = declaration
+	}
+	if err := validateContainerBodyNativeDeclarations(pkg, native, plan); err != nil {
+		t.Fatal(err)
+	}
+	nested, ok := pkg.Scope().Lookup("SecretRef").Type().(*types.Named)
+	if !ok || nested.NumMethods() != 1 || nested.Method(0).Name() != "ToContainerSecretRefMap" {
+		t.Fatal("actual nested request builder was omitted", nested)
+	}
+}
+
 const containerFilterNativeFixtureSource = `package containers
 import "context"
 import "time"
@@ -401,6 +501,7 @@ import gophercloud "github.com/gophercloud/gophercloud/v2"
 import "github.com/gophercloud/gophercloud/v2/pagination"
 type ConsumerRef struct{Name string ` + "`" + `json:"name"` + "`" + `;URL string ` + "`" + `json:"url"` + "`" + `}
 type SecretRef struct{SecretRef string ` + "`" + `json:"secret_ref"` + "`" + `;Name string ` + "`" + `json:"name"` + "`" + `}
+func(SecretRef)ToContainerSecretRefMap()(map[string]any,error){return nil,nil}
 type Container struct{Consumers []ConsumerRef ` + "`" + `json:"consumers"` + "`" + `;ContainerRef string ` + "`" + `json:"container_ref"` + "`" + `;Created time.Time ` + "`" + `json:"-"` + "`" + `;CreatorID string ` + "`" + `json:"creator_id"` + "`" + `;Name string ` + "`" + `json:"name"` + "`" + `;SecretRefs []SecretRef ` + "`" + `json:"secret_refs"` + "`" + `;Status string ` + "`" + `json:"status"` + "`" + `;Type string ` + "`" + `json:"type"` + "`" + `;Updated time.Time ` + "`" + `json:"-"` + "`" + `}
 func(*Container)UnmarshalJSON([]byte)error{return nil}
 type ListOpts struct{Limit int ` + "`" + `q:"limit"` + "`" + `;Name string ` + "`" + `q:"name"` + "`" + `;Offset int ` + "`" + `q:"offset"` + "`" + `}
