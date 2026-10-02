@@ -13285,6 +13285,145 @@
         "Deprecated Proxy._list jmespath_filters and the special __conflicting_attrs recovery branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify those branches have not drifted but do not claim their runtime mapping.",
         "Full eager Python property/formatter execution and Python urlsplit edge cases remain distinct from the audited selected-only Go projection. Generic inherited response error/default/schema behavior is not fully mapped by preserving native typed/page decode causes. Existing Fetch/FindIdentity reviews are unchanged and are not completed by this ordinary list proof."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/containers",
+      "source_fingerprint": "d3c62e7fe372f497d7bd73b3c396307230157ec3ea45b52bc13676f6d003322d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/containers.New",
+        "gophercloudsdk/keymanager/v1/containers.API.All",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.KeyManagerV1"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordinary Containers.Resources.List/All classify the entire pinned Container declaration through SDK-owned WithFilter/WithFilters: inherited limit and marker are the two canonical and accepted query names, and all ten non-query Body properties are supported. name is a local original-row condition, not a semantic server query; native ListOpts.Name, raw name queries and the existing WithName hint remain separate. Both the generated leaf and cached Connection.KeyManagerV1 facade use this descriptor without caller builders or predicates.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersEntireDescriptor",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersLocalNameAndQueryIsolation",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersSharedFacadeAndLocalName"
+          ]
+        },
+        {
+          "behavior": "Semantic query scalars encode strings, lowercase booleans and exact JSON-number text; flat scalar arrays retain repeated order and omit null elements. Null and empty arrays retain key presence for collisions. Unknown semantic names, including offset and raw created/updated names, are discarded. Final selected objects/nested arrays or invalid JSON fail lazily, and all nine source list-control names are reserved rather than accepted as field payloads.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersEntireDescriptor",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersLocalNameAndQueryIsolation",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersSnapshotsAndLazyPreflight",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration"
+          ]
+        },
+        {
+          "behavior": "Owned options snapshot nested input values and repeated query slices across application, independent iteration and concurrent reuse. Individual target assignments are last-wins; WithFilters replaces or clears only the semantic namespace, leaving raw query and explicit Body state intact. Only final selected semantic values are validated. Same-wire semantic/raw/page-size collisions and same-property semantic/explicit Body collisions fail before HTTP, in either order and even for equal/null values. Local semantic name can coexist with raw name because the destinations are distinct.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersSnapshotsAndLazyPreflight",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersLocalNameAndQueryIsolation",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersPreflightAndRawNameNamespace",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear",
+            "resource/filters_test.go:TestSemanticFiltersDescriptorGateAndWireAliasBodyOverlap"
+          ]
+        },
+        {
+          "behavior": "All ten local properties project from the original page row after native extraction. created_at and updated_at compare the original created/updated strings, and secret_refs/consumers retain full ordered arrays, unknown nested keys, null elements and exact numbers beyond float64. Missing/null values remain distinct from empty arrays. Objects use recursive subsets: an empty actual object rejects an object filter, while an empty filter matches a nonempty actual object. Numeric decimals compare exactly; boolean/number and string/number types remain distinct.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersEntireDescriptor",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersPassiveIDsAndRawJSON",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersSharedFacadeAndLocalName",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersArraysCompareExactly",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersExactDecimalNumbersAndHugeExponents",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersDeliberatelyDistinguishesBooleansAndNumbers"
+          ]
+        },
+        {
+          "behavior": "The id property gives literal raw id presence priority, including null, empty, numeric and object values; only an absent id falls back to the full container_ref. container_id is a separate HREFToUUID-style final-path projection from the original reference spelling, preserving percent escapes and literal Unicode/space, excluding query/fragment and producing an empty string for a trailing slash. Missing/null bypass formatting. Invalid selected formatters are terminal before common local predicates. References remain passive comparisons and never cause follow-up requests or synthesize native model IDs.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersPassiveIDsAndRawJSON",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersSharedFacadeAndLocalName",
+            "internal/jsonfilter/reference_test.go:TestReferenceLastComponentPassiveSpelling",
+            "internal/jsonfilter/reference_test.go:TestReferenceLastComponentErrors"
+          ]
+        },
+        {
+          "behavior": "Native Container extraction validates the entire current page before raw selectors run, preserving modeled string/array/timestamp and nested SecretRef/ConsumerRef failures even beyond a raw cap. A null row consumed by a Body-filter iterator is invalid; query-only iteration retains the native zero-model null-row result. After native extraction succeeds, a cap or break can skip a later selected null row or invalid formatter. Caps count raw rows before Body/name/status matches without refill or a wire limit hint; first-page and break stop before continuation, and All returns nil on terminal errors.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersControlsAndWholePageFailures",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths"
+          ]
+        },
+        {
+          "behavior": "Ordinary listing retains native HTTP 200/204/300 acceptance and rejects 201. A successfully parsed 204 is empty, while an empty 204 advertised as application/json yields native EOF before the emptiness check. Top-level next remains authoritative, including foreign URLs, and matching duplicate rows are returned. Later HTTP/decode/foreign-request failures, cycles and cancellation are terminal. The original ProviderClient, live token, configured headers, current microversion, middleware and reverse prefix remain shared across pages without client replacement.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersNativeSurfaceAndStatusPolicy",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersPagingAndLiveSource",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersSharedFacadeAndLocalName",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersPreflightAndRawNameNamespace"
+          ]
+        },
+        {
+          "behavior": "Body matching precedes common local name/status predicates. Semantic Body status compares exact JSON, whereas WithStatus retains local case-insensitive matching. Both normal and raw-filter Container iterators preserve baseline raw status-query removal and transfer other complete query maps with repeated/nil/empty key ownership. Raw name/offset remain native wire extensions. Typed API.List, Get and explicit-Ref lookup retain their separate contracts, and this unit neither enables Container FindIdentity nor adds detail/reference GETs.",
+          "tests": [
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersLocalNameAndQueryIsolation",
+            "api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersNativeSurfaceAndStatusPolicy",
+            "connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersPreflightAndRawNameNamespace"
+          ]
+        },
+        {
+          "behavior": "Generation requires the checked-in Container manifest and live audited -openstacksdk-source checkout. Seven file SHA-256 hashes are checked before isolated AST-only extraction and complete manifest comparison, including parser minor version, C3 MRO, inherited Resource._query_mapping and pagination defaults, literal/alternate id access, distinct HREF formatter and list coercion. Twenty-three AST anchors and optional response_accessor/formatter metadata remain separate from the runtime property names. Source/manifest drift fails closed without importing OpenStackSDK; existing Subnet and Secret extraction remain unchanged.",
+          "tests": [
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerPythonFilterManifestKeepsInheritedQueriesAndPropertyAccessors",
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerPythonFilterPinnedSourceRequiresInheritedDefaultProofAndIndependentAST"
+          ]
+        },
+        {
+          "behavior": "The plan additionally requires the exact native nine-field Container, three-field ListOpts, nested ConsumerRef/SecretRef shapes, decoder, linked-page/extractor contracts and thirteen receiver-qualified native/pagination declaration hashes, including UseNumber and original GetBody pairing. The sole native SecretRef builder is permitted only with its exact value-receiver map[string]any,error signature; its unused implementation is not claimed as a list contract. A real compiled native export-graph regression verifies this method outside results.go. Emission retains both query bridges and prior Secret resource-function ASTs; explicit Body and semantic inventory capabilities remain distinct, Body bindings are seven, semantic bindings three, and twenty native identity opt-ins are unchanged.",
+          "tests": [
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerBodyFilterNativeContractRejectsNestedModelsDecoderPagerAndSourceDrift",
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerSemanticFilterEmissionKeepsNameLocalNativePoliciesAndQueryOwnership",
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerRawPageDependencyLoaderRequiresExactNumbersAndOriginalBody",
+            "internal/cmd/sdkgen/container_filters_test.go:TestContainerBodyFilterAcceptsRealPinnedNativeTypeGraphAndBuilderMethod"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/listing/README.md",
+        "keymanager/v1/README.md",
+        "resource/README.md",
+        "docs/listing.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "Go provides concrete SDK-owned semantic and explicit Body options without caller builders or predicates. Container semantic name is local because the Python class inherits only limit/marker query mapping; native typed Name, raw name query and common WithName remain separate server-hint APIs. Raw name and semantic local name can be combined, while duplicate destinations within one wire/Body namespace fail instead of permissive kwargs merging.",
+        "Individual semantic assignments are last-wins by target and bulk replacement/clear affects only semantic state. Selected null/empty query values retain presence without URL values, flat scalar arrays emit repeated values, booleans use lowercase and JSON-number text is retained. Selected objects/nested query arrays are rejected, and unknown final semantic names are discarded; reserved source controls do not imply every inherited per-call control is implemented.",
+        "Local comparisons retain original dates, precise numbers and full nested array objects, but results remain native typed Containers with nine modeled fields, parsed time.Time values and native string reference structs. Unknown original/nested fields and raw id are not added to returned models or exposed as full HTTP evidence. Native whole-page decoding can fail before a raw cap or local mismatch stops consumption; Python list descriptors may instead coerce scalars into one-element lists.",
+        "Go distinguishes booleans from numbers and does not apply Python property coercion. Recursive object subsets preserve the Python empty-actual-object truthiness boundary, while nonobject actual values are safe nonmatches instead of potential Python attribute-access errors. Arrays compare complete ordered values, including all object keys inside arrays.",
+        "Passive id uses literal key presence or the entire reference, while container_id remains a distinct formatted property without UUID validation, unescaping or follow-up HTTP. Go formats only selected conditions; Python construction/to_dict can invoke formatters on unselected properties. Go parsing preserves original escaped path spelling but differs from Python urlsplit for some malformed authority ports and leading-control normalization.",
+        "Native HTTP 200/204/300 and top-level next pagination remain, including foreign advertised URLs and native JSON EOF for application/json empty204. This list unit does not acquire manual Secret Finder same-origin/fixed-query guards. Local caps stop on consumed raw rows without an inferred server limit; first-page/break stop before continuation and terminal All errors discard partial results.",
+        "Semantic status is exact original JSON; common WithStatus is case-insensitive and local. Normal and raw-filter iterators preserve Container status-query suppression. Existing native typed List/Get/explicit-Ref/CRUD behavior and identity opt-ins remain separate; this ordinary list layer adds no Container heuristic FindIdentity or update endpoint claim.",
+        "Source classification is guarded by an independently re-extracted live Python manifest plus native decoder/pager/type contracts. Python parser-version and source/native/manifest drift fail closed. The exact unused SecretRef builder signature is a compatibility guard, rather than a claim to map its implementation into ordinary listing."
+      ],
+      "remaining": [
+        "Complete Python Resource Body/URI defaults, coercion, seeded unknown attributes, mutable dict/resource behavior and final returned projection remain beyond complete declared query/Body classification. Native Container models normalize timestamps and nested references and omit raw id/unknown state; raw row comparison does not provide Resource cache/dirty lifecycle.",
+        "Pinned Proxy.request optional GET response caching(cache_enabled/skip_cache), resource/session injection and inherited per-call headers/microversion/base_path/allow_unknown_params controls remain separate from retaining configured native clients. Direct Proxy._list fixes session to itself; Container inherits _max_microversion=None and adds no class-specific maximum negotiation.",
+        "Resource._get_next_link accepts body links/containers_links, RFC Link headers and truthy limit/marker fallback beyond native top-level next. Python merges parsed continuation parameters with existing query values and derives markers from dynamic Resource id; Go preserves the native advertised URL and cycle guard without full inherited continuation mapping.",
+        "Deprecated Proxy._list jmespath_filters and its special __conflicting_attrs recovery branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify those branches have not drifted, but do not claim runtime mapping.",
+        "Eager Python formatter/property execution, scalar-to-list/default behavior and all Python urlsplit edges remain distinct from selected-only raw projection plus native decoding. Generic response error/default/schema and old explicit-Ref lookup contracts are not completed by this ordinary list unit; complete Container Find/CRUD coverage must be reviewed independently without inferring an unsupported update method."
+      ]
     }
   ]
 }
