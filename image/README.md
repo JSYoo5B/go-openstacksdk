@@ -146,4 +146,6 @@ stage→import, 원격 URL import, 여러 저장소 선택, Swift task 업로드
 
 [image_test.go](image_test.go)는 Glance의 envelope 없는 응답, 추가 Properties, 실패 상태를 검증합니다. [upload_test.go](upload_test.go)는 업로드 HTTP 계약과 검증·실패 정책을, [upload_retry_test.go](upload_retry_test.go)는 단일 PUT·지연된 Body.Close·현재 offset·Reader 소유권과 원인 오류 보존을 검증합니다. [서버 생성 통합 테스트](../server_create_test.go)는 Compute에서 이미지 이름을 해석하는 과정을 검증합니다.
 
-`image.WaitForState(ctx, service.Images, ref, target)`와 Image v2 leaf의 `WaitForState`는 정확한 ERROR 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 생성·업로드의 기존 `WithWait` 기본값은 유지합니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 Task 대기의 남은 차이를 설명합니다.
+`image.WaitForState(ctx, service.Images, ref, target)`와 Image v2 leaf의 `WaitForState`는 정확한 ERROR 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 생성·업로드의 기존 `WithWait` 기본값은 유지합니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응을 설명합니다.
+
+Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는 `conn.ImageV2(ctx)`의 `Tasks`에서 기다립니다. [Task 전용 사용법](v2/tasks/README.md)은 success·failure·120초·2초 기본값, 정확한 396 오류의 재생성, 같은 시간 제한으로 새 ID 조회, 실제 응답과 부분 실패를 설명합니다. Python의 cached Task 대신 fresh ID를 받고 `tasks.WithTaskWait...` 옵션을 사용합니다. 공통 이미지 상태 대기와 import 제출은 각각 별도 호출입니다.

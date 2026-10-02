@@ -49,3 +49,5 @@ func example(ctx context.Context, api *ports.API) error {
 API transport 목록과 별도로 [지원 판정](sdk_reviews.json)을 보존하고 [검증기](../internal/cmd/paritycheck/README.md)로 API·테스트·문서 근거와 고정 소스를 확인합니다. 미검토 연산은 `unresolved`이며 생성된 함수 수만으로 SDK 지원을 완료 처리하지 않습니다.
 
 Compute Server·Cinder v2/v3 Volume/Snapshot·Image v2 Image의 `WaitForState/WaitForDelete`는 [서비스별 대기 기본값](../docs/service-waits.md)을 적용합니다. `resource_inventory.json`의 `service_wait`는 감사한 기존 여섯 collection에만 기록하며 native `WaitForStatus`나 공통 `WaitFor/WaitForDeletion`을 교체하지 않습니다.
+
+Glance v2 Task의 `task_wait: WaitForTask`는 기존 ID-only collection의 [Task 대기와 396 재생성](../image/v2/tasks/README.md)을 표시합니다. `WaitForTask/WaitForTaskState`는 전용 concrete 옵션으로 success·failure·120초·2초 기본값을 적용하고, 정확한 396 실패에서 받은 type/input으로만 재생성해 같은 시간 제한으로 새 ID를 조회합니다. 실제 응답과 생성 증거를 오류와 함께 반환하며 native Task Get/Create/List와 공통 waiter는 유지합니다. Task Name·Delete capability를 추가하지 않습니다.

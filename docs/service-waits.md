@@ -100,4 +100,4 @@ Python은 supplied Resource의 cached 현재 상태가 대상이면 HTTP 없이 
 
 Python `interval=0`의 내부 보정과 0/음수 timeout을 그대로 재현하지 않습니다. Go는 양수 `WithPollInterval` / `WithTimeout`을 요구하며 무제한은 `WithUnlimitedWait`로 명시합니다. 문자열 상태의 missing/null이 네이티브 모델에서 합쳐질 수 있다는 한계도 유지됩니다.
 
-Image v1은 현재 SDK의 typed binding이 없습니다. Image v2 `wait_for_task`의 특정 396 오류 후 task 재생성, 새 ID로 이어가는 공통 시간 예산은 별도 기능입니다. 이 상태 대기 API는 그 작업을 구현하지 않습니다. Cloud의 `wait_for_server` 180초·IP 할당, `wait_for_image` 3600초, 생성·업로드 workflow의 기존 정책도 별도 계약으로 남습니다.
+Image v1은 현재 SDK의 typed binding이 없습니다. Image v2의 [Task 대기](../image/v2/tasks/README.md)는 별도 `WaitForTask/WaitForTaskState`와 `tasks.WithTaskWait...` 옵션을 제공합니다. 기본 success·failure·120초·2초이며 정확한 396 실패 후 실제 type/input으로 재생성하고 같은 시간 예산으로 새 ID를 조회합니다. 이 문서의 조회 전용 상태·삭제 대기와 별도 workflow입니다. Cloud의 `wait_for_server` 180초·IP 할당, `wait_for_image` 3600초, 생성·업로드 workflow의 기존 정책도 별도 계약으로 남습니다.
