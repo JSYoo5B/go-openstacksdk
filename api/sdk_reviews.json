@@ -14275,6 +14275,178 @@
         "Python Resource._get_next_link advertised/top-level/RFC Link header and limit/marker fallbacks, limit hints and inherited cache/retry/session behavior remain outside native links.next guards. Full descriptor conversion/equality and query container formatting are not replicated.",
         "Deprecated Proxy._list jmespath_filters and explicit __conflicting_attrs restoration have no corresponding ordinary Go expression/recovery option. Existing native List, Get/Ref/FindIdentity, CRUD, tags and subport APIs are separate contracts. This ordinary-list mapping remains partial and unresolved, not full Proxy parity."
       ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.UpdateMetadata",
+      "source_fingerprint": "d2b8e349af9bca62e0bf85b54a8a29012524f3c8db68ee48240baccaa55f73cc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/snapshots.API.UpdateMetadata",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithUpdateMetadataOptions",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithUpdateMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT snapshots/{id}/metadata accepts native HTTP 200 and returns the actual lowercase metadata object as map[string]any, rather than selecting a promoted Snapshot extractor. A snapshot sibling is ignored; no seeded Snapshot, read/merge/write sequence or follow-up request is added.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsReturnOnlyMetadataAndExactNativeNumbers",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepLiveNativeClientAndSnapshotGet",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAllowlistChoosesOwnMapWithoutChangingSnapshotCRUD"
+          ]
+        },
+        {
+          "behavior": "The already-decoded metadata map retains empty objects, nested objects/arrays, null members and json.Number values without another marshal or decode. This is the native decoded result, not exact raw response bytes or a new status/header model.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsReturnOnlyMetadataAndExactNativeNumbers",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection",
+            "internal/snapshotmetadata/extract_test.go:TestExtractReturnsCanonicalObjectAndExactNativeNumbers"
+          ]
+        },
+        {
+          "behavior": "Absent/null/nonobject canonical metadata or a nonobject root produces a terminal SDK-owned envelope error instead of the pinned native assertion panic. Only exact lowercase metadata is selected, and existing native result.Err takes precedence over response shape.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsRejectAcceptedWrongEnvelopesWithoutReplay",
+            "internal/snapshotmetadata/extract_test.go:TestExtractRejectsMalformedEnvelopeWithoutPanicking",
+            "internal/snapshotmetadata/extract_test.go:TestExtractPreservesOriginalErrorAndConcurrentResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Native unexpected HTTP status, transport, accepted read/decode and context causes remain available through the SDK OperationError. The extractor correction never resends the mutation or automatically fetches the Snapshot after a failure.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsPreserveNativeFailuresAndPreflight",
+            "internal/snapshotmetadata/extract_test.go:TestExtractPreservesOriginalErrorAndConcurrentResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "The native Metadata map[string]any input and metadata,omitempty builder remain unchanged. Nil and empty maps omit metadata and send an empty root object; populated input is sent with concrete UpdateMetadataOpts, while SDK With functions own builder adaptation and extension-core collision checks.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepTypedMapOwnershipAndFrozenExtensions",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection"
+          ]
+        },
+        {
+          "behavior": "Concrete options keep existing sequential replacement and caller-owned typed map behavior. Serialized extension values are snapshotted, follow existing envelope nesting and cannot replace core metadata even when omitted; invalid extension serialization fails before HTTP. Unrelated native operation builders and result types retain their prior policies.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepTypedMapOwnershipAndFrozenExtensions",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsPreserveNativeFailuresAndPreflight",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPolicy"
+          ]
+        },
+        {
+          "behavior": "The request retains the original ServiceClient and Provider, live token, configured headers, selected version and ResourceBase. No endpoint rewrite, project/name discovery, inferred version or extra source policy is added by result extraction.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepLiveNativeClientAndSnapshotGet"
+          ]
+        },
+        {
+          "behavior": "Generation activates the specialized result policy on exactly the audited blockstorage/v2 and v3 Snapshot UpdateMetadata operations. Exact native request/options/interface/result/own-vs-promoted method graph, sole Metadata field and complete tag, and six declaration hashes per package fail closed on drift; receiver-qualified source rejects missing/duplicate declarations. Twenty-one other compiled metadata operations retain generic extraction.",
+          "tests": [
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAllowlistChoosesOwnMapWithoutChangingSnapshotCRUD",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorRejectsRequestResultAndBuilderGraphDrift",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorGuardsAllSixPinnedDeclarationsAndSourceOwnership",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorRejectsMissingAndDuplicateQualifiedSource",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPolicy",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAcceptsActualPromotedGraphAndKeepsOtherMetadataOperations"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/snapshots/README.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "The corrected SDK return type is map[string]any; callers expecting *Snapshot must read metadata directly. Other declared Snapshot-returning operations retain their own result types.",
+        "Pinned ExtractMetadata uses unchecked object assertions. The SDK returns an envelope error for invalid accepted shapes while preserving original native errors first; it does not invent raw body, header or status evidence absent from the native Result.",
+        "This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.",
+        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted."
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.UpdateMetadata",
+      "source_fingerprint": "73ff6133d1b7a9bb62eb6b1648e40d938b5409e236b3fd6e33855d2b26b82cdc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/snapshots.API.UpdateMetadata",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithUpdateMetadataOptions",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithUpdateMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT snapshots/{id}/metadata accepts native HTTP 200 and returns the actual lowercase metadata object as map[string]any, rather than selecting a promoted Snapshot extractor. A snapshot sibling is ignored; no seeded Snapshot, read/merge/write sequence or follow-up request is added.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsReturnOnlyMetadataAndExactNativeNumbers",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepLiveNativeClientAndSnapshotGet",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAllowlistChoosesOwnMapWithoutChangingSnapshotCRUD"
+          ]
+        },
+        {
+          "behavior": "The already-decoded metadata map retains empty objects, nested objects/arrays, null members and json.Number values without another marshal or decode. This is the native decoded result, not exact raw response bytes or a new status/header model.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsReturnOnlyMetadataAndExactNativeNumbers",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection",
+            "internal/snapshotmetadata/extract_test.go:TestExtractReturnsCanonicalObjectAndExactNativeNumbers"
+          ]
+        },
+        {
+          "behavior": "Absent/null/nonobject canonical metadata or a nonobject root produces a terminal SDK-owned envelope error instead of the pinned native assertion panic. Only exact lowercase metadata is selected, and existing native result.Err takes precedence over response shape.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsRejectAcceptedWrongEnvelopesWithoutReplay",
+            "internal/snapshotmetadata/extract_test.go:TestExtractRejectsMalformedEnvelopeWithoutPanicking",
+            "internal/snapshotmetadata/extract_test.go:TestExtractPreservesOriginalErrorAndConcurrentResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Native unexpected HTTP status, transport, accepted read/decode and context causes remain available through the SDK OperationError. The extractor correction never resends the mutation or automatically fetches the Snapshot after a failure.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsPreserveNativeFailuresAndPreflight",
+            "internal/snapshotmetadata/extract_test.go:TestExtractPreservesOriginalErrorAndConcurrentResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "The native Metadata map[string]any input and metadata,omitempty builder remain unchanged. Nil and empty maps omit metadata and send an empty root object; populated input is sent with concrete UpdateMetadataOpts, while SDK With functions own builder adaptation and extension-core collision checks.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepTypedMapOwnershipAndFrozenExtensions",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection"
+          ]
+        },
+        {
+          "behavior": "Concrete options keep existing sequential replacement and caller-owned typed map behavior. Serialized extension values are snapshotted, follow existing envelope nesting and cannot replace core metadata even when omitted; invalid extension serialization fails before HTTP. Unrelated native operation builders and result types retain their prior policies.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepTypedMapOwnershipAndFrozenExtensions",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsPreserveNativeFailuresAndPreflight",
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepOmissionAndCoreFieldProtection",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPolicy"
+          ]
+        },
+        {
+          "behavior": "The request retains the original ServiceClient and Provider, live token, configured headers, selected version and ResourceBase. No endpoint rewrite, project/name discovery, inferred version or extra source policy is added by result extraction.",
+          "tests": [
+            "api/snapshot_metadata_results_test.go:TestSnapshotMetadataResultsKeepLiveNativeClientAndSnapshotGet"
+          ]
+        },
+        {
+          "behavior": "Generation activates the specialized result policy on exactly the audited blockstorage/v2 and v3 Snapshot UpdateMetadata operations. Exact native request/options/interface/result/own-vs-promoted method graph, sole Metadata field and complete tag, and six declaration hashes per package fail closed on drift; receiver-qualified source rejects missing/duplicate declarations. Twenty-one other compiled metadata operations retain generic extraction.",
+          "tests": [
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAllowlistChoosesOwnMapWithoutChangingSnapshotCRUD",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorRejectsRequestResultAndBuilderGraphDrift",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorGuardsAllSixPinnedDeclarationsAndSourceOwnership",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorRejectsMissingAndDuplicateQualifiedSource",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPolicy",
+            "internal/cmd/sdkgen/snapshot_metadata_extractors_test.go:TestSnapshotMetadataExtractorAcceptsActualPromotedGraphAndKeepsOtherMetadataOperations"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/snapshots/README.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "The corrected SDK return type is map[string]any; callers expecting *Snapshot must read metadata directly. Other declared Snapshot-returning operations retain their own result types.",
+        "Pinned ExtractMetadata uses unchecked object assertions. The SDK returns an envelope error for invalid accepted shapes while preserving original native errors first; it does not invent raw body, header or status evidence absent from the native Result.",
+        "This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.",
+        "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted."
+      ]
     }
   ]
 }
