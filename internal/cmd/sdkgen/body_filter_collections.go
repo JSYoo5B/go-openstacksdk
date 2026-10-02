@@ -19,6 +19,7 @@ type bodyFilterCollectionSpec struct {
 // These body-only Python filters are audited against the pinned native models.
 // Other body fields and native collections remain unsupported until reviewed.
 var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
+	{path: trunkSDKPath, model: "Trunk", rawRecord: true, fields: trunkBodyCollectionFields()},
 	{path: securityGroupSDKPath, model: "SecGroup", rawRecord: true, fields: securityGroupBodyCollectionFields()},
 	{path: routerSDKPath, model: "Router", rawRecord: true, fields: routerBodyCollectionFields()},
 	{path: qosPolicySDKPath, model: "Policy", rawRecord: true, fields: qosPolicyBodyCollectionFields()},
@@ -32,6 +33,9 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == trunkSDKPath {
+		return trunkBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == securityGroupSDKPath {
 		return securityGroupBodyCollectionMetadataValid(spec)
 	}
@@ -83,6 +87,8 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 
 func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
+	case trunkSDKPath:
+		return trunkBodyNativeSchema(pkg, plan)
 	case securityGroupSDKPath:
 		return securityGroupBodyNativeSchema(pkg, plan)
 	case routerSDKPath:
@@ -159,7 +165,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == securityGroupSDKPath {
+		if spec.path == trunkSDKPath {
+			emitTrunkBodyRecordAdapter(e, plan)
+		} else if spec.path == securityGroupSDKPath {
 			emitSecurityGroupBodyRecordAdapter(e, plan)
 		} else if spec.path == routerSDKPath {
 			emitRouterBodyRecordAdapter(e, plan)

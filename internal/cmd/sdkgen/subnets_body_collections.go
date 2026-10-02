@@ -131,6 +131,12 @@ func emitSubnetBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 // Called once after newResources is closed, so the raw-row helper remains a
 // private SDK method and the native public List options/signature do not change.
 func emitBodyFilterList(e *emitter, plan *collectionPlan) {
+	if sdkPath(e.pkg.Path()) == trunkSDKPath {
+		if _, ok := bodyFilterCollectionContract(e.pkg, plan, 0); ok {
+			emitTrunkBodyFilterList(e, plan)
+		}
+		return
+	}
 	if sdkPath(e.pkg.Path()) == securityGroupSDKPath {
 		if _, ok := bodyFilterCollectionContract(e.pkg, plan, 0); ok {
 			emitSecurityGroupBodyFilterList(e, plan)

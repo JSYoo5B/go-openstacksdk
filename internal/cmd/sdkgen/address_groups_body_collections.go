@@ -93,6 +93,9 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 	label := "audited AddressGroup body collection"
 	switch sdkPath(path) {
 	case addressGroupSDKPath:
+	case trunkSDKPath:
+		label = "audited Trunk body collection"
+		wanted = map[string]bool{"Result.ExtractInto": true, "BuildQueryString": true}
 	case securityGroupSDKPath:
 		label = "audited SecurityGroup body collection"
 		wanted["BuildQueryString"] = true

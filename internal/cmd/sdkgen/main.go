@@ -57,6 +57,7 @@ type generator struct {
 	networkPythonFilters       *pythonFilterManifest
 	routerPythonFilters        *pythonFilterManifest
 	securityGroupPythonFilters *pythonFilterManifest
+	trunkPythonFilters         *pythonFilterManifest
 }
 
 func main() {
@@ -107,6 +108,10 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
+	trunkPythonFilters, err := loadTrunkPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
+	}
 	file, err := os.Open(*metadataPath)
 	if err != nil {
 		fatal(err)
@@ -125,7 +130,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters, qosPolicyPythonFilters: qosPolicyPythonFilters, subnetPoolPythonFilters: subnetPoolPythonFilters, networkPythonFilters: networkPythonFilters, routerPythonFilters: routerPythonFilters, securityGroupPythonFilters: securityGroupPythonFilters}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters, qosPolicyPythonFilters: qosPolicyPythonFilters, subnetPoolPythonFilters: subnetPoolPythonFilters, networkPythonFilters: networkPythonFilters, routerPythonFilters: routerPythonFilters, securityGroupPythonFilters: securityGroupPythonFilters, trunkPythonFilters: trunkPythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -274,7 +279,7 @@ func (g *generator) generate(path string) error {
 	// SubnetPool's local timestamp decoder uses an exported root wrapper that
 	// need not appear in the leaf's export signatures. Load the complete root
 	// scope before checking this explicitly audited dependency graph.
-	if sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath || sdkPath(path) == securityGroupSDKPath {
+	if sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath || sdkPath(path) == securityGroupSDKPath || sdkPath(path) == trunkSDKPath {
 		if _, err := g.importer.Import(upstreamModule); err != nil {
 			return err
 		}
@@ -383,6 +388,12 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateQoSPolicyBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
+	if err := g.trunkBodyLeafDeclarations(pkg.Path()); err != nil {
+		return err
+	}
+	if err := validateTrunkBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	if err := validateSecurityGroupBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
