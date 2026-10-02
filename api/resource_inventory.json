@@ -109,7 +109,8 @@
     "model": "Snapshot",
     "find": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "metadata_scope": "MetadataIn"
   },
   {
     "package": "gophercloudsdk/blockstorage/v2/transfers",
@@ -123,7 +124,8 @@
     "model": "Volume",
     "find": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "metadata_scope": "MetadataIn"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/attachments",
@@ -201,7 +203,8 @@
     "model": "Snapshot",
     "find": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "metadata_scope": "MetadataIn"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/transfers",
@@ -219,7 +222,8 @@
     "identity_details": true,
     "identity_all_projects": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "metadata_scope": "MetadataIn"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/volumetypes",

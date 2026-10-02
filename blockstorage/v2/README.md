@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 blockstorage/v2 API를 하나의 인증된 서비스 객�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Volumes.MetadataIn(ctx, ref)`와 `Snapshots.MetadataIn(ctx, ref)`는 ID 또는 이름을 한 번 해석해 Get·Merge·Replace·DeleteKeys를 같은 방식으로 제공합니다. Merge는 POST 병합, Replace는 PUT 전체 교체이며 nil/빈 map도 명시적 metadata 객체를 보냅니다. DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음, 그 외에는 입력 순서대로 삭제하고 실패 전 결과를 반환합니다. 실제 metadata·원문·헤더·성공 코드를 반환하며 Resource cache를 만들지 않습니다. [공통 metadata 사용법](../metadata/README.md), [Volume](volumes/README.md), [Snapshot](snapshots/README.md)에 Python 대응·ETag·옵션·부분 성공을 설명합니다. Backup metadata 하위 경로는 이 범위에 포함하지 않습니다.
+
 ## Go 사용
 
 ```go
@@ -40,9 +42,9 @@ _ = value
 | `QuotaSets` | [quotasets](quotasets/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `Snapshots` | [snapshots](snapshots/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `Snapshots` | [snapshots](snapshots/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답 |
 | `Transfers` | [transfers](transfers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
-| `Volumes` | [volumes](volumes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `Volumes` | [volumes](volumes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 
