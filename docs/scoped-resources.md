@@ -50,6 +50,8 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Trove database | `database.Databases.InInstance(ctx, instance)` | 데이터베이스 이름 |
 | Trove user | `database.Users.InInstance(ctx, instance)` | 사용자·host 식별자 (서비스 설명 참조) |
 | Magnum node group | `magnum.NodeGroups.InCluster(ctx, cluster)` | UUID |
+| Barbican secret consumer | `keymanager.SecretConsumers.InSecret(ctx, secret)` | service + resource_type + resource_id association; 별도 consumer ID 없음 |
+| Zaqar subscription | `messaging.Subscriptions.InQueue(ctx, queueName)` | 구독 ID; caller가 지정한 queue 이름을 추가 조회 없이 고정 |
 | Masakari host | `ha.Hosts.InSegment(ctx, segment)` | Host UUID; Segment UUID는 한 번 고정 |
 | Masakari VMove | `ha.VMoves.InNotification(ctx, notification)` | VMove UUID; Notification UUID와 numeric1.3 이상 필요 |
 | Keystone application credential | `identity.ApplicationCredentials.InUser(ctx, user)` | credential ID |
@@ -65,6 +67,10 @@ openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balan
 | Swift object | `swift.Objects.InContainer(ctx, container)` | object 이름 |
 
 Compute/Network/Image의 전체 API 객체는 `conn.ComputeV2(ctx)`, `conn.NetworkV2(ctx)`, `conn.ImageV2(ctx)`로 가져오거나 기존 서비스의 `API` 필드를 사용합니다. 표의 부모는 `resource.ID(...)` 또는 `resource.Name(...)`입니다. floating IP처럼 이름 필드가 없는 부모는 ID로 지정합니다.
+
+Barbican의 [SecretConsumer](../keymanager/v1/secretconsumers/README.md)는 secret ID로 범위를 고정합니다. 명시적 Name은 기존 Secrets 목록으로 한 번 해석하는 Go 편의 기능이며 Python consumer 문자열의 ID 해석과 구분합니다. Create·Delete는 실제 HTTP200의 secret 응답을 반환하고 List/All은 advertised offset next로 순회합니다. 별도 consumer Get·ID·Find·Wait는 제공하지 않습니다.
+
+Zaqar의 [Subscription](../messaging/v2/subscriptions/README.md) 부모는 `resource.Ref` 대신 queue 이름 문자열입니다. `conn.MessagingV2(ctx)`의 `Subscriptions.InQueue(ctx, "jobs")`는 queue를 조회하지 않고 Create·Get·List/All·Delete의 경로를 고정합니다. 연결의 안정적인 Client-ID를 공유하며 호출별 typed project header는 공유 client를 수정하지 않습니다. 목록은 Python MessageResource의 limit·marker 동작을 사용하고 TTL 생략은 서버 기본값을 유지합니다.
 
 Masakari의 `ha`는 `conn.InstanceHA(ctx)`로 얻습니다. [Host scope](../instanceha/v1/hosts/README.md)는 Segment 이름이나 UUID를 한 번 해석하며 [VMove scope](../instanceha/v1/vmoves/README.md)는 이름이 없는 Notification의 UUID를 사용합니다. 데이터베이스 `ID`와 URI UUID를 구별하고, scope의 부모 ID를 응답 body나 확장 query로 바꾸지 않습니다.
 

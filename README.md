@@ -55,6 +55,12 @@ Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default
 SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증거를 처리합니다.
 [SecretStore 비교](keymanager/v1/secretstores/README.md)와
 [Quota 비교](keymanager/v1/quotas/README.md)에 Python/Go 사용법과 범위를 설명합니다.
+`SecretConsumers.InSecret(ctx, resource.ID(secretID))`는 consumer association의 생성·삭제와
+offset 목록을 제공합니다. [SecretConsumer 비교](keymanager/v1/secretconsumers/README.md)에서
+association 입력과 실제 secret 응답을 구별합니다.
+Zaqar는 `conn.MessagingV2(ctx)`의 `Subscriptions.InQueue(ctx, queueName)`으로 queue를 고정하고
+구독 생성·조회·목록·삭제를 제공합니다. [Subscription 비교](messaging/v2/subscriptions/README.md)에
+Client-ID·project header·TTL 기본값·marker 순회와 Python/Go 사용법을 설명합니다.
 [Python/Go 목록 비교](docs/listing.md#명시적인-native-body-필터)에 raw query·로컬 cap·nil/빈 값과
 native 응답 모델의 경계를 설명합니다.
 
