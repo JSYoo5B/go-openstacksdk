@@ -320,7 +320,9 @@ func TestIdentityNeutronPageExtractorAndNativeListDriftFailGeneration(t *testing
 				}
 				mutations["unexpected concrete list"] = func(s string) string { return strings.Replace(s, "opts ListOptsBuilder)", "opts ListOpts)", 1) }
 			} else {
-				mutations["unexpected builder list"] = func(s string) string { return strings.Replace(s, "opts ListOpts)", "opts ListOptsBuilder)", 1) }
+				mutations["unexpected builder list"] = func(s string) string {
+					return strings.Replace(s, "opts ListOpts)", "opts ListOptsBuilder)", 1) + "\ntype ListOptsBuilder interface{ToListQuery()(string,error)}\nfunc(ListOpts)ToListQuery()(string,error){return \"\",nil}\n"
+				}
 				mutations["unexpected renamed opts"] = func(s string) string {
 					return strings.ReplaceAll(s, "type ListOpts struct", "type ConcreteOpts struct") + "\ntype ListOpts=ConcreteOpts\n"
 				}

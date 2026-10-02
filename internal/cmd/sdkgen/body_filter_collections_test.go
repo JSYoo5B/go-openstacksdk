@@ -95,14 +95,14 @@ func pinnedSubnetBodyIdentityDeclarations(t *testing.T) map[string]*ast.FuncDecl
 }
 
 func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing.T) {
-	if len(bodyFilterCollectionSpecs) != 9 || len(identityCollectionSpecs) != 20 {
+	if len(bodyFilterCollectionSpecs) != 10 || len(identityCollectionSpecs) != 20 {
 		t.Fatal("body-filter or identity inventory broadened")
 	}
 	enabled := 0
 	for _, identity := range identityCollectionSpecs {
 		pkg, plan := identityQueryFixture(t, identity, identityQueryFixtureSource(identity))
 		spec, ok := bodyFilterCollectionContract(pkg, plan, identity.parents)
-		wanted := identity.path == routerSDKPath || identity.path == "network/v2/extensions/qos/policies" || identity.path == "network/v2/extensions/security/addressgroups" || identity.path == "network/v2/extensions/subnetpools" || identity.path == "network/v2/networks" || identity.path == "network/v2/subnets"
+		wanted := identity.path == securityGroupSDKPath || identity.path == routerSDKPath || identity.path == "network/v2/extensions/qos/policies" || identity.path == "network/v2/extensions/security/addressgroups" || identity.path == "network/v2/extensions/subnetpools" || identity.path == "network/v2/networks" || identity.path == "network/v2/subnets"
 		if ok != wanted {
 			t.Fatal("body filter capability leaked or disappeared", identity.path, ok)
 		}
@@ -118,6 +118,9 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 		}
 		base := identityQueryFixtureSource(identity)
 		field := spec.fields[0]
+		if identity.model == "SecGroup" {
+			field = spec.fields[1]
+		}
 		if identity.model == "SubnetPool" {
 			// Its first selector is a timestamp decoded through a json:"-"
 			// field; mutate a direct native JSON field instead.
@@ -131,7 +134,9 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 			"wire field tag":         strings.Replace(base, `json:"`+field.key+`"`, `json:"different_body_key"`, 1),
 			"missing selected field": strings.Replace(base, field.member+" ", "OtherField ", 1),
 		}
-		if identity.model == "Policy" {
+		if identity.model == "SecGroup" {
+			mutations["nested rule decoder"] = strings.Replace(base, "Rules []rules.SecGroupRule", "Rules []string", 1)
+		} else if identity.model == "Policy" {
 			mutations["numeric rule decoder"] = strings.Replace(base, "Rules []map[string]any", "Rules []map[string]float64", 1)
 		} else if identity.model == "SubnetPool" {
 			mutations["arbitrary array decoder"] = strings.Replace(base, "Prefixes []string", "Prefixes []any", 1)
@@ -250,7 +255,7 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 			}
 		}
 	}
-	if enabled != 6 {
+	if enabled != 7 {
 		t.Fatal("missing audited body selectors", enabled)
 	}
 }
@@ -293,6 +298,22 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				}
 			}
 			if spec.rawRecord {
+				if identity.model == "SecGroup" {
+					body := string(source)
+					for _, required := range []string{"BodyFilterRecordValue:", "securityGroupBodyFilterValue(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", "nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)"} {
+						if !strings.Contains(body, required) {
+							t.Fatal("SecurityGroup raw owned pager missing", required, body)
+						}
+					}
+					for _, forbidden := range []string{"BodyFilterValue:", "json.Marshal(", "record.Value", `q.Del("status")`, "WithListQuery(", "upstream.List(", "listOptsBuilder"} {
+						if strings.Contains(body, forbidden) {
+							t.Fatal("concrete native list/query policy changed", forbidden, body)
+						}
+					}
+					helper := controlledEmittedMethod(t, source, "listBodyWithControl")
+					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "groups", err)`, "nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)")
+					return
+				}
 				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" || identity.model == "Network" || identity.model == "Router" {
 					body := string(source)
 					selector, envelope, extractor, kind := "addressGroupBodyFilterValue", "address_groups", "ExtractGroups", "addressgroups"
@@ -504,7 +525,7 @@ func TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields(t *testing.T) 
 			t.Fatal("inventory caller mutated generator-owned schema")
 		}
 	}
-	if enabled != 6 {
+	if enabled != 7 {
 		t.Fatal("audited inventory body capability count changed", enabled)
 	}
 }

@@ -44,6 +44,10 @@ func ExtractThings(p pagination.Page)([]Thing,error){_ = p.(ThingPage);return ni
 
 func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Package, map[string]*ast.FuncDecl) {
 	t.Helper()
+	return typedCollectionFixtureWithRuleSource(t, packagePath, source, securityGroupRuleFixtureSource)
+}
+func typedCollectionFixtureWithRuleSource(t *testing.T, packagePath, source, ruleSource string) (*types.Package, map[string]*ast.FuncDecl) {
+	t.Helper()
 	cloud := types.NewPackage(upstreamModule, "gophercloud")
 	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "ServiceClient", types.NewNamed(types.NewTypeName(token.NoPos, cloud, "ServiceClient", nil), types.NewStruct(nil, nil), nil)))
 	link := types.NewNamed(types.NewTypeName(token.NoPos, cloud, "Link", nil), types.NewStruct([]*types.Var{types.NewVar(token.NoPos, cloud, "Href", types.Typ[types.String]), types.NewVar(token.NoPos, cloud, "Rel", types.Typ[types.String])}, []string{`json:"href"`, `json:"rel"`}), nil)
@@ -79,7 +83,17 @@ func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Pa
 	if err != nil {
 		t.Fatal(err)
 	}
-	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page, "context": contexts, "net/http": http, "time": times}}
+	ruleSet := token.NewFileSet()
+	ruleFile, err := parser.ParseFile(ruleSet, "rule.go", ruleSource, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleConfig := types.Config{Importer: packageImports{"time": times}}
+	rules, err := ruleConfig.Check(securityGroupRulesNativePath, ruleSet, []*ast.File{ruleFile}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := types.Config{Importer: packageImports{upstreamModule: cloud, upstreamModule + "/pagination": page, securityGroupRulesNativePath: rules, "context": contexts, "net/http": http, "time": times}}
 	pkg, err := config.Check(packagePath, fset, []*ast.File{file}, nil)
 	if err != nil {
 		t.Fatal(err)

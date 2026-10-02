@@ -76,6 +76,16 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		source = strings.Replace(source, "import \"net/http\"\n", "", 1)
 		source += "\nfunc(*Router)UnmarshalJSON([]byte)error{return nil}\n"
 	}
+	if spec.path == securityGroupSDKPath {
+		source = strings.Replace(source, "type SecGroup struct{ID string;Name string}", "type SecGroup struct{ID string;Name string;Description string;Rules []rules.SecGroupRule `json:\"security_group_rules\"`;Stateful bool `json:\"stateful\"`;TenantID string `json:\"tenant_id\"`;UpdatedAt time.Time `json:\"-\"`;CreatedAt time.Time `json:\"-\"`;ProjectID string `json:\"project_id\"`;Tags []string `json:\"tags\"`;RevisionNumber int `json:\"revision_number\"`}", 1)
+		source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"\nimport rules \""+securityGroupRulesNativePath+"\"", 1)
+		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;Name string `q:\"name\"`;Description string `q:\"description\"`;Stateful *bool `q:\"stateful\"`;TenantID string `q:\"tenant_id\"`;ProjectID string `q:\"project_id\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`;Tags string `q:\"tags\"`;TagsAny string `q:\"tags-any\"`;NotTags string `q:\"not-tags\"`;NotTagsAny string `q:\"not-tags-any\"`;RevisionNumber *int `q:\"revision_number\"`}", 1)
+		source = strings.Replace(source, "type ListOptsBuilder interface{ToListQuery()(string,error)}\nfunc(ListOpts)ToListQuery()(string,error){return \"\",nil}", "", 1)
+		source = strings.Replace(source, "type GetResult struct{Body any;Header http.Header;Err error}", "type commonResult struct{gophercloud.Result}\ntype GetResult struct{commonResult}", 1)
+		source = strings.Replace(source, "func(GetResult)Extract()(*SecGroup,error)", "func(commonResult)Extract()(*SecGroup,error)", 1)
+		source = strings.Replace(source, "import \"net/http\"\n", "", 1)
+		source += "\nfunc(*SecGroup)UnmarshalJSON([]byte)error{return nil}\nvar _ rules.SecGroupRule\n"
+	}
 	if spec.path == "network/v2/extensions/layer3/routers" || spec.path == "network/v2/extensions/security/groups" {
 		page, extract := "RouterPage", "ExtractRouters"
 		if spec.rawListIterator != "" {

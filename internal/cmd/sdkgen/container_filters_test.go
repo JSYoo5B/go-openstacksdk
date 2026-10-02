@@ -110,7 +110,7 @@ func TestContainerPythonFilterManifestKeepsInheritedQueriesAndPropertyAccessors(
 
 func TestContainerBodyFilterNativeContractRejectsNestedModelsDecoderPagerAndSourceDrift(t *testing.T) {
 	pkg, plan := containerFilterNativeFixture(t, containerFilterNativeFixtureSource)
-	if plan == nil || !containerBodyNativeSchema(pkg, plan) || identityCollectionEnabled(pkg, plan, 0) || len(identityCollectionSpecs) != 20 || len(bodyFilterCollectionSpecs) != 9 {
+	if plan == nil || !containerBodyNativeSchema(pkg, plan) || identityCollectionEnabled(pkg, plan, 0) || len(identityCollectionSpecs) != 20 || len(bodyFilterCollectionSpecs) != 10 {
 		t.Fatal(plan)
 	}
 	if err := validateContainerBodyNativeDeclarations(pkg, containerBodyPinnedDeclarations(t), plan); err != nil {
