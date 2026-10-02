@@ -95,8 +95,14 @@ native 모델이 생략하는 `prefixlen`과 nested 추가 필드는 원본 페�
 반환값은 기존 typed Subnet입니다. `resource.WithFilter`/`WithFilters`는 Python 속성 이름을
 받아 query 24개와 로컬 Body 9개로 자동 분류합니다. 예를 들어 `is_dhcp_enabled`는
 `enable_dhcp` query이고 `prefix_length`는 원본 `prefixlen`의 로컬 비교입니다.
-현재 이 semantic 분류는 Subnet에 연결되어 있습니다.
 [Subnet Python/Go 사용법](v2/subnets/README.md)에 bulk 교체·별칭 우선순위·충돌 검사를 설명합니다.
+
+`service.API.SecurityAddressGroups.Resources`도 `resource.WithFilter`/`WithFilters`로
+query 8개와 로컬 Body 3개를 분류합니다. `name`·`project_id`는 서버 query이고
+`id`·`tenant_id`·`addresses`는 원본 응답의 로컬 조건입니다. native 모델에 없는 tenant ID와
+주소 배열의 null 요소도 원문으로 비교하지만 반환값은 기존 typed AddressGroup입니다.
+[AddressGroup Python/Go 사용법](v2/extensions/security/addressgroups/listing/README.md)에
+필드 선택과 이름 hint·raw query·페이지 경계의 차이를 설명합니다.
 
 ## 삭제와 대기
 

@@ -277,6 +277,25 @@ JSON number는 원래 정밀도/표기, null은 URL 생략으로 처리합니다
 전체 Resource descriptor/coercion/cache·상속 continuation/session·Proxy `__conflicting_attrs`
 복구·deprecated JMESPath 조건은 별도 비교 범위로 남습니다.
 
+### AddressGroup의 속성 이름 분류
+
+`SecurityAddressGroups.Resources.List/All`은 Python `conn.network.address_groups(**query)`의
+query 8개와 non-query Body 3개를 `resource.WithFilter`/`WithFilters`로 분류합니다.
+`name`·`description`·`project_id`·`fields`·정렬·페이지 인자는 서버에 전달하며,
+`id`·`tenant_id`·`addresses`는 native 디코드 뒤 원본 행에서 비교합니다. `tenant_id`는
+`project_id` query의 별칭으로 바꾸지 않으며 native 모델에 없는 원문 값도 비교할 수 있습니다.
+
+`WithName`의 기존 서버 hint와 로컬 이름 조건은 유지됩니다. semantic `name`은 서버
+query만 지정하므로 두 옵션을 동시에 쓰면 같은 query 목적지의 충돌 오류입니다. raw
+`tenant_id`·`id`·`addresses` query는 같은 이름의 로컬 Body 조건과 독립적입니다.
+raw `status`도 기존대로 서버에 전달하지만 모델에 Status가 없어 `WithStatus`는 지원하지 않습니다.
+
+주소 배열의 원문 null 요소는 native `[]string`의 빈 문자열 변환과 구분합니다.
+전체 페이지의 native 디코드는 로컬 조건과 cap보다 먼저 적용되며 결과 모델은 그대로 반환합니다.
+[AddressGroup 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)에
+Python/Go 예제, 이름과 프로젝트 필터, 원문·native 결과 및 plural-links 페이지 경계를 설명합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/address_group.json)는 고정 소스를 검증합니다.
+
 ### Secret의 속성 이름 분류
 
 `Secrets.Resources.List/All`은 Python `conn.key_manager.secrets(**query)`의

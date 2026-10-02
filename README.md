@@ -49,6 +49,9 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 Subnet은 [선언된 query 24개·로컬 필드 9개](network/v2/subnets/README.md)를
 `resource.WithFilter`/`WithFilters`로 자동 분류합니다. Python 이름의 query 변환과 원본
 응답 비교를 SDK가 처리하며, 값 복사·bulk 교체·충돌 검사도 같은 옵션에서 제공합니다.
+AddressGroup은 [query 8개·로컬 필드 3개](network/v2/extensions/security/addressgroups/listing/README.md)를
+분류합니다. `project_id`는 서버 query이고 `tenant_id`는 원본 응답의 로컬 조건입니다.
+`id`·`addresses`도 원문으로 비교하며 기존 이름 조회와 native 결과 모델을 유지합니다.
 
 Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
