@@ -61,6 +61,9 @@ association 입력과 실제 secret 응답을 구별합니다.
 `Secrets.Fetch(ctx, resource.ID(secretID))`는 metadata를 조회한 뒤 content type이 있을 때만
 payload를 가져옵니다. [Secret 조회 비교](keymanager/v1/secrets/README.md)에 기본 선택 규칙,
 metadata 전용 옵션, 텍스트·바이너리 결과와 실패 시 응답 보존을 설명합니다.
+`Secrets.FindIdentity(ctx, identity, options...)`는 직접 조회와 이름 검색을 SDK가 처리하며
+공통 `resource.WithIdentityFindIgnoreMissing/Fallback` 옵션을 받습니다.
+[Secret 자동 조회 비교](keymanager/v1/secrets/finding/README.md)에 두 조회 경로의 결과와 오류 정책을 설명합니다.
 Zaqar는 `conn.MessagingV2(ctx)`의 `Subscriptions.InQueue(ctx, queueName)`으로 queue를 고정하고
 구독 생성·조회·목록·삭제를 제공합니다. [Subscription 비교](messaging/v2/subscriptions/README.md)에
 Client-ID·project header·TTL 기본값·marker 순회와 Python/Go 사용법을 설명합니다.

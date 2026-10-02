@@ -5,6 +5,11 @@ requests the secret's JSON representation and conditionally requests its payload
 The existing native `Get`, `GetPayload`, user-metadata operations, and `Resources`
 contracts remain available.
 
+`FindIdentity(ctx, identity, options...)` also provides library-owned ID/name
+lookup with conditional payload on direct success and metadata-only list
+fallback. [Identity lookup comparison](finding/README.md) describes shared
+options, nullable/full-reference matching, duplicate detection, and pagination.
+
 ```go
 package example
 
