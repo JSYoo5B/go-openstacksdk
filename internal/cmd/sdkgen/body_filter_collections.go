@@ -23,7 +23,7 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 	{path: qosPolicySDKPath, model: "Policy", rawRecord: true, fields: qosPolicyBodyCollectionFields()},
 	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", rawRecord: true, fields: addressGroupBodyCollectionFields()},
 	{path: subnetPoolSDKPath, model: "SubnetPool", rawRecord: true, fields: subnetPoolBodyCollectionFields()},
-	{path: "network/v2/networks", model: "Network", fields: []bodyFilterCollectionField{{key: "subnets", member: "Subnets", aliases: []string{"subnet_ids"}}}},
+	{path: networkSDKPath, model: "Network", rawRecord: true, fields: networkBodyCollectionFields()},
 	{path: "network/v2/subnets", model: "Subnet", rawRecord: true, fields: subnetBodyCollectionFields()},
 	{path: "keymanager/v1/secrets", model: "Secret", rawRecord: true, fields: secretBodyCollectionFields()},
 	{path: "keymanager/v1/containers", model: "Container", rawRecord: true, fields: containerBodyCollectionFields()},
@@ -31,6 +31,9 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == networkSDKPath {
+		return networkBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == subnetPoolSDKPath {
 		return subnetPoolBodyCollectionMetadataValid(spec)
 	}
@@ -87,10 +90,8 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 		return qosPolicyBodyNativeSchema(pkg, plan)
 	case subnetPoolSDKPath:
 		return subnetPoolBodyNativeSchema(pkg, plan)
-	case "network/v2/networks":
-		if !identityNetworkListSchema(pkg, plan) {
-			return false
-		}
+	case networkSDKPath:
+		return networkBodyNativeSchema(pkg, plan)
 	default:
 		return false
 	}
@@ -159,7 +160,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == subnetPoolSDKPath {
+		if spec.path == networkSDKPath {
+			emitNetworkBodyRecordAdapter(e, plan)
+		} else if spec.path == subnetPoolSDKPath {
 			emitSubnetPoolBodyRecordAdapter(e, plan)
 		} else if spec.path == qosPolicySDKPath {
 			emitQoSPolicyBodyRecordAdapter(e, plan)

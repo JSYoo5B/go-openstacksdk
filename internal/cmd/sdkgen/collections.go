@@ -264,9 +264,16 @@ func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl,
 
 func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) error {
 	e := emitter{pkg: pkg, imports: map[string]string{}, pythonFilters: g.pythonFilterFor(pkg, plan)}
-	e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
-	emitCollectionAdapter(&e, plan, "a", nil)
-	e.printf("}\n")
+	if sdkPath(pkg.Path()) == networkSDKPath {
+		e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return resource.NewCollection(a.ResourceAdapter())}\n", plan.modelName)
+		e.printf("// ResourceAdapter returns a fresh SDK-owned adapter for composing the Network facade.\nfunc(a *API)ResourceAdapter()resource.Adapter[%s]{return ", plan.modelName)
+		emitCollectionAdapterValue(&e, plan, "a", nil)
+		e.printf("}\n")
+	} else {
+		e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
+		emitCollectionAdapter(&e, plan, "a", nil)
+		e.printf("}\n")
+	}
 	emitBodyFilterList(&e, plan)
 	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
 	if identityCollectionEnabled(pkg, plan, 0) {
@@ -285,6 +292,12 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 
 // Both global and parent-bound resources use exactly the same adapter policies.
 func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, parents []string) {
+	e.printf("resource.NewCollection(")
+	emitCollectionAdapterValue(e, plan, receiver, parents)
+	e.printf(")")
+}
+
+func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver string, parents []string) {
 	e.use("context")
 	e.use("net/url")
 	e.use("iter")
@@ -294,7 +307,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.use("strings")
 	}
 	arguments := func(id string) string { return strings.Join(append(append([]string{"ctx"}, parents...), id), ",") }
-	e.printf("resource.NewCollection(resource.Adapter[%s]{\nKind:%q,\n", plan.modelName, e.pkg.Name())
+	e.printf("resource.Adapter[%s]{\nKind:%q,\n", plan.modelName, e.pkg.Name())
 	emitBodyFilterCollection(e, plan, len(parents))
 	emitPythonFilterDescriptor(e, plan, len(parents))
 	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok {
@@ -391,7 +404,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 		e.use("gophercloudsdk/request")
 		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, controlledListName(list), listArgs, list)
 	}
-	e.printf("},})")
+	e.printf("},}")
 }
 
 func (g *generator) writeCollectionInventory() error {

@@ -54,6 +54,7 @@ type generator struct {
 	addressGroupPythonFilters *pythonFilterManifest
 	qosPolicyPythonFilters    *pythonFilterManifest
 	subnetPoolPythonFilters   *pythonFilterManifest
+	networkPythonFilters      *pythonFilterManifest
 }
 
 func main() {
@@ -92,6 +93,10 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
+	networkPythonFilters, err := loadNetworkPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
+	}
 	file, err := os.Open(*metadataPath)
 	if err != nil {
 		fatal(err)
@@ -110,7 +115,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters, qosPolicyPythonFilters: qosPolicyPythonFilters, subnetPoolPythonFilters: subnetPoolPythonFilters}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters, addressGroupPythonFilters: addressGroupPythonFilters, qosPolicyPythonFilters: qosPolicyPythonFilters, subnetPoolPythonFilters: subnetPoolPythonFilters, networkPythonFilters: networkPythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -259,7 +264,7 @@ func (g *generator) generate(path string) error {
 	// SubnetPool's local timestamp decoder uses an exported root wrapper that
 	// need not appear in the leaf's export signatures. Load the complete root
 	// scope before checking this explicitly audited dependency graph.
-	if sdkPath(path) == subnetPoolSDKPath {
+	if sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath {
 		if _, err := g.importer.Import(upstreamModule); err != nil {
 			return err
 		}
@@ -356,6 +361,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateQoSPolicyBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
+	if err := validateNetworkBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	if err := validateSubnetPoolBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
