@@ -12122,6 +12122,381 @@
         "Pinned Resource._get_next_link has RFC Link-header and limit/marker continuation paths beyond the native subnets_links pager. Deprecated Proxy._list jmespath_filters is consumed from direct query and has no ordinary Go expression-filter option. FindIdentity/native typed List do not acquire these ordinary Body options.",
         "Pinned Proxy._list restores its special __conflicting_attrs dictionary into kwargs before Resource.list (openstack/proxy.py:896-902). The semantic declared-field API does not implement that recovery branch; its source hash is verification evidence rather than a claim that every inherited Proxy branch is mapped."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/secret_stores",
+      "source_fingerprint": "1902e76ae70dd45fcf8ce5789a4b7635038a37ed5c1cdeb2c1d5142edb399e4f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretstores.New",
+        "gophercloudsdk/keymanager/v1/secretstores.API.List",
+        "gophercloudsdk/keymanager/v1/secretstores.API.All",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListOptions",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListGlobalDefault",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListQuery",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListMaxItems",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:361 delegates SecretStore to Resource.list. The owned lazy List/All performs GET secret-stores accepting only 200 with a secret_stores array; typed name/status/global_default/plugin/created/updated plus inherited limit/marker are server query values, not extra local name/status predicates. Explicit false is preserved and raw repeated/empty extension values, owned option snapshots, iterator slice snapshots, independent reuse and concurrent library-option reuse are tested.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Listed models preserve canonical typed fields and complete raw row evidence without following external references. Case-variant extensions cannot overwrite or break canonical decoding; response null/omission, literal-id priority and raw percent/Unicode/space/trailing-slash reference behavior remain observable.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences"
+          ]
+        },
+        {
+          "behavior": "A supplied limit, including a generated max-items limit hint, enables marker fallback on short nonempty pages using the literal canonical id if present or the FULL original secret_store_ref otherwise; null/empty literal id never falls back to the ref and yields accepted response evidence if a continuation marker is needed. With no limit or hint only advertised links are followed, and empty pages stop.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresMarkerFallbackUsesFullRawReference",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Local max-items uses a limit hint only if limit is absent, preserves explicit limit, counts raw rows before yield and stops before trailing row decode/continuation after the cap. Single-page, consumer break and empty-page stops perform no extra HTTP. Invalid consumed models or malformed whole-page JSON retain full accepted response body/header/status; All discards partial output on terminal errors.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence"
+          ]
+        },
+        {
+          "behavior": "Advertised next/plural-links/HTTP Link continuation preserves filters and the same origin/exact collection path; foreign or changed-path/filter links and cycles fail. Later HTTP/cancellation/source-type/read errors remain terminal with no resend or partial All result. Live shared provider/middleware/token and lazy unsupported/negative/nil/control-query preflight are preserved.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresContinuationGuardsAndTerminalFailures",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretstores/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
+        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
+        "WithListQuery is an explicit wire extension, preserving repeated/empty values and overriding a same-key typed query; it does not automatically discard unknown query or classify Python Body kwargs. SDK controls are dedicated owned options. Same-origin/exact-path/filter guards and immediate cap/first-page termination are explicit Go policies, not claims that Barbican supports marker fallback on a live deployment."
+      ],
+      "remaining": [
+        "Complete pinned Resource.list/QueryParameters automatic query alias/transposition/unknown-discard and declared non-query Body local classification, descriptor equality/default/coercion semantics, deprecated Proxy._list JMESPath and __conflicting_attrs recovery are not implemented for SecretStore.",
+        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
+        "Inherited per-call Resource.list session/resource_type/base_path/microversion/header/allow_unknown_params controls and full optional request-cache behavior remain separate. Existing guarded link/marker paging proves its stated lane, not every inherited Resource pagination policy or response-descriptor state."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/get_global_default_secret_store",
+      "source_fingerprint": "06af4323c4016ba21d0b411240d1644cacaff4ebcbdb4ce9b4bb9c777927709d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretstores.New",
+        "gophercloudsdk/keymanager/v1/secretstores.API.GetGlobalDefault"
+      ],
+      "contracts": [
+        {
+          "behavior": "The deployment global default is read with one GET secret-stores/global-default accepting 200 and a ROOT object. There is no project/name lookup, response-ref follow-up or implicit global/preferred fallback. Source client/provider, configured headers, response ownership and exact raw/canonical model fields are retained.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "The shared singleton decoder rejects unexpected success status, malformed/null/array root JSON and invalid canonical typed fields with accepted evidence. Actual HTTP404 remains strict NotFound with native cause; wrapped transport404 remains transport failure, not resource absence. Nil/invalid source and canceled context fail without HTTP; no error causes a resend.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresStrictSingletonErrorsAndAcceptedEvidence",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretstores/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
+        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
+        "Go returns a decoded value and context/error instead of a mutable seeded Python SecretStore Resource. Typed canonical field/ref validation is a deliberate stricter policy; Body retains accepted untyped extension data."
+      ],
+      "remaining": [
+        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
+        "Inherited Resource.fetch/Proxy request cache and generic per-call session/adapter/base_path/header/microversion controls remain separate from these fixed singleton getters. Neither SecretStore nor this mapping establishes a class-specific maximum-version negotiation requirement."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/get_preferred_secret_store",
+      "source_fingerprint": "5dcee4cc7a15557103d6f03faa2ff4767e5d163a9a61e615654b365be95b6c1a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretstores.New",
+        "gophercloudsdk/keymanager/v1/secretstores.API.GetPreferred"
+      ],
+      "contracts": [
+        {
+          "behavior": "The current authenticated-project preferred backend is read with one GET secret-stores/preferred accepting 200 and a ROOT object. There is no project/name lookup, response-ref follow-up or implicit global/preferred fallback. Source client/provider, configured headers, response ownership and exact raw/canonical model fields are retained.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "The shared singleton decoder rejects unexpected success status, malformed/null/array root JSON and invalid canonical typed fields with accepted evidence. Actual HTTP404 remains strict NotFound with native cause; wrapped transport404 remains transport failure, not resource absence. Nil/invalid source and canceled context fail without HTTP; no error causes a resend.",
+          "tests": [
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresStrictSingletonErrorsAndAcceptedEvidence",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretstores/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
+        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
+        "Go returns a decoded value and context/error instead of a mutable seeded Python SecretStore Resource. Typed canonical field/ref validation is a deliberate stricter policy; Body retains accepted untyped extension data."
+      ],
+      "remaining": [
+        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
+        "Inherited Resource.fetch/Proxy request cache and generic per-call session/adapter/base_path/header/microversion controls remain separate from these fixed singleton getters. Neither SecretStore nor this mapping establishes a class-specific maximum-version negotiation requirement."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/get_quota",
+      "source_fingerprint": "f99c8f1e357f5da29b11e750640eb414f720e32d0f10cea7850cab83219d3cee",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/quotas.New",
+        "gophercloudsdk/keymanager/v1/quotas.API.Get",
+        "gophercloudsdk/keymanager/v1/quotas.WithGetHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:457 uses requires_id=False. The singleton GET quotas accepts only 200 with a non-null quotas object and uses the provider token current project; no project/name lookup or implicit token-project inference from configuration is submitted. Raw missing/null/large integer/extension/case-variant values and actual metadata are preserved.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "Wrong/missing/null/array envelopes and malformed accepted JSON/read failures retain ResponseError body/header/status and cause without resend. Unexpected GET203 retains native cause; nil/invalid source, unsupported field/query/header inputs and canceled/nil context fail before HTTP.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/quotas/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "GET fields secrets/orders/containers/consumers/cas are json.RawMessage rather than mutable untyped Python descriptors: omitted/null/large integer/unknown values and exact canonical-versus-case-variant keys remain in owned Body/Data, with actual response headers/status.",
+        "Effective quotas are an ID-free read. The singleton returns an owned decoded value and does not fabricate a cached quota ID or automatically negotiate a class-specific microversion."
+      ],
+      "remaining": [
+        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
+        "Optional inherited Proxy GET cache/cache_enabled/skip_cache policies are not provided by the singleton API. Dedicated owned headers are supported, but arbitrary Python Resource/adapter injection is not a new public overload."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/get_project_quota",
+      "source_fingerprint": "48684186e2e4ee16182c8cec785e19e236ea7130df420712671f8b8c6520747a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/quotas.New",
+        "gophercloudsdk/keymanager/v1/quotas.API.InProject",
+        "gophercloudsdk/keymanager/v1/quotas.ProjectScope.Get",
+        "gophercloudsdk/keymanager/v1/quotas.ProjectScope.ProjectID",
+        "gophercloudsdk/keymanager/v1/quotas.WithGetHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:421 extracts the project ID. InProject constructs an explicit-ID scope with zero HTTP; GET project-quotas/{escaped id} accepts only 200 with a project_quotas object. Unicode/plus IDs are safely escaped, incidental response project/id values never retarget the scope, and the original ResourceBase/current provider token remain effective.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "Wrong configured-quota envelope retains accepted evidence. Invalid/unsupported project references, nil/invalid source, protected or unsupported request extensions and canceled context fail before HTTP; the common strict decode/read/no-resend policy remains intact.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/quotas/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "GET fields secrets/orders/containers/consumers/cas are json.RawMessage rather than mutable untyped Python descriptors: omitted/null/large integer/unknown values and exact canonical-versus-case-variant keys remain in owned Body/Data, with actual response headers/status.",
+        "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared."
+      ],
+      "remaining": [
+        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
+        "The direct Python str-or-Project input is mapped to an explicit ID scope rather than arbitrary Python Project Resource overloads. Optional inherited Proxy GET cache controls are not provided by this scope."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/update_project_quota",
+      "source_fingerprint": "903588a91c076e255493e9d6ecc51f73c731896892a7f806009ea13ed270bea6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/quotas.New",
+        "gophercloudsdk/keymanager/v1/quotas.API.InProject",
+        "gophercloudsdk/keymanager/v1/quotas.ProjectScope.Update",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateOptions",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateSecrets",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateOrders",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateContainers",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateConsumers",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateCAs",
+        "gophercloudsdk/keymanager/v1/quotas.WithUpdateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "PUT project-quotas/{fixed escaped id} sends one project_quotas envelope, accepts only 204 and replaces overrides: omitted fields use server defaults, empty typed options sends an empty object, and explicit 0/-1/-2/large int64 values remain present. There is no read-modify-write or automatic follow-up GET and no response-ID/token-project retargeting.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasReplacementPresenceAndOwnedOptions",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "The SDK owns Optional[int64] field presence, options snapshots, last-wins helpers/bulk replacement and reusable case-insensitive header snapshots. The stock integer-only schema policy rejects null, bool, fraction, numeric string, out-of-int64 input and unknown/core body extensions rather than delegating unsafe untyped attrs; no minimum beyond the published integer schema is fabricated. Invalid source/options/context fail before HTTP and source mutations by options are rechecked.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasReplacementPresenceAndOwnedOptions",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation"
+          ]
+        },
+        {
+          "behavior": "UpdateResult is the actual accepted204 body/header/status acknowledgement, not a configured Quota synthesized from request inputs. Unexpected status preserves native cause; accepted read failure preserves actual response evidence, transport/context causes remain observable and no failure is resent.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/quotas/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared.",
+        "Python fields are untyped attrs; Go deliberately uses optional int64 and preflight null/unknown rejection for the stock controller schema, while GET values remain unrestricted precise raw JSON. The integer schema has no minimum, so <-1 is not guessed invalid.",
+        "Pinned Resource.commit discards dirty id and skips HTTP when no dirty attributes remain (resource.py:1914-1919). Go empty UpdateOpts explicitly submits replacement {project_quotas:{}} to reset all overrides; headers do not turn it into Python dirty-state behavior.",
+        "Python returns its seeded ProjectQuota Resource after commit. Go returns only actual204 acknowledgement without creating a cached response from inputs or automatically fetching configuration."
+      ],
+      "remaining": [
+        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
+        "The Python commit lifecycle, including same-value/current comparison, sticky dirty attributes, no-change HTTP0, response merge/reset, returned Resource identity and inherited conflict-retry controls, is not implemented by this stateless replacement API. The empty-request reset policy is an explicit Go difference, not evidence that the lifecycle is closed."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/delete_project_quota",
+      "source_fingerprint": "723ca95bae08e7550ba217500a3e3b74215ad01c2576c2c20ed2fbbe3a226c93",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/quotas.New",
+        "gophercloudsdk/keymanager/v1/quotas.API.InProject",
+        "gophercloudsdk/keymanager/v1/quotas.ProjectScope.Delete",
+        "gophercloudsdk/keymanager/v1/quotas.WithDeleteOptions",
+        "gophercloudsdk/keymanager/v1/quotas.WithDeleteIgnoreMissing",
+        "gophercloudsdk/keymanager/v1/quotas.WithDeleteHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE project-quotas/{fixed escaped id} accepts204, resets configured overrides and returns error-only without an extra GET or synthesized quota. Default ignoreMissing=true suppresses actual HTTP404 only; explicit false preserves native404, while403/409/503/unexpected200 remain errors. The fixed project is independent of response/token project.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasMissingDeleteAndNativeFailures",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
+          ]
+        },
+        {
+          "behavior": "A transport failure wrapping a native404 and an accepted204 body-read failure wrapping a native404 remain terminal despite default missing suppression. ResponseError keeps accepted body/header/status and native cause; no wrapped failure is resent. Nil/invalid source, unsupported query/body/protected headers and canceled context fail before HTTP.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasMissingDeleteAndNativeFailures",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight",
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "tests": [
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
+            "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/quotas/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared.",
+        "The direct Python default ignore_missing=True and error-only success are retained; explicit Go missing/header options replace kwargs. Only actual HTTP absence is ignored, preserving transport/accepted-response errors containing a404 cause."
+      ],
+      "remaining": [
+        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
+        "Inherited Resource.delete descriptor/cached-instance behavior, base_path/microversion/params/error_message and adapter/session policies are not exposed by the fixed project scope. No project-name resolver or arbitrary Project object overload is implied."
+      ]
     }
   ]
 }
