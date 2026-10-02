@@ -6,6 +6,7 @@ import (
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/snapshots"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
+	snapshotmetadata "gophercloudsdk/internal/snapshotmetadata"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
@@ -314,21 +315,21 @@ func (b updateMetadataOptsBuilder) ToSnapshotUpdateMetadataMap() (map[string]any
 }
 
 // UpdateMetadata invokes the upstream API with library-owned builders and result handling.
-func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (*Snapshot, error) {
+func (a *API) UpdateMetadata(ctx context.Context, id string, opts UpdateMetadataOpts, options ...UpdateMetadataOption) (map[string]any, error) {
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("UpdateMetadata", "snapshots", err)
-		var zero0 *Snapshot
+		var zero0 map[string]any
 		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("UpdateMetadata", "snapshots", err)
-		var zero0 *Snapshot
+		var zero0 map[string]any
 		return zero0, err
 	}
 	_opts := updateMetadataOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.UpdateMetadata(ctx, a.client, id, _opts)
-	value0, err := result.Extract()
+	value0, err := snapshotmetadata.Extract(result.Result)
 	err = request.Wrap("UpdateMetadata", "snapshots", err)
 	return value0, err
 }

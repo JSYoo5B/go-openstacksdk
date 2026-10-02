@@ -704,7 +704,8 @@
       "name": "UpdateMetadata",
       "sdk_package": "gophercloudsdk/blockstorage/v2/snapshots",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "result_policy": "sdk_snapshot_metadata_object"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v2/snapshots",
@@ -1296,7 +1297,8 @@
       "name": "UpdateMetadata",
       "sdk_package": "gophercloudsdk/blockstorage/v3/snapshots",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "result_policy": "sdk_snapshot_metadata_object"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/snapshots",
