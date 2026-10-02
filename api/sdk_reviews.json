@@ -13989,6 +13989,150 @@
         "Python Resource._get_next_link top-level/RFC Link-header and limit/marker fallbacks, limit hints and inherited pagination/session/retry/cache behavior are not closed by native routers_links source guards or original-row pairing.",
         "Deprecated Proxy._list jmespath_filters and the explicit __conflicting_attrs restoration branch have no corresponding ordinary Go expression/recovery option. Typed native List, existing explicit Ref lookup/FindIdentity and actions are separate contracts; this review does not claim complete direct Proxy or inherited Resource parity."
       ]
+    },
+    {
+      "operation": "python:network/v2/security_groups",
+      "source_fingerprint": "fa67ab131f54a42f91ec1a417e28fc5bc494235cb7be49b280a1f006a1753baf",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/security/groups.New",
+        "gophercloudsdk/network/v2/extensions/security/groups.API.All",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithPageSize",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.Network",
+        "gophercloudsdk.Connection.NetworkV2"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned direct Proxy.security_groups delegates query to SecurityGroup Resource.list. Ordinary SecurityGroups.Resources.List/All and API.All provide SDK-owned WithFilter/WithFilters classification and explicit WithBodyFilter predicates without caller builders or callbacks. Leaf and cached Connection.Network().API/NetworkV2 facades share the existing native service/provider client; no handwritten top-level SecurityGroup collection or public ResourceAdapter is added.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersEntireQueryAndAliasDescriptor",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupFilterEmissionPreservesOwnedFullQueryPagersAndPriorNineBindings"
+          ]
+        },
+        {
+          "behavior": "Seventeen canonical query attributes and twenty-one accepted canonical/wire spellings include inherited limit/marker/tags and shared/tag aliases. Both project_id and tenant_id are explicit separate server query keys; the response project alias does not collapse them. Inherited revision_number, stateful, is_shared, id and name are also query-only. Only created_at, updated_at and security_group_rules are local Body properties.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersEntireQueryAndAliasDescriptor",
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersPreflightAndNativeSurfaces",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupPythonManifestKeepsQueryAliasesAndOnlyThreeJSONBodyProperties"
+          ]
+        },
+        {
+          "behavior": "Semantic bulk canonical query names take precedence by presence over wire aliases even for null/false/empty values. Individual same-wire options are last-wins. Scalar arrays retain repeated URL values and exact number spelling while omitting null members; nil/empty arrays omit URL values without losing option-key presence. Query objects/nested arrays and nine source controls reject lazily. Unknown semantic names are discarded before value validation.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersEntireQueryAndAliasDescriptor",
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues"
+          ]
+        },
+        {
+          "behavior": "Semantic query conditions conflict before HTTP with raw query/page-size/name hints for the same wire key; semantic and explicit Body conditions for the same raw field also conflict even when values agree. Explicit Body filters support exactly the three original response keys, with no queried name/id/tenant/revision/stateful/shared selectors. Raw WithQuery remains an independent literal wire extension. WithStatus remains unsupported because the native model has no Status field.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersPreflightAndNativeSurfaces",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear"
+          ]
+        },
+        {
+          "behavior": "All three local fields use original JSON without response-only boolean or integer normalization. Missing/null rules match null, empty arrays remain distinct, and null rule members stay null for comparison while the returned native Rules contains zero structs. Original date strings are compared literally after native time decoding; equal instants with different spellings need not match.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersRawDescriptorsAndNativeProjection",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesOwnQueryRowsAndLiveSource"
+          ]
+        },
+        {
+          "behavior": "Original rule arrays retain unknown nested keys, precise large JSON numbers and complete ordered elements after successful native decoding. Whole-array objects compare fully rather than as recursive subsets; standalone object filters use the existing subset policy on nonempty actual objects. Native Rules, Stateful, ProjectID/TenantID, revision integers and group/rule timestamp projections are returned unchanged. Known native fields may reject before any raw comparison.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersRawDescriptorsAndNativeProjection",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesControlsAndWholePageDecoding"
+          ]
+        },
+        {
+          "behavior": "Options deeply snapshot maps, lists and raw JSON, permit independent concurrent reuse, and validate only final selected values. Semantic bulk replacement/clear changes only its namespace; raw query and explicit Body conditions remain independent. Mutating returned rules cannot mutate saved options or later responses. Invalid options and canceled contexts produce an iterator error before HTTP rather than silent truncation.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesLazyPreflightAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Local max_items counts raw rows before Body/name predicates without match refill or wire-limit inference. First-page mode and consumer break stop before continuation. Native extraction validates every row of the current page, including malformed known group/rule fields after a raw cap. Consumed null rows with Body filters reject, query-only null rows keep native zero models, and empty object rows remain valid.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersControlsAndNativeWholePageFailures",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesControlsAndWholePageDecoding",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersPreflightAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned raw pager preserves the hyphenated security-groups route and underscore security_groups envelope, native 200/204/300 and security_groups_links last-rel-next behavior. Non-JSON204 completes empty; JSON-empty204 produces native EOF. Top-level next does not acquire support. Later HTTP/native decode failures, cycles, foreign continuation following and cancellation remain terminal; All does not return a partial slice on error.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersPagingLiveSourceAndNativeStatus",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesNativeContinuationCodesAndErrors",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules"
+          ]
+        },
+        {
+          "behavior": "The new Body iterator uses a frozen complete url.Values map and the original live service/provider clients, configured headers, microversion, middleware and ResourceBase prefix. Repeated, nil/empty and unknown wire values are preserved by the existing raw-query path rather than concrete native ListOpts conversion. The unchanged ordinary iterator remains the no-Body path; list conditions do not manufacture item GETs or rule requests.",
+          "tests": [
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesOwnQueryRowsAndLiveSource",
+            "internal/nativefind/security_group_bodies_test.go:TestNativeSecurityGroupBodiesLazyPreflightAndConcurrentReuse",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules"
+          ]
+        },
+        {
+          "behavior": "Semantic unknown status is discarded, while raw status/shared/fields/vendor queries remain literal wire extensions. Typed native List/Get, existing FindIdentity, group CRUD and rule APIs retain their separate request/model contracts; this list unit does not add lookup, mutation, status-model or rule-fetch capabilities.",
+          "tests": [
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersNativeAndIdentitySurfaceIsolation",
+            "api/security_group_list_filters_test.go:TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_security_group_filters_test.go:TestConnectionSecurityGroupFiltersPreflightAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "The complete classifier requires seven live pinned Python file SHAs and thirty-nine independent AST anchors proving exact C3 inheritance, all twelve effective descriptors/defaults/types/aliases, inherited queried revision and tag mapping, None access, conversion and direct Proxy controls. Fresh isolated AST extraction must match the checked-in manifest. Native gates cover twenty-one declaration hashes, rootPath and NoZ constants, full model/ListOpts/nested Rule/result/page schemas and receiver signatures, including the unchanged typed List BuildQueryString policy. Direct Result.ExtractInto is reachable; struct/slice pointer extractors are not. Source hashes do not themselves implement inherited cache/session/continuation behavior.",
+          "tests": [
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupPythonManifestKeepsQueryAliasesAndOnlyThreeJSONBodyProperties",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupBodyNativeSchemaGuardsConcreteListAndBothTimestampDecoders",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupFilterEmissionPreservesOwnedFullQueryPagersAndPriorNineBindings",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupPythonPinnedSourceRequiresCompleteLiveClassificationProof",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupDependenciesGuardNestedRuleWholePageNumbersCodesAndConstants",
+            "internal/cmd/sdkgen/security_group_filters_test.go:TestSecurityGroupBodyFiltersAcceptActualCompiledGroupRuleAndConcreteRequestGraph"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "network/v2/README.md",
+        "resource/README.md",
+        "network/v2/extensions/security/groups/listing/README.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "Go uses concrete frozen WithFilter/WithFilters and explicit Body options instead of Python keyword arguments and mutable Resource descriptors. Canonical query keys win by presence in bulk maps; individual options are last-wins. Both tenant_id/project_id remain query attributes despite the response alias. Unknown semantic names are discarded, while raw WithQuery remains an explicit wire extension.",
+        "Original JSON is available only after successful native whole-page decoding. Known group/rule strings, bools, ints, nested arrays and timestamps can reject before filtering, including rows past a cap. Unknown rule members retain exact numbers and null array members for comparison without changing the returned native zero/projection policy.",
+        "Python list descriptors wrap scalar values, while the Go raw lane does not. Arrays compare full ordered elements; standalone dictionaries retain subset matching on nonempty actual objects. Go bool/number equality is distinct from Python, and original date spellings are compared literally. All three local descriptors are raw JSON; queried int/bool descriptors introduce no new local coercion.",
+        "Known semantic query arrays become repeated URL values rather than arbitrary Python container formatting. Nil/empty arrays preserve option-key presence while omitting values. Reserved source controls are not interpreted as per-call session/base-path/header/microversion or JMESPath options.",
+        "Raw-row caps omit Python Resource.list wire-limit hints and stop before continuation. Native whole-page extraction, native linked pagination including foreign following, and JSON-empty204 EOF remain unchanged. Body-filter null rows reject; query-only native zero rows remain accepted."
+      ],
+      "remaining": [
+        "Complete eager/seeded Resource descriptor defaults, project/tenant response alias fallback state, unknown Body storage, mutable Resource/cache/dirty lifecycle, arbitrary Resource subclasses and full descriptor coercion/equality remain outside this ordinary-list classifier. SecurityGroup inherits NetworkResource and TagMixinNetwork; revision-aware mutation/if-match behavior is separate.",
+        "Pinned Proxy.request optional GET cache and inherited Resource adapter/session injection and per-call headers/microversion/base_path controls remain separate. Direct Proxy._list fixes its session to itself; SecurityGroup declares no class maximum microversion, so no class-specific automatic maximum negotiation gap is asserted.",
+        "Python Resource._get_next_link top-level/RFC Link-header and limit/marker fallbacks, limit hints and inherited pagination/session/retry/cache behavior are not closed by native security_groups_links guards or original-row pairing.",
+        "Deprecated Proxy._list jmespath_filters and explicit __conflicting_attrs restoration have no corresponding ordinary Go expression/recovery option. Existing native List, explicit Ref lookup/FindIdentity, group CRUD and rule APIs are separate contracts; complete direct Proxy or inherited Resource parity is not claimed."
+      ]
     }
   ]
 }
