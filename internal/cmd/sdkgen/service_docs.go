@@ -57,6 +57,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if key == "compute/v2" || key == "blockstorage/v2" || key == "blockstorage/v3" || key == "image/v2" {
 		out.WriteString("감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.\n\n")
 	}
+	if key == "image/v2" {
+		out.WriteString("`Tasks.WaitForTask(ctx, resource.ID(id), options...)`는 success·failure·120초·2초 간격을 기본으로 사용합니다. 선택한 실패 상태와 정확한 396 메시지가 함께 관찰될 때만 실제 fetched type/input으로 재생성하며, 새 ID도 같은 context 시간 제한을 사용합니다. native Task Get/Create/List와 공통 상태 대기는 유지합니다. [Task 대기·재생성 사용법](tasks/README.md)에 전용 옵션·실제 응답·부분 결과와 Python cache 차이를 설명합니다.\n\n")
+	}
 	if parts[0] == "metric" {
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")
 	}
@@ -299,6 +302,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			}
 			if record.ServiceWait != "" {
 				policies = append(policies, "`WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션")
+			}
+			if record.TaskWait != "" {
+				policies = append(policies, "`WaitForTask/WaitForTaskState`: 단일 시간 제한·396 재생성·실제 부분 결과")
 			}
 		}
 		policy := strings.Join(policies, "; ")

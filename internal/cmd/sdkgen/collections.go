@@ -33,6 +33,7 @@ type collectionRecord struct {
 	Scope                string            `json:"scope,omitempty"`
 	MetadataScope        string            `json:"metadata_scope,omitempty"`
 	ServiceWait          string            `json:"service_wait,omitempty"`
+	TaskWait             string            `json:"task_wait,omitempty"`
 	Parent               string            `json:"parent,omitempty"`
 	Issue                string            `json:"issue,omitempty"`
 }
