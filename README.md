@@ -70,6 +70,12 @@ Python `revision_number`는 원문 `revision`을 선택하며 native 반환값�
 구분합니다. `conn.Network(ctx).API.Routers.Resources`와 `conn.NetworkV2(ctx).Routers.Resources`에
 같은 옵션을 사용합니다.
 
+Security Group은 [query 17개·로컬 필드 3개](network/v2/extensions/security/groups/listing/README.md)를
+분류합니다. `revision_number`·`tenant_id`·`stateful`·`is_shared`는 서버 조건이며, timestamp 두 개와
+`security_group_rules`만 원문에서 비교합니다. rule의 추가 필드·큰 숫자·null 요소를 비교에
+보존하고 기존 typed Security Group을 반환합니다. SDK가 concrete native 목록의 raw query도
+처리하므로 호출자가 builder를 구현하지 않습니다.
+
 Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default·preferred 조회를,
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
 SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증거를 처리합니다.

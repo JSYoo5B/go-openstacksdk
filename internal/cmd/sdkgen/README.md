@@ -29,14 +29,15 @@ go run ./internal/cmd/sdkgen -metadata /path/to/packages.json -output . \
 [QoSPolicy manifest](../../../api/openstacksdk/resources/network/v2/qos_policy.json)와
 [SubnetPool manifest](../../../api/openstacksdk/resources/network/v2/subnet_pool.json)와
 [Network manifest](../../../api/openstacksdk/resources/network/v2/network.json)와
-[Router manifest](../../../api/openstacksdk/resources/network/v2/router.json)의
-identity·pin·envelope를 확인합니다. 앞의 네 리소스와 SubnetPool·Network·Router는 소스 7개, AddressGroup은 소스 5개, QoSPolicy는 소스 6개의
+[Router manifest](../../../api/openstacksdk/resources/network/v2/router.json)와
+[SecurityGroup manifest](../../../api/openstacksdk/resources/network/v2/security_group.json)의
+identity·pin·envelope를 확인합니다. 앞의 네 리소스와 SubnetPool·Network·Router·SecurityGroup은 소스 7개, AddressGroup은 소스 5개, QoSPolicy는 소스 6개의
 SHA256을 독립적으로 감사합니다.
 현재 checkout의 SHA256을 비교하고 `python3 -I`로 [AST extractor](python_filter_manifest.py)를 실행합니다.
 C3 MRO·상속 Body/URI·query mapping과 pagination defaults·tag expansion·unknown 및 canonical
 우선 정책·list controls를 다시 추출해 manifest 전체와 비교합니다. Subnet AST proof 15개와
 Secret·Container의 proof 각 23개, Order의 25개, AddressGroup의 16개와 QoSPolicy의 18개,
-SubnetPool의 33개와 Network의 43개·Router의 41개, parser minor version도 포함합니다. Key Manager 리소스는
+SubnetPool의 33개와 Network의 43개·Router의 41개·SecurityGroup의 39개, parser minor version도 포함합니다. Key Manager 리소스는
 Resource.id의 literal/alternate 접근과 별도의 HREFToUUID formatter를 구분합니다.
 Container는 상속된 `Resource._query_mapping`과 pagination defaults를 함께 검증하며
 `name`은 로컬 Body 속성입니다. Order는 별도의 `order_id`·`secret_id` formatter와 `meta`의 dict
@@ -61,6 +62,11 @@ Router는 NetworkResource+TagMixinNetwork의 정확한 MRO와 inherited descript
 revision을 선택하는 것을 고정합니다. project_id의 response alias는 query 별칭을 추가하지
 않고 deprecated tenant_id는 로컬 조건입니다. effective Body20개 전체의 타입·default·alias를
 감사하고 bool1개의 None shortcut/truthiness·정수2개·원문 JSON7개 정책을 구분합니다.
+SecurityGroup은 NetworkResource+TagMixinNetwork의 정확한 MRO와 effective Body12개를
+감사합니다. query17개·accepted21개와 local Body3개를 분류하며 revision_number·stateful·
+is_shared·project_id·tenant_id는 모두 query입니다. project의 response alias가 별도 tenant
+query를 합치지 않으며 두 timestamp·security_group_rules만 원문 JSON으로 비교합니다.
+이 단위의 local selector에는 int/bool 정규화를 추가하지 않습니다.
 
 manifest 수정, 현재 소스 변경, 누락 파일, parser 차이, native raw Body gate drift는 생성
 전에 오류입니다. source flag를 생략하거나 감사하지 않은 resource로 분류를 확대하면 거부합니다.
@@ -68,7 +74,7 @@ manifest 수정, 현재 소스 변경, 누락 파일, parser 차이, native raw 
 [Container 검증 테스트](container_filters_test.go), [Order 검증 테스트](order_filters_test.go)와
 [AddressGroup 검증 테스트](address_group_filters_test.go)와 [QoSPolicy 검증 테스트](qos_policy_filters_test.go)와
 [SubnetPool 검증 테스트](subnet_pool_filters_test.go)와 [Network 검증 테스트](network_filters_test.go)와
-[Router 검증 테스트](router_filters_test.go)가
+[Router 검증 테스트](router_filters_test.go)와 [SecurityGroup 검증 테스트](security_group_filters_test.go)가
 live 소스·상속·분류·drift·출력 범위를 검사합니다. Secret·Container는 native decoder·pager·원문 숫자
 보존에 필요한 함수 선언도 검증합니다. Order는 native `Order`·`Meta`의 두 decoder, pager와 원문 숫자
 보존을 포함한 함수 선언 14개를 검증합니다. 다른 리소스에 분류를 추가할 때는 그 소스 계약을 먼저 감사하고 증거를
@@ -76,7 +82,8 @@ live 소스·상속·분류·drift·출력 범위를 검사합니다. Secret·Co
 accepted 이름 13개·Body 12개, Container의 query/accepted 이름 2개·Body 10개와
 Order의 query/accepted 이름 2개·Body 14개와 AddressGroup의 query/accepted 이름 8개·Body 3개,
 QoSPolicy의 query15개·accepted19개·Body2개, SubnetPool의 query16개·accepted20개·Body10개와
-Network의 query23개·accepted35개·Body14개와 Router의 query18개·accepted24개·Body10개 연결은
+Network의 query23개·accepted35개·Body14개와 Router의 query18개·accepted24개·Body10개,
+SecurityGroup의 query17개·accepted21개·Body3개 연결은
 전체 Python Resource 또는 Proxy lifecycle 완료 판정과 구분합니다. Container는 중첩
 `ConsumerRef`·`SecretRef` 모델도 확인하며 세 Key Manager raw bridge의 반복 query와 기존
 Secret 생성 함수의 AST가 유지되는지 검사합니다.
@@ -111,7 +118,17 @@ getter의 commonResult.Extract→Result.ExtractInto 경로를 확인합니다. R
 revision_number의 별도 필드·nested unknown/null·전체 페이지 timestamp 디코드·반복/nil query와
 wire status를 보존하며 기존8개 manifest/function AST는 유지합니다. Router에는 공개
 ResourceAdapter를 추가하지 않으며 캐시된 versioned Resources를 사용합니다.
-Container·Order·AddressGroup·QoSPolicy·SubnetPool·Network·Router 검증에는 실제 compiled native export를 읽는 회귀 테스트도 포함합니다.
+SecurityGroup은 native SecGroup11개·concrete ListOpts15개·nested SecGroupRule16개 필드,
+Group/Rule의 sole pointer timestamp decoder·Page2개·commonResult.Extract1개·GetResult embedding을
+확인합니다. ListOpts에는 own method와 builder interface가 없습니다. native leaf9개·nested rule
+decoder1개·pagination7개·root4개의 union guard21개와 rootPath·NoZ 상수2개를 고정합니다.
+목록과 getter는 직접 Result.ExtractInto를 사용하며 slice/struct pointer helper를 가정하지 않습니다.
+BuildQueryString guard는 유지하는 typed native List의 증거이며 두 SDK raw pager는 이를
+호출하지 않습니다. 기존 nativefind.IterateSecurityGroups의 AST는 보존하고 별도
+IterateSecurityGroupBodies가 같은 source 검사·전체 query·native pager를 BodyRecord로 연결합니다.
+rule의 알려진 필드·timestamp 디코드를 cap보다 먼저 적용하고 원문 unknown/null·숫자는 비교에
+남깁니다. 기존9개 generated semantic binding/function과 manifest는 유지합니다.
+Container·Order·AddressGroup·QoSPolicy·SubnetPool·Network·Router·SecurityGroup 검증에는 실제 compiled native export를 읽는 회귀 테스트도 포함합니다.
 Order의 native identity callback은 [별도 타입 검증](order_identity_collections_test.go)으로 자신의
 `OrderRef`를 선택합니다. 이름 기반 탐색 지원이나 서버의 변경 API 지원을 추론하지 않습니다.
 `GOPHERCLOUD_METADATA=/path/to/packages.json`으로 생성과 같은 metadata를 지정할 수 있으며,

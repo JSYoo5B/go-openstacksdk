@@ -62,7 +62,8 @@ SDK가 프로젝트를 자동 추론하지 않으며 query는 GET과 목록에 �
 반복 `fields`·tags와 확장 query는 concrete 설정의 `Query`로 전달할 수 있습니다.
 Security Group의 공통 `Resources.List/All`도 raw query를 보존하며, 로컬 소비량·첫 페이지
 옵션을 지원합니다. native typed `List`는 기존 concrete `ListOpts`를 사용합니다.
-Python 속성 별칭과 로컬 Body 필터 분류는 자동 적용하지 않습니다.
+`FindIdentity`는 wire query를 그대로 사용합니다. ordinary `Resources.List/All`의 Python
+속성 별칭과 로컬 Body 분류는 아래 `WithFilter`/`WithFilters` 사용법을 따릅니다.
 [Python/Go 사용 예제](../docs/finding-identities.md#neutron-routersecurity-group와-project-query)를 참고하세요.
 
 ## Subnet Pool·Trunk 자동 조회
@@ -137,6 +138,15 @@ Python `revision_number`는 원문 `revision`을 선택합니다. native `Revisi
 `revision_number`는 별도이며 전체 페이지의 native 디코드가 로컬 비교보다 먼저 수행됩니다.
 기존 이름·상태 조건과 native typed List·FindIdentity·Get·interface 변경 API는 유지합니다.
 [Router Python/Go 사용법](v2/extensions/layer3/routers/listing/README.md)에 전체 필터와 raw 응답 차이를 설명합니다.
+
+`service.API.SecurityGroups.Resources`와 `conn.NetworkV2(ctx).SecurityGroups.Resources`는
+query 17개·accepted 이름 21개와 로컬 Body 3개를 분류합니다. `is_shared`→`shared`와 태그 별칭을
+변환하며 revision·project·tenant·stateful·이름·ID는 서버 조건입니다. 두 timestamp와
+`security_group_rules`를 원문에서 비교하고 native 전체 페이지의 중첩 rule 디코드를 먼저 적용합니다.
+추가 rule 필드와 큰 숫자·null 배열 요소는 비교에 남으며 반환값은 기존 native SecGroup입니다.
+SDK 소유 pager가 concrete native ListOpts로 표현할 수 없는 반복·nil·확장 query를 보존합니다.
+기존 `WithName`은 로컬 이름 비교를 유지하고 `WithStatus`는 미지원이며 raw status는 전달합니다.
+[Security Group Python/Go 사용법](v2/extensions/security/groups/listing/README.md)에 전체 이름·입력·native 응답·페이지 차이를 설명합니다.
 
 ## 삭제와 대기
 

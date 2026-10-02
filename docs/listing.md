@@ -205,9 +205,10 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 | Subnet Pool | 아래 10개 필드 | prefix length의 Python 이름 3개 | 아래 설명 참고 |
 | Network | 아래 14개 필드 | `subnet_ids`·`is_vlan_qinq`·`is_vlan_transparent` | 아래 설명 참고 |
 | Router | 아래 10개 필드 | `revision_number` → `revision` | 아래 설명 참고 |
+| Security Group | `created_at`·`updated_at`·`security_group_rules` | 없음 | canonical 이름과 같음 |
 | Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-QoS Policy·Address Group·Subnet Pool·Network·Router·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
+QoS Policy·Address Group·Subnet Pool·Network·Router·Security Group·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
 상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
@@ -348,6 +349,45 @@ typed List·FindIdentity·Get/Delete·interface 변경 API는 유지합니다.
 [AST manifest](../api/openstacksdk/resources/network/v2/router.json)는 source SHA 7개·AST 41개를,
 [생성기 검증](../internal/cmd/sdkgen/router_filters_test.go)은 native 함수 23개와 resource path·
 NoZ timestamp 상수 2개를 확인합니다. 전체 Python Resource/cache·revision if-match·Proxy lifecycle은
+계속 구현할 대상입니다.
+
+### Security Group의 속성 이름 분류
+
+`SecurityGroups.Resources.List/All`은 Python `conn.network.security_groups(**query)`의
+query 17개와 로컬 Body 3개를 분류합니다. `is_shared`→`shared`와 태그 별칭을 포함한 21개 이름을
+받습니다. `revision_number`·`tenant_id`·`project_id`·`stateful`·이름·ID는 모두 서버 조건이며
+상속한 int/bool descriptor가 있어도 로컬 필터로 변환하지 않습니다. project의 response alias가
+별도로 선언된 tenant query를 대체하지 않습니다. 로컬 조건은 `created_at`·`updated_at`·
+`security_group_rules`의 원문 JSON입니다. semantic `status`는 알 수 없는 이름으로 버리고 raw
+status는 query로 보존합니다. 기존 `WithName`은 정확한 로컬 비교와 서버 hint를 유지하며
+`WithStatus`는 native 모델에 Status가 없어 `ErrUnsupported`입니다.
+
+rule 배열은 순서·길이·완전한 요소를 비교하므로 중첩 object는 subset으로 비교하지 않습니다.
+unknown rule 필드·큰 숫자·null 요소는 원문으로 보존합니다. 반환 `SecGroup.Rules`는 native
+`[]SecGroupRule`이며 null 요소는 zero struct입니다. missing/null rules는 nil slice, 빈 배열은
+빈 slice로 반환합니다. caller 조건·timestamp 문자열은 변환하지 않고 Python list wrapping도
+적용하지 않습니다. Group과 Rule의 알려진 문자열·port/revision 정수·timestamp 디코드는 cap과
+로컬 비교보다 먼저 전체 페이지에 적용합니다. Group과 각 Rule은 각각 NoZ→RFC3339 재시도하며
+같은 객체 안의 두 timestamp가 혼합 형식이면 실패할 수 있습니다.
+
+native List는 concrete ListOpts를 받습니다. SDK가 소유하는 두 pager 경로가 반복/nil/확장
+query와 client/provider를 보존하므로 caller builder는 필요하지 않습니다. Body 경로도 기존
+query-only 경로와 같은 service URL 검사·`security-groups` 경로·`security_groups` envelope·
+native 200/204/300·plural links·foreign continuation을 사용합니다. 소비한 Body null 행은
+오류이며 query-only null 행은 native zero model입니다. raw cap·first-page·break는 미소비
+로컬 비교와 continuation을 생략하며 wire limit hint를 추가하지 않습니다. 전체 결과 수집의
+terminal 오류는 부분 slice를 반환하지 않습니다. bulk canonical 우선·입력 snapshot·전체 교체·
+clear·최종값 검증·namespace 충돌은 공통 옵션 정책을 따릅니다.
+
+`Network(ctx).API.SecurityGroups.Resources`와 `NetworkV2(ctx).SecurityGroups.Resources`는
+같은 캐시된 client를 사용하며 typed native List·Get/Delete·FindIdentity·rule 변경 API는 유지합니다.
+[Security Group Python/Go 예제](../network/v2/extensions/security/groups/listing/README.md),
+[HTTP 7개 그룹](../api/security_group_list_filters_test.go),
+[Connection 2개 그룹](../connection_security_group_filters_test.go),
+[SDK 소유 raw pager](../internal/nativefind/security_group_bodies_test.go)에서 이 계약을 검증합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/security_group.json)는 source SHA 7개·AST 39개를,
+[생성기 검증](../internal/cmd/sdkgen/security_group_filters_test.go)은 native 함수 21개와 상수 2개를
+확인합니다. 전체 Resource/cache·descriptor coercion·session·상속 continuation과 Proxy/JMESPath는
 계속 구현할 대상입니다.
 
 ### Subnet의 속성 이름 분류

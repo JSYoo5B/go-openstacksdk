@@ -424,10 +424,14 @@ Security Group의 native `List`는 concrete `ListOpts`를 받습니다. 공통
 같이 적용하며 직접 typed `List`의 API는 유지합니다. Router의 공통 목록도 raw query를
 전달합니다. 이 보정은 일반 목록의 raw status와 확장 key 전달에도 적용됩니다.
 
-Python `is_admin_state_up`·`is_distributed`·`is_ha`·`is_shared`는 각각
+`FindIdentity`의 `WithIdentityFindQuery`에서는 Python
+`is_admin_state_up`·`is_distributed`·`is_ha`·`is_shared`를 각각
 wire `admin_state_up`·`distributed`·`ha`·`shared`로 직접 지정해야 합니다.
-Python의 query alias/로컬 Body 분류·descriptor 변환·conditional GET cache·상속
-continuation/session 정책까지 동일하게 구현한 것은 아닙니다. Details·AllProjects·ExtraSpecs
+ordinary `Resources.List/All`의 자동 query/Body 분류는 별도
+[Router 사용법](../network/v2/extensions/layer3/routers/listing/README.md)과
+[Security Group 사용법](../network/v2/extensions/security/groups/listing/README.md)을 따릅니다.
+descriptor 변환·conditional GET cache·상속 continuation/session 전체는 추가 구현 대상입니다.
+Details·AllProjects·ExtraSpecs
 옵션은 명시적 false도 첫 HTTP 전에 `ErrUnsupported`이며 자동 hidden 검색이나
 microversion 변경은 없습니다.
 
