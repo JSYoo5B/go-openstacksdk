@@ -12497,6 +12497,501 @@
         "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
         "Inherited Resource.delete descriptor/cached-instance behavior, base_path/microversion/params/error_message and adapter/session policies are not exposed by the fixed project scope. No project-name resolver or arbitrary Project object overload is implied."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/create_secret_consumer",
+      "source_fingerprint": "730179cd376e6dfaeb6ef7ee66061490b7ec4ac1f5038073fe9d2270db8257fb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretconsumers.New",
+        "gophercloudsdk/keymanager/v1/secretconsumers.API.InSecret",
+        "gophercloudsdk/keymanager/v1/secretconsumers.SecretScope.Create",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithCreateOptions",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithCreateField",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "InSecret fixes one safe explicit secret ID without HTTP, or resolves an explicit Name through the existing Secrets collection once across all advertised pages, rejecting duplicates. The shared client/provider and original project headers remain in use; neither response references nor association fields retarget the scope.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersNameScopeAndFixedIdentity",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "POST and DELETE send one flat service/resource_type/resource_id association body to secrets/{fixed-id}/consumers and accept only the published HTTP200 root Secret response. The SDK returns actual SecretResponse fields/Body/Header/StatusCode without seeding association values from inputs, following secret_ref or synthesizing a consumer resource ID. Canonical fields are decoded by exact wire key and incompatible case variants remain raw JSON.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Owned body-field/header options snapshot JSON, prevent core/parent/readonly/case-alias shadowing, and are frozen before transport. Invalid or canceled input is rejected before HTTP; options that change the configured source are rechecked. Unexpected status/native and accepted decode/read errors retain original causes and response evidence without resend.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Pinned create_secret_consumer moves resource_type through __conflicting_attrs to avoid Proxy._create's resource-class parameter; delete_secret_consumer constructs SecretConsumer.new directly to avoid the analogous Proxy._delete collision. Concrete ConsumerOpts.ResourceType serializes the canonical resource_type body field for both operations without caller builder/workaround burden.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Conflicting source MoreHeaders case aliases are rejected before HTTP. Create/Delete also reject conflicting custom Config.Headers aliases; equal values across case aliases are accepted consistently without mutating caller maps. This removes map-iteration precedence ambiguity while retaining header snapshots and shared provider configuration.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated facade and adds SecretConsumers beside native Secrets using the same ServiceClient/Provider. Explicit secret IDs perform no lookup, ResourceBase and live token rotation remain effective, response references cannot retarget the fixed parent and canceled construction performs no HTTP. The SDK-owned registry declares secret_consumer association scope with no independently addressable Consumer Resources/Get/Find/Wait surface.",
+          "tests": [
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretconsumers/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python consumer proxy strings are IDs obtained through Resource._get_id; Go requires an explicit safe Ref and supports an explicit Name lookup extension through the existing Secrets collection. There is no mutable Python Secret Resource input overload or automatic response-ref follow-up.",
+        "Go uses nonempty concrete string association fields, guarded explicit JSON/header extensions and canonical-key-only typed response decoding. Python untyped Body descriptors and automatic unknown-attribute discard remain broader/different. Raw original response JSON preserves null, omission, timestamp spelling and exact unknown numbers.",
+        "The official consumer reference documents HTTP200 for all three methods. The pinned _raw_delete unit test mocks204 only while asserting the outgoing JSON body; it is not a server-success contract. Go unexpected-status errors and strict accepted-object decoding are deliberate policies rather than complete Resource._translate_response behavior.",
+        "Pinned _proxy.py:555-564 preserves resource_type through __conflicting_attrs because it collides with Proxy._create. The concrete Go input has no resource-class builder parameter collision. Python returns a seeded SecretConsumer Resource whose requested association fields remain cached when the server returns full Secret JSON; Go returns only actual HTTP SecretResponse evidence."
+      ],
+      "remaining": [
+        "The pinned mutable seeded Consumer create lifecycle and descriptor presence/default/coercion/cache behavior are not implemented; Go does not present requested association fields as an HTTP response or recover a reusable Python Resource state.",
+        "Direct create **attrs can supply base_path consumed by Proxy._create (proxy.py:771-799). This Go unit fixes the selected secrets/{id}/consumers route and does not expose a per-call alternate create base path or generic __conflicting_attrs mechanism."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/delete_secret_consumer",
+      "source_fingerprint": "c9cb998feebe6696fa3bb68d7718d92549abf98353762795a2c89bce5043d240",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretconsumers.New",
+        "gophercloudsdk/keymanager/v1/secretconsumers.API.InSecret",
+        "gophercloudsdk/keymanager/v1/secretconsumers.SecretScope.Delete",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithDeleteOptions",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithDeleteIgnoreMissing",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithDeleteField",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithDeleteHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "InSecret fixes one safe explicit secret ID without HTTP, or resolves an explicit Name through the existing Secrets collection once across all advertised pages, rejecting duplicates. The shared client/provider and original project headers remain in use; neither response references nor association fields retarget the scope.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersNameScopeAndFixedIdentity",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "POST and DELETE send one flat service/resource_type/resource_id association body to secrets/{fixed-id}/consumers and accept only the published HTTP200 root Secret response. The SDK returns actual SecretResponse fields/Body/Header/StatusCode without seeding association values from inputs, following secret_ref or synthesizing a consumer resource ID. Canonical fields are decoded by exact wire key and incompatible case variants remain raw JSON.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Owned body-field/header options snapshot JSON, prevent core/parent/readonly/case-alias shadowing, and are frozen before transport. Invalid or canceled input is rejected before HTTP; options that change the configured source are rechecked. Unexpected status/native and accepted decode/read errors retain original causes and response evidence without resend.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Delete defaults ignoreMissing=true and returns nil,nil only for an actual HTTP404; explicit false preserves the native404. Wrapped transport404 remains terminal, while other statuses, accepted-response decode/read errors and cancellation are not suppressed. No follow-up GET or automatic retry is fabricated.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Pinned create_secret_consumer moves resource_type through __conflicting_attrs to avoid Proxy._create's resource-class parameter; delete_secret_consumer constructs SecretConsumer.new directly to avoid the analogous Proxy._delete collision. Concrete ConsumerOpts.ResourceType serializes the canonical resource_type body field for both operations without caller builder/workaround burden.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Conflicting source MoreHeaders case aliases are rejected before HTTP. Create/Delete also reject conflicting custom Config.Headers aliases; equal values across case aliases are accepted consistently without mutating caller maps. This removes map-iteration precedence ambiguity while retaining header snapshots and shared provider configuration.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "A custom transport that cancels the caller then returns an actual HTTP404 remains terminal: both context.Canceled and the native404 status/body/header survive instead of missing suppression. Cancellation after an accepted200 also preserves original ResponseError body/header/status without resend.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated facade and adds SecretConsumers beside native Secrets using the same ServiceClient/Provider. Explicit secret IDs perform no lookup, ResourceBase and live token rotation remain effective, response references cannot retarget the fixed parent and canceled construction performs no HTTP. The SDK-owned registry declares secret_consumer association scope with no independently addressable Consumer Resources/Get/Find/Wait surface.",
+          "tests": [
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretconsumers/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python consumer proxy strings are IDs obtained through Resource._get_id; Go requires an explicit safe Ref and supports an explicit Name lookup extension through the existing Secrets collection. There is no mutable Python Secret Resource input overload or automatic response-ref follow-up.",
+        "Go uses nonempty concrete string association fields, guarded explicit JSON/header extensions and canonical-key-only typed response decoding. Python untyped Body descriptors and automatic unknown-attribute discard remain broader/different. Raw original response JSON preserves null, omission, timestamp spelling and exact unknown numbers.",
+        "The official consumer reference documents HTTP200 for all three methods. The pinned _raw_delete unit test mocks204 only while asserting the outgoing JSON body; it is not a server-success contract. Go unexpected-status errors and strict accepted-object decoding are deliberate policies rather than complete Resource._translate_response behavior.",
+        "Pinned _proxy.py:590-596 constructs SecretConsumer.new directly so resource_type stays an association attribute, then returns None after deletion. Go additionally exposes the actual full SecretResponse on HTTP200; an ignored missing association returns nil,nil."
+      ],
+      "remaining": [
+        "Pinned SecretConsumer.new descriptor handling of arbitrary untyped association kwargs, omission/null values and unknown discard is not fully reproduced by the required concrete string identity and explicit guarded extension options. Generic inherited Resource deletion object/state and optional session/version/cache controls remain outside this stateless fixed-parent method."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/secret_consumers",
+      "source_fingerprint": "08bb08acff46caf4d40dd8ecdb9ee273aa5aef21a963b6b7c9440f079c3a1d8a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secretconsumers.New",
+        "gophercloudsdk/keymanager/v1/secretconsumers.API.InSecret",
+        "gophercloudsdk/keymanager/v1/secretconsumers.SecretScope.List",
+        "gophercloudsdk/keymanager/v1/secretconsumers.SecretScope.All",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithListOptions",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithListQuery",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithListMaxItems",
+        "gophercloudsdk/keymanager/v1/secretconsumers.WithListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "InSecret fixes one safe explicit secret ID without HTTP, or resolves an explicit Name through the existing Secrets collection once across all advertised pages, rejecting duplicates. The shared client/provider and original project headers remain in use; neither response references nor association fields retarget the scope.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersNameScopeAndFixedIdentity",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "List/All lazily read HTTP200 consumers arrays, preserve row Body and canonical typed fields, own pointer/query/options snapshots and support iterator reuse and concurrent owned-option reuse. Defaults omit offset and limit to retain server0/10; explicit raw repetitions/empty/nil values are retained. Positive concrete offset/limit plus a raw same-key value is rejected even if equal.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersOffsetPagingAndQueryOwnership",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Only advertised, strictly increasing offset continuation on the same origin/exact fixed-parent collection is followed. A first server limit may be introduced when absent initially and then stays fixed; other filters remain fixed. No consumer ID or synthetic marker fallback is invented. Same/backward offsets, changed scope/filter, foreign links, later HTTP/decode/context/source errors remain terminal.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersOffsetPagingAndQueryOwnership",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersContinuationGuardsAndTerminalFailures"
+          ]
+        },
+        {
+          "behavior": "MaxItems is a local raw-row cap without a wire limit hint; single-page/consumer-break/empty-page stop before continuation or extra HTTP. Unconsumed model rows beyond cap are not decoded; malformed whole-page JSON and consumed invalid models keep accepted whole-response evidence. All returns nil rows on terminal error.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersListControlsAndAcceptedRows",
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersContinuationGuardsAndTerminalFailures"
+          ]
+        },
+        {
+          "behavior": "Conflicting source MoreHeaders case aliases are rejected before HTTP. Create/Delete also reject conflicting custom Config.Headers aliases; equal values across case aliases are accepted consistently without mutating caller maps. This removes map-iteration precedence ambiguity while retaining header snapshots and shared provider configuration.",
+          "tests": [
+            "api/keymanager_secretconsumers_test.go:TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight"
+          ]
+        },
+        {
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated facade and adds SecretConsumers beside native Secrets using the same ServiceClient/Provider. Explicit secret IDs perform no lookup, ResourceBase and live token rotation remain effective, response references cannot retarget the fixed parent and canceled construction performs no HTTP. The SDK-owned registry declares secret_consumer association scope with no independently addressable Consumer Resources/Get/Find/Wait surface.",
+          "tests": [
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretconsumers/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python consumer proxy strings are IDs obtained through Resource._get_id; Go requires an explicit safe Ref and supports an explicit Name lookup extension through the existing Secrets collection. There is no mutable Python Secret Resource input overload or automatic response-ref follow-up.",
+        "Go uses nonempty concrete string association fields, guarded explicit JSON/header extensions and canonical-key-only typed response decoding. Python untyped Body descriptors and automatic unknown-attribute discard remain broader/different. Raw original response JSON preserves null, omission, timestamp spelling and exact unknown numbers.",
+        "The official consumer reference documents HTTP200 for all three methods. The pinned _raw_delete unit test mocks204 only while asserting the outgoing JSON body; it is not a server-success contract. Go unexpected-status errors and strict accepted-object decoding are deliberate policies rather than complete Resource._translate_response behavior.",
+        "Official REST paging uses offset, but the pinned SecretConsumer inherits QueryParameters(limit,marker) without an offset mapping. Go explicitly supports offset and wire query extensions, never synthesizes a consumer marker, and does not claim automatic Python query transposition. Same-origin/exact-path/filter guards, immediate raw caps and no partial All output are explicit Go policies."
+      ],
+      "remaining": [
+        "Pinned Resource.list classifies service/resource_type/resource_id kwargs as local Body equality filters and discards unknown query names. This unit does not implement that automatic Body/query classification, descriptor equality/coercion, alias transposition or deprecated JMESPath/__conflicting_attrs handling.",
+        "The generic Python marker fallback when a limit exists, mutable returned Consumer Resource descriptor/cache state, and inherited per-call base_path/session/microversion/allow_unknown_params controls are not implemented by the guarded advertised-offset lane."
+      ]
+    },
+    {
+      "operation": "python:message/v2/create_subscription",
+      "source_fingerprint": "c309e0f70189164de8c17d26fbdc5dcc59b853dc731d2c707147e93b7f34544e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/messaging/v2/subscriptions.New",
+        "gophercloudsdk/messaging/v2/subscriptions.API.InQueue",
+        "gophercloudsdk/messaging/v2/subscriptions.QueueScope.Create",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateOptions",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateSubscriber",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateTTL",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateDeliveryOptions",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateField",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateHeader",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateClientID",
+        "gophercloudsdk/messaging/v2/subscriptions.WithCreateProjectID"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:191-205 and Subscription.create_opts(request_key=None) map to one POST queues/{fixed queue}/subscriptions with flat subscriber/optional ttl/options JSON, accepting 201 and an actual root object. subscription_id is an optional response field: omitted/null/empty values return the decoded raw model with no ID inferred from Location or request inputs. Omitted ttl remains omitted rather than submitting the documented server default 3600. No Queue GET, confirmation or implicit fetch is performed; collection-valued or foreign Location remains passive response evidence rather than an ID/action/request target.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend"
+          ]
+        },
+        {
+          "behavior": "Owned CreateOptions/metadata/extension/header snapshots preserve false/null/precise nested numbers, reusable concurrent options and last-wins helpers. Unknown extension fields cannot overwrite concrete fields, response identities or fixed queue metadata. Null TTL, non-object delivery options and unsupported query/argument/auth headers fail before HTTP.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity"
+          ]
+        },
+        {
+          "behavior": "Unexpected status retains native errors. Malformed/null/array accepted root, wrong-type canonical typed response fields and accepted body-read failures retain actual ResponseError body/header/status/cause; accepted decode/read failures are not resent. Optional response identity absence, null or empty is not itself a decode failure.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation"
+          ]
+        },
+        {
+          "behavior": "Concrete request client/project identities and extra headers are copied into request-local ServiceClient headers. Source configured Client-ID and other headers remain unchanged; typed overrides apply to this operation only and SDK-owned auth/body/identity header extensions are rejected. Different values under case-variant custom request-header keys are rejected before HTTP; normal canonical WithHeader helpers remain last-wins. The original ProviderClient remains live for authentication and middleware.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsTypedRequestIdentityAllOperations",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned Messaging.Subscriptions facade shares the original authenticated message ServiceClient/Provider with native Queues/Messages/Claims. InQueue fixes a validated escaped queue segment with zero HTTP, preserves selected ResourceBase/live provider token, and never performs Queue lookup or follows response locations. Invalid/nil source, unsafe scope/child identities and canceled context fail before HTTP; the registry declares queue_subscription rather than fabricated native CRUD/Find/Wait capabilities.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/messaging_services_test.go:TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "messaging/v2/subscriptions/README.md",
+        "messaging/v2/README.md"
+      ],
+      "differences": [
+        "Python Subscription age/ttl/subscriber/source/subscription_id descriptors are untyped and options uses dict conversion. Go creation deliberately uses optional int64 TTL with null rejection, a required string subscriber and object-only raw options; the server still evaluates subscriber scheme and TTL range. Response subscription_id is optional and does not have a fabricated nonempty/safe-segment requirement: exact canonical strings/null/omission remain response evidence; wrong-type canonical typed fields still receive deliberate Go strict decode errors.",
+        "Go returns only the decoded accepted response with owned exact-key Body/Header/StatusCode, not the Python request-seeded Subscription with descriptor/header/URI state. Canonical literal id presence (including null) overrides alternate subscription_id; case variants remain raw extensions. Location is passive and is not used to synthesize an ID."
+      ],
+      "remaining": [
+        "Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.",
+        "Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.",
+        "Direct **attrs still permits broader Python descriptor/coercion/unknown-body and inherited _create base_path/__conflicting_attrs behavior. Concrete Go body/field protection intentionally narrows that surface; passing source fields age/source/id through creation is not a new supported overload."
+      ]
+    },
+    {
+      "operation": "python:message/v2/get_subscription",
+      "source_fingerprint": "d08d3b610dd6ee7cf85a54c8037f30a8fafd51dc0c141c8d793861409bf7eb7b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/messaging/v2/subscriptions.New",
+        "gophercloudsdk/messaging/v2/subscriptions.API.InQueue",
+        "gophercloudsdk/messaging/v2/subscriptions.QueueScope.Get",
+        "gophercloudsdk/messaging/v2/subscriptions.WithGetOptions",
+        "gophercloudsdk/messaging/v2/subscriptions.WithGetHeader",
+        "gophercloudsdk/messaging/v2/subscriptions.WithGetClientID",
+        "gophercloudsdk/messaging/v2/subscriptions.WithGetProjectID"
+      ],
+      "contracts": [
+        {
+          "behavior": "One GET queues/{fixed queue}/subscriptions/{escaped literal identity} accepts 200 and a flat object. Get remains strict for native missing/error status and does not use name lookup, alternate Location, response source/ID or an incidental queue name to retarget the request.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend"
+          ]
+        },
+        {
+          "behavior": "Exact canonical response fields populate owned typed/raw convenience values: present literal id including null wins over subscription_id; incompatible case variants remain Body extensions. Raw ttl/age/options preserve omission/null/precise nested numbers independently of Body. Unexpected success codes, accepted decode/read failures and canceled/invalid source remain terminal with actual evidence and no implicit follow-up.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation"
+          ]
+        },
+        {
+          "behavior": "Concrete request client/project identities and extra headers are copied into request-local ServiceClient headers. Source configured Client-ID and other headers remain unchanged; typed overrides apply to this operation only and SDK-owned auth/body/identity header extensions are rejected. Different values under case-variant custom request-header keys are rejected before HTTP; normal canonical WithHeader helpers remain last-wins. The original ProviderClient remains live for authentication and middleware.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsTypedRequestIdentityAllOperations",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned Messaging.Subscriptions facade shares the original authenticated message ServiceClient/Provider with native Queues/Messages/Claims. InQueue fixes a validated escaped queue segment with zero HTTP, preserves selected ResourceBase/live provider token, and never performs Queue lookup or follows response locations. Invalid/nil source, unsafe scope/child identities and canceled context fail before HTTP; the registry declares queue_subscription rather than fabricated native CRUD/Find/Wait capabilities.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/messaging_services_test.go:TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "messaging/v2/subscriptions/README.md",
+        "messaging/v2/README.md"
+      ],
+      "differences": [
+        "Go Get accepts a validated literal ID string and returns an owned exact-key projection; it does not mutate a seeded Python Subscription. Canonical subscriber/source/subscription_id/id values are stricter typed strings, while ttl/age/options and full raw Body remain precise/untyped response data.",
+        "Python MessageResource.fetch accepts skip_cache/base_path and supplied Resource header descriptors, deriving missing request IDs/project from UUID/session. Go exposes concrete per-call identity/header options on its fixed queue scope with the stable configured Client-ID policy."
+      ],
+      "remaining": [
+        "Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.",
+        "Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API."
+      ]
+    },
+    {
+      "operation": "python:message/v2/subscriptions",
+      "source_fingerprint": "6512a642db7063b6851dab3dfee3e29ec0f96537b132300127c134efed802576",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/messaging/v2/subscriptions.New",
+        "gophercloudsdk/messaging/v2/subscriptions.API.InQueue",
+        "gophercloudsdk/messaging/v2/subscriptions.QueueScope.List",
+        "gophercloudsdk/messaging/v2/subscriptions.QueueScope.All",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListOptions",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListQuery",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListHeader",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListClientID",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListProjectID",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListMaxItems",
+        "gophercloudsdk/messaging/v2/subscriptions.WithListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:207-229 fixes queue_name before MessageResource.list; Go scopes it in the URI and rejects route/control query injection. List is lazy, expects 200 with a subscriptions array and copies original caller queries/options/headers per iteration. Explicit positive limit/marker are submitted; the selected fixed endpoint and live ProviderClient are retained across pages.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsPythonMarkerPagingIgnoresLinksAndKeepsSource",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels"
+          ]
+        },
+        {
+          "behavior": "The custom pinned MessageResource.list algorithm is implemented rather than generic Resource.list: advertised links/next are ignored; after each nonempty full page, even with no initial limit, next query receives limit=decoded page count and marker=last canonical Resource-style ID. A page shorter than the active limit or an empty page stops. Paginated=false stops after the first page. Missing/null terminal marker and repeated marker receive deliberate Go accepted-evidence/cycle guards.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsPythonMarkerPagingIgnoresLinksAndKeepsSource",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListControlsLazyDecodeAndReuse",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation"
+          ]
+        },
+        {
+          "behavior": "Go MaxItems is a local raw decoded-row cap with zero unbounded, negative preflight failure and no wire key/limit hint. It stops before unused row typed decode/marker continuation; consumer break stops without another request. Whole-page JSON syntax still must decode before any rows. Reused iterators own independent counters; late HTTP/decode/cycle/source/context errors invalidate All instead of returning partial success, with actual accepted page evidence where available.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListControlsLazyDecodeAndReuse",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation"
+          ]
+        },
+        {
+          "behavior": "Concrete request client/project identities and extra headers are copied into request-local ServiceClient headers. Source configured Client-ID and other headers remain unchanged; typed overrides apply to this operation only and SDK-owned auth/body/identity header extensions are rejected. Different values under case-variant custom request-header keys are rejected before HTTP; normal canonical WithHeader helpers remain last-wins. The original ProviderClient remains live for authentication and middleware.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsTypedRequestIdentityAllOperations",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned Messaging.Subscriptions facade shares the original authenticated message ServiceClient/Provider with native Queues/Messages/Claims. InQueue fixes a validated escaped queue segment with zero HTTP, preserves selected ResourceBase/live provider token, and never performs Queue lookup or follows response locations. Invalid/nil source, unsafe scope/child identities and canceled context fail before HTTP; the registry declares queue_subscription rather than fabricated native CRUD/Find/Wait capabilities.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/messaging_services_test.go:TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "messaging/v2/subscriptions/README.md",
+        "messaging/v2/README.md"
+      ],
+      "differences": [
+        "Pinned MessageResource.list ignores its headers/microversion/max_items parameters and does not perform generic Resource.list Body-local filter transposition. Go header options and effective local MaxItems are deliberate supported extensions; no generic Body filtering/semantic classification or class-specific automatic maximum-microversion negotiation is claimed.",
+        "Go extension query forwards nonreserved unknown wire keys, including frozen repeated values; the pinned inherited QueryParameters transpose only retains limit/marker. Go rejects invalid/repeated/empty limit and invalid marker earlier and rejects malformed subscriptions envelopes, invalid consumed typed values, null last-ID and marker cycles with explicit errors.",
+        "Python per-iterator UUID/session-project derivation and bare cls.existing(**row) objects differ from Go stable configured headers, caller-owned exact raw fields and actual page Header/StatusCode. Go queue scope remains authoritative and does not infer a URI overlay from returned source."
+      ],
+      "remaining": [
+        "Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.",
+        "Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.",
+        "Inherited Proxy._list base_path/__conflicting_attrs/deprecated jmespath filtering and arbitrary Python adapter/session controls are not exposed. Ordinary typed options/query extensions do not implement these wrappers; custom MessageResource list quirks remain explicitly separated from generic Resource filtering/cache contracts."
+      ]
+    },
+    {
+      "operation": "python:message/v2/delete_subscription",
+      "source_fingerprint": "d4b3e333abf39bcbea1b78f049c7dffb2d27a9f7d945f85ab8283099f441d8fe",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/messaging/v2/subscriptions.New",
+        "gophercloudsdk/messaging/v2/subscriptions.API.InQueue",
+        "gophercloudsdk/messaging/v2/subscriptions.QueueScope.Delete",
+        "gophercloudsdk/messaging/v2/subscriptions.WithDeleteOptions",
+        "gophercloudsdk/messaging/v2/subscriptions.WithDeleteIgnoreMissing",
+        "gophercloudsdk/messaging/v2/subscriptions.WithDeleteHeader",
+        "gophercloudsdk/messaging/v2/subscriptions.WithDeleteClientID",
+        "gophercloudsdk/messaging/v2/subscriptions.WithDeleteProjectID"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:250-278 default ignore_missing=True maps to one DELETE queues/{fixed queue}/subscriptions/{escaped literal identity}, accepting 204 with no request JSON or implicit GET/Queue lookup. Go returns error-only; explicit false preserves actual native404, while default true suppresses only actual HTTP404. Other status errors remain terminal.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend"
+          ]
+        },
+        {
+          "behavior": "Wrapped transport404 and an accepted204 read failure whose cause contains native404 are never treated as logical absence. Original transport/context/native cause and accepted body/header/status are preserved with no SDK resend. Invalid source/unsafe identities/protected header or unsupported field/query/argument options fail before HTTP.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsListTerminalErrorsAndSourceCancellation"
+          ]
+        },
+        {
+          "behavior": "Concrete request client/project identities and extra headers are copied into request-local ServiceClient headers. Source configured Client-ID and other headers remain unchanged; typed overrides apply to this operation only and SDK-owned auth/body/identity header extensions are rejected. Different values under case-variant custom request-header keys are rejected before HTTP; normal canonical WithHeader helpers remain last-wins. The original ProviderClient remains live for authentication and middleware.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsTypedRequestIdentityAllOperations",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity",
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned Messaging.Subscriptions facade shares the original authenticated message ServiceClient/Provider with native Queues/Messages/Claims. InQueue fixes a validated escaped queue segment with zero HTTP, preserves selected ResourceBase/live provider token, and never performs Queue lookup or follows response locations. Invalid/nil source, unsafe scope/child identities and canceled context fail before HTTP; the registry declares queue_subscription rather than fabricated native CRUD/Find/Wait capabilities.",
+          "tests": [
+            "api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels",
+            "connection_scoped_sdk_owned_test.go:TestConnectionSDKOwnedSubscriptionAndConsumerScopes",
+            "internal/cmd/sdkgen/messaging_services_test.go:TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities"
+          ]
+        }
+      ],
+      "documentation": [
+        "messaging/v2/subscriptions/README.md",
+        "messaging/v2/README.md"
+      ],
+      "differences": [
+        "The direct default ignore_missing=True is retained, but Go returns error-only rather than the mutable seeded Subscription/None result of Python _delete. A successful acknowledgement does not fabricate a returned Subscription or update cached model state.",
+        "Literal child IDs are validated/escaped and header identity is selected by SDK-owned options; Python also accepts Subscription Resource inputs and broader supplied descriptor/session state."
+      ],
+      "remaining": [
+        "Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.",
+        "Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API."
+      ]
     }
   ]
 }
