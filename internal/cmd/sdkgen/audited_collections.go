@@ -21,6 +21,9 @@ var auditedCollections = []auditedCollectionSpec{
 }
 
 func identifyCollectionBinding(pkg *types.Package, decls map[string]*ast.FuncDecl, extractors map[string]string) (*collectionPlan, error) {
+	if sdkPath(pkg.Path()) == "keymanager/v1/orders" {
+		return identifyOrderCollectionIdentity(pkg, decls, extractors)
+	}
 	for _, spec := range auditedCollections {
 		if sdkPath(pkg.Path()) == spec.path {
 			return identifyAuditedCollection(pkg, decls, extractors, spec)
