@@ -371,12 +371,68 @@ ROUTER_ANCHORS = (
     ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
     ('openstack/resource.py', 'ResourceMixinProtocol'),
 )
+SECURITY_GROUP_RESOURCE = "openstack.network.v2.security_group.SecurityGroup"
+SECURITY_GROUP_FILES = (
+    "openstack/network/v2/security_group.py",
+    "openstack/network/v2/_base.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+# Both tenant and project are explicit query attributes. The response alias
+# does not collapse them, and inherited revision_number stays query-mapped.
+SECURITY_GROUP_ANCHORS = (
+    ('openstack/network/v2/security_group.py', 'SecurityGroup'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup._query_mapping'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.created_at'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.description'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.name'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.stateful'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.project_id'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.security_group_rules'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.tenant_id'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.updated_at'),
+    ('openstack/network/v2/security_group.py', 'SecurityGroup.is_shared'),
+    ('openstack/resource.py', 'Resource'),
+    ('openstack/resource.py', 'Resource.id'),
+    ('openstack/resource.py', 'Resource.name'),
+    ('openstack/resource.py', 'Resource._max_microversion'),
+    ('openstack/resource.py', 'Resource.__init__'),
+    ('openstack/resource.py', 'Resource._attributes_iterator'),
+    ('openstack/resource.py', 'Resource._collect_attrs'),
+    ('openstack/resource.py', 'Resource.__getattribute__'),
+    ('openstack/resource.py', 'Resource.__getitem__'),
+    ('openstack/resource.py', 'Resource._alternate_id'),
+    ('openstack/resource.py', 'Resource.to_dict'),
+    ('openstack/resource.py', 'Resource.list'),
+    ('openstack/resource.py', 'Resource._get_next_link'),
+    ('openstack/resource.py', 'QueryParameters.__init__'),
+    ('openstack/resource.py', 'QueryParameters._validate'),
+    ('openstack/resource.py', 'QueryParameters._transpose'),
+    ('openstack/fields.py', '_BaseComponent.__init__'),
+    ('openstack/fields.py', '_BaseComponent.__get__'),
+    ('openstack/fields.py', '_convert_type'),
+    ('openstack/proxy.py', 'Proxy._list'),
+    ('openstack/network/v2/_proxy.py', 'Proxy.security_groups'),
+    ('openstack/common/tag.py', 'TagMixin'),
+    ('openstack/common/tag.py', 'TagMixin._tag_query_parameters'),
+    ('openstack/common/tag.py', 'TagMixin.tags'),
+    ('openstack/network/v2/_base.py', 'NetworkResource'),
+    ('openstack/network/v2/_base.py', 'NetworkResource.revision_number'),
+    ('openstack/network/v2/_base.py', 'TagMixinNetwork'),
+    ('openstack/resource.py', 'ResourceMixinProtocol'),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "network": (NETWORK_RESOURCE, NETWORK_FILES, NETWORK_ANCHORS,
                 "gophercloudsdk/network/v2/networks"),
     "router": (ROUTER_RESOURCE, ROUTER_FILES, ROUTER_ANCHORS,
                "gophercloudsdk/network/v2/extensions/layer3/routers"),
+    "security_group": (SECURITY_GROUP_RESOURCE, SECURITY_GROUP_FILES,
+                       SECURITY_GROUP_ANCHORS,
+                       "gophercloudsdk/network/v2/extensions/security/groups"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
                "gophercloudsdk/keymanager/v1/secrets"),
     "container": (CONTAINER_RESOURCE, CONTAINER_FILES, CONTAINER_ANCHORS,
@@ -830,6 +886,100 @@ def router_body_descriptors(source, attrs, body, query):
         raise ValueError("unsupported Router boolean conversion")
 
 
+def security_group_body_descriptors(source, attrs, body, query):
+    """Keep queried tenant/revision fields outside the three raw predicates."""
+    expected = {
+        "created_at": ("created_at", None, None, {}),
+        "description": ("description", None, None, {}),
+        "id": ("id", None, None, {}),
+        "is_shared": ("shared", "bool", None, {}),
+        "name": ("name", None, None, {}),
+        "project_id": ("project_id", None, None, {"alias": "tenant_id"}),
+        "revision_number": ("revision_number", "int", None, {}),
+        "security_group_rules": ("security_group_rules", "list", None, {}),
+        "stateful": ("stateful", None, None, {}),
+        "tags": ("tags", "list", [], {}),
+        "tenant_id": ("tenant_id", None, None, {"deprecated": True}),
+        "updated_at": ("updated_at", None, None, {}),
+    }
+    actual = {}
+    for name, (module, descriptor, _) in attrs.items():
+        if not isinstance(descriptor, ast.Call):
+            continue
+        if source.resolve(module, descriptor.func) not in {
+            "openstack.resource.Body", "openstack.fields.Body"
+        }:
+            continue
+        if len(descriptor.args) != 1:
+            raise ValueError("unsupported SecurityGroup response field name")
+        options = [keyword.arg for keyword in descriptor.keywords]
+        if (len(options) != len(set(options))
+                or set(options) - {"type", "default", "alias", "deprecated"}):
+            raise ValueError("unsupported SecurityGroup descriptor options")
+        typed = next((keyword.value for keyword in descriptor.keywords
+                      if keyword.arg == "type"), None)
+        response_type = (source.resolve(module, typed).removeprefix("builtins.")
+                         if typed is not None else None)
+        default = next((keyword.value for keyword in descriptor.keywords
+                        if keyword.arg == "default"), None)
+        additional = {keyword.arg: source.literal(module, keyword.value)
+                      for keyword in descriptor.keywords
+                      if keyword.arg not in {"type", "default"}}
+        actual[name] = (source.literal(module, descriptor.args[0]), response_type,
+                        source.literal(module, default) if default else None,
+                        additional)
+    if actual != expected:
+        raise ValueError("unsupported SecurityGroup declared response descriptors")
+    expected_query = {name: name for name in (
+        "description", "fields", "id", "name", "stateful", "project_id",
+        "tenant_id", "revision_number", "sort_dir", "sort_key", "limit",
+        "marker", "tags"
+    )}
+    expected_query.update({
+        "is_shared": "shared", "any_tags": "tags-any", "not_tags": "not-tags",
+        "not_any_tags": "not-tags-any",
+    })
+    if query != expected_query:
+        raise ValueError("unsupported SecurityGroup query classification")
+    expected_local = {
+        name: {"field": field, "response_type": response_type}
+        for name, (field, response_type, _, _) in expected.items()
+        if name not in query
+    }
+    if body != expected_local:
+        raise ValueError("unsupported SecurityGroup local Body classification")
+    if source.mro(SECURITY_GROUP_RESOURCE) != [
+        SECURITY_GROUP_RESOURCE, "openstack.network.v2._base.NetworkResource",
+        "openstack.resource.Resource", "builtins.dict",
+        "openstack.network.v2._base.TagMixinNetwork",
+        "openstack.common.tag.TagMixin", "openstack.resource.ResourceMixinProtocol",
+        "typing.Protocol",
+    ]:
+        raise ValueError("unsupported SecurityGroup inheritance")
+    init = source.anchor("openstack/fields.py", "_BaseComponent.__init__")
+    args = init.args.posonlyargs + init.args.args
+    defaults = dict(zip((arg.arg for arg in args[-len(init.args.defaults):]),
+                        init.args.defaults))
+    for name, expected_default in (("default", None), ("coerce_to_default", False),
+                                   ("alternate_id", False), ("list_type", None)):
+        if source.literal("openstack.fields", defaults[name]) is not expected_default:
+            raise ValueError("unsupported SecurityGroup implicit descriptor default")
+    getter = source.anchor("openstack/fields.py", "_BaseComponent.__get__")
+    null_returns = [node for node in getter.body if isinstance(node, ast.If)
+                    and isinstance(node.test, ast.Compare)
+                    and isinstance(node.test.left, ast.Name)
+                    and node.test.left.id == "value"
+                    and len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.Is)
+                    and len(node.test.comparators) == 1
+                    and isinstance(node.test.comparators[0], ast.Constant)
+                    and node.test.comparators[0].value is None]
+    if (len(null_returns) != 1 or len(null_returns[0].body) != 1
+            or not isinstance(null_returns[0].body[0], ast.Return)
+            or not isinstance(null_returns[0].body[0].value, ast.Constant)
+            or null_returns[0].body[0].value.value is not None):
+        raise ValueError("unsupported SecurityGroup None response shortcut")
+
+
 def extract(root, target="subnet"):
     resource, files, anchors, sdk_package = TARGETS[target]
     source = Source(root, files)
@@ -904,6 +1054,8 @@ def extract(root, target="subnet"):
         network_body_descriptors(source, attrs, body)
     elif target == "router":
         router_body_descriptors(source, attrs, body, query)
+    elif target == "security_group":
+        security_group_body_descriptors(source, attrs, body, query)
     elif target == "secret":
         keymanager_body_accessors(source, attrs, body, "Secret", "secret_id", "secret_ref")
     elif target == "container":
