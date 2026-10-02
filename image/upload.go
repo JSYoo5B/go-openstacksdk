@@ -191,6 +191,12 @@ var reservedImageProperties = func() map[string]bool {
 
 type uploadMetadata struct{ options uploadImageOptions }
 
+// prepareUploadMetadata shares the existing concrete metadata builder with
+// workflows that freeze the JSON request before starting another phase.
+func prepareUploadMetadata(options uploadImageOptions) (map[string]any, error) {
+	return (uploadMetadata{options: options}).ToImageCreateMap()
+}
+
 func (b uploadMetadata) ToImageCreateMap() (map[string]any, error) {
 	body, err := b.options.base.ToImageCreateMap()
 	if err != nil {
@@ -238,7 +244,7 @@ func (s *Service) Upload(ctx context.Context, input UploadImageRequest, options 
 		}
 	}
 	metadata := uploadMetadata{options: o}
-	if _, err := metadata.ToImageCreateMap(); err != nil {
+	if _, err := prepareUploadMetadata(o); err != nil {
 		return nil, uploadWrap("prepare upload", err)
 	}
 	created, err := images.Create(ctx, s.client, metadata).Extract()
