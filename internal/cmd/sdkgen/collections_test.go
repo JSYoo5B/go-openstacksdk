@@ -46,6 +46,8 @@ func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Pa
 	t.Helper()
 	cloud := types.NewPackage(upstreamModule, "gophercloud")
 	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "ServiceClient", types.NewNamed(types.NewTypeName(token.NoPos, cloud, "ServiceClient", nil), types.NewStruct(nil, nil), nil)))
+	link := types.NewNamed(types.NewTypeName(token.NoPos, cloud, "Link", nil), types.NewStruct([]*types.Var{types.NewVar(token.NoPos, cloud, "Href", types.Typ[types.String]), types.NewVar(token.NoPos, cloud, "Rel", types.Typ[types.String])}, []string{`json:"href"`, `json:"rel"`}), nil)
+	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "Link", link))
 	page := types.NewPackage(upstreamModule+"/pagination", "pagination")
 	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Page", types.NewNamed(types.NewTypeName(token.NoPos, page, "Page", nil), types.NewInterfaceType(nil, nil).Complete(), nil)))
 	page.Scope().Insert(types.NewTypeName(token.NoPos, page, "Pager", types.NewNamed(types.NewTypeName(token.NoPos, page, "Pager", nil), types.NewStruct(nil, nil), nil)))

@@ -97,6 +97,7 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 			source = strings.ReplaceAll(source, "ToListQuery", "ToPolicyListQuery")
 			source += "\nfunc ExtractPolicysInto(r pagination.Page,v any)error{return nil}\n"
 		} else {
+			source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;Name string `q:\"name\"`;Description string `q:\"description\"`;ProjectID string `q:\"project_id\"`;Addresses []string `q:\"addresses\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`}", 1)
 			source = strings.ReplaceAll(source, "ToListQuery", "ToAddressGroupListQuery")
 		}
 		source = strings.Replace(source, "type "+spec.model+" struct{ID string;Name string}", "type "+spec.model+" struct{"+fields+"}", 1)

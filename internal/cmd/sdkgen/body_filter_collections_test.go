@@ -124,7 +124,7 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 		}
 		if identity.model == "Policy" {
 			mutations["numeric rule decoder"] = strings.Replace(base, "Rules []map[string]any", "Rules []map[string]float64", 1)
-		} else if spec.rawRecord {
+		} else if identity.model == "Subnet" {
 			mutations["arbitrary array decoder"] = strings.Replace(base, "AllocationPools []AllocationPool", "AllocationPools []any", 1)
 		} else {
 			mutations["arbitrary array decoder"] = strings.Replace(base, field.member+" []string", field.member+" []any", 1)
@@ -201,7 +201,7 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 				})
 			}
 		}
-		if spec.rawRecord {
+		if identity.model == "Subnet" {
 			for name, changed := range map[string]string{
 				"native prefix field introduced":         strings.Replace(base, "type Subnet struct{", "type Subnet struct{PrefixLength int;", 1),
 				"missing timestamp decoder":              strings.Replace(base, "func(*Subnet)UnmarshalJSON([]byte)error{return nil}", "", 1),
@@ -278,6 +278,22 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				}
 			}
 			if spec.rawRecord {
+				if identity.model == "AddressGroup" {
+					body := string(source)
+					for _, required := range []string{"BodyFilterRecordValue:", "addressGroupBodyFilterValue(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"address_groups", control)`, "upstream.ExtractGroups(page)"} {
+						if !strings.Contains(body, required) {
+							t.Fatal("AddressGroup raw projection missing", required, body)
+						}
+					}
+					for _, forbidden := range []string{"BodyFilterValue:", "json.Marshal(", "record.Value", `q.Del("status")`, "WithListQuery("} {
+						if strings.Contains(body, forbidden) {
+							t.Fatal("AddressGroup query/projection policy changed", forbidden, body)
+						}
+					}
+					helper := controlledEmittedMethod(t, source, "listBodyWithControl")
+					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "addressgroups", err)`, "upstream.List(a.client, _opts)", "upstream.ExtractGroups(page)")
+					return
+				}
 				if fields["BodyFilterValue"] != nil {
 					t.Fatal("Subnet raw fields projected from a native model", string(source))
 				}

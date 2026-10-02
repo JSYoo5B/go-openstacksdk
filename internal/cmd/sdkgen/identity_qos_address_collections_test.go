@@ -162,10 +162,16 @@ func TestIdentityQoSAddressPinnedOwnLinksAndEnvelopeExtraction(t *testing.T) {
 			if err := validate(decls); err == nil || !strings.Contains(err.Error(), "decoder") {
 				t.Fatal("new source decoder escaped type/source guard", err)
 			}
-			// These pages own their continuation; Trunk's dependency source must
-			// not become a requirement for an unrelated standard collection.
+			// Both pages still own continuation. AddressGroup's separate raw
+			// Body lane now requires number-preserving page construction, not
+			// Trunk's inherited NextPageURL implementation.
 			sdkGenerator := generator{}
-			if dependency, err := sdkGenerator.identityPaginationDeclarations(pkg.Path()); err != nil || len(dependency) != 0 {
+			dependency, err := sdkGenerator.identityPaginationDeclarations(pkg.Path())
+			if spec.model == "AddressGroup" {
+				if err == nil || !strings.Contains(err.Error(), "AddressGroup body collection: native pagination dependency metadata missing") || len(dependency) != 0 {
+					t.Fatal("raw Body dependency silently omitted", dependency, err)
+				}
+			} else if err != nil || len(dependency) != 0 {
 				t.Fatal("inherited continuation dependency leaked", dependency, err)
 			}
 		})
