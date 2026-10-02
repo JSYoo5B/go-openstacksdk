@@ -82,9 +82,9 @@ conn.block_storage.wait_for_delete(volume, wait=None)
 
 SDK 기본 옵션 뒤에 caller 옵션을 순서대로 적용합니다. `WithTimeout`과 `WithUnlimitedWait`를 함께 전달하면 마지막 옵션이 유효합니다. `WithFailureStates("error", "aborted")`는 기본 실패 목록을 교체하고, 인자 없는 `WithFailureStates()`는 상태 실패 판정을 끕니다. 삭제 대기는 상태 실패 목록을 사용하지 않습니다.
 
-`WithPollInterval`은 조회 간격을, `WithStatusAttribute`는 모델의 단일 exported string 상태 필드를 선택합니다. `WithProgressCallback`은 첫 조회를 포함한 각 비종료 응답에서 실행하며 성공·실패 응답에는 실행하지 않습니다. 선택한 progress가 없거나 nil이면 0입니다. callback은 동기적으로 실행됩니다. callback, 간격, 시간 제한, 상태 필드에 대한 Go 검증은 [공통 Resource 문서](../resource/README.md)를 따릅니다.
+`WithPollInterval`은 조회 간격을, `WithStatusAttribute`는 모델의 단일 exported string 상태 필드를 선택합니다. `WithProgressCallback`은 비종료 응답에서 실행하며 성공·실패 응답에는 실행하지 않습니다. 상태 대기는 Name의 초기 List 결과도 보고합니다. 삭제 대기는 Name을 ID로 해결하는 List에서는 실행하지 않고, 고정 ID의 첫 GET부터 보고합니다. canonical progress가 없거나 nil이면 0입니다. callback은 동기적으로 실행됩니다. callback, 간격, 시간 제한, 상태 필드에 대한 Go 검증은 [공통 Resource 문서](../resource/README.md)를 따릅니다.
 
-네이티브 Cinder v3 Snapshot의 `Progress`는 string이므로 `WithProgressCallback`을 지정하면 HTTP 전에 `ErrUnsupported`입니다. progress가 없는 v2 Snapshot·Volume·Image 모델은 0을 보고하며, Server의 정수 progress는 실제 값을 보고합니다. Python의 임의 progress 값에 대한 callback을 그대로 재현하지 않습니다.
+네이티브 Cinder v3 Snapshot의 `Progress`는 string이며 JSON 키는 `os-extended-snapshot-attributes:progress`입니다. 공통 callback의 canonical `progress` 선택과 일치하지 않으므로 callback은 0을 받습니다. 이 확장 문자열을 정수로 형변환하지 않습니다. canonical progress가 없는 v2 Snapshot·Volume·Image 모델도 0을 보고하며, Server의 정수 progress는 실제 값을 보고합니다. Python의 임의 progress 값에 대한 callback을 그대로 재현하지 않습니다.
 
 명시적인 ID는 첫 GET부터 고정합니다. Name은 기존 collection의 조회로 한 번 해결한 뒤 그 ID를 고정합니다. Cinder v2 Snapshot의 기존 Name resolver는 네이티브 단일 페이지 정책을 유지합니다. 응답의 ID가 바뀌어도 다음 조회 대상은 변경하지 않습니다. 이미 대상 상태인 응답은 즉시 반환하고 추가 조회나 callback을 하지 않습니다.
 
