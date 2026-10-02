@@ -12033,77 +12033,140 @@
       "status": "unresolved",
       "go_api": [
         "gophercloudsdk/network/v2/extensions/subnetpools.New",
+        "gophercloudsdk/network/v2/extensions/subnetpools.API.All",
+        "gophercloudsdk/network/v2/extensions/subnetpools.API.List",
         "gophercloudsdk/resource.Collection.List",
         "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
         "gophercloudsdk/resource.WithBodyFilter",
         "gophercloudsdk/resource.WithBodyFilters",
         "gophercloudsdk/resource.WithMaxItems",
         "gophercloudsdk/resource.WithPaginated",
-        "gophercloudsdk/resource.WithQuery"
+        "gophercloudsdk/resource.WithPageSize",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.Network",
+        "gophercloudsdk.Connection.NetworkV2"
       ],
       "contracts": [
         {
-          "behavior": "Pinned direct subnet_pools (openstack/network/v2/_proxy.py:7667) delegates query to Resource.list. The declared non-query Body attribute prefixes is now available through explicit SDK-owned ordinary Resources.List/All filters, projecting native SubnetPool.Prefixes. Leaf and cached Connection.API paths retain native routes, extraction and shared provider.",
+          "behavior": "Ordinary SubnetPool.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: sixteen canonical query fields and twenty accepted canonical/wire spellings, ten local Body properties and nine reserved list controls. SubnetPool inherits Resource+TagMixinNetwork, not NetworkResource. id remains local; queried name/project_id/default/shared/ip_version/address_scope/tags stay server-only even when returned fields differ. Generated leaf and cached Network/NetworkV2 facades share the descriptor without implicit detail GET, prefix mutation or caller builder.",
           "tests": [
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField"
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersEntireQueryAndAliasDescriptor",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors"
           ]
         },
         {
-          "behavior": "String arrays compare complete ordered values with exact length and elements; native nil matches null and a present empty array remains distinct. CIDR strings are not merged or normalized. JSON/non-JSON value validation, creation snapshots, per-iteration ownership, independent concurrent reuse, bulk replacement/clear and lazy unsupported/unknown preflight remain owned by the SDK.",
+          "behavior": "Canonical is_shared/any_tags/not_tags/not_any_tags transpose to shared/tags-any/not-tags/not-tags-any. Bulk canonical key presence wins over a wire alias even for null/false/empty string/empty array; individual options targeting the same query are last-wins. Scalar strings, lowercase booleans and original JSON-number text encode without response-descriptor coercion. Flat arrays retain repeated scalar order and omit null elements; null/empty arrays omit URL values while keeping collision presence. Selected query objects/nested arrays fail, while unknown semantic names and their encoding errors are discarded.",
           "tests": [
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersAliasesSnapshotsAndConcurrentReuse",
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersEntireQueryAndAliasDescriptor",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding"
           ]
         },
         {
-          "behavior": "Raw caps count rows before local Body/name filters and do not refill with matches or infer a wire limit. Explicit first-page and consumer break preserve native continuation behavior. Native plural_links, whole-current-page decoding including malformed rows beyond the cap, later HTTP failures/cycles and cancellation retain their existing terminal behavior.",
+          "behavior": "Local id/tenant_id/prefixes/created_at/updated_at read original row JSON after successful native whole-page extraction. Literal missing/null ID or tenant matches null, distinct from a present empty string; tenant never falls back to project_id and the project response alias does not create a tenant query alias. Full prefix arrays compare ordered length/elements and preserve null elements for matching while the returned native []string uses an empty string. No CIDR normalization is added. Timestamp conditions compare original text, so equivalent instants with different text differ, while returned CreatedAt/UpdatedAt retain native time.Time decoding.",
           "tests": [
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersPreflightAndIndependentRawID",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersArraysCompareExactly"
+          ]
+        },
+        {
+          "behavior": "The five selected integer response descriptors default_prefix_length/maximum_prefix_length/minimum_prefix_length/default_quota/revision_number use exact-integral raw normalization. Integral decimal/exponent numbers and signed decimal integer strings compare mathematically when permitted by preceding native decoding; large original prefix numbers remain distinct from rounded native float64/int projection, and filter values are not coerced. Selected fractional prefix responses are terminal invalid-option errors rather than Python int truncation; unselected native fractional prefixes retain native truncation. Missing/null quota/revision can match null, while missing/null native prefix fields fail native decoding first.",
+          "tests": [
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersRawPresenceIntegersAndTimestamps",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersControlsAndNativeWholePageFailures",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors",
+            "resource/body_record_test.go:TestBodyRecordFieldNormalizationPresenceAndCauses",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersExactDecimalNumbersAndHugeExponents",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersDeliberatelyDistinguishesBooleansAndNumbers"
+          ]
+        },
+        {
+          "behavior": "Options own deep JSON/query snapshots for independent concurrent reuse. Bulk nil/empty replacement clears only semantic state and validates final selected values, allowing overwritten errors to disappear; explicit Body/raw-query namespaces remain separate. Same-wire semantic/raw/name/page-size and same-Body semantic/explicit destinations fail lazily before HTTP even for null/empty/equal values. Reserved controls, selected invalid encodings, unsupported descriptors and canceled contexts yield terminal preflight errors. Local Body id/tenant conditions and raw wire id/tenant parameters are independent destinations.",
+          "tests": [
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersSnapshotsReplacementAndConcurrentReuse",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersPreflightAndIndependentRawID",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear"
+          ]
+        },
+        {
+          "behavior": "Native extraction of the entire page precedes raw matching and cap consumption. All three native prefix lengths must be numbers or Atoi-compatible strings: missing/null/bool/object/invalid-string values, null rows and empty objects fail even on the query-only lane or after a cap. Known quota/revision/string/bool/tag/prefix-array/timestamp errors keep native causes; mixed incompatible timestamp modes also fail. Only after extraction succeeds can raw cap or break avoid a later selected fractional normalization or continuation. MaxItems counts raw rows before local Body/name predicates without refill or invented wire limit, and All discards partial rows on terminal errors.",
+          "tests": [
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersControlsAndNativeWholePageFailures",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount",
+            "resource/body_record_test.go:TestCollectionBodyRecordLaneIsSelectedOnlyForPreparedFilters",
             "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersRawControlsAndConsumerBreak",
             "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
           ]
         },
         {
-          "behavior": "Raw subnet_ids/subnets/prefixes/status/vendor query remains independently frozen wire data without automatic alias conversion or Body classification. Native typed List and FindIdentity do not acquire the ordinary-list Body option. Trunk sub_ports remains query-mapped and is not registered as a local Body filter.",
+          "behavior": "Ordinary native listing preserves HTTP 200/204/300 and rejects 201. A successfully parsed 204 is empty while empty application/json 204 retains native EOF. subnetpools_links rel=next supplies continuation; top-level next/links.next alone is ignored and duplicate matching rows remain ordinary rows. Foreign advertised URLs retain native following. Later HTTP/decode/foreign failures, cycles and cancellation are terminal. Configured headers/current microversion, original ProviderClient/live token, middleware, context and ResourceBase reverse prefix remain in use across pages.",
           "tests": [
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces",
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions"
-          ]
-        },
-        {
-          "behavior": "Explicit selectors require the audited selected []string field and JSON tag, native custom decoder/pager/extractor shapes and receiver-qualified pinned declarations. Network adds its complete list/query-builder/decoder/envelope/page/extractor hashes; SubnetPool retains its audited list/extraction hashes. Inventory owns canonical field slices and does not advertise unsupported fields or unrelated collections.",
-          "tests": [
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionStillRequiresPinnedNativeContracts",
-            "internal/cmd/sdkgen/body_filter_collections_test.go:TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields"
-          ]
-        },
-        {
-          "behavior": "Native SubnetPool still requires min/max/default prefix-length fields in its accepted numeric or string forms and retains its timestamp decoder. Missing/null/bool prefix lengths and malformed timestamps remain decode errors before local Body matching; these selectors do not synthesize absent native fields or normalize a response first.",
-          "tests": [
-            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativeValueSemantics",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersPagingLiveSourceAndNativeStatus",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersSharedFacadesAndRawDescriptors",
             "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersNativePageErrorsAndContinuation"
+          ]
+        },
+        {
+          "behavior": "Raw WithQuery remains a literal wire extension, including id/tenant_id/prefixes/raw prefix spellings/status/vendor parameters; semantic raw prefix spellings remain unknown rather than invented property aliases. WithName retains server hint plus exact local predicate while semantic queried name is server-only. WithStatus stays unsupported on the statusless model. Native typed List, FindIdentity and AddPrefixes/RemovePrefixes keep their existing signatures and request behavior; ordinary list filters do not leak into their GET or prefix-operation requests.",
+          "tests": [
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersNativeAndIdentitySurfaceIsolation",
+            "api/subnet_pool_list_filters_test.go:TestSubnetPoolListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_subnet_pool_filters_test.go:TestConnectionSubnetPoolFiltersPreflightAndIndependentRawID",
+            "api/network_subnet_body_filters_test.go:TestNetworkSubnetBodyFiltersLocalWireAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "Generation requires the checked-in SubnetPool manifest and live audited -openstacksdk-source checkout. Seven source SHA files are verified before isolated AST-only extraction and full manifest comparison, including parser minor version, exact Resource+TagMixinNetwork C3 MRO, inherited limit/marker defaults, tag query expansion, all local classification, unknown discard and canonical query precedence. Thirty-three AST anchors independently prove the five integer descriptors, prefixes list descriptor, project alias/deprecated tenant, untyped timestamps, inherited ID/accessor/default behavior and local-dictionary filtering. SubnetPool.name is ordinary rather than alternate_id; no SDK import, NetworkResource hierarchy or tenant query is fabricated. Missing/stale source or manifest fails closed, and the prior six manifests stay exact.",
+          "tests": [
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolPythonFilterManifestKeepsTagAliasesLocalIntegersAndInheritedMRO",
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolPythonFilterPinnedSourceRequiresIntegerCoercionAndClassificationProof"
+          ]
+        },
+        {
+          "behavior": "The raw semantic plan requires exact native SubnetPool 18/ListOpts 22/Link 2 field/type/tag shapes, sole pointer model/time-wrapper decoders, the sole value query-builder and exact interface signature, and native linked-page/extractor/result contracts. Twenty-two receiver-qualified native/root/pagination declaration hashes protect routes, native extraction and NoZ/RFC3339 decoding, page creation/GetBody/UseNumber pairing, accepted page codes and handler/continuation ordering. Two constants protect resourcePath and the NoZ time layout. Emission retains repeat/nil/empty whole query maps on both lanes, raw status, the prior six audited bindings and distinct explicit Body/semantic inventory metadata. Identity opt-ins remain twenty, Body bindings eight and semantic bindings seven; actual compiled native export schemas are also checked.",
+          "tests": [
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolBodyFilterNativeContractRejectsModelBuilderDecoderAndSourceDrift",
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolSemanticFilterEmissionPreservesQueryMapsStatusAndPriorSixBindings",
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolRawDependencyLoaderPreservesNativeTimeCodesAndNumbers",
+            "internal/cmd/sdkgen/subnet_pool_filters_test.go:TestSubnetPoolBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods"
           ]
         }
       ],
       "documentation": [
-        "docs/listing.md",
-        "network/README.md",
+        "network/v2/extensions/subnetpools/listing/README.md",
         "network/v2/README.md",
-        "resource/README.md"
+        "network/README.md",
+        "resource/README.md",
+        "docs/listing.md",
+        "internal/cmd/sdkgen/README.md"
       ],
       "differences": [
-        "Go explicitly selects prefixes with owned local options and frozen JSON values rather than automatically consuming Python query kwargs. The native Prefixes string slice collapses missing/null to nil; empty arrays remain distinct. Other unknown outer Body attributes and internally seeded descriptor state are not recovered.",
-        "The SDK compares exact ordered strings without Python descriptor coercion or CIDR normalization. JSON scalar inputs are not coerced into arrays; bool and number remain distinct. Raw query keeps caller wire names, repetitions and extensions.",
-        "max_items caps raw native rows locally without Python Resource.list's automatic limit hint. Native accepted statuses, whole-page extraction and advertised plural_links continuation remain intact; typed native List and FindIdentity are separate surfaces."
+        "The complete declared query/local classification is now SDK-owned through concrete semantic and explicit Body options. id is local rather than a Python query field; queried name/project/default/shared/ip_version/address_scope/tags are server-only. The project response alias does not create a tenant query alias. WithName retains separate hint/local behavior and raw WithQuery is a wire extension, without a caller builder or predicate.",
+        "Individual semantic options are last-wins and bulk canonical presence wins over wire aliases. Only final selected semantic values are validated; same-destination collisions reject even null/empty/equal values. Query arrays encode repeated scalar values with null omission, booleans are lowercase, JSON-number spelling is retained and unknown semantic keys/errors are discarded. Raw prefix spellings are available through explicit Body aliases or raw query, rather than invented semantic property names.",
+        "The five integer response descriptors use exact-integral Go normalization after native decoding. Python int descriptor behavior can truncate fractions, retain bool-as-int values, and default ordinary signed/non-digit strings differently; these conversions are not replicated. Filter values stay uncoerced. Native quota/revision int decoding remains strict, and native prefix floats/strings retain their returned int/float64 or Atoi limits independently of raw comparisons.",
+        "Original timestamps, literal ID/tenant presence and prefix-array null elements drive matching, while returned typed times, native zero strings and []string null-to-empty projection remain unchanged. Native known TenantID is a string and malformed values fail first; no arbitrary tenant-object or precision claim is made. Arrays compare full ordered elements, bools remain distinct from numbers, and Python scalar-to-list wrapping/default/alias projection is not added.",
+        "Whole-page native decoding remains authoritative before raw caps: every row requires all three valid prefix-length fields, so null/empty rows fail on both query and Body lanes. Selected raw integer normalization runs only on consumed fields after that boundary; caps/break can avoid later normalization but cannot hide native type/required-prefix/time errors.",
+        "Native 200/204/300, plural-links continuation and foreign URL following are preserved, including application/json empty-204 EOF. Raw caps count rows like pinned Resource.list but do not infer wire limit; first-page/break stop before continuation and All drops partial results on errors. No RFC-Link parsing, same-origin/fixed-query or synthesized marker policy is added."
       ],
       "remaining": [
-        "Pinned Resource.list/QueryParameters still automatically transpose declared wire aliases, discard unknown keys and classify other non-query Body fields. Remaining fields, full descriptor/default/alias/coercion behavior and complete automatic query/Body policy require separate implementation and tests.",
-        "SubnetPool inherits Resource with TagMixinNetwork. Native model decoding and explicit local filters do not provide its complete seeded Resource/unknown-Body/cache/dirty lifecycle. Native time.Time/prefix-length response policies are preserved rather than claimed equivalent to all Python descriptor response semantics.",
-        "Pinned Proxy.request optional GET response cache (cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate. Direct Proxy._list fixes session to itself; adapter/session injection is an inherited Resource.list surface. Neither class declares a resource maximum microversion, so no class-specific maximum negotiation gap is claimed.",
-        "Pinned Resource._get_next_link includes RFC Link-header and limit/marker continuation paths beyond the native plural_links pager. Deprecated Proxy._list jmespath_filters (openstack/proxy.py:866-916) is consumed from direct query and has no ordinary Go expression filter option."
+        "Complete mutable Python Resource state, defaults/coercion, unknown seeded attrs, project_id alias fallback, returned property projection and cache/dirty lifecycle remain beyond declared list classification. SubnetPool inherits Resource+TagMixinNetwork rather than NetworkResource; its own revision descriptor does not provide NetworkResource if-match behavior. Ordinary name is not an alternate ID and generic Resource identity/unknown-body behavior is not newly implemented.",
+        "Pinned Proxy.request optional GET caching(cache_enabled/skip_cache), Resource/session injection and inherited per-call headers/microversion/base_path/allow_unknown_params remain separate from retaining configured native clients. Direct Proxy._list fixes session to itself, and SubnetPool has no class-specific maximum microversion declaration.",
+        "Resource._get_next_link recognizes plural/body links, top-level next, RFC Link headers and truthy limit/marker fallback beyond native subnetpools_links. Python continuation-query merging, dynamic Resource.id markers, max_items wire-limit hints and page-end observations remain distinct from native advertised URL/cycle behavior; full inherited continuation remains open.",
+        "Deprecated Proxy._list jmespath_filters and __conflicting_attrs restoration(openstack/proxy.py:896-902) remain outside declared semantic classification. Whole-file hashes verify source stability without implementing every branch.",
+        "Native whole-page schema/status/empty204/error behavior and selected raw JSON equality do not complete generic Python response/default/descriptor coercion. Native typed List, FindIdentity and prefix operations remain independently reviewed surfaces; this ordinary-list work neither changes their options nor claims their full inherited Resource contracts."
       ]
     },
     {
