@@ -14,6 +14,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 	want := []collectionRecord{
 		{Package: "gophercloudsdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
 		{Package: "gophercloudsdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
+		{Package: "gophercloudsdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "gophercloudsdk/keymanager/v1/secrets"},
 	}
 	var actual []collectionRecord
 	for _, record := range sdkOwnedCollections {
@@ -44,7 +45,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	registry := read("keymanager/v1/service_generated.go")
-	for _, part := range []string{"SecretStores", "Quotas", "Secrets", "gophercloudsdk/keymanager/v1/secretstores", "gophercloudsdk/keymanager/v1/quotas", "New(client)"} {
+	for _, part := range []string{"SecretStores", "Quotas", "SecretConsumers", "Secrets", "gophercloudsdk/keymanager/v1/secretstores", "gophercloudsdk/keymanager/v1/quotas", "gophercloudsdk/keymanager/v1/secretconsumers", "New(client)"} {
 		if !strings.Contains(registry, part) {
 			t.Fatalf("missing shared-client registry %q: %s", part, registry)
 		}
@@ -56,12 +57,12 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	docs := read("keymanager/v1/README.md")
-	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretstores/README.md", "quotas/README.md", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)"} {
+	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "SecretConsumers.InSecret", "consumer ID·Resources·Find·Wait 없음", "advertised offset next", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing documented actual capability %q: %s", part, docs)
 		}
 	}
-	for _, invented := range []string{"SecretStores.Resources", "Quotas.Resources", "SecretStores.Find(", "Quotas.Find("} {
+	for _, invented := range []string{"SecretStores.Resources", "Quotas.Resources", "SecretConsumers.Resources", "SecretStores.Find(", "Quotas.Find(", "SecretConsumers.Find("} {
 		if strings.Contains(docs, invented) {
 			t.Fatalf("documentation invented an unsupported abstraction %q", invented)
 		}

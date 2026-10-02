@@ -6,21 +6,24 @@ import (
 	resource0 "gophercloudsdk/messaging/v2/claims"
 	resource1 "gophercloudsdk/messaging/v2/messages"
 	resource2 "gophercloudsdk/messaging/v2/queues"
+	resource3 "gophercloudsdk/messaging/v2/subscriptions"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client   *gophercloud.ServiceClient
-	Claims   *resource0.API
-	Messages *resource1.API
-	Queues   *resource2.API
+	client        *gophercloud.ServiceClient
+	Claims        *resource0.API
+	Messages      *resource1.API
+	Queues        *resource2.API
+	Subscriptions *resource3.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		Claims:   resource0.New(client),
-		Messages: resource1.New(client),
-		Queues:   resource2.New(client),
+		Claims:        resource0.New(client),
+		Messages:      resource1.New(client),
+		Queues:        resource2.New(client),
+		Subscriptions: resource3.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

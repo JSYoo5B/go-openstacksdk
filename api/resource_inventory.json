@@ -1619,6 +1619,28 @@
     "parent": "gophercloudsdk/identity/v3/projects"
   },
   {
+    "package": "gophercloudsdk/keymanager/v1/secretconsumers",
+    "source": "sdk_owned",
+    "model": "Consumer",
+    "kind": "secret_consumer",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InSecret",
+    "parent": "gophercloudsdk/keymanager/v1/secrets"
+  },
+  {
+    "package": "gophercloudsdk/messaging/v2/subscriptions",
+    "source": "sdk_owned",
+    "model": "Subscription",
+    "kind": "queue_subscription",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InQueue",
+    "parent": "gophercloudsdk/messaging/v2/queues"
+  },
+  {
     "package": "gophercloudsdk/sharedfilesystems/v2/quotasets",
     "source": "sdk_owned",
     "model": "QuotaResource",

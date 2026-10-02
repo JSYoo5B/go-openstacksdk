@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 messaging/v2 API를 하나의 인증된 서비스 객체�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Subscriptions.InQueue(ctx, queueName)`는 caller가 지정한 queue 이름을 추가 조회 없이 고정합니다. scope의 Create·Get·List/All은 SDK 소유 Subscription 모델을 반환하고 Delete는 error만 반환합니다. 생성은 POST201 응답의 선택적인 subscription_id와 실제 원문을 보존합니다. Location은 collection URL일 수 있어 item ID로 해석하거나 따라가지 않습니다. 연결의 안정적인 Client-ID를 사용하며 목록은 Python MessageResource의 행 수 limit·마지막 ID marker 방식으로 순회합니다. [Subscription Python/Go 사용법](subscriptions/README.md)에 호출별 project header·TTL 생략·소비 제어·삭제 404 기본값과 남은 Resource/cache 계약을 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -34,6 +36,7 @@ for value, err := range service.Queues.List(ctx) {
 | `Claims` | [claims](claims/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Queues` | [queues](queues/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Subscriptions` | [subscriptions](subscriptions/api.go) | `InQueue(ctx, queueName)`: 고정 이름의 Create·Get·List/All·Delete; Resources·Find·Wait·Update 없음 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
 

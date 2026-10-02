@@ -85,6 +85,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "keymanager/v1" {
 		out.WriteString("Barbican의 native API와 함께 SDK가 직접 구현한 `SecretStores`와 `Quotas`를 제공합니다. `SecretStores.List/All`, `GetGlobalDefault`, `GetPreferred`는 목록과 두 고정 selector의 조회이며 자동 fallback·CRUD·상태 대기를 추가하지 않습니다. `Quotas.Get`은 현재 인증된 프로젝트의 effective quota이고 `Quotas.InProject(ctx, resource.ID(projectID))`는 고정 프로젝트의 Get·Update·Delete입니다. Update는 설정 교체 PUT204이고 삭제는 override 초기화 DELETE204이며 둘 다 자동 재조회하지 않습니다. 반환 acknowledgement는 실제 빈 응답·header·status이며 Python의 seeded Resource와 구분합니다. [SecretStore Python/Go 사용법](secretstores/README.md)과 [Quota Python/Go 사용법](quotas/README.md)에 marker·nullable 응답·정수 입력·기본값 및 남은 Resource/cache 계약을 설명합니다.\n\n")
+		out.WriteString("`SecretConsumers.InSecret(ctx, resource.ID(secretID))`는 고정 secret의 consumer association 생성·삭제와 목록을 제공합니다. association은 service·resource_type·resource_id로 식별하며 별도 consumer ID를 만들지 않습니다. 생성·삭제는 실제 HTTP200 secret 응답을 반환하고 목록은 advertised offset next를 따릅니다. [SecretConsumer Python/Go 사용법](secretconsumers/README.md)에 세 proxy 연산·삭제 404 기본값·고정 부모·응답과 Python의 seeded Resource 차이를 설명합니다.\n\n")
+	}
+	if key == "messaging/v2" {
+		out.WriteString("`Subscriptions.InQueue(ctx, queueName)`는 caller가 지정한 queue 이름을 추가 조회 없이 고정합니다. scope의 Create·Get·List/All은 SDK 소유 Subscription 모델을 반환하고 Delete는 error만 반환합니다. 생성은 POST201 응답의 선택적인 subscription_id와 실제 원문을 보존합니다. Location은 collection URL일 수 있어 item ID로 해석하거나 따라가지 않습니다. 연결의 안정적인 Client-ID를 사용하며 목록은 Python MessageResource의 행 수 limit·마지막 ID marker 방식으로 순회합니다. [Subscription Python/Go 사용법](subscriptions/README.md)에 호출별 project header·TTL 생략·소비 제어·삭제 404 기본값과 남은 Resource/cache 계약을 설명합니다.\n\n")
 	}
 	switch key {
 	case "instanceha/v1":
@@ -197,6 +201,14 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			}
 			if record.Kind == "effective_project_quota" {
 				policies = append(policies, "`Get(ctx)`: 인증된 프로젝트 effective quota; `InProject(ctx, ID)`: Get·교체 Update·override Delete, 목록·Find·Wait 없음")
+				continue
+			}
+			if record.Kind == "secret_consumer" {
+				policies = append(policies, "`InSecret(ctx, ref)`: association Create·Delete와 offset List/All; 실제 secret 응답, consumer ID·Resources·Find·Wait 없음")
+				continue
+			}
+			if record.Kind == "queue_subscription" {
+				policies = append(policies, "`InQueue(ctx, queueName)`: 고정 이름의 Create·Get·List/All·Delete; Resources·Find·Wait·Update 없음")
 				continue
 			}
 			if record.Kind == "list_only" {
