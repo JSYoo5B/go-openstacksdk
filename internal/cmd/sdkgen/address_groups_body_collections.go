@@ -115,11 +115,28 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 			return nil, fmt.Errorf("%s: native extraction dependency: %w", label, err)
 		}
 		if sdkPath(path) == subnetPoolSDKPath {
-			if value, found := identitySourceConstants(file)["RFC3339NoZ"]; found {
-				if value != "2006-01-02T15:04:05" {
-					return nil, fmt.Errorf("%s: native RFC3339NoZ constant changed", label)
+			// Count declarations before the convenience map can collapse
+			// repeated names in a source file.
+			for _, declaration := range file.Decls {
+				group, ok := declaration.(*ast.GenDecl)
+				if !ok || group.Tok != token.CONST {
+					continue
 				}
-				noZConstants++
+				for _, entry := range group.Specs {
+					spec, ok := entry.(*ast.ValueSpec)
+					if !ok {
+						continue
+					}
+					for _, name := range spec.Names {
+						if name.Name != "RFC3339NoZ" {
+							continue
+						}
+						noZConstants++
+						if identitySourceConstants(file)[name.Name] != "2006-01-02T15:04:05" {
+							return nil, fmt.Errorf("%s: native RFC3339NoZ constant changed", label)
+						}
+					}
+				}
 			}
 		}
 		for _, declaration := range file.Decls {
