@@ -70,6 +70,9 @@ type Adapter[T any] struct {
 	// It is selected only for a nonempty prepared Body filter set.
 	IterateBodyControlled func(context.Context, url.Values, ListControl) iter.Seq2[*BodyRecord[T], error]
 	BodyFilterRecordValue func(*BodyRecord[T], string) (json.RawMessage, error)
+	// FilterDescriptor opts an audited binding into declared attribute query/
+	// Body classification. It is independent of raw wire and explicit Body options.
+	FilterDescriptor *FilterDescriptor
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
@@ -85,6 +88,7 @@ type Collection[T any] struct{ binding Adapter[T] }
 
 func NewCollection[T any](adapter Adapter[T]) *Collection[T] {
 	adapter.BodyFilterFields = maps.Clone(adapter.BodyFilterFields)
+	adapter.FilterDescriptor = cloneFilterDescriptor(adapter.FilterDescriptor)
 	if adapter.IdentityMissingListQuery != nil {
 		adapter.IdentityMissingListQuery = cloneIdentityFindOptions(IdentityFindOpts{Query: adapter.IdentityMissingListQuery}).Query
 	}
@@ -154,6 +158,42 @@ func (c *Collection[T]) List(ctx context.Context, opts ...ListOption) iter.Seq2[
 		}
 		bodyFilters, err := c.prepareBodyFilters(o.bodyFilters)
 		if err != nil {
+			yield(nil, err)
+			return
+		}
+		semanticQuery, semanticBody, err := prepareFilters(c.binding.FilterDescriptor, o.filters, c.binding.BodyFilterFields)
+		if err != nil {
+			if errors.Is(err, ErrUnsupported) {
+				err = c.wrap("list", err)
+			}
+			yield(nil, err)
+			return
+		}
+		if len(semanticBody) > 0 {
+			for _, field := range sortedBodyKeys(semanticBody) {
+				if _, exists := bodyFilters[field]; exists {
+					yield(nil, invalid("semantic Body field %q conflicts with an explicit Body filter", field))
+					return
+				}
+			}
+			prepared, err := c.prepareBodyFilters([]bodyFilterUpdate{{values: semanticBody}})
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			if bodyFilters == nil {
+				bodyFilters = make(map[string]json.RawMessage)
+			}
+			maps.Copy(bodyFilters, prepared)
+		}
+		nameHintKey := ""
+		if c.binding.NameQuery != nil {
+			nameHintKey = c.binding.NameQueryKey
+			if nameHintKey == "" {
+				nameHintKey = "name"
+			}
+		}
+		if err := mergeFilterQuery(&o, semanticQuery, nameHintKey); err != nil {
 			yield(nil, err)
 			return
 		}

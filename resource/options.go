@@ -36,6 +36,7 @@ type listOptions struct {
 	status      bool
 	control     ListControl
 	bodyFilters []bodyFilterUpdate
+	filters     []filterUpdate
 }
 
 // ListOption configures a typed resource iterator. Later options win.
