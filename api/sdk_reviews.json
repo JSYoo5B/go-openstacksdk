@@ -13150,6 +13150,141 @@
         "Broader inherited Resource.find/list and session controls, such as list_base_path, microversion, arbitrary params, per-list headers/paginated/max_items and adapter/cache policy, are not added to a direct proxy that declares only name_or_id and ignore_missing. Python's custom Secret.fetch itself ignores several generic fetch controls and bypasses response translation; no unsupported class-maximum negotiation requirement or default HTTP404 fallback parity is claimed.",
         "Native Secrets.Get/GetPayload/Resources retain their separate existing metadata/query/pagination APIs. The callable SDK FindIdentity addition covers direct metadata-plus-conditional-payload lookup and metadata-only exact list resolution under documented Go policies, without claiming full inherited Resource equivalence or generic native collection IdentityFind support."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/secrets",
+      "source_fingerprint": "32a9ac5f270f3cbbd87441514c219211385b5c09a47e4e7e28a416e1a1a89aeb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secrets.New",
+        "gophercloudsdk/keymanager/v1/secrets.API.All",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.KeyManagerV1"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordinary Secrets.Resources.List/All classify the complete pinned Secret declaration through SDK-owned WithFilter/WithFilters: twelve canonical query attributes, thirteen accepted canonical/wire names, and all twelve declared non-query Body properties. algorithm becomes alg; bits/created/updated/expiration stay server queries while bit_length/created_at/updated_at/expires_at compare original row values. Both the generated leaf and cached Connection.KeyManagerV1 facade use the same descriptor without caller builders or predicates.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireQueryDescriptor",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireRawBodyDescriptor",
+            "connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersSharedFacadeAndRawProperties"
+          ]
+        },
+        {
+          "behavior": "Bulk canonical query names beat wire aliases even when nil, false or empty; individual options are last-wins by target. Semantic query scalars encode strings, lowercase booleans and exact JSON number text, while flat scalar arrays retain repeated order and omit null elements. Null and empty arrays retain key presence for precedence and collisions. Unknown semantic names are discarded; selected objects/nested arrays and invalid selected JSON fail lazily, and all nine source list-control names are reserved rather than field payloads.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersQueriesSnapshotsAndNamespacePolicies",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersLazyPreflightAndCollisions",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding",
+            "resource/filters_test.go:TestSemanticFiltersRejectSelectedErrorsAndReservedControlsBeforeIteration"
+          ]
+        },
+        {
+          "behavior": "SDK-owned snapshots preserve nested input values and repeated query slices across option application, independent iteration and concurrent reuse. Bulk replacement/clear changes only semantic state; raw query and explicit Body filters survive. Only final selected semantic values are validated, so overwritten or unknown captured errors are discarded. Same-wire semantic/raw/page-size/WithName-hint collisions and same-property semantic/explicit Body collisions fail before HTTP, in either order and even for equal or null values. Unsupported bindings reject semantic clear too.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersQueriesSnapshotsAndNamespacePolicies",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersLazyPreflightAndCollisions",
+            "resource/filters_test.go:TestSemanticFiltersSnapshotsConcurrentReuseAndServerOnlyName",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear",
+            "resource/filters_test.go:TestSemanticFiltersDescriptorGateAndWireAliasBodyOverlap"
+          ]
+        },
+        {
+          "behavior": "All twelve local properties project from the original page row after native extraction, including unknown payload fields and original timestamp text. Original JSON preserves numbers beyond float64, missing/null versus empty arrays, exact ordered arrays/full nested array objects and recursive object subsets. An empty actual object rejects an object filter, while an empty filter matches a nonempty actual object. Numbers compare by exact decimal value; boolean/number and string/number types remain distinct.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireRawBodyDescriptor",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersExactJSONAndPresence",
+            "resource/body_record_test.go:TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersExactDecimalNumbersAndHugeExponents",
+            "internal/jsonfilter/filter_test.go:TestMatchFiltersDeliberatelyDistinguishesBooleansAndNumbers"
+          ]
+        },
+        {
+          "behavior": "The id property gives literal raw id key presence priority, including null, empty, numeric and object values; only an absent id falls back to the full secret_ref. The distinct secret_id property applies HREFToUUID-style final-path projection to the original reference spelling, preserving percent escapes and literal Unicode/space and excluding query/fragment. Missing/null bypass formatting, a trailing slash produces an empty string, and an invalid selected formatter is terminal before common local predicates. These values are passive comparisons, never follow-up request routes.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersPassiveIDsAndFormatter",
+            "connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersSharedFacadeAndRawProperties"
+          ]
+        },
+        {
+          "behavior": "Native Secret extraction validates the entire current page before raw selectors run. Native int/map/string/timestamp failures remain observable beyond a raw cap; the raw lane cannot erase native errors. A consumed null row is invalid, but a cap can stop before a later null row or invalid selected formatter after native decoding succeeds. Caps count raw rows before Body/name/status matches without refill or a wire limit hint; first-page and consumer break stop before continuation, and All returns nil on terminal errors.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersControlsAndNativeFailures",
+            "resource/body_record_test.go:TestBodyRecordPairingRejectsUnprovenShapeAndCount",
+            "resource/body_record_test.go:TestCollectionBodyRecordLaneIsSelectedOnlyForPreparedFilters",
+            "resource/body_filters_test.go:TestCollectionBodyFiltersRunAfterRawCapsOnBothIteratorPaths"
+          ]
+        },
+        {
+          "behavior": "Ordinary listing retains native HTTP 200/204/300 acceptance with 204 empty and 201 rejected. The native top-level next field remains authoritative, including foreign URLs, and matching duplicate rows are returned rather than deduplicated. Later HTTP/decode/foreign-request failures, cycle detection and cancellation are terminal; this unit adds no fixed-offset or same-origin pager policy. The original ProviderClient, live token, configured headers, selected microversion, middleware and reverse prefix remain shared across pages without client replacement.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersControlsAndNativeFailures",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersPagingSourceAndNativeIsolation",
+            "connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersSharedFacadeAndRawProperties",
+            "connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersPreflightAndNativeQueryLane"
+          ]
+        },
+        {
+          "behavior": "Semantic query name is server-only while WithName retains its hint and exact local predicate. Body comparisons run before common local name/status predicates; semantic status is exact JSON and WithStatus retains local case-insensitive matching. Both ordinary Secret iterators retain baseline raw status-query removal and now transfer other complete query maps with repeated/nil/empty key ownership. Native typed API.List, Fetch, manual FindIdentity and explicit-Ref lookup keep their separate contracts; listing adds no metadata/payload GET.",
+          "tests": [
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireQueryDescriptor",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersQueriesSnapshotsAndNamespacePolicies",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersControlsAndNativeFailures",
+            "api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersPagingSourceAndNativeIsolation",
+            "connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersPreflightAndNativeQueryLane"
+          ]
+        },
+        {
+          "behavior": "Generation requires the checked-in Secret manifest and a live audited -openstacksdk-source checkout. Seven pinned file SHA-256 hashes are verified before isolated AST-only extraction and complete manifest comparison, including parser minor version, C3 MRO, inherited Body/id/alternate-id access, distinct HREF formatter proof, unknown-discard and canonical precedence. Twenty-three AST anchors and optional response_accessor/formatter metadata are checked without importing OpenStackSDK. Default Subnet extraction remains unchanged; source or manifest drift fails closed.",
+          "tests": [
+            "internal/cmd/sdkgen/secret_filters_test.go:TestSecretPythonFilterManifestKeepsDistinctPropertyAccessors",
+            "internal/cmd/sdkgen/secret_filters_test.go:TestSecretPythonFilterPinnedSourceRequiresSHAAndIndependentAST"
+          ]
+        },
+        {
+          "behavior": "The semantic plan also requires exact native Secret/ListOpts/DateQuery shapes, native decoder, own linked-page methods, extractor and thirteen receiver-qualified native/pagination declaration hashes, including UseNumber and original GetBody pairing. Generated selectors project only the twelve owned properties; semantic query/body/reserved inventory remains separate from explicit Body capability, id/secret_id/secret_ref are not collapsed, existing twenty native identity opt-ins are unchanged and no new identity capability leaks into Secret or other resources.",
+          "tests": [
+            "internal/cmd/sdkgen/secret_filters_test.go:TestSecretBodyFilterNativeContractRejectsDecoderPagerAndSourceDrift",
+            "internal/cmd/sdkgen/secret_filters_test.go:TestSecretSemanticFilterEmissionKeepsNativePoliciesAndQueryOwnership",
+            "internal/cmd/sdkgen/secret_filters_test.go:TestSecretRawPageDependencyLoaderRequiresOriginalNumberAndBodyContract"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/listing/README.md",
+        "keymanager/v1/README.md",
+        "resource/README.md",
+        "docs/listing.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "Go exposes concrete SDK-owned WithFilter/WithFilters for complete declared classification and WithBodyFilter/WithBodyFilters for explicit local selection, without caller builders/predicates. Raw WithQuery remains a separate wire namespace; ordinary Secret Resources preserves its existing status-query suppression. Typed API.List and manual Fetch/FindIdentity do not acquire semantic options.",
+        "Individual Go options are last-wins by target; bulk canonical query names follow Python precedence and bulk replacement/clear affects only semantic state. Cross-namespace duplicate destinations are errors rather than permissive kwargs merging. A selected null/empty query retains presence without URL values; flat scalar arrays encode repeated values, booleans are lowercase and exact JSON number text is retained. Objects/nested query arrays are rejected and final unknown semantic values are discarded.",
+        "Raw local matching keeps original timestamp spelling and precise JSON values, while returned resources remain native typed Secrets with native time/int/map defaults. Raw fields such as payload, literal id and unknown attributes are not added to the returned native model or exposed as complete HTTP response evidence. Native whole-page decoding may fail on a later modeled field before a raw cap or local mismatch can stop consumption.",
+        "Go distinguishes booleans and numbers and does not apply Python descriptor/scalar coercion. Object filters recursively compare subsets of nonempty actual objects, preserving the Python empty-object truthiness boundary; nonobject actual values are nonmatches rather than potential Python attribute-access errors. Arrays require exact ordered values including full objects inside arrays.",
+        "Passive id uses raw key presence or the full reference; secret_id remains a separate formatted property and never requires a UUID. Go formats only selected secret_id conditions, while Python Resource construction/to_dict can eagerly invoke the formatter on unselected fields. Go URL parsing preserves original percent/path spelling but differs from Python urlsplit for nonnumeric authority ports and leading-control normalization.",
+        "Native HTTP 200/204/300 and top-level next pagination are retained. A bodyless 204 without JSON Content-Type is empty; a JSON-typed empty 204 retains the native EOF parsing error. The native pager can follow foreign advertised URLs and does not acquire the same-origin/fixed-query offset guards used by manual Secret FindIdentity. Local caps stop on consumed raw rows without a Python-inferred server limit; first-page/break stop before continuation and All discards partial results on a terminal error.",
+        "Semantic name is a server condition rather than an automatic exact local predicate; WithName retains the latter. Semantic Body status is exact JSON, whereas common WithStatus retains case-insensitive comparison. The nine source controls are reserved as field names; this does not imply every inherited per-call control is implemented by the ordinary collection.",
+        "Generation additionally requires an independently verified live Python checkout and recorded AST parser minor version. Manifest/accessor/formatter/source/native drift fails closed, and Subnet proof plus existing native identity capability tables remain independent."
+      ],
+      "remaining": [
+        "Complete Python Resource Body/URI descriptor defaults, coercion, seeded unknown attributes, mutable dict/resource behavior and final returned projection remain beyond the covered complete query/Body classification. Native Secret models omit original id/payload/unknown Body state and normalize modeled timestamps; raw row matching does not provide Python Resource/cache/dirty lifecycle.",
+        "Pinned Proxy.request optional GET response caching(cache_enabled/skip_cache), resource/session injection and inherited per-call headers/microversion/base_path/allow_unknown_params controls remain separate from retaining configured native clients. Direct Proxy._list fixes session to itself; Secret inherits _max_microversion=None and this unit adds no class-specific maximum negotiation.",
+        "Pinned Resource._get_next_link accepts body links/secrets_links, RFC Link headers and limit/marker fallback beyond the native top-level next pager. Python merges parsed continuation parameters with existing query values and derives marker from its dynamic Resource id, while this ordinary Go unit preserves advertised native URL behavior and a cycle guard; full inherited continuation parity remains open.",
+        "Deprecated Proxy._list jmespath_filters and the special __conflicting_attrs recovery branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify those branches have not drifted but do not claim their runtime mapping.",
+        "Full eager Python property/formatter execution and Python urlsplit edge cases remain distinct from the audited selected-only Go projection. Generic inherited response error/default/schema behavior is not fully mapped by preserving native typed/page decode causes. Existing Fetch/FindIdentity reviews are unchanged and are not completed by this ordinary list proof."
+      ]
     }
   ]
 }
