@@ -28,3 +28,13 @@ _ = password
 빈 암호 응답은 빈 문자열을 반환합니다. 잘못된 개인 키나 nil 옵션은 요청 전에 거부합니다. 복호화 오류와 HTTP 오류는 반환한 error로 확인합니다. 옵션을 여러 개 지정하면 마지막 키를 사용하며 `WithGetPasswordPrivateKey(nil)`은 기본 동작으로 돌아갑니다. 개인 키는 호출 동안 변경하지 않습니다.
 
 `CreateImage`는 Nova microversion에 따라 Location 헤더 또는 JSON 본문에서 이미지 ID를 해석합니다. `Evacuate`에서 서버가 관리자 암호를 제공하지 않으면 빈 문자열을 반환합니다. 이 반환값만으로 이미지 생성이나 evacuation 완료를 뜻하지는 않습니다. 완료 확인은 이미지·서버의 공통 `Wait`를 사용합니다.
+
+## 서비스별 상태·삭제 대기
+
+`WaitForServer(ctx, ref, options...)`는 ACTIVE/ERROR와 120초·2초 기본값을
+SDK가 적용합니다. `WaitForState`는 caller가 대상 상태를 지정하며 SDK 시간
+제한이 없습니다. `WaitForServerState`는 caller 대상과 120초 제한을 사용합니다. `WaitForDelete`는 삭제 요청 없이 실제
+미존재를 최대 120초 기다립니다. 호출별 `resource.WaitOption`이 기본값을
+순서대로 재정의합니다. 기존 `WaitFor`/`WaitForDeletion`과 네이티브
+`WaitForStatus`의 계약은 유지됩니다. 전체 예제와 Python Resource/cache의
+차이는 [서비스 대기 가이드](../../../docs/service-waits.md)를 참고하세요.

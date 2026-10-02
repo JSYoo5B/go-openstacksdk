@@ -53,3 +53,13 @@ cover the shared v3 client; v2 uses its existing leaf API.
 
 The [release-pinned server contract](../../../docs/cinder-metadata-server-contracts.md)
 separates these routes from Backup metadata and deployment-specific policies.
+
+## 서비스별 상태·삭제 대기
+
+`WaitForAvailable(ctx, ref, options...)`는 available/error와 2초 간격을
+SDK가 적용하며 SDK 시간 제한이 없습니다. `WaitForState`는 caller가 대상
+상태를 지정하고, `WaitForDelete`는 삭제 요청 없이 실제 미존재를 기본
+120초 기다립니다. parent context와 호출별 `resource.WaitOption`이 항상
+적용됩니다. 기존 공통 `WaitFor`/`WaitForDeletion`의 5분 정책과 네이티브
+`WaitForStatus`는 유지됩니다. 전체 예제와 Python Resource/cache의 차이는
+[서비스 대기 가이드](../../../docs/service-waits.md)를 참고하세요.
