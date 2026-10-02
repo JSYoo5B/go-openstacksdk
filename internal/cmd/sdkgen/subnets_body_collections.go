@@ -135,6 +135,10 @@ func emitBodyFilterList(e *emitter, plan *collectionPlan) {
 	if !ok || !spec.rawRecord {
 		return
 	}
+	if spec.path == "keymanager/v1/secrets" {
+		emitSecretBodyFilterList(e, plan)
+		return
+	}
 	e.use("gophercloudsdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())

@@ -25,9 +25,13 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", fields: []bodyFilterCollectionField{{key: "prefixes", member: "Prefixes"}}},
 	{path: "network/v2/networks", model: "Network", fields: []bodyFilterCollectionField{{key: "subnets", member: "Subnets", aliases: []string{"subnet_ids"}}}},
 	{path: "network/v2/subnets", model: "Subnet", rawRecord: true, fields: subnetBodyCollectionFields()},
+	{path: "keymanager/v1/secrets", model: "Secret", rawRecord: true, fields: secretBodyCollectionFields()},
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == "keymanager/v1/secrets" {
+		return secretBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == "network/v2/subnets" {
 		return subnetBodyCollectionMetadataValid(spec)
 	}
@@ -56,6 +60,8 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 
 func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
+	case "keymanager/v1/secrets":
+		return secretBodyNativeSchema(pkg, plan)
 	case "network/v2/subnets":
 		return identitySubnetBodySchema(pkg, plan)
 	case "network/v2/extensions/qos/policies", "network/v2/extensions/security/addressgroups":
@@ -86,7 +92,7 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 }
 
 func bodyFilterCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (bodyFilterCollectionSpec, bool) {
-	if parents != 0 || !identityCollectionEnabled(pkg, plan, parents) {
+	if plan == nil || parents != 0 || (sdkPath(pkg.Path()) != "keymanager/v1/secrets" && !identityCollectionEnabled(pkg, plan, parents)) {
 		return bodyFilterCollectionSpec{}, false
 	}
 	for _, spec := range bodyFilterCollectionSpecs {
@@ -136,7 +142,11 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		emitSubnetBodyRecordAdapter(e, plan)
+		if spec.path == "keymanager/v1/secrets" {
+			emitSecretBodyRecordAdapter(e, plan)
+		} else {
+			emitSubnetBodyRecordAdapter(e, plan)
+		}
 		return
 	}
 	e.printf("},\nBodyFilterValue:func(v *%s,key string)(json.RawMessage,error){\n", plan.modelName)

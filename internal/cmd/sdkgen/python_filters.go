@@ -39,8 +39,10 @@ var subnetFilterSourceHashes = map[string]string{
 }
 
 type pythonFilterField struct {
-	Field        string  `json:"field"`
-	ResponseType *string `json:"response_type"`
+	Field            string  `json:"field"`
+	ResponseType     *string `json:"response_type"`
+	ResponseAccessor string  `json:"response_accessor,omitempty"`
+	Formatter        string  `json:"formatter,omitempty"`
 }
 
 type pythonFilterAnchor struct {
@@ -98,9 +100,17 @@ func decodePythonFilterManifest(data []byte) (*pythonFilterManifest, error) {
 }
 
 func extractPythonFilterManifest(source string) (*pythonFilterManifest, error) {
+	return extractPythonFilterManifestTarget(source, "")
+}
+
+func extractPythonFilterManifestTarget(source, resource string) (*pythonFilterManifest, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	command := exec.CommandContext(ctx, "python3", "-I", "-", "--source", source)
+	arguments := []string{"-I", "-", "--source", source}
+	if resource != "" {
+		arguments = append(arguments, "--resource", resource)
+	}
+	command := exec.CommandContext(ctx, "python3", arguments...)
 	command.Stdin = strings.NewReader(pythonFilterExtractor)
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
@@ -169,6 +179,15 @@ func loadPythonFilterManifest(root, source string) (*pythonFilterManifest, error
 }
 
 func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectionPlan) error {
+	if sdkPath(pkg.Path()) == "keymanager/v1/secrets" {
+		if !secretPythonFilterMetadataValid(g.secretPythonFilters) {
+			return fmt.Errorf("audited Secret semantic filter source proof was not verified")
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); !ok {
+			return fmt.Errorf("audited Secret semantic filters require the full native raw Body contract")
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) != "network/v2/subnets" {
 		return nil
 	}
@@ -182,6 +201,15 @@ func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectio
 }
 
 func (g *generator) pythonFilterFor(pkg *types.Package, plan *collectionPlan) *pythonFilterManifest {
+	if sdkPath(pkg.Path()) == "keymanager/v1/secrets" {
+		if !secretPythonFilterMetadataValid(g.secretPythonFilters) {
+			return nil
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); ok {
+			return g.secretPythonFilters
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) != "network/v2/subnets" || g.pythonFilters == nil {
 		return nil
 	}
@@ -197,7 +225,13 @@ func pythonFilterBodyFields(manifest *pythonFilterManifest) map[string]string {
 	}
 	result := make(map[string]string, len(manifest.Body))
 	for name, field := range manifest.Body {
-		result[name] = field.Field
+		if manifest.Resource == secretPythonResource {
+			// Body properties have distinct accessors even when they share a
+			// stored field: id, secret_ref, and formatted secret_id stay separate.
+			result[name] = name
+		} else {
+			result[name] = field.Field
+		}
 	}
 	return result
 }
@@ -222,7 +256,7 @@ func pythonFilterReserved(manifest *pythonFilterManifest) []string {
 
 func emitPythonFilterDescriptor(e *emitter, plan *collectionPlan, parents int) {
 	manifest := e.pythonFilters
-	if manifest == nil || parents != 0 || sdkPath(e.pkg.Path()) != "network/v2/subnets" {
+	if manifest == nil || parents != 0 || manifest.SDKPackage != "gophercloudsdk/"+sdkPath(e.pkg.Path()) {
 		return
 	}
 	if _, ok := bodyFilterCollectionContract(e.pkg, plan, parents); !ok {
