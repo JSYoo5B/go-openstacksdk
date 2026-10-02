@@ -14447,6 +14447,1790 @@
         "This review maps only the declared native PUT operation. Pinned Python set_snapshot_metadata performs POST merge and cached Resource update; its explicit metadata envelope, metadata GET/delete family and broader session/cache/lifecycle contracts are separate.",
         "Typed Metadata maps remain caller-owned references through WithUpdateMetadataOptions; extension values are JSON snapshots. Populated metadata retains the existing envelope nesting for extension fields, and the core metadata key cannot be supplied through WithUpdateMetadataField even when omitted."
       ]
+    },
+    {
+      "operation": "python:block_storage/v2/delete_snapshot_metadata",
+      "source_fingerprint": "ebaaeea149f9760eb0a926423cb9ad1667142be38b0f0202b81f947e899520da",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.DeleteKeys",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys preserves the Python keys-is-None branch: nil sends one PUT with metadata:{} and returns its actual clear response; a nonnil empty slice validates without HTTP or fabricated body/header/status.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "Nonempty keys preserve order and duplicates as per-key DELETE /snapshots/{id}/metadata/{key}; each HTTP 200 acknowledgement retains the requested key and actual raw Body/Header/StatusCode. The first error stops later keys and returns already acknowledged deletions; missing keys are terminal, no deduplication or transaction is promised.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataDeleteKeepsLiteralKeysOrderDuplicatesAndPartialAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
+        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/delete_volume_metadata",
+      "source_fingerprint": "0596868d553b4a40c877908475a55b3db7da30f62e1419e04d1dc01c38db5ef2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.DeleteKeys",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys preserves the Python keys-is-None branch: nil sends one PUT with metadata:{} and returns its actual clear response; a nonnil empty slice validates without HTTP or fabricated body/header/status.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "Nonempty keys preserve order and duplicates as per-key DELETE /volumes/{id}/metadata/{key}; each HTTP 200 acknowledgement retains the requested key and actual raw Body/Header/StatusCode. The first error stops later keys and returns already acknowledged deletions; missing keys are terminal, no deduplication or transaction is promised.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataDeleteKeepsLiteralKeysOrderDuplicatesAndPartialAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/fetch_snapshot_metadata",
+      "source_fingerprint": "d0d50191b231ee40ffff627b7cff9b6601382c00554e8984f87d7db3436c7aa5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /snapshots/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
+        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/fetch_volume_metadata",
+      "source_fingerprint": "59c53cc7bb87944e1cc42f559b37177dc30d78e284bcfb1f58ddae04eedcd0f2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/get_snapshot_metadata",
+      "source_fingerprint": "5c5178977a585fd8affaf24453f8aca69ad44b6058241764e390834aa267d03b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /snapshots/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "The pinned get_snapshot_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
+        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/get_volume_metadata",
+      "source_fingerprint": "fd2781f1bc3429f81eb55a10cf440c7427ef62b3e31c56e5df89db50b6244995",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "The pinned get_volume_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/set_snapshot_metadata",
+      "source_fingerprint": "2571de17109313ae76d19bec152f097ade0ceb511a6c8b727c609dc5119bd831",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.Merge",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.Replace",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Merge maps the declared Python set operation to POST /snapshots/{id}/metadata with one explicit metadata object, including nil and empty input as metadata:{}. It returns the full actual server metadata map rather than caching the supplied delta; no read/merge/write or parent GET occurs.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The additional inherited replacement capability is explicit scope.Replace: PUT uses the complete metadata object, with nil/empty maps clearing it. Replace is not another direct proxy declaration, and native Snapshot UpdateMetadata retains its existing omitempty input and decoded map[string]any result.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
+        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/set_volume_metadata",
+      "source_fingerprint": "9cce7689b41b5ff546e0a37cc4d22b184869e697ea77cd364160230c0bb859d0",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v2/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.Merge",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.Replace",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v2/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v2/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Merge maps the declared Python set operation to POST /volumes/{id}/metadata with one explicit metadata object, including nil and empty input as metadata:{}. It returns the full actual server metadata map rather than caching the supplied delta; no read/merge/write or parent GET occurs.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The additional inherited replacement capability is explicit scope.Replace: PUT uses the complete metadata object, with nil/empty maps clearing it. Replace is not another direct proxy declaration, and native Snapshot UpdateMetadata retains its existing omitempty input and decoded map[string]any result.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v2/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_snapshot_metadata",
+      "source_fingerprint": "5e025c24f2f591e185af7ccf6daebb1846fa4d44faf1b3df513a79bbbf86cb13",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.DeleteKeys",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys preserves the Python keys-is-None branch: nil sends one PUT with metadata:{} and returns its actual clear response; a nonnil empty slice validates without HTTP or fabricated body/header/status.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "Nonempty keys preserve order and duplicates as per-key DELETE /snapshots/{id}/metadata/{key}; each HTTP 200 acknowledgement retains the requested key and actual raw Body/Header/StatusCode. The first error stops later keys and returns already acknowledged deletions; missing keys are terminal, no deduplication or transaction is promised.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataDeleteKeepsLiteralKeysOrderDuplicatesAndPartialAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_volume_metadata",
+      "source_fingerprint": "9dd3cac19e9408790dc0e3766fcde11833e582ee357deb658ec7cc35774d361e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.DeleteKeys",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys preserves the Python keys-is-None branch: nil sends one PUT with metadata:{} and returns its actual clear response; a nonnil empty slice validates without HTTP or fabricated body/header/status.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "Nonempty keys preserve order and duplicates as per-key DELETE /volumes/{id}/metadata/{key}; each HTTP 200 acknowledgement retains the requested key and actual raw Body/Header/StatusCode. The first error stops later keys and returns already acknowledged deletions; missing keys are terminal, no deduplication or transaction is promised.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataDeleteKeepsLiteralKeysOrderDuplicatesAndPartialAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/fetch_snapshot_metadata",
+      "source_fingerprint": "97a9d8d68f146b4b8c79ca6d8af72f4fd48ab88ad0482dc126118d4affb1e30a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /snapshots/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/fetch_volume_metadata",
+      "source_fingerprint": "4c235f669d7ff6e47b0fabc6cbd005ed6e2f6218fd1e27870d24e406146754d6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_snapshot_metadata",
+      "source_fingerprint": "b288d4de39a2ba4297fe8973ffc374a347c3b73f4469630dae88bbd9ed8d888a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /snapshots/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "The pinned get_snapshot_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_volume_metadata",
+      "source_fingerprint": "a9e3d8747a01763951eb0fe9457b5cb26a39e0b476c73d5ea8a78d8f09f42ed5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.Get",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to the fixed /volumes/{id}/metadata collection and accepts HTTP 200 with the actual exact lowercase metadata string object. No parent GET, implicit metadata fetch, name search for an explicit ID or synthesized parent Resource is added.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The fetched string map, complete raw response Body including unknown envelope fields and precise unknown numbers, independent multi-valued Header and StatusCode belong to the actual response. Caller mutations do not alter later responses or the source client.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "The pinned get_volume_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/set_snapshot_metadata",
+      "source_fingerprint": "c3a8510e429eb571f3907f846fbcc65d583194141dc518ec1f6205e22d653005",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/snapshots.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.Merge",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.Replace",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/snapshots.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/snapshots.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Merge maps the declared Python set operation to POST /snapshots/{id}/metadata with one explicit metadata object, including nil and empty input as metadata:{}. It returns the full actual server metadata map rather than caching the supplied delta; no read/merge/write or parent GET occurs.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The additional inherited replacement capability is explicit scope.Replace: PUT uses the complete metadata object, with nil/empty maps clearing it. Replace is not another direct proxy declaration, and native Snapshot UpdateMetadata retains its existing omitempty input and decoded map[string]any result.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/snapshots/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/set_volume_metadata",
+      "source_fingerprint": "69dec9f97cd6586994971c617a2703847a7f2dccc804189d5cbb1b079bded501",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.MetadataIn",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.Merge",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.Replace",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.ID",
+        "gophercloudsdk/blockstorage/v3/volumes.MetadataScope.RawClient",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeader",
+        "gophercloudsdk/blockstorage/v3/volumes.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Merge maps the declared Python set operation to POST /volumes/{id}/metadata with one explicit metadata object, including nil and empty input as metadata:{}. It returns the full actual server metadata map rather than caching the supplied delta; no read/merge/write or parent GET occurs.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "The additional inherited replacement capability is explicit scope.Replace: PUT uses the complete metadata object, with nil/empty maps clearing it. Replace is not another direct proxy declaration, and native Snapshot UpdateMetadata retains its existing omitempty input and decoded map[string]any result.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesEmptyMapsAndDeleteBranches",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataMethodsKeepActualEvidenceExplicitEmptyAndInputSnapshots"
+          ]
+        },
+        {
+          "behavior": "MetadataIn(ctx, resource.ID(id)) constructs a validated fixed ID/collection URL with zero HTTP and retains the original client. ResourceBase changes and response data cannot retarget the scope; each operation and an empty-key call revalidate source and context. The selected source origin/query is validated before optional Name lookup; malformed UTF-8 metadata inputs fail before custom options or HTTP.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesRoutesAndOwnedResponse",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreflightZeroHTTPAndBetweenDeletionSourceChecks",
+            "internal/cindermetadata/scope_test.go:TestMetadataUTF8AndSelectedOriginAreValidatedBeforeOptionsAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Explicit resource.Name is a Go convenience resolving once through the current parent collection, then validating and fixing the resolved ID. Missing/duplicate/error observations retain the existing resolver policy: v2 Snapshot uses its native single page, while the other three bindings use native linked continuation; this scope does not broaden those native pagers.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "connection_metadata_test.go:TestConnectionCinderMetadataResolvesNamesOnceAndPreflightsReferences"
+          ]
+        },
+        {
+          "behavior": "Input metadata maps and deletion keys are copied before custom options and HTTP; concrete WithMetadataHeader/WithMetadataHeaders capture header values and allow sequential canonical last-wins reuse without an application builder. Returned fields do not serve as request inputs or retarget identity.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesNameBindingAndRequestSnapshots",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsSnapshotCanonicalLastWinsAndIndependentReuse",
+            "blockstorage/metadata/options_test.go:TestHeaderOptionsRejectBulkConflictsAndReinitializeNilConfigMap"
+          ]
+        },
+        {
+          "behavior": "Malformed accepted JSON, missing/null/nonobject exact metadata, non-string/null values and accepted partial reads retain raw HTTP evidence through ResponseError and original causes. Native unexpected status, transport and cancellation remain unwrap-able; accepted decode failure does not reenter the SDK request or invoke retry callbacks. Invalid UTF-8 accepted response bytes are also terminal and retain their original evidence.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesMalformedAcceptedAndOriginalErrors",
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "internal/cindermetadata/scope_test.go:TestMetadataCanonicalStringEnvelopeErrorsKeepWholeAcceptedResponse",
+            "internal/cindermetadata/scope_test.go:TestMetadataNativeTransportAcceptedReadAndCancellationErrorsStayTerminal"
+          ]
+        },
+        {
+          "behavior": "Closed metadata options accept headers only: auth/body/routing/version/field/query/argument injection and ambiguous case conflicts fail before HTTP. Configured ordinary MoreHeaders retains native precedence. A differing configured versus explicit If-Match is rejected, while ETag/If-Match/412 are preserved without automatic GET, version upgrade or retry after 412.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesHeaderVersionAndETagPolicies",
+            "internal/cindermetadata/scope_test.go:TestMetadataHeaderSnapshotsConditionsAndProtectedCapabilities"
+          ]
+        },
+        {
+          "behavior": "The fixed URL keeps the selected ResourceBase/reverse prefix and original live Provider, middleware, token, configured microversion and caller context. Existing Provider reauthentication and explicitly configured native retry remain in use; the scope introduces no automatic server concurrency policy.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesFixedTargetLiveProviderAndContext",
+            "connection_metadata_test.go:TestConnectionCinderMetadataSharesLiveVersionedClientAndFixedPrefix",
+            "internal/cindermetadata/scope_test.go:TestMetadataPreparedOptionsAreIndependentAndLiveTokenKeepsFixedTarget"
+          ]
+        },
+        {
+          "behavior": "Independent result ownership and frozen header options support concurrent scope reuse when the source and input maps are not being concurrently written. Existing native parent Get and Snapshot UpdateMetadata APIs remain distinct and unchanged.",
+          "tests": [
+            "api/cinder_metadata_scopes_test.go:TestCinderMetadataScopesConcurrentReuseAndNativeSurfaceIsolation",
+            "internal/cindermetadata/scope_test.go:TestMetadataConcurrentReuseKeepsRequestAndResponseOwnership"
+          ]
+        },
+        {
+          "behavior": "Generator discovery supplements exactly the four audited Volume/Snapshot ID/name collections with MetadataIn; it rejects missing parent bindings and other resources. No new CRUD collection, Backup child route or inferred metadata capability is registered.",
+          "tests": [
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopesUseActualCollectionsAndPreserveNativeAPIs",
+            "internal/cmd/sdkgen/cinder_metadata_scopes_test.go:TestCinderMetadataScopeRejectsMissingParentBindingAndOtherResources"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/metadata/README.md",
+        "blockstorage/v3/volumes/README.md",
+        "docs/cinder-metadata-server-contracts.md"
+      ],
+      "differences": [
+        "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
+        "Metadata values are concrete Go strings. Exact lowercase metadata objects and string members are required; Python metadata uses a dict descriptor and its own json/update behavior. Unknown response envelope fields and their original number spelling remain in raw Body, not in a widened typed metadata map.",
+        "Go closes per-call options to SDK-owned headers, preserves original source ownership and exposes context/error explicitly. It does not reproduce injected Python sessions, custom Resource URI/adapter selection or automatic Resource microversion negotiation.",
+        "No new metadata-specific microversion gate is introduced. Fixed Cinder 27.0.0 proves v3 routes and Volume GET/conditional collection PUT ETag at 3.15+, not current legacy v2 deployment support or an equivalent Snapshot ETag policy; caller/server own that condition.",
+        "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance.",
+        "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
+      ],
+      "remaining": [
+        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
+        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+      ]
     }
   ]
 }
