@@ -202,11 +202,12 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 |---|---|---|---|
 | QoS Policy | `rules` | 없음 | `rules` |
 | Address Group | `addresses` | 없음 | `addresses` |
-| Subnet Pool | `prefixes` | 없음 | `prefixes` |
+| Subnet Pool | 아래 10개 필드 | prefix length의 Python 이름 3개 | 아래 설명 참고 |
 | Network | `subnets` | `subnet_ids` | `subnet_ids` |
 | Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-처음 네 binding은 위의 한 응답 필드를 지원합니다. 상위 `network.Service.Networks`도 같은 Network
+QoS Policy·Address Group·Subnet Pool·Subnet은 아래에 설명한 추가 응답 필드도 지원합니다.
+상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
 첫 HTTP 전에 반환합니다. 오류는 iterator를 소비할 때 나타나며 malformed JSON·NaN 등
@@ -238,8 +239,8 @@ decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으�
 `WithQuery("subnets", ...)`는 기존 wire 확장으로 독립 전달하며 별칭을 자동 변환하지 않습니다. native typed List와
 `FindIdentity`는 이 공통 ListOption을 받지 않습니다.
 
-Subnet Pool의 `Prefixes`와 Network의 `Subnets` 비교 값은 native typed 모델의 field projection입니다.
-누락/null 배열은 모두 nil이 되지만 빈 배열은 구별됩니다. QoS와 Address Group은 원문 행의 필드를 비교합니다.
+Network의 `Subnets` 비교 값은 native typed 모델의 field projection입니다.
+누락/null 배열은 모두 nil이 되지만 빈 배열은 구별됩니다. QoS·Address Group·Subnet Pool은 원문 행의 필드를 비교합니다.
 Subnet Pool의 native prefix length와 timestamp, Network의 native timestamp decoder 등 다른
 필드의 decode 오류도 로컬 필터 전에 발생하며, 현재 응답 페이지 안에서 cap 뒤에 위치한
 행의 decode 오류도 숨기지 않습니다. cap으로 방문하지 않은 다음 페이지는 검사하지 않습니다.
@@ -276,6 +277,53 @@ JSON number는 원래 정밀도/표기, null은 URL 생략으로 처리합니다
 [생성기](../internal/cmd/sdkgen/README.md)가 현재 소스 SHA와 재추출 결과를 확인합니다.
 전체 Resource descriptor/coercion/cache·상속 continuation/session·Proxy `__conflicting_attrs`
 복구·deprecated JMESPath 조건은 별도 비교 범위로 남습니다.
+
+### Subnet Pool의 속성 이름 분류
+
+`SubnetPools.Resources.List/All`은 Python `conn.network.subnet_pools(**query)`의 선언된
+query 16개와 non-query Body 속성 10개를 분류합니다. `is_shared`→`shared`와 태그 별칭을
+포함한 query 이름 20개를 받습니다. `name`·`project_id`·`ip_version`·`is_default` 등 query
+속성은 응답에서 다시 비교하지 않습니다. `tenant_id`는 `project_id`의 query 별칭이 아닙니다.
+semantic `id`는 원문 로컬 조건이며 native ListOpts의 ID query와는 다릅니다.
+`resource.WithQuery("id", ...)`로 서버 ID query를 별도로 지정할 수 있습니다.
+
+| Python 로컬 속성 | 원문 필드 | 응답 비교 정책 |
+|---|---|---|
+| `id`, `tenant_id` | 같은 이름 | 원문 JSON, 누락/null을 빈 문자열과 구별 |
+| `created_at`, `updated_at` | 같은 이름 | 원문 timestamp 문자열 |
+| `prefixes` | 같은 이름 | 배열 순서·길이·원소 전체, null 요소 보존 |
+| `default_prefix_length` | `default_prefixlen` | 정확한 정수 |
+| `minimum_prefix_length` | `min_prefixlen` | 정확한 정수 |
+| `maximum_prefix_length` | `max_prefixlen` | 정확한 정수 |
+| `default_quota`, `revision_number` | 같은 이름 | 정확한 정수 |
+
+semantic 옵션은 위 Python 속성 이름만 분류합니다. raw prefix length 이름은 알 수 없는
+semantic 이름이므로 버립니다. 명시 `WithBodyFilter`는 세 raw 이름과 Python 이름을 모두
+받으며 같은 필드의 bulk 중복은 거부합니다. query alias의 canonical 우선·snapshot·전체
+교체·clear·충돌 검사는 Subnet과 같은 공통 옵션 정책입니다.
+
+정수 응답의 비교는 Go의 정확한 정수 정책을 따릅니다. 정수인 JSON decimal/exponent와
+부호·공백이 있는 십진 정수 문자열을 받아들이고 fractional/bool/object를 거부합니다.
+Python은 bool을 int로 인정하고 float을 절삭하며 일부 문자열을 0으로 변환하므로 완전한
+descriptor 변환 호환을 주장하지 않습니다. 필터 operand에는 응답 정수 변환을 적용하지 않습니다.
+
+native 전체 페이지 디코드가 원문 비교와 raw cap보다 먼저 실행됩니다. 모든 행에 세 prefix
+length가 필요하며 null 행·빈 object도 native 오류입니다. native decoder는 prefix 숫자를
+절삭할 수 있으나 선택한 정수 필드의 로컬 비교는 fractional 값을 거부합니다. default quota와
+revision은 native int decoder가 먼저 검증하며, timestamp 두 개는 같은 native decoding
+branch에서 처리됩니다. prefix 배열의 null 요소를 원문 null로 비교해도 반환 `Prefixes`의
+해당 값은 native 빈 문자열입니다. 누락/null 배열과 빈 배열은 구별합니다.
+`subnetpools_links`의 next link와 native 성공 코드 200/204/300을 유지하며 방문하지 않은
+다음 페이지를 미리 검사하지 않습니다. 기존 `WithName` hint·로컬 이름 조건, typed List,
+Get/Delete·FindIdentity·AddPrefixes/RemovePrefixes는 semantic 옵션과 독립적입니다.
+
+[Subnet Pool Python/Go 사용법](../network/v2/extensions/subnetpools/listing/README.md),
+[HTTP 7개 그룹](../api/subnet_pool_list_filters_test.go),
+[공유 Connection 2개 그룹](../connection_subnet_pool_filters_test.go)에서 실제 사용과 경계를 확인합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/subnet_pool.json)는 source SHA 7개와
+AST 33개를 기록하고 [생성기](../internal/cmd/sdkgen/README.md)가 현재 소스를 다시 검증합니다.
+전체 Resource/cache·coercion·상속 continuation/session·Proxy conflicting attrs·JMESPath는
+추가 비교 범위입니다.
 
 ### AddressGroup의 속성 이름 분류
 

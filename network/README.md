@@ -110,6 +110,13 @@ query 8개와 로컬 Body 3개를 분류합니다. `name`·`project_id`는 서�
 서버 query입니다. rule의 큰 숫자 비교와 native float64 반환값을 구분합니다.
 [QoS Policy Python/Go 사용법](v2/extensions/qos/policies/listing/README.md)에 옵션·응답·페이지 차이를 설명합니다.
 
+`service.API.SubnetPools.Resources`는 query 16개와 로컬 Body 10개를 분류합니다.
+`is_shared`와 태그 별칭을 포함한 20개 query 이름을 받으며 `project_id`는 서버 query입니다.
+`id`·deprecated `tenant_id`·prefix 배열·두 timestamp·다섯 정수 속성은 원문에서 비교합니다.
+Python prefix length 이름을 wire 필드로 연결하고 정수 응답에는 정확한 정수 정책을 적용합니다.
+native 모델의 필수 prefix length 디코드와 timestamp 디코드는 로컬 비교보다 먼저 수행합니다.
+[Subnet Pool Python/Go 사용법](v2/extensions/subnetpools/listing/README.md)에 전체 이름과 Python 정수 변환의 차이를 설명합니다.
+
 ## 삭제와 대기
 
 ```go

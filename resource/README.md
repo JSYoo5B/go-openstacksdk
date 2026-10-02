@@ -63,7 +63,8 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 `WithFilter`/`WithFilters`는 감사된 속성 이름을 서버 query 또는 로컬 Body 조건으로
 분류합니다. 현재 Subnet의 query 24개·로컬 Body 9개, Secret의 query 12개·로컬 Body 12개,
 Container의 query 2개·로컬 Body 10개, Order의 query 2개·로컬 Body 14개,
-AddressGroup의 query 8개·로컬 Body 3개, QoS Policy의 query 15개·로컬 Body 2개에
+AddressGroup의 query 8개·로컬 Body 3개, QoS Policy의 query 15개·로컬 Body 2개,
+Subnet Pool의 query 16개·로컬 Body 10개에
 연결되어 있고 다른 binding은 clear를 포함해 `ErrUnsupported`입니다. 개별 옵션은 같은 target의 마지막 값이 이기고,
 한 bulk map의 query canonical 이름은 wire 별칭보다 우선합니다. bulk 교체/clear는 semantic
 조건만 바꾸며 최종 선택값만 검증합니다. 알 수 없는 이름은 버리고 raw query·명시 Body와
@@ -73,7 +74,8 @@ AddressGroup의 query 8개·로컬 Body 3개, QoS Policy의 query 15개·로컬 
 [Container Python/Go 사용법](../keymanager/v1/containers/listing/README.md)과
 [Order Python/Go 사용법](../keymanager/v1/orders/listing/README.md)과
 [AddressGroup Python/Go 사용법](../network/v2/extensions/security/addressgroups/listing/README.md)과
-[QoS Policy Python/Go 사용법](../network/v2/extensions/qos/policies/listing/README.md)에 설명합니다.
+[QoS Policy Python/Go 사용법](../network/v2/extensions/qos/policies/listing/README.md)과
+[Subnet Pool Python/Go 사용법](../network/v2/extensions/subnetpools/listing/README.md)에 설명합니다.
 
 `WithBodyFilter`/`WithBodyFilters`는 ordinary `Resources.List/All`에서 감사된 응답 필드를
 로컬 비교합니다. 현재 QoS Policy의 `rules`, Address Group의 `addresses`, Subnet Pool의
@@ -88,6 +90,13 @@ semantic 서버 query이므로 로컬 Body 조건에 포함하지 않습니다. 
 서버 hint와 로컬 이름 조건을 제공하며 semantic `name`과 동시에 지정하면 충돌 오류입니다.
 Subnet의 9개 로컬 필드는 [원본 응답 비교](../network/v2/subnets/README.md)를 제공하며
 `prefix_length`를 `prefixlen`의 별칭으로 처리합니다. native Subnet은 그대로 반환합니다.
+Subnet Pool은 `id`·`tenant_id`·prefix 배열·두 timestamp·다섯 정수 속성의 10개 로컬 필드를
+원문에서 선택합니다. semantic `id`는 로컬 조건이고 raw `WithQuery("id", ...)`는 서버 query입니다.
+`default_prefix_length`·`minimum_prefix_length`·`maximum_prefix_length`는 Python 이름이며,
+명시 Body 옵션은 각각 `default_prefixlen`·`min_prefixlen`·`max_prefixlen`도 받습니다.
+native 전체 페이지 디코드를 먼저 적용하며 prefix 배열의 null 요소는 원문으로 비교하지만
+반환 `Prefixes`의 해당 요소는 native 빈 문자열입니다. 정수 변환과 timestamp의 경계는
+[Subnet Pool 사용법](../network/v2/extensions/subnetpools/listing/README.md)에 설명합니다.
 Secret은 timestamp의 속성 이름과 raw wire 이름을 구분하고 literal `id`·전체 `secret_ref`·
 별도의 `secret_id` formatter 결과를 비교합니다. 로컬 필드 12개를 원문 행에서 선택하고 native Secret을 반환합니다.
 Container는 `name`·timestamp·참조·중첩 배열 등 10개 로컬 속성을 비교합니다. `id`는 literal
