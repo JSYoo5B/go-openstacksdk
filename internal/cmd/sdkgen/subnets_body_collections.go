@@ -135,6 +135,10 @@ func emitBodyFilterList(e *emitter, plan *collectionPlan) {
 	if !ok || !spec.rawRecord {
 		return
 	}
+	if spec.path == addressGroupSDKPath {
+		emitAddressGroupBodyFilterList(e, plan)
+		return
+	}
 	if spec.path == "keymanager/v1/orders" {
 		emitKeyManagerBodyFilterList(e, plan, "orders", "ExtractOrders")
 		return

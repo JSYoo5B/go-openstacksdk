@@ -21,7 +21,7 @@ type bodyFilterCollectionSpec struct {
 // Other body fields and native collections remain unsupported until reviewed.
 var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 	{path: "network/v2/extensions/qos/policies", model: "Policy", fields: []bodyFilterCollectionField{{key: "rules", member: "Rules"}}},
-	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", fields: []bodyFilterCollectionField{{key: "addresses", member: "Addresses"}}},
+	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", rawRecord: true, fields: addressGroupBodyCollectionFields()},
 	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", fields: []bodyFilterCollectionField{{key: "prefixes", member: "Prefixes"}}},
 	{path: "network/v2/networks", model: "Network", fields: []bodyFilterCollectionField{{key: "subnets", member: "Subnets", aliases: []string{"subnet_ids"}}}},
 	{path: "network/v2/subnets", model: "Subnet", rawRecord: true, fields: subnetBodyCollectionFields()},
@@ -31,6 +31,9 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == addressGroupSDKPath {
+		return addressGroupBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == "keymanager/v1/orders" {
 		return orderBodyCollectionMetadataValid(spec)
 	}
@@ -56,8 +59,6 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
 	case "network/v2/extensions/qos/policies":
 		return spec.model == "Policy" && field.key == "rules" && field.member == "Rules"
-	case "network/v2/extensions/security/addressgroups":
-		return spec.model == "AddressGroup" && field.key == "addresses" && field.member == "Addresses"
 	case "network/v2/extensions/subnetpools":
 		return spec.model == "SubnetPool" && field.key == "prefixes" && field.member == "Prefixes"
 	case "network/v2/networks":
@@ -76,7 +77,9 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 		return secretBodyNativeSchema(pkg, plan)
 	case "network/v2/subnets":
 		return identitySubnetBodySchema(pkg, plan)
-	case "network/v2/extensions/qos/policies", "network/v2/extensions/security/addressgroups":
+	case "network/v2/extensions/security/addressgroups":
+		return addressGroupBodyNativeSchema(pkg, plan)
+	case "network/v2/extensions/qos/policies":
 		return identityQoSAddressSchema(pkg, plan)
 	case "network/v2/extensions/subnetpools":
 		if !identityPoolTrunkSchema(pkg, plan) {
@@ -154,7 +157,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == "keymanager/v1/orders" {
+		if spec.path == addressGroupSDKPath {
+			emitAddressGroupBodyRecordAdapter(e, plan)
+		} else if spec.path == "keymanager/v1/orders" {
 			emitKeyManagerBodyRecordAdapter(e, plan, "orderBodyFilterValue")
 		} else if spec.path == "keymanager/v1/containers" {
 			emitKeyManagerBodyRecordAdapter(e, plan, "containerBodyFilterValue")

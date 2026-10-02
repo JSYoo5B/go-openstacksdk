@@ -394,6 +394,11 @@ func (g *generator) identityPaginationDeclarations(path string) (map[string]*ast
 		wanted["PageResultFrom"] = true
 		wanted["PageResultFromParsed"] = true
 		wanted["LinkedPageBase.GetBody"] = true
+	case "network/v2/extensions/security/addressgroups":
+		label = "audited AddressGroup body collection"
+		wanted["PageResultFrom"] = true
+		wanted["PageResultFromParsed"] = true
+		wanted["LinkedPageBase.GetBody"] = true
 	case "keymanager/v1/containers":
 		label = "audited Container body collection"
 		wanted["PageResultFrom"] = true
