@@ -19,7 +19,7 @@ import (
 	"gophercloudsdk/network"
 	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
 	"gophercloudsdk/network/v2/extensions/security/addressgroups"
-	securitygroups "gophercloudsdk/network/v2/extensions/security/groups"
+	"gophercloudsdk/network/v2/extensions/trunks"
 	"gophercloudsdk/resource"
 )
 
@@ -407,7 +407,7 @@ func TestNetworkBodyFiltersLazyPreflightAndUnsupportedBindings(t *testing.T) {
 			if _, err := access.all(ctx, resource.WithBodyFilters(nil)); !errors.Is(err, context.Canceled) {
 				t.Fatal(err)
 			}
-			unsupported := securitygroups.New(networkQoSAddressesClient(cloud)).Resources
+			unsupported := trunks.New(networkQoSAddressesClient(cloud)).Resources
 			for _, option := range []resource.ListOption{resource.WithBodyFilters(nil), resource.WithBodyFilters(map[string]any{}), resource.WithBodyFilter(f.field, nil)} {
 				if _, err := unsupported.All(context.Background(), option); !errors.Is(err, resource.ErrUnsupported) {
 					t.Fatal("explicit empty body option enabled an unaudited binding", err)
