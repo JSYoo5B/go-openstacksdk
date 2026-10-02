@@ -35,7 +35,8 @@ The return type corrects the earlier `*Snapshot` wrapper, which looked for a
 `snapshot` response envelope and could return nil for a valid metadata response.
 Callers using that return type should read the returned map directly instead of
 accessing `Snapshot.Metadata`. Other Snapshot-returning methods retain their
-own result types. This change adds no endpoint or metadata scope API.
+own result types. This native result correction is separate from the scoped
+metadata APIs below.
 
 HTTP 200 is the native success status. The SDK requires an exact lowercase
 `metadata` object, including an empty object, and reports an error for a missing,
@@ -60,3 +61,32 @@ describes the pinned native source checks.
 [HTTP contract tests](../../../api/snapshot_metadata_results_test.go) cover both
 versions, response envelopes and number precision, native input ownership,
 empty-map omission, error causes and the shared client.
+
+## Scoped metadata operations
+
+`API.MetadataIn(ctx, resource.ID(id))` binds without HTTP. `scope.Get` reads
+metadata; `scope.Merge` POSTs a delta; `scope.Replace` PUTs a complete map.
+These SDK-owned operations accept `map[string]string` and return actual string
+metadata plus raw Body, copied Header and StatusCode. They explicitly send
+`metadata:{}` for nil or empty maps, while native `UpdateMetadata` keeps the
+input omission and decoded `map[string]any` contract described above.
+
+`scope.DeleteKeys(ctx, nil)` clears with one PUT. A nonnil empty slice makes no
+request after validation. Other keys are deleted in original order, including
+duplicates; the first failure returns earlier actual acknowledgements. There
+is no automatic GET, missing-key suppression or Resource-cache update. An
+explicit Name binds once through the existing collection lookup, a Go
+convenience beyond Python's ID string input.
+
+The [shared guide](../../metadata/README.md) contains complete examples and
+explains fixed targets, header/error ownership, escaping and Python cache
+differences. Snapshot has no promised Volume 3.15 ETag behavior. Legacy v2
+compatibility is separate from current server v3 endpoint support.
+
+[Scoped HTTP tests](../../../api/cinder_metadata_scopes_test.go) cover all four
+bindings, including native Snapshot result isolation.
+[Connection tests](../../../connection_metadata_test.go) cover the shared v3
+client; v2 remains available through its existing leaf API.
+
+The [release-pinned server contract](../../../docs/cinder-metadata-server-contracts.md)
+separates these routes from Backup metadata and deployment-specific policies.
