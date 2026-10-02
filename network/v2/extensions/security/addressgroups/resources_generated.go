@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/addressgroups"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -18,19 +19,22 @@ import (
 func (a *API) newResources() *resource.Collection[AddressGroup] {
 	return resource.NewCollection(resource.Adapter[AddressGroup]{
 		Kind:             "addressgroups",
-		BodyFilterFields: map[string]string{"addresses": "addresses"},
-		BodyFilterValue: func(v *AddressGroup, key string) (json.RawMessage, error) {
-			if v == nil {
-				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
-			}
-			switch key {
-			case "addresses":
-				return json.Marshal(v.Addresses)
-			default:
-				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
-			}
+		BodyFilterFields: map[string]string{"addresses": "addresses", "id": "id", "tenant_id": "tenant_id"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[AddressGroup], key string) (json.RawMessage, error) {
+			return addressGroupBodyFilterValue(record, key)
 		},
-		IdentityFind: true,
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[AddressGroup], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"description": "description", "fields": "fields", "limit": "limit", "marker": "marker", "name": "name", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key"}, Body: map[string]string{"addresses": "addresses", "id": "id", "tenant_id": "tenant_id"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*AddressGroup, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"address-groups", id}, q, []int{200}, &result.Body)
@@ -52,6 +56,22 @@ func (a *API) newResources() *resource.Collection[AddressGroup] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[AddressGroup], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "addressgroups", err)
+		return func(yield func(*resource.BodyRecord[AddressGroup], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]AddressGroup, error) {
+		values, err := upstream.ExtractGroups(page)
+		return []AddressGroup(values), err
+	}, "address_groups", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*AddressGroup, error) {
 	return a.Resources.Find(ctx, ref, options...)

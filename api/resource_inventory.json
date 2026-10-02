@@ -1295,7 +1295,35 @@
     "identity_find": true,
     "identity_get_query": true,
     "body_filter_fields": [
-      "addresses"
+      "addresses",
+      "id",
+      "tenant_id"
+    ],
+    "semantic_query_filters": {
+      "description": "description",
+      "fields": "fields",
+      "limit": "limit",
+      "marker": "marker",
+      "name": "name",
+      "project_id": "project_id",
+      "sort_dir": "sort_dir",
+      "sort_key": "sort_key"
+    },
+    "semantic_body_filters": {
+      "addresses": "addresses",
+      "id": "id",
+      "tenant_id": "tenant_id"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
     ],
     "delete": true,
     "wait": false
