@@ -63,6 +63,19 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		source += "type ListExtraSpecsResult struct{Body any;Header http.Header;Err error}\nfunc(ListExtraSpecsResult)Extract()(map[string]string,error){return nil,nil}\nfunc ListExtraSpecs(ctx context.Context,client *gophercloud.ServiceClient,id string)ListExtraSpecsResult{return ListExtraSpecsResult{}}\n"
 	}
 
+	if spec.path == routerSDKPath {
+		source = strings.Replace(source, "type Router struct{ID string;Name string}", "type Router struct{Status string `json:\"status\"`;GatewayInfo GatewayInfo `json:\"external_gateway_info\"`;AdminStateUp bool `json:\"admin_state_up\"`;Distributed bool `json:\"distributed\"`;Name string `json:\"name\"`;Description string `json:\"description\"`;ID string `json:\"id\"`;TenantID string `json:\"tenant_id\"`;ProjectID string `json:\"project_id\"`;Routes []Route `json:\"routes\"`;AvailabilityZoneHints []string `json:\"availability_zone_hints\"`;Tags []string `json:\"tags\"`;RevisionNumber int `json:\"revision_number\"`;CreatedAt time.Time `json:\"-\"`;UpdatedAt time.Time `json:\"-\"`}", 1)
+		source += "\ntype GatewayInfo struct{NetworkID string `json:\"network_id,omitempty\"`;EnableSNAT *bool `json:\"enable_snat,omitempty\"`;ExternalFixedIPs []ExternalFixedIP `json:\"external_fixed_ips,omitempty\"`;QoSPolicyID string `json:\"qos_policy_id,omitempty\"`}\n"
+		source += "\ntype ExternalFixedIP struct{IPAddress string `json:\"ip_address,omitempty\"`;SubnetID string `json:\"subnet_id,omitempty\"`}\n"
+		source += "\ntype Route struct{NextHop string `json:\"nexthop\"`;DestinationCIDR string `json:\"destination\"`}\n"
+		source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
+		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;Name string `q:\"name\"`;Description string `q:\"description\"`;AdminStateUp *bool `q:\"admin_state_up\"`;Distributed *bool `q:\"distributed\"`;Status string `q:\"status\"`;TenantID string `q:\"tenant_id\"`;ProjectID string `q:\"project_id\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`;Tags string `q:\"tags\"`;TagsAny string `q:\"tags-any\"`;NotTags string `q:\"not-tags\"`;NotTagsAny string `q:\"not-tags-any\"`;RevisionNumber *int `q:\"revision_number\"`}", 1)
+		source = strings.ReplaceAll(source, "ToListQuery", "ToRouterListQuery")
+		source = strings.Replace(source, "type GetResult struct{Body any;Header http.Header;Err error}", "type commonResult struct{gophercloud.Result}\ntype GetResult struct{commonResult}", 1)
+		source = strings.Replace(source, "func(GetResult)Extract()(*Router,error)", "func(commonResult)Extract()(*Router,error)", 1)
+		source = strings.Replace(source, "import \"net/http\"\n", "", 1)
+		source += "\nfunc(*Router)UnmarshalJSON([]byte)error{return nil}\n"
+	}
 	if spec.path == "network/v2/extensions/layer3/routers" || spec.path == "network/v2/extensions/security/groups" {
 		page, extract := "RouterPage", "ExtractRouters"
 		if spec.rawListIterator != "" {

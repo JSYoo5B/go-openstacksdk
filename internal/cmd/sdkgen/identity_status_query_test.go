@@ -9,7 +9,7 @@ func TestIdentityAuditedBindingsRetainRawStatusWithoutInferringTypedStatus(t *te
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path, func(t *testing.T) {
 			pkg, plan := identityQueryFixture(t, spec, identityQueryFixtureSource(spec))
-			nativeNetworkStatus := spec.path == networkSDKPath
+			nativeNetworkStatus := spec.path == networkSDKPath || spec.path == routerSDKPath
 			if !identityCollectionEnabled(pkg, plan, spec.parents) || (nativeNetworkStatus && (plan.status != "Status" || plan.statusQuery != "status")) || (!nativeNetworkStatus && (plan.status != "" || plan.statusQuery != "")) {
 				t.Fatal("fixture must preserve audited native status ownership", plan)
 			}

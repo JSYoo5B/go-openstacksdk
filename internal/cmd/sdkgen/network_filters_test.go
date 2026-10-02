@@ -142,7 +142,7 @@ func TestNetworkPythonFilterManifestKeepsQueryAliasesLocalTypesAndNetworkResourc
 func TestNetworkBodyFilterNativeContractRejectsModelBuilderDecoderAndSourceDrift(t *testing.T) {
 	source := networkFilterFixtureSource()
 	pkg, plan := networkFilterNativeFixture(t, source)
-	if !networkBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 8 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !networkBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 9 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	decls := networkBodyPinnedDeclarations(t)

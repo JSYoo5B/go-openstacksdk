@@ -116,7 +116,7 @@ func TestAddressGroupPythonFilterManifestKeepsQueryAndLocalTenantIdentity(t *tes
 func TestAddressGroupBodyFilterNativeContractRejectsModelBuilderPagerAndSourceDrift(t *testing.T) {
 	source := addressGroupFilterFixtureSource()
 	pkg, plan := addressGroupFilterNativeFixture(t, source)
-	if !addressGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 8 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !addressGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 9 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	if err := validateAddressGroupBodyNativeDeclarations(pkg, addressGroupBodyPinnedDeclarations(t), plan); err != nil {

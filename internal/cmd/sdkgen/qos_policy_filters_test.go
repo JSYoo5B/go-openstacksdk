@@ -114,7 +114,7 @@ func TestQoSPolicyPythonFilterManifestKeepsTagQueryAliasesAndLocalTenantRules(t 
 func TestQoSPolicyBodyFilterNativeContractRejectsModelBuilderInterfacePagerAndSourceDrift(t *testing.T) {
 	source := qosPolicyFilterFixtureSource()
 	pkg, plan := qosPolicyFilterNativeFixture(t, source)
-	if !qosPolicyBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 8 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !qosPolicyBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 9 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	if err := validateQoSPolicyBodyNativeDeclarations(pkg, qosPolicyBodyPinnedDeclarations(t), plan); err != nil {
