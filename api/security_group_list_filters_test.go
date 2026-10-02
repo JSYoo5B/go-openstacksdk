@@ -18,7 +18,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/testcloud"
 	securitygroups "gophercloudsdk/network/v2/extensions/security/groups"
-	"gophercloudsdk/network/v2/extensions/trunks"
+	"gophercloudsdk/network/v2/ports"
 	"gophercloudsdk/resource"
 )
 
@@ -335,7 +335,7 @@ func TestSecurityGroupListFiltersLazyPreflightAndNamespaceCollisions(t *testing.
 			if v != nil || !errors.Is(e, context.Canceled) || calls.Load() != 1 {
 				t.Fatal(v, e, calls.Load())
 			}
-			_, e = trunks.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
+			_, e = ports.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
 			if !errors.Is(e, resource.ErrUnsupported) || calls.Load() != 1 {
 				t.Fatal(e, calls.Load())
 			}

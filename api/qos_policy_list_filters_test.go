@@ -19,7 +19,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/testcloud"
 	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
-	"gophercloudsdk/network/v2/extensions/trunks"
+	"gophercloudsdk/network/v2/ports"
 	"gophercloudsdk/resource"
 )
 
@@ -366,7 +366,7 @@ func TestQoSPolicyListFiltersLazyPreflightAndNamespaceCollisions(t *testing.T) {
 			if values != nil || !errors.Is(err, context.Canceled) || calls.Load() != 1 {
 				t.Fatal(values, err, calls.Load())
 			}
-			_, err = trunks.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
+			_, err = ports.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
 			if !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 1 {
 				t.Fatal("unaudited binding gained a descriptor", err, calls.Load())
 			}

@@ -20,7 +20,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/network/v2/extensions/subnetpools"
-	"gophercloudsdk/network/v2/extensions/trunks"
+	"gophercloudsdk/network/v2/ports"
 	"gophercloudsdk/resource"
 )
 
@@ -434,7 +434,7 @@ func TestSubnetPoolListFiltersLazyPreflightAndNamespaceCollisions(t *testing.T) 
 			if values != nil || !errors.Is(err, context.Canceled) || calls.Load() != 1 {
 				t.Fatal(values, err, calls.Load())
 			}
-			_, err = trunks.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
+			_, err = ports.New(networkExtensionClient(cloud)).Resources.All(context.Background(), resource.WithFilters(nil))
 			if !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 1 {
 				t.Fatal("unaudited binding gained semantic filter", err, calls.Load())
 			}
