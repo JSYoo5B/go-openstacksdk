@@ -210,6 +210,53 @@ QOS_POLICY_ANCHORS = (
     ("openstack/proxy.py", "Proxy._list"),
     ("openstack/network/v2/_proxy.py", "Proxy.qos_policies"),
 )
+SUBNET_POOL_RESOURCE = "openstack.network.v2.subnet_pool.SubnetPool"
+SUBNET_POOL_FILES = (
+    "openstack/network/v2/subnet_pool.py",
+    "openstack/network/v2/_base.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+SUBNET_POOL_ANCHORS = (
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool._query_mapping"),
+    # Response aliases and local integer/list descriptors are independent of
+    # QueryParameters and its tag expansion; keep every coercion explicit.
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.project_id"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.tenant_id"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.prefixes"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.default_prefix_length"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.default_quota"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.maximum_prefix_length"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.minimum_prefix_length"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.revision_number"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.created_at"),
+    ("openstack/network/v2/subnet_pool.py", "SubnetPool.updated_at"),
+    ("openstack/network/v2/_base.py", "TagMixinNetwork"),
+    ("openstack/common/tag.py", "TagMixin._tag_query_parameters"),
+    ("openstack/common/tag.py", "TagMixin.tags"),
+    ("openstack/resource.py", "Body"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "Resource._alternate_id"),
+    ("openstack/resource.py", "Resource._collect_attrs"),
+    ("openstack/resource.py", "Resource._attributes_iterator"),
+    ("openstack/resource.py", "Resource.to_dict"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/resource.py", "Resource.list._dict_filter"),
+    ("openstack/fields.py", "_BaseComponent.__init__"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/network/v2/_proxy.py", "Proxy.subnet_pools"),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
@@ -223,6 +270,8 @@ TARGETS = {
                       "gophercloudsdk/network/v2/extensions/security/addressgroups"),
     "qos_policy": (QOS_POLICY_RESOURCE, QOS_POLICY_FILES, QOS_POLICY_ANCHORS,
                    "gophercloudsdk/network/v2/extensions/qos/policies"),
+    "subnet_pool": (SUBNET_POOL_RESOURCE, SUBNET_POOL_FILES, SUBNET_POOL_ANCHORS,
+                    "gophercloudsdk/network/v2/extensions/subnetpools"),
 }
 
 
