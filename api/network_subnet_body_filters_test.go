@@ -577,13 +577,13 @@ func TestNetworkSubnetBodyFiltersLazyPreflightAndExclusions(t *testing.T) {
 			testcloud.JSON(w, 200, networkPoolsTrunksPage(f, networkPoolsTrunksRow(f, "trunk", "Target"), ""))
 		})
 		a := trunks.New(networkExtensionClient(cloud))
-		for _, option := range []resource.ListOption{resource.WithBodyFilter("sub_ports", []any{}), resource.WithBodyFilters(nil)} {
+		for _, option := range []resource.ListOption{resource.WithBodyFilter("sub_ports", []any{}), resource.WithBodyFilters(map[string]any{"sub_ports": []any{}})} {
 			values, err := a.Resources.All(context.Background(), option)
-			if values != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 0 {
+			if values != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal("Trunk local filter was unexpectedly enabled", values, err, calls.Load())
 			}
 		}
-		values, err := a.Resources.All(context.Background(), resource.WithQuery("sub_ports", "wire-only"))
+		values, err := a.Resources.All(context.Background(), resource.WithBodyFilters(nil), resource.WithQuery("sub_ports", "wire-only"))
 		if err != nil || len(values) != 1 || values[0].ID != "trunk" || calls.Load() != 1 {
 			t.Fatal(values, err, calls.Load())
 		}
