@@ -65,7 +65,7 @@ func (a *API) stageImage(ctx context.Context, ref resource.Ref, seed *stageImage
 	if seed != nil && seed.status != "queued" {
 		return nil, wrap(stageInvalid("image must have exact queued status"))
 	}
-	policy, err := parseStageOpts(options)
+	policy, err := a.PrepareStageOptions(ctx, options...)
 	if err != nil {
 		return nil, wrap(err)
 	}
