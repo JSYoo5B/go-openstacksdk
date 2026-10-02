@@ -17284,6 +17284,146 @@
         "Python untyped/null/default Task fields and arbitrary Resource attribute construction differ from native Go maps/string/time.Time and canonical response-presence gates. This review does not claim full Task Resource parity, general create attrs, schema discovery or Cloud image-import/upload workflow coverage.",
         "Task list/find/pagination/delete and generic progress/status-attribute policies are independent declarations/capabilities; native Get/Create/List and existing generic waits are preserved rather than newly promoted by this operation review."
       ]
+    },
+    {
+      "operation": "python:image/v2/import_image",
+      "source_fingerprint": "d4779c08bfc97d4f7766dfa722788969aae1f96fa24432a34eff64667c20b265",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/imageimport.API.ImportImage",
+        "gophercloudsdk/image/v2/imageimport.API.ImportKnownImage",
+        "gophercloudsdk/image/v2/imageimport.WithImportOpts",
+        "gophercloudsdk/image/v2/imageimport.WithImportMethod",
+        "gophercloudsdk/image/v2/imageimport.WithImportURI",
+        "gophercloudsdk/image/v2/imageimport.WithImportRemoteRegion",
+        "gophercloudsdk/image/v2/imageimport.WithImportRemoteImageID",
+        "gophercloudsdk/image/v2/imageimport.WithImportRemoteServiceInterface",
+        "gophercloudsdk/image/v2/imageimport.WithImportStore",
+        "gophercloudsdk/image/v2/imageimport.WithImportStores",
+        "gophercloudsdk/image/v2/imageimport.WithImportAllStores",
+        "gophercloudsdk/image/v2/imageimport.WithImportAllStoresMustSucceed",
+        "gophercloudsdk/image/v2/imageimport.WithImportHeader",
+        "gophercloudsdk/image/v2/imageimport.WithImportHeaders",
+        "gophercloudsdk/image/v2/imageimport.WithImportField",
+        "gophercloudsdk/image/v2/imageimport.WithImportMethodField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ImportImage starts with a fresh metadata GET of the explicit ID. ImportKnownImage copies only supplied native ID/container/disk formats before option callbacks and sends no GET. The default request is one glance-direct POST with no empty URI or seeded model fields; incidental response IDs never retarget the requested import ID.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportFreshAndKnownAcknowledgements",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreKnownSeedAndHTTPBodySnapshots"
+          ]
+        },
+        {
+          "behavior": "An explicit Name uses the existing Images collection exact-name and advertised native paging resolver once, then freshly GETs the resolved ID rather than reusing listed formats. Case decoys, missing names, duplicate matches and errors on later pages terminate before metadata GET or import POST.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportFreshFormatsAndAllPageNameBinding"
+          ]
+        },
+        {
+          "behavior": "Fresh metadata must be a flat UTF-8 object accepted as200, decode the complete native Image shape, and contain canonical lowercase nonempty container_format/disk_format strings. Missing/null/case-only/typed-invalid formats or unrelated malformed native fields/time preserve actual accepted GET body/header/status with ResponseError and never POST.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportFreshFormatsAndAllPageNameBinding",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreFreshCanonicalFormatsAndNativeDecodeEvidence"
+          ]
+        },
+        {
+          "behavior": "Owned method options default empty Method to glance-direct and preserve unknown nonempty server methods. Web URI is required and prohibited for other methods. Glance-download requires region+image ID and emits optional interface only when present; incomplete/orphan/wrong-method remote values reject before lookup.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportMethodsAndRootStoreControls",
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsMethodBodyAndOwnedNamespaces"
+          ]
+        },
+        {
+          "behavior": "Singular Store selects only X-Image-Meta-Store while plural Stores selects only the root JSON array. Explicit false root booleans remain present; nil booleans and nil/empty Stores omit. Store plus nonempty Stores or true AllStores conflicts, and explicit empty Store/empty entries reject; an inherited legacy store header conflicts with plural/all-store selection before HTTP.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportMethodsAndRootStoreControls",
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsMethodBodyAndOwnedNamespaces",
+            "image/v2/imageimport/import_core_test.go:TestImportCorePreflightAndSourceBeforeEveryPhase",
+            "api/glance_import_contracts_test.go:TestGlanceImportExtensionsAndPreflightAreSDKOwned",
+            "api/glance_import_contracts_test.go:TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks"
+          ]
+        },
+        {
+          "behavior": "Root Fields and MethodFields are separate SDK-owned JSON extension namespaces. Snapshot encoding retains nested JSON, null and exact json.Number values; protected core keys and aliases cannot replace method/store/booleans or method name/URI/remote controls. Non-JSON values fail before HTTP.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportExtensionsAndPreflightAreSDKOwned",
+            "api/glance_import_contracts_test.go:TestGlanceImportOptionSnapshotsReplacementAndReuse",
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsMethodBodyAndOwnedNamespaces",
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsOwnedSnapshotsReplacementAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Ordinary headers are canonicalized with sequential last-wins helpers, frozen and independently reused. Different values under case aliases and protected auth/transport/version/store headers reject. A configured explicit image version header must agree with the selected source Microversion.",
+          "tests": [
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsHeaderAuthorityAndCanonicalLastWins",
+            "image/v2/imageimport/import_core_test.go:TestImportCorePreflightAndSourceBeforeEveryPhase",
+            "api/glance_import_contracts_test.go:TestGlanceImportExtensionsAndPreflightAreSDKOwned",
+            "api/glance_import_contracts_test.go:TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks"
+          ]
+        },
+        {
+          "behavior": "WithImportOpts snapshots pointers, Stores slices, header maps and both nested JSON extension maps and replaces the whole options value; individual helpers apply afterward. Bulk empty restores the default method and clears prior controls. Parsed custom configs, supplied KnownImage mutation during options and concurrent reusable options do not alter frozen request data or another response.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportOptionSnapshotsReplacementAndReuse",
+            "image/v2/imageimport/import_options_test.go:TestImportOptionsOwnedSnapshotsReplacementAndConcurrentReuse",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreKnownSeedAndHTTPBodySnapshots"
+          ]
+        },
+        {
+          "behavior": "ImportResult reports the fixed ImageID and only actual accepted202 Body/Header/StatusCode. Empty, arbitrary acknowledgement and large-number bytes are passive owned evidence, not an active Image/Task model. A foreign Location is retained without following it or deriving identity.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportHTTPFailuresAndAcceptedEvidence",
+            "api/glance_import_contracts_test.go:TestGlanceImportFreshAndKnownAcknowledgements",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreKnownSeedAndHTTPBodySnapshots"
+          ]
+        },
+        {
+          "behavior": "Native HTTP/transport, context and accepted body-read failures stay terminal submission errors without fabricated acknowledgements or semantic resend/cleanup. Accepted202 read failure returns the actual partial result and ResponseError; a concurrently expired context is joined with the original native404 evidence instead of hiding either cause.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportHTTPFailuresAndAcceptedEvidence",
+            "api/glance_import_contracts_test.go:TestGlanceImportReadTransportAndCancellationAreTerminal",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreAcceptedReadFailureAndNativeErrors",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreCanceledNativeErrorsPreserveBothCauses"
+          ]
+        },
+        {
+          "behavior": "The workflow captures client settings/headers and fixes ResourceBase-aware metadata GET/import POST routes while sharing the original Provider. Live token rotation, request context, selected Microversion and configured middleware survive GET/POST; configured401 reauth and503 retry retain the same import body and target. Invalidating source changes after options or GET stop before the next phase, redirects cannot change the image, and explicit Store overlays the configured legacy value without modifying the original client.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportLiveProviderFixedRoutesAndSourceRechecks",
+            "api/glance_import_contracts_test.go:TestGlanceImportFreshAndKnownAcknowledgements",
+            "image/v2/imageimport/import_core_test.go:TestImportCorePreflightAndSourceBeforeEveryPhase",
+            "image/v2/imageimport/import_core_test.go:TestImportCoreAcceptedReadFailureAndNativeErrors"
+          ]
+        },
+        {
+          "behavior": "Existing native Create/Get and error-only Create result, Image aliases and the unsupported specialized inventory row remain separate. Generator gates verify actual native functions/method constants and canonical string Image identity/formats, reject drift or unrelated opt-in, preserve generated native declarations byte-for-byte and do not invent an import resource collection.",
+          "tests": [
+            "api/glance_import_contracts_test.go:TestGlanceImportNativeCreateGetAndImageModelsStayUnchanged",
+            "internal/cmd/sdkgen/glance_import_test.go:TestGlanceImportKeepsActualNativeCallsAndNoInventedCollection",
+            "internal/cmd/sdkgen/glance_import_test.go:TestGlanceImportRejectsNativeIdentityFormatsAndConstantsDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imageimport/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Python _get_resource constructs or accepts mutable Image/Store Resources without a GET, and the proxy requires supplied container/disk formats. Go ImportImage(Ref) freshly fetches metadata, resolving an explicit Name once through existing exact-name collection policy; ImportKnownImage copies only native ID/container/disk strings and does not fetch.",
+        "The Go known-image/native shape does not reproduce arbitrary supplied Resource subclasses, dict/Munch construction, dirty state or cached descriptor defaults. Fresh GET performs native whole-image decoding and requires canonical lowercase nonempty format strings with valid UTF-8; the requested ID stays fixed even if response ID differs.",
+        "Python singular Store sends both a stores array and compatibility header. Go Store is header-only and plural Stores is body-only, rejects configured store-header conflicts with plural/all-store requests, and permits an explicit typed Store to replace the configured legacy value.",
+        "Go requires web-download URI and glance-download remote region+image ID, permits optional omitted interface for the server default, and rejects orphan/wrong-method remote values. Python can send web without URI or silently omit an incomplete remote tuple. Unknown nonempty methods remain server-owned.",
+        "Concrete SDK options and JSON extensions snapshot owned request data, enforce namespace/header/source boundaries, and expose original Provider transport configuration rather than arbitrary caller native builders or injected Python sessions. Cloud custom extension support remains server-owned.",
+        "Go returns an actual202 ImportResult acknowledgement with partial accepted-read evidence, rather than the raw Python requests.Response. It does not imply completed storage, return a synthetic active Image/Task or automatically stage, discover, wait, clean up or follow Location."
+      ],
+      "remaining": [
+        "Full supplied Image/Store Resource subclass, dict/Munch, mutable descriptor/default/coercion/dirty state and session/adapter injection semantics remain outside the concrete native-model/ref APIs.",
+        "Python cache/seed identity and configured Proxy response/error policy, including an adapter returning a raw error response, are not fully reconstructed by strict accepted202 plus Go errors.",
+        "Import method discovery, staging, full create_image/upload/Swift task composition, config/vendor defaults, checksums, cleanup and asynchronous storage execution are separate workflow capabilities.",
+        "Cloud enabled-method, URL authorization, quota, backend/store availability, copy ownership and capability/version negotiation are not established by local unit tests. No full Image Resource or cloud workflow support status is claimed."
+      ]
     }
   ]
 }
