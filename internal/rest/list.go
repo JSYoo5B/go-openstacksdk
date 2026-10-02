@@ -40,6 +40,15 @@ type PagePolicy[T any] struct {
 	// StopOnEmptyPage ignores continuations on an empty page. The default keeps
 	// supporting services which advertise a next link from an empty page.
 	StopOnEmptyPage bool
+	// OffsetPagination permits advertised, strictly increasing offset cursors
+	// instead of markers. An omitted initial offset means zero. The first next
+	// link may introduce a positive server limit when none was requested; that
+	// limit then stays fixed. Marker input and marker fallback are unsupported.
+	OffsetPagination bool
+}
+
+type continuationRules struct {
+	reduceLimit, offsetPagination, firstPage bool
 }
 
 // ListControl limits raw, successfully decoded and validated rows before any
@@ -82,6 +91,29 @@ func paginationInput(query url.Values) (int, error) {
 		return 0, fmt.Errorf("%w: pagination limit must be positive", resource.ErrInvalidOption)
 	}
 	return limit, nil
+}
+
+func paginationOffset(query url.Values) (uint64, error) {
+	if _, exists := query["marker"]; exists {
+		return 0, fmt.Errorf("%w: offset pagination does not accept a marker", resource.ErrInvalidOption)
+	}
+	values, exists := query["offset"]
+	if !exists {
+		return 0, nil
+	}
+	if len(values) != 1 || values[0] == "" {
+		return 0, fmt.Errorf("%w: pagination requires one nonnegative offset", resource.ErrInvalidOption)
+	}
+	for _, ch := range values[0] {
+		if ch < '0' || ch > '9' {
+			return 0, fmt.Errorf("%w: pagination offset must be a nonnegative decimal integer", resource.ErrInvalidOption)
+		}
+	}
+	offset, err := strconv.ParseUint(values[0], 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("%w: pagination offset is out of range", resource.ErrInvalidOption)
+	}
+	return offset, nil
 }
 
 // List streams raw-decoded objects lazily. Continuations stay on the collection
@@ -127,6 +159,16 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 		if spec.Paging.MarkerFallback && spec.Paging.Marker == nil {
 			fail(fmt.Errorf("%w: marker fallback requires a wire marker callback", resource.ErrInvalidOption))
 			return
+		}
+		if spec.Paging.OffsetPagination {
+			if spec.Paging.MarkerFallback {
+				fail(fmt.Errorf("%w: offset pagination cannot use marker fallback", resource.ErrInvalidOption))
+				return
+			}
+			if _, err := paginationOffset(initial); err != nil {
+				fail(err)
+				return
+			}
 		}
 		base, err := url.Parse(spec.Client.ServiceURL(spec.Path))
 		if err != nil {
@@ -202,7 +244,9 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			if control.SinglePage || (spec.Paging.StopOnEmptyPage && len(items) == 0) {
 				return
 			}
-			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, pageNumber == 0 && spec.Paging.AllowFirstLimitReduction)
+			rules := continuationRules{reduceLimit: pageNumber == 0 && spec.Paging.AllowFirstLimitReduction,
+				offsetPagination: spec.Paging.OffsetPagination, firstPage: pageNumber == 0}
+			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, rules)
 			if err != nil {
 				fail(response.Fail(err))
 				return
@@ -233,7 +277,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			if next == nil {
 				return
 			}
-			if err := lockContinuation(base, current, next, pageNumber == 0 && spec.Paging.AllowFirstLimitReduction); err != nil {
+			if err := lockContinuation(base, current, next, rules); err != nil {
 				fail(response.Fail(err))
 				return
 			}
@@ -284,7 +328,7 @@ func pageItems(response *Response, plural string) (map[string]json.RawMessage, [
 	return fields, items, nil
 }
 
-func continuation[T any](fields map[string]json.RawMessage, headers http.Header, plural string, policy PagePolicy[T], base, current *url.URL, reduceLimit bool) (*url.URL, error) {
+func continuation[T any](fields map[string]json.RawMessage, headers http.Header, plural string, policy PagePolicy[T], base, current *url.URL, rules continuationRules) (*url.URL, error) {
 	keys := policy.LinkKeys
 	if keys == nil {
 		keys = []string{"links", plural + "_links"}
@@ -332,7 +376,7 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 			return nil, err
 		}
 		next := current.ResolveReference(parsed)
-		if err := lockContinuation(base, current, next, reduceLimit); err != nil {
+		if err := lockContinuation(base, current, next, rules); err != nil {
 			return nil, err
 		}
 		if result != nil && pageKey(result) != pageKey(next) {
@@ -343,7 +387,7 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 	return result, nil
 }
 
-func lockContinuation(base, current, next *url.URL, reduceLimit bool) error {
+func lockContinuation(base, current, next *url.URL, rules continuationRules) error {
 	if next.User != nil || next.Opaque != "" || next.Fragment != "" || !strings.EqualFold(next.Scheme, base.Scheme) || !strings.EqualFold(next.Host, base.Host) || next.EscapedPath() != base.EscapedPath() {
 		return fmt.Errorf("%w: pagination changes collection origin or path", resource.ErrInvalidOption)
 	}
@@ -353,11 +397,16 @@ func lockContinuation(base, current, next *url.URL, reduceLimit bool) error {
 	}
 	previous := current.Query()
 	for key, values := range query {
-		if key == "marker" {
+		if key == "marker" && !rules.offsetPagination || key == "offset" && rules.offsetPagination {
 			continue
 		}
 		old, exists := previous[key]
-		if key == "limit" && reduceLimit && exists {
+		if key == "limit" && rules.offsetPagination && rules.firstPage && !exists {
+			if _, err := paginationInput(url.Values{"limit": values}); err == nil {
+				continue
+			}
+		}
+		if key == "limit" && rules.reduceLimit && exists {
 			newLimit, err := paginationInput(url.Values{"limit": values})
 			oldLimit, oldErr := paginationInput(url.Values{"limit": old})
 			if err == nil && oldErr == nil && newLimit <= oldLimit {
@@ -380,6 +429,22 @@ func lockContinuation(base, current, next *url.URL, reduceLimit bool) error {
 	}
 	if _, err := paginationInput(query); err != nil {
 		return err
+	}
+	if rules.offsetPagination {
+		oldOffset, err := paginationOffset(previous)
+		if err != nil {
+			return err
+		}
+		newOffset, err := paginationOffset(query)
+		if err != nil {
+			return err
+		}
+		if newOffset == oldOffset {
+			return &resource.PaginationCycleError{URL: next.String()}
+		}
+		if newOffset < oldOffset {
+			return fmt.Errorf("%w: pagination offset moves backwards", resource.ErrInvalidOption)
+		}
 	}
 	next.RawQuery = query.Encode()
 	return nil
