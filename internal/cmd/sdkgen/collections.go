@@ -378,7 +378,7 @@ func emitCollectionAdapter(e *emitter, plan *collectionPlan, receiver string, pa
 	} else if plan.listInput == nil {
 		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, controlledListName(list), listArgs)
 	} else if plan.listQueryBuilder {
-		if identityCollectionEnabled(e.pkg, plan, len(parents)) || sdkPath(e.pkg.Path()) == "keymanager/v1/secrets" || sdkPath(e.pkg.Path()) == "keymanager/v1/containers" {
+		if identityCollectionEnabled(e.pkg, plan, len(parents)) || sdkPath(e.pkg.Path()) == "keymanager/v1/secrets" || sdkPath(e.pkg.Path()) == "keymanager/v1/containers" || sdkPath(e.pkg.Path()) == "keymanager/v1/orders" {
 			// FindIdentity can retain repeated query values and a present nil
 			// name key. A sequence of WithQuery options would Set each value
 			// and collapse that input before the native builder sees it.

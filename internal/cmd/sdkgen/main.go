@@ -50,12 +50,13 @@ type generator struct {
 	pythonFilters          *pythonFilterManifest
 	secretPythonFilters    *pythonFilterManifest
 	containerPythonFilters *pythonFilterManifest
+	orderPythonFilters     *pythonFilterManifest
 }
 
 func main() {
 	metadataPath := flag.String("metadata", "", "go list -deps -export -json ./openstack/... output")
 	output := flag.String("output", ".", "SDK module root")
-	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet and Secret semantic filters)")
+	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet, Secret, Container and Order semantic filters)")
 	flag.Parse()
 	if *metadataPath == "" {
 		fatal(fmt.Errorf("-metadata is required"))
@@ -69,6 +70,10 @@ func main() {
 		fatal(err)
 	}
 	containerPythonFilters, err := loadContainerPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
+	}
+	orderPythonFilters, err := loadOrderPythonFilterManifest(*output, *pythonSource)
 	if err != nil {
 		fatal(err)
 	}
@@ -90,7 +95,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters, orderPythonFilters: orderPythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -312,6 +317,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateContainerBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
+	if err := validateOrderBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	if err := g.validatePythonFilterPlan(pkg, plan); err != nil {

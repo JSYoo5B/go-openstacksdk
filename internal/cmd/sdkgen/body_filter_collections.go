@@ -27,9 +27,13 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 	{path: "network/v2/subnets", model: "Subnet", rawRecord: true, fields: subnetBodyCollectionFields()},
 	{path: "keymanager/v1/secrets", model: "Secret", rawRecord: true, fields: secretBodyCollectionFields()},
 	{path: "keymanager/v1/containers", model: "Container", rawRecord: true, fields: containerBodyCollectionFields()},
+	{path: "keymanager/v1/orders", model: "Order", rawRecord: true, fields: orderBodyCollectionFields()},
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == "keymanager/v1/orders" {
+		return orderBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == "keymanager/v1/containers" {
 		return containerBodyCollectionMetadataValid(spec)
 	}
@@ -64,6 +68,8 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 
 func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
+	case "keymanager/v1/orders":
+		return orderBodyNativeSchema(pkg, plan)
 	case "keymanager/v1/containers":
 		return containerBodyNativeSchema(pkg, plan)
 	case "keymanager/v1/secrets":
@@ -98,7 +104,7 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 }
 
 func bodyFilterCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (bodyFilterCollectionSpec, bool) {
-	if plan == nil || parents != 0 || (sdkPath(pkg.Path()) != "keymanager/v1/secrets" && sdkPath(pkg.Path()) != "keymanager/v1/containers" && !identityCollectionEnabled(pkg, plan, parents)) {
+	if plan == nil || parents != 0 || (sdkPath(pkg.Path()) != "keymanager/v1/secrets" && sdkPath(pkg.Path()) != "keymanager/v1/containers" && sdkPath(pkg.Path()) != "keymanager/v1/orders" && !identityCollectionEnabled(pkg, plan, parents)) {
 		return bodyFilterCollectionSpec{}, false
 	}
 	for _, spec := range bodyFilterCollectionSpecs {
@@ -148,7 +154,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == "keymanager/v1/containers" {
+		if spec.path == "keymanager/v1/orders" {
+			emitKeyManagerBodyRecordAdapter(e, plan, "orderBodyFilterValue")
+		} else if spec.path == "keymanager/v1/containers" {
 			emitKeyManagerBodyRecordAdapter(e, plan, "containerBodyFilterValue")
 		} else if spec.path == "keymanager/v1/secrets" {
 			emitSecretBodyRecordAdapter(e, plan)
