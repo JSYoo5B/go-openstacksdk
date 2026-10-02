@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go/types"
-	"reflect"
 )
 
 type bodyFilterCollectionField struct {
@@ -95,18 +94,6 @@ func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, 
 	default:
 		return false
 	}
-	fields, ok := plan.model.Underlying().(*types.Struct)
-	if !ok {
-		return false
-	}
-	selected := spec.fields[0]
-	for i := 0; i < fields.NumFields(); i++ {
-		field := fields.Field(i)
-		if field.Name() == selected.member {
-			return !field.Embedded() && types.Identical(field.Type(), types.NewSlice(types.Typ[types.String])) && reflect.StructTag(fields.Tag(i)).Get("json") == selected.key
-		}
-	}
-	return false
 }
 
 func bodyFilterCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (bodyFilterCollectionSpec, bool) {
