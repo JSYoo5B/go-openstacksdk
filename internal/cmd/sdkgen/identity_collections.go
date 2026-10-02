@@ -389,6 +389,11 @@ func (g *generator) identityPaginationDeclarations(path string) (map[string]*ast
 	switch sdkPath(path) {
 	case "network/v2/extensions/trunks":
 		wanted["LinkedPageBase.NextPageURL"] = true
+	case routerSDKPath:
+		label = "audited Router body collection"
+		for _, name := range []string{"PageResultFrom", "PageResultFromParsed", "LinkedPageBase.GetBody", "Request", "NewPager", "Pager.EachPage", "Pager.fetchNextPage"} {
+			wanted[name] = true
+		}
 	case networkSDKPath:
 		label = "audited Network body collection"
 		for _, name := range []string{"PageResultFrom", "PageResultFromParsed", "LinkedPageBase.GetBody", "Request", "NewPager", "Pager.EachPage", "Pager.fetchNextPage"} {
