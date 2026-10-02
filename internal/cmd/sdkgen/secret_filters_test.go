@@ -112,7 +112,7 @@ func TestSecretBodyFilterNativeContractRejectsDecoderPagerAndSourceDrift(t *test
 	if plan == nil || !secretBodyNativeSchema(pkg, plan) {
 		t.Fatal(plan)
 	}
-	if identityCollectionEnabled(pkg, plan, 0) || len(identityCollectionSpecs) != 20 || len(bodyFilterCollectionSpecs) != 10 {
+	if identityCollectionEnabled(pkg, plan, 0) || len(identityCollectionSpecs) != 20 || len(bodyFilterCollectionSpecs) != 11 {
 		t.Fatal("raw Body support opted into native identity or broadened inventory")
 	}
 	if err := validateSecretBodyNativeDeclarations(pkg, secretBodyPinnedDeclarations(t), plan); err != nil {

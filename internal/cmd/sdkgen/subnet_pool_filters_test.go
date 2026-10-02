@@ -144,7 +144,7 @@ func TestSubnetPoolPythonFilterManifestKeepsTagAliasesLocalIntegersAndInheritedM
 func TestSubnetPoolBodyFilterNativeContractRejectsModelBuilderDecoderAndSourceDrift(t *testing.T) {
 	source := subnetPoolFilterFixtureSource()
 	pkg, plan := subnetPoolFilterNativeFixture(t, source)
-	if !subnetPoolBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 10 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !subnetPoolBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	decls := subnetPoolBodyPinnedDeclarations(t)

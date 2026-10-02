@@ -414,12 +414,16 @@ func TestIdentityTrunkInheritedContinuationDependencyIsNarrowAndPinned(t *testin
 	}
 	dir := t.TempDir()
 	path := filepath.Join(dir, "linked.go")
-	if err := os.WriteFile(path, []byte(pinnedLinkedIdentitySource), 0600); err != nil {
+	_, _, _, nativeBody := trunkActualNative(t)
+	// The raw Body lane additionally uses the pinned native fetch/decoding and
+	// handler-order declarations. Identity's continuation guard remains exact.
+	pageSource := "package pagination\n" + securityGroupFunctionSource(t, nativeBody, "pagination.")
+	if err := os.WriteFile(path, []byte(pageSource), 0600); err != nil {
 		t.Fatal(err)
 	}
 	sdkGenerator := generator{meta: map[string]metadata{upstreamModule + "/pagination": {Dir: dir, GoFiles: []string{"linked.go"}}}}
 	dependency, err := sdkGenerator.identityPaginationDeclarations(upstreamModule + "/openstack/networking/v2/extensions/trunks")
-	if err != nil || len(dependency) != 1 {
+	if err != nil || len(dependency) != 8 {
 		t.Fatal(dependency, err)
 	}
 	key := "pagination.LinkedPageBase.NextPageURL"

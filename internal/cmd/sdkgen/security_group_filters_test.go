@@ -115,7 +115,7 @@ func securityGroupFixtureWithRules(t *testing.T, source, ruleSource string) (*ty
 func TestSecurityGroupBodyNativeSchemaGuardsConcreteListAndBothTimestampDecoders(t *testing.T) {
 	source := securityGroupFilterFixtureSource()
 	pkg, plan := securityGroupFilterFixture(t, source)
-	if !securityGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 10 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !securityGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	for name, pair := range map[string][2]string{
@@ -508,7 +508,7 @@ func TestSecurityGroupDependenciesGuardNestedRuleWholePageNumbersCodesAndConstan
 			t.Fatal(label, got, err)
 		}
 	}
-	for _, path := range []string{upstreamModule + "/openstack/networking/v2/ports", upstreamModule + "/openstack/networking/v2/extensions/trunks"} {
+	for _, path := range []string{upstreamModule + "/openstack/networking/v2/ports", upstreamModule + "/openstack/networking/v2/extensions/agents"} {
 		for _, load := range []func(string) (map[string]*ast.FuncDecl, error){g.bodyRecordRootDeclarations, g.securityGroupBodyRuleDeclarations} {
 			d, err := load(path)
 			if err != nil || d != nil {

@@ -95,14 +95,14 @@ func pinnedSubnetBodyIdentityDeclarations(t *testing.T) map[string]*ast.FuncDecl
 }
 
 func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing.T) {
-	if len(bodyFilterCollectionSpecs) != 10 || len(identityCollectionSpecs) != 20 {
+	if len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 {
 		t.Fatal("body-filter or identity inventory broadened")
 	}
 	enabled := 0
 	for _, identity := range identityCollectionSpecs {
 		pkg, plan := identityQueryFixture(t, identity, identityQueryFixtureSource(identity))
 		spec, ok := bodyFilterCollectionContract(pkg, plan, identity.parents)
-		wanted := identity.path == securityGroupSDKPath || identity.path == routerSDKPath || identity.path == "network/v2/extensions/qos/policies" || identity.path == "network/v2/extensions/security/addressgroups" || identity.path == "network/v2/extensions/subnetpools" || identity.path == "network/v2/networks" || identity.path == "network/v2/subnets"
+		wanted := identity.path == trunkSDKPath || identity.path == securityGroupSDKPath || identity.path == routerSDKPath || identity.path == "network/v2/extensions/qos/policies" || identity.path == "network/v2/extensions/security/addressgroups" || identity.path == "network/v2/extensions/subnetpools" || identity.path == "network/v2/networks" || identity.path == "network/v2/subnets"
 		if ok != wanted {
 			t.Fatal("body filter capability leaked or disappeared", identity.path, ok)
 		}
@@ -136,6 +136,8 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 		}
 		if identity.model == "SecGroup" {
 			mutations["nested rule decoder"] = strings.Replace(base, "Rules []rules.SecGroupRule", "Rules []string", 1)
+		} else if identity.model == "Trunk" {
+			mutations["arbitrary array decoder"] = strings.Replace(base, "Subports []Subport", "Subports []any", 1)
 		} else if identity.model == "Policy" {
 			mutations["numeric rule decoder"] = strings.Replace(base, "Rules []map[string]any", "Rules []map[string]float64", 1)
 		} else if identity.model == "SubnetPool" {
@@ -255,7 +257,7 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 			}
 		}
 	}
-	if enabled != 7 {
+	if enabled != 8 {
 		t.Fatal("missing audited body selectors", enabled)
 	}
 }
@@ -314,7 +316,7 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 					requireControlledCalls(t, helper, "request.Apply(opts, options...)", "request.ValidateCapabilities(cfg, false, true, false)", `request.Wrap("List", "groups", err)`, "nativefind.IterateSecurityGroupBodies(ctx, a.RawClient(), cfg.Query, control)")
 					return
 				}
-				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" || identity.model == "Network" || identity.model == "Router" {
+				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" || identity.model == "Network" || identity.model == "Router" || identity.model == "Trunk" {
 					body := string(source)
 					selector, envelope, extractor, kind := "addressGroupBodyFilterValue", "address_groups", "ExtractGroups", "addressgroups"
 					if identity.model == "Policy" {
@@ -325,6 +327,8 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 						selector, envelope, extractor, kind = "networkBodyFilterValue", "networks", "ExtractNetworks", "networks"
 					} else if identity.model == "Router" {
 						selector, envelope, extractor, kind = "routerBodyFilterValue", "routers", "ExtractRouters", "routers"
+					} else if identity.model == "Trunk" {
+						selector, envelope, extractor, kind = "trunkBodyFilterValue", "trunks", "ExtractTrunks", "trunks"
 					}
 					for _, required := range []string{"BodyFilterRecordValue:", selector + "(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"` + envelope + `", control)`, "upstream." + extractor + "(page)"} {
 						if !strings.Contains(body, required) {
@@ -525,7 +529,7 @@ func TestBodyFilterCollectionInventoryHasOnlyOwnedCanonicalFields(t *testing.T) 
 			t.Fatal("inventory caller mutated generator-owned schema")
 		}
 	}
-	if enabled != 7 {
+	if enabled != 8 {
 		t.Fatal("audited inventory body capability count changed", enabled)
 	}
 }
