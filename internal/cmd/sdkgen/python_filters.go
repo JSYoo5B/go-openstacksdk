@@ -179,6 +179,15 @@ func loadPythonFilterManifest(root, source string) (*pythonFilterManifest, error
 }
 
 func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectionPlan) error {
+	if sdkPath(pkg.Path()) == "keymanager/v1/containers" {
+		if !containerPythonFilterMetadataValid(g.containerPythonFilters) {
+			return fmt.Errorf("audited Container semantic filter source proof was not verified")
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); !ok {
+			return fmt.Errorf("audited Container semantic filters require the full native raw Body contract")
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) == "keymanager/v1/secrets" {
 		if !secretPythonFilterMetadataValid(g.secretPythonFilters) {
 			return fmt.Errorf("audited Secret semantic filter source proof was not verified")
@@ -201,6 +210,15 @@ func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectio
 }
 
 func (g *generator) pythonFilterFor(pkg *types.Package, plan *collectionPlan) *pythonFilterManifest {
+	if sdkPath(pkg.Path()) == "keymanager/v1/containers" {
+		if !containerPythonFilterMetadataValid(g.containerPythonFilters) {
+			return nil
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); ok {
+			return g.containerPythonFilters
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) == "keymanager/v1/secrets" {
 		if !secretPythonFilterMetadataValid(g.secretPythonFilters) {
 			return nil
@@ -225,9 +243,9 @@ func pythonFilterBodyFields(manifest *pythonFilterManifest) map[string]string {
 	}
 	result := make(map[string]string, len(manifest.Body))
 	for name, field := range manifest.Body {
-		if manifest.Resource == secretPythonResource {
+		if manifest.Resource == secretPythonResource || manifest.Resource == containerPythonResource {
 			// Body properties have distinct accessors even when they share a
-			// stored field: id, secret_ref, and formatted secret_id stay separate.
+			// stored field: literal id, raw reference and formatted ID stay separate.
 			result[name] = name
 		} else {
 			result[name] = field.Field

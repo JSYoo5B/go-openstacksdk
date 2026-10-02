@@ -1,14 +1,8 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"go/types"
-	"os"
-	"path/filepath"
 	"reflect"
-	"strings"
 )
 
 const secretPythonResource = "openstack.key_manager.v1.secret.Secret"
@@ -51,54 +45,11 @@ func secretPythonFilterMetadataValid(manifest *pythonFilterManifest) bool {
 }
 
 func verifySecretPythonFilterManifest(source string, manifest *pythonFilterManifest) error {
-	if strings.TrimSpace(source) == "" {
-		return fmt.Errorf("-openstacksdk-source is required for audited Secret semantic filters")
-	}
-	if !secretPythonFilterMetadataValid(manifest) {
-		return fmt.Errorf("audited Secret Python filter identity or descriptor changed")
-	}
-	if !reflect.DeepEqual(manifest.Proof.Files, secretFilterSourceHashes) {
-		return fmt.Errorf("audited Secret Python source proof changed")
-	}
-	for path, expected := range secretFilterSourceHashes {
-		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
-		if err != nil {
-			return fmt.Errorf("Python filter source %s: %w", path, err)
-		}
-		digest := sha256.Sum256(data)
-		if hex.EncodeToString(digest[:]) != expected {
-			return fmt.Errorf("audited Python filter source %s changed", path)
-		}
-	}
-	fresh, err := extractPythonFilterManifestTarget(source, secretPythonResource)
-	if err != nil {
-		return err
-	}
-	if manifest.Proof.PythonParser != fresh.Proof.PythonParser {
-		return fmt.Errorf("Python filter AST parser version %s differs from audited %s", fresh.Proof.PythonParser, manifest.Proof.PythonParser)
-	}
-	if !reflect.DeepEqual(manifest, fresh) {
-		return fmt.Errorf("Secret Python filter manifest differs from independent live-source extraction")
-	}
-	return nil
+	return verifyKeyManagerPythonFilterManifest(source, manifest, "Secret", secretPythonResource, secretFilterSourceHashes, secretPythonFilterMetadataValid)
 }
 
 func loadSecretPythonFilterManifest(root, source string) (*pythonFilterManifest, error) {
-	if strings.TrimSpace(source) == "" {
-		return nil, fmt.Errorf("-openstacksdk-source is required for audited Secret semantic filters")
-	}
-	data, err := os.ReadFile(filepath.Join(root, secretFilterManifestPath))
-	if err != nil {
-		return nil, fmt.Errorf("Secret Python filter manifest: %w", err)
-	}
-	manifest, err := decodePythonFilterManifest(data)
-	if err != nil {
-		return nil, err
-	}
-	if err := verifySecretPythonFilterManifest(source, manifest); err != nil {
-		return nil, err
-	}
-	return manifest, nil
+	return loadKeyManagerPythonFilterManifest(root, source, "Secret", secretFilterManifestPath, verifySecretPythonFilterManifest)
 }
 
 // The Secret manifest is accepted only for the exact guarded native plan; this

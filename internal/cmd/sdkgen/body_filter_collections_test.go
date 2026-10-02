@@ -95,7 +95,7 @@ func pinnedSubnetBodyIdentityDeclarations(t *testing.T) map[string]*ast.FuncDecl
 }
 
 func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing.T) {
-	if len(bodyFilterCollectionSpecs) != 6 || len(identityCollectionSpecs) != 20 {
+	if len(bodyFilterCollectionSpecs) != 7 || len(identityCollectionSpecs) != 20 {
 		t.Fatal("body-filter or identity inventory broadened")
 	}
 	enabled := 0

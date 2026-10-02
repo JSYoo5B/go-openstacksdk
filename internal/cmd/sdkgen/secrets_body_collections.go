@@ -15,52 +15,25 @@ func secretBodyCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 	return spec.path == "keymanager/v1/secrets" && spec.model == "Secret" && spec.rawRecord && reflect.DeepEqual(spec.fields, secretBodyCollectionFields())
 }
 
-func secretBodyFieldsMatch(value types.Type, tag string, wanted map[string][2]string) bool {
-	if value == nil {
-		return false
-	}
-	fields, ok := value.Underlying().(*types.Struct)
-	if !ok || fields.NumFields() != len(wanted) {
-		return false
-	}
-	for i := 0; i < fields.NumFields(); i++ {
-		field := fields.Field(i)
-		want, known := wanted[field.Name()]
-		if !known || field.Embedded() || types.TypeString(field.Type(), func(p *types.Package) string { return p.Path() }) != want[0] || reflect.StructTag(fields.Tag(i)).Get(tag) != want[1] {
-			return false
-		}
-	}
-	return true
-}
-
 func secretBodyNativeSchema(pkg *types.Package, plan *collectionPlan) bool {
 	if plan == nil || plan.modelName != "Secret" || !plan.listQueryBuilder || plan.nameQuery != "name" || plan.statusQuery != "" || plan.id != "SecretRef" || !plan.idIsURL || plan.name != "Name" || plan.status != "Status" || plan.getter == nil || plan.getter.Name() != "Get" || plan.lister == nil || plan.lister.Name() != "List" || !isString(plan.getIDType) {
 		return false
 	}
 	model, ok := plan.model.(*types.Named)
-	if !ok || model.NumMethods() != 1 || !secretBodyFieldsMatch(model, "json", map[string][2]string{
+	if !ok || !rawBodyNativeDecoder(model) || !rawBodyFieldsMatch(model, "json", map[string][2]string{
 		"BitLength": {"int", "bit_length"}, "Algorithm": {"string", "algorithm"}, "Expiration": {"time.Time", "-"}, "ContentTypes": {"map[string]string", "content_types"},
 		"Created": {"time.Time", "-"}, "CreatorID": {"string", "creator_id"}, "Mode": {"string", "mode"}, "Name": {"string", "name"}, "SecretRef": {"string", "secret_ref"}, "SecretType": {"string", "secret_type"}, "Status": {"string", "status"}, "Updated": {"time.Time", "-"},
 	}) {
 		return false
 	}
-	decoder, _, _ := types.LookupFieldOrMethod(types.NewPointer(model), true, nil, "UnmarshalJSON")
-	decode, ok := decoder.(*types.Func)
-	if !ok {
-		return false
-	}
-	sig := decode.Type().(*types.Signature)
-	if sig.Variadic() || sig.Params().Len() != 1 || !types.Identical(sig.Params().At(0).Type(), types.NewSlice(types.Typ[types.Uint8])) || sig.Results().Len() != 1 || !isError(sig.Results().At(0).Type()) {
-		return false
-	}
-	if !secretBodyFieldsMatch(plan.listInput, "q", map[string][2]string{
+	if !rawBodyFieldsMatch(plan.listInput, "q", map[string][2]string{
 		"Offset": {"int", "offset"}, "Limit": {"int", "limit"}, "Name": {"string", "name"}, "Alg": {"string", "alg"}, "Mode": {"string", "mode"}, "Bits": {"int", "bits"}, "SecretType": {pkg.Path() + ".SecretType", "secret_type"}, "ACLOnly": {"*bool", "acl_only"},
 		"CreatedQuery": {"*" + pkg.Path() + ".DateQuery", ""}, "UpdatedQuery": {"*" + pkg.Path() + ".DateQuery", ""}, "ExpirationQuery": {"*" + pkg.Path() + ".DateQuery", ""}, "Sort": {"string", "sort"},
 	}) {
 		return false
 	}
 	date := pkg.Scope().Lookup("DateQuery")
-	if date == nil || !secretBodyFieldsMatch(date.Type(), "json", map[string][2]string{"Date": {"time.Time", ""}, "Filter": {pkg.Path() + ".DateFilter", ""}}) {
+	if date == nil || !rawBodyFieldsMatch(date.Type(), "json", map[string][2]string{"Date": {"time.Time", ""}, "Filter": {pkg.Path() + ".DateFilter", ""}}) {
 		return false
 	}
 	for _, name := range []string{"SecretType", "DateFilter"} {
@@ -69,34 +42,7 @@ func secretBodyNativeSchema(pkg *types.Package, plan *collectionPlan) bool {
 			return false
 		}
 	}
-	pageObject := pkg.Scope().Lookup("SecretPage")
-	if pageObject == nil {
-		return false
-	}
-	page, ok := pageObject.Type().(*types.Named)
-	if !ok || page.NumMethods() != 2 {
-		return false
-	}
-	fields, ok := page.Underlying().(*types.Struct)
-	if !ok || fields.NumFields() != 1 || !fields.Field(0).Embedded() || types.TypeString(fields.Field(0).Type(), func(p *types.Package) string { return p.Path() }) != upstreamModule+"/pagination.LinkedPageBase" {
-		return false
-	}
-	for name, result := range map[string]types.Type{"IsEmpty": types.Typ[types.Bool], "NextPageURL": types.Typ[types.String]} {
-		method := extractionMethod(page, name)
-		own := false
-		for i := 0; i < page.NumMethods(); i++ {
-			own = own || page.Method(i).Name() == name
-		}
-		if !own || method == nil || !types.Identical(method.Results().At(0).Type(), result) {
-			return false
-		}
-	}
-	extractor, ok := pkg.Scope().Lookup("ExtractSecrets").(*types.Func)
-	if !ok {
-		return false
-	}
-	sig = extractor.Type().(*types.Signature)
-	return !sig.Variadic() && sig.Params().Len() == 1 && types.TypeString(sig.Params().At(0).Type(), func(p *types.Package) string { return p.Path() }) == upstreamModule+"/pagination.Page" && sig.Results().Len() == 2 && types.Identical(sig.Results().At(0).Type(), types.NewSlice(plan.model)) && isError(sig.Results().At(1).Type())
+	return rawBodyNativePage(pkg, plan.model, "SecretPage", "ExtractSecrets")
 }
 
 var secretBodyNativeDeclarations = map[string]string{
@@ -132,19 +78,9 @@ func validateSecretBodyNativeDeclarations(pkg *types.Package, decls map[string]*
 }
 
 func emitSecretBodyRecordAdapter(e *emitter, plan *collectionPlan) {
-	e.use("gophercloudsdk/request")
-	e.use("maps")
-	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return secretBodyFilterValue(record,key)},\n", plan.modelName)
-	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
-	e.printf("q=maps.Clone(q)\nq.Del(\"status\")\n")
-	e.printf("options:=[]ListOption{func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
+	emitKeyManagerBodyRecordAdapter(e, plan, "secretBodyFilterValue")
 }
 
 func emitSecretBodyFilterList(e *emitter, plan *collectionPlan) {
-	e.use("gophercloudsdk/request")
-	e.use(upstreamModule + "/pagination")
-	e.use(e.pkg.Path())
-	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
-	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",\"secrets\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
-	e.printf("_opts:=listOptsBuilder{base:cfg.Options,config:cfg}\nreturn resource.BodyStreamWithControl(ctx,upstream.List(a.client,_opts),func(page pagination.Page)([]%s,error){values,err:=upstream.ExtractSecrets(page);return []%s(values),err},\"secrets\",control)\n}\n", plan.modelName, plan.modelName)
+	emitKeyManagerBodyFilterList(e, plan, "secrets", "ExtractSecrets")
 }

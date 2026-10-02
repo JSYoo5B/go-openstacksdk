@@ -42,13 +42,14 @@ type inventory struct {
 	Operations []operation `json:"operations"`
 }
 type generator struct {
-	meta                map[string]metadata
-	importer            types.Importer
-	root                string
-	inventory           inventory
-	collections         []collectionRecord
-	pythonFilters       *pythonFilterManifest
-	secretPythonFilters *pythonFilterManifest
+	meta                   map[string]metadata
+	importer               types.Importer
+	root                   string
+	inventory              inventory
+	collections            []collectionRecord
+	pythonFilters          *pythonFilterManifest
+	secretPythonFilters    *pythonFilterManifest
+	containerPythonFilters *pythonFilterManifest
 }
 
 func main() {
@@ -64,6 +65,10 @@ func main() {
 		fatal(err)
 	}
 	secretPythonFilters, err := loadSecretPythonFilterManifest(*output, *pythonSource)
+	if err != nil {
+		fatal(err)
+	}
+	containerPythonFilters, err := loadContainerPythonFilterManifest(*output, *pythonSource)
 	if err != nil {
 		fatal(err)
 	}
@@ -85,7 +90,7 @@ func main() {
 		}
 		meta[m.ImportPath] = m
 	}
-	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters}
+	g := generator{meta: meta, root: *output, inventory: inventory{Version: "v2.15.0"}, pythonFilters: pythonFilters, secretPythonFilters: secretPythonFilters, containerPythonFilters: containerPythonFilters}
 	g.importer = importer.ForCompiler(token.NewFileSet(), "gc", func(path string) (io.ReadCloser, error) {
 		m, ok := meta[path]
 		if !ok || m.Export == "" {
@@ -304,6 +309,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := validateSecretBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
+	if err := validateContainerBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
 	if err := g.validatePythonFilterPlan(pkg, plan); err != nil {
