@@ -17559,6 +17559,140 @@
         "Image creation, interoperable import, method discovery, completion waiting, storage cleanup and end-to-end cloud upload composition are separate capabilities. Local HTTP tests do not establish deployment feature/version, quota, permissions, backend capacity or size-validation outcome.",
         "Reader cancellation cannot forcibly release a caller blocking Read without caller cooperation, and custom RoundTripper internal replay is not controlled by the SDK."
       ]
+    },
+    {
+      "operation": "python:image/v2/create_image",
+      "source_fingerprint": "28928737435d50a5e0bdc4af314cdd02f9f62009f400a514c69ebe42ce66a210",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.CreateAndImport",
+        "gophercloudsdk/image.WithCreateImportOpts",
+        "gophercloudsdk/image.WithCreateImportMetadata",
+        "gophercloudsdk/image.WithCreateImportStage",
+        "gophercloudsdk/image.WithCreateImportImport",
+        "gophercloudsdk/image.WithCreateImportStageOptions",
+        "gophercloudsdk/image.WithCreateImportImportOptions",
+        "gophercloudsdk/image.WithCreateImportWait",
+        "gophercloudsdk/image.WithoutCreateImportWait",
+        "gophercloudsdk/image/v2/imagedata.API.PrepareStageOptions",
+        "gophercloudsdk/image/v2/imageimport.API.PrepareImportOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateAndImport defaults to qcow2/bare/private and glance-direct with waiting disabled. Direct execution performs actual creation201, staging204, post-stage metadata200 and import202 without an initial image lookup, duplicate/discovery request or synthetic active result. Phase responses and fixed ImageID are retained separately.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportDefaultDirectSequenceAndEvidence",
+            "image/create_import_core_test.go:TestCreateImportFixedCanonicalRouteAndIndependentActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Concrete metadata, stage, import and wait policies, source/reference validity, reader requirements and protected namespaces are checked before the first create POST or input read. Typed nil, invalid source/context, unknown fresh workflow method, conflicting selector and invalid field/header/size/wait policies stop locally.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportCompletePreflight",
+            "image/create_import_options_test.go:TestCreateImportWaitOptionsHaveConcretePreflightPolicy",
+            "image/create_import_core_test.go:TestCreateImportPreflightValidatesEveryPhaseBeforeCreationOrReading"
+          ]
+        },
+        {
+          "behavior": "PrepareStageOptions validates the selected source, applies a caller callback once and returns independently owned concrete size/header settings without HTTP or reader use. Retained callback configuration cannot later alter the prepared snapshot; invalid configured source headers are rejected before callbacks.",
+          "tests": [
+            "image/v2/imagedata/stage_prepare_test.go:TestPrepareStageOptionsFreezesOnceWithoutRequests"
+          ]
+        },
+        {
+          "behavior": "PrepareImportOptions is a local-only source-aware snapshot seam. It preserves owned JSON extension numbers and store slices after one callback application, rejects conflicting configured store headers and selected plural/all-store controls, and permits an explicit singular-store overlay without changing the shared source.",
+          "tests": [
+            "image/v2/imageimport/import_prepare_test.go:TestPrepareImportOptionsFreezesJSONAndSourceConflictsWithoutRequests"
+          ]
+        },
+        {
+          "behavior": "The original lowercase creation id must be a nonempty safe route segment and becomes the fixed workflow ImageID. Typed case aliases, foreign Location and later response IDs do not retarget staging, import or wait. Direct creation also requires exact canonical queued status before consuming Data.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportCanonicalIdentityAndPostStageFormats",
+            "image/create_import_contracts_test.go:TestCreateAndImportDefaultDirectSequenceAndEvidence",
+            "image/create_import_core_test.go:TestCreateImportFixedCanonicalRouteAndIndependentActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Direct import reads required lowercase container_format and disk_format from the actual post-stage metadata body, independently of returned typed case aliases or stale creation formats. Missing/null/empty canonical decision fields preserve the actual accepted response and stop before import.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportCanonicalIdentityAndPostStageFormats",
+            "image/create_import_core_test.go:TestCreateImportCanonicalFailureRetainsAcceptedCreationAndStage"
+          ]
+        },
+        {
+          "behavior": "The workflow metadata policy reuses the existing upload builder, retaining optional false and explicit min_disk/min_ram zero and root JSON extensions without replacing protected core fields. Full and namespace helpers snapshot pointers, slices, maps and JSON. Deferred leaf callback batches run once during preparation and can be cleared by later concrete helpers; reusable policies remain independent. Invalid custom JSON retains the original MarshalerError and caller cause alongside ErrInvalidOption.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportPreparedSnapshotsAndCallbacksOnce",
+            "image/create_import_options_test.go:TestCreateImportOptionsOwnReplacementAndReusableSnapshots",
+            "image/create_import_options_test.go:TestCreateImportDeferredPhaseCallbacksAreAppliedOnceAndCanBeCleared",
+            "image/create_import_options_test.go:TestCreateImportMetadataReusesUploadBuilderAndPreservesZeroFields",
+            "image/create_import_options_test.go:TestCreateImportMetadataRetainsCustomJSONFailureCause"
+          ]
+        },
+        {
+          "behavior": "Fresh web-download and glance-download workflows create metadata and submit import with no reader or staging phase. Required URI/remote inputs and unused stage controls are guarded before creation. Remote formats come from the actual creation response, plural stores retain repeats and explicit false flags, and singular Store remains header-only. Copy-image and unknown fresh methods are unsupported while the existing leaf passthrough remains separate.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportRemoteModesAndSelectors",
+            "image/create_import_contracts_test.go:TestCreateAndImportCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Direct data is borrowed at its current cursor without input Close/Seek/size inspection/buffering or semantic replay. Stage headers and metadata POST-only headers are kept in their selected phases, while size is header-only and explicit zero can be retained. The binary provider replay policy stays distinct from configured JSON requests.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportDefaultDirectSequenceAndEvidence",
+            "image/create_import_contracts_test.go:TestCreateAndImportPreparedSnapshotsAndCallbacksOnce",
+            "image/create_import_contracts_test.go:TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation"
+          ]
+        },
+        {
+          "behavior": "Before accepted creation201 the result is nil; accepted creation read/decode/invariant errors retain Created evidence. Later stage/read/followup/import failures preserve prior actual201/204/200/202 proof and original errors without automatic delete, recreation, recovery GET or fabricated model. Response bodies/headers and models from different phases are independently owned.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportPartialProofAndTerminalFailures",
+            "image/create_import_contracts_test.go:TestCreateAndImportDefaultDirectSequenceAndEvidence",
+            "image/create_import_core_test.go:TestCreateImportCanonicalFailureRetainsAcceptedCreationAndStage"
+          ]
+        },
+        {
+          "behavior": "Optional active waiting uses concrete SDK-owned policy: nil Wait disables, selected nil timeout/interval use five minutes/two seconds, zero timeout removes the SDK deadline, nil failures select killed/deleted and nonnil empty failures disable them. The parent context bounds all phases; only an actual successful wait populates Ready and prior accepted phase proof remains on failure.",
+          "tests": [
+            "image/create_import_options_test.go:TestCreateImportWaitOptionsHaveConcretePreflightPolicy",
+            "image/create_import_contracts_test.go:TestCreateAndImportExplicitWaitAndFailureRetention",
+            "image/create_import_core_test.go:TestCreateImportOptionalWaitUsesPreparedDefaultBudgetAndFixedID"
+          ]
+        },
+        {
+          "behavior": "The workflow captures one original-provider client selection and validates its source between phases and waiter polls. Canonical decisions and actual native header/model extraction stay separate from raw evidence; native Create/Get/Stage/Upload and existing Service.Upload remain independently callable without changing generated native declarations or inventory. Generation checks required native CreateOpts/Image field types and canonical JSON tags, rejects drift, and documents the upper workflow independently of native image API declarations.",
+          "tests": [
+            "image/create_import_contracts_test.go:TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation",
+            "image/create_import_core_test.go:TestCreateImportFixedCanonicalRouteAndIndependentActualEvidence",
+            "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportKeepsNativeImageAPIAndDocumentsUpperService",
+            "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportRejectsNativeMetadataAndResponseFieldDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/create-import.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "CreateAndImport is an explicit fresh-image import workflow with qcow2/bare/private, glance-direct and no-wait defaults. Python create_image additionally selects metadata-only/direct-file/configured Swift task paths and uses cloud format/vendor/container configuration.",
+        "Go prepares and freezes concrete metadata/stage/import/wait policy before POST or reader consumption, using local-only SDK seams and separate callback namespaces. Python kwargs/meta conversion, descriptor values and mutable Resource/session behavior are broader.",
+        "Python non-task _upload_image_put does not receive create_image wait or timeout. Go optional active wait is an explicit five-minute/two-second policy, with caller overrides and parent context, rather than a reproduction of timeout3600 for that source branch.",
+        "Go preserves actual accepted201/204/200/202 phase evidence and performs no cleanup DELETE after failure. Python checks response import-method capability after creation, stages without this post-stage metadata GET and deletes upload/import/checksum failures inside its try block.",
+        "Go canonical created ID and original lowercase post-stage format decisions reject missing/unsafe data while typed case aliases and passive Location cannot choose the route. Go retains native typed projection/header behavior alongside independent raw response evidence.",
+        "Go explicit plural stores and optional false flags are preserved together, while Python stores-is-not-None suppresses both all-store flags. Existing leaf singular Store is header-only rather than Python header plus one-element stores body.",
+        "Go borrows explicit io.Reader without filename/name inference, hashing, automatic whole-file size or checksum validation. Binary staging disables SDK replay callbacks and redirects; caller RoundTripper internals and blocking Read release remain caller responsibilities."
+      ],
+      "remaining": [
+        "Cloud configuration image_format/vendor flags, automatic Swift object/container and image_api_use_tasks selection, task workflow/cleanup and configuration-specific upload/import capability handling are not reproduced by this explicit workflow.",
+        "Python filename opening/name inference, bytes/string/file polymorphism, MD5/SHA256 calculation and duplicate hash freshness shortcut, synthesized owner_specified/legacy shade properties, legacy checksum fetch/compare and seekable whole-file size remain outside the concrete reader API.",
+        "Python kwargs integer/string/raw conversion and meta precedence, full mutable Image Resource defaults/descriptors/coercion/dirty state/alternate identity/cache/seed/header merge and injected session/adapter behavior remain unresolved.",
+        "Deployment method/storage availability, URL policy, quota, permissions, actual backend processing, eventual import state and end-to-end cloud success are server-owned. Local HTTP proof does not establish those outcomes or a full create_image mapping.",
+        "Response models keep native numeric/timestamp/unknown-property projection limits; raw response evidence does not make typed Image precision or arbitrary source Resource semantics exact. Shared wait returns no original response body/header/status or last-failure image evidence.",
+        "Custom RoundTripper internal replay and forcibly unblocking a caller reader are outside the SDK one-binary-provider-attempt guarantee. The SDK deliberately avoids cleanup and leaves retained side effects for caller decisions."
+      ]
     }
   ]
 }
