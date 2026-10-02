@@ -89,6 +89,11 @@ ordinary 목록에서는 `service.API.QoSPolicies.Resources.List/All`의 `rules`
 SDK가 field 선택과 옵션 복사를 처리하므로 별도 predicate는 필요하지 않습니다. 배열 순서·길이·내부 dict 전체가
 일치해야 하며 raw query와는 독립적입니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)을 참고합니다.
 
+`service.API.Subnets.Resources`는 allocation pools·DNS nameservers·host routes·service types·
+두 timestamp·prefix length·tenant ID·revision number의 9개 로컬 필터도 제공합니다.
+native 모델이 생략하는 `prefixlen`과 nested 추가 필드는 원본 페이지에서 비교하며,
+반환값은 기존 typed Subnet입니다. [Subnet Python/Go 사용법](v2/subnets/README.md)을 참고하세요.
+
 ## 삭제와 대기
 
 ```go

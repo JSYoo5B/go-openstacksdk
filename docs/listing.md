@@ -204,8 +204,9 @@ func ListSubnetMatches(ctx context.Context, service *networkv2.Service) error {
 | Address Group | `addresses` | 없음 | `addresses` |
 | Subnet Pool | `prefixes` | 없음 | `prefixes` |
 | Network | `subnets` | `subnet_ids` | `subnet_ids` |
+| Subnet | 아래 9개 필드 | `prefix_length` → `prefixlen` | 아래 표 참고 |
 
-각 binding은 위의 한 응답 필드를 지원합니다. 상위 `network.Service.Networks`도 같은 Network
+처음 네 binding은 위의 한 응답 필드를 지원합니다. 상위 `network.Service.Networks`도 같은 Network
 필터를 제공합니다. 지원이 없는 binding의 명시
 옵션은 `ErrUnsupported`, 알 수 없는 필드·JSON으로 표현할 수 없는 값은 `ErrInvalidOption`을
 첫 HTTP 전에 반환합니다. 오류는 iterator를 소비할 때 나타나며 malformed JSON·NaN 등
@@ -230,14 +231,14 @@ Python Network의 `subnets`는 wire Body 이름이며 로컬 필터용 속성 �
 Go는 SDK가 명시 등록한 두 이름을 받아 같은 native `Subnets`를 비교합니다.
 
 `WithMaxItems`는 로컬 필터 이전의 raw 행을 세므로 필터에서 제외된 행을 추가 페이지로 보충하지
-않습니다. `WithName`·`WithStatus`와 AND로 조합하며 Network는 Status가 있지만 나머지 세 모델은
+않습니다. `WithName`·`WithStatus`와 AND로 조합하며 Network는 Status가 있지만 나머지 모델은
 Status가 없어 typed `WithStatus`를 지원하지 않습니다. 첫 페이지·consumer break·후속 HTTP/decode/cycle/취소·native 전체 페이지
 decode 정책을 유지합니다. Body 필터를 서버 query로 넣지 않으며, 명시 `WithQuery("rules", ...)`나
 `WithQuery("addresses", ...)`·`WithQuery("prefixes", ...)`·`WithQuery("subnet_ids", ...)`·
 `WithQuery("subnets", ...)`는 기존 wire 확장으로 독립 전달하며 별칭을 자동 변환하지 않습니다. native typed List와
 `FindIdentity`는 이 공통 ListOption을 받지 않습니다.
 
-비교 값은 native typed 모델의 field projection입니다. 누락/null `Rules`·`Addresses`는 모두
+처음 네 binding의 비교 값은 native typed 모델의 field projection입니다. 누락/null `Rules`·`Addresses`는 모두
 nil이 되지만 빈 배열은 구별됩니다. `Prefixes`·`Subnets`도 같은 presence 한계를 갖습니다.
 Subnet Pool의 native prefix length와 timestamp, Network의 native timestamp decoder 등 다른
 필드의 decode 오류도 로컬 필터 전에 발생하며, 현재 응답 페이지 안에서 cap 뒤에 위치한
@@ -247,9 +248,50 @@ QoS `Rules`는 native `map[string]any`의 float64 decoding을
 Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 제공한 것으로 확대하지
 않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
 
+### Subnet의 원본 응답 필터
+
+Python `conn.network.subnets(prefix_length=24, dns_nameservers=["192.0.2.53"])`에 대응하는
+Go 호출은 [Subnet README](../network/v2/subnets/README.md)에 있습니다. 다음 9개는 Python의
+query mapping에 포함되지 않은 Body 속성이며, Go는 명시적인 `WithBodyFilter(s)`로 선택합니다.
+
+| Python 로컬 속성 | Go canonical 필드 | 비교하는 응답 값 |
+|---|---|---|
+| `allocation_pools` | `allocation_pools` | 배열 전체, 내부 추가 필드·null 원소 포함 |
+| `dns_nameservers` | `dns_nameservers` | 배열 전체, 순서·null 원소 포함 |
+| `host_routes` | `host_routes` | 배열 전체, 내부 추가 필드·null 원소 포함 |
+| `service_types` | `service_types` | 배열 전체 |
+| `created_at` | `created_at` | 서비스가 반환한 timestamp 문자열 |
+| `updated_at` | `updated_at` | 서비스가 반환한 timestamp 문자열 |
+| `prefix_length` | `prefixlen` | 타입이 선언되지 않은 원본 JSON, `prefix_length` 별칭 지원 |
+| `tenant_id` | `tenant_id` | `project_id`와 독립적인 원본 값 |
+| `revision_number` | `revision_number` | 정확한 정수 |
+
+Subnet은 native typed 값과 같은 페이지의 원본 행을 함께 사용합니다. 추가 HTTP 요청 없이
+native 모델이 생략한 `prefixlen`·내부 추가 key와 정수 정밀도를 보존합니다. 반환값은 기존
+typed Subnet이며, 로컬 비교에만 원본 필드를 사용합니다. 원본 timestamp의 표기를 정규화하지
+않고, 누락/null은 null 필터와 일치하며 빈 문자열·배열·객체는 구별합니다. 중첩 배열의 객체는
+전체 equality이므로 부분 allocation pool·route를 지정하면 추가 key가 있는 원본과 일치하지 않습니다.
+
+`prefixlen`의 Python Body descriptor에는 타입이 없습니다. Go도 응답 문자열·number·bool·
+객체·배열을 원형대로 비교합니다. 숫자 `24`·`24.0`·`2.4e1`은 같은 정확한 decimal 값이며
+문자열 `"24"`는 숫자 `24`와 다릅니다. 큰 숫자도 float64로 변환하지 않습니다. 소수와 JSON
+bool도 정상 값으로 비교하지만 Python의 bool/int 동등성은 적용하지 않습니다.
+`revision_number`는 native int decoder가 먼저 처리하므로 문자열·소수 응답은 그 단계에서 실패합니다.
+다른 필드에도 Python scalar→list 변환을 추가하지 않습니다.
+
+native extractor가 현재 페이지 전체를 먼저 검사합니다. DNS 배열·route/pool의 알려진 필드·
+timestamp·revision의 decode 오류는 cap 뒤의 행이어도 유지됩니다. native 모델에 없는
+`prefixlen`에 임의 타입 검증을 추가하지 않습니다. cap 뒤의 미소비 값과
+필터 없는 ordinary List에 새 검증을 추가하지 않습니다. clear 옵션도 원래 typed 목록 경로로
+돌아갑니다. Subnet의 typed `WithStatus`는 지원하지 않고, `WithQuery("tenant_id", ...)`와
+`WithQuery("revision_number", ...)`도 명시 wire query로 독립 전달합니다.
+
 고정 Python [qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L5177)·[address_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L392)의 추가 query는
 [Resource.list의 Body 분류와 비교](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2217)에 연결됩니다.
 Network [subnet_ids](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/network.py#L119)·Subnet Pool [prefixes](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/subnet_pool.py#L91)도 non-query Body 속성입니다.
 Trunk `sub_ports`는 query mapping에 있어 Python도 wire query로 전달하며, 이 SDK에서 로컬 필터로 등록하지 않습니다.
 실제 동작은 [native HTTP 계약](../api/network_body_filters_test.go), [Network·Subnet Pool HTTP 계약](../api/network_subnet_body_filters_test.go), [공통 옵션·소비 계약](../resource/body_filters_test.go),
 [JSON 비교 엔진](../internal/jsonfilter/filter_test.go)에서 검증합니다.
+Subnet 원본 행·native decoder·cap/continuation 계약은 [Subnet HTTP 테스트](../api/network_subnet_raw_body_filters_test.go),
+공통 행 소유권과 정수 변환은 [BodyRecord 테스트](../resource/body_record_test.go)와
+[정확한 정수 테스트](../internal/jsonfilter/integer_test.go)에서 검증합니다.

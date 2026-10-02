@@ -65,6 +65,8 @@ Octavia Member의 `WithStatus`는 wire 대신 로컬 필터를 사용하며, raw
 `prefixes`, Network의 `subnets`를 지원합니다. Network의 Python 이름 `subnet_ids`는 SDK가
 `subnets`의 별칭으로 처리하며 canonical/alias의 마지막 옵션이 이깁니다. 같은 bulk map에
 두 이름을 넣으면 `ErrInvalidOption`입니다.
+Subnet의 9개 로컬 필드는 [원본 응답 비교](../network/v2/subnets/README.md)를 제공하며
+`prefix_length`를 `prefixlen`의 별칭으로 처리합니다. native Subnet은 그대로 반환합니다.
 SDK가 JSON snapshot·필드 선택·배열 전체 equality를 처리하며 builder/predicate는 필요하지
 않습니다. 지원이 없는 리소스·알 수 없는 필드는 HTTP 전에 거부하고 raw query와 typed List·
 FindIdentity는 유지합니다. [Python/Go Body 필터 사용법](../docs/listing.md#명시적인-native-body-필터)에
