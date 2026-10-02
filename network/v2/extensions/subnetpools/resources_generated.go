@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/subnetpools"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -18,19 +19,22 @@ import (
 func (a *API) newResources() *resource.Collection[SubnetPool] {
 	return resource.NewCollection(resource.Adapter[SubnetPool]{
 		Kind:             "subnetpools",
-		BodyFilterFields: map[string]string{"prefixes": "prefixes"},
-		BodyFilterValue: func(v *SubnetPool, key string) (json.RawMessage, error) {
-			if v == nil {
-				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
-			}
-			switch key {
-			case "prefixes":
-				return json.Marshal(v.Prefixes)
-			default:
-				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
-			}
+		BodyFilterFields: map[string]string{"created_at": "created_at", "default_prefixlen": "default_prefixlen", "default_prefix_length": "default_prefixlen", "default_quota": "default_quota", "id": "id", "max_prefixlen": "max_prefixlen", "maximum_prefix_length": "max_prefixlen", "min_prefixlen": "min_prefixlen", "minimum_prefix_length": "min_prefixlen", "prefixes": "prefixes", "revision_number": "revision_number", "tenant_id": "tenant_id", "updated_at": "updated_at"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[SubnetPool], key string) (json.RawMessage, error) {
+			return subnetPoolBodyFilterValue(record, key)
 		},
-		IdentityFind: true,
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[SubnetPool], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"address_scope_id": "address_scope_id", "any_tags": "tags-any", "description": "description", "fields": "fields", "ip_version": "ip_version", "is_default": "is_default", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "tags": "tags"}, Body: map[string]string{"created_at": "created_at", "default_prefix_length": "default_prefixlen", "default_quota": "default_quota", "id": "id", "maximum_prefix_length": "max_prefixlen", "minimum_prefix_length": "min_prefixlen", "prefixes": "prefixes", "revision_number": "revision_number", "tenant_id": "tenant_id", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*SubnetPool, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"subnetpools", id}, q, []int{200}, &result.Body)
@@ -52,6 +56,22 @@ func (a *API) newResources() *resource.Collection[SubnetPool] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[SubnetPool], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "subnetpools", err)
+		return func(yield func(*resource.BodyRecord[SubnetPool], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]SubnetPool, error) {
+		values, err := upstream.ExtractSubnetPools(page)
+		return []SubnetPool(values), err
+	}, "subnetpools", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*SubnetPool, error) {
 	return a.Resources.Find(ctx, ref, options...)

@@ -1391,7 +1391,57 @@
     "identity_find": true,
     "identity_get_query": true,
     "body_filter_fields": [
-      "prefixes"
+      "created_at",
+      "default_prefixlen",
+      "default_quota",
+      "id",
+      "max_prefixlen",
+      "min_prefixlen",
+      "prefixes",
+      "revision_number",
+      "tenant_id",
+      "updated_at"
+    ],
+    "semantic_query_filters": {
+      "address_scope_id": "address_scope_id",
+      "any_tags": "tags-any",
+      "description": "description",
+      "fields": "fields",
+      "ip_version": "ip_version",
+      "is_default": "is_default",
+      "is_shared": "shared",
+      "limit": "limit",
+      "marker": "marker",
+      "name": "name",
+      "not_any_tags": "not-tags-any",
+      "not_tags": "not-tags",
+      "project_id": "project_id",
+      "sort_dir": "sort_dir",
+      "sort_key": "sort_key",
+      "tags": "tags"
+    },
+    "semantic_body_filters": {
+      "created_at": "created_at",
+      "default_prefix_length": "default_prefixlen",
+      "default_quota": "default_quota",
+      "id": "id",
+      "maximum_prefix_length": "max_prefixlen",
+      "minimum_prefix_length": "min_prefixlen",
+      "prefixes": "prefixes",
+      "revision_number": "revision_number",
+      "tenant_id": "tenant_id",
+      "updated_at": "updated_at"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
     ],
     "delete": true,
     "wait": false
