@@ -18,7 +18,7 @@ func (a *API) newResources() *resource.Collection[Order] {
 		Kind: "orders",
 		Get:  func(ctx context.Context, id string) (*Order, error) { return a.Get(ctx, string(id)) },
 		ID: func(v *Order) string {
-			parsed, err := url.Parse(v.SecretRef)
+			parsed, err := url.Parse(v.OrderRef)
 			if err != nil {
 				return ""
 			}
