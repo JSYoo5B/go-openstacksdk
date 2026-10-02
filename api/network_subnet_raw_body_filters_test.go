@@ -392,7 +392,7 @@ func TestNetworkSubnetRawBodyFiltersWireAndNativeIsolation(t *testing.T) {
 			}
 		})
 	}
-	t.Run("qos-keeps-native-projection", func(t *testing.T) {
+	t.Run("qos-raw-comparison-keeps-native-return-projection", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		cloud.Mux.HandleFunc("GET "+networkExtensionPrefix+"qos/policies", func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.RawQuery != "" {
@@ -404,10 +404,13 @@ func TestNetworkSubnetRawBodyFiltersWireAndNativeIsolation(t *testing.T) {
 		for _, tc := range []struct {
 			raw   string
 			count int
-		}{{`[{"quota":9007199254740993}]`, 0}, {`[{"quota":9007199254740992}]`, 1}} {
+		}{{`[{"quota":9007199254740993}]`, 1}, {`[{"quota":9007199254740992}]`, 0}} {
 			values, err := a.Resources.All(context.Background(), resource.WithBodyFilter("rules", json.RawMessage(tc.raw)))
 			if err != nil || len(values) != tc.count {
-				t.Fatal("raw Subnet lane altered existing QoS float64 projection", values, err)
+				t.Fatal("raw QoS comparison used rounded native numbers", values, err)
+			}
+			if len(values) != 0 && values[0].Rules[0]["quota"] != float64(9007199254740992) {
+				t.Fatal("raw comparison replaced native returned float64 decoding", values[0].Rules)
 			}
 		}
 	})
