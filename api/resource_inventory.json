@@ -1554,6 +1554,41 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "id",
+      "tenant_id"
+    ],
+    "semantic_query_filters": {
+      "any_tags": "tags-any",
+      "description": "description",
+      "fields": "fields",
+      "is_admin_state_up": "admin_state_up",
+      "limit": "limit",
+      "marker": "marker",
+      "name": "name",
+      "not_any_tags": "not-tags-any",
+      "not_tags": "not-tags",
+      "port_id": "port_id",
+      "project_id": "project_id",
+      "status": "status",
+      "sub_ports": "sub_ports",
+      "tags": "tags"
+    },
+    "semantic_body_filters": {
+      "id": "id",
+      "tenant_id": "tenant_id"
+    },
+    "semantic_reserved": [
+      "allow_unknown_params",
+      "base_path",
+      "headers",
+      "jmespath_filters",
+      "max_items",
+      "microversion",
+      "paginated",
+      "resource_type",
+      "session"
+    ],
     "delete": true,
     "wait": true
   },

@@ -3,8 +3,10 @@ package trunks
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/trunks"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -17,8 +19,23 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Trunk] {
 	return resource.NewCollection(resource.Adapter[Trunk]{
-		Kind:         "trunks",
-		IdentityFind: true,
+		Kind:             "trunks",
+		BodyFilterFields: map[string]string{"id": "id", "tenant_id": "tenant_id"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Trunk], key string) (json.RawMessage, error) {
+			return trunkBodyFilterValue(record, key)
+		},
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Trunk], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "is_admin_state_up": "admin_state_up", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "port_id": "port_id", "project_id": "project_id", "status": "status", "sub_ports": "sub_ports", "tags": "tags"}, Body: map[string]string{"id": "id", "tenant_id": "tenant_id"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Trunk, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"trunks", id}, q, []int{200}, &result.Body)
@@ -45,6 +62,22 @@ func (a *API) newResources() *resource.Collection[Trunk] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Trunk], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "trunks", err)
+		return func(yield func(*resource.BodyRecord[Trunk], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Trunk, error) {
+		values, err := upstream.ExtractTrunks(page)
+		return []Trunk(values), err
+	}, "trunks", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Trunk, error) {
 	return a.Resources.Find(ctx, ref, options...)
