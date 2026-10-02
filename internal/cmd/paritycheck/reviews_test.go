@@ -221,6 +221,84 @@ func TestSDKDiscoveryHintsDoNotInvalidateSourceReviews(t *testing.T) {
 	}
 }
 
+func TestSDKResultPoliciesKeepNativeReviewsAndRejectSourceDrift(t *testing.T) {
+	root := fixture(t)
+	before, err := loadInventory(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const id = "gophercloud:service/v1/resources.Fetch"
+	review := validReview(t, root)
+	review.ID, review.Fingerprint = id, before.Operations[id]
+	writeReviews(t, root, review)
+	putJSON(t, root, "api/sdk_support_catalog.json", before)
+	reviewsBefore, err := os.ReadFile(filepath.Join(root, "api/sdk_reviews.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalogBefore, err := os.ReadFile(filepath.Join(root, "api/sdk_support_catalog.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeNative := func(version string, declaration map[string]any) {
+		putJSON(t, root, "api/gophercloud_inventory.json", map[string]any{
+			"gophercloud_version": version, "operations": []map[string]any{declaration},
+		})
+	}
+	declaration := map[string]any{"package": "service/v1/resources", "name": "Fetch", "source": "upstream/service"}
+	for _, policy := range []string{"sdk_snapshot_metadata_object", "another_sdk_extractor", ""} {
+		t.Run("SDK policy "+policy, func(t *testing.T) {
+			declaration["result_policy"] = policy
+			declaration["return_policy"] = "extract"
+			declaration["request_policy"] = "sdk_owned_builder"
+			writeNative(gophercloudPin, declaration)
+			after, err := loadInventory(root)
+			if err != nil || !reflect.DeepEqual(before, after) {
+				t.Fatalf("SDK policy changed native source fingerprint: %v", err)
+			}
+			counts, err := check(root, false)
+			if err != nil || counts.total != 2 || counts.status["go_mapping"] != 1 || counts.status["unresolved"] != 1 {
+				t.Fatalf("SDK policy invalidated native review: counts=%+v err=%v", counts, err)
+			}
+		})
+	}
+	t.Run("source declaration", func(t *testing.T) {
+		declaration["source"] = "upstream/changed-declaration"
+		writeNative(gophercloudPin, declaration)
+		after, err := loadInventory(root)
+		if err != nil || after.Operations[id] == before.Operations[id] {
+			t.Fatalf("native source drift was ignored: %v", err)
+		}
+		if _, err := check(root, false); err == nil || !strings.Contains(err.Error(), "stale or incomplete") {
+			t.Fatalf("catalog accepted native source drift: %v", err)
+		}
+		symbols, err := goSymbols(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := validateReview(root, after, symbols, review); err == nil || !strings.Contains(err.Error(), "fingerprint changed") {
+			t.Fatalf("native review survived source drift: %v", err)
+		}
+	})
+	t.Run("source revision", func(t *testing.T) {
+		declaration["source"] = "upstream/service"
+		writeNative("v2.99.0", declaration)
+		if _, err := loadInventory(root); err == nil || !strings.Contains(err.Error(), "must be pinned") {
+			t.Fatalf("source revision drift accepted: %v", err)
+		}
+		changed, err := sourceFingerprint("v2.99.0", map[string]any{"package": "service/v1/resources", "name": "Fetch", "source": "upstream/service"})
+		if err != nil || changed == before.Operations[id] {
+			t.Fatalf("revision is absent from the source fingerprint: %v", err)
+		}
+	})
+	for path, want := range map[string][]byte{"api/sdk_reviews.json": reviewsBefore, "api/sdk_support_catalog.json": catalogBefore} {
+		got, err := os.ReadFile(filepath.Join(root, path))
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Fatalf("read-only checks changed %s: %v", path, err)
+		}
+	}
+}
+
 func TestUnknownReviewFieldsCannotHideRemainingContracts(t *testing.T) {
 	for _, tc := range []struct{ name, key string }{
 		{"review", "remainng"}, {"contract", "test"}, {"pins", "gopherclod"},

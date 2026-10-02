@@ -42,6 +42,7 @@ func loadInventory(root string) (operationCatalog, error) {
 		delete(value, "builder_free")
 		delete(value, "return_policy")
 		delete(value, "request_policy")
+		delete(value, "result_policy")
 		delete(value, "issue")
 		pin := pythonPin
 		if strings.HasPrefix(id, "gophercloud:") {
