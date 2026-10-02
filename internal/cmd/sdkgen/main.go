@@ -35,6 +35,7 @@ type operation struct {
 	BuilderFree   bool   `json:"builder_free"`
 	ReturnPolicy  string `json:"return_policy"`
 	RequestPolicy string `json:"request_policy,omitempty"`
+	ResultPolicy  string `json:"result_policy,omitempty"`
 	Issue         string `json:"issue,omitempty"`
 }
 type inventory struct {
@@ -339,6 +340,13 @@ func (g *generator) generate(path string) error {
 	if err := validateAuditedRequestCalls(pkg, decls); err != nil {
 		return err
 	}
+	snapshotDeclarations, err := g.snapshotMetadataDeclarations(pkg.Path())
+	if err != nil {
+		return err
+	}
+	if err := validateSnapshotMetadataDeclarations(pkg, snapshotDeclarations); err != nil {
+		return err
+	}
 	extractors := extractorsByPage(pkg, decls)
 	plan, err := identifyCollectionBinding(pkg, decls, extractors)
 	if err != nil {
@@ -480,6 +488,9 @@ func (g *generator) generate(path string) error {
 			op.ReturnPolicy = operationReturnPolicy(fn)
 			if override := requestCallOverride(pkg, name); override != nil {
 				op.RequestPolicy = override.policy
+			}
+			if snapshotMetadataExtractor(fn) {
+				op.ResultPolicy = "sdk_snapshot_metadata_object"
 			}
 		}
 		g.inventory.Operations = append(g.inventory.Operations, op)
@@ -672,6 +683,9 @@ func returnPolicy(sig *types.Signature) string {
 }
 
 func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors map[string]string) error {
+	if err := validateSnapshotMetadataTypes(e.pkg, fn); err != nil {
+		return err
+	}
 	override := requestCallOverride(e.pkg, fn.Name())
 	if override != nil {
 		if err := validateAuditedRequestCall(e.pkg, map[string]*ast.FuncDecl{fn.Name(): decl}, *override); err != nil {
@@ -991,7 +1005,13 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				vals = append(vals, fmt.Sprintf("value%d", i))
 			}
 		}
-		e.printf("%s:=result.%s()\nerr=%s.Wrap(%q,%q,err)\nreturn %s\n", strings.Join(vals, ","), resultExtractor, requestAlias, op, e.pkg.Name(), strings.Join(vals, ","))
+		if snapshotMetadataExtractor(fn) {
+			helper := e.use("gophercloudsdk/internal/snapshotmetadata")
+			e.printf("%s:=%s.Extract(result.Result)\n", strings.Join(vals, ","), helper)
+		} else {
+			e.printf("%s:=result.%s()\n", strings.Join(vals, ","), resultExtractor)
+		}
+		e.printf("err=%s.Wrap(%q,%q,err)\nreturn %s\n", requestAlias, op, e.pkg.Name(), strings.Join(vals, ","))
 	case "download":
 		e.printf("result:=%s\nheader,err:=result.Extract()\nreturn %s.OpenDownload(result.Body,header,%s.Wrap(%q,%q,err))\n", call, requestAlias, requestAlias, op, e.pkg.Name())
 	case "error":

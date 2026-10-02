@@ -27,6 +27,9 @@ func operationExtractor(fn *types.Func) (string, *types.Signature) {
 		return "", nil
 	}
 	result := sig.Results().At(0).Type()
+	if snapshotMetadataExtractor(fn) {
+		return "ExtractMetadata", extractionMethod(result, "ExtractMetadata")
+	}
 	if ex := extraction(result); ex != nil {
 		return "Extract", ex
 	}
