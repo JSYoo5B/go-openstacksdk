@@ -17424,6 +17424,141 @@
         "Import method discovery, staging, full create_image/upload/Swift task composition, config/vendor defaults, checksums, cleanup and asynchronous storage execution are separate workflow capabilities.",
         "Cloud enabled-method, URL authorization, quota, backend/store availability, copy ownership and capability/version negotiation are not established by local unit tests. No full Image Resource or cloud workflow support status is claimed."
       ]
+    },
+    {
+      "operation": "python:image/v2/stage_image",
+      "source_fingerprint": "2b9d6f748bcbc228eb097a58ac1f877c3f4383b2bfeb391c3c1852ac9e2a0320",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/imagedata.API.StageImage",
+        "gophercloudsdk/image/v2/imagedata.API.StageKnownImage",
+        "gophercloudsdk/image/v2/imagedata.WithStageOpts",
+        "gophercloudsdk/image/v2/imagedata.WithStageSize",
+        "gophercloudsdk/image/v2/imagedata.WithStageHeader",
+        "gophercloudsdk/image/v2/imagedata.WithStageHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "StageImage performs a fresh explicit-ID metadata GET before streaming, while StageKnownImage snapshots only supplied native ID/status before option callbacks and skips that initial GET. Both require exact queued status before PUT and leave the supplied model unchanged.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageFreshKnownAndBorrowedReader",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreFreshCanonicalQueuedAndWholeNativeDecode"
+          ]
+        },
+        {
+          "behavior": "Explicit Name uses the existing Images exact-name native page resolver once, followed by a fresh metadata GET. Requested or resolved ImageID remains fixed even when accepted metadata or Location describes another ID.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageQueuedNativePreflightAndNameBinding"
+          ]
+        },
+        {
+          "behavior": "Initial metadata is a flat UTF-8 object accepted as200, decoded as a complete native Image before exact lowercase canonical status is required. Missing/null/case-only/nonstring/nonqueued status or unrelated native decode failure prevents PUT and reader consumption.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageQueuedNativePreflightAndNameBinding",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreFreshCanonicalQueuedAndWholeNativeDecode"
+          ]
+        },
+        {
+          "behavior": "The SDK borrows a nonnil reader through a Read-only view, streaming from its current position without caller Close, Seek, size inspection or buffering. Typed-nil input and canceled preflight fail before HTTP or reading.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageClosedOptionsAndPreflight",
+            "api/glance_stage_contracts_test.go:TestGlanceStageStreamFailuresAndCallerCancellation",
+            "api/glance_stage_contracts_test.go:TestGlanceStageFreshKnownAndBorrowedReader",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases",
+            "image/v2/imagedata/stage_core_test.go:TestStageCorePreflightSourceAndCustomCancellationCauses"
+          ]
+        },
+        {
+          "behavior": "Size is an optional nonnegative int64 pointer: nil omits and zero is preserved in X-OpenStack-Image-Size only. No Content-Length or whole-file length is inferred, and no caller data is truncated to the stated size.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageSizeAndOptionSnapshots",
+            "image/v2/imagedata/stage_options_test.go:TestStageOptionsSizeNilZeroAndInvalidConfiguration",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases"
+          ]
+        },
+        {
+          "behavior": "Binary PUT uses a private fixed-target Provider with reauthentication, retry, backoff and redirects disabled, preserving the original client settings. Partial consumption followed by native status, transport or reader failure is not semantically replayed or followed by metadata GET.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageStreamFailuresAndCallerCancellation",
+            "api/glance_stage_contracts_test.go:TestGlanceStagePutNeverReplaysOrInvokesProviderCallbacks",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreBinaryFailuresDoNotReplayOrRedirect"
+          ]
+        },
+        {
+          "behavior": "StageImageResult retains independently copied actual PUT204 Acknowledgement evidence. Outer Image is assigned only after successful final native GetResult extraction, including import-method/store-ID header projection; outer Body/Header/StatusCode retain original accepted final GET200 evidence even on read or decode errors, unaffected by that model projection.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageLiveProviderFixedRoutesAndNativeABI",
+            "api/glance_stage_contracts_test.go:TestGlanceStageAcceptedAndFollowupEvidence",
+            "api/glance_stage_contracts_test.go:TestGlanceStageFreshKnownAndBorrowedReader",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreAcknowledgementAndFollowupFailureEvidence",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreGETHeaderProjectionMatchesNativeAndPreservesRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Binary octet-stream Content-Type and empty Accept are SDK-owned, distinct from captured ordinary metadata headers. Size/auth/framing/version overrides are guarded; ordinary header helpers canonicalize aliases with sequential last-wins and reject conflicting map aliases.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageLiveProviderFixedRoutesAndNativeABI",
+            "api/glance_stage_contracts_test.go:TestGlanceStageClosedOptionsAndPreflight",
+            "image/v2/imagedata/stage_options_test.go:TestStageOptionsHeaderAuthorityAndCanonicalLastWins",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases"
+          ]
+        },
+        {
+          "behavior": "WithStageOpts snapshots Size and header maps and replaces the complete config; individual helpers apply afterward. Parsed custom options and reusable concurrent options remain independent; each caller retains ownership of its reader.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageLiveProviderFixedRoutesAndNativeABI",
+            "api/glance_stage_contracts_test.go:TestGlanceStageSizeAndOptionSnapshots",
+            "image/v2/imagedata/stage_options_test.go:TestStageOptionsOwnedSnapshotsReplacementAndConcurrentReuse",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases"
+          ]
+        },
+        {
+          "behavior": "Before any accepted PUT204 the result is nil. Accepted PUT read or followup GET failures return the actual acknowledgement plus original errors without synthetic uploading/active models, extra recovery GET, import POST or cleanup DELETE. Context causes remain inspectable alongside original failures.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageClosedOptionsAndPreflight",
+            "api/glance_stage_contracts_test.go:TestGlanceStageStreamFailuresAndCallerCancellation",
+            "api/glance_stage_contracts_test.go:TestGlanceStageAcceptedAndFollowupEvidence",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreAcknowledgementAndFollowupFailureEvidence",
+            "image/v2/imagedata/stage_core_test.go:TestStageCorePreflightSourceAndCustomCancellationCauses"
+          ]
+        },
+        {
+          "behavior": "Source client/provider/type/header/origin validity is checked before options and subsequent phases. Captured ServiceClient routes, Microversion and header maps remain fixed; the original Provider token is read at dispatch. Each metadata GET keeps the configured JSON retry/auth policy and selected HTTPClient transport/timeout, while binary PUT disables replay callbacks on its private provider.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageClosedOptionsAndPreflight",
+            "api/glance_stage_contracts_test.go:TestGlanceStageLiveProviderFixedRoutesAndNativeABI",
+            "image/v2/imagedata/stage_core_test.go:TestStageCorePreflightSourceAndCustomCancellationCauses",
+            "image/v2/imagedata/stage_core_test.go:TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases"
+          ]
+        },
+        {
+          "behavior": "Existing native Stage/Upload/Download functions, StageResult alias and specialized inventory placeholder remain separate. Actual compiled signature and canonical Image ID/status tag guards reject drift without inventing a resource collection or changing generated native declarations.",
+          "tests": [
+            "api/glance_stage_contracts_test.go:TestGlanceStageLiveProviderFixedRoutesAndNativeABI",
+            "internal/cmd/sdkgen/glance_stage_test.go:TestGlanceStageKeepsActualNativeStreamingAndNoInventedCollection",
+            "internal/cmd/sdkgen/glance_stage_test.go:TestGlanceStageRejectsNativeSignatureIdentityAndStatusDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imagedata/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python _get_resource does not GET a bare ID, and Proxy.stage_image checks the supplied mutable Image cached status. Go StageImage(Ref) freshly GETs metadata, with an explicit Name convenience resolver; StageKnownImage copies only native ID/status and skips the initial GET.",
+        "Python filename and existing Resource.data inputs are separate from explicit borrowed io.Reader. Python infers seekable whole-file size, restoring its cursor, and accepts bool or negative int; Go omits automatic size and accepts only optional nonnegative int64, preserving zero and current-position streaming.",
+        "The Go binary provider disables SDK reauthentication, retry, backoff and redirects to prevent reader replay. Caller RoundTripper internals and release of a blocking Read remain outside the one-SDK-PUT guarantee; the underlying reader is never closed or sought.",
+        "Go keeps actual accepted PUT204 Acknowledgement evidence separate from the final GET model/response, and can return partial evidence with an error. Python mutates and fetches the same Resource and returns it, without this owned partial-result structure.",
+        "Go fresh metadata uses strict accepted200, full native Image decoding, UTF-8 and canonical queued status; native extension map/number/timestamp projection remains native. Safe fixed routes and protected SDK-owned options/header namespaces are deliberate Go policies rather than arbitrary injected builders."
+      ],
+      "remaining": [
+        "Full mutable Image Resource defaults/descriptors/coercion/dirty state, alternate identity, response/header merge and cache semantics are not reproduced by concrete native model/ref APIs.",
+        "Python filename opening, existing Resource.data, whole-file automatic size and arbitrary session/adapter injection remain outside this explicit reader workflow.",
+        "Proxy fetch cache/skip-cache, configured source response/error policy and general Resource continuation/transport behavior are not fully reconstructed by strict native JSON requests and partial accepted acknowledgements.",
+        "Image creation, interoperable import, method discovery, completion waiting, storage cleanup and end-to-end cloud upload composition are separate capabilities. Local HTTP tests do not establish deployment feature/version, quota, permissions, backend capacity or size-validation outcome.",
+        "Reader cancellation cannot forcibly release a caller blocking Read without caller cooperation, and custom RoundTripper internal replay is not controlled by the SDK."
+      ]
     }
   ]
 }
