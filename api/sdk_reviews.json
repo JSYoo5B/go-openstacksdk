@@ -13065,6 +13065,91 @@
         "Full inherited Resource/session/cache and direct Resource.fetch base_path/requires_id controls remain outside this fixed composition. The pinned custom Secret.fetch ignores microversion, params, resource_response_key, error_message and prepared headers, performs metadata without skip_cache, and forwards skip_cache only to payload; this review does not invent a class maximum-microversion negotiation requirement or claim generic Resource.fetch equivalence.",
         "Native Secrets.Get, GetPayload, Resources.Find/List/Wait remain separately callable APIs with their native model/query/pagination policies. Adding Fetch closes the metadata-plus-conditional-payload callable gap for get_secret; it does not claim find_secret fallback, automatic query/Body classification or the complete inherited Resource surface."
       ]
+    },
+    {
+      "operation": "python:key_manager/v1/find_secret",
+      "source_fingerprint": "061a518c49f029f4b107402bd284dcf109ddeff386f3f6d2d845d9617488b357",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secrets.New",
+        "gophercloudsdk/keymanager/v1/secrets.API.FindIdentity",
+        "gophercloudsdk/resource.WithIdentityFindOptions",
+        "gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
+        "gophercloudsdk/resource.WithIdentityFindFallback"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned find_secret at key_manager/v1/_proxy.py:302-320 accepts a string and ignore_missing=True without query kwargs, delegates through Proxy._find to Resource.find, and its direct branch invokes the custom Secret.fetch. The SDK-owned API.FindIdentity uses strict Fetch for a safe request identity: metadata GET secrets/{fixed-id}, then conditional GET of that same ID's payload, accepting only HTTP200. A successful direct result retains the request SecretID separately from actual metadata and does not require the returned ID/name to equal the input. Returned secret_ref/id never redirects a request.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindDirectFetchAndSeedIdentity",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindSharedFacadeAndTwoPhaseResults"
+          ]
+        },
+        {
+          "behavior": "The default compatible Go policy permits a metadata-only list search after actual native HTTP400/403/404 from either metadata or payload Fetch. NotFoundOnly and Never are explicit Go alternatives. Default ignore-missing returns nil after successful complete absence; explicit false returns a typed not-found error. List HTTP403/404 remain terminal. This is an owned strict-status policy rather than an assertion about the pinned default Proxy's actual HTTP exception behavior. Unsupported query keys, Details, AllProjects and GetExtraSpecs, including explicit false or present-but-empty query, fail before any HTTP on both direct and list-only paths.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindFallbackAndMissingPolicies",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindCapabilityPreflightAndExistingRef",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindCanceledAndStrictAbsence"
+          ]
+        },
+        {
+          "behavior": "The fallback injects the original literal string as the server name hint and locally compares exact passive ID OR canonical name across all rows. Literal lowercase raw id presence wins, including null, empty and nonstring values; these cannot match a nonblank string input and do not fall back to a reference. If id is absent, direct Fetch retains its out-of-band request seed while list rows use the full original secret_ref. No UUID/final-component derivation, case-alias shadowing, URL decoding or following of a reference is used. List models retain raw null/omission, precise numbers, unknown fields and page evidence; they have no request seed or fetched payload.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindPassiveIDAndExactName",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindDirectFetchAndSeedIdentity",
+            "resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsAreOnlyCompared",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindSharedFacadeAndTwoPhaseResults"
+          ]
+        },
+        {
+          "behavior": "A unique fallback result is returned only after the entire accepted iterator completes. Repeated matches, including the same ID twice, are ambiguous; later HTTP/decode/null-row/context failures invalidate an earlier match. There is no final secret/payload GET. The initial query has no invented limit/offset or marker. Advertised offset/body-next/RFC-Link continuations preserve the selected origin and collection path, require forward offsets and fixed introduced limit/filters, reject cycles or changed/foreign continuations, and stop on an empty page. With no advertised continuation, search ends without synthesizing a UUID marker.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindAllPagesAndTerminalObservations",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindPassiveIDAndExactName",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindSharedFacadeAndTwoPhaseResults"
+          ]
+        },
+        {
+          "behavior": "Accepted metadata decode/content selection/payload UTF-8 or body-read failures, wrapped transport404, canceled404 and non-success native codes such as203/204 are terminal rather than missing/fallback signals. Finder returns nil on terminal failure, while original native/transport/context causes and accepted Body/Header/StatusCode remain observable; it does not resend the composition. Unsafe but nonblank UTF-8 names use list-only lookup, while Never rejects that path. Blank/control/invalid UTF-8 input, nil options/context/API, invalid policies and SDK control queries fail before HTTP.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindFetchFailuresAreTerminal",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindCapabilityPreflightAndExistingRef",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindAllPagesAndTerminalObservations",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindCanceledAndStrictAbsence"
+          ]
+        },
+        {
+          "behavior": "User option callbacks execute exactly once per FindIdentity call. Prepared options own boolean pointers/maps before HTTP, so retained callback mutation cannot change fallback and reusable owned options have independent concurrent snapshots. Each call snapshots ServiceClient prefix/headers/version and the original Provider pointer; provider token/transport remain live. Original source configuration/context is validated before Fetch/list pages and after a successful Fetch. Reverse ResourceBase, configured project/source headers and middleware are preserved. This is a private SDK-owned comparison binding: native Get/GetPayload/Resources.Find remain separate, and native Secrets.Resources is not broadly opted into IdentityFind.",
+          "tests": [
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindPreparedOptionsAndConcurrentReuse",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindSourceSnapshotAndPageRevalidation",
+            "api/keymanager_secret_find_test.go:TestKeyManagerSecretFindCapabilityPreflightAndExistingRef",
+            "resource/find_identity_response_id_test.go:TestPrepareIdentityFindOptionsFreezesCustomAndBulkValues",
+            "resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsLeaveRouteGuardsAndDefaultBindings",
+            "connection_keymanager_secret_find_test.go:TestConnectionKeyManagerSecretFindSharedFacadeAndTwoPhaseResults"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/finding/README.md",
+        "keymanager/v1/secrets/README.md",
+        "keymanager/v1/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go deliberately requires published HTTP200 successes and defaults to compatible native400/403/404 fallback. Pinned Resource.find catches the three OpenStackSDK status exception classes around the whole custom Fetch, but Proxy.request defaults raise_exc=False and forwards it, while Secret.fetch reads JSON/content without response translation. Under that default, parseable error metadata or payload bytes may be returned as data instead of taking fallback. HTTP status alone does not prove Python took the catch; Go's strict behavior is an intentional policy difference.",
+        "Go guards request identity separately from passive response comparison. Names unsafe for single-segment ID routes are searched literally through the list; full response references and nullable/nonstring literal IDs are never used as request targets. Python Resource.id uses raw literal id presence, otherwise full alternate secret_ref; its distinct secret_id HREFToUUID formatter is not the Resource.id comparison value. Go does not derive list UUIDs or fabricate raw IDs.",
+        "Go returns independent canonical typed/raw FetchedSecret and FetchedPayload evidence rather than a mutable Python Secret. Canonical string fields are narrower than Python untyped descriptors and can fail on incompatible JSON types; raw ContentTypes/BitLength/Body retain original field values and precision. A terminal Finder failure returns nil even though standalone Fetch may expose partial metadata.",
+        "Advertised offsets, same-origin/fixed-path/filter/limit continuity and whole-iterator error checks are SDK-owned guards. Pinned Resource._get_next_link can update query fields from continuation links and uses truthy-limit marker fallback when a limit is known; this direct proxy has no limit argument. Its HTTP Link branch accesses response.links['next']['uri']; Go parses the RFC header directly instead of assuming that adapter-dependent literal mapping. No generic marker or stronger Python link support is claimed.",
+        "Service configuration is captured per call while the original Provider remains live for token/transport policy. Configure ServiceClient fields before concurrent calls; original-source validation around phases/pages is not live monitoring inside an already-running snapshot Fetch. Strict terminal handling prevents fallback for transport/read/context/accepted decode failures; provider retry/reauthentication remains its existing policy."
+      ],
+      "remaining": [
+        "The complete inherited Secret/Resource descriptor/default/coercion, mutable seeded-instance and response/cache lifecycle is not reproduced by this owned projection. Python class construction/declared-field merges, existing cache/session behavior and untyped attributes remain distinct. The direct find_secret declaration accepts a string, so this review does not invent a missing str-or-Secret overload.",
+        "Broader inherited Resource.find/list and session controls, such as list_base_path, microversion, arbitrary params, per-list headers/paginated/max_items and adapter/cache policy, are not added to a direct proxy that declares only name_or_id and ignore_missing. Python's custom Secret.fetch itself ignores several generic fetch controls and bypasses response translation; no unsupported class-maximum negotiation requirement or default HTTP404 fallback parity is claimed.",
+        "Native Secrets.Get/GetPayload/Resources retain their separate existing metadata/query/pagination APIs. The callable SDK FindIdentity addition covers direct metadata-plus-conditional-payload lookup and metadata-only exact list resolution under documented Go policies, without claiming full inherited Resource equivalence or generic native collection IdentityFind support."
+      ]
     }
   ]
 }
