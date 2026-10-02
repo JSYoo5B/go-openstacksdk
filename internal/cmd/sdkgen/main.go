@@ -440,6 +440,10 @@ func (g *generator) generate(path string) error {
 	e.use(pkg.Path())
 	e.use(upstreamModule)
 	specialized, hasSpecialized := specializedCollections[path]
+	metadataScope, err := cinderMetadataCollectionScope(pkg, plan)
+	if err != nil {
+		return err
+	}
 	if hasSpecialized && (plan != nil || len(scopes) != 0) {
 		return fmt.Errorf("specialized collection conflicts with inferred policies for %s", path)
 	}
@@ -459,7 +463,7 @@ func (g *generator) generate(path string) error {
 		e.use("gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
 		filter := g.pythonFilterFor(pkg, plan)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != ""})
+		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != "", MetadataScope: metadataScope})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {

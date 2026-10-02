@@ -31,6 +31,7 @@ type collectionRecord struct {
 	Delete               bool              `json:"delete"`
 	Wait                 bool              `json:"wait"`
 	Scope                string            `json:"scope,omitempty"`
+	MetadataScope        string            `json:"metadata_scope,omitempty"`
 	Parent               string            `json:"parent,omitempty"`
 	Issue                string            `json:"issue,omitempty"`
 }

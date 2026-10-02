@@ -125,7 +125,11 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Servers.GetPassword`는 기본적으로 암호화된 문자열을 반환합니다. RSA 복호화는 `servers.WithGetPasswordPrivateKey(key)`로 선택합니다. [암호 조회 사용법](servers/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.\n\n")
 		out.WriteString("`InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.\n\n")
-	case "blockstorage/v3":
+	case "blockstorage/v2", "blockstorage/v3":
+		out.WriteString("`Volumes.MetadataIn(ctx, ref)`와 `Snapshots.MetadataIn(ctx, ref)`는 ID 또는 이름을 한 번 해석해 Get·Merge·Replace·DeleteKeys를 같은 방식으로 제공합니다. Merge는 POST 병합, Replace는 PUT 전체 교체이며 nil/빈 map도 명시적 metadata 객체를 보냅니다. DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음, 그 외에는 입력 순서대로 삭제하고 실패 전 결과를 반환합니다. 실제 metadata·원문·헤더·성공 코드를 반환하며 Resource cache를 만들지 않습니다. [공통 metadata 사용법](../metadata/README.md), [Volume](volumes/README.md), [Snapshot](snapshots/README.md)에 Python 대응·ETag·옵션·부분 성공을 설명합니다. Backup metadata 하위 경로는 이 범위에 포함하지 않습니다.\n\n")
+		if key == "blockstorage/v2" {
+			break
+		}
 		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.BlockStorageProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. 프로젝트 필터는 실제 요청 버전 3.39 이상이 필요하며 [limits 사용법](limits/README.md)에 버전·typed/raw 응답을 설명합니다.\n\n")
 	case "network/v2":
@@ -287,6 +291,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				features = append(features, "상태 대기")
 			}
 			policies = append(policies, fmt.Sprintf("`%s`: %s", label, strings.Join(features, ", ")))
+			if record.MetadataScope != "" {
+				policies = append(policies, fmt.Sprintf("`%s(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답", record.MetadataScope))
+			}
 		}
 		policy := strings.Join(policies, "; ")
 		if policy == "" {
