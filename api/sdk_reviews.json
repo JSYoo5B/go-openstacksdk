@@ -14133,6 +14133,148 @@
         "Python Resource._get_next_link top-level/RFC Link-header and limit/marker fallbacks, limit hints and inherited pagination/session/retry/cache behavior are not closed by native security_groups_links guards or original-row pairing.",
         "Deprecated Proxy._list jmespath_filters and explicit __conflicting_attrs restoration have no corresponding ordinary Go expression/recovery option. Existing native List, explicit Ref lookup/FindIdentity, group CRUD and rule APIs are separate contracts; complete direct Proxy or inherited Resource parity is not claimed."
       ]
+    },
+    {
+      "operation": "python:network/v2/trunks",
+      "source_fingerprint": "f9f0437ef04f6d19557301c694d2fcf32748d8cc86d216185963f1f654214f88",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/trunks.New",
+        "gophercloudsdk/network/v2/extensions/trunks.API.All",
+        "gophercloudsdk/resource.Collection.List",
+        "gophercloudsdk/resource.Collection.All",
+        "gophercloudsdk/resource.WithFilter",
+        "gophercloudsdk/resource.WithFilters",
+        "gophercloudsdk/resource.WithBodyFilter",
+        "gophercloudsdk/resource.WithBodyFilters",
+        "gophercloudsdk/resource.WithName",
+        "gophercloudsdk/resource.WithStatus",
+        "gophercloudsdk/resource.WithPageSize",
+        "gophercloudsdk/resource.WithMaxItems",
+        "gophercloudsdk/resource.WithPaginated",
+        "gophercloudsdk/resource.WithQuery",
+        "gophercloudsdk.Connection.Network",
+        "gophercloudsdk.Connection.NetworkV2"
+      ],
+      "contracts": [
+        {
+          "behavior": "SDK-owned Resources.List/All classify all14 canonical query attributes and18 accepted spellings and exactly two non-query Body properties from pinned Trunk. Effective10 descriptors use Resource+TagMixin C3 MRO6, not NetworkResource; sourceSHA6/AST35 independently anchor defaults/accessors/types and query classification. Native created_at/updated_at/revision_number do not become semantic attributes.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersEntireQueryAndAliasDescriptor",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonPinnedSourceRequiresLiveSixSHAAndThirtyFiveASTProof"
+          ]
+        },
+        {
+          "behavior": "Query is_admin_state_up->admin_state_up and three tag aliases are transposed. Bulk canonical keys win by presence over wire aliases including null/false/empty, while individual options targeting one wire key use last-wins. Scalars preserve exact numbers, lowercase bools and empty strings; scalar arrays repeat values with null entries omitted and nil/empty presence retained.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersEntireQueryAndAliasDescriptor",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersSharedClientAndDistinctQueryBodyNamespaces",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity"
+          ]
+        },
+        {
+          "behavior": "Local id and tenant_id compare original lowercase JSON fields; missing/null match null, empty strings remain distinct and literal missing/null ID never falls back to Name. Native ID/TenantID still return zero strings and reject incompatible nonnull known types before matching. Project response alias does not infer local tenant from native ProjectID.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersRawDescriptorsAndNativeProjection",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersSharedClientAndDistinctQueryBodyNamespaces"
+          ]
+        },
+        {
+          "behavior": "Semantic project_id/name/status/port_id/sub_ports/description/is_admin_state_up/tags stay server-only despite disagreeing returned values; sub_ports list and administrative bool response descriptors do not add local normalization. WithName retains server hint+exact local name, WithStatus retains case-insensitive local target using final last-wins status query, raw status alone is wire-only.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersEntireQueryAndAliasDescriptor",
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersNativeAndIdentitySurfaceIsolation",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersPreflightFinalStatusAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "Library-owned semantic options snapshot maps/raw JSON/nested scalar arrays and can be reused concurrently. Bulk options replace only their own namespace; nil/empty clears preserve explicit Body/raw query. Only final selected known values validate, allowing later overwrite/clear to remove earlier invalid values.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersSnapshotsReplacementAndConcurrentReuse",
+            "resource/filters_test.go:TestSemanticFiltersValidateOnlyFinalSelectedValues"
+          ]
+        },
+        {
+          "behavior": "Unknown semantic names are discarded even with unserializable values, including native-only timestamps/revision/sort. Nine source controls fail lazily before HTTP; query objects/nested arrays and unsupported explicit Body keys reject. Same-target semantic/raw query/page/name/status or explicit Body collisions reject, while raw id/tenant query and local Body namespaces are independent.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersLazyPreflightAndNamespaceCollisions",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersPreflightFinalStatusAndNativeSurfaces",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear"
+          ]
+        },
+        {
+          "behavior": "MaxItems counts raw rows before local Body/name/status filtering, and SinglePage or consumer break stops before continuation without synthetic wire limit hints. Caps suppress only unconsumed local selector work; native whole-page malformed strings/bools/ints/arrays/nested Subport/date fields remain errors even beyond a cap, with All returning nil rather than partial results.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersControlsAndNativeWholePageFailures",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersPreflightFinalStatusAndNativeSurfaces",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyNativeSchemaGuardsPlainModelsBuilderAndInheritedContinuation"
+          ]
+        },
+        {
+          "behavior": "Native Trunk13/Subport3 fields and plain own-method graphs remain unchanged; native standard RFC3339 time.Time accepts Z/offsets and rejects no-zone strings. Missing/null known fields use native zeros, null nested Subport elements are zero structs; consumed null Body rows reject, query-only null rows return native zero models and empty object rows remain valid.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersRawDescriptorsAndNativeProjection",
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersControlsAndNativeWholePageFailures",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyNativeSchemaGuardsPlainModelsBuilderAndInheritedContinuation",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyFiltersAcceptActualCompiledPlainNestedAndRequestMethodGraph"
+          ]
+        },
+        {
+          "behavior": "Native list HTTP200/204/300 and inherited top-level links.next are retained; plural trunks_links/top-level next do not gain support. Foreign continuations are followed by native pager; cycles/malformed links/late HTTP/decode/cancellation terminate. JSON-empty204 produces native EOF; non-JSON204 is empty. Matching duplicates stay distinct list rows.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersPagingLiveSourceAndNativeStatus",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkDependenciesGuardInheritedLinksWholePageNumbersCodesAndRoute"
+          ]
+        },
+        {
+          "behavior": "Leaf and cached Connection.Network/NetworkV2 Trunk facades retain the same original client/Provider, configured headers/microversion, ResourceBase prefix, middleware and live token changes across pages. No parent GET, automatic mutation, follow-up fetch or shared-client rewrite is introduced.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersPagingLiveSourceAndNativeStatus",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersSharedClientAndDistinctQueryBodyNamespaces",
+            "connection_trunk_filters_test.go:TestConnectionTrunkFiltersPreflightFinalStatusAndNativeSurfaces"
+          ]
+        },
+        {
+          "behavior": "Ordinary typed native List/Get/FindIdentity/explicit Ref and existing tags/subport actions remain independent from semantic List filters. Raw wire id/tenant/status/vendor/revision values remain intact in ordinary and Body lanes; native nested full models and action envelopes are returned without fabricating response metadata or a ResourceAdapter API.",
+          "tests": [
+            "api/trunk_list_filters_test.go:TestTrunkListFiltersNativeAndIdentitySurfaceIsolation",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkFilterEmissionOwnsBothQueryLanesAndPreservesPriorTenBindings",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyFiltersAcceptActualCompiledPlainNestedAndRequestMethodGraph"
+          ]
+        },
+        {
+          "behavior": "Generation fails closed without live sourceSHA6/fresh completeAST35 equality and schema/hash proof.20 reachable native declarations (leaf10/root2/pager8) plus exactly one resourcePath=trunks constant guard builder/result/plain nested model/inherited pager/UseNumber/codes/route drift. Both iterator query maps deep-copy repeated/nil values; prior ten manifest bytes and emitted function ASTs remain unchanged.",
+          "tests": [
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyNativeSchemaGuardsPlainModelsBuilderAndInheritedContinuation",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkFilterEmissionOwnsBothQueryLanesAndPreservesPriorTenBindings",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkPythonPinnedSourceRequiresLiveSixSHAAndThirtyFiveASTProof",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkDependenciesGuardInheritedLinksWholePageNumbersCodesAndRoute",
+            "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyFiltersAcceptActualCompiledPlainNestedAndRequestMethodGraph"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/listing.md",
+        "network/v2/README.md",
+        "resource/README.md",
+        "network/v2/extensions/trunks/listing/README.md",
+        "internal/cmd/sdkgen/README.md"
+      ],
+      "differences": [
+        "Go uses frozen concrete WithFilter/WithFilters and explicit Body options instead of Python kwargs and mutable descriptors. Bulk canonical keys win by presence and individual options are last-wins. Raw WithQuery remains an independent explicit wire extension; unknown semantic names discard. Trunk project query and deprecated tenant local Body stay separate.",
+        "Original JSON comparison occurs only after native whole-page extraction. Known string/bool/int/nested Subport/time fields can reject before matching, including later rows past a cap. Returned models remain native projections; original local id/tenant spelling/presence does not expand native model permissiveness.",
+        "All two local descriptors are untyped JSON: no bool/int/list formatter is added. Go does not coerce caller JSON values and distinguishes bool from numbers; Python equality differs. Dictionary subset and ordered-array machinery is shared but native known local strings limit which returned domains reach matching. Queried sub_ports/is_admin_state_up response coercion does not become local filtering.",
+        "Semantic query arrays become repeated scalar URL values rather than arbitrary Python container formatting; nil/empty arrays retain key presence while omitting values. Reserved source controls do not expose caller session/headers/microversion/base_path or JMESPath overrides.",
+        "Go raw cap counts before filtering like Python but omits its limit hint and stops continuation immediately. Native whole-page decoding/HTTP200204300/foreign following/inherited links.next and JSON-empty204 EOF remain. Body-consumed null rows reject; query-only native zero rows remain."
+      ],
+      "remaining": [
+        "Complete eager/seeded Resource descriptor defaults, project response alias fallback, unknown Body storage, mutable Resource/cache/dirty lifecycle and arbitrary subclasses remain distinct from selected raw-row filtering. Trunk inherits Resource+TagMixin, not NetworkResource; revision-aware if-match behavior is not claimed.",
+        "Pinned Proxy.request optional GET cache, adapter/session injection and per-call headers/microversion/base_path remain separate. Direct Proxy.trunks fixes its session to Proxy; Trunk declares no class maximum microversion, so no class-specific maximum negotiation gap is asserted.",
+        "Python Resource._get_next_link advertised/top-level/RFC Link header and limit/marker fallbacks, limit hints and inherited cache/retry/session behavior remain outside native links.next guards. Full descriptor conversion/equality and query container formatting are not replicated.",
+        "Deprecated Proxy._list jmespath_filters and explicit __conflicting_attrs restoration have no corresponding ordinary Go expression/recovery option. Existing native List, Get/Ref/FindIdentity, CRUD, tags and subport APIs are separate contracts. This ordinary-list mapping remains partial and unresolved, not full Proxy parity."
+      ]
     }
   ]
 }
