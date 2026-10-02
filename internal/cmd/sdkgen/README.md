@@ -170,3 +170,5 @@ Cinder Volume·Snapshot v2/v3의 수동 `MetadataIn` 범위는 [등록 규칙](c
 부모 binding의 변경·누락과 감사하지 않은 리소스를 거부합니다. 요청 실행과 metadata 응답은
 [공통 SDK 구현](../../cindermetadata/scope.go), [네 HTTP binding](../../../api/cinder_metadata_scopes_test.go),
 [Python/Go 사용법](../../../blockstorage/metadata/README.md)에서 별도로 검증합니다.
+
+`service_waits.go`는 Compute Server·Cinder v2/v3 Volume/Snapshot·Glance v2 Image 여섯 부모 collection에만 `service_wait` 정책을 기록합니다. ID/name/status와 GET/list/delete binding이 달라지면 생성 오류를 반환하며, 다른 모델의 이름으로 capability를 추론하지 않습니다. 추가 메서드는 수동 `wait.go`에 있으며 기존 native 및 공통 waiter의 생성 코드는 유지합니다. 실제 pin과 scope 제외 회귀는 `service_waits_test.go`로 검증합니다.

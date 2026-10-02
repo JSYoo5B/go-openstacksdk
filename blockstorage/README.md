@@ -77,3 +77,5 @@ native options의 nil/빈 Metadata map은 `omitempty`로 생략되며, core 필�
 [blockstorage_test.go](blockstorage_test.go)는 Cinder의 실패 상태 패턴과 microversion 헤더를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.
 
 Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)`로 고정합니다. v3는 `conn.VolumeMetadata`·`conn.SnapshotMetadata`가 공유 클라이언트를 연결합니다. Get은 실제 map을 조회하고 Merge는 POST 병합, Replace는 PUT 전체 교체를 실행합니다. nil/빈 map도 명시적인 객체를 보내며 DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음입니다. 문자열 map·header 옵션·순서별 부분 성공과 Python Resource/cache 차이는 [공통 사용법](metadata/README.md), [v3 Volume](v3/volumes/README.md)·[Snapshot](v3/snapshots/README.md)을 참고합니다. [서버 계약](../docs/cinder-metadata-server-contracts.md)은 Cinder의 ETag와 Backup 경로 차이를 고정 소스로 설명합니다.
+
+`blockstorage.WaitForAvailable(ctx, service.Volumes, ref)`는 available·정확한 error 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForState`는 다른 대상을 명시하고 `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. v2/v3 Volume·Snapshot leaf에도 같은 메서드가 있습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.

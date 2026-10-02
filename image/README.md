@@ -145,3 +145,5 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 stage→import, 원격 URL import, 여러 저장소 선택, Swift task 업로드, checksum 계산·검증을 묶는 상위 작업은 아직 없습니다. 각각의 API는 위 `service.API`를 통해 사용할 수 있습니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
 
 [image_test.go](image_test.go)는 Glance의 envelope 없는 응답, 추가 Properties, 실패 상태를 검증합니다. [upload_test.go](upload_test.go)는 업로드 HTTP 계약과 검증·실패 정책을, [upload_retry_test.go](upload_retry_test.go)는 단일 PUT·지연된 Body.Close·현재 offset·Reader 소유권과 원인 오류 보존을 검증합니다. [서버 생성 통합 테스트](../server_create_test.go)는 Compute에서 이미지 이름을 해석하는 과정을 검증합니다.
+
+`image.WaitForState(ctx, service.Images, ref, target)`와 Image v2 leaf의 `WaitForState`는 정확한 ERROR 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 생성·업로드의 기존 `WithWait` 기본값은 유지합니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 Task 대기의 남은 차이를 설명합니다.

@@ -47,3 +47,5 @@ func example(ctx context.Context, api *ports.API) error {
 [공통 정책 목록](resource_inventory.json)의 `metadata_scope: MetadataIn`은 Cinder v2/v3 Volume·Snapshot의 네 기존 collection에 추가한 SDK 소유 범위입니다. 별도 metadata Collection이나 Backup 경로를 뜻하지 않습니다. Get·POST Merge·PUT Replace·순서별 DeleteKeys는 [metadata 사용법](../blockstorage/metadata/README.md)에 설명하며 native Snapshot UpdateMetadata와 volume image metadata API를 유지합니다. [네 binding HTTP 계약](cinder_metadata_scopes_test.go)과 [공유 Connection 계약](../connection_metadata_test.go)은 요청·응답·부분 성공·토큰·고정 경로를 검증합니다.
 
 API transport 목록과 별도로 [지원 판정](sdk_reviews.json)을 보존하고 [검증기](../internal/cmd/paritycheck/README.md)로 API·테스트·문서 근거와 고정 소스를 확인합니다. 미검토 연산은 `unresolved`이며 생성된 함수 수만으로 SDK 지원을 완료 처리하지 않습니다.
+
+Compute Server·Cinder v2/v3 Volume/Snapshot·Image v2 Image의 `WaitForState/WaitForDelete`는 [서비스별 대기 기본값](../docs/service-waits.md)을 적용합니다. `resource_inventory.json`의 `service_wait`는 감사한 기존 여섯 collection에만 기록하며 native `WaitForStatus`나 공통 `WaitFor/WaitForDeletion`을 교체하지 않습니다.
