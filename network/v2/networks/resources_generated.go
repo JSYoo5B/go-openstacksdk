@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -17,21 +18,29 @@ import (
 
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Network] {
-	return resource.NewCollection(resource.Adapter[Network]{
+	return resource.NewCollection(a.ResourceAdapter())
+}
+
+// ResourceAdapter returns a fresh SDK-owned adapter for composing the Network facade.
+func (a *API) ResourceAdapter() resource.Adapter[Network] {
+	return resource.Adapter[Network]{
 		Kind:             "networks",
-		BodyFilterFields: map[string]string{"subnets": "subnets", "subnet_ids": "subnets"},
-		BodyFilterValue: func(v *Network, key string) (json.RawMessage, error) {
-			if v == nil {
-				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
-			}
-			switch key {
-			case "subnets":
-				return json.Marshal(v.Subnets)
-			default:
-				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
-			}
+		BodyFilterFields: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "dns_domain": "dns_domain", "is_default": "is_default", "mtu": "mtu", "pvlan": "pvlan", "qos_policy_id": "qos_policy_id", "revision_number": "revision_number", "segments": "segments", "subnets": "subnets", "subnet_ids": "subnets", "updated_at": "updated_at", "vlan_qinq": "vlan_qinq", "is_vlan_qinq": "vlan_qinq", "vlan_transparent": "vlan_transparent", "is_vlan_transparent": "vlan_transparent"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Network], key string) (json.RawMessage, error) {
+			return networkBodyFilterValue(record, key)
 		},
-		IdentityFind: true,
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Network], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "id": "id", "ipv4_address_scope_id": "ipv4_address_scope", "ipv6_address_scope_id": "ipv6_address_scope", "is_admin_state_up": "admin_state_up", "is_port_security_enabled": "port_security_enabled", "is_router_external": "router:external", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "provider_network_type": "provider:network_type", "provider_physical_network": "provider:physical_network", "provider_segmentation_id": "provider:segmentation_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "status": "status", "tags": "tags"}, Body: map[string]string{"availability_zone_hints": "availability_zone_hints", "availability_zones": "availability_zones", "created_at": "created_at", "dns_domain": "dns_domain", "is_default": "is_default", "is_vlan_qinq": "vlan_qinq", "is_vlan_transparent": "vlan_transparent", "mtu": "mtu", "pvlan": "pvlan", "qos_policy_id": "qos_policy_id", "revision_number": "revision_number", "segments": "segments", "subnet_ids": "subnets", "updated_at": "updated_at"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"networks", id}, q, []int{200}, &result.Body)
@@ -57,7 +66,23 @@ func (a *API) newResources() *resource.Collection[Network] {
 				return nil
 			}}
 			return a.listWithControl(ctx, control, options...)
-		}})
+		}}
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Network], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "networks", err)
+		return func(yield func(*resource.BodyRecord[Network], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Network, error) {
+		values, err := upstream.ExtractNetworks(page)
+		return []Network(values), err
+	}, "networks", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Network, error) {
 	return a.Resources.Find(ctx, ref, options...)

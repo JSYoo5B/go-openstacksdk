@@ -2,14 +2,12 @@ package network
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	networkapi "gophercloudsdk/network/v2"
 	"net/url"
 	"strings"
 
 	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
+	networkapi "gophercloudsdk/network/v2"
 	"gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -42,33 +40,23 @@ type Dependencies struct {
 // NewWithDependencies adds cross-service references while preserving New's
 // standalone constructor. All collections share the supplied Neutron client.
 func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
-	s := &Service{client: client, API: networkapi.New(client), Networks: resource.NewCollection[Network](resource.Adapter[Network]{
-		Kind:             "network",
-		IdentityFind:     true,
-		BodyFilterFields: map[string]string{"subnets": "subnets", "subnet_ids": "subnets"},
-		BodyFilterValue: func(n *Network, key string) (json.RawMessage, error) {
-			if n == nil {
-				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
-			}
-			if key == "subnets" {
-				return json.Marshal(n.Subnets)
-			}
-			return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
-		},
-		Get: func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() },
-		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Network, error) {
-			var result networks.GetResult
-			result.Header, result.Err = nativefind.Get(ctx, client, []string{"networks", id}, q, []int{200}, &result.Body)
-			return result.Extract()
-		},
-		List:    func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) },
-		Extract: networks.ExtractNetworks,
-		Delete:  func(ctx context.Context, id string) error { return networks.Delete(ctx, client, id).ExtractErr() },
-		ID:      func(n *Network) string { return n.ID }, Name: func(n *Network) string { return n.Name },
-		NameQuery: func(name string) string { return name },
-		Status:    func(n *Network) string { return n.Status },
-		Failed:    func(status string) bool { return strings.EqualFold(status, "ERROR") },
-	})}
+	s := &Service{client: client, API: networkapi.New(client)}
+	// The SDK supplies one complete list-filter policy for both facades. Keep
+	// this convenience facade's singular errors, waiter and native query lane.
+	adapter := s.API.Networks.ResourceAdapter()
+	adapter.Kind = "network"
+	adapter.Failed = func(status string) bool { return strings.EqualFold(status, "ERROR") }
+	adapter.Get = func(ctx context.Context, id string) (*Network, error) { return networks.Get(ctx, client, id).Extract() }
+	adapter.GetIdentityQuery = func(ctx context.Context, id string, q url.Values) (*Network, error) {
+		var result networks.GetResult
+		result.Header, result.Err = nativefind.Get(ctx, client, []string{"networks", id}, q, []int{200}, &result.Body)
+		return result.Extract()
+	}
+	adapter.IterateControlled = nil
+	adapter.List = func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) }
+	adapter.Extract = networks.ExtractNetworks
+	adapter.Delete = func(ctx context.Context, id string) error { return networks.Delete(ctx, client, id).ExtractErr() }
+	s.Networks = resource.NewCollection(adapter)
 	s.Ports = s.API.Ports.Resources
 	s.FloatingIPs = newFloatingIPs(s, dependencies)
 	return s
