@@ -110,7 +110,8 @@
     "find": true,
     "delete": true,
     "wait": true,
-    "metadata_scope": "MetadataIn"
+    "metadata_scope": "MetadataIn",
+    "service_wait": "cinder"
   },
   {
     "package": "gophercloudsdk/blockstorage/v2/transfers",
@@ -125,7 +126,8 @@
     "find": true,
     "delete": true,
     "wait": true,
-    "metadata_scope": "MetadataIn"
+    "metadata_scope": "MetadataIn",
+    "service_wait": "cinder"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/attachments",
@@ -204,7 +206,8 @@
     "find": true,
     "delete": true,
     "wait": true,
-    "metadata_scope": "MetadataIn"
+    "metadata_scope": "MetadataIn",
+    "service_wait": "cinder"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/transfers",
@@ -223,7 +226,8 @@
     "identity_all_projects": true,
     "delete": true,
     "wait": true,
-    "metadata_scope": "MetadataIn"
+    "metadata_scope": "MetadataIn",
+    "service_wait": "cinder"
   },
   {
     "package": "gophercloudsdk/blockstorage/v3/volumetypes",
@@ -377,7 +381,8 @@
     "identity_details": true,
     "identity_all_projects": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "service_wait": "compute"
   },
   {
     "package": "gophercloudsdk/compute/v2/services",
@@ -798,7 +803,8 @@
     "identity_get_query": true,
     "identity_missing_list": true,
     "delete": true,
-    "wait": true
+    "wait": true,
+    "service_wait": "image"
   },
   {
     "package": "gophercloudsdk/image/v2/members",

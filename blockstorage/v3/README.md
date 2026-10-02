@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 blockstorage/v3 API를 하나의 인증된 서비스 객�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.
+
 `Volumes.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
 
 서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.
@@ -53,9 +55,9 @@ _ = value
 | `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Usage·Update·Reset; List/Find/Wait 없음 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
-| `Snapshots` | [snapshots](snapshots/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답 |
+| `Snapshots` | [snapshots](snapshots/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |
 | `Transfers` | [transfers](transfers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
-| `Volumes` | [volumes](volumes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답 |
+| `Volumes` | [volumes](volumes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |
 | `VolumeTypes` | [volumetypes](volumetypes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.
