@@ -148,3 +148,16 @@ Order의 native identity callback은 [별도 타입 검증](order_identity_colle
 `GOPHERCLOUD_METADATA=/path/to/packages.json`으로 생성과 같은 metadata를 지정할 수 있으며,
 metadata가 없으면 해당 실제 타입 검사만 skip합니다. 실제 생성은 고정 native 타입과 소스
 계약을 항상 검증합니다.
+
+Cinder v2/v3 Snapshot의 `UpdateMetadata`에는 [별도 결과 선택 규칙](snapshot_metadata_extractors.go)을
+적용합니다. native 결과가 상속하는 Snapshot용 `Extract` 대신 metadata 객체를 반환하며,
+native `ExtractMetadata`의 unchecked assertion은 [안전한 helper](../../snapshotmetadata/extract.go)로
+대체합니다. 원래 native 오류를 먼저 반환하고 원본 decoded map과 `json.Number`를 보존합니다.
+결과에 보존되지 않은 HTTP 성공 코드나 응답 원문은 만들지 않습니다. [생성기 테스트](snapshot_metadata_extractors_test.go)의
+6그룹은 정확한 두 package·operation·result만 허용하고 request/result/method graph, Metadata의
+전체 `json:"metadata,omitempty"` tag, 패키지별 native 선언 6개, 누락·중복 소스를 검증합니다.
+실제 compiled graph와 다른 metadata 연산의 기존 extractor도 확인합니다. [helper 테스트](../../snapshotmetadata/extract_test.go)의
+3그룹과 [HTTP 테스트](../../../api/snapshot_metadata_results_test.go)의 6그룹은 malformed envelope,
+숫자 정밀도, 원래 오류, 옵션 소유권과 explicit Get을 검증합니다. [연산 목록](../../../api/gophercloud_inventory.json)의
+`result_policy: sdk_snapshot_metadata_object`는 이 두 결과 해석만 표시하며 Snapshot CRUD의 반환형이나
+Python의 metadata merge·cache 정책을 확장하지 않습니다.

@@ -63,4 +63,12 @@ microversion이 필요하면 연결 시 `sdk.WithMicroversion(sdk.BlockStorage, 
 
 볼륨 생성·수정·크기 변경·attachment·snapshot·backup·volume type 관리는 `service.API`의 [Block Storage v3 API](v3/README.md)에서 제공합니다. 기존 볼륨으로 서버를 부팅할 때는 [Compute의 `WithBootVolume`](../compute/README.md)을 사용하며, 볼륨 이름은 이 패키지의 `Volumes.ResolveID`로 해석합니다. 별도의 데이터 볼륨 생성·연결·분리와 상태 대기를 묶는 상위 작업은 계속 구현할 대상입니다.
 
+`service.API.Snapshots.UpdateMetadata`와 버전별 Snapshot API는 PUT 응답의 메타데이터를
+`map[string]any`로 반환합니다. 이전 `*Snapshot` 반환형은 다른 envelope를 읽어 정상 응답도
+nil로 반환하던 오류였습니다. Snapshot 전체 모델이 필요하면 `Get`을 명시적으로 호출합니다.
+숫자는 native `json.Number`로 유지하고 잘못된 metadata object는 panic 대신 오류로 처리합니다.
+native options의 nil/빈 Metadata map은 `omitempty`로 생략되며, core 필드를 extension으로
+덮어쓰는 기존 금지 정책도 유지합니다. [v2 사용법](v2/snapshots/README.md)과
+[v3 사용법](v3/snapshots/README.md)에 반환형 변경과 Python의 POST 병합·캐시 차이를 설명합니다.
+
 [blockstorage_test.go](blockstorage_test.go)는 Cinder의 실패 상태 패턴과 microversion 헤더를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.

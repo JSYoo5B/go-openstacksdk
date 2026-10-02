@@ -76,6 +76,11 @@ Security Group은 [query 17개·로컬 필드 3개](network/v2/extensions/securi
 보존하고 기존 typed Security Group을 반환합니다. SDK가 concrete native 목록의 raw query도
 처리하므로 호출자가 builder를 구현하지 않습니다.
 
+Snapshot v2/v3의 `UpdateMetadata`는 실제 `metadata` 응답을 `map[string]any`로 반환합니다.
+이전의 잘못된 Snapshot 반환형을 교정하고, 잘못된 응답은 오류로 처리합니다.
+[v2 사용법](blockstorage/v2/snapshots/README.md)과 [v3 사용법](blockstorage/v3/snapshots/README.md)에
+반환형 변경과 native PUT 교체·Python POST 병합의 차이를 설명합니다.
+
 Trunk는 [query 14개·로컬 필드 2개](network/v2/extensions/trunks/listing/README.md)를
 분류합니다. `project_id`·`sub_ports`·`status`는 서버 조건이며 `id`·`tenant_id`만 원문에서
 비교합니다. SDK가 admin state·태그 별칭과 옵션 snapshot을 처리하고 기존 이름·상태 필터와
