@@ -49,6 +49,11 @@ type Adapter[T any] struct {
 	// IdentityExtraSpecs enriches a validated, uniquely resolved resource when
 	// requested. Audited bindings own the native fetch and model snapshot.
 	IdentityExtraSpecs func(context.Context, *T) (*T, error)
+	// IdentityResponseID opts an audited binding into passive response-ID
+	// comparison for FindIdentity. Empty or URL-like values are permitted and
+	// never become request targets. Other operations retain ID and ValidateID.
+	// Nil models and callback errors remain terminal lookup errors.
+	IdentityResponseID func(*T) (string, error)
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]

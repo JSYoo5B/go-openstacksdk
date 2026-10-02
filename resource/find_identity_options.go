@@ -126,7 +126,10 @@ func cloneIdentityFindOptions(value IdentityFindOpts) IdentityFindOpts {
 	return copy
 }
 
-func parseIdentityFindOptions(options []IdentityFindOption) (IdentityFindOpts, error) {
+// PrepareIdentityFindOptions applies and snapshots the shared concrete options.
+// SDK service bindings use the result to check their capabilities before HTTP;
+// callers do not need to construct an Adapter or implement an option builder.
+func PrepareIdentityFindOptions(options ...IdentityFindOption) (IdentityFindOpts, error) {
 	value := IdentityFindOpts{Query: make(url.Values)}
 	for _, apply := range append([]IdentityFindOption(nil), options...) {
 		if apply == nil {

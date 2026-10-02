@@ -28,14 +28,14 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	fail := func(err error) (*T, error) {
 		return nil, &OperationError{Operation: "find_identity", Resource: kind, Cause: err}
 	}
-	config, err := parseIdentityFindOptions(options)
+	config, err := PrepareIdentityFindOptions(options...)
 	if err == nil {
 		err = validateIdentityFindInput(identity)
 	}
 	if err != nil {
 		return fail(err)
 	}
-	if c == nil || !c.binding.IdentityFind || c.binding.Get == nil || c.binding.ID == nil || c.binding.Name == nil {
+	if c == nil || !c.binding.IdentityFind || c.binding.Get == nil || c.binding.ID == nil && c.binding.IdentityResponseID == nil || c.binding.Name == nil {
 		return fail(ErrUnsupported)
 	}
 	if ctx == nil {
@@ -288,6 +288,9 @@ func safeIdentityFindRoute(identity string) bool {
 func (c *Collection[T]) identityFindID(value *T) (string, error) {
 	if value == nil {
 		return "", invalid("identity response must contain a resource")
+	}
+	if c.binding.IdentityResponseID != nil {
+		return c.binding.IdentityResponseID(value)
 	}
 	id := c.binding.ID(value)
 	if err := validateIdentityFindInput(id); err != nil {
