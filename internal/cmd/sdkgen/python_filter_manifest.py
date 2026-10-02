@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract audited Subnet, Secret or Container filters without importing OpenStack.
+"""Extract audited Subnet, Secret, Container or Order filters without importing OpenStack.
 
 Only Python's standard-library AST is used. The source checkout is data, never
 executed; unexpected expression shapes fail rather than becoming guessed fields.
@@ -114,12 +114,51 @@ CONTAINER_ANCHORS = (
     ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
     ("openstack/format.py", "Formatter"),
 )
+ORDER_RESOURCE = "openstack.key_manager.v1.order.Order"
+ORDER_FILES = (
+    "openstack/key_manager/v1/order.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/key_manager/v1/_proxy.py",
+    "openstack/key_manager/v1/_format.py",
+    "openstack/format.py",
+)
+ORDER_ANCHORS = (
+    ("openstack/key_manager/v1/order.py", "Order"),
+    ("openstack/resource.py", "Resource._query_mapping"),
+    ("openstack/key_manager/v1/order.py", "Order.order_id"),
+    ("openstack/key_manager/v1/order.py", "Order.secret_id"),
+    ("openstack/key_manager/v1/order.py", "Order.meta"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "Resource._alternate_id"),
+    ("openstack/resource.py", "Resource._get_id"),
+    ("openstack/resource.py", "Resource.__init__"),
+    ("openstack/resource.py", "Resource._attributes_iterator"),
+    ("openstack/resource.py", "Resource._attr_to_dict"),
+    ("openstack/resource.py", "Resource.to_dict"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/key_manager/v1/_proxy.py", "Proxy.orders"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID"),
+    ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
+    ("openstack/format.py", "Formatter"),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
                "gophercloudsdk/keymanager/v1/secrets"),
     "container": (CONTAINER_RESOURCE, CONTAINER_FILES, CONTAINER_ANCHORS,
                   "gophercloudsdk/keymanager/v1/containers"),
+    "order": (ORDER_RESOURCE, ORDER_FILES, ORDER_ANCHORS,
+              "gophercloudsdk/keymanager/v1/orders"),
 }
 
 
@@ -317,6 +356,27 @@ def keymanager_body_accessors(source, attrs, body, label, alternate_id, ref):
     body[alternate_id]["formatter"] = formatter
 
 
+def order_body_accessors(source, attrs, body):
+    """Prove two separate formatted references and the sole alternate ID."""
+    keymanager_body_accessors(source, attrs, body, "Order", "order_id", "order_ref")
+    formatter = "openstack.key_manager.v1._format.HREFToUUID"
+    if body.get("secret_id") != {"field": "secret_ref", "response_type": formatter}:
+        raise ValueError("unsupported Order secret ID formatter")
+    if body.get("secret_ref") != {"field": "secret_ref", "response_type": None}:
+        raise ValueError("unsupported Order secret reference descriptor")
+    if body.get("meta") != {"field": "meta", "response_type": "dict"}:
+        raise ValueError("unsupported Order metadata dict descriptor")
+    for name, expected in (("order_id", {"alternate_id", "type"}),
+                           ("secret_id", {"type"}), ("meta", {"type"})):
+        _, descriptor, _ = attrs[name]
+        keywords = [keyword.arg for keyword in descriptor.keywords]
+        if len(keywords) != len(expected) or set(keywords) != expected:
+            raise ValueError("unsupported Order " + name + " descriptor options")
+    # secret_id uses its own secret_ref formatter but is not the Resource ID.
+    # Keep both properties separate from the literal/full order_ref accessor.
+    body["secret_id"]["formatter"] = formatter
+
+
 def extract(root, target="subnet"):
     resource, files, anchors, sdk_package = TARGETS[target]
     source = Source(root, files)
@@ -391,6 +451,8 @@ def extract(root, target="subnet"):
         keymanager_body_accessors(source, attrs, body, "Secret", "secret_id", "secret_ref")
     elif target == "container":
         keymanager_body_accessors(source, attrs, body, "Container", "container_id", "container_ref")
+    elif target == "order":
+        order_body_accessors(source, attrs, body)
     resource_controls = control_arguments(
         source.anchor("openstack/resource.py", "Resource.list"), {"cls"}
     )
