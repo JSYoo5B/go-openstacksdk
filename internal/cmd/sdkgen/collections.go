@@ -264,6 +264,7 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 	e.printf("// Resources applies the SDK's shared lookup, missing-resource and wait policies.\nfunc(a *API)newResources()*resource.Collection[%s]{return ", plan.modelName)
 	emitCollectionAdapter(&e, plan, "a", nil)
 	e.printf("}\n")
+	emitBodyFilterList(&e, plan)
 	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
 	if identityCollectionEnabled(pkg, plan, 0) {
 		emitIdentityFind(&e, "a *API", "a.Resources", plan.modelName)

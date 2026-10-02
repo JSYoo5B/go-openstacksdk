@@ -380,31 +380,41 @@ func identityNetworkListSchema(pkg *types.Package, plan *collectionPlan) bool {
 	return !sig.Variadic() && sig.Params().Len() == 1 && types.Identical(sig.Params().At(0).Type(), types.NewInterfaceType(nil, nil).Complete()) && sig.Results().Len() == 1 && isError(sig.Results().At(0).Type())
 }
 
-// Only the audited Trunk page relies on this dependency's default continuation.
-// Imported type data does not include method bodies, so load the pinned native
-// dependency source rather than infer its wire policy from an interface.
+// Trunk relies on inherited continuation, and Subnet's raw-row Body lane
+// requires the original JSON-number-aware page body. Imported type data does
+// not include method bodies, so load only these audited dependency methods.
 func (g *generator) identityPaginationDeclarations(path string) (map[string]*ast.FuncDecl, error) {
-	if sdkPath(path) != "network/v2/extensions/trunks" {
+	wanted := map[string]bool{}
+	label := "audited Trunk identity collection"
+	switch sdkPath(path) {
+	case "network/v2/extensions/trunks":
+		wanted["LinkedPageBase.NextPageURL"] = true
+	case "network/v2/subnets":
+		label = "audited Subnet body collection"
+		wanted["PageResultFrom"] = true
+		wanted["PageResultFromParsed"] = true
+		wanted["LinkedPageBase.GetBody"] = true
+	default:
 		return nil, nil
 	}
 	source, ok := g.meta[upstreamModule+"/pagination"]
 	if !ok || source.Dir == "" || len(source.GoFiles) == 0 {
-		return nil, fmt.Errorf("audited Trunk identity collection: native pagination dependency metadata missing")
+		return nil, fmt.Errorf("%s: native pagination dependency metadata missing", label)
 	}
 	result := map[string]*ast.FuncDecl{}
 	for _, name := range source.GoFiles {
 		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(source.Dir, name), nil, 0)
 		if err != nil {
-			return nil, fmt.Errorf("audited Trunk identity collection: native pagination dependency: %w", err)
+			return nil, fmt.Errorf("%s: native pagination dependency: %w", label, err)
 		}
 		for _, decl := range file.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
-			if !ok || identityDeclarationKey(fn) != "LinkedPageBase.NextPageURL" {
+			if !ok || !wanted[identityDeclarationKey(fn)] {
 				continue
 			}
-			key := "pagination.LinkedPageBase.NextPageURL"
+			key := "pagination." + identityDeclarationKey(fn)
 			if result[key] != nil {
-				return nil, fmt.Errorf("audited Trunk identity collection: duplicate pagination continuation declaration")
+				return nil, fmt.Errorf("%s: duplicate pagination declaration %s", label, key)
 			}
 			result[key] = fn
 		}
@@ -637,7 +647,21 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"ExtractNetworks":             "5a2d1db17e38f0070dfdac235159c3aae4589cf69a4399e2f00a3bdd02a1448f",
 		"ExtractNetworksInto":         "808d8179a8b72552591dc81fbb2cd482cef8c07873a77cda7063d5af0fd2f512",
 	},
-	"network/v2/subnets":    {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "0fffec6b477ce31fc27ed1dc2ab5c205c5290d79980b3aa259b179ee7766b263"},
+	"network/v2/subnets": {
+		"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": "0fffec6b477ce31fc27ed1dc2ab5c205c5290d79980b3aa259b179ee7766b263",
+		"ListOpts.ToSubnetListQuery":        "96d27a9981d705c59461e14b7eec469cc7012495aef26aa86eb27f1ccb97725d",
+		"List":                              "3f9c6f5492912506178bf90a8099a7fc5b20449482d4f92e3bf374426ff8feb3",
+		"rootURL":                           "9065832569065787974f0229428d95df14d276dffccf043be3863252a717b09a",
+		"listURL":                           "0a55ee851552d789ddd3c12304e6d0d209cae0cfd477d71b138196681486bf9d",
+		"commonResult.Extract":              "a671ef3f1a4b74842dcc9f26e6fddae21b4346f77ea39bb927577f1bdf1bee72",
+		"Subnet.UnmarshalJSON":              "651c7cc93b57dc51a64d179755bf27c239f1186b9d930126d98c8c5f705519b5",
+		"SubnetPage.NextPageURL":            "1789418f24f1280398ccee230d5fed129fd2eda84b86cfadb7fedd0e4ccd8a2c",
+		"SubnetPage.IsEmpty":                "77be080544675db1cbf4e7916f8545b1f952d4c637187346601225cd411c5c64",
+		"ExtractSubnets":                    "4fde13ed5bc13c3f980d931bd6e58489d9a0c65d91757a1da44d19a948e63da4",
+		"pagination.PageResultFrom":         "74ab15dabe2872e7a66623f3d6d17952e69a8abed23d6612350687126b0501e9",
+		"pagination.PageResultFromParsed":   "3731e7529e8f52b6a07678931dc55380b3e04bde25aa39ef5f7420842ab49089",
+		"pagination.LinkedPageBase.GetBody": "56322265078df9600b40f7136c0280ac2db3894f7142154069c2ef7d47173284",
+	},
 	"identity/v3/projects":  {"Get": identityDefaultGetSHA, "getURL": "d5e4289c71c7a028ecb7fe6a2a47b1e4a8f6438bdaccbc17c7fe1469bc0461f6"},
 	"identity/v3/users":     {"Get": identityDefaultGetSHA, "getURL": "d3b727df4f5525b08c0dc43b6cb255bb5a6bb1b53da4c3fcbad076787334998e"},
 	"identity/v3/groups":    {"Get": identityDefaultGetSHA, "getURL": "0b7a41e86f5eb5dafbcb193d202162b4385462274178934a7ec20f7efbe9ddbe"},
@@ -822,6 +846,9 @@ func validateIdentityCollectionContracts(pkg *types.Package, decls map[string]*a
 		}
 		if spec.path == "network/v2/networks" && !identityNetworkListSchema(pkg, selected) {
 			return fmt.Errorf("audited identity collection %s.%s: native network decoder, linked pager, or extractor schema changed", spec.path, spec.model)
+		}
+		if spec.path == "network/v2/subnets" && !identitySubnetBodySchema(pkg, selected) {
+			return fmt.Errorf("audited identity collection %s.%s: native subnet model, decoder, linked pager, or extractor schema changed", spec.path, spec.model)
 		}
 		if spec.path == "network/v2/extensions/trunks" && decls["TrunkPage.NextPageURL"] != nil {
 			return fmt.Errorf("audited identity collection %s.%s: native inherited continuation override changed", spec.path, spec.model)

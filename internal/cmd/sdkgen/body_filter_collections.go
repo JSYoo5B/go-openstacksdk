@@ -14,6 +14,7 @@ type bodyFilterCollectionField struct {
 type bodyFilterCollectionSpec struct {
 	path, model string
 	fields      []bodyFilterCollectionField
+	rawRecord   bool
 }
 
 // These body-only Python filters are audited against the pinned native models.
@@ -23,9 +24,16 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", fields: []bodyFilterCollectionField{{key: "addresses", member: "Addresses"}}},
 	{path: "network/v2/extensions/subnetpools", model: "SubnetPool", fields: []bodyFilterCollectionField{{key: "prefixes", member: "Prefixes"}}},
 	{path: "network/v2/networks", model: "Network", fields: []bodyFilterCollectionField{{key: "subnets", member: "Subnets", aliases: []string{"subnet_ids"}}}},
+	{path: "network/v2/subnets", model: "Subnet", rawRecord: true, fields: subnetBodyCollectionFields()},
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == "network/v2/subnets" {
+		return subnetBodyCollectionMetadataValid(spec)
+	}
+	if spec.rawRecord {
+		return false
+	}
 	if len(spec.fields) != 1 {
 		return false
 	}
@@ -48,6 +56,8 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 
 func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
+	case "network/v2/subnets":
+		return identitySubnetBodySchema(pkg, plan)
 	case "network/v2/extensions/qos/policies", "network/v2/extensions/security/addressgroups":
 		return identityQoSAddressSchema(pkg, plan)
 	case "network/v2/extensions/subnetpools":
@@ -124,6 +134,10 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		for _, alias := range field.aliases {
 			e.printf("%q:%q,", alias, field.key)
 		}
+	}
+	if spec.rawRecord {
+		emitSubnetBodyRecordAdapter(e, plan)
+		return
 	}
 	e.printf("},\nBodyFilterValue:func(v *%s,key string)(json.RawMessage,error){\n", plan.modelName)
 	e.printf("if v==nil{return nil,fmt.Errorf(\"%%w: nil body filter resource\",resource.ErrInvalidOption)}\nswitch key{\n")

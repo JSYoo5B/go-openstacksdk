@@ -3,8 +3,10 @@ package subnets
 
 import (
 	context "context"
+	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -16,7 +18,31 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Subnet] {
 	return resource.NewCollection(resource.Adapter[Subnet]{
-		Kind:         "subnets",
+		Kind:             "subnets",
+		BodyFilterFields: map[string]string{"allocation_pools": "allocation_pools", "created_at": "created_at", "dns_nameservers": "dns_nameservers", "host_routes": "host_routes", "prefixlen": "prefixlen", "prefix_length": "prefixlen", "revision_number": "revision_number", "service_types": "service_types", "tenant_id": "tenant_id", "updated_at": "updated_at"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Subnet], key string) (json.RawMessage, error) {
+			if record == nil {
+				return nil, fmt.Errorf("%w: nil body filter record", resource.ErrInvalidOption)
+			}
+			switch key {
+			case "revision_number":
+				return resource.BodyRecordField(record.Fields, key, resource.BodyFieldInteger)
+			case "allocation_pools", "created_at", "dns_nameservers", "host_routes", "prefixlen", "service_types", "tenant_id", "updated_at":
+				return resource.BodyRecordField(record.Fields, key, resource.BodyFieldJSON)
+			default:
+				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
+			}
+		},
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Subnet], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
 		IdentityFind: true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Subnet, error) {
 			var result upstream.GetResult
@@ -39,6 +65,22 @@ func (a *API) newResources() *resource.Collection[Subnet] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Subnet], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "subnets", err)
+		return func(yield func(*resource.BodyRecord[Subnet], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Subnet, error) {
+		values, err := upstream.ExtractSubnets(page)
+		return []Subnet(values), err
+	}, "subnets", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Subnet, error) {
 	return a.Resources.Find(ctx, ref, options...)

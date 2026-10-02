@@ -29,6 +29,16 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		source = strings.ReplaceAll(source, "ExtractModels", "ExtractNetworks")
 		source += "\nfunc(*Network)UnmarshalJSON([]byte)error{return nil}\nfunc(NetworkPage)IsEmpty()(bool,error){return false,nil}\nfunc(NetworkPage)NextPageURL()(string,error){return \"\",nil}\nfunc(NetworkPage)ResourceKey()string{return \"networks\"}\nfunc ExtractNetworksInto(r pagination.Page,v any)error{return nil}\nfunc(GetResult)ExtractInto(v any)error{return nil}\n"
 	}
+	if spec.path == "network/v2/subnets" {
+		fields := "ID string `json:\"id\"`;NetworkID string `json:\"network_id\"`;Name string `json:\"name\"`;Description string `json:\"description\"`;IPVersion int `json:\"ip_version\"`;CIDR string `json:\"cidr\"`;GatewayIP string `json:\"gateway_ip\"`;DNSNameservers []string `json:\"dns_nameservers\"`;DNSPublishFixedIP bool `json:\"dns_publish_fixed_ip\"`;ServiceTypes []string `json:\"service_types\"`;AllocationPools []AllocationPool `json:\"allocation_pools\"`;HostRoutes []HostRoute `json:\"host_routes\"`;EnableDHCP bool `json:\"enable_dhcp\"`;TenantID string `json:\"tenant_id\"`;ProjectID string `json:\"project_id\"`;IPv6AddressMode string `json:\"ipv6_address_mode\"`;IPv6RAMode string `json:\"ipv6_ra_mode\"`;SubnetPoolID string `json:\"subnetpool_id\"`;Tags []string `json:\"tags\"`;RevisionNumber int `json:\"revision_number\"`;SegmentID string `json:\"segment_id\"`;CreatedAt time.Time `json:\"-\"`;UpdatedAt time.Time `json:\"-\"`"
+		source = strings.Replace(source, "type Subnet struct{ID string;Name string}", "type AllocationPool struct{Start string `json:\"start\"`;End string `json:\"end\"`}\ntype HostRoute struct{DestinationCIDR string `json:\"destination\"`;NextHop string `json:\"nexthop\"`}\ntype Subnet struct{"+fields+"}", 1)
+		source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
+		source = strings.ReplaceAll(source, "ToListQuery", "ToSubnetListQuery")
+		source = strings.ReplaceAll(source, "ModelPage", "SubnetPage")
+		source = strings.Replace(source, "type SubnetPage struct{}", "type SubnetPage struct{pagination.LinkedPageBase}", 1)
+		source = strings.ReplaceAll(source, "ExtractModels", "ExtractSubnets")
+		source += "\nfunc(*Subnet)UnmarshalJSON([]byte)error{return nil}\nfunc(SubnetPage)IsEmpty()(bool,error){return false,nil}\nfunc(SubnetPage)NextPageURL()(string,error){return \"\",nil}\n"
+	}
 	if spec.path == "image/v2/images" {
 		source = strings.Replace(source, "type Image struct{ID string;Name string}", "type Image struct{ID string;Name string;Hidden bool `json:\"os_hidden\"`}", 1)
 		source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{Name string `q:\"name\"`;Hidden bool `q:\"os_hidden\"`}", 1)
@@ -253,6 +263,8 @@ func pinnedIdentityDeclarations(t *testing.T, spec identityCollectionSpec) map[s
 	switch spec.path {
 	case "network/v2/networks":
 		return pinnedNetworkBodyIdentityDeclarations(t)
+	case "network/v2/subnets":
+		return pinnedSubnetBodyIdentityDeclarations(t)
 	case "image/v2/images":
 		return pinnedImageIdentityDeclarations(t)
 	case "compute/v2/flavors":
@@ -270,7 +282,7 @@ func deleteURL(client *gophercloud.ServiceClient, id string) string { return cli
 	case "blockstorage/v3/volumes":
 		urls = `func getURL(c *gophercloud.ServiceClient, id string) string { return deleteURL(c,id) }
 func deleteURL(c *gophercloud.ServiceClient, id string) string { return c.ServiceURL("volumes",id) }`
-	case "network/v2/ports", "network/v2/subnets":
+	case "network/v2/ports":
 		request = strings.ReplaceAll(defaultGet, "client", "c")
 		urls = fmt.Sprintf(`func getURL(c *gophercloud.ServiceClient, id string) string { return resourceURL(c,id) }
 func resourceURL(c *gophercloud.ServiceClient, id string) string { return c.ServiceURL(%q,id) }`, spec.getSegments[0])

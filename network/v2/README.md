@@ -17,6 +17,8 @@ Gophercloud v2.15.0의 network/v2 API를 하나의 인증된 서비스 객체에
 
 `QoSPolicies.Resources`의 `rules`, `SecurityAddressGroups.Resources`의 `addresses`, `SubnetPools.Resources`의 `prefixes`, `Networks.Resources`의 `subnets`는 `resource.WithBodyFilter`/`WithBodyFilters`로 로컬에서 비교합니다. SDK가 필드 선택·JSON snapshot·배열 전체 equality를 처리하며 builder나 predicate를 구현하지 않습니다. Network의 Python 이름 `subnet_ids`도 `subnets`의 SDK 별칭으로 받으며 bulk에서 두 이름을 함께 지정하면 HTTP 전에 거부합니다. 상위 `network.Service.Networks`에도 같은 필터가 연결됩니다. nil/빈 배열과 raw cap 이후 비교를 구분하고 raw wire query는 자동 분류하지 않습니다. 이 옵션은 ordinary `Resources.List/All`만 받으며 native typed List·FindIdentity와 다른 리소스는 별도입니다. [Python/Go Body 필터 비교](../../docs/listing.md#명시적인-native-body-필터)를 참고합니다.
 
+`Subnets.Resources`는 선언된 로컬 Body 필드 9개도 지원합니다. allocation pools·DNS nameservers·host routes·service types·timestamp·prefix length·tenant ID·revision number를 원본 페이지 행으로 비교하며 typed Subnet을 반환합니다. `prefix_length`는 `prefixlen`의 SDK 별칭이고 native 전체 페이지 디코드가 먼저 적용됩니다. [Subnet Python/Go 사용법](subnets/README.md)에 숫자 정밀도·누락/null·native decoder 경계를 설명합니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용

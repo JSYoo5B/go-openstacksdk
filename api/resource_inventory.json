@@ -1274,6 +1274,17 @@
     "find": true,
     "identity_find": true,
     "identity_get_query": true,
+    "body_filter_fields": [
+      "allocation_pools",
+      "created_at",
+      "dns_nameservers",
+      "host_routes",
+      "prefixlen",
+      "revision_number",
+      "service_types",
+      "tenant_id",
+      "updated_at"
+    ],
     "delete": true,
     "wait": false
   },
