@@ -25,12 +25,15 @@ const (
 	BodyFieldJSON BodyFieldType = iota
 	// BodyFieldInteger applies an audited integer response descriptor.
 	BodyFieldInteger
+	// BodyFieldBoolean applies audited response-only JSON truthiness.
+	BodyFieldBoolean
 )
 
 // BodyRecordField projects one original response field. Omission and null both
 // match a null filter; an empty string, list or object remains distinct. Integer
 // descriptors accept exact integer JSON numbers and decimal integer strings.
-// The returned bytes are independent of the record.
+// Boolean descriptors preserve null and normalize JSON truthiness without
+// changing caller filter types. The returned bytes are independent of the record.
 func BodyRecordField(fields map[string]json.RawMessage, key string, kind BodyFieldType) (json.RawMessage, error) {
 	raw, exists := fields[key]
 	if !exists {
@@ -47,6 +50,12 @@ func BodyRecordField(fields map[string]json.RawMessage, key string, kind BodyFie
 		normalized, err := jsonfilter.IntegerJSON(raw)
 		if err != nil {
 			return nil, fmt.Errorf("%w: response integer field %q: %w", ErrInvalidOption, key, err)
+		}
+		return normalized, nil
+	case BodyFieldBoolean:
+		normalized, err := jsonfilter.BooleanJSON(raw)
+		if err != nil {
+			return nil, fmt.Errorf("%w: response boolean field %q: %w", ErrInvalidOption, key, err)
 		}
 		return normalized, nil
 	default:
