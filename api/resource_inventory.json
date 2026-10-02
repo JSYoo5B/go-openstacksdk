@@ -820,7 +820,8 @@
     "model": "Task",
     "find": false,
     "delete": false,
-    "wait": true
+    "wait": true,
+    "task_wait": "WaitForTask"
   },
   {
     "package": "gophercloudsdk/keymanager/v1/acls",
