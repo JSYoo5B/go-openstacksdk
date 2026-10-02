@@ -55,3 +55,5 @@ Glance v2 Task의 `task_wait: WaitForTask`는 기존 ID-only collection의 [Task
 Glance의 [SDK import 제출](../image/v2/imageimport/README.md)은 `ImageImport.ImportImage(ctx, ref, options...)`와 이미 보유한 native Image를 받는 `ImportKnownImage`를 제공합니다. format 사전검증, method·원격 소스·root 저장소 목록과 생략/false 옵션, 확장 필드를 SDK가 조립하고 실제 202 응답을 반환합니다. 단일 저장소는 호환 헤더만 보내 복수 목록과 구분합니다. import는 Collection이 아니므로 기존 inventory의 미적용 행과 native Create/Get을 유지합니다. stage·이미지 생성·완료 대기는 별도 호출입니다.
 
 Glance의 [SDK staging](../image/v2/imagedata/README.md)은 `ImageData.StageImage(ctx, ref, data, options...)`와 `StageKnownImage`를 제공합니다. queued 사전검증·단일 바이너리 전송·후속 metadata 조회와 선택적 Size/Headers를 SDK가 처리합니다. caller Reader를 닫거나 seek하지 않으며 binary PUT의 재전송·재인증·redirect를 막습니다. 실제 PUT204 acknowledgement는 후속 조회 실패에도 남고 GET200 응답·native Image와 독립적으로 보존됩니다. 기존 native Stage/Upload/Download와 미적용 Collection inventory는 유지합니다.
+
+상위 [이미지 생성·import 흐름](../image/create-import.md)은 `conn.Image(ctx)`의 `Service.CreateAndImport`에서 사용합니다. 생성201·staging204·fresh 조회200·import202를 연결하고 remote 소스·단계별 concrete 옵션·선택적 active 대기를 제공합니다. 실제 단계 결과를 보존하는 수동 SDK 기능이며 native 연산 수와 전체 Python 지원 판정은 바꾸지 않습니다.

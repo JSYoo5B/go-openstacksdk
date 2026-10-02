@@ -1,6 +1,6 @@
 # Image
 
-Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이터 생성부터 직접 업로드까지 묶는 작업을 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
+Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이터 생성·직접 업로드·staging과 import를 묶는 작업을 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
 
 ## openstacksdk 대응
 
@@ -12,6 +12,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.delete_image(id)` | `service.Images.Delete(ctx, resource.ID(id))` |
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
+| `conn.image.create_image(..., use_import=True)` | `service.CreateAndImport(ctx, image.CreateAndImportRequest{...}, ...)`; [단계별 옵션·결과 비교](create-import.md) |
 
 조회 대상은 이미지 메타데이터이며 이미지 데이터 다운로드 자체가 아닙니다. [공식 Image API](https://docs.openstack.org/openstacksdk/latest/user/proxies/image_v2.html)
 
@@ -142,7 +143,7 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 생성·속성 수정, 데이터 업로드·다운로드, import, task, 멤버 관리는 `service.API`의 [Image v2 API](v2/README.md)에서 제공합니다. `service.API.Images`, `ImageData`, `ImageImport`, `Tasks`, `Members`에서 각 호출을 사용하며, 멤버는 `Members.InImage(ctx, ref)`로 부모 이미지를 고정할 수 있습니다. 서버 생성의 이미지 이름 해석은 이 패키지의 Find를 사용합니다.
 
-stage→import, 원격 URL import, 여러 저장소 선택, Swift task 업로드, checksum 계산·검증을 묶는 상위 작업은 아직 없습니다. 각각의 API는 위 `service.API`를 통해 사용할 수 있습니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
+`Service.CreateAndImport`는 metadata 생성·직접 staging·import 접수를 연결하고 remote URL/Glance 소스와 저장소 선택도 concrete 옵션으로 처리합니다. [생성·import 사용법](create-import.md)은 실제 단계별 접수 증거와 부분 실패, 기본값·소유권·선택적 active 대기를 설명합니다. Swift task 업로드, checksum 계산·검증, 기존 이미지 재사용과 vendor/cloud 설정의 자동 적용은 남은 비교 범위입니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
 
 [image_test.go](image_test.go)는 Glance의 envelope 없는 응답, 추가 Properties, 실패 상태를 검증합니다. [upload_test.go](upload_test.go)는 업로드 HTTP 계약과 검증·실패 정책을, [upload_retry_test.go](upload_retry_test.go)는 단일 PUT·지연된 Body.Close·현재 offset·Reader 소유권과 원인 오류 보존을 검증합니다. [서버 생성 통합 테스트](../server_create_test.go)는 Compute에서 이미지 이름을 해석하는 과정을 검증합니다.
 
