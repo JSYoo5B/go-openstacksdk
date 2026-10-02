@@ -59,6 +59,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "image/v2" {
 		out.WriteString("`Tasks.WaitForTask(ctx, resource.ID(id), options...)`는 success·failure·120초·2초 간격을 기본으로 사용합니다. 선택한 실패 상태와 정확한 396 메시지가 함께 관찰될 때만 실제 fetched type/input으로 재생성하며, 새 ID도 같은 context 시간 제한을 사용합니다. native Task Get/Create/List와 공통 상태 대기는 유지합니다. [Task 대기·재생성 사용법](tasks/README.md)에 전용 옵션·실제 응답·부분 결과와 Python cache 차이를 설명합니다.\n\n")
+		out.WriteString("`ImageImport.ImportImage(ctx, ref, options...)`는 기존 이미지의 format을 조회·검증한 뒤 기본 glance-direct import를 제출합니다. `ImportKnownImage`는 이미 보유한 native Image의 ID/format을 사용합니다. 구체적인 옵션으로 web/remote import, root 저장소 목록과 생략/false를 구분하고 실제 202 응답을 반환합니다. [Import의 Python/Go 비교](imageimport/README.md)는 단일 저장소 헤더·확장 필드·부분 실패와 별도 stage/완료 대기를 설명합니다. native Create/Get의 계약은 유지합니다.\n\n")
 	}
 	if parts[0] == "metric" {
 		out.WriteString("이 버전은 Aetos의 Prometheus API입니다. Python openstacksdk의 Gnocchi metric 서비스와 기능이 같지 않습니다.\n\n")

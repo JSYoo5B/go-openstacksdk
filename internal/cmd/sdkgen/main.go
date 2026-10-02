@@ -422,6 +422,9 @@ func (g *generator) generate(path string) error {
 	if err := validateIdentityListModeContracts(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
+	if err := g.validateGlanceImport(pkg); err != nil {
+		return err
+	}
 	names := []string{}
 	for _, name := range pkg.Scope().Names() {
 		fn, ok := pkg.Scope().Lookup(name).(*types.Func)
