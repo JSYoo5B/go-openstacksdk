@@ -151,3 +151,5 @@ stage→import, 원격 URL import, 여러 저장소 선택, Swift task 업로드
 Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는 `conn.ImageV2(ctx)`의 `Tasks`에서 기다립니다. [Task 전용 사용법](v2/tasks/README.md)은 success·failure·120초·2초 기본값, 정확한 396 오류의 재생성, 같은 시간 제한으로 새 ID 조회, 실제 응답과 부분 실패를 설명합니다. Python의 cached Task 대신 fresh ID를 받고 `tasks.WithTaskWait...` 옵션을 사용합니다. 공통 이미지 상태 대기와 import 제출은 각각 별도 호출입니다.
 
 `service.API.ImageImport.ImportImage(ctx, ref, options...)`는 기존 이미지의 ID/Name 참조를 해결하고 format을 조회한 뒤 import를 제출합니다. 이미 보유한 native Image는 `ImportKnownImage`로 조회 없이 사용할 수 있습니다. [Import 사용법](v2/imageimport/README.md)에 기본 glance-direct, web/remote 소스, 저장소 선택, 명시적 false와 실제 202 응답을 설명합니다. 결과는 접수 응답이며 이미지가 active라는 뜻은 아닙니다. 준비된 이미지의 완료 대기는 `service.API.Images.WaitForState(ctx, ref, "active", options...)`로 별도 선택합니다.
+
+`service.API.ImageData.StageImage(ctx, ref, data, options...)`는 queued 이미지를 확인하고 `io.Reader`를 한 번 전송한 뒤 최신 이미지를 조회합니다. `StageKnownImage`는 이미 보유한 native Image의 ID/status를 복사해 첫 조회를 생략합니다. [Staging 사용법](v2/imagedata/README.md)은 선택적 크기 헤더, caller의 Reader 소유권, 실제 PUT204 접수와 후속 GET200 결과·부분 실패를 설명합니다. staged 데이터의 import 제출과 active 상태 대기는 이어서 선택할 수 있습니다.
