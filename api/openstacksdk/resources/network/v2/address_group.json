@@ -1,0 +1,202 @@
+{
+  "base_path": "/address-groups",
+  "body": {
+    "addresses": {
+      "field": "addresses",
+      "response_type": "list"
+    },
+    "id": {
+      "field": "id",
+      "response_type": null
+    },
+    "tenant_id": {
+      "field": "tenant_id",
+      "response_type": null
+    }
+  },
+  "class_bases": [
+    "resource.Resource"
+  ],
+  "counts": {
+    "accepted_query": 8,
+    "canonical_query": 8,
+    "local_body": 3
+  },
+  "envelope": "address_groups",
+  "mro": [
+    "openstack.network.v2.address_group.AddressGroup",
+    "openstack.resource.Resource",
+    "builtins.dict"
+  ],
+  "proof": {
+    "ast_algorithm": "sha256(ast.dump(node, annotate_fields=True, include_attributes=False).encode(\"utf-8\"))",
+    "files": {
+      "openstack/fields.py": "dc557f53c445bb20cbc4dfddf44fb7dd4e3080f97a3bfa087b82f16f242d55cd",
+      "openstack/network/v2/_proxy.py": "e409ee081f8b9c44903a1b81a4d9f9590c59f9f947aa686f960a5171ab1a6b58",
+      "openstack/network/v2/address_group.py": "ba4bacb24761eb2b9e4dad0ac3f664e65c0ecb231b13813020cc5eac5f6ec54c",
+      "openstack/proxy.py": "1eff2aa3ff960c7086fc7f8d2722b3c7d3f72316f58b25505491319213869a46",
+      "openstack/resource.py": "a3dc108ff184cf2928513a4c1e33295b85a5e485bc30b104e5b7e030dfdeb2e0"
+    },
+    "nodes": [
+      {
+        "ast_sha256": "287e8a2e0e97200e25894a2f7019ae56d51aa1aa7ff560c01a35b77a57809a7f",
+        "end_line": 102,
+        "line": 22,
+        "source": "openstack/network/v2/address_group.py",
+        "symbol": "AddressGroup"
+      },
+      {
+        "ast_sha256": "c6b97fcec10516c896cd64ef1465174ef0705ff6323f0d0f32594a0990f7708b",
+        "end_line": 45,
+        "line": 38,
+        "source": "openstack/network/v2/address_group.py",
+        "symbol": "AddressGroup._query_mapping"
+      },
+      {
+        "ast_sha256": "4f3705ac86ebc828f07ad1c8053f5c00adf358c457243e5f4dd69e460adec3ef",
+        "end_line": 55,
+        "line": 55,
+        "source": "openstack/network/v2/address_group.py",
+        "symbol": "AddressGroup.project_id"
+      },
+      {
+        "ast_sha256": "8362cc8982ba6d47d5877d1872923606d2a3cb73b6bf172f21f2c4cb4b84b62d",
+        "end_line": 57,
+        "line": 57,
+        "source": "openstack/network/v2/address_group.py",
+        "symbol": "AddressGroup.tenant_id"
+      },
+      {
+        "ast_sha256": "9862d7dabbae045d5e2eada6c3ca784f99a748940aa827eccaa77a060b9b830d",
+        "end_line": 59,
+        "line": 59,
+        "source": "openstack/network/v2/address_group.py",
+        "symbol": "AddressGroup.addresses"
+      },
+      {
+        "ast_sha256": "dfc7c99d202a3c467327b2d4859057e49268c2156ae07226e3701ce82c4443fd",
+        "end_line": 449,
+        "line": 449,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.id"
+      },
+      {
+        "ast_sha256": "bd3bef77824d46756a3fbe4cf25a3a6b275c8524e410b5cb4c8ee4911df046cf",
+        "end_line": 452,
+        "line": 452,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.name"
+      },
+      {
+        "ast_sha256": "91b26ee6b385cc09329b02e6928a869ea5586d44e1e84868763ceb80606ab0e4",
+        "end_line": 684,
+        "line": 656,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.__getattribute__"
+      },
+      {
+        "ast_sha256": "1173ce94b0986c9f1b11e2d8b46dc673fbe1ece550da965e5ae85fed0bde9154",
+        "end_line": 299,
+        "line": 272,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters.__init__"
+      },
+      {
+        "ast_sha256": "f206c066fc5ee949936926d27df0cb346033dccf91f46cb673155f0e246cdcc2",
+        "end_line": 340,
+        "line": 301,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._validate"
+      },
+      {
+        "ast_sha256": "d514f3d47c626bc06d183504ba9bda4273eed601aaf972cf993c21be5bff2e50",
+        "end_line": 387,
+        "line": 342,
+        "source": "openstack/resource.py",
+        "symbol": "QueryParameters._transpose"
+      },
+      {
+        "ast_sha256": "87817f4adeb9404971e664155b136da2c16b9ae29b715c8b348dabac7b8cd1be",
+        "end_line": 2359,
+        "line": 2155,
+        "source": "openstack/resource.py",
+        "symbol": "Resource.list"
+      },
+      {
+        "ast_sha256": "69240cc8cc5a068ef1e13a2ce380a6abed6fdb2fde1545317b0250ebbdb42a18",
+        "end_line": 256,
+        "line": 208,
+        "source": "openstack/fields.py",
+        "symbol": "_BaseComponent.__get__"
+      },
+      {
+        "ast_sha256": "3ba05f6db1bdcebfa98d3cf997bf9ff58fa057958f63f980f85d7938acdae1aa",
+        "end_line": 136,
+        "line": 86,
+        "source": "openstack/fields.py",
+        "symbol": "_convert_type"
+      },
+      {
+        "ast_sha256": "13e21d7c05845ae309bea4901e05ee4d1b07b11a36223610e2ddc1e1f409e9f0",
+        "end_line": 916,
+        "line": 866,
+        "source": "openstack/proxy.py",
+        "symbol": "Proxy._list"
+      },
+      {
+        "ast_sha256": "42ddc64717cab89586fb84f803bfdafa60c4c893889782af85d2e91dea549f32",
+        "end_line": 407,
+        "line": 392,
+        "source": "openstack/network/v2/_proxy.py",
+        "symbol": "Proxy.address_groups"
+      }
+    ],
+    "python_parser": "3.14"
+  },
+  "query": {
+    "description": "description",
+    "fields": "fields",
+    "limit": "limit",
+    "marker": "marker",
+    "name": "name",
+    "project_id": "project_id",
+    "sort_dir": "sort_dir",
+    "sort_key": "sort_key"
+  },
+  "query_collision": "canonical_client_name_wins",
+  "query_formats": {},
+  "reserved": [
+    "allow_unknown_params",
+    "base_path",
+    "headers",
+    "jmespath_filters",
+    "max_items",
+    "microversion",
+    "paginated",
+    "resource_type",
+    "session"
+  ],
+  "resource": "openstack.network.v2.address_group.AddressGroup",
+  "schema_version": 1,
+  "sdk_package": "gophercloudsdk/network/v2/extensions/security/addressgroups",
+  "source_controls": {
+    "proxy_list": [
+      "resource_type",
+      "paginated",
+      "base_path",
+      "jmespath_filters"
+    ],
+    "resource_list": [
+      "session",
+      "paginated",
+      "base_path",
+      "allow_unknown_params",
+      "microversion",
+      "headers",
+      "max_items"
+    ]
+  },
+  "source_pin": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "unknown_filters": "discard",
+  "uri": {}
+}

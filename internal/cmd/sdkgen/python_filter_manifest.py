@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract audited Subnet, Secret, Container or Order filters without importing OpenStack.
+"""Extract audited resource filters without importing OpenStack.
 
 Only Python's standard-library AST is used. The source checkout is data, never
 executed; unexpected expression shapes fail rather than becoming guessed fields.
@@ -151,6 +151,34 @@ ORDER_ANCHORS = (
     ("openstack/key_manager/v1/_format.py", "HREFToUUID.deserialize"),
     ("openstack/format.py", "Formatter"),
 )
+ADDRESS_GROUP_RESOURCE = "openstack.network.v2.address_group.AddressGroup"
+ADDRESS_GROUP_FILES = (
+    "openstack/network/v2/address_group.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/network/v2/_proxy.py",
+)
+ADDRESS_GROUP_ANCHORS = (
+    ("openstack/network/v2/address_group.py", "AddressGroup"),
+    ("openstack/network/v2/address_group.py", "AddressGroup._query_mapping"),
+    # Descriptor aliases do not add query keys. Keep the deprecated local
+    # tenant_id property separate from the queried project_id property.
+    ("openstack/network/v2/address_group.py", "AddressGroup.project_id"),
+    ("openstack/network/v2/address_group.py", "AddressGroup.tenant_id"),
+    ("openstack/network/v2/address_group.py", "AddressGroup.addresses"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/network/v2/_proxy.py", "Proxy.address_groups"),
+)
 TARGETS = {
     "subnet": (RESOURCE, FILES, ANCHORS, "gophercloudsdk/network/v2/subnets"),
     "secret": (SECRET_RESOURCE, SECRET_FILES, SECRET_ANCHORS,
@@ -159,6 +187,9 @@ TARGETS = {
                   "gophercloudsdk/keymanager/v1/containers"),
     "order": (ORDER_RESOURCE, ORDER_FILES, ORDER_ANCHORS,
               "gophercloudsdk/keymanager/v1/orders"),
+    "address_group": (ADDRESS_GROUP_RESOURCE, ADDRESS_GROUP_FILES,
+                      ADDRESS_GROUP_ANCHORS,
+                      "gophercloudsdk/network/v2/extensions/security/addressgroups"),
 }
 
 
