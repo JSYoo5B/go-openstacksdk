@@ -39,6 +39,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `resource/wait_policy_test.go`, `resource/wait_attributes_test.go` | 실패 상태 교체·빈 목록·목표 우선, 무제한/유한 대기와 부모 context, 모델 JSON tag·pointer·null·progress 순서, terminal callback 생략·callback 취소·deleted/nil 결과 |
 | `api/wait_workflow_preflight_test.go`, `api/introspection_wait_options_test.go` | 잘못된 대기 속성을 생성·업로드 전에 차단, Inspector의 Finished 고정 조건과 서비스 오류 보존 |
 | `resource/collection_test.go` | 잘못된 참조와 iterator 옵션을 HTTP 요청 전에 거부 |
+| `resource/filters_test.go`, `api/network_subnet_semantic_filters_test.go` | Subnet query24/accepted30·Body9 자동 분류, bulk canonical nil/false/empty·최종 선택값 검증·snapshot/동시 재사용, unknown/reserved·namespace 충돌/clear·server-only name, raw/native isolation·cap/terminal 페이지 오류 |
+| `internal/cmd/sdkgen/python_filters_test.go` | 고정 Python SHA7·isolated AST/C3/inherited 선언 재추출·15개 AST proof·전체 manifest drift 거부, native raw Body gate·Subnet-only 생성 및 inventory |
 | `resource/pagination_test.go`, `api/pagination_contracts_test.go` | linked URL·query 순서·Swift marker 순환 중단, 오류 한 번 전달, break 시 후속 링크 검사 생략 |
 | `internal/cmd/paritycheck/reviews_test.go` | catalog 추가 시 기존 판정 보존, 원본 입력 drift 거부, API·테스트·문서 근거, 중복 ID/JSON key와 불완전 지원 판정 거부 |
 | `api/server_tags_contracts_test.go` | 서버 1회 해석, 2.26 요구, tag escaping, nil/빈 교체·명시 false·404 정책과 원래 HTTP 오류 |

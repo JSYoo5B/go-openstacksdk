@@ -19,6 +19,8 @@ Gophercloud v2.15.0의 network/v2 API를 하나의 인증된 서비스 객체에
 
 `Subnets.Resources`는 선언된 로컬 Body 필드 9개도 지원합니다. allocation pools·DNS nameservers·host routes·service types·timestamp·prefix length·tenant ID·revision number를 원본 페이지 행으로 비교하며 typed Subnet을 반환합니다. `prefix_length`는 `prefixlen`의 SDK 별칭이고 native 전체 페이지 디코드가 먼저 적용됩니다. [Subnet Python/Go 사용법](subnets/README.md)에 숫자 정밀도·누락/null·native decoder 경계를 설명합니다.
 
+`Subnets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python 속성 이름을 서버 query 24개 또는 로컬 Body 9개로 자동 분류합니다. query의 wire 별칭을 포함한 30개 이름, bulk canonical 우선·최종값 검증·semantic 전체 교체/clear·JSON snapshot을 SDK가 처리합니다. raw query·명시 Body·page/name hint와 같은 target을 지정하면 HTTP 전에 오류이며, 알 수 없는 semantic 이름은 버립니다. 현재 이 분류는 Subnet에 연결되어 있고 [고정 Python AST manifest](../../api/openstacksdk/resources/network/v2/subnet.json)의 현재 소스 검증을 통과해야 생성됩니다. 전체 Resource/cache·상속 continuation/session·Proxy conflicting attrs·JMESPath 조건은 별도입니다. [Subnet 사용법](subnets/README.md)을 참고하세요.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용

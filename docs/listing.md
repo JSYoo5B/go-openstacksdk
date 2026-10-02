@@ -248,11 +248,41 @@ QoS `Rules`는 native `map[string]any`의 float64 decoding을
 Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 제공한 것으로 확대하지
 않습니다. 다른 리소스의 필드도 별도 source 감사를 거쳐 연결합니다.
 
+### Subnet의 속성 이름 분류
+
+`Subnets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python
+`conn.network.subnets(**query)`처럼 속성 이름을 받아 서버 query와 로컬 Body로 나눕니다.
+query 24개의 canonical/wire 이름 30개와 non-query Body 속성 9개 전체를 고정 Python
+소스에서 추출합니다. `is_dhcp_enabled`→`enable_dhcp`, `any_tags`→`tags-any` 같은 query
+별칭은 변환하며 `tenant_id`·`revision_number`는 로컬 비교입니다. `name`·`id`·`tags`는
+서버 query만 지정합니다. 다른 binding은 아직 이 분류를 지원하지 않습니다.
+
+개별 조건은 마지막 target 값이 이깁니다. bulk map에서는 canonical query 이름이 wire
+별칭보다 우선하며 nil·false·빈 배열도 지정한 값입니다. bulk는 semantic 전체 교체이고
+nil/빈 map은 semantic만 clear합니다. 최종 선택값만 검증하므로 제거된 조건의 encoding
+오류도 제거됩니다. 옵션은 생성 시 JSON snapshot을 만들며 알 수 없는 이름은 버립니다.
+전용 로컬 제어 이름과 지원하지 않는 Python list controls는 field 값으로 사용하지 않습니다.
+
+Go query encoding은 scalar와 scalar 배열을 받으며 배열은 반복 key, bool은 소문자,
+JSON number는 원래 정밀도/표기, null은 URL 생략으로 처리합니다. nil/빈 배열의 key 존재는
+충돌 검사에 유지됩니다. 객체/중첩 배열 query는 HTTP 전에 오류입니다. 같은 key의 raw query,
+`WithPageSize` 또는 `WithName` query hint와 겹치거나 같은 Body 필드의 명시 조건과 겹치면
+`ErrInvalidOption`입니다. raw query와 명시 Body 조건은 semantic clear로 지워지지 않습니다.
+
+[Subnet 사용법](../network/v2/subnets/README.md)에 전체 이름·reserved controls·Python/Go
+예제가 있으며 [HTTP 7개 그룹](../api/network_subnet_semantic_filters_test.go)과
+[공통 6개 그룹](../resource/filters_test.go)에서 분류·최종값·snapshot·충돌·페이지를 검증합니다.
+[AST manifest](../api/openstacksdk/resources/network/v2/subnet.json)는
+[생성기](../internal/cmd/sdkgen/README.md)가 현재 소스 SHA와 재추출 결과를 확인합니다.
+전체 Resource descriptor/coercion/cache·상속 continuation/session·Proxy `__conflicting_attrs`
+복구·deprecated JMESPath 조건은 별도 비교 범위로 남습니다.
+
 ### Subnet의 원본 응답 필터
 
 Python `conn.network.subnets(prefix_length=24, dns_nameservers=["192.0.2.53"])`에 대응하는
 Go 호출은 [Subnet README](../network/v2/subnets/README.md)에 있습니다. 다음 9개는 Python의
-query mapping에 포함되지 않은 Body 속성이며, Go는 명시적인 `WithBodyFilter(s)`로 선택합니다.
+query mapping에 포함되지 않은 Body 속성입니다. Go는 `WithFilter(s)`로 자동 분류하거나
+명시적인 `WithBodyFilter(s)`로 선택합니다.
 
 | Python 로컬 속성 | Go canonical 필드 | 비교하는 응답 값 |
 |---|---|---|

@@ -92,7 +92,11 @@ SDK가 field 선택과 옵션 복사를 처리하므로 별도 predicate는 필�
 `service.API.Subnets.Resources`는 allocation pools·DNS nameservers·host routes·service types·
 두 timestamp·prefix length·tenant ID·revision number의 9개 로컬 필터도 제공합니다.
 native 모델이 생략하는 `prefixlen`과 nested 추가 필드는 원본 페이지에서 비교하며,
-반환값은 기존 typed Subnet입니다. [Subnet Python/Go 사용법](v2/subnets/README.md)을 참고하세요.
+반환값은 기존 typed Subnet입니다. `resource.WithFilter`/`WithFilters`는 Python 속성 이름을
+받아 query 24개와 로컬 Body 9개로 자동 분류합니다. 예를 들어 `is_dhcp_enabled`는
+`enable_dhcp` query이고 `prefix_length`는 원본 `prefixlen`의 로컬 비교입니다.
+현재 이 semantic 분류는 Subnet에 연결되어 있습니다.
+[Subnet Python/Go 사용법](v2/subnets/README.md)에 bulk 교체·별칭 우선순위·충돌 검사를 설명합니다.
 
 ## 삭제와 대기
 
