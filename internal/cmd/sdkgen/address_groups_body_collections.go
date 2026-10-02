@@ -93,6 +93,10 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 	label := "audited AddressGroup body collection"
 	switch sdkPath(path) {
 	case addressGroupSDKPath:
+	case securityGroupSDKPath:
+		label = "audited SecurityGroup body collection"
+		wanted["BuildQueryString"] = true
+		wanted["JSONRFC3339NoZ.UnmarshalJSON"] = true
 	case routerSDKPath:
 		label = "audited Router body collection"
 		for _, name := range []string{"JSONRFC3339NoZ.UnmarshalJSON", "Result.ExtractIntoSlicePtr", "Result.extractIntoPtr"} {
@@ -124,7 +128,7 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 		if err != nil {
 			return nil, fmt.Errorf("%s: native extraction dependency: %w", label, err)
 		}
-		if sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath {
+		if sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath || sdkPath(path) == securityGroupSDKPath {
 			// Count declarations before the convenience map can collapse
 			// repeated names in a source file.
 			for _, declaration := range file.Decls {
@@ -164,7 +168,7 @@ func (g *generator) bodyRecordRootDeclarations(path string) (map[string]*ast.Fun
 	if len(result) != len(wanted) {
 		return nil, fmt.Errorf("%s: native extraction declarations missing", label)
 	}
-	if (sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath) && noZConstants != 1 {
+	if (sdkPath(path) == subnetPoolSDKPath || sdkPath(path) == networkSDKPath || sdkPath(path) == routerSDKPath || sdkPath(path) == securityGroupSDKPath) && noZConstants != 1 {
 		return nil, fmt.Errorf("%s: native RFC3339NoZ constant missing or duplicated", label)
 	}
 	return result, nil

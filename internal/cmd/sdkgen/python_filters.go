@@ -179,6 +179,15 @@ func loadPythonFilterManifest(root, source string) (*pythonFilterManifest, error
 }
 
 func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectionPlan) error {
+	if sdkPath(pkg.Path()) == securityGroupSDKPath {
+		if !securityGroupPythonFilterMetadataValid(g.securityGroupPythonFilters) {
+			return fmt.Errorf("audited SecurityGroup semantic filter source proof was not verified")
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); !ok {
+			return fmt.Errorf("audited SecurityGroup semantic filters require the full native raw Body contract")
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) == routerSDKPath {
 		if !routerPythonFilterMetadataValid(g.routerPythonFilters) {
 			return fmt.Errorf("audited Router semantic filter source proof was not verified")
@@ -264,6 +273,15 @@ func (g *generator) validatePythonFilterPlan(pkg *types.Package, plan *collectio
 }
 
 func (g *generator) pythonFilterFor(pkg *types.Package, plan *collectionPlan) *pythonFilterManifest {
+	if sdkPath(pkg.Path()) == securityGroupSDKPath {
+		if !securityGroupPythonFilterMetadataValid(g.securityGroupPythonFilters) {
+			return nil
+		}
+		if _, ok := bodyFilterCollectionContract(pkg, plan, 0); ok {
+			return g.securityGroupPythonFilters
+		}
+		return nil
+	}
 	if sdkPath(pkg.Path()) == routerSDKPath {
 		if !routerPythonFilterMetadataValid(g.routerPythonFilters) {
 			return nil

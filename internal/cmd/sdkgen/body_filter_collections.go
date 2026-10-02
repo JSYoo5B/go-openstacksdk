@@ -19,6 +19,7 @@ type bodyFilterCollectionSpec struct {
 // These body-only Python filters are audited against the pinned native models.
 // Other body fields and native collections remain unsupported until reviewed.
 var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
+	{path: securityGroupSDKPath, model: "SecGroup", rawRecord: true, fields: securityGroupBodyCollectionFields()},
 	{path: routerSDKPath, model: "Router", rawRecord: true, fields: routerBodyCollectionFields()},
 	{path: qosPolicySDKPath, model: "Policy", rawRecord: true, fields: qosPolicyBodyCollectionFields()},
 	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", rawRecord: true, fields: addressGroupBodyCollectionFields()},
@@ -31,6 +32,9 @@ var bodyFilterCollectionSpecs = []bodyFilterCollectionSpec{
 }
 
 func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
+	if spec.path == securityGroupSDKPath {
+		return securityGroupBodyCollectionMetadataValid(spec)
+	}
 	if spec.path == routerSDKPath {
 		return routerBodyCollectionMetadataValid(spec)
 	}
@@ -79,6 +83,8 @@ func bodyFilterCollectionMetadataValid(spec bodyFilterCollectionSpec) bool {
 
 func bodyFilterCollectionNativeSchema(pkg *types.Package, plan *collectionPlan, spec bodyFilterCollectionSpec) bool {
 	switch spec.path {
+	case securityGroupSDKPath:
+		return securityGroupBodyNativeSchema(pkg, plan)
 	case routerSDKPath:
 		return routerBodyNativeSchema(pkg, plan)
 	case "keymanager/v1/orders":
@@ -153,7 +159,9 @@ func emitBodyFilterCollection(e *emitter, plan *collectionPlan, parents int) {
 		}
 	}
 	if spec.rawRecord {
-		if spec.path == routerSDKPath {
+		if spec.path == securityGroupSDKPath {
+			emitSecurityGroupBodyRecordAdapter(e, plan)
+		} else if spec.path == routerSDKPath {
 			emitRouterBodyRecordAdapter(e, plan)
 		} else if spec.path == networkSDKPath {
 			emitNetworkBodyRecordAdapter(e, plan)
