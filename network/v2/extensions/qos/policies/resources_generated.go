@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/qos/policies"
+	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	nativefind "gophercloudsdk/internal/nativefind"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
@@ -18,19 +19,22 @@ import (
 func (a *API) newResources() *resource.Collection[Policy] {
 	return resource.NewCollection(resource.Adapter[Policy]{
 		Kind:             "policies",
-		BodyFilterFields: map[string]string{"rules": "rules"},
-		BodyFilterValue: func(v *Policy, key string) (json.RawMessage, error) {
-			if v == nil {
-				return nil, fmt.Errorf("%w: nil body filter resource", resource.ErrInvalidOption)
-			}
-			switch key {
-			case "rules":
-				return json.Marshal(v.Rules)
-			default:
-				return nil, fmt.Errorf("%w: unsupported body filter field %q", resource.ErrInvalidOption, key)
-			}
+		BodyFilterFields: map[string]string{"rules": "rules", "tenant_id": "tenant_id"},
+		BodyFilterRecordValue: func(record *resource.BodyRecord[Policy], key string) (json.RawMessage, error) {
+			return qosPolicyBodyFilterValue(record, key)
 		},
-		IdentityFind: true,
+		IterateBodyControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*resource.BodyRecord[Policy], error] {
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
+				}
+				return nil
+			}}
+			return a.listBodyWithControl(ctx, control, options...)
+		},
+		FilterDescriptor: &resource.FilterDescriptor{Query: map[string]string{"any_tags": "tags-any", "description": "description", "fields": "fields", "id": "id", "is_default": "is_default", "is_shared": "shared", "limit": "limit", "marker": "marker", "name": "name", "not_any_tags": "not-tags-any", "not_tags": "not-tags", "project_id": "project_id", "sort_dir": "sort_dir", "sort_key": "sort_key", "tags": "tags"}, Body: map[string]string{"rules": "rules", "tenant_id": "tenant_id"}, Reserved: []string{"allow_unknown_params", "base_path", "headers", "jmespath_filters", "max_items", "microversion", "paginated", "resource_type", "session"}},
+		IdentityFind:     true,
 		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Policy, error) {
 			var result upstream.GetResult
 			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"qos", "policies", id}, q, []int{200}, &result.Body)
@@ -52,6 +56,22 @@ func (a *API) newResources() *resource.Collection[Policy] {
 			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
+}
+func (a *API) listBodyWithControl(ctx context.Context, control resource.ListControl, options ...ListOption) iter.Seq2[*resource.BodyRecord[Policy], error] {
+	var opts ListOpts
+	cfg, err := request.Apply(opts, options...)
+	if err == nil {
+		err = request.ValidateCapabilities(cfg, false, true, false)
+	}
+	if err != nil {
+		err = request.Wrap("List", "policies", err)
+		return func(yield func(*resource.BodyRecord[Policy], error) bool) { yield(nil, err) }
+	}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	return resource.BodyStreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Policy, error) {
+		values, err := upstream.ExtractPolicies(page)
+		return []Policy(values), err
+	}, "policies", control)
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Policy, error) {
 	return a.Resources.Find(ctx, ref, options...)
