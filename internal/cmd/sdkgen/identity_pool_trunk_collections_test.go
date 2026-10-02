@@ -477,7 +477,7 @@ func TestIdentityTrunkInheritedContinuationDependencyIsNarrowAndPinned(t *testin
 		t.Fatal("new native LinkPath policy ignored", err)
 	}
 	empty := generator{meta: map[string]metadata{}}
-	for _, path := range []string{upstreamModule + "/openstack/networking/v2/extensions/subnetpools", upstreamModule + "/openstack/compute/v2/servers"} {
+	for _, path := range []string{upstreamModule + "/openstack/compute/v2/servers"} {
 		result, err := empty.identityPaginationDeclarations(path)
 		if err != nil || len(result) != 0 {
 			t.Fatal("dependency guard leaked to unrelated native pagers", path, result, err)

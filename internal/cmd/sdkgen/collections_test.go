@@ -66,6 +66,14 @@ func typedCollectionFixture(t *testing.T, packagePath, source string) (*types.Pa
 	times := types.NewPackage("time", "time")
 	times.Scope().Insert(types.NewTypeName(token.NoPos, times, "Time", types.NewNamed(types.NewTypeName(token.NoPos, times, "Time", nil), types.NewStruct(nil, nil), nil)))
 	times.MarkComplete()
+	// Audited SubnetPool decoder dependency: a named time.Time wrapper with
+	// its sole pointer JSON decoder, without tying fixtures to private Time fields.
+	noZ := types.NewNamed(types.NewTypeName(token.NoPos, cloud, "JSONRFC3339NoZ", nil), times.Scope().Lookup("Time").Type().Underlying(), nil)
+	noZ.AddMethod(types.NewFunc(token.NoPos, cloud, "UnmarshalJSON", types.NewSignatureType(types.NewVar(token.NoPos, cloud, "jt", types.NewPointer(noZ)), nil, nil, types.NewTuple(types.NewVar(token.NoPos, cloud, "data", types.NewSlice(types.Typ[types.Uint8]))), types.NewTuple(types.NewVar(token.NoPos, cloud, "", types.Universe.Lookup("error").Type())), false)))
+	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "JSONRFC3339NoZ", noZ))
+	result := types.NewNamed(types.NewTypeName(token.NoPos, cloud, "Result", nil), types.NewStruct([]*types.Var{types.NewField(token.NoPos, cloud, "Body", types.NewInterfaceType(nil, nil).Complete(), false), types.NewField(token.NoPos, cloud, "StatusCode", types.Typ[types.Int], false), types.NewField(token.NoPos, cloud, "Header", http.Scope().Lookup("Header").Type(), false), types.NewField(token.NoPos, cloud, "Err", types.Universe.Lookup("error").Type(), false)}, nil), nil)
+	cloud.Scope().Insert(types.NewTypeName(token.NoPos, cloud, "Result", result))
+	cloud.SetImports([]*types.Package{times})
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, "fixture.go", source, 0)
 	if err != nil {

@@ -118,12 +118,23 @@ func TestBodyFilterCollectionGateRejectsNativeShapeAndUnauditedFields(t *testing
 		}
 		base := identityQueryFixtureSource(identity)
 		field := spec.fields[0]
+		if identity.model == "SubnetPool" {
+			// Its first selector is a timestamp decoded through a json:"-"
+			// field; mutate a direct native JSON field instead.
+			for _, candidate := range spec.fields {
+				if candidate.key == "prefixes" {
+					field = candidate
+				}
+			}
+		}
 		mutations := map[string]string{
 			"wire field tag":         strings.Replace(base, `json:"`+field.key+`"`, `json:"different_body_key"`, 1),
 			"missing selected field": strings.Replace(base, field.member+" ", "OtherField ", 1),
 		}
 		if identity.model == "Policy" {
 			mutations["numeric rule decoder"] = strings.Replace(base, "Rules []map[string]any", "Rules []map[string]float64", 1)
+		} else if identity.model == "SubnetPool" {
+			mutations["arbitrary array decoder"] = strings.Replace(base, "Prefixes []string", "Prefixes []any", 1)
 		} else if identity.model == "Subnet" {
 			mutations["arbitrary array decoder"] = strings.Replace(base, "AllocationPools []AllocationPool", "AllocationPools []any", 1)
 		} else {
@@ -278,11 +289,13 @@ func TestBodyFilterCollectionSelectorsMarshalOnlyTheSelectedNativeField(t *testi
 				}
 			}
 			if spec.rawRecord {
-				if identity.model == "AddressGroup" || identity.model == "Policy" {
+				if identity.model == "AddressGroup" || identity.model == "Policy" || identity.model == "SubnetPool" {
 					body := string(source)
 					selector, envelope, extractor, kind := "addressGroupBodyFilterValue", "address_groups", "ExtractGroups", "addressgroups"
 					if identity.model == "Policy" {
 						selector, envelope, extractor, kind = "qosPolicyBodyFilterValue", "policies", "ExtractPolicies", "policies"
+					} else if identity.model == "SubnetPool" {
+						selector, envelope, extractor, kind = "subnetPoolBodyFilterValue", "subnetpools", "ExtractSubnetPools", "subnetpools"
 					}
 					for _, required := range []string{"BodyFilterRecordValue:", selector + "(record, key)", "IterateBodyControlled:", "config.Query[key] = append([]string(nil), values...)", "return a.listBodyWithControl(ctx, control, options...)", `"` + envelope + `", control)`, "upstream." + extractor + "(page)"} {
 						if !strings.Contains(body, required) {

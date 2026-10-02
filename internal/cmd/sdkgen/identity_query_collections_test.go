@@ -76,7 +76,14 @@ func identityQueryFixtureSource(spec identityCollectionSpec) string {
 		if spec.model == "Trunk" {
 			page, extract = "TrunkPage", "ExtractTrunks"
 		} else {
-			source = strings.Replace(source, "type SubnetPool struct{ID string;Name string}", "type SubnetPool struct{ID string;Name string;DefaultPrefixLen int `json:\"-\"`;MinPrefixLen int `json:\"-\"`;MaxPrefixLen int `json:\"-\"`;Prefixes []string `json:\"prefixes\"`}", 1)
+			source = strings.Replace(source, "type SubnetPool struct{ID string;Name string}", "type SubnetPool struct{ID string `json:\"id\"`;Name string `json:\"name\"`;DefaultQuota int `json:\"default_quota\"`;TenantID string `json:\"tenant_id\"`;ProjectID string `json:\"project_id\"`;CreatedAt time.Time `json:\"-\"`;UpdatedAt time.Time `json:\"-\"`;Prefixes []string `json:\"prefixes\"`;DefaultPrefixLen int `json:\"-\"`;MinPrefixLen int `json:\"-\"`;MaxPrefixLen int `json:\"-\"`;AddressScopeID string `json:\"address_scope_id\"`;IPversion int `json:\"ip_version\"`;Shared bool `json:\"shared\"`;Description string `json:\"description\"`;IsDefault bool `json:\"is_default\"`;RevisionNumber int `json:\"revision_number\"`;Tags []string `json:\"tags\"`}", 1)
+			source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
+			source = strings.Replace(source, "type ListOpts struct{Name string `q:\"name\"`}", "type ListOpts struct{ID string `q:\"id\"`;Name string `q:\"name\"`;DefaultQuota int `q:\"default_quota\"`;TenantID string `q:\"tenant_id\"`;ProjectID string `q:\"project_id\"`;DefaultPrefixLen int `q:\"default_prefixlen\"`;MinPrefixLen int `q:\"min_prefixlen\"`;MaxPrefixLen int `q:\"max_prefixlen\"`;AddressScopeID string `q:\"address_scope_id\"`;IPVersion int `q:\"ip_version\"`;Shared *bool `q:\"shared\"`;Description string `q:\"description\"`;IsDefault *bool `q:\"is_default\"`;Limit int `q:\"limit\"`;Marker string `q:\"marker\"`;SortKey string `q:\"sort_key\"`;SortDir string `q:\"sort_dir\"`;Tags string `q:\"tags\"`;TagsAny string `q:\"tags-any\"`;NotTags string `q:\"not-tags\"`;NotTagsAny string `q:\"not-tags-any\"`;RevisionNumber int `q:\"revision_number\"`}", 1)
+			source = strings.ReplaceAll(source, "ToListQuery", "ToSubnetPoolListQuery")
+			source = strings.Replace(source, "type GetResult struct{Body any;Header http.Header;Err error}", "type commonResult struct{gophercloud.Result}\ntype GetResult struct{commonResult}", 1)
+			source = strings.Replace(source, "func(GetResult)Extract()(*SubnetPool,error)", "func(commonResult)Extract()(*SubnetPool,error)", 1)
+			source = strings.Replace(source, "import \"net/http\"\n", "", 1)
+			source += "\nfunc(*SubnetPool)UnmarshalJSON([]byte)error{return nil}\n"
 		}
 		source = strings.ReplaceAll(source, "ModelPage", page)
 		source = strings.Replace(source, "type "+page+" struct{}", "type "+page+" struct{pagination.LinkedPageBase}", 1)
