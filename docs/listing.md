@@ -255,7 +255,7 @@ Python descriptor/default/alias/coercion과 자동 query/Body 분류 전체를 �
 query 24개의 canonical/wire 이름 30개와 non-query Body 속성 9개 전체를 고정 Python
 소스에서 추출합니다. `is_dhcp_enabled`→`enable_dhcp`, `any_tags`→`tags-any` 같은 query
 별칭은 변환하며 `tenant_id`·`revision_number`는 로컬 비교입니다. `name`·`id`·`tags`는
-서버 query만 지정합니다. 다른 binding은 아직 이 분류를 지원하지 않습니다.
+서버 query만 지정합니다. Secret에도 아래의 별도 속성 분류가 연결되어 있습니다.
 
 개별 조건은 마지막 target 값이 이깁니다. bulk map에서는 canonical query 이름이 wire
 별칭보다 우선하며 nil·false·빈 배열도 지정한 값입니다. bulk는 semantic 전체 교체이고
@@ -276,6 +276,22 @@ JSON number는 원래 정밀도/표기, null은 URL 생략으로 처리합니다
 [생성기](../internal/cmd/sdkgen/README.md)가 현재 소스 SHA와 재추출 결과를 확인합니다.
 전체 Resource descriptor/coercion/cache·상속 continuation/session·Proxy `__conflicting_attrs`
 복구·deprecated JMESPath 조건은 별도 비교 범위로 남습니다.
+
+### Secret의 속성 이름 분류
+
+`Secrets.Resources.List/All`은 Python `conn.key_manager.secrets(**query)`의
+query 12개와 로컬 Body 속성 12개를 `WithFilter`/`WithFilters`로 분류합니다.
+`algorithm`은 `alg`로 보내고 wire 이름도 받습니다. `bits`·`created`·`updated`·
+`expiration`은 서버 조건이며 `bit_length`·`created_at`·`updated_at`·`expires_at`은
+원본 행을 비교합니다. `id`는 literal id의 존재를 우선하고 없을 때 전체 secret_ref를
+사용합니다. `secret_id`는 별도의 HREF accessor로 마지막 path 부분을 비교하므로 두
+조건을 하나로 합치지 않습니다. 반복 query 값·bulk canonical 우선·snapshot·충돌과
+clear 규칙은 위의 공통 semantic 옵션 정책을 따릅니다.
+
+[Secret 목록 사용법](../keymanager/v1/secrets/listing/README.md)에 전체 이름,
+native 전체 페이지 디코드와 원문 비교의 순서, JSON 타입 및 pagination의 Python/Go
+차이를 설명합니다. [Secret AST manifest](../api/openstacksdk/resources/key_manager/v1/secret.json)는
+생성 시 현재 고정 소스의 checksum과 독립 AST 재추출 결과를 확인합니다.
 
 ### Subnet의 원본 응답 필터
 
