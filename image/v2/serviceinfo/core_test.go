@@ -115,17 +115,17 @@ func TestServiceInfoCoreCanonicalAndNullableDecoding(t *testing.T) {
 	}
 }
 
-func TestServiceInfoCorePagingUsesRawIDsAndStopsAtControls(t *testing.T) {
+func TestServiceInfoCorePagingUsesAdvertisedLinksAndStopsAtControls(t *testing.T) {
 	var requests int
 	client := infoClient(func(req *http.Request) (*http.Response, error) {
 		requests++
 		if req.URL.Path != "/reverse/glance/v2/info/stores/detail" || req.URL.Query().Get("limit") != "2" || req.URL.Query().Get("filter") != "a & b" {
 			t.Fatal("paging route or query changed", req.URL)
 		}
-		body := `{"stores":[{"id":"raw /?% 中文"}]}`
+		body := `{"stores":[{"id":"raw /?% 中文"}],"next":"?marker=advertised"}`
 		if requests == 2 {
-			if req.URL.Query().Get("marker") != "raw /?% 中文" {
-				t.Fatal("caller-mutated ID became marker", req.URL)
+			if req.URL.Query().Get("marker") != "advertised" {
+				t.Fatal("caller-mutated ID replaced advertised cursor", req.URL)
 			}
 			body = `{"stores":[],"next":"https://foreign.test/ignored"}`
 		}
@@ -139,22 +139,56 @@ func TestServiceInfoCorePagingUsesRawIDsAndStopsAtControls(t *testing.T) {
 		value.Body["id"] = json.RawMessage(`"other caller mutation"`)
 	}
 	if requests != 2 {
-		t.Fatal("short-page marker fallback lost", requests)
+		t.Fatal("advertised continuation lost", requests)
 	}
-	for _, option := range []ListStoresOption{WithListStoresMaxItems(1), WithListStoresPaginated(false)} {
+	for _, test := range []struct {
+		option ListStoresOption
+		body   string
+	}{
+		{WithListStoresMaxItems(1), `{"stores":[{"id":"one"},{"id":5}],"next":"https://foreign.test/unused"}`},
+		{WithListStoresPaginated(false), `{"stores":[{"id":"one"}],"next":"https://foreign.test/unused"}`},
+	} {
 		requests = 0
 		client = infoClient(func(req *http.Request) (*http.Response, error) {
 			requests++
-			body := `{"stores":[{"id":"one"}],"next":"https://foreign.test/unused"}`
-			if req.URL.Query().Get("limit") == "1" {
-				body = `{"stores":[{"id":"one"},{"id":5}],"next":"https://foreign.test/unused"}`
+			if req.URL.Query().Has("limit") {
+				t.Fatal("local control generated wire limit", req.URL)
 			}
-			return infoResponse(req, io.NopCloser(strings.NewReader(body))), nil
+			return infoResponse(req, io.NopCloser(strings.NewReader(test.body))), nil
 		})
-		values, err := New(client).AllStores(context.Background(), option)
+		values, err := New(client).AllStores(context.Background(), test.option)
 		if err != nil || len(values) != 1 || requests != 1 {
 			t.Fatalf("cap/first-page control failed: values=%+v err=%v requests=%d", values, err, requests)
 		}
+	}
+}
+
+func TestServiceInfoCoreServerIgnoresPaginationQueries(t *testing.T) {
+	for _, test := range []struct {
+		name, path, limit, marker string
+		options                   []ListStoresOption
+	}{
+		{"local cap three", "/info/stores", "", "", []ListStoresOption{WithListStoresMaxItems(3)}},
+		{"local cap twenty detail", "/info/stores/detail", "", "", []ListStoresOption{WithListStoresDetails(true), WithListStoresMaxItems(20)}},
+		{"explicit typed inputs", "/info/stores", "1", "start", []ListStoresOption{WithListStoresOptions(ListStoresOpts{Limit: 1, Marker: "start"})}},
+		{"explicit raw inputs", "/info/stores", "1", "raw", []ListStoresOption{WithListStoresQuery("limit", "1"), WithListStoresQuery("marker", "raw")}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var requests int
+			client := infoClient(func(req *http.Request) (*http.Response, error) {
+				requests++
+				if req.URL.Path != "/reverse/glance/v2"+test.path || req.URL.Query().Get("limit") != test.limit || req.URL.Query().Get("marker") != test.marker {
+					t.Fatal("explicit query or route changed", req.URL)
+				}
+				// Actual Glance discovery handlers return the entire configured
+				// list and ignore limit/marker. Empty IDs are passive row data.
+				return infoResponse(req, io.NopCloser(strings.NewReader(`{"stores":[{"id":""},{"id":"two"}]}`))), nil
+			})
+			values, err := New(client).AllStores(context.Background(), test.options...)
+			if err != nil || len(values) != 2 || values[0].ID != "" || values[1].ID != "two" || requests != 1 {
+				t.Fatalf("invented repeated page: values=%+v err=%v requests=%d", values, err, requests)
+			}
+		})
 	}
 }
 

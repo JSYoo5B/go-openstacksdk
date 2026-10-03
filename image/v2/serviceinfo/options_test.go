@@ -32,7 +32,7 @@ func TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles(t *testing.T) {
 			return nil
 		},
 	})
-	if err != nil || !policy.Details || policy.Limit != 2 || policy.MaxItems != 3 || policy.Paginated == nil || *policy.Paginated || query.Get("marker") != "before" || query.Get("extension") != "owned" || headers["X-Extra"] != "owned" || !control.SinglePage {
+	if err != nil || !policy.Details || policy.Limit != 2 || policy.MaxItems != 3 || policy.Paginated == nil || *policy.Paginated || query.Get("marker") != "before" || query.Get("extension") != "owned" || headers["X-Extra"] != "owned" || !control.SinglePage || control.LimitHint {
 		t.Fatalf("policy=%+v query=%v headers=%v control=%+v err=%v", policy, query, headers, control, err)
 	}
 	retained.Query["extension"][0] = "later"
@@ -102,7 +102,7 @@ func TestServiceInfoOptionsConcurrentReusableSnapshots(t *testing.T) {
 			defer group.Done()
 			for range 10 {
 				policy, query, headers, control, err := prepareListStores(options)
-				if err != nil || !policy.Details || policy.Paginated == nil || *policy.Paginated || !control.SinglePage || control.MaxItems != 5 || query.Get("extension") != "owned" || headers["X-Extra"] != "owned" {
+				if err != nil || !policy.Details || policy.Paginated == nil || *policy.Paginated || !control.SinglePage || control.MaxItems != 5 || control.LimitHint || query.Get("extension") != "owned" || headers["X-Extra"] != "owned" {
 					t.Errorf("reusable options changed: policy=%+v err=%v", policy, err)
 					return
 				}

@@ -388,7 +388,7 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 		var calls, callbacks atomic.Int32
 		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
-			if r.URL.Path != infoPrefix+"info/stores" || r.URL.Query().Get("limit") != "1" || r.URL.Query().Get("name") != "wire-only" || r.Header.Get("X-Option") != "ordinary" {
+			if r.URL.Path != infoPrefix+"info/stores" || r.URL.Query().Has("limit") || r.URL.Query().Has("marker") || r.URL.Query().Get("name") != "wire-only" || r.Header.Get("X-Option") != "ordinary" {
 				t.Error(r.URL, r.Header)
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"unfiltered","name":"different"},{"id":12}],"next":"https://foreign.invalid/unused"}`))), nil
@@ -420,35 +420,60 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 }
 
 func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
-	t.Run("short-page fallback uses owned literal raw ID", func(t *testing.T) {
-		cloud := testcloud.New(t)
-		id := "wire%literal /?#"
-		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
-			n := calls.Add(1)
-			if r.URL.Path != infoPrefix+"info/stores/detail" || r.URL.Query().Get("limit") != "3" || r.URL.Query().Get("vendor") != "original" {
-				t.Error(r.URL)
+	for _, test := range []struct {
+		name    string
+		options serviceinfo.ListStoresOpts
+		emptyID bool
+	}{
+		{"basic cap three", serviceinfo.ListStoresOpts{MaxItems: 3}, false},
+		{"basic cap twenty", serviceinfo.ListStoresOpts{MaxItems: 20}, false},
+		{"detail cap three", serviceinfo.ListStoresOpts{Details: true, MaxItems: 3}, false},
+		{"detail cap twenty", serviceinfo.ListStoresOpts{Details: true, MaxItems: 20}, false},
+		{"explicit preferences are ignored by server", serviceinfo.ListStoresOpts{Details: true, Limit: 3, Marker: "wire%literal /?#", MaxItems: 20}, false},
+		{"empty ID is passive with explicit preferences", serviceinfo.ListStoresOpts{Limit: 3, Marker: "wire%literal /?#", MaxItems: 20}, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var calls atomic.Int32
+			path := infoPrefix + "info/stores"
+			if test.options.Details {
+				path += "/detail"
 			}
-			if n == 1 {
-				return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"wire%literal /?#","ID":"decoy"}]}`))), nil
+			raw := `{"stores":[{"id":"first"},{"id":"second"}]}`
+			if test.emptyID {
+				raw = `{"stores":[{"id":"first"},{"id":"","ID":"decoy"}]}`
 			}
-			if n != 2 || r.URL.Query().Get("marker") != id {
-				t.Error("marker came from caller-mutated model", r.URL, n)
+			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+				if calls.Add(1) != 1 {
+					t.Error("fixed configured store set invented another request", r.URL)
+				}
+				if r.Method != http.MethodGet || r.URL.Path != path || r.Body != nil {
+					t.Error(r.Method, r.URL, r.Body)
+				}
+				if test.options.Limit == 0 {
+					if r.URL.RawQuery != "" {
+						t.Error("local cap leaked into wire query", r.URL)
+					}
+				} else if r.URL.Query().Get("limit") != "3" || r.URL.Query().Get("marker") != test.options.Marker || len(r.URL.Query()) != 2 {
+					t.Error("explicit wire preferences changed", r.URL)
+				}
+				// Actual Glance returns its entire configured set regardless of
+				// limit/marker and advertises no continuation for this response.
+				return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
+			})
+			values, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background(), serviceinfo.WithListStoresOptions(test.options))
+			if err != nil || len(values) != 2 || values[0].ID != "first" || calls.Load() != 1 {
+				t.Fatal(values, err, calls.Load())
 			}
-			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[],"next":"https://foreign.invalid/ignored-empty-page"}`))), nil
+			if test.emptyID {
+				if values[1].ID != "" || string(values[1].Body["id"]) != `""` || string(values[1].Body["ID"]) != `"decoy"` {
+					t.Fatal("empty passive ID was rejected or replaced", values[1])
+				}
+			} else if values[1].ID != "second" {
+				t.Fatal(values[1])
+			}
 		})
-		count := 0
-		for store, err := range serviceinfo.New(infoClient(cloud)).ListStores(context.Background(), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{Details: true, Limit: 3}), serviceinfo.WithListStoresQuery("vendor", "original")) {
-			if err != nil || store == nil || store.ID != id {
-				t.Fatal(store, err)
-			}
-			store.ID, store.Body["id"] = "caller", json.RawMessage(`"caller"`)
-			count++
-		}
-		if count != 1 || calls.Load() != 2 {
-			t.Fatal(count, calls.Load())
-		}
-	})
+	}
 	for _, representation := range []string{"next", "links", "stores_links", "HTTP Link"} {
 		t.Run("advertised "+representation, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -514,8 +539,8 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 				if !strings.HasPrefix(r.URL.Path, infoPrefix) {
 					t.Error("unsafe continuation reached HTTP", r.URL)
 				}
-				if mode == "malformed unused row" && r.URL.Query().Get("limit") != "1" {
-					t.Error("maxitems hint absent", r.URL)
+				if mode == "malformed unused row" && (r.URL.Query().Has("limit") || r.URL.Query().Has("marker")) {
+					t.Error("local cap invented a wire preference", r.URL)
 				}
 				if mode == "later malformed row" && n%2 == 0 {
 					return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":12}]}`))), nil
