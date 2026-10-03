@@ -1,6 +1,6 @@
 # Image
 
-Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이터 생성·직접 업로드·staging과 import를 묶는 작업을 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
+Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이터 생성·직접 업로드·staging과 import, checksum 검사를 포함한 다운로드를 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
 
 ## openstacksdk 대응
 
@@ -10,6 +10,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.find_image(name_or_id, ignore_missing=False)` | `service.Images.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.image.images(status="active")` | `service.Images.List(ctx, resource.WithStatus("active"))` |
 | `conn.image.delete_image(id)` | `service.Images.Delete(ctx, resource.ID(id))` |
+| `conn.image.download_image(id, output=file)` | `service.DownloadTo(ctx, resource.ID(id), writer, ...)`; [다운로드 옵션·결과 비교](download.md) |
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
 | `conn.image.create_image(..., use_import=True)` | `service.CreateAndImport(ctx, image.CreateAndImportRequest{...}, ...)`; [단계별 옵션·결과 비교](create-import.md) |
@@ -154,3 +155,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.API.ImageImport.ImportImage(ctx, ref, options...)`는 기존 이미지의 ID/Name 참조를 해결하고 format을 조회한 뒤 import를 제출합니다. 이미 보유한 native Image는 `ImportKnownImage`로 조회 없이 사용할 수 있습니다. [Import 사용법](v2/imageimport/README.md)에 기본 glance-direct, web/remote 소스, 저장소 선택, 명시적 false와 실제 202 응답을 설명합니다. 결과는 접수 응답이며 이미지가 active라는 뜻은 아닙니다. 준비된 이미지의 완료 대기는 `service.API.Images.WaitForState(ctx, ref, "active", options...)`로 별도 선택합니다.
 
 `service.API.ImageData.StageImage(ctx, ref, data, options...)`는 queued 이미지를 확인하고 `io.Reader`를 한 번 전송한 뒤 최신 이미지를 조회합니다. `StageKnownImage`는 이미 보유한 native Image의 ID/status를 복사해 첫 조회를 생략합니다. [Staging 사용법](v2/imagedata/README.md)은 선택적 크기 헤더, caller의 Reader 소유권, 실제 PUT204 접수와 후속 GET200 결과·부분 실패를 설명합니다. staged 데이터의 import 제출과 active 상태 대기는 이어서 선택할 수 있습니다.
+
+`service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 기본 1MiB chunk로 writer에 전송하며 가능한 checksum을 검사합니다. [다운로드 사용법](download.md)은 저장소 우선순위·hash 우선순위·caller의 writer 소유권과 실제 metadata/binary 응답·바이트 수·부분 오류를 설명합니다. 기존 raw `service.API.ImageData.Download`를 사용할 때는 반환된 Body를 직접 닫습니다.

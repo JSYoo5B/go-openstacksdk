@@ -57,3 +57,5 @@ Glance의 [SDK import 제출](../image/v2/imageimport/README.md)은 `ImageImport
 Glance의 [SDK staging](../image/v2/imagedata/README.md)은 `ImageData.StageImage(ctx, ref, data, options...)`와 `StageKnownImage`를 제공합니다. queued 사전검증·단일 바이너리 전송·후속 metadata 조회와 선택적 Size/Headers를 SDK가 처리합니다. caller Reader를 닫거나 seek하지 않으며 binary PUT의 재전송·재인증·redirect를 막습니다. 실제 PUT204 acknowledgement는 후속 조회 실패에도 남고 GET200 응답·native Image와 독립적으로 보존됩니다. 기존 native Stage/Upload/Download와 미적용 Collection inventory는 유지합니다.
 
 상위 [이미지 생성·import 흐름](../image/create-import.md)은 `conn.Image(ctx)`의 `Service.CreateAndImport`에서 사용합니다. 생성201·staging204·fresh 조회200·import202를 연결하고 remote 소스·단계별 concrete 옵션·선택적 active 대기를 제공합니다. 실제 단계 결과를 보존하는 수동 SDK 기능이며 native 연산 수와 전체 Python 지원 판정은 바꾸지 않습니다.
+
+상위 [이미지 다운로드](../image/download.md)는 `Service.DownloadTo`에서 metadata-first 조회·writer 전송·저장소 순서·checksum 검사를 처리합니다. 실제 metadata와 binary 응답, 쓴 바이트 수와 무결성 결과를 구분하고 caller의 writer 소유권을 유지합니다. native raw Download의 스트림 계약과 inventory는 보존합니다.
