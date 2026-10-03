@@ -27,6 +27,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 `GenerateFormSignature`와 `GenerateTempURL`은 `FormSignatureInput`, concrete `GenerateFormSignatureOpts`·`GenerateTempURLOpts`와 함수 옵션으로 서명합니다. 기본 SHA1과 선택 SHA256·SHA512, owned binary key·UTC 정수 만료 시간을 지원하며 명시 key는 HTTP 없이 계산합니다. 자동 조회는 FormPost의 container→account와 Temp URL의 account-only 정책을 유지하며 실패 시 실제 Discovery 응답을 보존합니다. [서명의 Python/Go 비교](signing.md)는 decoded literal path와 escaped URL·prefix·IP range 사용법을 설명합니다.
 
+`GetInfo`는 catalog endpoint에서 `/info` 경로를 유도해 실제200의 capability와 확장 raw JSON을 반환합니다. `GetObjectSegmentSize`는 기본1GiB 또는 명시한 크기를 advertised bounds로 선택하며, clean404/412만 최대2684354561의 fallback을 사용합니다. concrete `GetInfoOpts`·`ObjectSegmentSizeOpts`와 함수 옵션, 실제 응답·오류 증거는 [Python/Go capability 비교](info.md)를 참고합니다.
+
 Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.
 
 `Containers.Resources`와 `Objects.InContainer(ctx, parent)`는 공통 리소스 정책을 제공합니다. HEAD로 조회하면 SDK의 `ContainerResource/ObjectResource`가 typed 정보와 사용자 metadata, 전체 헤더를 함께 보관합니다. [Swift 리소스 사용법](objects/README.md)을 참고합니다.
