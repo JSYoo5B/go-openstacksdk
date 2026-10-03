@@ -45,6 +45,8 @@ delimiter 목록에서 얻은 디렉터리 항목은 `Object.Subdir`에 보관�
 
 범위 객체는 `Update`, `Copy`, `Download`에도 같은 container와 object 참조를 사용합니다. `CopyOpts.Destination`은 `/container/object` 형식으로 지정합니다. 입력 확장은 기존 API의 `objects.With...Header/Query`를 전달합니다. `Create`는 업로드 응답 헤더를 반환하며 서버의 객체를 추가 HEAD로 읽지 않습니다. 특정 object version, SLO/DLO와 temp URL 등의 API 입력은 전체 API에서 사용할 수 있으며, 이 공통 Collection의 조회·삭제 기본값은 현재 object version입니다.
 
+`Objects.Copy`와 `ObjectScope.Copy`는 기존 native COPY API로 제공하며 `CopyOpts.Destination`을 `/container/object`로 지정합니다. pinned Python의 [`copy_object`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/object_store/v1/_proxy.py#L531-L533)는 `NotImplementedError`를 발생시키는 stub이며 [해당 unit test](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/tests/unit/object_store/v1/test_proxy.py#L251-L252)도 이를 확인합니다. unsupported 판정은 이 pinned Python direct workflow에만 적용하며 Go의 Copy API는 사용할 수 있습니다. `upload_object`는 `create_object`의 alias로 별도 작업을 세지 않습니다.
+
 ## 목록의 읽기 범위
 
 Python `conn.object_store.objects(container, max_items=20)`의 읽을 행 수는 Go에서 `resource.WithMaxItems(20)`로 지정합니다. pinned Python Swift proxy는 `paginated=True`를 명시하므로 Go의 `resource.WithPaginated(false)`는 그 proxy에 대한 첫 페이지 확장입니다. 두 옵션은 공통 `scope.List/All`에 사용하며 기존 공개 `service.Objects.List(ctx, container, objects.WithListOptions(...))`와 typed query 입력은 유지됩니다.

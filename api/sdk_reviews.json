@@ -26668,6 +26668,38 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:object_store/v1/copy_object",
+      "source_fingerprint": "8e8ca6cf75e3c0034d88dd25b83c2e0a8e00844df289813cfba81283b56c6cbf",
+      "status": "unsupported",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.Copy",
+        "gophercloudsdk/objectstorage/v1/objects.ObjectScope.Copy",
+        "gophercloudsdk/objectstorage/v1/objects.WithCopyOptions",
+        "gophercloudsdk/objectstorage/v1/objects.WithCopyHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithCopyQuery"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/README.md"
+      ],
+      "differences": [
+        "Pinned Proxy.copy_object(self)->None is only a three-line stub that raises NotImplementedError immediately; the pinned Python unit test asserts that exception. It implements no HTTP copy workflow, source/destination arguments, options or returned object.",
+        "Existing Go API.Copy and ObjectScope.Copy remain native capability: source COPY accepts201, CopyOpts.Destination is /container/object, ObjectVersionID extends the query and CopyHeader extracts response headers. This available Go operation is not an implementation of the pinned Python stub.",
+        "The pinned upload_object name is a class assignment to create_object, not a separate declaration/workflow/catalog operation. Its canonical review remains create_object; no upload_object alias review or additional parity count is introduced."
+      ],
+      "remaining": [
+        "Pinned source has no executable copy workflow to port. Unsupported applies only to this pinned Python direct stub; Go native API.Copy/ObjectScope.Copy remain separately available, and reproducing NotImplementedError is not needed.",
+        "Reviewing all29 direct Swift Proxy declarations does not complete the22 separately catalogued ObjectStoreCloudMixin workflows or inherited Proxy/Resource/session/cache/descriptor behavior."
+      ],
+      "contracts": [
+        {
+          "behavior": "The existing ObjectScope.Copy resolves its literal resource reference under the bound container and delegates native COPY. Its fixture asserts one source COPY, Destination /target/copy, version-id=version,201 and returned ETag=checksum; this verifies Go capability only. This one fixture is separate native-capability evidence, not a Python parity or full COPY policy matrix.",
+          "tests": [
+            "api/swift_resources_contracts_test.go:TestSwiftScopeBindsUploadMetadataUpdateAndDownload"
+          ]
+        }
+      ]
     }
   ]
 }
