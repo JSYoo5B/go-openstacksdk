@@ -46,7 +46,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"serviceinfo/README.md", "serviceinfo/api.go", "ListStores/AllStores(ctx)", "GetImportInfo(ctx)", "기존 native `ImageImport.Get`", "WithListStoresDetails(true)"} {
+	for _, want := range []string{"serviceinfo/README.md", "serviceinfo/api.go", "ListStores/AllStores(ctx)", "GetImportInfo(ctx)", "GetUsageInfo(ctx)", "serviceinfo/usage.go", "serviceinfo/usage.md", "기존 native `ImageImport.Get`", "WithListStoresDetails(true)"} {
 		if !strings.Contains(string(docs), want) {
 			t.Fatalf("missing actual ServiceInfo contract: %s", want)
 		}
@@ -55,16 +55,18 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 		t.Fatal("invented aggregate CRUD")
 	}
 	var records int
+	models := map[string]string{"Store": "list_only", "ImportInfo": "service_info", "UsageInfo": "service_info"}
 	for _, record := range g.collections {
 		if record.Package == "gophercloudsdk/image/v2/serviceinfo" {
 			records++
-			if record.Source != "sdk_owned" || record.Find || record.Delete || record.Wait || record.Scope != "" || (record.Model != "Store" && record.Model != "ImportInfo") {
+			if record.Source != "sdk_owned" || record.Find || record.Delete || record.Wait || record.Scope != "" || record.Kind != models[record.Model] || models[record.Model] == "" {
 				t.Fatalf("invented discovery capability: %+v", record)
 			}
+			delete(models, record.Model)
 		}
 	}
-	if records != 2 {
-		t.Fatalf("records=%d", records)
+	if records != 3 || len(models) != 0 {
+		t.Fatalf("records=%d missing models=%v", records, models)
 	}
 }
 

@@ -80,6 +80,7 @@ var specializedCollections = map[string]collectionRecord{
 var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "Store", Kind: "list_only"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "ImportInfo", Kind: "service_info"},
+	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "UsageInfo", Kind: "service_info"},
 	{Package: "gophercloudsdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
 	{Package: "gophercloudsdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
 	{Package: "gophercloudsdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "gophercloudsdk/keymanager/v1/secrets"},
