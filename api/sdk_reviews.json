@@ -20265,6 +20265,587 @@
         "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
         "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
       ]
+    },
+    {
+      "operation": "python:image/v2/get_image_cache",
+      "source_fingerprint": "df7a1eac49355ab82b4d295d614511700615aaeddbf6bc99c4d2029edd85235c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImageCache",
+        "gophercloudsdk/image.WithCacheOpts",
+        "gophercloudsdk/image.WithCacheHeader",
+        "gophercloudsdk/image.WithCacheHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImageCache sends bodyless/query-free GET at captured base plus fixed cache, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "ImageCache requires canonical nonnull cached_images array of nonnull object rows and queued_images array of nonnull strings; explicit empty arrays remain nonnil, ordered and repeated. CachedImage optional canonical image_id is string; hits/size exact signedint64 integers; last_accessed/last_modified strict JSON number tokens in json.Number pointers. Missing/null optional fields nil, explicit empty/zero present; quoted epoch numbers reject, lexical fractions/exponents retained without float64. Independent typed rows/raw Body/Header preserve unknown/case-decoy/links/date/id/status data passively; Metadata links/dates stay nil and decoder failure is atomic.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Typed200 read/Close/context/wholeUTF8/JSON/canonical failure returns nil typed result plus owned ResponseError retaining actual bytes/Header/status and all original read/Close/ctx.Err/custom causes. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "One snapshot of selected endpoint only; no query/limit/marker/discovery/pager/cache tracking. Driver supplies numeric epoch measurements and queued processing order; data cannot select new routes or enforce future requests.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "One snapshot of selected endpoint only; no query/limit/marker/discovery/pager/cache tracking. Driver supplies numeric epoch measurements and queued processing order; data cannot select new routes or enforce future requests."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/cache_delete_image",
+      "source_fingerprint": "c2b2c77e0fabc501522a6b8f972fba79de2fd2d784ee60cc175254ed6aa164f4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.CacheDeleteImage",
+        "gophercloudsdk/image.WithCacheDeleteOpts",
+        "gophercloudsdk/image.WithCacheDeleteHeader",
+        "gophercloudsdk/image.WithCacheDeleteHeaders",
+        "gophercloudsdk/image.WithCacheDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "CacheDeleteImage sends bodyless/query-free DELETE at captured base plus fixed cache/{image_id}, requiring actual204 acknowledgement only, with separately owned404 acceptance for the narrow nil/true missing policy. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity"
+          ]
+        },
+        {
+          "behavior": "Actual204 acknowledgement records fixed requested ImageID, nil Target and independent opaque Body/Header/status. Nil IgnoreMissing defaults true; only fully read/closed/context-successful physically owned DELETE404 yields nil,nil. Accepted404 Read/Close/context failure returns nil acknowledgement plus ResponseError404. Every Name/transport/hook/reauth error remains an error.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy",
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted expected-status acknowledgement Read/Close/context failure retains result plus independent ResponseError bytes/Header/status and original causes; default owned404 failure has nil acknowledgement as described. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Private owned404 acceptance bypasses native404 RetryFunc only with nil/true IgnoreMissing. Explicitfalse preserves native strict204/404 retry ownership. Native Name errors including logical missing never quiet. Ordinary server404 alone cannot distinguish missing image from disabled cache, so either can be quiet under this narrow default.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy",
+            "image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Private owned404 acceptance bypasses native404 RetryFunc only with nil/true IgnoreMissing. Explicitfalse preserves native strict204/404 retry ownership. Native Name errors including logical missing never quiet. Ordinary server404 alone cannot distinguish missing image from disabled cache, so either can be quiet under this narrow default."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/queue_image",
+      "source_fingerprint": "f34a5b5c03b6674192b8ff0546c42a44da73ac2f928998766643b5f5dcba18cf",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.QueueImage",
+        "gophercloudsdk/image.WithCacheOpts",
+        "gophercloudsdk/image.WithCacheHeader",
+        "gophercloudsdk/image.WithCacheHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "QueueImage sends bodyless/query-free PUT at captured base plus fixed cache/{image_id}, requiring original actual202 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity"
+          ]
+        },
+        {
+          "behavior": "Acknowledgement records fixed requested ImageID, nil Target, and actual opaque Body/Header/StatusCode202. Empty/nonJSON/nonUTF8 body bytes are not translated into cached-image state or a mutable seeded Resource. Accepted body failure retains nonnil acknowledgement plus ResponseError.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted expected-status acknowledgement Read/Close/context failure retains result plus independent ResponseError bytes/Header/status and original causes; default owned404 failure has nil acknowledgement as described. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Actual routed server checks registry image existence and active status before cache.queue_image and worker submission despite stale controller docstring. SDK adds no metadata fetch/active gate/wait/cache completion claim;202 is asynchronous acknowledgement only.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Actual routed server checks registry image existence and active status before cache.queue_image and worker submission despite stale controller docstring. SDK adds no metadata fetch/active gate/wait/cache completion claim;202 is asynchronous acknowledgement only."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/clear_cache",
+      "source_fingerprint": "7cd652bcb82b1caa1fde806d180051018b29e2d594138f9570a6dc0c291491d8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.ClearCache",
+        "gophercloudsdk/image.WithClearCacheOpts",
+        "gophercloudsdk/image.WithClearCacheHeader",
+        "gophercloudsdk/image.WithClearCacheHeaders",
+        "gophercloudsdk/image.WithClearCacheTarget"
+      ],
+      "contracts": [
+        {
+          "behavior": "ClearCache sends bodyless/query-free DELETE at captured base plus fixed cache, requiring original actual204 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Acknowledgement records empty ImageID and independently owned Target pointer including default CacheBoth, plus actual opaque Body/Header/status204. Controller internal cache_deleted/queue_deleted counts are discarded by serializer and never synthesized. CacheBoth omits owned target header; CacheOnly/QueueOnly emit exact cache/queue. Only uint8 enum0/1/2 accepted.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted expected-status acknowledgement Read/Close/context failure retains result plus independent ResponseError bytes/Header/status and original causes; default owned404 failure has nil acknowledgement as described. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Python target both also omits header. Literal both header is rejected by pinned controller although admin prose lists it; absent/empty actual wire means both. Source/option x-image-cache-clear-target aliases are reserved across all seven methods and may not bypass typed target policy.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Python target both also omits header. Literal both header is rejected by pinned controller although admin prose lists it; absent/empty actual wire means both. Source/option x-image-cache-clear-target aliases are reserved across all seven methods and may not bypass typed target policy."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/cached_image_nodes",
+      "source_fingerprint": "a97e90e44deabbdb9865cc7e56f63812d2a56f0efd6f37836f63ceca01e28304",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.CachedImageNodes",
+        "gophercloudsdk/image.WithCacheOpts",
+        "gophercloudsdk/image.WithCacheHeader",
+        "gophercloudsdk/image.WithCacheHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "CachedImageNodes sends bodyless/query-free GET at captured base plus fixed cache/nodes/{image_id}, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity"
+          ]
+        },
+        {
+          "behavior": "Finite bare nonnull array of nonnull strings, including empty/foreign/literal URL values, returned in order with repeats. Explicit [] remains nonnil. Result preserves fixed requested ImageID plus independent entire Body/Header/StatusCode; no envelope/singleton coercion, URL validation/following, paging or node fanout.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Typed200 read/Close/context/wholeUTF8/JSON/canonical failure returns nil typed result plus owned ResponseError retaining actual bytes/Header/status and all original read/Close/ctx.Err/custom causes. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Pinned server requires configured cache, centralized_db driver, authorized list_cached_nodes policy and registry image existence. Node URLs are passive references; SDK does not validate hosts/follow URLs/discover drivers/fanout or apply a local capability gate.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Pinned server requires configured cache, centralized_db driver, authorized list_cached_nodes policy and registry image existence. Node URLs are passive references; SDK does not validate hosts/follow URLs/discover drivers/fanout or apply a local capability gate."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/clean_cache",
+      "source_fingerprint": "6dc827b7cd28b8b2bc66757d93bb1b4ce3cdd3d1c4f0ba6e61771d1e4d64889c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.CleanCache",
+        "gophercloudsdk/image.WithCacheOpts",
+        "gophercloudsdk/image.WithCacheHeader",
+        "gophercloudsdk/image.WithCacheHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "CleanCache sends bodyless/query-free POST at captured base plus fixed cache/clean, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Acknowledgement records empty ImageID, nil Target, actual opaque Body/Header/status200. Serializer does not emit JSON counts. Empty/nonJSON/nonUTF8 accepted bytes remain evidence without parsing or inferring cleaning outcome; accepted body failure retains nonnil acknowledgement plus ResponseError.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted expected-status acknowledgement Read/Close/context failure retains result plus independent ResponseError bytes/Header/status and original causes; default owned404 failure has nil acknowledgement as described. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Official API history states2.18/cache-enabled for clean/prune; Python Cache max_microversion remains2.15. Go preserves supplied source version policy and adds no discovery/minimum-version gate, cap mirroring, background scheduler, automatic cleanup or backend-state proof.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Official API history states2.18/cache-enabled for clean/prune; Python Cache max_microversion remains2.15. Go preserves supplied source version policy and adds no discovery/minimum-version gate, cap mirroring, background scheduler, automatic cleanup or backend-state proof."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/prune_cache",
+      "source_fingerprint": "def2bfe196c22877a8bc5098bdf2f79c364aa3a7c4e1c0fbc93e6111c75ef071",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.PruneCache",
+        "gophercloudsdk/image.WithCacheOpts",
+        "gophercloudsdk/image.WithCacheHeader",
+        "gophercloudsdk/image.WithCacheHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "PruneCache sends bodyless/query-free POST at captured base plus fixed cache/prune, requiring original actual200 only. DirectID has only requested cache endpoint; explicit Name for per-ID calls uses unchanged native all-pages exact-name resolution, with no synthetic Ref/ID for singleton routes.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Nonnull canonical root object requires total_files_pruned and total_bytes_pruned, each exact signedint64 integer lexeme; absent/null/string/fraction/exponent/overflow fail. Explicit zeros retained. Embedded Metadata owns unknown/raw/case-decoy values, independent actual200 Header, with links/dates passive and no inferred capacity/completion.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers/ref captured and validated before callbacks. Concrete full replacement and helper input maps/optional bool/slice/percallback configs owned before/after one application; nil/error callback/protected/conflicting header invalid before HTTP. Cache-owned target header rejected in source/options on all7. Options and captured route/header stay fixed while original provider token stays live; provider replacement/unsafe retarget and postName source changes rejected.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCachePreparedOptionsAndLiveSource",
+            "image/cache_core_test.go:TestImageCacheCoreCompletePreflightAndOwnedTargetHeader",
+            "image/cache_options_test.go:TestImageCacheOptionsSnapshotReplacementAndLastWins",
+            "image/cache_options_test.go:TestImageCacheOptionsOwnPointersCallbacksAndSlices",
+            "image/cache_options_test.go:TestImageCacheOptionsProtectedHeadersAndCompleteDefaults",
+            "image/cache_options_test.go:TestImageCacheOptionsParallelReusableHelpers",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards"
+          ]
+        },
+        {
+          "behavior": "Typed200 read/Close/context/wholeUTF8/JSON/canonical failure returns nil typed result plus owned ResponseError retaining actual bytes/Header/status and all original read/Close/ctx.Err/custom causes. Body closes once and accepted bytes are never replayed. Other actual statuses/prebody transport/hook failures retain native error policy; expanded native OkCodes cannot broaden captured acceptance.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheAcceptedEvidenceAndFailureRetention",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request/DoJSON retain configured native prebody retry/reauth/backoff and identical-target redirects. Changed method/origin/path/query blocked before transport. Nil body cannot become JSONnull; RawBody/KeepResponseBody/JSONResponse/serialized body ownership cannot mutate before another attempt; original/hook/marshal causes retained. Native reauth ErrOriginal/ErrReauth remain in original fields. Existing native image bindings unchanged; no native cache API/inventory row fabricated.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheProviderHooksAndCauseSafeMissing",
+            "image/cache_core_test.go:TestImageCacheCoreCapturedSourceAndPrebodyGuards",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
+          ]
+        },
+        {
+          "behavior": "Only explicit actual200 files/bytes counts are returned, including zero values. Server owns configured capacity/pruning/policy/node-local behavior. Python max2.15 versus documented2.18 does not become a new Go discovery/minimum-version gate.",
+          "tests": [
+            "image/cache_contracts_test.go:TestImageCacheFixedRoutesAndClearTargets",
+            "image/cache_core_test.go:TestImageCacheCoreFixedRoutesAndActualEvidence",
+            "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
+            "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults",
+            "image/cache_contracts_test.go:TestImageCacheCanonicalModelsAndRawPrecision",
+            "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
+            "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/cache.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
+        "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
+        "Only explicit actual200 files/bytes counts are returned, including zero values. Server owns configured capacity/pruning/policy/node-local behavior. Python max2.15 versus documented2.18 does not become a new Go discovery/minimum-version gate."
+      ],
+      "remaining": [
+        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
+        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
+        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
+      ]
     }
   ]
 }
