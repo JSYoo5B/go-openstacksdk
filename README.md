@@ -380,3 +380,5 @@ Swift 객체 바이트 읽기는 `Objects.GetObject`·`DownloadObject`·`StreamO
 Swift 서비스 capability는 `service.GetInfo(ctx)`로 조회하고, 객체 segment 크기는 `GetObjectSegmentSize(ctx, options...)`로 선택합니다. [Python/Go 사용법](objectstorage/v1/info.md)에 기본값·확장 JSON·404/412 fallback과 실제 응답 증거를 설명합니다.
 
 Swift 객체 삭제는 `Objects.DeleteObject(ctx, container, object, options...)`로 사용합니다. [Python/Go 삭제 비교](objectstorage/v1/objects/delete.md)에 기본 HEAD 확인, known SLO 함수 옵션, 단계별 실제 응답과 bulk 부분 실패를 설명합니다.
+
+Swift 객체 생성은 `Objects.CreateObject(ctx, container, object, input, options...)`으로 사용합니다. [Python/Go 생성과 stale 비교](objectstorage/v1/objects/create.md)에 bytes·file·Reader 입력, checksum과 자동 SLO/DLO, 재시도·단계별 응답 및 보수적인 부분 정리를 설명합니다.
