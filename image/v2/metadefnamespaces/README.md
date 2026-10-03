@@ -127,7 +127,7 @@ Python의 [5개 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d166
 
 namespace는 nonempty valid UTF-8, 최대 80 rune입니다. colon·Unicode·space는 그대로 유지하고 path component를 한 번 escape합니다. 정확한 `.`·`..`, slash·backslash·percent·query·fragment 문자와 ASCII control/DEL은 거부합니다. route 이름과 필수 create 입력은 callback 전에, optional rename은 callback 적용 뒤 HTTP 전에 검사합니다. 자동 trim·case 변경·UUID 해석을 하지 않습니다.
 
-`CreateOpts`의 DisplayName·Description·Visibility·Owner는 optional string pointer, Protected는 optional bool pointer입니다. nil은 생략하고 explicit empty·false는 그대로 전송합니다. Visibility는 public/private만 허용합니다. DisplayName은 최대 80, Description은 500, Owner는 255 rune의 valid UTF-8이며 Description은 newline을 포함할 수 있습니다. 기본 create는 namespace만 보내고 private·false·인증 context owner 등의 기본값을 서버에 맡깁니다. nested properties·objects·tags·resource_type_associations 입력은 이 API에서 제공하지 않습니다.
+`CreateOpts`의 DisplayName·Description·Visibility·Owner는 optional string pointer, Protected는 optional bool pointer입니다. nil은 생략하고 explicit empty·false는 그대로 전송합니다. Visibility는 public/private만 허용합니다. DisplayName은 최대 80, Description은 500, Owner는 255 rune의 valid UTF-8이며 Description은 newline을 포함할 수 있습니다. 기본 create는 namespace만 보내고 private·false·인증 context owner 등의 기본값을 서버에 맡깁니다. 중첩 정의는 아래의 concrete Create container 옵션으로 보낼 수 있습니다.
 
 `Update(ctx, current, ...)`는 선택한 current 이름에 한 번 PUT합니다. body의 namespace는 기본 current이며 `WithUpdateNamespace`로 rename을 지정할 수 있습니다. [공식 replacement 경고](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#update-namespace)와 고정 [controller](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_namespaces.py#L342-L387)에 따라, 생략한 display_name·description은 null로, visibility·protected·owner는 서버 기본값으로 돌아갑니다. 기존 nested 정의는 이 scalar PUT으로 갱신하지 않습니다. SDK가 현재 설정을 GET하거나 merge하지 않으며 자동 unprotect·rollback도 수행하지 않습니다.
 
@@ -157,6 +157,92 @@ Delete의 `IgnoreMissing *bool`은 nil이면 true입니다. true는 SDK가 직�
 
 source client/provider/type/endpoint/base/microversion/일반 header를 callback 전에 캡처하고 callback 뒤·accepted body 뒤·소비하는 행과 page 전에 안정성과 context를 검사합니다. 원래 provider의 live auth를 사용합니다. configured native pre-body retry·reauth·backoff·동일한 target redirect 정책을 유지하고 method·origin·path·query 또는 owned body를 바꾸는 callback은 차단합니다. body는 한 번 닫고 accepted 실패 뒤 replay하지 않습니다. 원래 read·Close·transport 원인과 `ctx.Err()`·custom `context.Cause`를 보존합니다. native reauth wrapper는 기존 정책을 유지하며 `ErrOriginal`·`ErrReauth` 필드에서 원인을 확인합니다.
 
-비교 기준은 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, native Gophercloud `v2.15.0`입니다. native에는 namespace CRUD/list API가 없어 이 leaf를 SDK에서 소유합니다. Python의 넓은 query/Body filter·coercion·cache/session·nested POST·tag/child resource API와 전체 parity를 주장하지 않으며 discovery gate·Wait·일반 Resources API는 제공하지 않습니다.
+비교 기준은 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, native Gophercloud `v2.15.0`입니다. native에는 namespace CRUD/list API가 없어 이 leaf를 SDK에서 소유합니다. Python의 넓은 query/Body filter·coercion·cache/session·tag/child resource API와 전체 parity를 주장하지 않으며 discovery gate·Wait·일반 Resources API는 제공하지 않습니다.
 
 실제 wire·raw 모델·advertised paging·옵션·오류 경계는 [외부 HTTP 테스트](contracts_test.go), [core 증거 테스트](core_test.go), [옵션 소유권 테스트](options_test.go)에서 확인합니다. [Connection 테스트](../../../connection_image_metadef_namespaces_test.go)는 shared client와 기본 paging을, [생성기 테스트](../../../internal/cmd/sdkgen/glance_metadef_namespaces_test.go)는 SDK 소유 registry·literal identity·concrete 옵션과 기존 native API의 유지를 검증합니다.
+
+## 한 번의 Create로 중첩 정의 보내기
+
+`CreateOpts`는 `Properties map[string]PropertyDefinition`, `Objects []ObjectDefinition`, `Tags []TagDefinition`, `ResourceTypeAssociations []ResourceTypeAssociationDefinition`을 받습니다. 네 helper는 해당 container를 교체합니다. nil map/slice는 필드를 생략하고 nonnil empty map/slice는 `{}` 또는 `[]`를 그대로 보냅니다. nested null container를 만드는 모드는 없습니다. `ObjectDefinition.Properties`와 `Required`도 nil 생략·empty 명시를 구분합니다. optional Description·Prefix·PropertiesTarget pointer는 nil 생략·빈 문자열 명시입니다.
+
+`PropertyDefinition.Type`과 `Title`은 항상 직렬화하는 문자열입니다. Type은 nonempty valid UTF-8이며 Go가 type enum을 제한하지 않습니다. Title은 빈 문자열도 유효합니다. property dictionary key, child Name, Required 항목, optional 문자열은 valid UTF-8만 검사하므로 빈 값·control·route 문자·80 rune 초과를 그대로 보낼 수 있습니다. 이는 JSON body 입력이며 root namespace의 안전한 route 이름 검사와 별개입니다. 자동 trim·중복 제거·CSV 변환·property key/Name 맞춤을 하지 않습니다.
+
+`Attributes map[string]json.RawMessage`는 property의 나머지 keyword를 flat하게 보냅니다. 원래 key의 UTF-8을 marshal 전에 검사하며 value는 valid UTF-8 JSON 전체여야 합니다. null과 큰 숫자의 원래 token도 허용합니다. 정확한 `name`, `type`, `title`, `description`, `self`, `schema`, `created_at`, `updated_at`, `namespace_name`은 typed/읽기 전용 필드 소유권 때문에 거부합니다. 나머지 keyword는 서버에 전달하고 SDK가 JSON Schema·WSME·DB·policy 규칙을 재현하지 않습니다. [고정 nested schema](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_namespaces.py#L705-L925)와 [WSME PropertyType](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/model/metadef_property_type.py#L25-L57)는 type/title·Required 중복·keyword 타입 등을 더 제한할 수 있으며, WSME의 default·숫자·enum·unknown keyword 처리는 raw 전송의 저장/반환 round-trip을 보장하지 않습니다.
+
+다음 예제는 네 container helper를 같은 Create에 적용하고 한 번의 collection POST를 보냅니다. 결과의 nested 정의는 기존 `Namespace.Metadata.Body`에서 raw로 읽습니다. 예제의 default/enum은 raw 입력이며 응답에서 보존되는지 서버 결과로 확인해야 합니다.
+
+```go
+package example
+
+import (
+    "context"
+    "encoding/json"
+
+    "gophercloudsdk/image"
+    "gophercloudsdk/image/v2/metadefnamespaces"
+)
+
+func createNestedNamespace(ctx context.Context, service *image.Service, namespace string) (*metadefnamespaces.Namespace, error) {
+    description := "A compute shape"
+    prefix, target := "hw:", "metadata"
+    properties := map[string]metadefnamespaces.PropertyDefinition{
+        "mode": {
+            Type: "string", Title: "",
+            Attributes: map[string]json.RawMessage{
+                "enum": json.RawMessage(`["small","large"]`),
+                "default": json.RawMessage(`"small"`),
+            },
+        },
+    }
+    objects := []metadefnamespaces.ObjectDefinition{{
+        Name: "shape", Description: &description,
+        Properties: map[string]metadefnamespaces.PropertyDefinition{
+            "vcpus": {
+                Type: "integer", Title: "VCPUs",
+                Attributes: map[string]json.RawMessage{"minimum": json.RawMessage(`0`)},
+            },
+        },
+        Required: []string{"vcpus"},
+    }}
+    tags := []metadefnamespaces.TagDefinition{{Name: "example"}}
+    associations := []metadefnamespaces.ResourceTypeAssociationDefinition{{
+        Name: "OS::Nova::Server", Prefix: &prefix, PropertiesTarget: &target,
+    }}
+    return service.API.MetadefNamespaces.Create(ctx, namespace,
+        metadefnamespaces.WithCreateOpts(metadefnamespaces.CreateOpts{}),
+        metadefnamespaces.WithCreateProperties(properties),
+        metadefnamespaces.WithCreateObjects(objects),
+        metadefnamespaces.WithCreateTags(tags),
+        metadefnamespaces.WithCreateResourceTypeAssociations(associations))
+}
+```
+
+`WithCreateOpts`는 scalar와 중첩 정의를 포함한 전체 설정을 교체하고 마지막 container helper가 우선합니다. factory와 callback 전후에는 recursive map·slice·RawMessage buffer·optional pointer를 깊게 복사합니다. 입력이나 callback이 보관한 config를 나중에 바꿔도 준비된 요청은 바뀌지 않습니다. raw JSON 오류와 callback 오류는 기존 원인 보존 규칙을 따릅니다.
+
+Python 비교에서는 두 경로를 구분합니다. [고정 MetadefNamespace](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_namespace.py#L23-L54)는 association을, [상속된 TagMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/tag.py#L38)을 통해 tags를 인식합니다. properties·objects descriptor는 없고 unknown body 저장은 False라서 일반 `create_metadef_namespace`의 해당 kwargs는 요청 body에 남지 않습니다. 아래 두 함수는 대안이며 같은 namespace에 연속 실행하지 않습니다. 두 번째는 인증된 Adapter HTTP 호출로 서버의 네 container 입력을 보여 줍니다.
+
+```python
+def create_namespace_known_containers(conn, namespace):
+    return conn.image.create_metadef_namespace(
+        namespace=namespace,
+        resource_type_associations=[{"name": "OS::Nova::Server"}],
+        tags=[{"name": "example"}])
+
+
+def create_namespace_server_body(conn, namespace):
+    # Adapter HTTP: properties/objects are not pinned MetadefNamespace descriptors.
+    response = conn.image.post("/metadefs/namespaces", json={
+        "namespace": namespace,
+        "properties": {"mode": {"type": "string", "title": ""}},
+        "objects": [{"name": "shape", "properties": {
+            "vcpus": {"type": "integer", "title": "VCPUs"}},
+            "required": ["vcpus"]}],
+        "tags": [{"name": "example"}],
+        "resource_type_associations": [{"name": "OS::Nova::Server"}]})
+    response.raise_for_status()
+    return response
+```
+
+[고정 controller](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_namespaces.py#L133-L261)는 truthy nested family의 policy를 먼저 확인한 뒤 parent, associations, objects, tags, properties 순서로 저장합니다. Invalid 400은 cleanup을 호출하지 않고 Forbidden·NotFound·Duplicate에서는 best-effort cleanup을 시도합니다. protected namespace나 cleanup 실패로 효과가 남을 수 있고 자동 생성한 global resource type도 남을 수 있습니다. SDK는 rollback·재시도 후 정리·별도 child 요청을 실행하지 않습니다. 이는 pinned source 동작이며 실행한 cloud transaction의 증거가 아닙니다.
+
+201의 nested content는 제출한 WSME 모델에서 붙이며 저장된 child를 다시 GET한 결과가 아닙니다. child 날짜·self·schema·Required CSV 저장이나 keyword 변환을 입력 echo만으로 검증할 수 없습니다. Create 성공 응답의 actual bytes·header·status는 그대로 소유하며 input으로 응답을 채우지 않습니다. `Update`는 기존 scalar replacement PUT 그대로이며 nested 입력 API를 추가하지 않습니다. [공식 문서](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-namespace)의 nested Update 설명과 달리 pinned controller의 Update는 scalar만 처리합니다.
