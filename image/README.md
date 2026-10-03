@@ -170,3 +170,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.AddImageLocation(ctx, ref, url, options...)`는 외부 저장소 URL과 선택 validation hash를 제출하고 실제202 응답을 보존합니다. `GetImageLocations(ctx, ref, options...)`는 유한 배열을 한 번 조회합니다. [Location 사용법](locations.md)에 서버의 비동기 검증·concrete 옵션·Python Resource와의 차이를 설명합니다.
 
 `service.GetImageSchema/GetImagesSchema`와 member·task·metadef의 16개 schema getter는 공통 `GetSchemaOption`으로 조회합니다. [Schema 사용법](schemas.md)에 고정 경로·실제200·SDK 소유 `Schema`의 canonical 필드와 raw JSON 보존을 설명합니다. 반환값의 links·이름·schema URL은 자동으로 따라가지 않습니다.
+
+`service.GetImageCache/QueueImage/CacheDeleteImage/ClearCache/CachedImageNodes/CleanCache/PruneCache`는 캐시 조회와 정리를 제공합니다. [캐시 사용법](cache.md)에 concrete 옵션·미존재 삭제 기본값·zero target의 cache/queue 선택·실제202/204/200과 passive node URL을 설명합니다. Queue 결과는 작업 접수이며 완료 여부는 서버의 후속 상태로 확인합니다.

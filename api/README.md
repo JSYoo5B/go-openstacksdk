@@ -71,3 +71,5 @@ Glance [단일 태그·활성화 action](../image/mutations.md)은 상위 image.
 Glance [전용 location 추가·조회](../image/locations.md)는 상위 image.Service에서 고정 POST202와 body/query 없는 GET200 배열을 제공합니다. 기존 native metadata location set PATCH·resource inventory를 유지하며 location ID나 목록 continuation을 합성하지 않습니다.
 
 Glance [schema 조회 16개](../image/schemas.md)는 상위 image.Service의 고정 GET200 메서드와 공통 concrete header 옵션을 제공합니다. SDK 소유 Schema는 canonical 필드와 다양한 additionalProperties 값을 보존하며 native API나 Collection capability에 임의 schema 리소스를 추가하지 않습니다.
+
+Glance [캐시 API 7개](../image/cache.md)는 상위 image.Service의 SDK 소유 모델과 concrete 옵션으로 고정 endpoint를 호출합니다. native binding과 resource inventory를 보존하며 cache/queue 선택 헤더·미존재 삭제 기본값·원문 응답과 서버가 반환한 수치를 SDK가 관리합니다.
