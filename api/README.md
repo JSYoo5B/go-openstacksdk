@@ -73,3 +73,5 @@ Glance [전용 location 추가·조회](../image/locations.md)는 상위 image.S
 Glance [schema 조회 16개](../image/schemas.md)는 상위 image.Service의 고정 GET200 메서드와 공통 concrete header 옵션을 제공합니다. SDK 소유 Schema는 canonical 필드와 다양한 additionalProperties 값을 보존하며 native API나 Collection capability에 임의 schema 리소스를 추가하지 않습니다.
 
 Glance [캐시 API 7개](../image/cache.md)는 상위 image.Service의 SDK 소유 모델과 concrete 옵션으로 고정 endpoint를 호출합니다. native binding과 resource inventory를 보존하며 cache/queue 선택 헤더·미존재 삭제 기본값·원문 응답과 서버가 반환한 수치를 SDK가 관리합니다.
+
+Glance [이미지 공유 멤버](../image/members.md)는 상위 image.Service의 concrete header·미존재·로컬 소비 옵션과 SDK 소유 모델을 제공합니다. 기존 native Member API·scoped binding을 유지하며 canonical member/status JSON·고정 부모·실제200/204 응답을 SDK가 관리합니다.
