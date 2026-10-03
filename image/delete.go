@@ -97,6 +97,18 @@ func (s *Service) DeleteImage(ctx context.Context, ref resource.Ref, options ...
 		return nil, wrap(err)
 	}
 	clientForDelete.ProviderClient.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	if retry := clientForDelete.ProviderClient.RetryFunc; retry != nil {
+		clientForDelete.ProviderClient.RetryFunc = func(ctx context.Context, method, target string, options *gophercloud.RequestOpts, original error, count uint) error {
+			err := retry(ctx, method, target, options, original, count)
+			// Native retry hooks may edit RequestOpts. Deletion owns the empty
+			// request and response body; changing either loses acknowledgement
+			// evidence or closes its body before this workflow can own it.
+			if !options.KeepResponseBody || options.JSONResponse != nil || options.JSONBody != nil || options.RawBody != nil {
+				return errors.Join(err, original, uploadInvalid("retry changes image delete body ownership"))
+			}
+			return err
+		}
+	}
 	// Privately handling 404 owns its body failures before deciding absence.
 	// It bypasses native RetryFunc for 404; other pre-accept policies remain.
 	wire, err := clientForDelete.Request(ctx, http.MethodDelete, endpoint, &gophercloud.RequestOpts{
