@@ -21351,6 +21351,492 @@
         "No genericResource generator/cache/fieldprojection or full Python list/session parity.",
         "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
       ]
+    },
+    {
+      "operation": "python:image/v2/create_metadef_namespace",
+      "source_fingerprint": "b2eb83aa678f1d6c2237a5d2033af04cd822ba52202f9d98732c8789399e57b6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefnamespaces.API.Create",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateOpts",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateHeader",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateHeaders",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateDisplayName",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateDescription",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateVisibility",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateOwner",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateProtected"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "tests": [
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One flat POST201 sends required literal namespace and only supplied display_name/description/visibility/owner/protected scalars. Optional nil omits; empty/false explicit. UTF8 scalar rune bounds are80/500/255, description may be multiline, visibility exactlypublic/private. Omission delegates private/false/authowner to server. Nested definition inputs, policy enforcement and server cleanup are deferred, with no hidden discovery/GET/rollback.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
+            "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefnamespaces/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+      ],
+      "remaining": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_metadef_namespace",
+      "source_fingerprint": "95602a00b3c1b31d3e86efe5351b025cbb94ae13c5987313ba3ba6e1c2d96d80",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefnamespaces.API.Delete",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithDeleteOpts",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithDeleteHeader",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithDeleteHeaders",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "tests": [
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "DELETE204 has no body/query and returns selected requested Namespace with opaque actual acknowledgement evidence. IgnoreMissing nil=>true, explicitfalse native404 policy. True owns only clean physical404 and returns nil,nil after successful read/Close/context/source checks; only that404 bypasses RetryFunc. Missing/forbidden may be indistinguishable; defaultquiet404 is not absence proof; accepted204 handling error retains acknowledgement.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
+            "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefnamespaces/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Go actual204 acknowledgement and cause-safe private clean404 ownership differ from Python None return and generic missing/native retry policy."
+      ],
+      "remaining": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Go actual204 acknowledgement and cause-safe private clean404 ownership differ from Python None return and generic missing/native retry policy."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_namespace",
+      "source_fingerprint": "82b5f34b96834f62ca17b5fd3b244235390ca01345980d2b3897c32d4e405318",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefnamespaces.API.Get",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithGetOpts",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithGetHeader",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithGetHeaders",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithGetResourceType"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "tests": [
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One fixed GET200 at requested namespace; ResourceType nil omits and explicitempty encodes resource_type=. Server alone applies property-name prefix; returned namespace/self/schema are passive. No local prefix rewrite, find, fallback or response-driven routing.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
+            "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefnamespaces/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Typed optional ResourceType GET projection is an explicit Go wire convenience; pinned Python proxy does not expose a named resource_type argument."
+      ],
+      "remaining": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Typed optional ResourceType GET projection is an explicit Go wire convenience; pinned Python proxy does not expose a named resource_type argument."
+      ]
+    },
+    {
+      "operation": "python:image/v2/metadef_namespaces",
+      "source_fingerprint": "c9e50ff4309b0323e79f400d847a37731c526b488def43636fd98d338c01f357",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListOpts",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListHeader",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListHeaders",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListLimit",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListMarker",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListVisibility",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListSortKey",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListSortDir",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListResourceTypes",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListMaxItems",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithListSinglePage",
+        "gophercloudsdk/image/v2/metadefnamespaces.API.List",
+        "gophercloudsdk/image/v2/metadefnamespaces.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "tests": [
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Reusable lazy List/All prepares per iteration, only six typed query keys. Limit nilomit/0wire/negativeinvalid; emptyMarker omitted, literalCSV resource_types unchanged, enums validated, server defaults/clamp delegated. MaxItems is local, SinglePage skipsnext only; no limit hint, arbitrary query, Python local Body filter or invented marker.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAdvertisedPaginationAndCaps",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesAdvertisedPagingAndControls",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Required nonnull namespaces array; rows decoded/check source only when consumed. Cap/break skip unused malformed rows and next; empty success stops; All nonnil empty and discards partials on errors. Only canonical advertised body next is followed after consumption. Exact /v2/metadefs/namespaces rootrelative maps to captured reverse-prefix collection while original Body stays unchanged. Sameorigin/path and initial key/value query retained, singleton bounded marker advances; changed target/query/escaped alias/dot/authority or repeated URL/marker rejected before HTTP. No first/schema/self/links/header/fallback.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAdvertisedPaginationAndCaps",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesAdvertisedPagingAndControls",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefnamespaces/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Typed six query keys, leaf-only advertised next/prefix guards, local cap and no marker fallback/hint do not reproduce arbitrary Python query/Body filters or generic pagination/cache semantics."
+      ],
+      "remaining": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Typed six query keys, leaf-only advertised next/prefix guards, local cap and no marker fallback/hint do not reproduce arbitrary Python query/Body filters or generic pagination/cache semantics."
+      ]
+    },
+    {
+      "operation": "python:image/v2/update_metadef_namespace",
+      "source_fingerprint": "8f470305ee765783c5fa45b669ccdbe927a894ffc1a1253321acdb4425597ca4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefnamespaces.API.Update",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateOpts",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateHeader",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateHeaders",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateNamespace",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateDisplayName",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateDescription",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateVisibility",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateOwner",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithUpdateProtected"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "tests": [
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
+        },
+        {
+          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One replacement PUT200 to fixed current namespace; required namespace body defaults current or optional supplied rename. Only supplied scalars encoded; omitted display_name/description cleared and visibility/protected/owner reset by server. No GET/RMW/PATCH, nested child update, automatic unprotect or rollback. Go always sends replacement, unlike Python dirty Resource cache no-op.",
+          "tests": [
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
+            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
+            "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefnamespaces/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+      ],
+      "remaining": [
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
+        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
+        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
+        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+      ]
     }
   ]
 }
