@@ -24777,6 +24777,277 @@
         "Python None return, mutable Resource/cache/Adapter/session semantics and system alias mapping remain different.",
         "Strict duplicate/case validation, literal name/effectivebase policy and actual204-only acceptance are deliberate Go differences; no automatic refresh, missing suppression or whole-container deletion parity is claimed."
       ]
+    },
+    {
+      "operation": "python:object_store/v1/get_object_metadata",
+      "source_fingerprint": "d94a0c23e14275ea5e351778b2213e010a08f8faace3f8d8628079cb5d42262f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.GetMetadata",
+        "gophercloudsdk/objectstorage/v1/objects.WithGetMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithGetMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithGetMetadataHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithGetMetadataNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutGetMetadataNewest"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadata sends one bodyless query-free normal HEAD with strict actual200 at the captured effective ResourceBase/Endpoint and once-escaped literal container/object. No parent HEAD, lookup, contents GET or metadata cache; normal server symlink semantics remain.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Newest nil omits X-Newest, explicit false/true emits its literal value on Getter HEAD, and Without clears. Concrete whole opts replaces configuration; singular/plural headers merge with original ASCII validation, alias rejection and last singular overwrite.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsReplacementAndRetainedHandles",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Reusable helper factories own header maps/Newest pointers; initialized callback storage is copied after every callback. Nil callbacks and retained handle mutation cannot alter another invocation; option and source/custom context causes are joined.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsReplacementAndRetainedHandles",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Actual HEAD atomically projects initialized lowercased suffix Values including presentempty, nullable exact signed64 ContentLength and nullable literal ETag/content/timestamp/expiry/manifest/cache fields. Original nonASCII keys, case aliases, duplicate/multivalue known/custom headers and malformed counters fail with nil Metadata and retained raw response.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreAtomicProjection",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsAtomicHeaders",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Required literal names permit once-escaped object hierarchy and percent/space/Unicode/question/hash/colon, while empty/invalidUTF8/backslash/control/DEL and dot path components fail before HTTP with ErrInvalidOption and native name cause. Nil API/context/source/provider, unsafe Endpoint/effectivebase/type/header and canceled contexts fail before callbacks/HTTP.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsCompletePreflightAndCauses",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Only actualHEAD200 creates independent Body/Header/Status. Accepted read/Close/context/custom cause/source/projection failures preserve raw result plus whole independent ResponseError; one Close, no accepted replay and original strconv.NumError are retained. Unknown raw headers may repeat and remain passive.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCorePhaseFailuresAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsAtomicHeaders",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Captured source/provider/raw bases/Type/Microversion/ordinary headers remain stable, original live auth and native prebody retry/backoff/reauth/timeout/transport/fixedtarget redirects remain. SDK method/body/status ownership holds while advanced RetryFunc.MoreHeaders stays providerpolicy; native Get200/204 and Update201/202 ABI remain intact.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSourceAndLiveAuth",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsSourceAndNativePolicy",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases",
+            "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/README.md"
+      ],
+      "differences": [
+        "Python returns mutable Object with cached descriptors/header/session state and recognized-header conversions. Go exposes strictactual200 raw owned proof, nullable exactint64/literal MetadataInfo and lowercased generic Values.",
+        "Required literal container/object and safe effectivebase/source/name policy replace Python optional-parent Object precedence and Resource coercion; broader native query/conditional models remain available."
+      ],
+      "remaining": [
+        "Python Resource descriptors/cache/Adapter/session/_last_headers and mutable sameObject identity are not reproduced.",
+        "Conditional/temp/version/SLO/symlink query options and richer native parsedheader model remain outside this bounded concrete getter. Server limits/authorization/middleware/encoding/replication are not client parity guarantees."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/set_object_metadata",
+      "source_fingerprint": "41e6a3e10d05a0e595545f726865dd1f74de19bbf577d7b918ed8a0893f98102",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.SetMetadata",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadata always performs a fresh owned HEAD200 at symlink=get then one query-free bodyless full-custom POST202. Nil/empty maps and unchanged values still request both phases; no final HEAD, payload transfer, parent creation, synthetic updated state, whole RMW restart or cache.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Caller metadata is snapshotted before callbacks. Original ASCII token suffix-only keys reject full X-Object-Meta prefix and case aliases; literal legalUTF8 values preserve spaces/percent/HTAB and presentempty without Python str coercion, falsey omission, trim or URL encoding.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsCompletePreflightAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Mutation owns HEAD symlink=get, validates observed known symlink headers and rejects X-Symlink-Target presence beforePOST with ErrUnsupported and raw Before. This bounds current versioned aliases; later link changes may apply POST then307 and retain native error evidence rather than prove unchanged state.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSymlinkAndStrictStatus",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "Mutation opts are concrete initialized header maps with whole replacement/canonical merge, original key validation and independent factory/callback snapshots. MetadataOpts headers apply only POST; sourceordinary headers apply fresh read and captured POST. Request/auth/body/Newest/custom/symlink/sysmeta prefixes are reserved; exact generic system wire headers are allowed.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsReplacementAndRetainedHandles",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsCompletePreflightAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Accepted HEAD raw Body/Header/Status are retained as Before on read/Close/context/source/projection/symlink and prePOST failure, with nil Acknowledgement. Completed Before remains immutable through native POST errors; failedaccepted HEAD Metadata remains nil and actual proof/cause is preserved.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreAtomicProjection",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCorePhaseFailuresAndCauses",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSourceAndLiveAuth",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsAtomicHeaders",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "Only actualPOST202 creates opaque Acknowledgement, preserved independently even on accepted read/Close/context/source failure plus whole ResponseError. Before is observed priorstate and POST headers are not projected as refreshedmetadata; accepted responses are closed once and never replayed.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCorePhaseFailuresAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsMutationEvidence",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Missing404/unexpected/native/transport errors are never ignored, preserve original typed status/body/header/custom/context/reauthfield causes, and retain completed Before on second-phase failure. Captured source/liveauth and fixed method/target/serializednilbody/strictstatus survive native perphase prebody policies without an automatic whole RMW retry or CAS promise.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSymlinkAndStrictStatus",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSourceAndLiveAuth",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsSourceAndNativePolicy",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/README.md"
+      ],
+      "differences": [
+        "Python setter conditionallyHEADs only when last_modified_at absent, merges cached metadata/systemaliases and returns the same Object with no finalHEAD; Go alwaysfreshHEAD and returns distinct Before/POSTack.",
+        "Python drops falsey input and str-coerces alias fields. Go stores empty custom strings literally, alwaysrequests bothphases and uses suffix-only names plus exact wire header overrides.",
+        "Mutation own-linkread/rejection and onlynine bounded system carryheaders deliberately exclude unknown serverconfiguredmutable/sysmeta/currentversionedaliases; normal getter can followlinks."
+      ],
+      "remaining": [
+        "Python cache-based conditionalreads, Object return/descriptors/Adapter/session/falseycoercion/systemalias conventions remain different.",
+        "Broader temp/version/SLO/symlink mutation semantics and configurable extra systemheaders are deferred; no complete resourcecache or metadata subsystem parity.",
+        "Read/merge/write is not atomic or CAS-protected; concurrentupdates may be overwritten and POST307 may followapplication. No automatic rollback/restart/refresh or mutationabsent inference."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/delete_object_metadata",
+      "source_fingerprint": "2f18ff01dbaaade5e5347a3c6487640464c9777a72e0ce9297fb3e490abbb701",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.DeleteMetadata",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMetadata always performs fresh own HEAD200 then one full-custom bodyless POST202, including nil/empty key slices and absent suffixes. It is custom metadata subtraction, never HTTPDELETE or X-Remove headers; no final refresh, inferred no-op or suppression of missing errors.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Delete snapshots the caller key slice before callbacks and rejects full-prefix, empty, original nonASCII/malformed suffix tokens, duplicates and casealiases before HTTP. Names/source/header/context validation preserves native typed/option/custom causes with no lookup or coercion.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsCompletePreflightAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Delete removes only specified suffixes from fresh complete custom Values, preserves all other custom entries including empty and carries exactly nine bounded observed mutable systemheaders with source/option override precedence. Exact system wire overrides are separate from custom keys; Python alias deletions are not synthesized.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Delete shares mutation whole-opts replacement, canonical singular/plural merge, original token validation, retained callback/factory ownership and parallel reusable options. All preparation/input capture completes before HTTP; POST option headers do not alter the HEAD read phase.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsReplacementAndRetainedHandles",
+            "objectstorage/v1/objects/metadata_options_test.go:TestObjectMetadataOptionsParallelReuseAndHeaderBoundaries",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Delete reads own symlink=get metadata, validates known symlink response headers and rejects link presence beforePOST while retaining actual Before. Current versioned aliases are deliberately bounded; native307 after application remains an error with priorphase proof and no unchanged-state or rollback claim.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSymlinkAndStrictStatus",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "Delete retains acceptedHEAD raw Before on firstphase handling or prePOST error, completed Before without Acknowledgement on nativePOSTfailure, and actualPOST202 Acknowledgement on accepted handling failure. Raw fields, response errors and typed/custom causes are independent with one Close/no accepted replay; no response state is synthesized.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCorePhaseFailuresAndCauses",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsAtomicHeaders",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsMutationEvidence",
+            "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Strict HEAD200/POST202 and missing404 preservation remain separate from native Get200/204 and Update201/202. Source/provider/raw bases/liveauth and method/URL/body/status guards retain perphase prebody native policy, advanced MoreHeaders and reauthfield boundaries without automatically restarting the read/merge/write flow.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSourceAndLiveAuth",
+            "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreSymlinkAndStrictStatus",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsSourceAndNativePolicy",
+            "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
+            "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/README.md"
+      ],
+      "differences": [
+        "Python falseykeys or absentkeys can skipPOST and actual deletionPOST ends with HEAD; its proxy returnsNone. Go alwaysfreshHEAD and POST, then returns distinct phaseevidence without final refresh.",
+        "Go delete keys refer onlystrict customsuffixes; Python cached custom/systemalias deletion and special delete_after behavior are not reproduced."
+      ],
+      "remaining": [
+        "Python cachedResource mutation, no-op detection, finalHEAD refresh/None return, systemalias delete behavior and generic Adapter/session remain unresolved.",
+        "Strictown-link policy/currentversionedalias limitation, exactsuffix validation and actual200/202 evidence are explicit Go choices; native richer APIs remain available.",
+        "Concurrentread/write can overwrite changes; POST307 may followapplication. No CAS/rollback/durablecompletion or missing-absence guarantee."
+      ]
     }
   ]
 }
