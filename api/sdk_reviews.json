@@ -17916,6 +17916,205 @@
         "Generic Collection.Delete/Remove broad nested404 classification is unchanged and remains outside this targeted workflow. Native Name pagination keeps existing continuation, source normalization and surfaced body/error policy; no stricter continuation contract is introduced.",
         "Configured pre-body retry/backoff may emit more than one DELETE. After an owned204/404 body is obtained the SDK preserves evidence/causes and does not replay; custom transports may have separate internal policies. Complete Python cleanup, lifecycle and generic deletion parity are not claimed."
       ]
+    },
+    {
+      "operation": "python:image/v2/stores",
+      "source_fingerprint": "097003354a75ea150136ba381715a1b902c41d4ac1a851ca7e4051e30ebd48a9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/serviceinfo.New",
+        "gophercloudsdk/image/v2/serviceinfo.API.RawClient",
+        "gophercloudsdk/image/v2/serviceinfo.API.ListStores",
+        "gophercloudsdk/image/v2/serviceinfo.API.AllStores",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresOptions",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresDetails",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresMaxItems",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresPaginated",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresQuery",
+        "gophercloudsdk/image/v2/serviceinfo.WithListStoresHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListStores/AllStores default to basic GET info/stores with actual200 only. Local Details true chooses info/stores/detail and never becomes query; server403/404 and feature-unavailable remain errors with no basic fallback. Store embeds Metadata with actual per-page Header/status and raw canonical/unknown fields.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreDiscoveryRoutesAndRawModels"
+          ]
+        },
+        {
+          "behavior": "Store stores envelope is mandatory nonnull array and rows must be objects. Canonical id/description missing/null become empty strings, nonnull require strings. Canonical default/read-only are optional flags accepting JSON bool or lexical true/false strings; is_default/case variants are raw unknown only. Properties missing/null remain nil else raw object; optional type is string and weight exactint64, without coercion. Store IDs are passive discovery data, never derived request routes.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCanonicalModelsAndPresence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCanonicalAndNullableDecoding"
+          ]
+        },
+        {
+          "behavior": "Concrete defaults Details=false,Limit=0,Marker empty,MaxItems=0,Paginated=nil mean basic route, omitted wire limit/marker, uncapped allpages. Negative controls, malformed limit/marker, invalidUTF8, nil/cause-returning callbacks, body/argument/microversion and reserved query controls reject before HTTP. Wire query helper is a Go extension and does not implement Python Body filters or unknown-query discard; ordinary headers use protected shared validation.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCompletePreflight",
+            "image/v2/serviceinfo/options_test.go:TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "List creation performs no HTTP and copies callback slice. Each iteration applies callbacks once to owned independent query/header/pointers and source snapshots. Whole typed replacement snapshots Paginated at creation/application; later leaf options replace settings in order. Retained callback handles cannot change prepared request or subsequent callbacks; standard options and iterator reuse are concurrent-safe.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoPreparedOptionsAndLazyParallelReuse",
+            "image/v2/serviceinfo/options_test.go:TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles",
+            "image/v2/serviceinfo/options_test.go:TestServiceInfoOptionsConcurrentReusableSnapshots"
+          ]
+        },
+        {
+          "behavior": "Paginated=false stops at firstpage and MaxItems is a local raw-row cap, stops before unused row decode or next-link interpretation, and never generates a wire limit hint. Only advertised Link/body-next/HTTPLink continues, bounded to fixed origin/reverse-prefix/selectedpath/initialnonpaginationquery and cycle checks; empty page stops. Missing link ends even a nonempty response. Explicit caller limit/marker remain wire preferences but never authorize automatic marker fallback, because actual Glance discovery ignores those queries and returns the same full store set.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoPaginationCapsAndRawMarkers",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCorePagingUsesAdvertisedLinksAndStopsAtControls",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreServerIgnoresPaginationQueries"
+          ]
+        },
+        {
+          "behavior": "ListStores may yield valid prior rows then terminal row/page error. AllStores discards prior rows and returns nil on terminalerror; successful empty collection returns nonnil empty slice. Cap and firstpage control may stop before otherwise unused malformed rows/continuations without inventing deployment pagination support.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoPaginationCapsAndRawMarkers",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCorePagingUsesAdvertisedLinksAndStopsAtControls"
+          ]
+        },
+        {
+          "behavior": "Context/image client/provider/base/source headers validate before options, after callbacks and before each request/page. Capture origin/reverse prefix/provider/header policy, retain the original provider live token and reject source/provider/target replacement. Fixedrequest retains configured same-scope redirect callbacks and rejects method/origin/path/query changes before transport.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCompletePreflight",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoProviderSourceAndRetryBoundaries",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCapturesSourceAndGuardsLaterPages"
+          ]
+        },
+        {
+          "behavior": "Accepted actual200 owns whole raw body/Header/StatusCode and closes the body once. Read/Close/JSON/full-root UTF8/model/context failures preserve ResponseError evidence and independent original/custom causes; accepted body failures do not replay. Native rejected errors and native ErrUnableToReauthenticate.ErrOriginal/ErrReauth field ownership remain unchanged. Shared DoJSON rejects RetryFunc ownership-field mutation and rechecks captured200 even when native OkCodes expands.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoAcceptedFailuresAndNativeCompatibility",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoProviderSourceAndRetryBoundaries",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreBodyAndModelFailuresKeepEvidence"
+          ]
+        },
+        {
+          "behavior": "Exact canonical keys alone populate typed fields. Full raw root is valid UTF8 flat JSON object; unknown and case-variant fields remain raw without overriding canonical fields. Raw model Body/Header/status are independently owned, preserving unknown large numbers as json.RawMessage.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCanonicalModelsAndPresence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCanonicalAndNullableDecoding",
+            "internal/rest/response_validation_test.go:TestResponseValidationChecksWholeBodyBeforeGetAndListDecoders",
+            "internal/rest/response_validation_test.go:TestResponseValidationRunsPerPageAndPreservesLazyBreak"
+          ]
+        },
+        {
+          "behavior": "Generated ImageV2.ServiceInfo and upper Image.API share the configured authenticated client/prefix/liveauth with Connection. Store list_only and ImportInfo service_info inventory are SDK-owned records; original native ImageImport.Get route/signature/result remains unchanged. Generator rejects native Get/canonical model drift without inventing an upstream operation.",
+          "tests": [
+            "connection_image_serviceinfo_test.go:TestConnectionImageServiceInfoSharesClientPrefixAndLiveAuthentication",
+            "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRegistryAndNativeCompatibility",
+            "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRejectsNativeGetAndCanonicalModelDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/serviceinfo/README.md",
+        "image/v2/README.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Go uses canonical default/read-only optional flags with lexical true/false strings; Python bool(\"false\") isTrue. Detail type/read-only/weight are official-wire convenience fields absent from pinned Python Store descriptors. Store envelope must be array, unlike Python singleton coercion.",
+        "Go wire-query extension sends exact raw query and rejects localcontrol aliases. Pinned Python only transposes limit/marker, applies recognized Body attribute/properties subset filters locally and discards unknown keys; these filters/classification are not implemented.",
+        "Go continues only advertised links bounded to captured prefix/selected collection and unchanged initial nonpagination query; MaxItems is local with no wire limit hint or synthetic next marker. Pinned Python genericResource list emits a limit hint and performs limit-based marker fallback even though actual Glance discovery ignores limit/marker. Go deliberately avoids repeated stores and false cycles; Python broader version-relative link normalization also remains different.",
+        "Go returns owned Metadata raw JSON/Header/actualstatus and uses exact canonical UTF8/schema decoding. Pinned Python mutable Resource descriptors may discard unknown fields and apply broader bool/dict coercion; Python response translation accepts status<400 and Import fetch swallows some ValueError instead of returning accepted decode proof.",
+        "Go freezes source origin/prefix/header/provider with live original auth, guarded native retry body ownership and original200 status. Configured same-scope redirect and native rejected/reauth policies remain; native reauth fields must be inspected through the wrapper because it has no Unwrap. These bounded policies do not reproduce arbitrary Python session/adapter semantics."
+      ],
+      "remaining": [
+        "Python local Body/properties filters, unknown query classification, arbitrary base_path override and broader version-root continuation normalization remain partial. Optional Go wire limit does not guarantee server-side pagination.",
+        "Mutable Python Resource/descriptor/default/dirty/cache/adapter/session behavior, object overloads, base_path/microversion overrides and complete response/exception/coercion parity remain unresolved.",
+        "No automatic discovery gate/cache, Store Resources/Find/CRUD/Wait, info/usage, image mutation wiring or capability inference. Local fixtures establish request/model/error contracts, not real cloud feature support or server permissions."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_import_info",
+      "source_fingerprint": "50c8388297968f76e73638e180bacefdf57accd8f06b4bb7f7ea5ce4863bf372",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/serviceinfo.New",
+        "gophercloudsdk/image/v2/serviceinfo.API.RawClient",
+        "gophercloudsdk/image/v2/serviceinfo.API.GetImportInfo",
+        "gophercloudsdk/image/v2/serviceinfo.WithGetImportInfoHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImportInfo performs ID-free singleton GET info/import with actual200 only and no list/cache/capability gate. Flat root metadata carries actual Header/status/raw unknown fields. Original native ImageImport.Get still performs the same discovery wire route and retains its existing typed callable/model.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoAcceptedFailuresAndNativeCompatibility",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreDiscoveryRoutesAndRawModels"
+          ]
+        },
+        {
+          "behavior": "Canonical import-methods missing/null stays nil; nonnull is object. Nested description/type missing/null become empty strings else require strings. Value missing/null stays nil, emptyarray stays nonnil empty, and nonnullarray requires string entries without enum filtering. Nested raw Body retains unknown future constraints/exact numbers; alternate envelopes are never unwrapped.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCanonicalModelsAndPresence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCanonicalAndNullableDecoding"
+          ]
+        },
+        {
+          "behavior": "GetImportInfo concrete options support ordinary validated headers only. Nil callbacks, callback causes, fields/query/arguments/microversion and protected/malformed headers fail before HTTP. Each callback receives owned configuration; retained handles cannot mutate the final prepared header policy.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCompletePreflight",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoPreparedOptionsAndLazyParallelReuse",
+            "image/v2/serviceinfo/options_test.go:TestServiceInfoOptionsRejectUnsupportedInputsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Context/image client/provider/base/source headers validate before options, after callbacks and before each request/page. Capture origin/reverse prefix/provider/header policy, retain the original provider live token and reject source/provider/target replacement. Fixedrequest retains configured same-scope redirect callbacks and rejects method/origin/path/query changes before transport.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCompletePreflight",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoProviderSourceAndRetryBoundaries",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCapturesSourceAndGuardsLaterPages"
+          ]
+        },
+        {
+          "behavior": "Accepted actual200 owns whole raw body/Header/StatusCode and closes the body once. Read/Close/JSON/full-root UTF8/model/context failures preserve ResponseError evidence and independent original/custom causes; accepted body failures do not replay. Native rejected errors and native ErrUnableToReauthenticate.ErrOriginal/ErrReauth field ownership remain unchanged. Shared DoJSON rejects RetryFunc ownership-field mutation and rechecks captured200 even when native OkCodes expands.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoAcceptedFailuresAndNativeCompatibility",
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoProviderSourceAndRetryBoundaries",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreBodyAndModelFailuresKeepEvidence"
+          ]
+        },
+        {
+          "behavior": "Exact canonical keys alone populate typed fields. Full raw root is valid UTF8 flat JSON object; unknown and case-variant fields remain raw without overriding canonical fields. Raw model Body/Header/status are independently owned, preserving unknown large numbers as json.RawMessage.",
+          "tests": [
+            "image/v2/serviceinfo/contracts_test.go:TestServiceInfoCanonicalModelsAndPresence",
+            "image/v2/serviceinfo/core_test.go:TestServiceInfoCoreCanonicalAndNullableDecoding",
+            "internal/rest/response_validation_test.go:TestResponseValidationChecksWholeBodyBeforeGetAndListDecoders",
+            "internal/rest/response_validation_test.go:TestResponseValidationRunsPerPageAndPreservesLazyBreak"
+          ]
+        },
+        {
+          "behavior": "Generated ImageV2.ServiceInfo and upper Image.API share the configured authenticated client/prefix/liveauth with Connection. Store list_only and ImportInfo service_info inventory are SDK-owned records; original native ImageImport.Get route/signature/result remains unchanged. Generator rejects native Get/canonical model drift without inventing an upstream operation.",
+          "tests": [
+            "connection_image_serviceinfo_test.go:TestConnectionImageServiceInfoSharesClientPrefixAndLiveAuthentication",
+            "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRegistryAndNativeCompatibility",
+            "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRejectsNativeGetAndCanonicalModelDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/serviceinfo/README.md",
+        "image/v2/README.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Go optional ImportMethods and exact string Value distinguish missing/null/empty and retain unknown raw root/nested values. Pinned Python dictionary descriptor coercion/mutable fetchedResource and cache/session semantics differ; alternate envelopes are never automatically unwrapped.",
+        "Native ImageImport.Get already implements /info/import. ServiceInfo adds owned actualstatus/header/raw/optional evidence without replacing that native API or adding a new upstream operation.",
+        "Go returns owned Metadata raw JSON/Header/actualstatus and uses exact canonical UTF8/schema decoding. Pinned Python mutable Resource descriptors may discard unknown fields and apply broader bool/dict coercion; Python response translation accepts status<400 and Import fetch swallows some ValueError instead of returning accepted decode proof.",
+        "Go freezes source origin/prefix/header/provider with live original auth, guarded native retry body ownership and original200 status. Configured same-scope redirect and native rejected/reauth policies remain; native reauth fields must be inspected through the wrapper because it has no Unwrap. These bounded policies do not reproduce arbitrary Python session/adapter semantics."
+      ],
+      "remaining": [
+        "Python cached mutable Import Resource, negotiated microversion/session policy and broader fetch translation/coercion remain unresolved. Query/body/ID/Name/Resource overload are not added to this read-only singleton.",
+        "Mutable Python Resource/descriptor/default/dirty/cache/adapter/session behavior, object overloads, base_path/microversion overrides and complete response/exception/coercion parity remain unresolved.",
+        "No automatic discovery gate/cache, Store Resources/Find/CRUD/Wait, info/usage, image mutation wiring or capability inference. Local fixtures establish request/model/error contracts, not real cloud feature support or server permissions."
+      ]
     }
   ]
 }
