@@ -117,3 +117,5 @@ source/context/client/provider·prefix·일반 header를 callback 전에 검증�
 공통 `DoJSON`과 fixed request policy는 configured pre-body retry·reauth·backoff 및 같은 target의 native redirect 동작을 유지합니다. method·origin·path·query 변경은 transport 전에 차단합니다. RetryFunc가 nil body를 JSON null로 바꾸거나 RawBody·KeepResponseBody·JSONResponse 등 SDK 소유 필드를 바꾸면 다음 요청 전에 원래 오류와 hook/encoding cause를 보존해 거부합니다. callback이 native OkCodes를 넓혀도 실제 200만 accepted합니다. native reauth의 원인들은 기존 `ErrOriginal`·`ErrReauth` 필드에 남습니다.
 
 이 getter들은 schema 조회만 수행합니다. resource CRUD·Name lookup·URL/ref following·paging·cache mutation·recursive schema validation·자동 quota/권한 enforcement·discovery gate·wait·cleanup을 추가하지 않습니다. local 계약과 컴파일 검증은 실제 cloud의 인증·deployment policy나 full Python Resource/cache/session 동등성을 증명하지 않습니다.
+
+실제 local 계약은 [외부 HTTP tests](schemas_contracts_test.go), [core tests](schemas_core_test.go), [option tests](schemas_options_test.go)에서 검증합니다. [Connection test](../connection_image_schemas_test.go)는 공유 native client와 passive discovery를, [generator test](../internal/cmd/sdkgen/glance_schemas_test.go)는 기존 native binding 보존과 16개 getter 문서를 확인합니다.
