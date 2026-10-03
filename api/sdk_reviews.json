@@ -21365,67 +21365,70 @@
         "gophercloudsdk/image/v2/metadefnamespaces.WithCreateDescription",
         "gophercloudsdk/image/v2/metadefnamespaces.WithCreateVisibility",
         "gophercloudsdk/image/v2/metadefnamespaces.WithCreateOwner",
-        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateProtected"
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateProtected",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateProperties",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateObjects",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateTags",
+        "gophercloudsdk/image/v2/metadefnamespaces.WithCreateResourceTypeAssociations"
       ],
       "contracts": [
         {
-          "behavior": "Literal namespace identity, fixed source capture and strict preflight: name is nonempty UTF8<=80runes; colon/Unicode/spaces remain, route-breaking/control/dot syntax rejected before callbacks/HTTP. No Find, Ref/name resolver, generic Resources or response-driven routing. Fixed original provider/prefix/header/microversion with live original auth; source checks after callbacks/body and before consumed rows/pages.",
+          "behavior": "Literal root namespace retains safe nonempty UTF8<=80rune identity and fixed source capture before callbacks; no Ref/Find/Name resolver or input/response-driven retargeting. One existing collection Create request uses original provider and reverse prefix with live original auth and captures ordinary headers/microversion, then rechecks source/context after preparation and accepted body.",
           "tests": [
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
-            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreCompletePreflight",
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreSourceAndUpdatePreservation",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedOptionsAndCapturedSource",
+            "connection_image_metadef_namespace_create_test.go:TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput"
           ]
         },
         {
           "behavior": "Canonical Namespace is a validUTF8 nonnull object with exact-case optional string fields namespace/display_name/description/visibility/owner/self/schema and protected bool. Missing/null nil, empty/false present; literal nullable dates are unparsed. Nested definitions/links/unknown shapes stay independently owned raw JSON with exact large-number precision; no ID/Name/Links synthesis. Wrong types are atomic model failures with actual whole response proof.",
           "tests": [
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCanonicalPresenceAndAtomicDecoder",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership"
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreAllDefinitionsOnePOST",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedAcceptedResponseEvidence"
           ]
         },
         {
-          "behavior": "Concrete FullOpts replaces all configuration; helper values, maps, optional pointers and option slice are copied, per-callback config independently copied before/after and callback once per request/iteration. Nil/error callbacks and protected headers fail before HTTP; helper reuse/parallel iterations retain snapshots.",
+          "behavior": "Concrete FullOpts replaces complete scalar and nested configuration; last helper wins. Recursive maps/slices/raw attributes/optional pointers and callback option/config snapshots are independently owned. Callbacks execute once; helper reuse and concurrent Create prepare independent bodies. Original raw keys are checked before JSON marshal, callback causes retained.",
           "tests": [
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsSnapshotsReplacementAndLastWins",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsParallelReusableHelpers",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
-            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsDeepFactorySnapshots",
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsReplacementAndPresence",
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation",
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsParallelReusableHelpers",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedOptionsAndCapturedSource",
+            "connection_image_metadef_namespace_create_test.go:TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput"
           ]
         },
         {
-          "behavior": "Strict original Create201/Get-List-Update200/Delete204 accepted statuses. Accepted read/Close/UTF8/JSON/model/context/source failure preserves original bytes/header/status and read/Close/ctx.Err/customCause in owned ResponseError, without accepted-body replay. Delete actual204 preserves nonnil opaque acknowledgement plus error; close once. Native rejected response ownership is retained.",
+          "behavior": "Original Create201 is the only accepted decode status. Accepted read/Close/UTF8/JSON/model/context/source failure returns no typed Namespace and preserves actual whole bytes/header/status and original read/Close/ctx.Err/customCause in ResponseError, close once, without accepted-body replay or input-seeded nested models. Native rejected response ownership remains unchanged.",
           "tests": [
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreAcceptedResponseOwnership",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedAcceptedResponseEvidence"
           ]
         },
         {
           "behavior": "Shared unchanged REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect policy, blocks changed method/origin/path/query and owned KeepResponseBody/JSONResponse/RawBody/serialized JSON. Original accepted status enforced even if native hook expands OkCodes; unchanged serialized replacement may remain, nilbody differsJSONnull. Native reauth ErrOriginal/ErrReauth fields remain native.",
           "tests": [
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership",
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCapturedSourceAndNativeRetryBoundaries",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsCallbackPointersAndSliceOwnership",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesCanonicalModelsAndRawOwnership",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks"
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreNativeErrorsAndRetryBody",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedNativeRetriesAndServerFailures"
           ]
         },
         {
-          "behavior": "One flat POST201 sends required literal namespace and only supplied display_name/description/visibility/owner/protected scalars. Optional nil omits; empty/false explicit. UTF8 scalar rune bounds are80/500/255, description may be multiline, visibility exactlypublic/private. Omission delegates private/false/authowner to server. Nested definition inputs, policy enforcement and server cleanup are deferred, with no hidden discovery/GET/rollback.",
+          "behavior": "One flat collection POST201 combines required literal namespace, existing optional scalars and each supplied nested container, with no hidden GET/child writes/wait/cleanup. Nil properties/objects/tags/associations and nested object properties/Required omit; explicit nonnil empty encodes object/array. Property Type and Title value strings always encode, including empty Title; optional nil strings omit and explicit empty strings remain. Server defaults for omitted scalar settings remain unchanged.",
           "tests": [
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreFixedRoutesAndReplacementEvidence",
-            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreCompletePreflight",
-            "image/v2/metadefnamespaces/options_test.go:TestMetadefNamespacesOptionsValidationAndDefaults",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
-            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesOwnedPreparationAndSource",
-            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
-            "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreAllDefinitionsOnePOST",
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreNilEmptyAndDefaults",
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsReplacementAndPresence",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedCreateWireAndPresence",
+            "internal/cmd/sdkgen/glance_metadef_namespace_create_test.go:TestGlanceMetadefNamespaceNestedCreatePreservesRegistry"
+          ]
+        },
+        {
+          "behavior": "Nested dictionary keys, Name, object Required entries, description, prefix and target accept validUTF8 only, including empty/control/route characters/>80; root route80 validation is separate, no trim/dedupe/CSV/key-name normalization. Property Type is nonemptyUTF8 without enum gate, Title validUTF8 empty allowed. Flat Attributes checks original keyUTF8 before marshal, requires full validUTF8 JSON values incl null/exact number tokens, and rejects exact nine owned keys. Local schema/WSME/DB/policy gates are not added; failures remain preHTTP with original causes.",
+          "tests": [
+            "image/v2/metadefnamespaces/nested_core_test.go:TestMetadefNamespaceCreateNestedCoreCompletePreflight",
+            "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation",
+            "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedDefinitionsAndRawSchema"
           ]
         }
       ],
@@ -21433,16 +21436,20 @@
         "image/v2/metadefnamespaces/README.md"
       ],
       "differences": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+        "Pinned Python MetadefNamespace recognizes resource_type_associations and inherited tags, but has no properties/objects descriptors; ordinary create proxy kwargs for those two are discarded under False unknown-body flags. Go covers all four actual server containers; this server augmentation is not invented Python operation parity.",
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework remain broader than concrete snapshot Create. Go always sends an explicit requested Create without cached-state mutation.",
+        "Go validates root safe route80 separately from UTF8-only nested JSON names/keys/Required; it does not locally reproduce pinned schema type enums, WSME mandatory/coercion/lost-key behavior, DB length/Unicode/CSV storage or server policy. Raw input forwarding and response echo do not prove keyword precision/storage round-trip.",
+        "Pinned server creates parent then associations/objects/tags/properties sequentially; Invalid400 skips cleanup and other named failures attempt best-effort cleanup that may fail protected. Auto-created global resource types can survive. SDK adds no rollback/cleanup/child requests and fixtures do not establish deployed effects.",
+        "Create201 nested content is submitted WSME echo rather than fresh persisted child fetch. Canonical Namespace response stays raw for nested definitions; generated child metadata and normalized schema/Required values are not inferred.",
+        "Namespace Update remains scalar replacement and its cached Python dirty semantics remain partial; nested Update is not added despite APIref prose. No authenticated cloud execution/full SDK parity is claimed."
       ],
       "remaining": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+        "Pinned Python MetadefNamespace recognizes resource_type_associations and inherited tags, but has no properties/objects descriptors; ordinary create proxy kwargs for those two are discarded under False unknown-body flags. Go covers all four actual server containers; this server augmentation is not invented Python operation parity.",
+        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework remain broader than concrete snapshot Create. Go always sends an explicit requested Create without cached-state mutation.",
+        "Go validates root safe route80 separately from UTF8-only nested JSON names/keys/Required; it does not locally reproduce pinned schema type enums, WSME mandatory/coercion/lost-key behavior, DB length/Unicode/CSV storage or server policy. Raw input forwarding and response echo do not prove keyword precision/storage round-trip.",
+        "Pinned server creates parent then associations/objects/tags/properties sequentially; Invalid400 skips cleanup and other named failures attempt best-effort cleanup that may fail protected. Auto-created global resource types can survive. SDK adds no rollback/cleanup/child requests and fixtures do not establish deployed effects.",
+        "Create201 nested content is submitted WSME echo rather than fresh persisted child fetch. Canonical Namespace response stays raw for nested definitions; generated child metadata and normalized schema/Required values are not inferred.",
+        "Namespace Update remains scalar replacement and its cached Python dirty semantics remain partial; nested Update is not added despite APIref prose. No authenticated cloud execution/full SDK parity is claimed."
       ]
     },
     {
