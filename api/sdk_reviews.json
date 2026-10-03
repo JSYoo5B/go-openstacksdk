@@ -17806,6 +17806,116 @@
         "Custom HTTP transports may implement cache/replay behavior internally; the SDK does not restart a transfer after receiving an accepted body. Forced release of a caller blocking Write and cleanup/rollback of caller output are outside the workflow. Existing Name pagination keeps common native continuation semantics and does not add stricter path/query continuity.",
         "Python binary error-response consumption and arbitrary configured adapter/cache exceptions remain broader. Go deliberately keeps only accepted200/204 binary header/status and native rejection causes, with metadata evidence independently retained."
       ]
+    },
+    {
+      "operation": "python:image/v2/delete_image",
+      "source_fingerprint": "292b3d1ab782ca5cf739f016c72004f3a096110802d366639b197c2a825b1003",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.DeleteImage",
+        "gophercloudsdk/image.WithDeleteImageOpts",
+        "gophercloudsdk/image.WithDeleteImageStore",
+        "gophercloudsdk/image.WithDeleteImageIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteImage defaults to whole-image DELETE and ignores clean missing resources. ID routes directly without metadata GET; nonnil store selects only /stores/{storeID}/{imageID}. Only actual204 constructs a result with fixed selected ImageID/StoreID, owned raw Body, cloned Header and actual StatusCode; no decoded model or fabricated response.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageWholeAndStoreRoutesAndEvidence",
+            "image/delete_core_test.go:TestDeleteCoreFixedScopeAndOwnedAcknowledgement"
+          ]
+        },
+        {
+          "behavior": "Context/service/provider/image base/headers/ref and all options are validated before HTTP. Nil policy defaults StoreID=nil and IgnoreMissing=true; explicit false remains distinct. Explicit empty/unsafe/invalid UTF8 store fails locally instead of broadening to whole delete. Nil callbacks and caller callback failures preserve the invalid-option or original cause.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageCompletePreflight",
+            "image/delete_options_test.go:TestDeleteOptionsDefaultsAndExplicitStorePreflight"
+          ]
+        },
+        {
+          "behavior": "Whole-policy helper snapshots both pointers at construction and fully replaces prior settings; leaf helpers replace one setting in order. Option slice and each callback configuration are owned. Custom callbacks run once before requests, and retained configuration cannot mutate later callbacks or the final policy. Reused snapshot helpers remain independent under concurrent application.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImagePreparedSnapshotsAndSource",
+            "image/delete_options_test.go:TestDeleteOptionsFullReplacementAndConcurrentReuse",
+            "image/delete_options_test.go:TestDeleteOptionsCallbacksOnceAndIndependentRetainedHandles"
+          ]
+        },
+        {
+          "behavior": "Explicit Name uses existing exact-name full-page Images resolver and duplicate detection, then a fixed safe DELETE ID. Only direct logical image NotFound from completed successful lookup, with no cause/context/source failure, is ignored by default. HTTP404, surfaced native body/decode/transport failures, ambiguity and nested404 causes remain errors. Native LIST body ownership and continuation semantics are retained.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageExactNameResolutionAndFailures",
+            "image/delete_core_test.go:TestDeleteCoreNameAbsenceAndSourceFailureBoundaries"
+          ]
+        },
+        {
+          "behavior": "Privately owned DELETE404 is read and closed once before ignore decisions. Clean default404 returns nil,nil; clean strict404 returns nil plus typed logical NotFound preserving a value native ErrUnexpectedResponseCode with DELETE/fixedURL/expected204/actual404/rawBody/Header. Body read/Close/context failure preserves native404 and every cause and is never suppressed or converted into NotFound-only success.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageNotFoundPolicyAndClassification",
+            "image/delete_core_test.go:TestDeleteCoreOwnedMissingPreservesBodyAndContextFailures"
+          ]
+        },
+        {
+          "behavior": "Accepted DELETE204 result survives partial read, Close and context failures together with accepted ResponseError. Result and error independently own bytes and headers. Original read/Close/native status and ctx.Err/context.Cause survive request operation wrapping. Nested404 during accepted204 does not erase acknowledgement or classify the operation as missing. Owned204/404 bodies close once without replay after body failure.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageAcceptedProofAndCancellation",
+            "image/delete_core_test.go:TestDeleteCoreAcknowledgementAndErrorEvidenceAreIndependent",
+            "image/delete_core_test.go:TestDeleteCoreOwnedMissingPreservesBodyAndContextFailures"
+          ]
+        },
+        {
+          "behavior": "Captured prefix/headers and policy use the original provider live token; original source/provider and target guards run after callbacks and Name lookup. Legitimate captured source/header selection remains fixed while malformed or replaced sources fail before DELETE. Cancellation, parent deadline, HTTPClient timeout and original transport causes remain errors; all HTTP/test handles are closed.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImagePreparedSnapshotsAndSource",
+            "image/delete_contracts_test.go:TestDeleteImageAcceptedProofAndCancellation",
+            "image/delete_core_test.go:TestDeleteCoreNameAbsenceAndSourceFailureBoundaries"
+          ]
+        },
+        {
+          "behavior": "Configured pre-body reauthentication/retry/backoff remains available for native rejected/transport failures and may resend DELETE before acceptance. DELETE redirect following is disabled. Privately handled404 intentionally bypasses native RetryFunc; neither handled404 nor accepted204 body read/Close failures are retried. Native ErrUnableToReauthenticate retains independent ErrOriginal/ErrReauth fields; its causes are inspected through these fields after errors.As because that native wrapper does not Unwrap. Configured RetryFunc changes to KeepResponseBody/JSONResponse/JSONBody/RawBody are rejected before another DELETE with ErrInvalidOption, original pre-body failure and any callback cause retained, preserving the empty request and owned-response contract. The contract does not promise a single wire packet under configured retry policy.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageProviderHooksAndRedirects",
+            "image/delete_core_test.go:TestDeleteCoreActualProtocolAndNativeRetryBoundaries"
+          ]
+        },
+        {
+          "behavior": "The upper workflow accepts actual204 only;200/202/206/redirect/403/409 or other unexpected status normally uses native errors and native rejected-body ownership without an acknowledgement result. If configured RetryFunc changes OkCodes so native Request accepts another status, the workflow owns its read/Close then rejects the actual status with raw body/header and causes rather than creating acknowledgement evidence. Store deletion never falls back to whole deletion. Server-owned last-location409/protected/status/policy decisions do not trigger metadata/store discovery, wait or cache/Swift/task cleanup.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageWholeAndStoreRoutesAndEvidence",
+            "image/delete_contracts_test.go:TestDeleteImageNativeDeleteCompatibility",
+            "image/delete_contracts_test.go:TestDeleteImageProviderHooksAndRedirects",
+            "image/delete_core_test.go:TestDeleteCoreActualProtocolAndNativeRetryBoundaries"
+          ]
+        },
+        {
+          "behavior": "Existing native Images.Delete keeps its error-only generated callable and native202/204 semantics, while Collection.Delete/Remove and other native bindings remain unchanged. Generator checks native Delete context/client/id/result signature, ErrResult and Image canonical ID and rejects signature/result/identity drift. Upper whole/store guide adds no native operation, model, inventory row or store collection.",
+          "tests": [
+            "image/delete_contracts_test.go:TestDeleteImageNativeDeleteCompatibility",
+            "internal/cmd/sdkgen/glance_delete_test.go:TestGlanceDeletePreservesNativeAPIAndDocumentsStoreWorkflow",
+            "internal/cmd/sdkgen/glance_delete_test.go:TestGlanceDeleteRejectsNativeSignatureResultAndIdentityDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/delete.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Go uses explicit ID or exact Name Ref and concrete owned options. Pinned Python accepts ID or mutable Image/Store Resource objects and chooses store only when truthy; its empty/falsy store broadens to whole image, whereas explicit empty Go StoreID is invalid before HTTP.",
+        "Pinned Python Proxy defaults ignore_missing=True, forwards it to Store leaf whose direct default isFalse, and discards both leaf return values. Go exposes actual204 raw Body/Header/StatusCode with fixed scope IDs; ignored clean404 or logical absence returns nil,nil and carries no success acknowledgement.",
+        "Pinned Python exceptions.raise_from_response accepts status<400. Existing native images.Delete accepts202/204; upper DeleteImage deliberately accepts204 only. Unexpected statuses retain native error ownership rather than full Python response translation/session parity.",
+        "Go privately handles404 to read/Close before suppression, retaining read/Close/context/native404 causes and preventing nested404 failure suppression. The handled404 bypasses native RetryFunc, an explicit difference from the rejected native404 hook; other configured pre-body reauth/retry/backoff remains.",
+        "Go captured route/header/options and live original provider token, source guards, redirect rejection, independently owned204 result/error proof and errors.Is/As causes are concrete workflow policies. Python Resource/adapter/session and mutable request preparation are broader; Name LIST ownership and continuation retain existing native pager behavior.",
+        "Go bounds native RetryFunc request-option mutation: changing KeepResponseBody, JSONResponse, JSONBody or RawBody fails before another DELETE while preserving the original rejected-request error and callback cause. This deliberate body-ownership guard is not complete arbitrary Python adapter/session hook parity."
+      ],
+      "remaining": [
+        "Full mutable supplied Image/Store Resource descriptor/default/coercion/dirty/cache/session/adapter behavior and Resource object overload remain unresolved. Concrete native Ref and StoreID policy does not reproduce these Python object semantics.",
+        "Cloud ImageCloudMixin.delete_image optional delete_objects and Swift object cleanup, cache_delete_image and task cleanup are separate operations. This workflow performs no wait, extra metadata GET, protected/status client gate, store discovery or fallback whole deletion.",
+        "Complete Python response/exception and configured session/transport retry/cache behavior remains partial. Native rejected-response body behavior and Name LIST body ownership are retained; owned DELETE204/404 body handling and private404 RetryFunc bypass are intentionally different.",
+        "Store/API release support, actual backend copy deletion, permission/protection/status constraints and last-location409 are server-owned. Local HTTP contracts do not establish deployment capabilities or real cloud deletion outcomes.",
+        "Generic Collection.Delete/Remove broad nested404 classification is unchanged and remains outside this targeted workflow. Native Name pagination keeps existing continuation, source normalization and surfaced body/error policy; no stricter continuation contract is introduced.",
+        "Configured pre-body retry/backoff may emit more than one DELETE. After an owned204/404 body is obtained the SDK preserves evidence/causes and does not replay; custom transports may have separate internal policies. Complete Python cleanup, lifecycle and generic deletion parity are not claimed."
+      ]
     }
   ]
 }
