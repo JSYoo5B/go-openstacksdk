@@ -14,8 +14,11 @@ import (
 
 type preparedCreateObject struct {
 	metadata *preparedMetadata
-	mu       sync.Mutex
-	observed error
+	// Optional immutable policy is used by scoped HEAD waiters. Existing
+	// create/stale operations retain their original header policy.
+	headerPolicy func(map[string]string) error
+	mu           sync.Mutex
+	observed     error
 }
 
 func (a *API) captureCreateObject(ctx context.Context, container, object string) (*preparedCreateObject, error) {
@@ -47,6 +50,9 @@ func validateCreateObjectHeaders(headers map[string]string) (map[string]string, 
 }
 func (p *preparedCreateObject) check(ctx context.Context) error {
 	_, headerErr := validateCreateObjectHeaders(p.metadata.source.MoreHeaders)
+	if p.headerPolicy != nil {
+		headerErr = joinMetadataErrors(headerErr, p.headerPolicy(p.metadata.source.MoreHeaders))
+	}
 	return metadataContextError(ctx, joinMetadataErrors(p.metadata.check(ctx), headerErr))
 }
 func (p *preparedCreateObject) guard(ctx context.Context) error {

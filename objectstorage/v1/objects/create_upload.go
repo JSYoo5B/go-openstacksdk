@@ -203,6 +203,9 @@ func (x *objectCreateExchange) headers(values map[string]string, requireOwned bo
 			}
 		}
 	}
+	if x.p.headerPolicy != nil {
+		return x.p.headerPolicy(values)
+	}
 	return nil
 }
 func (x *objectCreateExchange) wireHeaders(headers http.Header) error {
