@@ -25436,6 +25436,185 @@
       "documentation": [
         "objectstorage/v1/temp_url_key.md"
       ]
+    },
+    {
+      "operation": "python:object_store/v1/generate_form_signature",
+      "source_fingerprint": "4697a11d209a95519232b9bd4b9f5ca8cc45c8b281dc97862c4ffc5a6e4f3864",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1.Service.GenerateFormSignature",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureOpts",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureKey",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureDigest",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureTimestamp",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureHeader",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureHeaders",
+        "gophercloudsdk/objectstorage/v1.WithGenerateFormSignatureNewest",
+        "gophercloudsdk/objectstorage/v1.WithoutGenerateFormSignatureNewest"
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit nonempty arbitrary binary key signs decoded endpoint/container/prefix path plus literal redirect, positive size/count and captured expiry as five newline-separated fields, returning owned FormSignatureResult without HTTP upload.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths",
+            "connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "Nil key uses fresh container secondary then primary followed only on successful unusable keys by account secondary then primary; HTTP/atomic metadata/source errors stop fallback and missing key is semantic ErrNotFound without fabricated HTTP404.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreDiscoveryAndPhaseProof"
+          ]
+        },
+        {
+          "behavior": "Time is captured before discovery; explicit time.Time epoch and checked int64 relative expiry require nonnegative epochs, positive timeout/limits and no numeric/string coercion or overflow.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCorePreflightAndAcceptedFailures",
+            "objectstorage/v1/form_signature_options_test.go:TestFormSignatureOptionsParallelReuseAndInvalidValues"
+          ]
+        },
+        {
+          "behavior": "Endpoint path removes exactly one trailing slash and appends safe literal container/prefix without path.Clean or caller percent decoding; decoded UTF8 HMAC path and exactly-once escaped full endpoint URL are distinct owned representations.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths"
+          ]
+        },
+        {
+          "behavior": "Redirect is literal UTF8 emptyallowed, <=4096 bytes and no control/DEL/trailing hyphen, rejecting values altered by pinned FormPost rstrip before any discovery.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCorePreflightAndAcceptedFailures"
+          ]
+        },
+        {
+          "behavior": "Concrete full options replace configuration; key/header/timestamp/newest factories and callbacks deep snapshot values, preserve nil newest reset and literal accepted binary key bytes; SHA1 default and SHA256/SHA512 emit lowercase unprefixed hex.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/form_signature_options_test.go:TestFormSignatureOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/form_signature_options_test.go:TestFormSignatureOptionsParallelReuseAndInvalidValues"
+          ]
+        },
+        {
+          "behavior": "Original Service/client/provider/all4API identities and source route/header guards span discovery; accepted-phase handling failures retain raw Discovery evidence but no signature/URL and advanced native policy remains explicitly separate.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsSourceAndContext",
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsNativePolicy",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCorePreflightAndAcceptedFailures",
+            "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreDiscoveryAndPhaseProof",
+            "internal/cmd/sdkgen/swift_signing_test.go:TestSwiftSigningPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/signing.md"
+      ],
+      "differences": [
+        "Go returns structured path/full URL/digest/discovery instead of Python tuple, supports three concrete digests and explicit clock snapshot.",
+        "Go rejects redirect characters/size changed by the pinned parser and safely escapes output path; Python signs its supplied literal redirect/path unchanged."
+      ],
+      "remaining": [
+        "Python mutable Container/resource naming and adapter/session behavior are not reproduced by the concrete captured Service workflow.",
+        "Python integer coercion and timeout numeric behavior are deliberately narrower in Go, as are source-path/redirect validation and structured result semantics.",
+        "FormPost multipart upload, configured middleware acceptance, file rollback and browser redirect behavior remain server/caller responsibilities; no full Python SDK parity is claimed."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/generate_temp_url",
+      "source_fingerprint": "b3ec8eab9b83b05b2002a49f488244a00bd04146659a372a9a8b33e2057459c7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1.Service.GenerateTempURL",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLOpts",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLKey",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLDigest",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLTimestamp",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLHeader",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLHeaders",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLNewest",
+        "gophercloudsdk/objectstorage/v1.WithoutGenerateTempURLNewest",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLAbsolute",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLPrefix",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLISO8601",
+        "gophercloudsdk/objectstorage/v1.WithGenerateTempURLIPRange"
+      ],
+      "contracts": [
+        {
+          "behavior": "Decoded literal UTF8 /v1/account/container/object path is signed without caller percent decoding; literal percent/question/hash/unicode and slash structure survive exactly-once URL path and url.Values query escaping.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreVectorsAndEscapedOutput"
+          ]
+        },
+        {
+          "behavior": "ASCII HTTP token is uppercased without a local method whitelist; prefix mode permits empty object and signs prefix: path while IP restriction signs accepted literal ip= spelling.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreVectorsAndEscapedOutput"
+          ]
+        },
+        {
+          "behavior": "Relative or absolute nonnegative int64 seconds use one pre-discovery captured Unix epoch with checked arithmetic; ISO8601 output is UTC year1..9999 with no Python float/string/local-time parsing.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCorePreflightAndTimeBoundaries"
+          ]
+        },
+        {
+          "behavior": "IP restriction accepts untrimmed address or masked CIDR, rejects address zones and host-bit prefixes before HEAD, and does not rewrite accepted caller spelling.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCorePreflightAndTimeBoundaries"
+          ]
+        },
+        {
+          "behavior": "Nil key auto-discovers account-only even when the URL path names a container; nonnil empty bytes are invalid and nonempty arbitrary binary bytes skip all metadata HTTP.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy",
+            "connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "Concrete option factories/callbacks own binary key, header maps and timestamp/newest pointers; fullopts replacement and WithoutNewest preserve nil versus explicit bool while SHA1default and SHA256/SHA512 emit raw lowercase hex.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsOptionsAndPreflight",
+            "objectstorage/v1/temp_url_options_test.go:TestTempURLOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/temp_url_options_test.go:TestTempURLOptionsParallelReuseAndCallbackCauses"
+          ]
+        },
+        {
+          "behavior": "Actual fresh HEAD204 evidence survives accepted failures and missing key; all errors stop selection/signing, Discovery key/flags clear on failure and phase metadata clears on outer original-source drift without fabricating status.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsDiscoveryAndEvidence",
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsSourceAndContext",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Output is owned path-plus-query URL, while original native Objects.CreateTempURL ABI/primary-only discovery and Python str/bytes return/coercion/session behavior remain distinct.",
+          "tests": [
+            "objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsNativePolicy",
+            "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy",
+            "internal/cmd/sdkgen/swift_signing_test.go:TestSwiftSigningPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/signing.md"
+      ],
+      "differences": [
+        "Go accepts decoded UTF8 string and int64 seconds, escapes path/query once and returns structured owned result; Python accepts bytes/numeric/string timestamps and concatenates a literal query.",
+        "Go includes SHA256/SHA512, explicit time snapshot and strict masked CIDR validation, while pinned Python signs SHA1 and applies its own parsing/warning behavior."
+      ],
+      "remaining": [
+        "Python bytes-path return type, float/string/local-time parsing and mutable adapter/session behavior are outside this concrete Go contract.",
+        "Python warning/coercion and raw URL concatenation are not equivalent to Go ASCII token, literal decoded path, UTF8 and query escaping policies.",
+        "Existing native Objects.CreateTempURL has its own primary-only lookup/complete-URL API; middleware method/digest/IP/expiry configuration and deployment rewrite are not guaranteed by client signing."
+      ]
     }
   ]
 }
