@@ -2055,6 +2055,15 @@
     "wait": false
   },
   {
+    "package": "gophercloudsdk/image/v2/metadefnamespaces",
+    "source": "sdk_owned",
+    "model": "Namespace",
+    "kind": "named_resource",
+    "find": false,
+    "delete": true,
+    "wait": false
+  },
+  {
     "package": "gophercloudsdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "Store",

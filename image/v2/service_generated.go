@@ -7,29 +7,32 @@ import (
 	resource1 "gophercloudsdk/image/v2/imageimport"
 	resource2 "gophercloudsdk/image/v2/images"
 	resource3 "gophercloudsdk/image/v2/members"
-	resource4 "gophercloudsdk/image/v2/serviceinfo"
-	resource5 "gophercloudsdk/image/v2/tasks"
+	resource4 "gophercloudsdk/image/v2/metadefnamespaces"
+	resource5 "gophercloudsdk/image/v2/serviceinfo"
+	resource6 "gophercloudsdk/image/v2/tasks"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client      *gophercloud.ServiceClient
-	ImageData   *resource0.API
-	ImageImport *resource1.API
-	Images      *resource2.API
-	Members     *resource3.API
-	ServiceInfo *resource4.API
-	Tasks       *resource5.API
+	client            *gophercloud.ServiceClient
+	ImageData         *resource0.API
+	ImageImport       *resource1.API
+	Images            *resource2.API
+	Members           *resource3.API
+	MetadefNamespaces *resource4.API
+	ServiceInfo       *resource5.API
+	Tasks             *resource6.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		ImageData:   resource0.New(client),
-		ImageImport: resource1.New(client),
-		Images:      resource2.New(client),
-		Members:     resource3.New(client),
-		ServiceInfo: resource4.New(client),
-		Tasks:       resource5.New(client),
+		ImageData:         resource0.New(client),
+		ImageImport:       resource1.New(client),
+		Images:            resource2.New(client),
+		Members:           resource3.New(client),
+		MetadefNamespaces: resource4.New(client),
+		ServiceInfo:       resource5.New(client),
+		Tasks:             resource6.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

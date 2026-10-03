@@ -68,6 +68,7 @@ _ = value
 | `ImageImport` | [imageimport](imageimport/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Images` | [images](images/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |
 | `Members` | [members](members/api_generated.go) | `InImage(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
+| `MetadefNamespaces` | [metadefnamespaces](metadefnamespaces/api.go) | `Create/Get/Update/Delete(ctx, namespace, options...)`, `List/All(ctx, options...)`: literal namespace 이름·concrete 기본값·명시 PUT 교체; [Python/Go 비교](metadefnamespaces/README.md); Resources·Find·상태 대기 없음 |
 | `ServiceInfo` | [serviceinfo](serviceinfo/api.go) | `ListStores/AllStores(ctx)`: 저장소 목록·선택 상세 목록; Resources·CRUD·Find·Wait 없음; `GetImportInfo(ctx)`: import 방식의 서비스 정보; 원문 필드·헤더·상태 보존; [`GetUsageInfo(ctx)`](serviceinfo/usage.go): 인증된 프로젝트의 사용량·limit singleton; [사용량 정책](serviceinfo/usage.md); ID·목록·변경·상태 대기 없음 |
 | `Tasks` | [tasks](tasks/api_generated.go) | `Resources`: ID 조회, 목록, 상태 대기; `WaitForTask/WaitForTaskState`: 단일 시간 제한·396 재생성·실제 부분 결과 |
 
