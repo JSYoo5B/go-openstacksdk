@@ -2075,6 +2075,17 @@
     "parent": "gophercloudsdk/image/v2/metadefnamespaces"
   },
   {
+    "package": "gophercloudsdk/image/v2/metadefproperties",
+    "source": "sdk_owned",
+    "model": "Property",
+    "kind": "scoped_definition",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "InNamespace",
+    "parent": "gophercloudsdk/image/v2/metadefnamespaces"
+  },
+  {
     "package": "gophercloudsdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "Store",
