@@ -374,3 +374,5 @@ Swift 컨테이너는 `service.Containers.CreateContainer(ctx, name)`와 `Delete
 Swift Temp URL key는 `service.Accounts.SetTempURLKey`, `service.Containers.SetTempURLKey`와 `service.GetTempURLKey`로 설정·조회합니다. [Python/Go 키 관리 비교](objectstorage/v1/temp_url_key.md)는 기본 primary·secondary 함수 옵션, container→account 선택 순서와 단계별 실제 응답을 설명합니다.
 
 Swift 서명은 `service.GenerateFormSignature`와 `service.GenerateTempURL`로 생성합니다. [Python/Go 서명 비교](objectstorage/v1/signing.md)는 구조체 입력과 함수 옵션, binary key·만료 시간·URL 인코딩과 자동 키 조회를 설명합니다.
+
+Swift 객체 바이트 읽기는 `Objects.GetObject`·`DownloadObject`·`StreamObject`와 공유 함수 옵션으로 제공합니다. [Python/Go 조회·다운로드·스트리밍 비교](objectstorage/v1/objects/read.md)에 binary 반환, writer·stream 소유권과 조건부 응답을 설명합니다.
