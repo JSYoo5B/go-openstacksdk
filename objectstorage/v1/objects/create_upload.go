@@ -172,6 +172,9 @@ func (x *objectCreateExchange) ownership() error {
 func (x *objectCreateExchange) forcedHeader(name string) bool {
 	return (name == "etag" && (x.role == "segment" || x.role == "slo" || x.role == "dlo")) || (name == "if-none-match" && x.role == "segment") || (name == "accept" && x.role == "slo")
 }
+func (x *objectCreateExchange) ownedHeader(name string) bool {
+	return strings.HasPrefix(name, "x-object-meta-") || name == "x-object-manifest" || (name == "content-type" && x.role == "directory-marker")
+}
 func (x *objectCreateExchange) headers(values map[string]string, requireOwned bool) error {
 	seen := make(map[string]string, len(values))
 	for key, value := range values {
@@ -184,7 +187,7 @@ func (x *objectCreateExchange) headers(values map[string]string, requireOwned bo
 			return metadataInvalid("native object header aliases %q", key)
 		}
 		seen[canonical] = value
-		if strings.HasPrefix(name, "x-object-meta-") || name == "x-object-manifest" {
+		if x.ownedHeader(name) {
 			if expected, exists := x.ownedHeaders[canonical]; !exists || expected != value {
 				return metadataInvalid("native policy changes owned object header %q", key)
 			}
@@ -196,7 +199,7 @@ func (x *objectCreateExchange) headers(values map[string]string, requireOwned bo
 	}
 	if requireOwned {
 		for key, value := range x.ownedHeaders {
-			if strings.HasPrefix(strings.ToLower(key), "x-object-meta-") || strings.EqualFold(key, "X-Object-Manifest") {
+			if x.ownedHeader(strings.ToLower(key)) {
 				if actual, exists := seen[key]; !exists || actual != value {
 					return metadataInvalid("native policy removes owned object header %q", key)
 				}
@@ -232,7 +235,7 @@ func (x *objectCreateExchange) wireHeaders(headers http.Header) error {
 			}
 		}
 		values[key] = entries[0]
-		if len(entries) != 1 && (strings.HasPrefix(name, "x-object-meta-") || name == "x-object-manifest") {
+		if len(entries) != 1 && x.ownedHeader(name) {
 			return metadataInvalid("multiple owned object header %q values", key)
 		}
 	}
