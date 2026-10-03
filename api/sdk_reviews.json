@@ -23069,6 +23069,319 @@
         "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
         "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
       ]
+    },
+    {
+      "operation": "python:image/v2/metadef_resource_types",
+      "source_fingerprint": "fa112aabf69caa4db7ceb902dda6b875183f6095746a03d11d716bd38f61e424",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefresourcetypes.API.List",
+        "gophercloudsdk/image/v2/metadefresourcetypes.API.All",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListOpts",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListHeader",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListHeaders",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "Global List/All capture source per lazy iteration before option callbacks, not API lifetime. Original client/provider/type/endpoint/ServiceURL/microversion stays fixed during iteration, latest valid ordinary headers and live original auth retained; source/context checks before callbacks/request/accepted body/each consumedrow. No namespace discovery, global create/delete/fetch, or identity retargeting.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFiniteIterationAndLocalCaps",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource",
+            "connection_image_metadef_resource_types_test.go:TestConnectionImageMetadefResourceTypesShareClientAndScopes"
+          ]
+        },
+        {
+          "behavior": "ResourceType canonical exact optional nullable Name/CreatedAt/UpdatedAt are literal string pointers; strict whole UTF8 nonnullobject/canonical nonnullstring types atomic. Unknown raw JSON including protected, big numbers and null stays independently owned in Body; no typed Protected/ID/parent/Self/Links/date parsing or request-seeded identity.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "List concrete options use FullOpts whole replacement/lastwins and independent helper/header/map/pointer/option-slice/config snapshots before/after callbacks. Callback once per request or lazy iteration; nil/error callback/owned invalid headers fails preHTTP. Shared ListOption is reusable across the two real list operations, without assigning Create/Delete helper contracts to a list review.",
+          "tests": [
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFiniteIterationAndLocalCaps",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource"
+          ]
+        },
+        {
+          "behavior": "One lazy bodyless/queryless GET200, exact requirednonnull named array and wholeUTF8JSON checked before yielding, only consumed strict rows decoded. Preserve wire order/repeats; MaxItems0unlimited/negativeinvalid, cap/break skips unused malformed rows and extra HTTP. All nonnil empty on success/nil no partial on error. No query/limit/marker/sort/clientfilter/link-follow/fallback/cache even when response includes passive next metadata.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFiniteIterationAndLocalCaps",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "internal/cmd/sdkgen/glance_metadef_resource_types_test.go:TestGlanceMetadefResourceTypesRegistryAndConcreteScope"
+          ]
+        },
+        {
+          "behavior": "Original200 list only decoded, whole actualBody/Header/status and accepted read/Close/JSON/UTF8/canonical/contextErr/customCause/source errors preserved via ResponseError, onceClose/no replay; row/header/raw proof independently owned.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff and same-target redirects preserved; exact method/origin/path/query/serialized body/owned response fields and originalstatus gates. Native MoreHeaders mutation remains advanced provider policy; no ordinary-header hook rejection promise. Preserve read/Close/transport/ctx.Err/customCause and native ErrOriginal/ErrReauth fields without inventing Unwrap.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefresourcetypes/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ],
+      "remaining": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/create_metadef_resource_type_association",
+      "source_fingerprint": "aa2e39ac1488f044cd98bf9279ff7fd83bbdc46e3e4b0e147663a8e4d734aedf",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefresourcetypes.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefresourcetypes.NamespaceScope.Create",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithCreateOpts",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithCreateHeader",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithCreateHeaders",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithCreatePrefix",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget"
+      ],
+      "contracts": [
+        {
+          "behavior": "InNamespace is zeroHTTP; required safe literal namespace, original API/client/provider/type/endpoint/ServiceURL/microversion captured for scope lifetime without retained context or parentGET/lookup/Ref. Selected child is nonempty UTF8<=80runes with route-breaking/control/dot rejection and exact-once path escape, no trim/UUID/nameFind. Latest valid ordinary source headers copied per request and original provider auth remains live, guards before callbacks/request/accepted body/each consumedrow.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource",
+            "connection_image_metadef_resource_types_test.go:TestConnectionImageMetadefResourceTypesShareClientAndScopes"
+          ]
+        },
+        {
+          "behavior": "Association adds exact optional nullable Prefix/PropertiesTarget to Name and literal date strings. Strict whole UTF8 nonnull object/wrong nonnull canonical types fail atomically, no partial mutation. Body/Header/pointers independently owned; unknown precision/raw protected/self/links/parent remain passive, no request identity seed or returned-name routing.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Create concrete option family uses FullOpts whole replacement/lastwins and independent helper/header/map/pointer/option-slice/config snapshots before/after callbacks. Callback once/request; nil/error callback/owned invalid headers fails preHTTP, no runtime builder or auth/transport callback bridge.",
+          "tests": [
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsParallelReusableHelpers",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource"
+          ]
+        },
+        {
+          "behavior": "One flat POST201 body always selected name; Prefix/PropertiesTarget pointers nilomitted/empty supplied with validUTF8<=80literal JSON strings including controls, no colon rule/trim. Server schema/WSME readonly/unknown/bounds and DB effects not emulated. No parent/global lookup/precreate/RMW/cache/update/wait/rollback; actual server may create absent global type as side effect. Passive result independently decoded, no guarantee of DB/cloud completion.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFixedRoutesAndPayloads",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults",
+            "internal/cmd/sdkgen/glance_metadef_resource_types_test.go:TestGlanceMetadefResourceTypesRegistryAndConcreteScope"
+          ]
+        },
+        {
+          "behavior": "Original201 Create only decoded, actual wholeBody/Header/status and accepted read/Close/JSON/UTF8/canonical/contextErr/customCause/source errors preserved via ResponseError, onceClose/no replay; no synthetic input identity.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff and same-target redirects preserved; exact method/origin/path/query/serialized body/owned response fields and originalstatus gates. Native MoreHeaders mutation remains advanced provider policy; no ordinary-header hook rejection promise. Preserve read/Close/transport/ctx.Err/customCause and native ErrOriginal/ErrReauth fields without inventing Unwrap.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefresourcetypes/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ],
+      "remaining": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_metadef_resource_type_association",
+      "source_fingerprint": "3b7356d5bc90251f7cc69f7d475b875bda34d30c3016c736632a0f161386545a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefresourcetypes.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefresourcetypes.NamespaceScope.Delete",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithDeleteOpts",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithDeleteHeader",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithDeleteHeaders",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "InNamespace is zeroHTTP; required safe literal namespace, original API/client/provider/type/endpoint/ServiceURL/microversion captured for scope lifetime without retained context or parentGET/lookup/Ref. Selected child is nonempty UTF8<=80runes with route-breaking/control/dot rejection and exact-once path escape, no trim/UUID/nameFind. Latest valid ordinary source headers copied per request and original provider auth remains live, guards before callbacks/request/accepted body/each consumedrow.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource",
+            "connection_image_metadef_resource_types_test.go:TestConnectionImageMetadefResourceTypesShareClientAndScopes"
+          ]
+        },
+        {
+          "behavior": "Delete concrete option family uses FullOpts whole replacement/lastwins and independent helper/header/map/pointer/option-slice/config snapshots before/after callbacks. Callback once/request; nil/error callback/owned invalid headers fails preHTTP, no runtime builder or auth/transport callback bridge.",
+          "tests": [
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsParallelReusableHelpers",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource"
+          ]
+        },
+        {
+          "behavior": "One fixed childDELETE original204; IgnoreMissing nildefaulttrue privately accepts404 and bypasses native404 RetryFunc only there. Cleanphysically owned404 after completeRead/Close/context/source checks returns nil,nil; handlingfailure returns nil,error with wholeactual404 ResponseError. Strictfalse retains native404 ownership/hooks. Only204 ACK+error handlingretention. Hidden parent404 not absenceproof, no preflightGET/unprotect/count/globalcleanup; association removed only, globaltype remains.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFixedRoutesAndPayloads",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Onlyactual204 Delete returns opaque Acknowledgement requestedNamespace/Name with independent wholeBody/Header/status, ACK retained with accepted204handlingerror. Owned404 never yieldsACK: cleanignore nil,nil or handlingfailure nil,error with actual404ResponseError. OnceClose/no replay and read/Close/contextErr/customCause/source evidence retained.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff and same-target redirects preserved; exact method/origin/path/query/serialized body/owned response fields and originalstatus gates. Native MoreHeaders mutation remains advanced provider policy; no ordinary-header hook rejection promise. Preserve read/Close/transport/ctx.Err/customCause and native ErrOriginal/ErrReauth fields without inventing Unwrap.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefresourcetypes/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ],
+      "remaining": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/metadef_resource_type_associations",
+      "source_fingerprint": "77e75428836273c746bdd53714944fe1e2154168c53684d193b617bef6e7786d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefresourcetypes.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefresourcetypes.NamespaceScope.List",
+        "gophercloudsdk/image/v2/metadefresourcetypes.NamespaceScope.All",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListOpts",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListHeader",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListHeaders",
+        "gophercloudsdk/image/v2/metadefresourcetypes.WithListMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "InNamespace is zeroHTTP; required safe literal namespace, original API/client/provider/type/endpoint/ServiceURL/microversion captured for scope lifetime without retained context or parentGET/lookup/Ref.. Latest valid ordinary headers copied per request, original provider liveauth and fixed source/context guarded before callbacks/request/accepted body/each consumedrow; no child ID lookup or synthetic returned parent.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCompletePreflight",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource",
+            "connection_image_metadef_resource_types_test.go:TestConnectionImageMetadefResourceTypesShareClientAndScopes"
+          ]
+        },
+        {
+          "behavior": "Association adds exact optional nullable Prefix/PropertiesTarget to Name and literal date strings. Strict whole UTF8 nonnull object/wrong nonnull canonical types fail atomically, no partial mutation. Body/Header/pointers independently owned; unknown precision/raw protected/self/links/parent remain passive, no request identity seed or returned-name routing.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "List concrete options use FullOpts whole replacement/lastwins and independent helper/header/map/pointer/option-slice/config snapshots before/after callbacks. Callback once per request or lazy iteration; nil/error callback/owned invalid headers fails preHTTP. Shared ListOption is reusable across the two real list operations, without assigning Create/Delete helper contracts to a list review.",
+          "tests": [
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsCallbacksAndRequestOwnership",
+            "image/v2/metadefresourcetypes/options_test.go:TestMetadefResourceTypesOptionsValidationAndDefaults",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFiniteIterationAndLocalCaps",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesOwnedPreparationAndSource"
+          ]
+        },
+        {
+          "behavior": "One lazy bodyless/queryless GET200, exact requirednonnull named array and wholeUTF8JSON checked before yielding, only consumed strict rows decoded. Preserve wire order/repeats; MaxItems0unlimited/negativeinvalid, cap/break skips unused malformed rows and extra HTTP. All nonnil empty on success/nil no partial on error. No query/limit/marker/sort/clientfilter/link-follow/fallback/cache even when response includes passive next metadata.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesFiniteIterationAndLocalCaps",
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFixedRoutesAndPassiveModels",
+            "internal/cmd/sdkgen/glance_metadef_resource_types_test.go:TestGlanceMetadefResourceTypesRegistryAndConcreteScope"
+          ]
+        },
+        {
+          "behavior": "Original200 list only decoded, whole actualBody/Header/status and accepted read/Close/JSON/UTF8/canonical/contextErr/customCause/source errors preserved via ResponseError, onceClose/no replay; row/header/raw proof independently owned.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreFiniteConsumptionAndRootEvidence",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff and same-target redirects preserved; exact method/origin/path/query/serialized body/owned response fields and originalstatus gates. Native MoreHeaders mutation remains advanced provider policy; no ordinary-header hook rejection promise. Preserve read/Close/transport/ctx.Err/customCause and native ErrOriginal/ErrReauth fields without inventing Unwrap.",
+          "tests": [
+            "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
+            "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefresourcetypes/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ],
+      "remaining": [
+        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
+        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
+        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+      ]
     }
   ]
 }

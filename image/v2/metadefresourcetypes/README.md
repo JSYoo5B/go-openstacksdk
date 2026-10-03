@@ -137,3 +137,5 @@ Delete `IgnoreMissing *bool`은 nil이면 true입니다. 직접 소유한 fixed 
 configured native pre-body retry·reauth·backoff·동일 target redirect는 유지하고 method·origin·path·query·serialized body·owned response fields·원래 accepted status를 바꾸는 hook은 차단합니다. native RetryFunc의 MoreHeaders 변경은 기존 provider policy로 유지합니다. accepted body는 한 번 닫고 handling 실패 뒤 replay하지 않습니다. read·Close·transport·ctx.Err/custom context.Cause와 native reauth ErrOriginal·ErrReauth 필드를 보존합니다.
 
 비교 기준은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, Gophercloud `v2.15.0`입니다. native image resource-type CRUD는 없으며 SDK 소유 leaf입니다. Python 전체 Resource/cache/session/query parity나 실제 schema·WSME·DB·Unicode·권한·cloud side effect 검증을 주장하지 않습니다.
+
+실제 검증은 [core 테스트](core_test.go), [option 테스트](options_test.go), [외부 HTTP 계약](contracts_test.go), [Connection scope 계약](../../../connection_image_metadef_resource_types_test.go), [generator registry 계약](../../../internal/cmd/sdkgen/glance_metadef_resource_types_test.go)에 연결됩니다. 새 Go 예제 한 개를 컴파일하고 기존270 source를 그대로 보존했습니다. 누적271개 전체를 다시 실행했다는 의미는 아닙니다.
