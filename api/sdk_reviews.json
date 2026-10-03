@@ -25214,6 +25214,228 @@
         "Python NotFoundException/adapter generic <400 behavior and mutable Resource/cache/session policy are not a complete Go match.",
         "Server404 may reflect missing account and does not prove globalabsence; no recursivepurge/wait/CAS/atomic cloud guarantee."
       ]
+    },
+    {
+      "operation": "python:object_store/v1/set_account_temp_url_key",
+      "source_fingerprint": "f5cc742d0c4ad8001e15781f84b62a00e2eb5094325e443eaae951fce75acb1e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/accounts.API.SetTempURLKey",
+        "gophercloudsdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts",
+        "gophercloudsdk/objectstorage/v1/accounts.WithSetTempURLKeyHeader",
+        "gophercloudsdk/objectstorage/v1/accounts.WithSetTempURLKeyHeaders",
+        "gophercloudsdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary"
+      ],
+      "contracts": [
+        {
+          "behavior": "One bodyless exact-account-Endpoint POST204 sends only selected primary or secondary X-Account-Meta-Temp-URL-Key header, transmits empty key literally, and performs no implicit HEAD/refresh.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection",
+            "objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreWireAndStatus",
+            "connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "Concrete full/header/header-map/secondary options own factory and callback snapshots, replace full configuration and apply canonical header overwrite; default false selects primary.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions",
+            "objectstorage/v1/accounts/temp_url_key_options_test.go:TestAccountTempURLKeyOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/accounts/temp_url_key_options_test.go:TestAccountTempURLKeyOptionsParallelAndInvalidHeaders"
+          ]
+        },
+        {
+          "behavior": "Source/context/literal key preflight preserves invalid-option and cancellation causes before HTTP; setter never sends a body or asks consumer builders.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource",
+            "objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCorePreflightAndCallbackCause"
+          ]
+        },
+        {
+          "behavior": "Actual accepted204 opaque body/header/status survives Read/Close/customcontext failure in MetadataResponse+ResponseError; close once and no accepted-body replay.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence",
+            "objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreAcceptedFailuresAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Native prebody retry/reauth/bodyless ownership and configured advanced headers remain bounded; unexpected native successes reject actual status without changing native Update/Get/CreateTempURL ABI.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsNativePolicy",
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection",
+            "objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreAcceptedFailuresAndNativeHooks",
+            "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "differences": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
+      ],
+      "remaining": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
+        "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
+      ],
+      "documentation": [
+        "objectstorage/v1/temp_url_key.md"
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/set_container_temp_url_key",
+      "source_fingerprint": "d4ba694ba90f16f0f58ef53c45eee02a75a90df99b40115ce9f984d3b1a510ad",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.SetTempURLKey",
+        "gophercloudsdk/objectstorage/v1/containers.WithSetTempURLKeyOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithSetTempURLKeyHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithSetTempURLKeyHeaders",
+        "gophercloudsdk/objectstorage/v1/containers.WithSetTempURLKeySecondary"
+      ],
+      "contracts": [
+        {
+          "behavior": "One bodyless literal container POST204 uses captured effective ResourceBase with once-escaped Unicode/percent/space/colon/question/hash name and correct X-Container-Meta-Temp-URL-Key slot; no account prefix/discovery/implicit HEAD.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection",
+            "objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreWireAndStatus",
+            "connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "Concrete full/header/header-map/secondary options own factory and callback snapshots, replace full configuration and apply canonical header overwrite; default false selects primary.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions",
+            "objectstorage/v1/containers/temp_url_key_options_test.go:TestContainerTempURLKeyOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/containers/temp_url_key_options_test.go:TestContainerTempURLKeyOptionsParallelAndInvalidHeaders"
+          ]
+        },
+        {
+          "behavior": "Source/context/literal key preflight preserves invalid-option and cancellation causes before HTTP; setter never sends a body or asks consumer builders.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource",
+            "objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCorePreflightAndCallbackCause"
+          ]
+        },
+        {
+          "behavior": "Actual accepted204 opaque body/header/status survives Read/Close/customcontext failure in MetadataResponse+ResponseError; close once and no accepted-body replay.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence",
+            "objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreAcceptedFailuresAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Native prebody retry/reauth/bodyless ownership and configured advanced headers remain bounded; unexpected native successes reject actual status without changing native Update/Get/CreateTempURL ABI.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsNativePolicy",
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection",
+            "objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreAcceptedFailuresAndNativeHooks",
+            "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "differences": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
+      ],
+      "remaining": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
+        "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
+      ],
+      "documentation": [
+        "objectstorage/v1/temp_url_key.md"
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/get_temp_url_key",
+      "source_fingerprint": "3a790a715167c416598f739e121230804015fdc95dbc0c00271ae142820e43da",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1.Service.GetTempURLKey",
+        "gophercloudsdk/objectstorage/v1.WithGetTempURLKeyOpts",
+        "gophercloudsdk/objectstorage/v1.WithGetTempURLKeyContainer",
+        "gophercloudsdk/objectstorage/v1.WithGetTempURLKeyHeader",
+        "gophercloudsdk/objectstorage/v1.WithGetTempURLKeyHeaders",
+        "gophercloudsdk/objectstorage/v1.WithGetTempURLKeyNewest",
+        "gophercloudsdk/objectstorage/v1.WithoutGetTempURLKeyNewest"
+      ],
+      "contracts": [
+        {
+          "behavior": "Fresh container HEAD204 prefers nonempty secondary then primary; only successful absent/empty keys cause account HEAD204 with same preference. Account-only omits container HTTP and any HTTP failure stops fallback.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection",
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors",
+            "connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "No usable key gives nil Key/zero selection flags, while raw full metadata distinguishes absent versus explicit empty; whitespace and Unicode remain literal selected UTF8 bytes.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof"
+          ]
+        },
+        {
+          "behavior": "Full/header/header-map/container/newest/without-newest options own maps and pointers, replace final configuration, preserve explicitfalse/true on both phases and emptyContainer account-only reset.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPresenceAndOptions",
+            "objectstorage/v1/temp_url_key_options_test.go:TestTempURLKeyOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/temp_url_key_options_test.go:TestTempURLKeyOptionsParallelReuseAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Joint account/container custom/remove prefixes and auth/framing/newest are protected; original ASCII tokens/aliases/UTF8 values and source/context/name validation precede HTTP.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCorePreflightAndAcceptedSourceGuard",
+            "objectstorage/v1/temp_url_key_options_test.go:TestTempURLKeyOptionsParallelReuseAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Original Service/API/client/provider/Endpoint/rawResourceBase/type/version identities stay fixed across callbacks and accepted responses; late drift clears current Metadata, retains rawproof and prevents account fallback. Captured ordinary headers and original live auth persist.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPreflightAndSource",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCorePreflightAndAcceptedSourceGuard",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreCapturedHeadersAndNativeSigner",
+            "connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "Full atomic metadata projection rejects malformed unrelated metadata/counters/duplicate recognized fields even with usable key; signed int64/literal dates/unknown opaque body evidence are preserved.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors"
+          ]
+        },
+        {
+          "behavior": "Result allocation follows first accepted raw proof only; later account native/transport or accepted handling failure retains earlier container proof and any currentaccepted proof, with Key/selection flags zero and underlying causes retained.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors"
+          ]
+        },
+        {
+          "behavior": "Native configured retries/body ownership/actual-success-code/fixedtarget/auth policies remain bounded, and native CreateTempURL keeps its explicit noHTTP and primary-only signer ABI.",
+          "tests": [
+            "objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsNativePolicy",
+            "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreCapturedHeadersAndNativeSigner",
+            "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "differences": [
+        "Go concrete owned result instead of mutable Resource or bytes|string cache/coercion; strictHEAD204 and full atomic metadata validation deliberately exceed Python generic handling.",
+        "Python final explicit falsey empty primary can remain empty; Go exposes nil Key with raw empty-header evidence."
+      ],
+      "remaining": [
+        "Python mutable Resource/cache/header-descriptor/string-coercion surface is not implemented.",
+        "No native signer integration/signature algorithm/time/IP/FormPOST/middleware availability or secret persistence guarantee is added.",
+        "Server/deployment policy, header normalization and consistency after mutation remain server-owned."
+      ],
+      "documentation": [
+        "objectstorage/v1/temp_url_key.md"
+      ]
     }
   ]
 }
