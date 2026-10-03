@@ -26194,6 +26194,265 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:object_store/v1/create_object",
+      "source_fingerprint": "0775a8c4931db0e3c9d05380adcd3e584348773af855bc7c4204a3cf7efa42d0",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.CreateObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectMetadata",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectMetadataValue",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectMD5",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectSHA256",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectSegmentSize",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutCreateObjectSegmentSize",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectUseSLO",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutCreateObjectUseSLO",
+        "gophercloudsdk/objectstorage/v1/objects.WithCreateObjectGenerateChecksums",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutCreateObjectGenerateChecksums",
+        "gophercloudsdk/objectstorage/v1/objects.ObjectCreateUnconfirmedSegmentError.Error"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/create.md"
+      ],
+      "differences": [
+        "Go requires exactly one explicit Data/Filename/Reader source; nil and present empty bytes differ, no filename=name fallback, and borrowed Reader is an owned-spool file-workflow extension. Python data returns mutable Object while filename returns None.",
+        "Go preserves separate capabilities/discovery/ordinary/segment/manifest/cleanup responses and all actual upload attempts, immutable data/spool replay, controlled closure and sticky source/context errors. This corrects FileSegment pos/seek/Close and future.result retry defects rather than reproducing them.",
+        "Go unique slash-terminated generation and physical If-None-Match:* establish clean201 observed segment ownership; segment202 becomes an actual202 semantic error and blocks publication. Exact conservative cleanup replaces deterministic neighbors and image-task-only cleanup, preserving cumulative ambiguous manifest outcomes.",
+        "Go strict typed digests/options/metadata and explicit0 size differ from Python coercion/falsyzero. It preserves data checksum defaults, file supplied-one recomputation and false-generation comparison fallback, while correcting legacy suffix lookup. SDK hash metadata is not request ETag.",
+        "Native201/202 ordinary/manifest acknowledgement compatibility remains; no default/manifest request ETag is computed from JSON, and SLO raw JSON preserves logical Content-Type. Native generated Objects.Create remains separate for lower-level extensions."
+      ],
+      "remaining": [
+        "Python mutable Object/container precedence, dirty header/metadata state, descriptor str(any) coercion, adapter/session/microversion/cache and broad exception-class behavior are not reproduced wholesale.",
+        "Unique prefixes, conditional segment ownership and cleanup evidence are observed client safeguards; server races, eventual consistency, backend quota/permissions and partial writes cannot establish atomic publication, readable DLO, rollback or cluster completion.",
+        "Python cloud image-task/autocreated-object integration, broad async/query/native extensions, heartbeat upload reports and completion waits remain separate workflows."
+      ],
+      "contracts": [
+        {
+          "behavior": "Explicit Data selects one ordinary binary PUT, preserves nonnil empty input and native201/202 raw acknowledgement, and bypasses capabilities, HEAD, hashing and segmentation.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsBytesWireAndSnapshots",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreChecksumDecisions"
+          ]
+        },
+        {
+          "behavior": "File and borrowed Reader use one immutable bounded-memory spool; Reader starts at its current cursor and is never closed or sought. Size, checksums and every replay use those owned bytes.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsFileReaderAndHashes",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreOwnedSources"
+          ]
+        },
+        {
+          "behavior": "File-style checksum defaults, supplied-one recomputation, false-generation comparison-only hashes and matching stale skip preserve source behavior; supplied/generated metadata is distinct from request ETag.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsFileReaderAndHashes",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreChecksumDecisions"
+          ]
+        },
+        {
+          "behavior": "Fresh capabilities share strict Info decoding and maximum-first/minimum-second int64 selection, default1GiB, explicit0 and clean physical404/412 fallback2684354561. Empty files can upload at size0; invalid bounds or nonempty effective0 retain proof before writes.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsFileReaderAndHashes",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreCapabilityProjection",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreEmptyAndZeroBounds"
+          ]
+        },
+        {
+          "behavior": "Literal container/object and ResourceBase route once-escaped URLs; ordered SLO raw JSON and DLO empty body with once-percent-quoted slash-terminated generation preserve logical Content-Type.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsSLOAndDLOWire"
+          ]
+        },
+        {
+          "behavior": "Unique cryptographic segment prefixes and fixed numeric width preserve stable manifest order. Observed segment requests force If-None-Match:*, omit ETag, and SLO requests force Accept after redirect aliases while retaining logical Content-Type.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsSLOAndDLOWire",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativeOwnershipGuards",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup"
+          ]
+        },
+        {
+          "behavior": "Clean segment201 establishes observed ownership and preserves an optional literal ETag with one surrounding quote pair removed. Segment202 retains actual acknowledgement but returns ObjectCreateUnconfirmedSegmentError, never establishes ownership and blocks manifest publication.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsSLOAndDLOWire",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsAcceptedFaultsAndUnconfirmedSegments",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup"
+          ]
+        },
+        {
+          "behavior": "Eligible segment failures receive at most one second logical round and manifest failures at most three logical attempts. Recovered errors stay in attempt history while eventual success returns nil.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsNativeReplayAndPhysicalEvidence",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsCleanupAndStickyAmbiguity",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadManifestAttemptsAndAmbiguity"
+          ]
+        },
+        {
+          "behavior": "Native physical retry/backoff/reauth and permitted same-target redirects receive independent frozen body views with exact framing; previous Close cannot consume a later view. Callbacks cannot replace body, factory or success-code ownership.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsNativeReplayAndPhysicalEvidence",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativePhysicalReplay",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativeOwnershipGuards"
+          ]
+        },
+        {
+          "behavior": "Actually started physical uploads retain independent raw responses/status/headers and native causes, including rejected body Read/Close errors and response-plus-transport faults. Acknowledgement and error proof do not alias attempts; accepted processing faults never resend.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsBytesWireAndSnapshots",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsNativeReplayAndPhysicalEvidence",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsAcceptedFaultsAndUnconfirmedSegments",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadPhysicalFaultEvidence",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativePhysicalReplay"
+          ]
+        },
+        {
+          "behavior": "Segment and manifest uncertainty is cumulative across physical and logical attempts. Earlier transport or server uncertainty survives later clean rejection, and accepted processing/context faults keep ambiguity; manifest201/202 is acknowledgement without publication completion.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsSLOAndDLOWire",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsCleanupAndStickyAmbiguity",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadManifestAttemptsAndAmbiguity",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadPhysicalFaultEvidence"
+          ]
+        },
+        {
+          "behavior": "Terminal segment/manifest failure cleans only exact observed Created && !Ambiguous names before possible publication under live context/source. Unconfirmed names and ambiguous or canceled manifest outcomes preserve the generation for recovery.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsCleanupAndStickyAmbiguity",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadManifestAttemptsAndAmbiguity"
+          ]
+        },
+        {
+          "behavior": "Exact cleanup retains separate DELETE202/204/clean404 acknowledgements and joins cleanup failures after the original upload error. Cleanup uses no listing, HEAD or multipart controls, and acknowledgements do not establish cluster completion.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsCleanupAndStickyAmbiguity",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadManifestAttemptsAndAmbiguity"
+          ]
+        },
+        {
+          "behavior": "Full options replace configuration; map/pointer/Data snapshots, canonical last-wins overlays and Without helpers preserve defaults and reuse. Callbacks run once and retained option state cannot alter later phases.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsBytesWireAndSnapshots",
+            "objectstorage/v1/objects/create_options_test.go:TestObjectCreateOptionsFactorySnapshots",
+            "objectstorage/v1/objects/create_options_test.go:TestObjectCreateOptionsDefaultsAndReplacement",
+            "objectstorage/v1/objects/create_options_test.go:TestObjectCreateOptionsParallelReuse"
+          ]
+        },
+        {
+          "behavior": "Missing/multiple sources, typed-nil Reader, invalid filename/digest/segment size, nil options/context and reserved/alias headers reject before Reader consumption or HTTP. Callback cancellation/source/body-ownership causes remain joined and terminal.",
+          "tests": [
+            "objectstorage/v1/objects/create_options_test.go:TestObjectCreateOptionsPreflightAndCallbackCauses",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadNativeOwnershipGuards"
+          ]
+        },
+        {
+          "behavior": "Connection exposes CreateObject and IsObjectStale through the shared service client, with fresh capture and independent phase/result proof.",
+          "tests": [
+            "connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources"
+          ]
+        },
+        {
+          "behavior": "Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections, and the service guide references CreateObject/IsObjectStale plus SegmentPrefix/SLO-DLO policy.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_object_create_test.go:TestSwiftObjectCreatePreservesNativeAndRegistry"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/is_object_stale",
+      "source_fingerprint": "2669e64b3ef742733a12e74d6f9d00af2eb3b0a2acffdc1a9128406d57f608b3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.IsObjectStale",
+        "gophercloudsdk/objectstorage/v1/objects.WithIsObjectStaleOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithIsObjectStaleHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithIsObjectStaleHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithIsObjectStaleMD5",
+        "gophercloudsdk/objectstorage/v1/objects.WithIsObjectStaleSHA256"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/create.md"
+      ],
+      "differences": [
+        "Go requires explicit nonempty local filename and literal container/object, returns nullable Stale plus owned raw Discovery/local/remote hashes, while Python returns bool through mutable Resource metadata.",
+        "Go nativeHEAD200/204 and clean physical404 are explicit; dirty/nested404, read/Close/context/source/projection and later file errors retain real HEAD proof with no committed decision. Filename is not read for clean404 or sufficient supplied digests.",
+        "Go projects only relevant current/legacy hash headers with strict single-value/case-alias/UTF8 control validation, preserves absent versus empty and literal digest case, and corrects pinned full-header legacy fallback after BaseResource prefix stripping. Neither implementation substitutes ETag/size/date for SDK hashes.",
+        "Concrete digest/header options and callback snapshots reject malformed digests and reserved headers before HTTP and preserve fixed original source plus live auth rather than Python descriptor/adapter coercion."
+      ],
+      "remaining": [
+        "Python Resource metadata caches/mutation and session/adapter/exception policies remain distinct from fresh concrete Go HEAD evidence and nullable decision.",
+        "A stale=false decision is an observation, not an atomic lock or guarantee that a later upload will skip; CreateObject performs its own fresh comparison and server state can change between requests.",
+        "Remote digest metadata is trusted server/caller data; matching literals do not independently verify remote payload bytes or wholeSDK parity."
+      ],
+      "contracts": [
+        {
+          "behavior": "Fresh bodyless HEAD uses literal names and effective ResourceBase with native200/204 and clean physical404. No capability GET, upload, implicit filename or cleanup occurs.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsLazyFilesAndLiteralHEAD",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreLazyFilesAndComparison"
+          ]
+        },
+        {
+          "behavior": "Explicit filename remains required, but HEAD404 and sufficient supplied digests do not open it. Existing object with neither local digest lazily reads/hashes once; later IO/hash failures retain Discovery and nil Stale.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsLazyFilesAndLiteralHEAD",
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsHashProjectionAndAtomicErrors",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreLazyFilesAndComparison"
+          ]
+        },
+        {
+          "behavior": "Only current and legacy SDK digest headers project with one UTF8/control-safe value and no alias duplicates. Present empty current values shadow legacy, literal case is preserved, and unrelated ETag/size/date do not substitute.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsHashProjectionAndAtomicErrors",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreChecksumProjection"
+          ]
+        },
+        {
+          "behavior": "Stale=false requires at least one local digest and a matching remote literal for every available local digest; a missing remote digest is stale. Nullable decision and remote hashes commit only after clean complete evidence; dirty404, accepted read/Close/context/source and projection failures keep raw HEAD proof without a decision.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsHashProjectionAndAtomicErrors",
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsDirtyMissingAndLiveGuards",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreLazyFilesAndComparison",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreAcceptedFailuresAndStickyGuards"
+          ]
+        },
+        {
+          "behavior": "Full/header/digest option factories own snapshots with canonical overlays and reusable callback state; malformed digests or filename, nil options/context and reserved headers fail before HTTP.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsDirtyMissingAndLiveGuards",
+            "objectstorage/v1/objects/stale_options_test.go:TestObjectStaleOptionsSnapshotsAndReplacement",
+            "objectstorage/v1/objects/stale_options_test.go:TestObjectStaleOptionsPreflightAndCauses"
+          ]
+        },
+        {
+          "behavior": "Native HEAD retry preserves captured option/source headers until permitted native overrides, uses live auth, does not rerun callbacks, and snapshots rejected error proof before callback mutation. Accepted source/context faults stay sticky and do not commit a decision.",
+          "tests": [
+            "objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsDirtyMissingAndLiveGuards",
+            "objectstorage/v1/objects/stale_options_test.go:TestObjectStaleOptionsNativeSnapshotAndProof",
+            "objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreAcceptedFailuresAndStickyGuards"
+          ]
+        },
+        {
+          "behavior": "Connection exposes CreateObject and IsObjectStale through the shared service client, with fresh capture and independent phase/result proof.",
+          "tests": [
+            "connection_objectstorage_create_object_test.go:TestConnectionObjectCreateSharesClientAndOwnsSources"
+          ]
+        },
+        {
+          "behavior": "Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections, and the service guide references CreateObject/IsObjectStale plus SegmentPrefix/SLO-DLO policy.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_object_create_test.go:TestSwiftObjectCreatePreservesNativeAndRegistry"
+          ]
+        }
+      ]
     }
   ]
 }
