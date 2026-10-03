@@ -17,6 +17,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 `Containers.GetMetadata`는 literal container 이름과 concrete `GetMetadataOpts`, HEAD204로 사용자 metadata·nullable 카운터·원문 timestamp를 제공합니다. `Containers.SetMetadata`와 `Containers.DeleteMetadata`는 단일 POST204 acknowledgement를 반환하고 refresh는 명시 조회로 표현합니다. [컨테이너 metadata의 Python/Go 사용법](containers/README.md)은 ResourceBase 경로와 시스템 header 옵션을 설명합니다.
 
+`Containers.CreateContainer`는 concrete `CreateContainerOpts`와 함수 옵션으로 metadata·시스템 헤더를 담은 PUT201/202를 보냅니다. `Containers.DeleteContainer`는 DELETE204를 받고 기본 missing 허용 시 실제 404와 `IgnoredMissing`을 반환합니다. 통신 오류와 비어 있지 않은 container의 409는 유지하며 추가 HEAD나 객체 삭제를 수행하지 않습니다. [컨테이너 생성·삭제의 Python/Go 비교](containers/README.md)는 strict missing 옵션과 원문 응답을 설명합니다.
+
 `Accounts.GetMetadata`는 concrete `GetMetadataOpts`와 HEAD204로 계정 metadata·nullable 카운터·원문 응답을 제공합니다. `Accounts.SetMetadata`와 `Accounts.DeleteMetadata`는 POST204 acknowledgement를 반환하며 갱신 조회는 명시적으로 호출합니다. [계정 metadata의 Python/Go 사용법](accounts/README.md)은 owned 옵션과 Python의 자동 HEAD refresh 차이를 설명합니다.
 
 Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.
