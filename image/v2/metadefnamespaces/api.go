@@ -24,8 +24,9 @@ func (a *API) RawClient() *gophercloud.ServiceClient {
 	return a.client
 }
 
-// Create posts a literal namespace and only the supplied scalar fields. Nested
-// definitions are outside this operation; omission delegates server defaults.
+// Create posts a literal namespace with supplied scalar and nested definitions.
+// Nil containers are omitted; nonnil empty containers are sent explicitly. The
+// server owns persistence and cleanup, and no child requests are made here.
 func (a *API) Create(ctx context.Context, namespace string, options ...CreateOption) (*Namespace, error) {
 	p, err := a.capture(ctx)
 	if err == nil {
@@ -38,7 +39,7 @@ func (a *API) Create(ctx context.Context, namespace string, options ...CreateOpt
 	if err = p.finish(ctx, policy.Headers, err); err != nil {
 		return nil, wrap(ctx, "Create", err)
 	}
-	body := scalarBody(namespace, policy.DisplayName, policy.Description, policy.Visibility, policy.Owner, policy.Protected)
+	body := createBody(namespace, policy)
 	response, err := rest.DoJSON(ctx, p.client, http.MethodPost, p.url(nil), body, nil, http.StatusCreated)
 	value, err := decodeResponse(ctx, p, response, err)
 	return value, wrap(ctx, "Create", err)

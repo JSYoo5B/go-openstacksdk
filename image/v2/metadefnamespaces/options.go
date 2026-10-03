@@ -4,18 +4,23 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 // CreateOpts configures the bounded namespace create operation.
 type CreateOpts struct {
-	Headers     map[string]string
-	DisplayName *string
-	Description *string
-	Visibility  *string
-	Owner       *string
-	Protected   *bool
+	Headers                  map[string]string
+	DisplayName              *string
+	Description              *string
+	Visibility               *string
+	Owner                    *string
+	Protected                *bool
+	Properties               map[string]PropertyDefinition
+	Objects                  []ObjectDefinition
+	Tags                     []TagDefinition
+	ResourceTypeAssociations []ResourceTypeAssociationDefinition
 }
 type CreateOption func(*CreateOpts) error
 
@@ -26,6 +31,10 @@ func copyCreate(value CreateOpts) CreateOpts {
 	value.Visibility = copyPointer(value.Visibility)
 	value.Owner = copyPointer(value.Owner)
 	value.Protected = copyPointer(value.Protected)
+	value.Properties = copyPropertyDefinitions(value.Properties)
+	value.Objects = copyObjectDefinitions(value.Objects)
+	value.Tags = slices.Clone(value.Tags)
+	value.ResourceTypeAssociations = copyAssociationDefinitions(value.ResourceTypeAssociations)
 	return value
 }
 
@@ -350,6 +359,9 @@ func prepareCreate(options []CreateOption) (CreateOpts, error) {
 		return value, err
 	}
 	if err = scalars(value.DisplayName, value.Description, value.Visibility, value.Owner); err != nil {
+		return value, err
+	}
+	if err = validateDefinitions(value); err != nil {
 		return value, err
 	}
 	value.Headers, err = validateHeaders(value.Headers, false, "")
