@@ -188,3 +188,5 @@ Cinder Volume·Snapshot v2/v3의 수동 `MetadataIn` 범위는 [등록 규칙](c
 [Glance 서비스 정보 검증](glance_serviceinfo.go)은 기존 native `ImageImport.Get`의 signature와 canonical ImportInfo/ImportMethods 모델을 보호합니다. [회귀 테스트](glance_serviceinfo_test.go)는 세 SDK 소유 capability가 하나의 `ServiceInfo` 필드로 연결되고 native API는 동일하며 문서에 실제 `ListStores/AllStores/GetImportInfo/GetUsageInfo`를 표시되는지 확인합니다. 저장소 목록과 import singleton은 새 native 연산을 합성하지 않습니다. [ServiceInfo 비교](../../../image/v2/serviceinfo/README.md)에 전용 옵션·엄격한200·raw 응답과 상속된 Python Resource 계약의 차이를 설명합니다.
 
 `UsageInfo`는 [API 전용 사용량 singleton](../../../image/v2/serviceinfo/usage.md)입니다. 생성기는 해당 capability를 기존 `ServiceInfo`에 추가하고 실제 [usage 구현](../../../image/v2/serviceinfo/usage.go)을 문서에 연결합니다. 기존 native 연산·생성 Go·Python catalog는 그대로 보존합니다.
+
+[Glance mutation 생성 테스트](glance_mutations_test.go)는 native Image API·Resources 생성물이 동일하며 상위 단일 태그·활성화 메서드의 strict204·미존재 오류 정책과 [Python/Go 사용법](../../../image/mutations.md)이 문서에 연결되는지 확인합니다. 새로운 native 선언이나 Collection capability를 합성하지 않습니다.

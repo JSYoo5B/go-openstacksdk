@@ -65,3 +65,5 @@ Glance의 [SDK staging](../image/v2/imagedata/README.md)은 `ImageData.StageImag
 Glance `ServiceInfo`는 SDK 소유 `Store` 목록과 `ImportInfo` singleton을 [실제 capability 목록](resource_inventory.json)에 기록합니다. `ListStores/AllStores`와 `GetImportInfo`를 제공하며 native `ImageImport.Get`은 그대로 유지합니다. [Python/Go 비교](../image/v2/serviceinfo/README.md)에 목록·상세 선택과 응답/오류 정책을 설명합니다.
 
 Glance의 [사용량 singleton](../image/v2/serviceinfo/usage.md)은 SDK 소유 `UsageInfo` capability로 기록합니다. `GetUsageInfo(ctx)`는 인증된 프로젝트의 `info/usage`를 한 번 조회하며 pinned Python/native 연산이나 parity 판정을 합성하지 않습니다.
+
+Glance [단일 태그·활성화 action](../image/mutations.md)은 상위 image.Service의 전용 메서드입니다. 실제 body 없는 PUT/DELETE/POST와 strict204·미존재 오류 정책을 제공하며 기존 native metadata Update·전체 tag set 교체와 resource inventory를 유지합니다.
