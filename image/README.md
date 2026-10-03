@@ -159,6 +159,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 `service.UpdateImage/SetImageProperties`는 concrete 패치와 필드별 helper로 이미지를 수정합니다. [이미지 수정 사용법](update.md)에 패치 순서·속성 이름 escape·raw 값·빈 변경의 실제 응답과 Python dirty Resource·coercion의 차이를 설명합니다.
 
+`service.UploadImage`는 concrete 옵션으로 메타데이터를 생성하고 caller Reader를 한 번 전송합니다. [직접 업로드 사용법](upload-image.md)에 기본값·명시 size·단계별 응답과 Python 자동 길이 추론의 차이를 설명합니다.
+
 Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는 `conn.ImageV2(ctx)`의 `Tasks`에서 기다립니다. [Task 전용 사용법](v2/tasks/README.md)은 success·failure·120초·2초 기본값, 정확한 396 오류의 재생성, 같은 시간 제한으로 새 ID 조회, 실제 응답과 부분 실패를 설명합니다. Python의 cached Task 대신 fresh ID를 받고 `tasks.WithTaskWait...` 옵션을 사용합니다. 공통 이미지 상태 대기와 import 제출은 각각 별도 호출입니다.
 
 `service.API.ImageImport.ImportImage(ctx, ref, options...)`는 기존 이미지의 ID/Name 참조를 해결하고 format을 조회한 뒤 import를 제출합니다. 이미 보유한 native Image는 `ImportKnownImage`로 조회 없이 사용할 수 있습니다. [Import 사용법](v2/imageimport/README.md)에 기본 glance-direct, web/remote 소스, 저장소 선택, 명시적 false와 실제 202 응답을 설명합니다. 결과는 접수 응답이며 이미지가 active라는 뜻은 아닙니다. 준비된 이미지의 완료 대기는 `service.API.Images.WaitForState(ctx, ref, "active", options...)`로 별도 선택합니다.
