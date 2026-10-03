@@ -17693,6 +17693,119 @@
         "Response models keep native numeric/timestamp/unknown-property projection limits; raw response evidence does not make typed Image precision or arbitrary source Resource semantics exact. Shared wait returns no original response body/header/status or last-failure image evidence.",
         "Custom RoundTripper internal replay and forcibly unblocking a caller reader are outside the SDK one-binary-provider-attempt guarantee. The SDK deliberately avoids cleanup and leaves retained side effects for caller decisions."
       ]
+    },
+    {
+      "operation": "python:image/v2/download_image",
+      "source_fingerprint": "7c1992d4b68c31b43f7ffe91ad994240102fb18a5707f5c83663c8c2d92ce2d2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.DownloadTo",
+        "gophercloudsdk/image.WithDownloadImageOpts",
+        "gophercloudsdk/image.WithDownloadChunkSize",
+        "gophercloudsdk/image.WithDownloadStorePreferences",
+        "gophercloudsdk/image.WithDownloadChecksumVerification"
+      ],
+      "contracts": [
+        {
+          "behavior": "DownloadTo defaults to metadata GET200 then full binary GET200, using a bounded 1MiB copy chunk and available checksum verification. It retains independent actual native Image, raw metadata body/header/status, actual accepted binary header/status and exact BytesWritten without keeping the full payload or fabricating completion.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToDefaultSequenceAndEvidence",
+            "image/download_core_test.go:TestDownloadCoreFixedRouteBoundedCopyAndOwnedEvidence"
+          ]
+        },
+        {
+          "behavior": "Service/source/provider/context/ref/writer and concrete options are validated before any HTTP or Write. Nil and typed-nil writers, invalid route/source/header/Range/If-Range controls, nil callbacks, nonpositive or over64MiB chunks and malformed store preferences stop locally. Nil chunk selects1MiB and nil verification selects true; explicit false remains distinct.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToCompletePreflight",
+            "image/download_options_test.go:TestDownloadOptionsDefaultsAndBoundedPreflight"
+          ]
+        },
+        {
+          "behavior": "Whole-policy and leaf helpers snapshot pointers and preferences for last replacement, independent reuse and concurrent application. Custom callbacks run once before requests and their retained configuration cannot alter transfer options. Preferences preserve order and duplicates in one URL-encoded comma-separated prefer value; nil/empty omit it.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToPreparedSnapshotsAndPreferences",
+            "image/download_options_test.go:TestDownloadOptionsOwnFullReplacementAndConcurrentReuse",
+            "image/download_options_test.go:TestDownloadOptionsCustomCallbacksOnceAndOwnedPointers"
+          ]
+        },
+        {
+          "behavior": "Explicit ID chooses one fresh metadata GET; Name uses existing exact-name full-page resolution followed by fresh GET. The exact lowercase canonical metadata id must equal the fixed chosen ID. Incidental typed case aliases and response self/file/schema/Location cannot choose the binary route. Actual native projection remains separate from original response evidence; Name pager continuation keeps existing native semantics.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToCanonicalIdentityAndIntegrity",
+            "image/download_core_test.go:TestDownloadCoreRetainsAcceptedMetadataAndStopsInvalidIdentity",
+            "image/download_core_test.go:TestDownloadCoreFixedRouteBoundedCopyAndOwnedEvidence"
+          ]
+        },
+        {
+          "behavior": "Canonical complete nonempty os_hash_algo/os_hash_value wins over legacy metadata checksum, which wins over literal binary Content-MD5. Incomplete pairs fall back; disabled verification skips canonical hash-field validation while retaining native Image decode. The bounded algorithms md5/sha1/sha224/sha256/sha384/sha512/sha512_224/sha512_256 are implemented. Unsupported primary algorithms and malformed canonical hash types fail before binary GET. Expected strings are not hex-normalized or base64-decoded.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToCanonicalIdentityAndIntegrity",
+            "image/download_core_test.go:TestDownloadCoreCanonicalHashSelectionAndAlgorithms",
+            "image/download_core_test.go:TestDownloadCoreNoDataRejectedPartialAndLiteralHashMismatch"
+          ]
+        },
+        {
+          "behavior": "Only actual binary200/204 are accepted. Actual204 performs no Write, clears checksum evidence and retains header/status. Unsolicited206 or HTTP errors retain metadata plus original native rejection without an accepted binary status claim. Metadata-selected algorithm/expected survive binary open/rejection failures. Nonempty Content-Range on actual200 is rejected before Write with accepted200/header and selected metadata proof retained.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToNoDataAndNativeCompatibility",
+            "image/download_core_test.go:TestDownloadCoreNoDataRejectedPartialAndLiteralHashMismatch"
+          ]
+        },
+        {
+          "behavior": "Before accepted metadata200 the result is nil. Accepted metadata read/decode/canonical/native-model failures retain raw200 body/header/status and original error, stop before binary GET and do not Write. Later file/open/read/write/short-write failures retain prior metadata, any actual accepted binary response and exact writer-reported successful bytes without rollback, body replay or recovery requests.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToPartialTransferFailures",
+            "image/download_core_test.go:TestDownloadCoreRetainsAcceptedMetadataAndStopsInvalidIdentity"
+          ]
+        },
+        {
+          "behavior": "The borrowed writer is never closed, sought or truncated. The owned chunk loop does not use ReaderFrom/WriterTo shortcuts, enforces short writes and counts reported written bytes. Simultaneous read/write errors, accepted-body Close errors and context/custom causes remain inspectable. SDK accepted bodies close once and native Request owns rejected bodies. Actual/Complete require full EOF and successful writes; Verified requires a matching digest. Typed DownloadChecksumMismatchError unwraps ErrChecksumMismatch and carries algorithm/expected/actual. Close-only failure after valid full transfer preserves Complete/Verified proof; partial failures do not claim them.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToPartialTransferFailures",
+            "image/download_contracts_test.go:TestDownloadToBorrowedWriterCancellationAndClose",
+            "image/download_core_test.go:TestDownloadCoreJoinsReadWriteCloseAndPreservesFullDigestProof",
+            "image/download_core_test.go:TestDownloadCoreNoDataRejectedPartialAndLiteralHashMismatch"
+          ]
+        },
+        {
+          "behavior": "Captured prefix/headers/client selection use the original provider live token and configured pre-body reauthentication/retry. Original source/provider changes are checked before subsequent requests. Binary redirects are disabled and no accepted-body read/write failure restarts download. Parent deadlines, HTTPClient timeout, cancellation and custom cause remain in returned failures; tests release borrowed blocking writers and close all handles. Name pagination retains the existing pager contract rather than adding a new continuation policy.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToProviderSourceAndRetryBoundaries",
+            "image/download_contracts_test.go:TestDownloadToBorrowedWriterCancellationAndClose"
+          ]
+        },
+        {
+          "behavior": "Existing generated ImageData.Download raw-body API stays independently callable with native defaultGET200 behavior and without workflow metadata or integrity. Generator checks the native Download context/client/id/result signature and Image canonical ID/checksum string fields and rejects type/tag/arity drift. Upper writer documentation does not invent a native operation, model or resource collection; native declarations and inventory remain unchanged.",
+          "tests": [
+            "image/download_contracts_test.go:TestDownloadToNoDataAndNativeCompatibility",
+            "internal/cmd/sdkgen/glance_download_test.go:TestGlanceDownloadKeepsNativeStreamAndDocumentsWriterWorkflow",
+            "internal/cmd/sdkgen/glance_download_test.go:TestGlanceDownloadRejectsNativeSignatureIdentityAndChecksumDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/download.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "DownloadTo is an explicit bounded writer workflow with a fresh metadata request and optional available-checksum validation. Python accepts mutable Image or ID, output path/IOBase and stream/no-output modes, with a default whole-memory response branch. Existing raw native Download remains independently available.",
+        "Go fixes the selected ID and requires matching lowercase canonical metadata id, using raw decision fields alongside independent native/raw evidence. Python metadata fetch mutates its supplied Resource and later uses self.id; complete cache/descriptors/session/adapter identity semantics are broader.",
+        "Go concrete options freeze caller pointers/slices and callback results before requests, bound chunk size to1..64MiB, preserve ordered repeated preferences and use URL encoding. Python defaults to1MiB but does not impose this bound or Go snapshot policy; both nil/empty preferences omit prefer.",
+        "Go supports a bounded standard-library hash registry and rejects an unsupported complete primary pair before binary GET. Python performs the binary GET first and commonly falls through to MD5 or unverified transfer when the caught unsupported-hash error includes the algorithm name. Go disabled verification also skips canonical hash-field checks.",
+        "Go exposes selected algorithm/expected and full-EOF Actual/Complete/Verified without changing raw headers, retaining selected metadata hashes on binary failure and full digest proof on Close-only error. Python verifies consumed output after iteration, may rewrite Content-MD5 in raw-stream mode and logs missing hashes instead of returning explicit verification availability.",
+        "Go accepts full200/no-data204, rejects unsolicited206 and other statuses, and rejects Content-Range on accepted200 before writing. Pinned Python binary DownloadMixin does not translate response errors, while Proxy.request defaults raise_exc=False, so returned error bodies may be consumed. These are intentionally stronger Go accepted-status and whole-image policies.",
+        "Go enforces short-write counts, retains exact partial bytes and joins read/write/Close/context causes including a typed checksum mismatch. Python output ignores write counts and wraps output errors as text; both can leave already-written partial output. Go closes its HTTP body and borrows the writer without path opening or output rollback."
+      ],
+      "remaining": [
+        "Complete mutable supplied Image Resource/descriptors/defaults/coercion/dirty state/alternate identity/cache/header/session/adapter behavior remains unresolved. A fresh native Image plus raw response evidence does not reproduce the full Python Resource or every typed numeric/timestamp/property projection.",
+        "Python output path creation/truncation and IOBase polymorphism, raw streamed Response consumption/closing, full-memory no-output mode, compatibility Content-MD5 mutation and cloud name-or-ID wrapper requiring exactly one output_path/output_file remain outside this concrete writer API.",
+        "The complete hashlib.new algorithm registry and Python unsupported-algorithm/fallback/logging behavior are not reproduced. Go primary pre-GET rejection, raw field validation, fixed-ID equality, chunk bound and typed error/progress contracts are deliberate differences, not complete Python transfer parity.",
+        "Range206/If-Range/resume, partial-range integrity and stream-only caller consumption are not implemented by DownloadTo. No complete payload is retained by the workflow, and caller-selected memory output or path lifecycle remains the caller responsibility.",
+        "Store preference release support, backend availability/fallback/cache effectiveness, policy/permissions, actual storage and real deployed download success are server-owned. The current official2026.1 prefer reference and local HTTP proof establish no deployment capability or complete cloud lifecycle mapping.",
+        "Custom HTTP transports may implement cache/replay behavior internally; the SDK does not restart a transfer after receiving an accepted body. Forced release of a caller blocking Write and cleanup/rollback of caller output are outside the workflow. Existing Name pagination keeps common native continuation semantics and does not add stricter path/query continuity.",
+        "Python binary error-response consumption and arbitrary configured adapter/cache exceptions remain broader. Go deliberately keeps only accepted200/204 binary header/status and native rejection causes, with metadata evidence independently retained."
+      ]
     }
   ]
 }
