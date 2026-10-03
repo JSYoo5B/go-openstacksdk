@@ -18857,6 +18857,1414 @@
         "Queued image state, permissions, configured store and HTTP URI policy, import lock, server schema/digest/algorithm support and actual asynchronous hash validation/backend persistence are server-owned. Accepted HTTP proof does not establish deployment support or task completion.",
         "No metadata/status gate, capability discovery, synthetic location ID, RMW/PATCH, client URL fetch, cache mutation, wait/poll/task lookup, rollback or cleanup is added."
       ]
+    },
+    {
+      "operation": "python:image/v2/get_images_schema",
+      "source_fingerprint": "54573b03c49a3b7b95ef4c5aa520395b541a4ac46ac25ae7763dab0e48fe1d25",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImagesSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImagesSchema performs bodyless/query-free GET at captured base plus fixed schemas/images, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.images with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetImagesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_image_schema",
+      "source_fingerprint": "a70198ac574c2637cd4f7b2ff72f7b545f2695b575d52cfe8ca8644cfb500a76",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImageSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImageSchema performs bodyless/query-free GET at captured base plus fixed schemas/image, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.image with raw(); reported top-level additionalProperties is object {type:string}. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetImageSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_members_schema",
+      "source_fingerprint": "081d45ff15b7978d9e842c93d688ae35cc3ecf2d362b7a274498531d0c705c6f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMembersSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMembersSchema performs bodyless/query-free GET at captured base plus fixed schemas/members, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.members with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMembersSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_member_schema",
+      "source_fingerprint": "dc70a2860a2c9c7ef6dfa64b27e680ce4f07694fe10be39c40a7ee4d39fcd487",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMemberSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMemberSchema performs bodyless/query-free GET at captured base plus fixed schemas/member, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.member with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMemberSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_tasks_schema",
+      "source_fingerprint": "7aee6f2fe5ff5e4bc0035278d1cbb3ecc69db62a2b133e03c7c31a60311d9955",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetTasksSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetTasksSchema performs bodyless/query-free GET at captured base plus fixed schemas/tasks, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.tasks with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetTasksSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_task_schema",
+      "source_fingerprint": "b1159504ed7439e76085daff46f6b835288fa93880f9f86bc4043d4a729708a2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetTaskSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetTaskSchema performs bodyless/query-free GET at captured base plus fixed schemas/task, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.task with minimal(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetTaskSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_namespace_schema",
+      "source_fingerprint": "c269621186701aec5218d017f3e456a1087b8fdf8ed8ad15a87c398d5055dbd8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefNamespaceSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefNamespaceSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/namespace, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_namespace with raw(); reported top-level additionalProperties is false. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefNamespaceSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_namespaces_schema",
+      "source_fingerprint": "19c03295d7362d8c52bcd495e708bbbff49a2b345cf5c93b81cd50a6fd5fcb72",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefNamespacesSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefNamespacesSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/namespaces, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_namespaces with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefNamespacesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_resource_type_schema",
+      "source_fingerprint": "49257d961f2715deecf91f731283a44ca1d3fdeda832b4b07b217a286990b70d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefResourceTypeSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefResourceTypeSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/resource_type, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_resource_type with raw(); reported top-level additionalProperties is false. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefResourceTypeSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_resource_types_schema",
+      "source_fingerprint": "06c2e496727955c9b3a38e5556d6bce1dd59b39982a246a575a96318d1adea01",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefResourceTypesSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefResourceTypesSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/resource_types, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_resource_types with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefResourceTypesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_object_schema",
+      "source_fingerprint": "8486c856973fcaa0d9df9f075657ad82819ab0be99837d2ae96447b29a956c1e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefObjectSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefObjectSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/object, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_object with raw(); reported top-level additionalProperties is false. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefObjectSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_objects_schema",
+      "source_fingerprint": "4243b6a539a7637add93eae50e411bed1da7924fc6d2c5fe6e2b0347f9703504",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefObjectsSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefObjectsSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/objects, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_objects with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefObjectsSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_property_schema",
+      "source_fingerprint": "9177fd2bcd45ec0ca17ed2d2068c6c109fe75607ab3bc11750188213b4773acb",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefPropertySchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefPropertySchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/property, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_property with raw(); reported top-level additionalProperties is false. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefPropertySchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_properties_schema",
+      "source_fingerprint": "2724d2ea8de6bfed8d762d3327621b61f59f0e1dc62e48c3773068599838a7db",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefPropertiesSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefPropertiesSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/properties, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_properties with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefPropertiesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_tag_schema",
+      "source_fingerprint": "cc9bb78089572bcaa1147617ed352a98cb3874fb339aa74e277bac454b3b4f01",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefTagSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefTagSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/tag, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_tag with raw(); reported top-level additionalProperties is false. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefTagSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_tags_schema",
+      "source_fingerprint": "0e708b98235a3f2d66964fd926d3f2888670980268d745c3c6884251bf6926df",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetMetadefTagsSchema",
+        "gophercloudsdk/image.WithGetSchemaOpts",
+        "gophercloudsdk/image.WithGetSchemaHeader",
+        "gophercloudsdk/image.WithGetSchemaHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadefTagsSchema performs bodyless/query-free GET at captured base plus fixed schemas/metadefs/tags, requires actual200 and no Ref/ID/Name lookup. The pinned controller uses Controller.metadef_tags with raw(); reported top-level additionalProperties is absent. Plural getters return one discovery document, never resource lists or generic pagination. Returned passive Name need not equal the fixed route.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Strict whole-body UTF8 and nonnull root object with explicit canonical decoder: Name missing/null nil else string; Properties/Definitions missing/null nil else object rawmaps; Required missing/null nil else array of nonnullstrings. Empty string/map/array nonnil; no case-insensitive projection/coercion/envelope unwrap. AdditionalProperties owns arbitrary valid raw JSON including false/true/object/array/string/number and explicitnull; absent alone nil. Complete Body/typed maps/AP/header independent, exact numeric lexical precision retained. Embedded Metadata.Links/CreatedAt/UpdatedAt remain nil; links/date/id/$schema/$ref/extensions/case decoys remain raw passive data with no traversal, recursive schema validation or automatic future-request policy.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields",
+            "image/schemas_contracts_test.go:TestImageSchemasFixedRoutesAndRawDiscovery",
+            "image/schemas_core_test.go:TestImageSchemasCoreSixteenFixedBodylessRoutes",
+            "connection_image_schemas_test.go:TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive",
+            "internal/cmd/sdkgen/glance_schemas_test.go:TestGlanceSchemaDiscoveryPreservesNativeImageBindingsAndDocumentsManualGetters"
+          ]
+        },
+        {
+          "behavior": "Source/context/service/client/provider/origin/base/ordinary headers and source version policy validated and captured before callbacks, then context and original provider identity revalidated. Concrete full replacement and header helpers snapshot input maps/options slice/percallback configs, apply once and copy again; retained handle mutations cannot change prepared policy, reusable standard helpers race clean. Nil/error callback, protected/malformed/conflicting headers and invalid source fail before HTTP with actual causes. Safe source changes retain captured target/header while original live token changes remain live; provider replacement or unsafe retarget blocked.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Only original actual200 returns typed Schema with owned raw Body/Header/StatusCode. Accepted Read/Close/context/UTF8/JSON/root/canonical model failure returns nil typed result plus independent actual200 ResponseError preserving read/Close/ctx.Err/custom causes, close once and no accepted replay. Other statuses including cached304/missing404, transport or native hook failures retain native error policy; no cached result, ignoreMissing, alternate endpoint or partial model fallback.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses",
+            "image/schemas_contracts_test.go:TestImageSchemasCanonicalFieldsAndPassiveKeywords",
+            "image/schemas_core_test.go:TestImageSchemasCoreCanonicalPresenceAndIndependentRawFields"
+          ]
+        },
+        {
+          "behavior": "Shared fixed request and DoJSON preserve configured native prebody retry/reauth/backoff and identical-target redirect policy; changed method/origin/path/query fails before transport. Original provider/bodyless response ownership remains fixed. RetryFunc nil body to JSONnull, RawBody/JSONResponse/KeepResponseBody changes reject before another GET with original/hook/encoding causes; expanded native OkCodes cannot alter captured200 acceptance. Native reauth ErrOriginal/ErrReauth remain available via original fields. Existing native image/member/task Schema URI strings remain passive data; no native schema fetch operation or generated binding fabricated.",
+          "tests": [
+            "image/schemas_contracts_test.go:TestImageSchemasProviderHooksAndNativeCompatibility",
+            "image/schemas_core_test.go:TestImageSchemasCoreStrictStatusAndPrebodyOwnership",
+            "image/schemas_contracts_test.go:TestImageSchemasPreparedOptionsAndLiveSource",
+            "image/schemas_core_test.go:TestImageSchemasCoreCaptureAndCompletePreflight",
+            "image/schemas_options_test.go:TestImageSchemasOptionsSnapshotReplacementAndLastWins",
+            "image/schemas_options_test.go:TestImageSchemasOptionsOwnRetainedCallbacksAndSlice",
+            "image/schemas_options_test.go:TestImageSchemasOptionsHeaderAuthorityAndAliases",
+            "image/schemas_options_test.go:TestImageSchemasOptionsParallelReusableHelpers",
+            "image/schemas_contracts_test.go:TestImageSchemasResponseOwnershipAndStatusPolicy",
+            "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
+            "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/schemas.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefTagsSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
+        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+      ],
+      "remaining": [
+        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
+        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
+        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+      ]
     }
   ]
 }
