@@ -23960,6 +23960,224 @@
         "Go restores originalrepeatquery after boundedvalidadvertisedcollapse; pinned Python/native follow collapsed serverquery, so filter/sort preservation is an explicitGo repair. Go has body-next-only continuation andlocalcap/no serverhint; Python Resource pager has broader Link/fallback/clientBody/JMESPath/filter behavior.",
         "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim."
       ]
+    },
+    {
+      "operation": "python:image/v2/update_image",
+      "source_fingerprint": "f8816b4aac802962ae220c4a727c75332be218c612df412893a5f54ecbe9b378",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.UpdateImage",
+        "gophercloudsdk/image.WithUpdateImageOpts",
+        "gophercloudsdk/image.WithUpdateImageHeader",
+        "gophercloudsdk/image.WithUpdateImageHeaders",
+        "gophercloudsdk/image.WithUpdateImageChange",
+        "gophercloudsdk/image.WithUpdateImageChanges",
+        "gophercloudsdk/image.WithUpdateImageName",
+        "gophercloudsdk/image.WithUpdateImageVisibility",
+        "gophercloudsdk/image.WithUpdateImageProtected",
+        "gophercloudsdk/image.WithUpdateImageHidden",
+        "gophercloudsdk/image.WithUpdateImageOwner",
+        "gophercloudsdk/image.WithUpdateImageContainerFormat",
+        "gophercloudsdk/image.WithUpdateImageDiskFormat",
+        "gophercloudsdk/image.WithUpdateImageMinDisk",
+        "gophercloudsdk/image.WithUpdateImageMinRAM",
+        "gophercloudsdk/image.WithUpdateImageTags",
+        "gophercloudsdk/image.WithUpdateImageField",
+        "gophercloudsdk/image.WithUpdateImageFields",
+        "gophercloudsdk/image.WithUpdateImageRemoveField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Required Ref uses direct safe literal ID without GET or existing exact native Name resolution then fixed PATCH; values/options validate before Name HTTP. v2.1 media and Accept are set on private client after Name, source untouched, actual 200 only.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreFixedOrderedPatchAndMedia",
+            "image/update_core_test.go:TestUpdateImageCoreExactNameAndSource",
+            "image/update_core_test.go:TestUpdateImageCoreCompletePreflight",
+            "image/update_contracts_test.go:TestImageUpdateContractsWireAndReference",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource",
+            "connection_image_update_test.go:TestConnectionImageUpdateFacadeOwnsPatchAndResponse"
+          ]
+        },
+        {
+          "behavior": "Ordered concrete ImagePatch array retains duplicate paths and submitted sequence. FullOpts/plural Changes replace; singular Change and typed/Fields helpers append. Nil/empty inputs send nonnil [] PATCH and return real ImageInfo; no dirty comparison/dedup/local noop.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreFixedOrderedPatchAndMedia",
+            "image/update_core_test.go:TestUpdateImageCoreSortedPropertiesAndEmptyPatch",
+            "image/update_options_test.go:TestUpdateImageOptionsReplacementAppendAndTypedFields",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "Exact add/replace require present nonempty validUTF8 JSON raw bytes including explicit null; remove Value strictly nil and nonnil empty stays invalid. Generic JSON Pointer validates escapes/nonnull decoded tokens/Python-strip stable edges including U+001C..U+001F, with no percent decoding or client path-depth gate.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreCompletePreflight",
+            "image/update_options_test.go:TestUpdateImageOptionsFactoriesAndNilPresence",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "Typed ten mutable-field helpers use exact wire add/upsert, preserve string empty/bool false/int64 zero/negative, Tags zeroargs nonnil [], arbitrary Fields/Field/RemoveField use escaped exact root keys. Schema/type/range/readonly/reserved/locations validation remains server-owned.",
+          "tests": [
+            "image/update_options_test.go:TestUpdateImageOptionsReplacementAppendAndTypedFields",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "Immediate helper snapshots and callback configs own map/slice/raw bytes, nil/custom/marshal causes preserved, full replacement/header merge canonical lastwins and reusable parallel policies retain independent input. any helper snapshots encoding/json once; no original-key UTF8 normalization.",
+          "tests": [
+            "image/update_options_test.go:TestUpdateImageOptionsFactoriesAndNilPresence",
+            "image/update_options_test.go:TestUpdateImageOptionsCallbacksOwnRetainedState",
+            "image/update_options_test.go:TestUpdateImageOptionsReusablePoliciesAndFactoryCauses",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Actual successful PATCH uses unchanged ImageInfo atomic25 canonical types plus independent Body/noncanonical raw Properties/header/status, passive ID/date/URLs and raw precision/null with no request seed/header pseudoJSON/forced properties object.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreFixedOrderedPatchAndMedia",
+            "image/update_contracts_test.go:TestImageUpdateContractsCanonicalResponse",
+            "connection_image_update_test.go:TestConnectionImageUpdateFacadeOwnsPatchAndResponse"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close/context/customcause/source/JSON/model failures return nil model with whole actual ResponseError and Close once/no replay; fixed provider/target/microversion/liveauth and native advanced MoreHeaders/prebody retry/reauth/redirect/body/status policy preserve existing boundaries.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreAcceptedFailureEvidence",
+            "image/update_core_test.go:TestUpdateImageCoreNativePrebodyOwnership",
+            "image/update_contracts_test.go:TestImageUpdateContractsCanonicalResponse",
+            "image/update_contracts_test.go:TestImageUpdateContractsNativePolicy",
+            "internal/cmd/sdkgen/glance_image_update_test.go:TestGlanceImageUpdatePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/update.md"
+      ],
+      "differences": [
+        "Pinned Python reuses mutable Resource and commits sorted original/current-body diff only when dirty; Go sends explicit owned ordered operations even for [] and returns actual ImageInfo. Cached same-value/noop/Resource mutation/Adapter session and cache parity remain.",
+        "Go exact raw values and typed helpers are deliberate input shape choices, not Python descriptor coercion/aliases or server Schema/readonly/reserved/range/enum/property-protection parity. Backend location effects do not imply cloud rollback or atomicity.",
+        "Go Name lookup is an explicit native resolver extension, direct safe literal IDs do not fetch first. Accepted raw evidence/atomic ImageInfo and fixedsource/cause-safe ownership differ from Python/native model normalization; native ABI remains unchanged.",
+        "Go rejects pointer token edges that Python server strip would rename, including U+001C..U+001F; native UpdateImageProperty interpolates unescaped Names and remains separate. v2.0 draft4 media and broad Resource patch/session behavior are not replicated."
+      ],
+      "remaining": [
+        "Pinned Python reuses mutable Resource and commits sorted original/current-body diff only when dirty; Go sends explicit owned ordered operations even for [] and returns actual ImageInfo. Cached same-value/noop/Resource mutation/Adapter session and cache parity remain.",
+        "Go exact raw values and typed helpers are deliberate input shape choices, not Python descriptor coercion/aliases or server Schema/readonly/reserved/range/enum/property-protection parity. Backend location effects do not imply cloud rollback or atomicity.",
+        "Go Name lookup is an explicit native resolver extension, direct safe literal IDs do not fetch first. Accepted raw evidence/atomic ImageInfo and fixedsource/cause-safe ownership differ from Python/native model normalization; native ABI remains unchanged.",
+        "Go rejects pointer token edges that Python server strip would rename, including U+001C..U+001F; native UpdateImageProperty interpolates unescaped Names and remains separate. v2.0 draft4 media and broad Resource patch/session behavior are not replicated."
+      ]
+    },
+    {
+      "operation": "python:image/v2/update_image_properties",
+      "source_fingerprint": "4ab65a1588be8174faaa452cf33bb4b61f2c49a40aed23c7b0993ecf86fd126b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.SetImageProperties",
+        "gophercloudsdk/image.WithSetImagePropertiesOpts",
+        "gophercloudsdk/image.WithSetImagePropertiesHeader",
+        "gophercloudsdk/image.WithSetImagePropertiesHeaders",
+        "gophercloudsdk/image.WithSetImagePropertiesProperty",
+        "gophercloudsdk/image.WithSetImagePropertiesProperties"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete Properties raw map emits one v2.1 add/upsert per exact root key sorted by Go string order in a single PATCH. Direct ID has no GET/RMW/same-value comparison or dirty cached Resource dependency.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreSortedPropertiesAndEmptyPatch",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties",
+            "connection_image_update_test.go:TestConnectionImageUpdateFacadeOwnsPatchAndResponse"
+          ]
+        },
+        {
+          "behavior": "Nil/empty Properties sends nonnil [] and receives actual 200 ImageInfo without inferring Python boolean/noop or server save. Empty fields are distinct from missing state; supplied JSON null stays explicit data.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreSortedPropertiesAndEmptyPatch",
+            "image/update_contracts_test.go:TestImageUpdateContractsWireAndReference",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "FullOpts replaces wholeconfig; plural Properties replaces whole map; singular Property replaces one raw key. Header singular canonical replace and plural merge retain lastwins without taking source ownership.",
+          "tests": [
+            "image/update_options_test.go:TestUpdateImageOptionsReplacementAppendAndTypedFields",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Raw values copy and preserve exact numeric/null JSON semantics; malformedUTF8/syntax/nil/empty values stop before Name/PATCH. any Property serializes once at factory with originalkeyUTF8 check and retained marshal cause; standardGoJSON is not Python conversion.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreCompletePreflight",
+            "image/update_options_test.go:TestUpdateImageOptionsFactoriesAndNilPresence",
+            "image/update_options_test.go:TestUpdateImageOptionsReusablePoliciesAndFactoryCauses",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Field keys are nonemptyUTF8 and Python-strip-edge stable including U+001C..U+001F, interior literal controls retained. Root JSON Pointer escapes tilde/slash once with no URL-percent decode or aliases.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreCompletePreflight",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "Canonical/root properties keys may be forwarded directly without a forced properties object or readonly/range/type/schema inference. Default custom string-only schema, reserved/readonly permission failures, configured schema and backend limitations remain server-owned.",
+          "tests": [
+            "image/update_options_test.go:TestUpdateImageOptionsReplacementAppendAndTypedFields",
+            "image/update_contracts_test.go:TestImageUpdateContractsPatchAndProperties"
+          ]
+        },
+        {
+          "behavior": "Required direct literal ID and explicit Go Name extension share option-beforelookup/captured resolver/fixed PATCH policy. Private v2.1 Content-Type and Accept installation occurs after Name so source/option header policy reaches lookup unchanged.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreExactNameAndSource",
+            "image/update_contracts_test.go:TestImageUpdateContractsWireAndReference",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Helper maps/raw bytes and initialized callback state are copied before/after callbacks, preserving full replacement/reuse/parallel safety and nil/custom/source/context failures without HTTP or client header mutation.",
+          "tests": [
+            "image/update_options_test.go:TestUpdateImageOptionsCallbacksOwnRetainedState",
+            "image/update_options_test.go:TestUpdateImageOptionsReusablePoliciesAndFactoryCauses",
+            "image/update_contracts_test.go:TestImageUpdateContractsOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Reused atomic ImageInfo retains actual200 raw evidence/25 nullablecanonical fields/passive timestamps and ID/noncanonical Properties; no synthetic IDs/header pseudoJSON/outputschema validation or post-PATCH detail GET.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreFixedOrderedPatchAndMedia",
+            "image/update_contracts_test.go:TestImageUpdateContractsCanonicalResponse",
+            "connection_image_update_test.go:TestConnectionImageUpdateFacadeOwnsPatchAndResponse"
+          ]
+        },
+        {
+          "behavior": "Accepted failure retains whole ResponseError and nil result/Closeonce/noreplay/context and custom causes; live original auth/fixedsource and native advanced header/retry/reauth/redirect policy remain. Python properties seed/coercion/meta/kernel-ramdisk lookup/bool/cache/session semantics remain partial.",
+          "tests": [
+            "image/update_core_test.go:TestUpdateImageCoreAcceptedFailureEvidence",
+            "image/update_core_test.go:TestUpdateImageCoreNativePrebodyOwnership",
+            "image/update_contracts_test.go:TestImageUpdateContractsCanonicalResponse",
+            "image/update_contracts_test.go:TestImageUpdateContractsNativePolicy",
+            "internal/cmd/sdkgen/glance_image_update_test.go:TestGlanceImageUpdatePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/update.md"
+      ],
+      "differences": [
+        "Pinned Python reuses mutable Resource and commits sorted original/current-body diff only when dirty; Go sends explicit owned ordered operations even for [] and returns actual ImageInfo. Cached same-value/noop/Resource mutation/Adapter session and cache parity remain.",
+        "Go exact raw values and typed helpers are deliberate input shape choices, not Python descriptor coercion/aliases or server Schema/readonly/reserved/range/enum/property-protection parity. Backend location effects do not imply cloud rollback or atomicity.",
+        "Go Name lookup is an explicit native resolver extension, direct safe literal IDs do not fetch first. Accepted raw evidence/atomic ImageInfo and fixedsource/cause-safe ownership differ from Python/native model normalization; native ABI remains unchanged.",
+        "Go rejects pointer token edges that Python server strip would rename, including U+001C..U+001F; native UpdateImageProperty interpolates unescaped Names and remains separate. v2.0 draft4 media and broad Resource patch/session behavior are not replicated.",
+        "Python update_image_properties copies cached property seed, kwargs int/raw/string conversion and meta precedence, truthy kernel/ramdisk Connection lookup and bool return (which can be true without PATCH); Go SetImageProperties does none of these."
+      ],
+      "remaining": [
+        "Pinned Python reuses mutable Resource and commits sorted original/current-body diff only when dirty; Go sends explicit owned ordered operations even for [] and returns actual ImageInfo. Cached same-value/noop/Resource mutation/Adapter session and cache parity remain.",
+        "Go exact raw values and typed helpers are deliberate input shape choices, not Python descriptor coercion/aliases or server Schema/readonly/reserved/range/enum/property-protection parity. Backend location effects do not imply cloud rollback or atomicity.",
+        "Go Name lookup is an explicit native resolver extension, direct safe literal IDs do not fetch first. Accepted raw evidence/atomic ImageInfo and fixedsource/cause-safe ownership differ from Python/native model normalization; native ABI remains unchanged.",
+        "Go rejects pointer token edges that Python server strip would rename, including U+001C..U+001F; native UpdateImageProperty interpolates unescaped Names and remains separate. v2.0 draft4 media and broad Resource patch/session behavior are not replicated.",
+        "Python update_image_properties copies cached property seed, kwargs int/raw/string conversion and meta precedence, truthy kernel/ramdisk Connection lookup and bool return (which can be true without PATCH); Go SetImageProperties does none of these."
+      ]
     }
   ]
 }
