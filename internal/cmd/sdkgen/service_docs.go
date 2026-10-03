@@ -255,6 +255,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				policies = append(policies, "`InNamespace(ctx, namespace)`: HTTP 없는 고정 literal 범위; body 없는 `Create`와 `Get/Update/Delete(ctx, name, options...)`, `Set(ctx, names, options...)`, `DeleteAll/List/All(ctx, options...)`; Set의 기본 append=false·빈 입력은 DB를 지우지 않음; 실제 limit/marker/sort query·양수 limit의 raw 이름 continuation·로컬 MaxItems; 두 Delete 모두404 오류; [Python/Go 비교](metadeftags/README.md); Resources·Find·상태 대기 없음")
 				continue
 			}
+			if record.Kind == "catalog_and_association" {
+				policies = append(policies, "전역 `List/All(ctx, options...)`: resource type catalog; `InNamespace(ctx, namespace)`의 `Create/Delete(ctx, name, options...)`, `List/All(ctx, options...)`: 연결 관리; 두 유한 목록은 공통 concrete ListOpts·로컬 MaxItems·query/paging 없음; Prefix·PropertiesTarget의 생략/빈 값 구별; Delete는 기본 clean404 무시·연결만 해제; [Python/Go 비교](metadefresourcetypes/README.md); Resources·단건 Get/Update·Find·상태 대기 없음")
+				continue
+			}
 			if record.Kind == "store_defaults" {
 				policies = append(policies, "`List/All`, `GetGlobalDefault`, `GetPreferred`: 목록·두 고정 조회; Resources·CRUD·Find·Wait 없음")
 				continue
