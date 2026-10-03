@@ -138,3 +138,85 @@ route는 `ResourceBase`가 있으면 그 값을, 없으면 `Endpoint`를 사용�
 
 metadata 크기·개수·container 길이·ACL·authorization·동기화·저장 정책은 server가 결정합니다. raw 증거가 모든 사용자에게 보이거나 cluster의 durable replication을 보장하지 않습니다. 기존 native Get의 200/204, Update의 201/202/204 acceptance와 native 날짜/float/ACL 변환은 보존됩니다. Python `str(any)`·Resource/cache/session·alias 변환·자동 setter refresh까지 완전한 parity는 아닙니다.
 HTTP 계약은 [route와 identity](metadata_contracts_test.go#L99), [preflight와 옵션](metadata_contracts_test.go#L272), [atomic header와 소유권](metadata_contracts_test.go#L454), [mutation 증거](metadata_contracts_test.go#L553), [source와 native 정책](metadata_contracts_test.go#L671) 테스트로 검증합니다.
+
+## Container 생성·삭제
+
+`service.Containers.CreateContainer(ctx, name)`는 body 없는 PUT 한 번으로 container를 생성하거나 기존 container의 제출한 metadata를 갱신합니다. 실제 201과 202만 받아들이며 HEAD, 이름 검색, 자동 refresh를 실행하지 않습니다. `DeleteContainer(ctx, name)`는 body 없는 DELETE 한 번이며 object를 먼저 지우거나 container가 비었는지 조회하지 않습니다. [고정된 Swift API 문서](https://github.com/openstack/swift/blob/5e4b45fc17a59d4edd7079c0da3fe028175def45/api-ref/source/storage-container-services.inc#L117)는 PUT의 201/202와 빈 container DELETE의 204를 설명합니다. 비어 있지 않으면 409가 날 수 있습니다.
+
+[Python 생성·삭제 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/object_store/v1/_proxy.py#L154)는 다음처럼 사용합니다. 생성은 새 mutable Container를 반환하고 삭제는 literal 이름 또는 Container를 받아 `None`을 반환합니다. 기본 `ignore_missing=True`는 NotFoundException만 무시하며 409는 그대로 오류입니다.
+
+```python
+created = conn.object_store.create_container(
+    "books-lifecycle", metadata={"owner": "ops", "note": "literal %2F 雪"}
+)
+# PUT 후 자동 HEAD가 없으며 created는 생성에 사용한 Container입니다.
+conn.object_store.delete_container(created, ignore_missing=False)
+conn.object_store.delete_container("books-lifecycle")
+# 두 번째 DELETE의 404는 기본값으로 무시합니다. object를 자동 삭제하지 않습니다.
+```
+
+Go는 literal 이름과 concrete option을 받고 실제 응답 증거를 반환합니다. 아래 예제는 object를 넣지 않은 container를 생성하고 삭제합니다. 두 번째 DELETE는 이미 삭제된 이름의 실제 404를 관찰할 수 있습니다.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "gophercloudsdk/objectstorage/v1/containers"
+)
+
+func containerLifecycle(ctx context.Context, api *containers.API, name string) error {
+    createOptions := []containers.CreateContainerOption{
+        containers.WithCreateContainerOpts(containers.CreateContainerOpts{
+            Headers: map[string]string{"X-Request-Label": "initial"},
+            Metadata: map[string]string{"owner": "initial"},
+        }),
+        containers.WithCreateContainerHeaders(map[string]string{"X-Trace-Label": "container-create"}),
+        containers.WithCreateContainerHeader("X-Request-Label", "create"),
+        containers.WithCreateContainerMetadata(map[string]string{
+            "owner": "ops", "note": "literal %2F 雪",
+        }),
+    }
+    created, err := api.CreateContainer(ctx, name, createOptions...)
+    if created != nil { fmt.Println(created.StatusCode) }
+    if err != nil { return err }
+
+    deleteOptions := []containers.DeleteContainerOption{
+        containers.WithDeleteContainerOpts(containers.DeleteContainerOpts{
+            Headers: map[string]string{"X-Request-Label": "initial"},
+        }),
+        containers.WithDeleteContainerHeaders(map[string]string{"X-Trace-Label": "container-delete"}),
+        containers.WithDeleteContainerHeader("X-Request-Label", "delete"),
+        containers.WithDeleteContainerIgnoreMissing(false),
+    }
+    deleted, err := api.DeleteContainer(ctx, name, deleteOptions...)
+    if deleted != nil { fmt.Println(deleted.StatusCode, deleted.IgnoredMissing) }
+    if err != nil { return err }
+
+    quietOptions := append([]containers.DeleteContainerOption(nil), deleteOptions...)
+    quietOptions = append(quietOptions, containers.WithDeleteContainerIgnoreMissing(true))
+    missing, err := api.DeleteContainer(ctx, name, quietOptions...)
+    if missing != nil { fmt.Println(missing.StatusCode, missing.IgnoredMissing) }
+    return err
+}
+
+func main() {}
+```
+
+`CreateContainerOpts`는 `Headers`와 `Metadata` map, `DeleteContainerOpts`는 `Headers`와 `IgnoreMissing *bool`을 갖습니다. nil/빈 create 설정도 한 번의 PUT입니다. FullOpts helper는 전체 설정을 교체하고 Metadata helper는 metadata 전체 map을 교체합니다. nil/빈 metadata map은 제출할 key가 없다는 뜻입니다. Header/Headers는 canonical case로 병합하여 마지막 값이 이기며 한 map 또는 source/callback map 안의 case alias는 거부합니다. factory는 map/pointer를 snapshot하고 각 callback을 한 번 호출한 뒤 config를 다시 복사합니다. callback은 초기화된 Header map을 받으며 create callback의 Metadata map도 초기화되어 있습니다.
+
+Metadata key는 prefix 없는 nonempty ASCII HTTP token이며 이미 `X-Container-Meta-`가 붙은 key나 case alias는 허용하지 않습니다. value는 literal UTF-8 HTTP field value입니다. HTAB을 허용하지만 나머지 control과 DEL은 거부하며 stringify, trim 또는 URL decode를 하지 않습니다. prefix를 한 번 붙여 PUT하고 [server의 timestamp merge](https://github.com/openstack/swift/blob/5e4b45fc17a59d4edd7079c0da3fe028175def45/swift/common/db.py#L1015)가 제출하지 않은 기존 key를 유지합니다. 더 새 timestamp의 빈 value는 해당 key의 삭제 tombstone이며 모든 metadata 삭제나 object metadata의 전체 교체를 뜻하지 않습니다.
+
+ACL·sync·storage policy·version/history location·TempURL·If-None-Match 등 system 입력은 alias가 아닌 정확한 wire header를 `WithCreateContainerHeader` 또는 Headers에 넣습니다. custom/remove-container prefix·auth·framing·Host·X-Newest는 ordinary header에서 예약되어 있습니다. header의 원래 ASCII를 검증한 뒤 canonical case로 바꾸며 source, caller map은 변경하지 않습니다. ACL·quota·이름 길이·metadata 크기·storage policy·권한은 server가 결정합니다. 이미 존재하는 container의 storage policy 변경은 409가 될 수 있으며 조건부 생성이나 durable replication을 보장하지 않습니다.
+
+Delete의 IgnoreMissing nil은 true입니다. 실제로 받은 허용 404의 body read, Close, context와 source 검사가 모두 성공한 경우에만 `StatusCode=404`, `IgnoredMissing=true`, nil error를 반환합니다. 이 응답은 container가 과거에 존재했다거나 cluster 전체에서 없다는 증명이 아닙니다. 허용 404 처리 실패는 raw 결과와 whole-response `resource.ResponseError`를 보존하고 flag는 false입니다. explicit false는 204만 허용하므로 404에서 nil 결과와 native unexpected-response 오류를 반환합니다. transport/nested 오류의 404나 401·403·409·202, read/Close/context/source 실패는 missing으로 무시하지 않습니다. 허용 404는 native error RetryFunc를 거치지 않는 명시적인 Go 차이입니다.
+
+`ContainerResponse`의 `Body []byte`, `Header`, `StatusCode`는 실제 허용 응답에서 독립적으로 소유합니다. 허용 201/202/204/404 처리 중 오류가 나도 받은 raw 증거와 원인·custom context cause를 보존하며 body는 한 번 닫습니다. acknowledgement는 제출한 metadata를 합성하거나 refresh된 상태·date/model을 뜻하지 않습니다. 예상하지 않은 status/native/transport 오류는 nil 결과와 원래 typed 원인을 유지합니다. accepted-response 처리 실패 뒤 재전송하지 않습니다.
+
+이름은 required literal UTF-8입니다. empty/slash는 native name 원인과 `ErrInvalidOption`을 보존하고 backslash, 정확한 `.`/`..`, ASCII control과 DEL도 거부합니다. 공백·Unicode·percent·`?`·`#`·colon은 trim하지 않고 한 번 escape합니다. `resource.Ref`, Name lookup, account HEAD를 사용하지 않습니다. Endpoint/effective ResourceBase의 같은 origin, query 없는 HTTP(S)와 trailing slash를 검증하고 escaped reverse prefix를 보존합니다. callback 전에 source/provider/route/ordinary header를 capture하며 호출과 accepted-response 경계에서 다시 확인합니다. 원래 provider의 live token, configured native prebody retry/reauth/timeout 및 같은 fixed scope redirect 정책은 유지합니다. advanced RetryFunc header 변경은 기존 provider 정책이며 새 header-hook 거부를 약속하지 않습니다.
+
+기존 generated/native `Create`의 201/202/204, `Delete`의 202/204 acceptance와 typed header/date 변환, `Resources` Name 조회, metadata API는 유지됩니다. Python은 [Resource create 반환](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1519)·descriptor/dirty alias·`str(any)`·service cache/session을 사용하고 generic `<400` 응답을 허용하므로 이 두 메서드는 bounded partial 비교입니다. 필요한 변경 후 metadata 조회는 별도로 `GetMetadata`를 호출합니다.
+
+검증 근거는 [core wire·응답 처리](lifecycle_core_test.go#L80), [option 소유권·재사용](lifecycle_options_test.go#L16), [외부 API 계약](lifecycle_contracts_test.go#L49), [Connection 공유 client](../../../connection_objectstorage_container_lifecycle_test.go#L18), [native·generator 보존](../../../internal/cmd/sdkgen/swift_container_lifecycle_test.go#L11)에 있습니다.
