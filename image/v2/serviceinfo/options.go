@@ -13,7 +13,9 @@ import (
 )
 
 // ListStoresOpts selects basic or detailed discovery. Limit and Marker are
-// wire pagination values; MaxItems and Paginated are local iteration controls.
+// caller wire preferences, which Glance's discovery handlers may ignore.
+// MaxItems and Paginated are local controls and never generate a wire limit
+// or cursor. Only advertised links trigger another page.
 type ListStoresOpts struct {
 	Details   bool
 	Limit     int
@@ -150,7 +152,7 @@ func prepareListStores(options []ListStoresOption) (ListStoresOpts, url.Values, 
 		query[key] = append([]string(nil), values...)
 	}
 	headers, err := infoHeaders(config.Headers, false, "")
-	return value, query, headers, rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated, LimitHint: true}, err
+	return value, query, headers, rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated}, err
 }
 
 func prepareGetImportInfo(options []GetImportInfoOption) (map[string]string, error) {

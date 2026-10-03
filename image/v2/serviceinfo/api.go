@@ -56,6 +56,8 @@ func (a *API) GetImportInfo(ctx context.Context, options ...GetImportInfoOption)
 
 // ListStores is lazy and reusable. Each iteration owns its options and source
 // snapshot. Details selects the detail route locally; it is never a query key.
+// Only advertised continuations trigger another page; Glance's discovery
+// handlers return their complete store list and ignore pagination queries.
 func (a *API) ListStores(ctx context.Context, options ...ListStoresOption) iter.Seq2[*Store, error] {
 	owned := append([]ListStoresOption(nil), options...)
 	return func(yield func(*Store, error) bool) {
@@ -83,9 +85,7 @@ func (a *API) ListStores(ctx context.Context, options ...ListStoresOption) iter.
 			Metadata:  func(value *Store) *resource.Metadata { return &value.Metadata },
 			Validate:  prepared.check, ValidateResponse: validateResponse,
 			Paging: rest.PagePolicy[Store]{
-				HTTPLink: true, MarkerFallback: true, MarkerOnShortPage: true,
-				StopOnEmptyPage: true, MaxItemsLimitHint: true,
-				Marker: func(value *Store) (string, error) { return value.ID, nil },
+				HTTPLink: true, StopOnEmptyPage: true,
 			},
 		}
 		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
