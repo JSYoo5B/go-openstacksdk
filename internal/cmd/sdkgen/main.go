@@ -437,6 +437,9 @@ func (g *generator) generate(path string) error {
 	if err := validateGlanceDeleteTypes(pkg); err != nil {
 		return err
 	}
+	if err := validateGlanceServiceInfoTypes(pkg); err != nil {
+		return err
+	}
 	names := []string{}
 	for _, name := range pkg.Scope().Names() {
 		fn, ok := pkg.Scope().Lookup(name).(*types.Func)
