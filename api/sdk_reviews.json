@@ -25048,6 +25048,172 @@
         "Strictown-link policy/currentversionedalias limitation, exactsuffix validation and actual200/202 evidence are explicit Go choices; native richer APIs remain available.",
         "Concurrentread/write can overwrite changes; POST307 may followapplication. No CAS/rollback/durablecompletion or missing-absence guarantee."
       ]
+    },
+    {
+      "operation": "python:object_store/v1/create_container",
+      "source_fingerprint": "562cd981778633ae05fb46c2c133005ab5ca9710f04106dd299fde8c933a6126",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.CreateContainer",
+        "gophercloudsdk/objectstorage/v1/containers.WithCreateContainerOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithCreateContainerHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithCreateContainerHeaders",
+        "gophercloudsdk/objectstorage/v1/containers.WithCreateContainerMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "One bodyless literal-route PUT accepts only actual201/202, returns opaque ContainerResponse, and performs no lookup/HEAD/implicit refresh.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreWireIdentity",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity",
+            "connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative"
+          ]
+        },
+        {
+          "behavior": "Required safe literal UTF8 container and captured effective reverse-prefix source/provider/context/header validation precede HTTP; native empty/slash and unsupported causes remain visible.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreCompletePreflight",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsInvalidInputs",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete functional options snapshot Header/Metadata maps before callbacks, initialize maps, invoke each callback once, clone retained storage, replace full configuration/metadata and apply canonical header last overwrite.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsSnapshotsAndOverwrite",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsReplacementAndDefaults",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsParallelReuse",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Suffix-only ASCII metadata keys and literal legalUTF8 values produce exact X-Container-Meta headers; nil/empty maps still issue PUT, source/caller input remains owned. Omitted keys and newer emptyvalue deletion follow pinnedserver merge, with no clientRMW or inferred state.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreWireIdentity",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsInvalidInputs",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Actual accepted201/202 copied bytes/header/status survive read/Close/context/source failure with ResponseError and original causes; body closes once and accepted handling failure is never replayed.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreAcceptedResponseFailures",
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreSourceAndContext",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsAcknowledgementOwnership"
+          ]
+        },
+        {
+          "behavior": "Live original-provider auth, native prebody retry/reauth/fixedscope redirect policy and explicit advanced header policy remain bounded; new204rejection does not alter existing generated/native Create201/202/204 ABI.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreNativePolicy",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsSourceAndNativePolicy",
+            "connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative",
+            "internal/cmd/sdkgen/swift_container_lifecycle_test.go:TestSwiftContainerLifecyclePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "differences": [
+        "Python mutable Container return, dirty/alias descriptors and generic <400 acceptance differ from opaque strict201/202 acknowledgement.",
+        "Python arbitrary attrs/str(any)/known-header coercion and adapter/cache/session behavior are not replicated."
+      ],
+      "documentation": [
+        "objectstorage/v1/containers/README.md"
+      ],
+      "remaining": [
+        "Python mutable Container return, dirty/alias descriptors and generic <400 acceptance differ from opaque strict201/202 acknowledgement.",
+        "Python arbitrary attrs/str(any)/known-header coercion and adapter/cache/session behavior are not replicated.",
+        "Server configuration/ACL/quota/storagepolicy/metadata limits and HTTP normalization remain server-owned; no existence/CAS/durable-state guarantee."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/delete_container",
+      "source_fingerprint": "fea615f47488b036610a12f24ce63d85f0dc3b6f1278ff07b5ec9ac8ad6469b7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.DeleteContainer",
+        "gophercloudsdk/objectstorage/v1/containers.WithDeleteContainerOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithDeleteContainerHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithDeleteContainerHeaders",
+        "gophercloudsdk/objectstorage/v1/containers.WithDeleteContainerIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "One bodyless DELETE uses the literal container route without lookup, accountHEAD, emptiness probe, objectpurge, wait or cleanup; actual204 returns owned opaque response.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreWireIdentity",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity",
+            "connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative"
+          ]
+        },
+        {
+          "behavior": "IgnoreMissing nil/true accepts physically owned404 solely for observation; only clean read/Close/context/source checks return actual404 ContainerResponse with IgnoredMissingtrue and nilerror. It is not proof of historical existence or globalabsence and bypasses native error RetryFunc.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreStrictStatusesAndMissing",
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreNativePolicy",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsReplacementAndDefaults",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsMissingAndFailures"
+          ]
+        },
+        {
+          "behavior": "Explicitfalse accepts only204;404 yields nilresult/nativeunexpectederror. Nested/transport404,401/403/409/202 and handling/source/context errors are never suppressed.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreStrictStatusesAndMissing",
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreNativePolicy",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsMissingAndFailures",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsAcknowledgementOwnership"
+          ]
+        },
+        {
+          "behavior": "Owned Header maps and IgnoreMissing pointer snapshots support callback-retention separation, fullreplacement, canonical header lastwins, casealias rejection and parallel helper reuse without source mutation.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsReplacementAndDefaults",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsParallelReuse",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Required safe literalUTF8 name and captured effective ResourceBase/source/provider/options/context validation precede DELETE; no name resolver or URLdecode is performed.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreCompletePreflight",
+            "objectstorage/v1/containers/lifecycle_options_test.go:TestContainerLifecycleOptionsInvalidInputs",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsPreflightAndOptions",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Accepted204 and allowed404 actualBody/Header/StatusCode survive read/Close/context/source failure with original/customcontextcauses and wholeResponseError; dirty404 has IgnoredMissingfalse, oneClose and no acceptedresponse replay.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreAcceptedResponseFailures",
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreSourceAndContext",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsAcknowledgementOwnership",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsMissingAndFailures"
+          ]
+        },
+        {
+          "behavior": "Servernonempty409 and accountmissing404 remain bounded; liveauth/native prebody hooks and typedreauth evidence are retained. Existing generated/native Delete202/204 and metadata/Resources ABI remain unchanged.",
+          "tests": [
+            "objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreNativePolicy",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsSourceAndNativePolicy",
+            "objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsMissingAndFailures",
+            "connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative",
+            "internal/cmd/sdkgen/swift_container_lifecycle_test.go:TestSwiftContainerLifecyclePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "differences": [
+        "Python accepts an existing Container and returns None; Go requires a literal name and returns actual response/clean404 flag.",
+        "Python NotFoundException/adapter generic <400 behavior and mutable Resource/cache/session policy are not a complete Go match."
+      ],
+      "documentation": [
+        "objectstorage/v1/containers/README.md"
+      ],
+      "remaining": [
+        "Python accepts an existing Container and returns None; Go requires a literal name and returns actual response/clean404 flag.",
+        "Python NotFoundException/adapter generic <400 behavior and mutable Resource/cache/session policy are not a complete Go match.",
+        "Server404 may reflect missing account and does not prove globalabsence; no recursivepurge/wait/CAS/atomic cloud guarantee."
+      ]
     }
   ]
 }
