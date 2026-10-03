@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 image/v2 API를 하나의 인증된 서비스 객체에�
 
 감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.
 
+`ServiceInfo.ListStores/AllStores(ctx, options...)`는 저장소 목록과 `WithListStoresDetails(true)`로 선택하는 상세 목록을 제공합니다. `GetImportInfo(ctx)`는 import 방식의 서비스 정보를 읽고 원문 필드·실제 헤더·상태를 함께 보존합니다. [서비스 정보의 Python/Go 비교](serviceinfo/README.md)에 기본값·생략/null·엄격한200 정책·목록 제어를 설명합니다. discovery 응답은 현재 서버 정보이며 import 실행이나 자동 capability gate가 아닙니다. 기존 native `ImageImport.Get`은 유지합니다.
+
 상위 `image.Service.DeleteImage(ctx, ref, options...)`는 이미지 전체 또는 `WithDeleteImageStore`로 선택한 저장소 복사본을 삭제합니다. ID는 조회 없이 고정 DELETE를 전송하고 Name은 정확한 이름을 해석하며 기본적으로 미존재를 무시합니다. 실제204 응답의 원문·헤더·상태를 보존하고 읽기·종료·취소 오류를 미존재로 숨기지 않습니다. [삭제의 Python/Go 비교](../delete.md)는 concrete 옵션·store 경로·부분 결과와 Python/native 성공 코드·404 retry 차이를 설명합니다. 기존 native `Images.Delete`의 202/204 계약과 resource inventory는 유지합니다.
 
 상위 `image.Service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 선택한 저장소 순서로 이미지를 writer에 전송하며 사용 가능한 checksum을 검사합니다. caller의 writer는 닫지 않고 실제 metadata·binary 응답과 쓴 바이트 수·무결성 결과를 보존합니다. [다운로드의 Python/Go 비교](../download.md)는 기본값·제한된 chunk·checksum 우선순위·부분 실패와 full200/no-data204 정책을 설명합니다. native `ImageData.Download`의 stream 반환 계약은 유지합니다.
@@ -56,6 +58,7 @@ _ = value
 | `ImageImport` | [imageimport](imageimport/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Images` | [images](images/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |
 | `Members` | [members](members/api_generated.go) | `InImage(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
+| `ServiceInfo` | [serviceinfo](serviceinfo/api.go) | `ListStores/AllStores(ctx)`: 저장소 목록·선택 상세 목록; Resources·CRUD·Find·Wait 없음; `GetImportInfo(ctx)`: import 방식의 서비스 정보; 원문 필드·헤더·상태 보존 |
 | `Tasks` | [tasks](tasks/api_generated.go) | `Resources`: ID 조회, 목록, 상태 대기; `WaitForTask/WaitForTaskState`: 단일 시간 제한·396 재생성·실제 부분 결과 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.

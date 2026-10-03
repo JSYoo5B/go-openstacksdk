@@ -2055,6 +2055,24 @@
     "wait": false
   },
   {
+    "package": "gophercloudsdk/image/v2/serviceinfo",
+    "source": "sdk_owned",
+    "model": "Store",
+    "kind": "list_only",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
+    "package": "gophercloudsdk/image/v2/serviceinfo",
+    "source": "sdk_owned",
+    "model": "ImportInfo",
+    "kind": "service_info",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
     "package": "gophercloudsdk/keymanager/v1/secretstores",
     "source": "sdk_owned",
     "model": "SecretStore",
