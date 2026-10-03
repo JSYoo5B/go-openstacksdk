@@ -87,3 +87,5 @@ Swift의 container 이름과 object 키는 해당 서비스의 식별자입니�
 범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. 기존 15개 범위의 실제 URL·기본 TTL·JSON Patch·Swift 키는 [scope](../api/scoped_contracts_test.go), [QoS](../api/qos_contracts_test.go), [Swift](../api/swift_resources_contracts_test.go) 테스트에서 확인합니다. 추가 범위는 [tags](../api/server_tags_contracts_test.go), [actions](../api/instance_actions_scope_test.go), [databases](../api/trove_databases_contracts_test.go), [users](../api/trove_users_contracts_test.go) HTTP 계약에서 검증합니다.
 
 Glance [metadata Property](../image/v2/metadefproperties/README.md)의 `InNamespace`는 HTTP 없이 literal parent와 서비스 target을 고정합니다. 목록의 `Key`는 dictionary의 출처이며 optional `Name`과 별도로 유지합니다. 이후 호출은 애플리케이션이 선택한 literal 이름을 받습니다.
+
+Glance [metadata Tag](../image/v2/metadeftags/README.md)는 `InNamespace`로 parent와 service target을 고정합니다. 양수 limit의 다음 marker는 yield 전에 복사한 마지막 원본 이름이며 response의 next·Link를 따라가지 않습니다.

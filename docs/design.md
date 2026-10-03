@@ -82,3 +82,5 @@ SDK 소유 모델의 `resource.Metadata`는 추가 JSON 필드, null·생략의 
 각 단계는 실제 API별 모의 서버 테스트를 함께 추가해야 합니다. 지금의 구현이 openstacksdk와 기능적으로 동등하다고 가정하지 않습니다.
 
 Glance [Property](../image/v2/metadefproperties/README.md)는 concrete 옵션이 필수 scalar와 raw keyword를 소유합니다. With 함수가 JSON 값을 snapshot하므로 호출자가 builder interface를 구현할 필요가 없고, full replacement와 Python Resource의 dirty/cache 동작 차이를 문서화합니다.
+
+Glance [Tag](../image/v2/metadeftags/README.md)는 concrete 옵션으로 헤더·rename·append·목록 제어를 제공합니다. Set은 제출한 이름만 결과로 반환하며 빈 입력으로 삭제를 대신하지 않습니다.

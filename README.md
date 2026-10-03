@@ -348,3 +348,5 @@ Glance metadata namespace는 `conn.Image(ctx)`의 `service.API.MetadefNamespaces
 Glance metadata object는 `service.API.MetadefObjects.InNamespace(ctx, namespace)`로 범위를 만든 뒤 사용합니다. [Object의 Python/Go 비교](image/v2/metadefobjects/README.md)는 고정 namespace·concrete 기본값·PUT 교체·유한 목록과 개별/일괄 삭제의 차이를 설명합니다.
 
 Glance metadata property는 `service.API.MetadefProperties.InNamespace(ctx, namespace)`에서 사용합니다. [Property의 Python/Go 비교](image/v2/metadefproperties/README.md)는 필수 Type·Title, With 기반 JSON keyword, Get의 resource_type, dictionary Key·Name과 PUT 교체를 설명합니다.
+
+Glance metadata tag는 `service.API.MetadefTags.InNamespace(ctx, namespace)`에서 사용합니다. [Tag의 Python/Go 비교](image/v2/metadeftags/README.md)는 bodyless Create, strict 삭제, Set의 append 기본값과 빈 입력, limit·marker 기반 목록을 설명합니다.
