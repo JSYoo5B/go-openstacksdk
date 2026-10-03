@@ -368,3 +368,5 @@ Glance metadata tag는 `service.API.MetadefTags.InNamespace(ctx, namespace)`에�
 Glance metadata resource type의 전역 목록은 `service.API.MetadefResourceTypes.List/All`로 조회하고, namespace 연결은 `InNamespace(ctx, namespace)`에서 생성·목록·해제합니다. [Resource type의 Python/Go 비교](image/v2/metadefresourcetypes/README.md)는 공통 목록 옵션, Prefix·PropertiesTarget의 생략/빈 값과 삭제 기본값을 설명합니다.
 
 Swift object metadata는 `conn.ObjectStorage(ctx)`의 `service.Objects.GetMetadata/SetMetadata/DeleteMetadata`로 사용합니다. [객체 metadata의 Python/Go 비교](objectstorage/v1/objects/README.md)는 함수 옵션, 기존 값과 시스템 header 보존, 조회·변경 응답의 분리, 링크 객체와 동시 변경의 제약을 설명합니다.
+
+Swift 컨테이너는 `service.Containers.CreateContainer(ctx, name)`와 `DeleteContainer(ctx, name)`으로 생성·삭제합니다. [Python/Go 생성·삭제 비교](objectstorage/v1/containers/README.md)는 메타데이터·시스템 헤더 옵션, 기본 404 허용과 strict 삭제, 실제 HTTP 응답을 설명합니다.
