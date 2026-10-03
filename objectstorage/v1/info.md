@@ -2,7 +2,7 @@
 
 `service.GetInfo(ctx, options...)`는 catalog endpoint에서 `/info` 경로를 유도하여 fresh GET을 수행합니다. 성공은 실제 HTTP 200이며 사전 HEAD·목록·SDK 캐시 조회를 하지 않습니다. `GetObjectSegmentSize`도 호출마다 이 GET을 수행하여 요청 크기, 광고된 `swift.max_file_size`, `slo.min_segment_size`를 비교합니다.
 
-`Info`의 `Swift`, `SLO`, `BulkDelete`, `StaticWeb`, `TempURL`은 `map[string]json.RawMessage`입니다. section이 없거나 null이면 nil, `{}`이면 non-nil empty map입니다. root JSON object의 모든 필드는 `Info.Body`에 보존하므로 알려지지 않은 plugin과 큰 정수도 float64로 바꾸지 않습니다. 각 section과 raw field·header는 독립적으로 복사됩니다. `Info.UnmarshalJSON`은 같은 atomic parser를 사용하며 inherited `CreatedAt`·`UpdatedAt`·`Links`는 해석하거나 따라가지 않고 nil로 둡니다. 중복 JSON key는 encoding/json의 마지막 값 정책을 따릅니다. root가 유효한 UTF-8 JSON object가 아니거나 canonical section이 non-null object가 아니면 전체 typed projection을 실패시킵니다.
+`Info`의 `Swift`, `SLO`, `BulkDelete`, `StaticWeb`, `TempURL`은 `map[string]json.RawMessage`입니다. section이 없거나 null이면 nil, `{}`이면 non-nil empty map입니다. root JSON object의 모든 필드는 `Info.Body`에 보존하므로 알려지지 않은 plugin과 큰 정수도 float64로 바꾸지 않습니다. 각 section과 raw field·header는 독립적으로 복사됩니다. `Info.UnmarshalJSON`은 같은 atomic parser를 사용하며 inherited `CreatedAt`·`UpdatedAt`·`Links`는 해석하거나 따라가지 않고 nil로 둡니다. 중복 JSON key는 encoding/json의 마지막 값 정책을 따릅니다. root가 유효한 UTF-8 JSON object가 아니거나 존재하는 non-null canonical section이 object가 아니면 전체 typed projection을 실패시킵니다.
 
 다음 예제는 구성된 Service를 받아 두 작업과 concrete options를 사용합니다. full options가 먼저 설정한 Size를 Without helper로 해제하여 기본 1 GiB를 선택하고, 다음 호출에서는 8 GiB를 명시합니다. HTTP 오류나 응답 처리 오류의 실제 증거도 확인할 수 있습니다.
 
@@ -87,7 +87,7 @@ func main() {}
 
 `ObjectSegmentSizeOpts.Size`의 nil은 요청 기본값 1,073,741,824 bytes입니다. 명시한 0은 유지하고 음수는 HTTP 전에 거부합니다. 성공한 capability에서 bound가 없거나 null이면 0이며, 알려진 section이 없어도 0으로 처리합니다. bound는 non-negative int64 JSON 정수 token만 받습니다. string·fraction·overflow·음수는 actual 200의 raw 증거를 보존한 오류입니다. 최대 비교를 먼저 수행하고, 다음 최소 비교를 수행합니다. 따라서 max보다 크면 max, 아니면 min보다 작으면 min을 선택하며 서로 뒤집힌 bound를 정규화하지 않습니다. `Info` 조회 자체는 bound를 숫자로 변환하지 않습니다.
 
-segment 선택에만 실제 404 또는 412 fallback을 적용합니다. body 읽기·Close·context·원래 source 확인이 모두 성공한 응답에서 max=2,684,354,561, min=0을 사용하여 같은 비교를 수행합니다. `UsedFallback=true`, `Info=nil`이고 `StatusCode`, `Header`, `Body`에는 실제 404/412 증거가 남습니다. `GetInfo` 자체의 404/412는 오류입니다. transport/nested native error에 들어 있는 status, 403, malformed 200 JSON, read·Close·취소·source 변경 오류에는 fallback하지 않습니다. 2,684,354,561은 Python `(5 * 1024 * 1024 * 1024 + 2) / 2`의 정수값이며 Swift의 전체 기본 max와 구분합니다.
+segment 선택에만 실제 404 또는 412 fallback을 적용합니다. body 읽기·Close·context·원래 source 확인이 모두 성공한 응답에서 max=2,684,354,561, min=0을 사용하여 같은 비교를 수행합니다. `UsedFallback=true`, `Info=nil`이고 `StatusCode`, `Header`, `Body`에는 실제 404/412 증거가 남습니다. `GetInfo`는 404/412를 fallback 성공으로 바꾸지 않으며 기존 native retry 정책을 유지합니다. transport/nested native error에 들어 있는 status, 403, malformed 200 JSON, read·Close·취소·source 변경 오류에는 fallback하지 않습니다. 2,684,354,561은 Python `(5 * 1024 * 1024 * 1024 + 2) / 2`의 정수값이며 Swift의 전체 기본 max와 구분합니다.
 
 full options는 설정을 교체하고 Header/Headers는 canonical name으로 마지막 값을 병합합니다. 한 map 안의 case alias는 오류입니다. map과 Size pointer를 option 생성 시 snapshot하고 각 callback 뒤에도 복사합니다. nil option, 잘못된 header, auth·framing·metadata mutation 등 예약 header와 지원하지 않는 client capability는 HTTP 전에 거부합니다. callbacks는 한 번씩 호출하며 마지막 Size 또는 Without helper가 presence를 결정합니다.
 
@@ -116,3 +116,4 @@ Swift proxy는 [effective constraints](https://github.com/openstack/swift/blob/5
 
 pinned Gophercloud v2.15.0의 objectstorage/v1에는 `/info` 조회 또는 segment 선택 공개 연산이 없습니다. 기존 listing의 `ExtractInfo`는 다른 함수입니다. 이 두 workflow는 SDK 소유의 partial 구현이며 Python Resource·descriptor·adapter·exception·URL coercion까지 완료한 것으로 판정하지 않습니다.
 
+회귀 테스트는 [raw model·선택·응답 소유권](info_core_test.go), [옵션·사전검증](info_options_test.go), [public HTTP·native retry·fallback](info_contracts_test.go)을 다룹니다. [Connection 공유](../../connection_objectstorage_info_test.go)와 [native facade·생성물 보존](../../internal/cmd/sdkgen/swift_info_test.go)도 별도 계약입니다.

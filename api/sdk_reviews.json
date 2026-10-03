@@ -24894,7 +24894,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -25268,11 +25268,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -25333,11 +25333,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -25897,6 +25897,176 @@
             "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults",
             "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries",
             "internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/get_info",
+      "source_fingerprint": "aa9526170d6b61054c1731c346f0ed445879f77b27ba98786374e9d3c2b8f4a7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1.Service.GetInfo",
+        "gophercloudsdk/objectstorage/v1.WithGetInfoOpts",
+        "gophercloudsdk/objectstorage/v1.WithGetInfoHeader",
+        "gophercloudsdk/objectstorage/v1.WithGetInfoHeaders",
+        "gophercloudsdk/objectstorage/v1.Info.UnmarshalJSON"
+      ],
+      "differences": [
+        "Go returns owned Info raw fields and actual200 evidence with atomic nullable-object sections; Python fetch mutates a fresh Resource, accepts response translation below400 and coerces non-dict known sections to empty dict.",
+        "Go derives a fixed escaped-path URL with ASCII regex, rejects query/fragment/userinfo/opaque URLs and treats semicolon as path; Python uses Unicode digits and preserves URL params/query/fragment.",
+        "Inherited Metadata timestamps and Links stay passive/nil while every root JSON field remains raw; Go does not follow capability links or synthesize signed admin query."
+      ],
+      "remaining": [
+        "Python Resource descriptor coercion, unknown-body filtering, dirty state and JSON parse/exception translation are not reproduced by the strict Go Info model.",
+        "Python URL Unicode-digit/params/query/fragment behavior and adapter/session/cache/microversion semantics remain distinct from the fixed Go source and ownership contract."
+      ],
+      "documentation": [
+        "objectstorage/v1/info.md"
+      ],
+      "contracts": [
+        {
+          "behavior": "Fresh fixed GET derives the escaped catalog prefix/version path, ignores ResourceBase for routing and preserves actual200 capabilities and header evidence.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsRoutesAndModels",
+            "connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow"
+          ]
+        },
+        {
+          "behavior": "UTF8 nonnull root object and five nullable object sections project atomically; unknown plugin/large-number/raw inherited metadata remain exact and canonical section bytes own storage independently.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsRoutesAndModels",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreModelAtomicRawSections",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreModelFailuresAndAcceptedEvidence"
+          ]
+        },
+        {
+          "behavior": "Full options replace config; header factories/callbacks own maps, last canonical overlay wins, valid ordinary source drift leaves the captured request unchanged and original live auth remains active.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy",
+            "connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsNativeRetrySnapshots"
+          ]
+        },
+        {
+          "behavior": "Original source/API/provider/Endpoint/ResourceBase/Type/Microversion changes and reserved/malformed header aliases fail before another HTTP attempt; retries cannot inject body or broaden the public actual200 status gate.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsHeaderValidationAndPreflight",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreCallbackAndWireGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close/custom context/source failures preserve partial raw response proof and joined causes, clear typed Info and never replay accepted processing; returned data cannot mutate the owned error proof.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreModelFailuresAndAcceptedEvidence",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreCallbackAndWireGuards"
+          ]
+        },
+        {
+          "behavior": "Existing Swift generated native service/API files remain exact and accounts/containers/objects do not acquire new generated Collections.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_info_test.go:TestSwiftInfoPreservesNativeAndRegistry"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/get_object_segment_size",
+      "source_fingerprint": "a9db05eace9305be3be8e1ce0cba78bd2e48ac201b0a4e454c2f912e96b426d8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1.Service.GetObjectSegmentSize",
+        "gophercloudsdk/objectstorage/v1.WithObjectSegmentSizeOpts",
+        "gophercloudsdk/objectstorage/v1.WithObjectSegmentSizeHeader",
+        "gophercloudsdk/objectstorage/v1.WithObjectSegmentSizeHeaders",
+        "gophercloudsdk/objectstorage/v1.WithObjectSegmentSize",
+        "gophercloudsdk/objectstorage/v1.WithoutObjectSegmentSize"
+      ],
+      "differences": [
+        "Go uses optional non-negative int64 Size with nil default1073741824, strict exact int64 non-negative bounds and absent/null section or bound values0; Python requires positional int|None, does not preflight negative/type inputs, raises AttributeError for swift/slo None and TypeError for null bounds.",
+        "Go exposes RequestedSize, selected Size, observed bounds, optional Info and actual raw response evidence; Python returns a scalar and its404/412 fallback maximum is float2684354561.0.",
+        "Only clean physically accepted404/412 responses with read/Close/context/source checks permit integer fallback2684354561; nested native/transport statuses or accepted processing errors do not fallback. Maximum comparison remains before minimum even for inverted bounds."
+      ],
+      "remaining": [
+        "Python unrestricted numeric comparisons, float-return behavior, missing-section AttributeError/null-bound TypeError and SDK exception class semantics are outside the Go strict integer/physical-response contract.",
+        "The fresh Info operation still differs in Resource/descriptor/URL/adapter/session/cache behavior; advertised capability bounds and client selection do not guarantee middleware permissions or upload success."
+      ],
+      "documentation": [
+        "objectstorage/v1/info.md"
+      ],
+      "contracts": [
+        {
+          "behavior": "Fresh actual200 capabilities select exact int64 requested/default1073741824/explicit0 sizes using maximum first then minimum, preserve inverted-bound ordering and use0 for absent/null sections or bounds.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsSegmentBounds",
+            "connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreSegmentSelection"
+          ]
+        },
+        {
+          "behavior": "Reusable full/header/size/reset options own maps/pointers and preserve callback/source snapshots; each workflow captures the shared Connection client and live authentication separately.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsOptionsAndSource",
+            "connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsFactoryAndCallbackOwnership",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsParallelReuse"
+          ]
+        },
+        {
+          "behavior": "Negative requested size, nil option/context, malformed/case-alias/reserved source or caller headers fail before HTTP; invalid source headers are checked before callbacks.",
+          "tests": [
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsHeaderValidationAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Only clean physically accepted404/412 bypass retry and set fallback maximum2684354561/minimum0; result retains requested/selected size, actual status/header/raw body and nil Info.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsFallbackEvidence",
+            "objectstorage/v1/info_core_test.go:TestInfoCorePhysicalFallbackAndDirtyResponses"
+          ]
+        },
+        {
+          "behavior": "Invalid accepted JSON/model/bounds return a nonnil raw result with requested size and actual proof, Size0/no fallback; decoded Info survives bounds failure and both bounds stay atomic.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsSegmentBounds",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreModelFailuresAndAcceptedEvidence",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreSegmentBoundsAtomic"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close/EOF-plus-error/custom context/source faults remain joined and retain immutable partial evidence without retry; dirty404/412 never finalize fallback or selected size.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsFallbackEvidence",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy",
+            "objectstorage/v1/info_core_test.go:TestInfoCorePhysicalFallbackAndDirtyResponses",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreCallbackAndWireGuards"
+          ]
+        },
+        {
+          "behavior": "Transport/retry/reauth nested404 and other actual rejected statuses remain native errors; fixed URL/body ownership and original-source guards preserve configured advanced native header overwrite policy.",
+          "tests": [
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsFallbackEvidence",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsNativePolicy",
+            "objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsAcceptedResponse",
+            "objectstorage/v1/info_options_test.go:TestInfoOptionsNativeRetrySnapshots",
+            "objectstorage/v1/info_core_test.go:TestInfoCoreCallbackAndWireGuards"
+          ]
+        },
+        {
+          "behavior": "Existing Swift generated native service/API files remain exact and accounts/containers/objects do not acquire new generated Collections.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_info_test.go:TestSwiftInfoPreservesNativeAndRegistry"
           ]
         }
       ]
