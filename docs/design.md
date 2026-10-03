@@ -86,3 +86,5 @@ Glance [Property](../image/v2/metadefproperties/README.md)는 concrete 옵션이
 Glance [Tag](../image/v2/metadeftags/README.md)는 concrete 옵션으로 헤더·rename·append·목록 제어를 제공합니다. Set은 제출한 이름만 결과로 반환하며 빈 입력으로 삭제를 대신하지 않습니다.
 
 Glance [Resource type](../image/v2/metadefresourcetypes/README.md)은 두 목록이 같은 concrete ListOpts를 사용합니다. 연결 생성의 optional scalar와 삭제 기본값은 With 함수로 제공하며 호출자가 builder를 구현할 필요가 없습니다.
+
+Glance [Namespace 생성](../image/v2/metadefnamespaces/README.md)은 네 concrete 정의 container를 With 함수로 받습니다. 필수 Type·Title은 문자열 필드이며 선택 필드만 pointer로 생략을 표현합니다. 중첩 map·slice·raw JSON을 깊게 복사해 재사용하는 옵션과 준비된 요청의 값을 독립적으로 유지합니다.
