@@ -1,14 +1,12 @@
 package v1
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"gophercloudsdk/internal/rest"
+	"gophercloudsdk/internal/swiftinfo"
 	"gophercloudsdk/request"
 )
 
@@ -49,7 +47,7 @@ func (s *Service) GetObjectSegmentSize(ctx context.Context, options ...ObjectSeg
 	if err = p.finish(ctx, cfg.Headers, err); err != nil {
 		return nil, request.Wrap("GetObjectSegmentSize", "objectstorage", err)
 	}
-	requested := int64(1073741824)
+	requested := swiftinfo.DefaultSegmentSize
 	if cfg.Size != nil {
 		requested = *cfg.Size
 	}
@@ -65,7 +63,7 @@ func (s *Service) GetObjectSegmentSize(ctx context.Context, options ...ObjectSeg
 		return result, request.Wrap("GetObjectSegmentSize", "objectstorage", err)
 	}
 	if response.StatusCode == http.StatusNotFound || response.StatusCode == http.StatusPreconditionFailed {
-		result.MaxFileSize, result.UsedFallback = 2684354561, true
+		result.MaxFileSize, result.UsedFallback = swiftinfo.FallbackMaxFileSize, true
 	} else {
 		result.Info, err = decodeInfo(response)
 		if err == nil {
@@ -88,12 +86,7 @@ func (s *Service) GetObjectSegmentSize(ctx context.Context, options ...ObjectSeg
 		result.MaxFileSize, result.MinSegmentSize, result.UsedFallback = 0, 0, false
 		return result, request.Wrap("GetObjectSegmentSize", "objectstorage", err)
 	}
-	result.Size = requested
-	if requested > result.MaxFileSize {
-		result.Size = result.MaxFileSize
-	} else if requested < result.MinSegmentSize {
-		result.Size = result.MinSegmentSize
-	}
+	result.Size = swiftinfo.Select(requested, result.MaxFileSize, result.MinSegmentSize)
 	return result, nil
 }
 
@@ -107,13 +100,5 @@ func decodeInfo(response *rest.Response) (*Info, error) {
 }
 
 func infoBound(section map[string]json.RawMessage, name string) (int64, error) {
-	raw, present := section[name]
-	if !present || bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
-		return 0, nil
-	}
-	value, err := strconv.ParseInt(string(bytes.TrimSpace(raw)), 10, 64)
-	if err != nil || value < 0 {
-		return 0, fmt.Errorf("Swift info bound %q must be a nonnegative int64", name)
-	}
-	return value, nil
+	return swiftinfo.Bound(section, name)
 }

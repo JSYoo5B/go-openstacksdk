@@ -3,16 +3,13 @@ package v1
 import (
 	"context"
 	"net/http"
-	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/fixedrequest"
 	"gophercloudsdk/internal/rest"
+	"gophercloudsdk/internal/swiftinfo"
 )
-
-var infoVersionPath = regexp.MustCompile(`/v[0-9]+\.?[0-9]*(/.*)?`)
 
 type preparedInfo struct {
 	base      *preparedTempURLKey
@@ -36,22 +33,7 @@ func (s *Service) captureInfo(ctx context.Context) (*preparedInfo, error) {
 }
 
 func infoTarget(endpoint string) (string, error) {
-	parsed, err := url.Parse(endpoint)
-	if err != nil || parsed.User != nil || parsed.Opaque != "" || parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
-		return "", tempURLKeyInvalid("invalid Swift info catalog endpoint")
-	}
-	path := parsed.EscapedPath()
-	if infoVersionPath.MatchString(path) {
-		path = infoVersionPath.ReplaceAllString(path, "/info")
-	} else {
-		path = strings.TrimRight(path, "/") + "/info"
-	}
-	decoded, err := url.PathUnescape(path)
-	if err != nil {
-		return "", tempURLKeyInvalid("invalid Swift info escaped path")
-	}
-	parsed.Path, parsed.RawPath = decoded, path
-	return parsed.String(), nil
+	return swiftinfo.Target(endpoint)
 }
 
 func validateInfoHeaders(headers map[string]string) (map[string]string, error) {
