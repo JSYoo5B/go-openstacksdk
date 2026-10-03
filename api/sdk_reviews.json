@@ -21837,6 +21837,513 @@
         "No authenticated cloud/server policy execution or full SDK parity is claimed.",
         "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
       ]
+    },
+    {
+      "operation": "python:image/v2/create_metadef_object",
+      "source_fingerprint": "b69fbfd5b846ef8bfed703db491e7d6d0e9a5f543a1ce16d425497112b5b6398",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.Create",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateHeaders",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateDescription",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateProperties",
+        "gophercloudsdk/image/v2/metadefobjects.WithCreateRequired"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Object requires whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Properties root optionalobject with passive anyJSON inner RawMessages; required optionalstrictstringarray without null elements. Missing/null nil, empty map/array nonnil; atomic type errors retain actual response proof, raw unknown values and numeric precision independently owned.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One flat collection POST201 includes required name and only supplied description/properties/required. Description validUTF8 with no length bound; multiline/empty preserved. Properties nil omit/empty{} explicit, keys validUTF8 and values validnonnullUTF8JSONobject without fetched schema/type/title gate. Required nil omit/empty[] explicit, literal UTF8 entries including empty/comma/newline/repeats without trim/dedupe/membership/CSV normalization. No discovery/GET/rollback; server validates property schemas and owns RequiredCSV storage.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_object",
+      "source_fingerprint": "1350842ed9ec084bf8c3c505119fddc31596d3cb2e9a4460e835bed6f169c436",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.Get",
+        "gophercloudsdk/image/v2/metadefobjects.WithGetOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithGetHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithGetHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Object requires whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Properties root optionalobject with passive anyJSON inner RawMessages; required optionalstrictstringarray without null elements. Missing/null nil, empty map/array nonnil; atomic type errors retain actual response proof, raw unknown values and numeric precision independently owned.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One fixed child GET200 has no body/query/fallback. Selected literal parent and child remain route identity even if canonical response names/self/schema differ; optional canonical presence/raw data is passive. Python object_arg is reduced to _get_id before generic _get constructs a resource; mutable descriptor/coercion/session behavior remains broader.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsCanonicalModelsAndRawOwnership",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+      ]
+    },
+    {
+      "operation": "python:image/v2/metadef_objects",
+      "source_fingerprint": "a2ba1f1ff12df81d72970c374efdd86440f4adc00b85625b8d8dc57730799b93",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.List",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.All",
+        "gophercloudsdk/image/v2/metadefobjects.WithListOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithListHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithListHeaders",
+        "gophercloudsdk/image/v2/metadefobjects.WithListMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Object requires whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Properties root optionalobject with passive anyJSON inner RawMessages; required optionalstrictstringarray without null elements. Missing/null nil, empty map/array nonnil; atomic type errors retain actual response proof, raw unknown values and numeric precision independently owned.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Lazy finite one bodyless/queryless GET200 validates whole root and requirednonnullobjectsarray then only consumed rows. Local MaxItems0unlimited/negativeinvalid; cap/callerbreak skip unused bad rows. No query limits/markers/sort/filter or next/schema/self/headerLink continuation/hints/fallback despite copied namespace pagination prose in API reference. All success empty nonnil, error nil without partial rows; iterator yields already-consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFiniteConsumptionAndOwnership",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFiniteListAndLocalControls",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Go finite local cap deliberately avoids wire filters and continuation; pinned proxy has no query kwargs, generic Resource framework remains broader and official prose copies namespace paging."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Go finite local cap deliberately avoids wire filters and continuation; pinned proxy has no query kwargs, generic Resource framework remains broader and official prose copies namespace paging."
+      ]
+    },
+    {
+      "operation": "python:image/v2/update_metadef_object",
+      "source_fingerprint": "38016f6c18e51ff1aecff47672b075bd4efb05eee7f784d5d462e6484540761c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.Update",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateHeaders",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateName",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateDescription",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateProperties",
+        "gophercloudsdk/image/v2/metadefobjects.WithUpdateRequired"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Object requires whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Properties root optionalobject with passive anyJSON inner RawMessages; required optionalstrictstringarray without null elements. Missing/null nil, empty map/array nonnil; atomic type errors retain actual response proof, raw unknown values and numeric precision independently owned.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One replacement PUT200 uses fixed current child route and mandatory body name=current unless optional rename. Omitted optional description/required/properties reset server values; nil omit versus empty{} / [] explicit. No GET/RMW/cache merge/PATCH/noop/rollback. Pinned Python object_arg reduces via _get_id before generic _update; dirty-only commit may skip empty body/header and does not restore mandatory object name. RequiredCSV/server-schema behavior remains a difference.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python proxy reduces object_arg to _get_id; generic dirty-only commit may no-op and omits dirty identity, whereas Go supplies current name and always sends replacement PUT."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python proxy reduces object_arg to _get_id; generic dirty-only commit may no-op and omits dirty identity, whereas Go supplies current name and always sends replacement PUT."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_metadef_object",
+      "source_fingerprint": "739d2c7638608b5ba3ad27b23433ef50a4c92845f5c0f218973f52d5b2c76983",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.Delete",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteHeaders",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One child DELETE204 returns opaque acknowledgement of fixed requested Namespace/Name. Nil IgnoreMissing defaults true; only physically owned clean404 with successful read/Close/context/source returns nil,nil and privately bypasses native404RetryFunc. Explicitfalse preserves native404retry/error; nested transport/callback/reauth/logical404 never quiet. Hidden parent/child404 is not absence proof; no unprotect/enumeration/cleanup. Python delete returns Resource or None rather than actual204ACK.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_all_metadef_objects",
+      "source_fingerprint": "d03eed18c18c170247259a5354d8d5386f45f4a9a92a8f51d0f61286f1244d5b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefobjects.NamespaceScope.DeleteAll",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteAllOpts",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteAllHeader",
+        "gophercloudsdk/image/v2/metadefobjects.WithDeleteAllHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families: FullOpts wholly replaces configuration and last option wins; deep snapshots preserve nil/empty pointer/maps/RawMessage/slices. Per-callback config copied before/after and callbacks once per request/iteration; nil/error callback and owned/conflicting/invalid headers fail before HTTP. Helper reuse and lazy iterator option-slice ownership preserved.",
+          "tests": [
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsCallbackDeepOwnership",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults",
+            "image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsParallelReusableHelpers",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/UTF8/JSON/model/context/source failures preserve actual Body/Header/status and original causes in ResponseError with close once/no replay. Actual204 opaque acknowledgement survives handling failures with requested Namespace/childName, nil childName for DeleteAll; native rejected response ownership remains native.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Unchanged shared REST/fixedrequest retains configured prebody retry/reauth/backoff/identical-target redirect policy; guards method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership. Actual statuses cannot be expanded by hook OkCodes. Original read/Close/ctx.Err/customCause plus native reauth ErrOriginal/ErrReauth evidence retained; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One collection DELETE204 returns opaque acknowledgement with selected Namespace and nilName; every404strict, no IgnoreMissing helper. No enumerate/perchilddelete/count/wait/unprotect/rollback. Accepted handling failure retains ACK plus error. Python uses MetadefNamespace.delete_all_objects and returns namespace Resource, with policy/protected behavior delegated to server.",
+          "tests": [
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsResponseOwnershipAndNativeHooks",
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefobjects/README.md"
+      ],
+      "differences": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+      ],
+      "remaining": [
+        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
+        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+      ]
     }
   ]
 }
