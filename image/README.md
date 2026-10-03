@@ -160,3 +160,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 기본 1MiB chunk로 writer에 전송하며 가능한 checksum을 검사합니다. [다운로드 사용법](download.md)은 저장소 우선순위·hash 우선순위·caller의 writer 소유권과 실제 metadata/binary 응답·바이트 수·부분 오류를 설명합니다. 기존 raw `service.API.ImageData.Download`를 사용할 때는 반환된 Body를 직접 닫습니다.
 
 `service.DeleteImage(ctx, ref, options...)`는 ID 조회 없이 전체 이미지 또는 선택한 저장소 복사본을 삭제합니다. Name은 기존 정확한 이름 조회로 해석하며 기본 미존재는 `nil, nil`입니다. [삭제 사용법](delete.md)은 concrete 옵션, 실제204 응답 원문·헤더·상태와 응답 처리 오류, 저장소의 마지막 복사본 정책을 설명합니다. 기존 `Images.Delete`와 native `API.Images.Delete`는 계속 사용할 수 있습니다.
+
+`service.API.ServiceInfo.ListStores/AllStores(ctx, options...)`는 기본 저장소 목록과 선택적 상세 목록을 읽고, `GetImportInfo(ctx)`는 현재 서버의 import 방식을 조회합니다. [ServiceInfo 사용법](v2/serviceinfo/README.md)은 Python 대응·concrete 옵션·실제 응답 증거·목록 제어를 설명합니다. discovery 결과로 import 실행을 자동 제한하거나 캐시하지 않습니다.
