@@ -29,6 +29,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 | `compute/compute_test.go` | 상태가 없는 flavor에 대한 오류와 생성 입력/의존성 오류 |
 | `network/network_test.go` | 확장 query 인코딩, 정확한 이름으로 삭제 대상 선택 |
 | `image/image_test.go` | Glance의 flat response와 Properties, killed 상태 |
+| `image/delete_contracts_test.go`, `image/delete_core_test.go`, `image/delete_options_test.go` | 전체/저장소 고정 DELETE, 정확한 Name·실제404 기본값, 사전 검증·snapshot·현재 token, 실제204 원문/헤더와 Read/Close/context 오류, nested404 오류 보존·redirect·prebody retry·native ABI |
+| `internal/cmd/sdkgen/glance_delete_test.go` | native Delete signature/ErrResult/ID drift 거부, 기존 API/resource 생성물 보존과 수동 저장소 삭제 문서 연결 |
 | `blockstorage/blockstorage_test.go` | Cinder microversion 전송과 error 상태 패턴 |
 | `network/floating_ip_test.go`, `connection_floating_ip_test.go` | 외부 네트워크·Compute 참조, 포트·IPv4 선택, 모호성, 생성 후 연결·대기 실패 보존 |
 | `image/upload_test.go`, `image/upload_retry_test.go` | metadata/PUT/대기, 옵션 snapshot, Reader 소유권, 부분 소비·비동기 Close에서 무재전송, decode 부분 성공 보존 |

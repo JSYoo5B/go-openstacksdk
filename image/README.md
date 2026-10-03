@@ -9,7 +9,8 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.get_image(id)` | `service.Images.Get(ctx, id)` |
 | `conn.image.find_image(name_or_id, ignore_missing=False)` | `service.Images.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.image.images(status="active")` | `service.Images.List(ctx, resource.WithStatus("active"))` |
-| `conn.image.delete_image(id)` | `service.Images.Delete(ctx, resource.ID(id))` |
+| `conn.image.delete_image(id)` | `service.DeleteImage(ctx, resource.ID(id))`; [삭제 옵션·결과 비교](delete.md) |
+| `conn.image.delete_image(id, store="archive")` | `service.DeleteImage(ctx, resource.ID(id), image.WithDeleteImageStore("archive"))` |
 | `conn.image.download_image(id, output=file)` | `service.DownloadTo(ctx, resource.ID(id), writer, ...)`; [다운로드 옵션·결과 비교](download.md) |
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
@@ -157,3 +158,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.API.ImageData.StageImage(ctx, ref, data, options...)`는 queued 이미지를 확인하고 `io.Reader`를 한 번 전송한 뒤 최신 이미지를 조회합니다. `StageKnownImage`는 이미 보유한 native Image의 ID/status를 복사해 첫 조회를 생략합니다. [Staging 사용법](v2/imagedata/README.md)은 선택적 크기 헤더, caller의 Reader 소유권, 실제 PUT204 접수와 후속 GET200 결과·부분 실패를 설명합니다. staged 데이터의 import 제출과 active 상태 대기는 이어서 선택할 수 있습니다.
 
 `service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 기본 1MiB chunk로 writer에 전송하며 가능한 checksum을 검사합니다. [다운로드 사용법](download.md)은 저장소 우선순위·hash 우선순위·caller의 writer 소유권과 실제 metadata/binary 응답·바이트 수·부분 오류를 설명합니다. 기존 raw `service.API.ImageData.Download`를 사용할 때는 반환된 Body를 직접 닫습니다.
+
+`service.DeleteImage(ctx, ref, options...)`는 ID 조회 없이 전체 이미지 또는 선택한 저장소 복사본을 삭제합니다. Name은 기존 정확한 이름 조회로 해석하며 기본 미존재는 `nil, nil`입니다. [삭제 사용법](delete.md)은 concrete 옵션, 실제204 응답 원문·헤더·상태와 응답 처리 오류, 저장소의 마지막 복사본 정책을 설명합니다. 기존 `Images.Delete`와 native `API.Images.Delete`는 계속 사용할 수 있습니다.
