@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 image/v2 API를 하나의 인증된 서비스 객체에�
 
 감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.
 
+상위 `image.Service.DeleteImage(ctx, ref, options...)`는 이미지 전체 또는 `WithDeleteImageStore`로 선택한 저장소 복사본을 삭제합니다. ID는 조회 없이 고정 DELETE를 전송하고 Name은 정확한 이름을 해석하며 기본적으로 미존재를 무시합니다. 실제204 응답의 원문·헤더·상태를 보존하고 읽기·종료·취소 오류를 미존재로 숨기지 않습니다. [삭제의 Python/Go 비교](../delete.md)는 concrete 옵션·store 경로·부분 결과와 Python/native 성공 코드·404 retry 차이를 설명합니다. 기존 native `Images.Delete`의 202/204 계약과 resource inventory는 유지합니다.
+
 상위 `image.Service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 선택한 저장소 순서로 이미지를 writer에 전송하며 사용 가능한 checksum을 검사합니다. caller의 writer는 닫지 않고 실제 metadata·binary 응답과 쓴 바이트 수·무결성 결과를 보존합니다. [다운로드의 Python/Go 비교](../download.md)는 기본값·제한된 chunk·checksum 우선순위·부분 실패와 full200/no-data204 정책을 설명합니다. native `ImageData.Download`의 stream 반환 계약은 유지합니다.
 
 상위 `image.Service.CreateAndImport`는 concrete metadata·stage·import·wait 정책을 첫 요청 전에 검사하고 새 이미지 생성201 → 단일 staging204 → fresh 조회200 → import 접수202를 연결합니다. remote import는 staging을 생략하며 active 대기는 명시적으로 선택합니다. [생성·import의 Python/Go 비교](../create-import.md)는 기본값·옵션 소유권·단계별 부분 결과와 Python의 task/config/cache/cleanup 차이를 설명합니다. 이 메서드는 `conn.Image(ctx)`의 상위 서비스에 있으며 버전별 native 연산을 추가하지 않습니다.
