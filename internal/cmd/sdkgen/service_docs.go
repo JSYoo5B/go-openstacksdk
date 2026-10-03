@@ -243,6 +243,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				policies = append(policies, "`Create/Get/Update/Delete(ctx, namespace, options...)`, `List/All(ctx, options...)`: literal namespace 이름·concrete 기본값·명시 PUT 교체; [Python/Go 비교](metadefnamespaces/README.md); Resources·Find·상태 대기 없음")
 				continue
 			}
+			if record.Kind == "scoped_named_resource" {
+				policies = append(policies, "`InNamespace(ctx, namespace)`: HTTP 없는 고정 literal 범위; `Create/Get/Update/Delete(ctx, name, options...)`, `DeleteAll/List/All(ctx, options...)`; concrete 기본값·명시 PUT 교체·유한 목록·로컬 MaxItems; 개별 Delete는 기본404 무시, DeleteAll은404 오류; [Python/Go 비교](metadefobjects/README.md); Resources·Find·상태 대기 없음")
+				continue
+			}
 			if record.Kind == "store_defaults" {
 				policies = append(policies, "`List/All`, `GetGlobalDefault`, `GetPreferred`: 목록·두 고정 조회; Resources·CRUD·Find·Wait 없음")
 				continue
