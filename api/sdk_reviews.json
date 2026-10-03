@@ -18115,6 +18115,524 @@
         "Mutable Python Resource/descriptor/default/dirty/cache/adapter/session behavior, object overloads, base_path/microversion overrides and complete response/exception/coercion parity remain unresolved.",
         "No automatic discovery gate/cache, Store Resources/Find/CRUD/Wait, info/usage, image mutation wiring or capability inference. Local fixtures establish request/model/error contracts, not real cloud feature support or server permissions."
       ]
+    },
+    {
+      "operation": "python:image/v2/add_tag",
+      "source_fingerprint": "f27ca938ed635a51a4010679f6dd1d94e4c3fe8c02d244a4e84227d046544da1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.AddTag",
+        "gophercloudsdk/image.WithImageMutationOpts",
+        "gophercloudsdk/image.WithImageMutationHeader",
+        "gophercloudsdk/image.WithImageMutationHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddTag defaults to bodyless/query-free PUT on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Literal tag accepts nonempty validUTF8 up to255 Unicode code points, preserves case/whitespace/Unicode/percent/query/fragment data and PathEscapes exactly once (%2F becomes%252F). Empty/dot/dotdot/slash/backslash/control/invalidUTF8/256runes reject before Name lookup/callback/HTTP. No trim/dedupe/URL decode or tags-set replacement.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "ID is validated and routed directly; explicit Name resolves exact literal matches across existing native pages once, including UUID-shaped names, before a fixed chosen-ID mutation. Absent/ambiguous/late surfaced native lookup failures or malformed resolved IDs send no mutation. Native Name LIST model/body ownership/continuation behavior is retained.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "Context/source/provider/type/origin/UTF8 base/source headers/version/Ref and literal tag preflight runs before caller callbacks or HTTP. Nil callbacks and callback/source/context failures preserve original causes. Ordinary option headers are the only extension; protected auth/framing/version/representation fields and conflicting supplied-map aliases fail locally.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "WithImageMutationOpts replaces the full concrete header policy. Header helpers snapshot input maps at creation; option slice and each callback config/map are copied before and after one invocation. Retained handles, later callbacks and parallel helper reuse cannot change prepared request policy.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Captured original client/provider/prefix and ordinary headers are used for Name LIST and mutation; the original provider latest auth token stays live. Safe source base/header changes retain captured requests, while provider replacement or foreign source retarget rejects before mutation.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers",
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Only actual original204 creates an acknowledgement with fixed request ImageID and literal Tag or compiled Action, owned opaque Body bytes, cloned Header and actual StatusCode. Empty/nonJSON/invalidUTF8 response bytes are allowed and never decode metadata, retarget from Location/body IDs, or establish current tags/status.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted204 read/Close/context failures return retained partial/full acknowledgement plus ResponseError. Result/error Body/Header copies are independent; original read/Close/ctx.Err/custom cause survives. Accepted body closes exactly once without accepted replay. Native rejected/transport/prebody failures and unexpected200/201/202/206/404 keep nil result and their native evidence.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff preserves fixed method/origin/path/query and live auth, and may attempt the mutation again before acceptance. Body ownership tampering, including nil-to-JSONnull, RawBody, KeepResponseBody or JSONResponse, fails before the next attempt with original/hook/encoding causes; expanded OkCodes cannot bypass original204. Native ErrUnableToReauthenticate ErrOriginal/ErrReauth remain inspectable through fields. Changed-target/method redirects are guarded; identical-target configured redirect policy remains. Prior native APIs are preserved.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/mutations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
+        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
+        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
+        "Pinned TagMixin URL helper joins raw components and TagMixin raise_from_response rejects status>=400. Go adds deliberate bounded tag-route preflight and once-escaped literal identity, and requires actual204.",
+        "Python TagMixin updates the local Resource.tags list after successful HTTP. Go never fetches or modifies that local tag cache and uses a dedicated single-tag mutation; native ReplaceImageTags remains a separate full-set PATCH.",
+        "Server set addition makes repeated Add idempotent at the endpoint; Go sends the dedicated PUT again and does not perform Python local duplicate-list handling or read-modify-write."
+      ],
+      "remaining": [
+        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
+        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
+        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
+        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
+        "Python local tag-list append/remove, descriptor/dirty state and supplied Resource cache mutation semantics remain unresolved; server tag count constraints and persistence are not client-inferred."
+      ]
+    },
+    {
+      "operation": "python:image/v2/remove_tag",
+      "source_fingerprint": "60739ecdd9f8f7a5479ee3c9ccac51548f1950bb736a822426ac00ab59396d88",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.RemoveTag",
+        "gophercloudsdk/image.WithImageMutationOpts",
+        "gophercloudsdk/image.WithImageMutationHeader",
+        "gophercloudsdk/image.WithImageMutationHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveTag defaults to bodyless/query-free DELETE on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Literal tag accepts nonempty validUTF8 up to255 Unicode code points, preserves case/whitespace/Unicode/percent/query/fragment data and PathEscapes exactly once (%2F becomes%252F). Empty/dot/dotdot/slash/backslash/control/invalidUTF8/256runes reject before Name lookup/callback/HTTP. No trim/dedupe/URL decode or tags-set replacement.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "ID is validated and routed directly; explicit Name resolves exact literal matches across existing native pages once, including UUID-shaped names, before a fixed chosen-ID mutation. Absent/ambiguous/late surfaced native lookup failures or malformed resolved IDs send no mutation. Native Name LIST model/body ownership/continuation behavior is retained.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "Context/source/provider/type/origin/UTF8 base/source headers/version/Ref and literal tag preflight runs before caller callbacks or HTTP. Nil callbacks and callback/source/context failures preserve original causes. Ordinary option headers are the only extension; protected auth/framing/version/representation fields and conflicting supplied-map aliases fail locally.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "WithImageMutationOpts replaces the full concrete header policy. Header helpers snapshot input maps at creation; option slice and each callback config/map are copied before and after one invocation. Retained handles, later callbacks and parallel helper reuse cannot change prepared request policy.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Captured original client/provider/prefix and ordinary headers are used for Name LIST and mutation; the original provider latest auth token stays live. Safe source base/header changes retain captured requests, while provider replacement or foreign source retarget rejects before mutation.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers",
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Only actual original204 creates an acknowledgement with fixed request ImageID and literal Tag or compiled Action, owned opaque Body bytes, cloned Header and actual StatusCode. Empty/nonJSON/invalidUTF8 response bytes are allowed and never decode metadata, retarget from Location/body IDs, or establish current tags/status.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted204 read/Close/context failures return retained partial/full acknowledgement plus ResponseError. Result/error Body/Header copies are independent; original read/Close/ctx.Err/custom cause survives. Accepted body closes exactly once without accepted replay. Native rejected/transport/prebody failures and unexpected200/201/202/206/404 keep nil result and their native evidence.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff preserves fixed method/origin/path/query and live auth, and may attempt the mutation again before acceptance. Body ownership tampering, including nil-to-JSONnull, RawBody, KeepResponseBody or JSONResponse, fails before the next attempt with original/hook/encoding causes; expanded OkCodes cannot bypass original204. Native ErrUnableToReauthenticate ErrOriginal/ErrReauth remain inspectable through fields. Changed-target/method redirects are guarded; identical-target configured redirect policy remains. Prior native APIs are preserved.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/mutations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
+        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
+        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
+        "Pinned TagMixin URL helper joins raw components and TagMixin raise_from_response rejects status>=400. Go adds deliberate bounded tag-route preflight and once-escaped literal identity, and requires actual204.",
+        "Python TagMixin updates the local Resource.tags list after successful HTTP. Go never fetches or modifies that local tag cache and uses a dedicated single-tag mutation; native ReplaceImageTags remains a separate full-set PATCH.",
+        "Python remove_tag suppresses only local list.remove ValueError after successful HTTP; it does not ignore HTTP404. Go missing image/tag remains an error and produces no acknowledgement."
+      ],
+      "remaining": [
+        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
+        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
+        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
+        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
+        "Python local tag-list append/remove, descriptor/dirty state and supplied Resource cache mutation semantics remain unresolved; server tag count constraints and persistence are not client-inferred."
+      ]
+    },
+    {
+      "operation": "python:image/v2/deactivate_image",
+      "source_fingerprint": "d1af8d418d3852fb2d57dd522008618407a7d8561190f64301641e6eb734c5a9",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.DeactivateImage",
+        "gophercloudsdk/image.WithImageMutationOpts",
+        "gophercloudsdk/image.WithImageMutationHeader",
+        "gophercloudsdk/image.WithImageMutationHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "ID is validated and routed directly; explicit Name resolves exact literal matches across existing native pages once, including UUID-shaped names, before a fixed chosen-ID mutation. Absent/ambiguous/late surfaced native lookup failures or malformed resolved IDs send no mutation. Native Name LIST model/body ownership/continuation behavior is retained.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "Context/source/provider/type/origin/UTF8 base/source headers/version/Ref and literal tag preflight runs before caller callbacks or HTTP. Nil callbacks and callback/source/context failures preserve original causes. Ordinary option headers are the only extension; protected auth/framing/version/representation fields and conflicting supplied-map aliases fail locally.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "WithImageMutationOpts replaces the full concrete header policy. Header helpers snapshot input maps at creation; option slice and each callback config/map are copied before and after one invocation. Retained handles, later callbacks and parallel helper reuse cannot change prepared request policy.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Captured original client/provider/prefix and ordinary headers are used for Name LIST and mutation; the original provider latest auth token stays live. Safe source base/header changes retain captured requests, while provider replacement or foreign source retarget rejects before mutation.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers",
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Only actual original204 creates an acknowledgement with fixed request ImageID and literal Tag or compiled Action, owned opaque Body bytes, cloned Header and actual StatusCode. Empty/nonJSON/invalidUTF8 response bytes are allowed and never decode metadata, retarget from Location/body IDs, or establish current tags/status.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted204 read/Close/context failures return retained partial/full acknowledgement plus ResponseError. Result/error Body/Header copies are independent; original read/Close/ctx.Err/custom cause survives. Accepted body closes exactly once without accepted replay. Native rejected/transport/prebody failures and unexpected200/201/202/206/404 keep nil result and their native evidence.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff preserves fixed method/origin/path/query and live auth, and may attempt the mutation again before acceptance. Body ownership tampering, including nil-to-JSONnull, RawBody, KeepResponseBody or JSONResponse, fails before the next attempt with original/hook/encoding causes; expanded OkCodes cannot bypass original204. Native ErrUnableToReauthenticate ErrOriginal/ErrReauth remain inspectable through fields. Changed-target/method redirects are guarded; identical-target configured redirect policy remains. Prior native APIs are preserved.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/mutations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
+        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
+        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
+        "Pinned Image._action calls session.post and neither decodes a response nor applies raise_from_response explicitly; adapter exceptions remain native to the Python session. Go deliberately requires actual204 and returns owned acknowledgement evidence without updating a local status cache."
+      ],
+      "remaining": [
+        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
+        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
+        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
+        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
+        "Server permission and active/deactivated transition/idempotence validation remain server-owned. The acknowledgement does not seed an Image status model, wait for a state, or reproduce Python supplied Resource/session behavior."
+      ]
+    },
+    {
+      "operation": "python:image/v2/reactivate_image",
+      "source_fingerprint": "2cf135e95a0c94b8d83f4b3a3ec5eea6066aec13943a480a996f4d528128bfd2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.ReactivateImage",
+        "gophercloudsdk/image.WithImageMutationOpts",
+        "gophercloudsdk/image.WithImageMutationHeader",
+        "gophercloudsdk/image.WithImageMutationHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReactivateImage defaults to bodyless/query-free POST on the dedicated fixed-ID endpoint; only actual204 acknowledges the request. Direct ID causes no metadata GET/list/PATCH/discovery/wait. Missing image or tag is a strict error; there is no IgnoreMissing option or nested404 suppression.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "ID is validated and routed directly; explicit Name resolves exact literal matches across existing native pages once, including UUID-shaped names, before a fixed chosen-ID mutation. Absent/ambiguous/late surfaced native lookup failures or malformed resolved IDs send no mutation. Native Name LIST model/body ownership/continuation behavior is retained.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions"
+          ]
+        },
+        {
+          "behavior": "Context/source/provider/type/origin/UTF8 base/source headers/version/Ref and literal tag preflight runs before caller callbacks or HTTP. Nil callbacks and callback/source/context failures preserve original causes. Ordinary option headers are the only extension; protected auth/framing/version/representation fields and conflicting supplied-map aliases fail locally.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsLiteralTagIdentityAndCompletePreflight",
+            "image/mutation_core_test.go:TestImageMutationCoreTagBoundsPrecedeOptionsAndLookup",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "WithImageMutationOpts replaces the full concrete header policy. Header helpers snapshot input maps at creation; option slice and each callback config/map are copied before and after one invocation. Retained handles, later callbacks and parallel helper reuse cannot change prepared request policy.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Captured original client/provider/prefix and ordinary headers are used for Name LIST and mutation; the original provider latest auth token stays live. Safe source base/header changes retain captured requests, while provider replacement or foreign source retarget rejects before mutation.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsPreparedOptionsAndLiveSource",
+            "image/mutation_core_test.go:TestImageMutationCoreSourcePreflightAndCapturedLiveAuth",
+            "image/mutation_options_test.go:TestImageMutationOptionsSnapshotReplacementAndLastWins",
+            "image/mutation_options_test.go:TestImageMutationOptionsCallbacksOwnHandlesAndCauses",
+            "image/mutation_options_test.go:TestImageMutationOptionsRejectHeaderOwnershipAndAliases",
+            "image/mutation_options_test.go:TestImageMutationOptionsParallelReusableHelpers",
+            "image/mutation_contracts_test.go:TestImageMutationsExactNameResolutionAndFailures",
+            "image/mutation_core_test.go:TestImageMutationCoreExactNameAndStrictLookupFailures",
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Only actual original204 creates an acknowledgement with fixed request ImageID and literal Tag or compiled Action, owned opaque Body bytes, cloned Header and actual StatusCode. Empty/nonJSON/invalidUTF8 response bytes are allowed and never decode metadata, retarget from Location/body IDs, or establish current tags/status.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsFixedRoutesAndAcknowledgements",
+            "image/mutation_core_test.go:TestImageMutationCoreFixedRoutesAndOpaqueAcknowledgements",
+            "connection_image_mutations_test.go:TestConnectionImageMutationsShareClientAndKeepAcknowledgements",
+            "internal/cmd/sdkgen/glance_mutations_test.go:TestGlanceMutationsPreserveNativeImagesAndDocumentUpperActions",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted204 read/Close/context failures return retained partial/full acknowledgement plus ResponseError. Result/error Body/Header copies are independent; original read/Close/ctx.Err/custom cause survives. Accepted body closes exactly once without accepted replay. Native rejected/transport/prebody failures and unexpected200/201/202/206/404 keep nil result and their native evidence.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff preserves fixed method/origin/path/query and live auth, and may attempt the mutation again before acceptance. Body ownership tampering, including nil-to-JSONnull, RawBody, KeepResponseBody or JSONResponse, fails before the next attempt with original/hook/encoding causes; expanded OkCodes cannot bypass original204. Native ErrUnableToReauthenticate ErrOriginal/ErrReauth remain inspectable through fields. Changed-target/method redirects are guarded; identical-target configured redirect policy remains. Prior native APIs are preserved.",
+          "tests": [
+            "image/mutation_contracts_test.go:TestImageMutationsProviderHooksAndNativeCompatibility",
+            "image/mutation_core_test.go:TestImageMutationCoreNativeStatusesAndPrebodyOwnership",
+            "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
+            "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/mutations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
+        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
+        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
+        "Pinned Image._action calls session.post and neither decodes a response nor applies raise_from_response explicitly; adapter exceptions remain native to the Python session. Go deliberately requires actual204 and returns owned acknowledgement evidence without updating a local status cache."
+      ],
+      "remaining": [
+        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
+        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
+        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
+        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
+        "Server permission and active/deactivated transition/idempotence validation remain server-owned. The acknowledgement does not seed an Image status model, wait for a state, or reproduce Python supplied Resource/session behavior."
+      ]
     }
   ]
 }
