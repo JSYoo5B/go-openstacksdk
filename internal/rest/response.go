@@ -3,13 +3,16 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -31,46 +34,128 @@ func (r *Response) Fail(cause error) error {
 }
 
 // DoJSON snapshots JSON input before HTTP and guards the exact method/URL on
-// each attempt. The target must remain in the source service's origin. Empty
-// accepted responses are valid here; resource decoders enforce their envelopes.
+// each attempt. The target must remain in the source service's origin. Accepted
+// read, Close and context errors retain the actual response without a resend.
+// Resource decoders enforce envelopes; empty accepted responses are valid here.
 func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
+	if ctx == nil {
+		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
+	}
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, responseContextError(ctx, err)
 	}
 	if err := ValidateTarget(source, endpoint); err != nil {
-		return nil, err
+		return nil, responseContextError(ctx, err)
 	}
 	if len(codes) == 0 {
 		return nil, fmt.Errorf("%w: explicit success codes are required", resource.ErrInvalidOption)
 	}
-	options := &gophercloud.RequestOpts{OkCodes: append([]int(nil), codes...), KeepResponseBody: true, MoreHeaders: maps.Clone(headers)}
+	expectedCodes := append([]int(nil), codes...)
+	options := &gophercloud.RequestOpts{OkCodes: append([]int(nil), expectedCodes...), KeepResponseBody: true, MoreHeaders: maps.Clone(headers)}
+	var expectedBody []byte
 	if body != nil {
 		encoded, err := json.Marshal(body)
 		if err != nil {
-			return nil, err
+			return nil, responseContextError(ctx, err)
 		}
-		options.JSONBody = json.RawMessage(encoded)
+		// The retry hook can mutate RawMessage in place. Its request encoding
+		// must never alias the original bytes used to validate ownership.
+		expectedBody = append([]byte(nil), encoded...)
+		options.JSONBody = json.RawMessage(append([]byte(nil), encoded...))
 	}
 	client, err := fixedrequest.New(source, method, endpoint)
 	if err != nil {
-		return nil, err
+		return nil, responseContextError(ctx, err)
+	}
+	if retry := client.ProviderClient.RetryFunc; retry != nil {
+		client.ProviderClient.RetryFunc = func(ctx context.Context, method, endpoint string, options *gophercloud.RequestOpts, original error, count uint) error {
+			callbackErr := retry(ctx, method, endpoint, options, original, count)
+			if ownershipErr := responseRequestOwnership(options, expectedBody); ownershipErr != nil {
+				return responseContextError(ctx, joinResponseErrors(original, callbackErr, ownershipErr))
+			}
+			if callbackErr != nil || ctx.Err() != nil {
+				return responseContextError(ctx, joinResponseErrors(original, callbackErr))
+			}
+			return nil
+		}
 	}
 	wire, err := client.Request(ctx, method, endpoint, options)
 	if err != nil {
 		// Native errors already retain status/body/header and their original
 		// cause. Do not mask them with a successful-response decode error.
-		return nil, err
+		return nil, responseContextError(ctx, err)
 	}
 	result := &Response{Header: wire.Header.Clone(), StatusCode: wire.StatusCode}
-	defer wire.Body.Close()
-	result.Body, err = io.ReadAll(wire.Body)
-	if err == nil {
-		err = ctx.Err()
+	var readErr error
+	result.Body, readErr = io.ReadAll(wire.Body)
+	bodyErr := responseContextError(ctx, joinResponseErrors(readErr, wire.Body.Close()))
+	if !slices.Contains(expectedCodes, result.StatusCode) {
+		// Native hooks can expand OkCodes. Actual response evidence still
+		// cannot establish success outside the SDK's original policy.
+		native := gophercloud.ErrUnexpectedResponseCode{
+			Method: method, URL: endpoint, Expected: append([]int(nil), expectedCodes...), Actual: result.StatusCode,
+			Body: append([]byte(nil), result.Body...), ResponseHeader: result.Header.Clone(),
+		}
+		return nil, joinResponseErrors(native, bodyErr)
 	}
-	if err != nil {
-		return result, result.Fail(err)
+	if bodyErr != nil {
+		return result, result.Fail(bodyErr)
 	}
 	return result, nil
+}
+
+// responseRequestOwnership checks serialized bytes, not interface identity.
+// A nil expected body means no request body; an explicit JSON null has bytes.
+func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte) error {
+	invalid := func() error {
+		return fmt.Errorf("%w: retry changes SDK JSON request or response body ownership", resource.ErrInvalidOption)
+	}
+	if options == nil {
+		return invalid()
+	}
+	changed := !options.KeepResponseBody || options.JSONResponse != nil || options.RawBody != nil
+	if options.JSONBody == nil {
+		if expected == nil && !changed {
+			return nil
+		}
+		return invalid()
+	}
+	encoded, err := json.Marshal(options.JSONBody)
+	if err != nil {
+		return joinResponseErrors(invalid(), err)
+	}
+	if changed || expected == nil || !bytes.Equal(encoded, expected) {
+		return invalid()
+	}
+	// Do not invoke a replacement marshaler again during native recursion:
+	// it may return different bytes on its next call. The owned snapshot is
+	// the only JSON body that can reach the next HTTP request.
+	options.JSONBody = json.RawMessage(append([]byte(nil), expected...))
+	return nil
+}
+
+func joinResponseErrors(causes ...error) error {
+	var present []error
+	for _, cause := range causes {
+		if cause != nil {
+			present = append(present, cause)
+		}
+	}
+	if len(present) == 1 {
+		return present[0]
+	}
+	return errors.Join(present...)
+}
+
+func responseContextError(ctx context.Context, err error) error {
+	if ctx != nil && ctx.Err() != nil {
+		for _, cause := range []error{ctx.Err(), context.Cause(ctx)} {
+			if cause != nil && !errors.Is(err, cause) {
+				err = joinResponseErrors(err, cause)
+			}
+		}
+	}
+	return err
 }
 
 // ValidateTarget prevents server-provided continuation/location URLs from
