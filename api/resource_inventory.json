@@ -2086,6 +2086,17 @@
     "parent": "gophercloudsdk/image/v2/metadefnamespaces"
   },
   {
+    "package": "gophercloudsdk/image/v2/metadeftags",
+    "source": "sdk_owned",
+    "model": "Tag",
+    "kind": "scoped_tag_resource",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "InNamespace",
+    "parent": "gophercloudsdk/image/v2/metadefnamespaces"
+  },
+  {
     "package": "gophercloudsdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "Store",
