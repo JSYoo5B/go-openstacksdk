@@ -170,7 +170,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	var example *collectionRecord
 	for i := range g.collections {
 		record := &g.collections[i]
-		if record.Model != "" && record.Kind != "service_info" && record.Scope == "" && record.Package != "gophercloudsdk/image/v2/serviceinfo" && strings.HasPrefix(record.Package, "gophercloudsdk/"+key+"/") {
+		if record.Model != "" && record.Kind != "service_info" && record.Kind != "named_resource" && record.Scope == "" && record.Package != "gophercloudsdk/image/v2/serviceinfo" && strings.HasPrefix(record.Package, "gophercloudsdk/"+key+"/") {
 			example = record
 			if strings.TrimPrefix(record.Package, "gophercloudsdk/"+key+"/") == exampleResources[parts[0]] {
 				break
@@ -237,6 +237,10 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			}
 			if record.Kind == "service_info" {
 				policies = append(policies, "`Get(ctx)`: 서비스 build 정보 singleton; ID·목록·변경·상태 대기 없음")
+				continue
+			}
+			if record.Kind == "named_resource" {
+				policies = append(policies, "`Create/Get/Update/Delete(ctx, namespace, options...)`, `List/All(ctx, options...)`: literal namespace 이름·concrete 기본값·명시 PUT 교체; [Python/Go 비교](metadefnamespaces/README.md); Resources·Find·상태 대기 없음")
 				continue
 			}
 			if record.Kind == "store_defaults" {

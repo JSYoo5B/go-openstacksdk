@@ -78,6 +78,7 @@ var specializedCollections = map[string]collectionRecord{
 // These resources are implemented directly against documented service and
 // pinned Python contracts. Source distinguishes them from native models.
 var sdkOwnedCollections = []collectionRecord{
+	{Package: "gophercloudsdk/image/v2/metadefnamespaces", Source: "sdk_owned", Model: "Namespace", Kind: "named_resource", Delete: true},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "Store", Kind: "list_only"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "ImportInfo", Kind: "service_info"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "UsageInfo", Kind: "service_info"},
