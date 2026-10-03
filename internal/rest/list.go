@@ -205,6 +205,12 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 				fail(err)
 				return
 			}
+			if spec.ValidateResponse != nil {
+				if err := spec.ValidateResponse(response); err != nil {
+					fail(response.Fail(err))
+					return
+				}
+			}
 			fields, items, err := pageItems(response, spec.PluralKey)
 			if err != nil {
 				fail(response.Fail(err))

@@ -25,6 +25,9 @@ type CollectionSpec[T any] struct {
 	// request. ValidateQuery also checks server-provided continuation queries.
 	ValidateInitialQuery func(context.Context, url.Values) error
 	ValidateID           func(string) error
+	// ValidateResponse checks the whole accepted GET/list body before JSON
+	// decoding. Unset hooks preserve the existing decoder policy.
+	ValidateResponse func(*Response) error
 	// ValidateItem checks service-specific response invariants after decoding.
 	// Failure retains the original singular response or whole list page.
 	ValidateItem                     func(*T) error
@@ -78,6 +81,11 @@ func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 			response, err := DoJSON(ctx, spec.Client, http.MethodGet, spec.Client.ServiceURL(spec.Path, url.PathEscape(id)), nil, nil, successCodes(spec.GetCodes, http.StatusOK)...)
 			if err != nil {
 				return nil, err
+			}
+			if spec.ValidateResponse != nil {
+				if err := spec.ValidateResponse(response); err != nil {
+					return nil, response.Fail(err)
+				}
 			}
 			value, err := Decode(response, spec.SingleKey, spec.Metadata)
 			if err != nil {
