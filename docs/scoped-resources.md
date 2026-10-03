@@ -85,3 +85,5 @@ Trove의 [database](../db/v1/databases/README.md)와 [user](../db/v1/users/READM
 Swift의 container 이름과 object 키는 해당 서비스의 식별자입니다. object 키의 `/`, 공백과 query 문자도 SDK가 URL에 인코딩하며, 애플리케이션은 원래 문자열을 `resource.ID(...)`에 전달합니다. [Swift 사용법](../objectstorage/v1/objects/README.md)에서 metadata 조회와 업로드·다운로드를 확인합니다.
 
 범위는 호출 사이에도 고정됩니다. 부모 이름을 매번 다시 찾거나 다른 부모의 동일한 자식 이름으로 대체하지 않습니다. 일반 Collection처럼 context 취소와 원래 HTTP 오류를 보존합니다. 기존 15개 범위의 실제 URL·기본 TTL·JSON Patch·Swift 키는 [scope](../api/scoped_contracts_test.go), [QoS](../api/qos_contracts_test.go), [Swift](../api/swift_resources_contracts_test.go) 테스트에서 확인합니다. 추가 범위는 [tags](../api/server_tags_contracts_test.go), [actions](../api/instance_actions_scope_test.go), [databases](../api/trove_databases_contracts_test.go), [users](../api/trove_users_contracts_test.go) HTTP 계약에서 검증합니다.
+
+Glance [metadata Property](../image/v2/metadefproperties/README.md)의 `InNamespace`는 HTTP 없이 literal parent와 서비스 target을 고정합니다. 목록의 `Key`는 dictionary의 출처이며 optional `Name`과 별도로 유지합니다. 이후 호출은 애플리케이션이 선택한 literal 이름을 받습니다.

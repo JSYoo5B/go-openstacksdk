@@ -178,3 +178,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.API.MetadefNamespaces.Create/Get/Update/Delete`는 literal namespace 이름을 사용하고 `List/All`은 서버가 광고한 다음 페이지를 순회합니다. [Namespace 사용법](v2/metadefnamespaces/README.md)에 생략한 PUT 필드의 초기화·rename·`limit=0`·일반 헤더와 raw 응답을 설명합니다.
 
 `service.API.MetadefObjects.InNamespace(ctx, namespace)`는 HTTP 없이 namespace와 서비스 대상을 고정합니다. 범위의 `Create/Get/Update/Delete/DeleteAll/List/All`과 [Object 사용법](v2/metadefobjects/README.md)에 nested raw property·생략/빈 값·PUT 교체·유한 목록·삭제 기본값을 설명합니다.
+
+`service.API.MetadefProperties.InNamespace(ctx, namespace)`는 고정 namespace의 `Create/Get/Update/Delete/DeleteAll/List/All`을 제공합니다. [Property 사용법](v2/metadefproperties/README.md)에 flat JSONSchema 입력·필수 Type/Title·raw와 any 옵션의 차이·dictionary key provenance·삭제 기본값을 설명합니다.

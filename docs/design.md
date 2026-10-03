@@ -80,3 +80,5 @@ SDK 소유 모델의 `resource.Metadata`는 추가 JSON 필드, null·생략의 
 6. 고정 Python SDK에만 있는 서비스·버전의 typed API를 추가합니다.
 
 각 단계는 실제 API별 모의 서버 테스트를 함께 추가해야 합니다. 지금의 구현이 openstacksdk와 기능적으로 동등하다고 가정하지 않습니다.
+
+Glance [Property](../image/v2/metadefproperties/README.md)는 concrete 옵션이 필수 scalar와 raw keyword를 소유합니다. With 함수가 JSON 값을 snapshot하므로 호출자가 builder interface를 구현할 필요가 없고, full replacement와 Python Resource의 dirty/cache 동작 차이를 문서화합니다.
