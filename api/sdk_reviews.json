@@ -24536,6 +24536,247 @@
         "Python None return, mutable Resource/Adapter/session errors and prefixed-key conventions differ from suffix-only Go keys and independent opaque acknowledgement.",
         "Strict key/case collision validation and actual204 policy are deliberate Go boundaries; deployment header aliases/encoding and server state/durability semantics remain outside this review."
       ]
+    },
+    {
+      "operation": "python:object_store/v1/get_container_metadata",
+      "source_fingerprint": "d7c4595c8d592bce019cad0d4e249c8b756bde10b829128a76c7b76390d6b5fe",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.GetMetadata",
+        "gophercloudsdk/objectstorage/v1/containers.WithGetMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithGetMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithGetMetadataHeaders",
+        "gophercloudsdk/objectstorage/v1/containers.WithGetMetadataNewest",
+        "gophercloudsdk/objectstorage/v1/containers.WithoutGetMetadataNewest"
+      ],
+      "contracts": [
+        {
+          "behavior": "One bodyless HEAD targets the once-escaped literal container on the captured effective ResourceBase/Endpoint, including escaped reverse prefix and trailing-slash policy; strict actual204 and no discovery, Name lookup, parent HEAD or fallback.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry"
+          ]
+        },
+        {
+          "behavior": "Newest nil omits X-Newest, explicit false/true is sent only on HEAD and Without clears. Whole opts replaces configuration; ordinary singular/plural headers merge canonically with last overwrite while incoming and final case aliases are rejected.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsReplacementAndNewest",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Factories snapshot maps/pointers and every callback receives independently owned initialized storage. Retained callback handles and concurrent reusable options do not alter another call, and option/source/context causes are preserved.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsRetainedCallbacksAndCauses",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsParallelReuseAndSourceHeaders",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Get atomically projects a nonnil lowercased custom suffix map including Temp URL keys, nullable exact signed64 counters and literal Timestamp/LastModified. Original nonASCII keys/suffixes, alias/duplicate/multivalue headers and malformed counters reject without partial Metadata while raw headers remain intact.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAtomicHeaderProjection",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsAtomicHeaders",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence"
+          ]
+        },
+        {
+          "behavior": "Required literal name preserves native empty/slash typed errors and adds UTF8/control/backslash/dot safety without trimming or deployment length inference. Nil context/API/client/provider, wrong Type, invalid Endpoint/effectivebase/header, reserved headers, nil callbacks and canceled contexts stop before HTTP.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreCompletePreflight",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Only actual204 creates owned Get Body/Header/Status. Accepted read/Close/context/custom cause/source/projection failures retain the result with nil Metadata and whole independent ResponseError; one Close/no accepted replay and original strconv cause are retained.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAcceptedFailures",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAtomicHeaderProjection",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsAtomicHeaders",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence"
+          ]
+        },
+        {
+          "behavior": "Original source/provider/raw Endpoint/ResourceBase/Type/Microversion/target and ordinary headers are captured before callbacks and rechecked; live original auth, native prebody retry/reauth fields and configured fixed-scope redirects remain. Advanced RetryFunc.MoreHeaders and native Get200/204, Update201/202/204 ABI remain native policy.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreNativePolicyAndCompatibility",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsSourceAndNativePolicy",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/containers/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Container through Resource/header descriptors and Adapter/session state; Go owns raw actual204 evidence and atomic nullable MetadataInfo.",
+        "Values intentionally includes Temp-URL-Key and Temp-URL-Key-2; literal LastModified/Timestamp and signed nullable counters differ from Python known-descriptor consumption and native float/date/ACL parsing."
+      ],
+      "remaining": [
+        "Python mutable Container/descriptor/cache/_last_headers and generic Adapter/session behavior are not reproduced. Known-header extraction and Temp URL Values are deliberately different.",
+        "Stricter safe literal names/effectivebase/source/header validation and actual204 acceptance are explicit Go policy; server authorization/limits/encoding/header normalization/storage durability remain outside this client parity review."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/set_container_metadata",
+      "source_fingerprint": "21e83b033927c89bb1a9bc33a3c02f9568f7641f4c0feb92293a5116439e2569",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.SetMetadata",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Set is one bodyless POST with exactly one X-Container-Meta prefix and strict actual204, returning opaque acknowledgement without automatic HEAD, submitted-state projection, container creation or clear-all. Nil/empty maps still POST and empty values remove only the specified keys.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "The caller map is snapshotted before callbacks. Suffix-only nonempty original ASCII token keys reject full prefixes and case aliases; literal UTF8 field values preserve spaces/percent/Unicode/HTAB/empty without str coercion, trim or URL encoding, and invalid input stops before HTTP.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreCompletePreflight",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Exact ordinary system wire headers for ACL/sync/version/history/content type may be provided or explicitly empty. Python read_ACL/sync_key aliases are not translated; custom suffix inputs remain custom metadata. Auth/hop/body/Newest/custom-prefix ownership prevents generic-header interference while advanced native retry headers remain native policy.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsParallelReuseAndSourceHeaders",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsSourceAndNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Mutation full opts wholly replaces headers, singular/plural helpers merge with alias validation, factory/callback handles own their storage and options support parallel reuse. Literal-name/source/target/header/context preflight and joined callback/source/custom cancellation causes are preserved.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsRetainedCallbacksAndCauses",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsParallelReuseAndSourceHeaders",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsReplacementAndNewest",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Accepted204 Set acknowledgement owns opaque Body/Header/Status and preserves repeated or malformed metadata-looking headers without projection. Read/Close/context/custom/source failure returns result plus whole ResponseError, closes once and never replays an accepted response.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAcceptedFailures",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "Set produces no result on missing404, unexpected200/201/202 or native/transport errors and preserves original typed evidence. Captured effectivebase/raw source/liveauth and request/body/status guards retain native prebody retry/reauth/redirect policy and legacy Update acceptance without performing a refresh HEAD.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreNativePolicyAndCompatibility",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsSourceAndNativePolicy",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/containers/README.md"
+      ],
+      "differences": [
+        "Python setter defaults refresh=True, performs POST then HEAD and returns the same mutable Container. Go returns one POST acknowledgement and requires explicit GetMetadata refresh.",
+        "Python system aliases and str(any)/full-prefixed metadata handling differ from suffix-only string snapshots plus exact ordinary system wire headers."
+      ],
+      "remaining": [
+        "Python default automatic HEAD refresh, mutable Container return/cache/descriptor state and Adapter/session behavior remain unresolved.",
+        "Python arbitrary str coercion, system aliases and prefixed-key rules are intentionally not reproduced; Go preserves literal string metadata and exposes system writes through exact generic wire header names.",
+        "Server authorization/owner filtering/metadata limits/ACL/sync/storage policy and durable replication are server decisions; acknowledgement is not refreshed state."
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/delete_container_metadata",
+      "source_fingerprint": "11b38c4d607fa533f5ebb1c6986282857a09d2a7754eae747f7d49beb832b844",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/containers.API.DeleteMetadata",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataOpts",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataHeader",
+        "gophercloudsdk/objectstorage/v1/containers.WithMetadataHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMetadata sends one bodyless POST carrying empty X-Container-Meta values, never HTTP DELETE or X-Remove syntax. Nil/empty keys still POST, do not clear all metadata, and do not trigger refresh or fallback; only actual204 creates acknowledgement.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
+          ]
+        },
+        {
+          "behavior": "Delete copies the key slice before callbacks. Suffix-only nonempty original ASCII token keys reject full prefixes, duplicates and case aliases; required literal container/source/header/context validation fails before HTTP with original typed/callback/custom context causes.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreCompletePreflight",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsFactorySnapshots",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions"
+          ]
+        },
+        {
+          "behavior": "Delete shares concrete whole-replacement mutation opts and canonical singular/plural merging, independently copied callback/factory storage and concurrent reuse. Exact ordinary system wire headers may carry empty values; Python system alias mapping is not inferred from a custom key slice.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsReplacementAndNewest",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsRetainedCallbacksAndCauses",
+            "objectstorage/v1/containers/metadata_options_test.go:TestContainerMetadataOptionsParallelReuseAndSourceHeaders",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsPreflightAndOptions",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Actual204 Delete raw Body/Header/Status and joined read/Close/context/custom/source failures are preserved in independent acknowledgement and whole ResponseError with one Close/no resend. Mutation headers are passive and do not prove refreshed metadata state.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAcceptedFailures",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence"
+          ]
+        },
+        {
+          "behavior": "Delete preserves missing404 and other unexpected/native failures with nil result and original typed error; no IgnoreMissing or container deletion is inferred. Captured effectivebase/raw source/live original auth and native prebody/reauth/fixed-scope redirect policy remain guarded for target/body/status with advanced native MoreHeaders retained.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreNativePolicyAndCompatibility",
+            "objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsSourceAndNativePolicy",
+            "connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence",
+            "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
+            "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/containers/README.md"
+      ],
+      "differences": [
+        "Python returns None after empty metadata-value POST; Go exposes actual204 opaque acknowledgement and cause-safe accepted evidence.",
+        "Python system aliases and prefixed-key conventions differ from strict suffix-only copied key inputs plus explicitly named ordinary system headers."
+      ],
+      "remaining": [
+        "Python None return, mutable Resource/cache/Adapter/session semantics and system alias mapping remain different.",
+        "Strict duplicate/case validation, literal name/effectivebase policy and actual204-only acceptance are deliberate Go differences; no automatic refresh, missing suppression or whole-container deletion parity is claimed."
+      ]
     }
   ]
 }
