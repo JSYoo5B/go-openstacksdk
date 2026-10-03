@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Accounts.GetMetadata`는 concrete `GetMetadataOpts`와 HEAD204로 계정 metadata·nullable 카운터·원문 응답을 제공합니다. `Accounts.SetMetadata`와 `Accounts.DeleteMetadata`는 POST204 acknowledgement를 반환하며 갱신 조회는 명시적으로 호출합니다. [계정 metadata의 Python/Go 사용법](accounts/README.md)은 owned 옵션과 Python의 자동 HEAD refresh 차이를 설명합니다.
+
 Python의 `conn.object_store.containers()`와 `objects(container)`에 대응하는 Go 목록은 `Containers.List`와 `Objects.List`입니다. 이름만 반환하지 않고 `Container`의 `Name/Count/Bytes`, `Object`의 `Name/Bytes/ContentType/Hash/LastModified` 등 typed 정보를 반환합니다. delimiter로 얻는 항목은 `Object.Subdir`에 보존합니다.
 
 `Containers.Resources`와 `Objects.InContainer(ctx, parent)`는 공통 리소스 정책을 제공합니다. HEAD로 조회하면 SDK의 `ContainerResource/ObjectResource`가 typed 정보와 사용자 metadata, 전체 헤더를 함께 보관합니다. [Swift 리소스 사용법](objects/README.md)을 참고합니다.
