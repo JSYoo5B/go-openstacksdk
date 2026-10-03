@@ -35,11 +35,11 @@ for store in conn.image.stores(details=True, max_items=20):
     print(store.id, store.description, store.is_default)
 ```
 
-[공식 store API](https://docs.openstack.org/api-ref/image/v2/index.html#list-stores)는 v2.8부터 제공되는 multistore discovery이며 v2.7에서는 404를 반환합니다. [detail API](https://docs.openstack.org/api-ref/image/v2/index.html#list-stores-detail)는 type·read-only·weight·properties 등의 정보를 제공하며 접근 권한은 서버 정책을 따릅니다. SDK는 403/404를 숨기거나 detail 실패 뒤 basic 목록으로 fallback하지 않습니다. Limit/Marker는 선택적인 wire pagination 값이며 서버의 pagination 지원을 보장하지 않습니다.
+[공식 store API](https://docs.openstack.org/api-ref/image/v2/index.html#list-stores)는 v2.8부터 제공되는 multistore discovery이며 v2.7에서는 404를 반환합니다. [detail API](https://docs.openstack.org/api-ref/image/v2/index.html#list-stores-detail)는 type·read-only·weight·properties 등의 정보를 제공하며 접근 권한은 서버 정책을 따릅니다. SDK는 403/404를 숨기거나 detail 실패 뒤 basic 목록으로 fallback하지 않습니다. Limit/Marker는 caller가 명시적으로 보내는 wire 값입니다. Glance의 store discovery는 이 값으로 page를 나누지 않으므로 SDK가 다음 marker를 합성하지 않습니다. `MaxItems`는 로컬 소비 cap이며 wire limit hint를 생성하지 않습니다.
 
 `ListStores`는 생성 시 HTTP를 실행하지 않는 재사용 가능한 iterator입니다. iteration마다 옵션 callback을 한 번씩 적용하고 독립적인 source·query·header·pointer snapshot을 사용합니다. `WithListStoresOptions`는 생성 시 `Paginated` pointer를 복사하고 전체 typed 설정을 교체합니다. 별도 query/header 옵션은 유지하며 뒤의 옵션이 같은 값을 교체합니다. `Paginated=false`는 첫 page만, `MaxItems>0`은 최대 raw 행 수만 소비합니다. cap은 사용하지 않을 행의 decode와 continuation 검사 전에 멈춥니다. 성공한 빈 `AllStores`는 nonnil empty slice이며, 뒤 page나 행이 실패하면 부분 slice 대신 nil과 오류를 반환합니다. iterator에서 이미 받은 행은 caller에게 남습니다.
 
-body links·next와 HTTP Link를 사용하며, limit 또는 cap에서 나온 limit hint가 있으면 짧은 page를 포함한 nonempty page의 마지막 canonical ID로 marker fallback을 수행합니다. 빈 page는 종료합니다. continuation은 capture한 origin·reverse prefix·선택한 collection path와 초기 nonpagination query를 유지해야 하며 반복 link/marker를 거부합니다. Python의 더 넓은 version-relative next 경로 정규화와 완전히 같지는 않습니다.
+서버가 광고한 body links·next와 HTTP Link만 continuation으로 사용하고, 빈 page는 종료합니다. link가 없는 nonempty 응답에서 ID로 다음 marker를 만들거나 같은 목록을 반복 요청하지 않습니다. continuation은 capture한 origin·reverse prefix·선택한 collection path와 초기 nonpagination query를 유지해야 하며 반복 link/marker를 거부합니다. pinned Python의 limit 기반 marker fallback과 더 넓은 version-relative next 경로 정규화는 이 facade와 다릅니다.
 
 음수 limit/cap, invalid UTF-8 marker/query, malformed limit/marker, nil/error callback, 지원하지 않는 body·argument·microversion 확장은 HTTP 전에 오류입니다. `WithListStoresQuery`는 실제 wire query 확장입니다. details·max_items·paginated·base_path·session 등의 로컬 제어를 query로 전달할 수 없습니다. 일반 header는 `WithListStoresHeader`로 전달하고 공통 header 검사와 보호 정책을 적용합니다. Python은 선언된 Body attribute를 로컬 filter로 사용하고 unknown query를 버리지만, Go의 wire helper는 이 분류나 properties subset filter를 구현하지 않습니다.
 
