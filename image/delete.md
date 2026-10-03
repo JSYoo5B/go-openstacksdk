@@ -80,7 +80,7 @@ configured reauth·retry·backoff는 받아들인 응답 body를 소유하기 �
 
 DELETE의 빈 요청 body와 응답 body 소유권은 workflow가 고정합니다. `RetryFunc`가 `JSONBody`·`RawBody`·`JSONResponse`·`KeepResponseBody`를 바꾸면 추가 DELETE 전에 `resource.ErrInvalidOption`과 원래 요청 실패, callback이 반환한 오류를 함께 보존해 반환합니다.
 
-받아들인 204/404 body는 한 번 닫고, 나머지 status의 body는 native Request가 소유합니다. error는 `request.Wrap("DeleteImage", "image", ...)`를 통해 read·Close·transport·native status 원인과 `ctx.Err()`·`context.Cause(ctx)`를 보존하여 `errors.Is`/`errors.As`로 검사할 수 있습니다. native reauth 실패의 `ErrOriginal`/`ErrReauth`는 `errors.As`로 얻은 `gophercloud.ErrUnableToReauthenticate`의 필드에서 확인합니다.
+받아들인 204/404 body는 한 번 닫고, 기본 status 처리에서 거부한 응답 body는 native Request가 소유합니다. `RetryFunc`가 `OkCodes`를 바꿔 다른 status를 native가 받아들여도 workflow는 그 body를 읽고 한 번 닫은 뒤 실제 status로 거부합니다. error는 `request.Wrap("DeleteImage", "image", ...)`를 통해 read·Close·transport·native status 원인과 `ctx.Err()`·`context.Cause(ctx)`를 보존하여 `errors.Is`/`errors.As`로 검사할 수 있습니다. native reauth 실패의 `ErrOriginal`/`ErrReauth`는 `errors.As`로 얻은 `gophercloud.ErrUnableToReauthenticate`의 필드에서 확인합니다.
 
 추가 metadata GET, protected/status의 client gate, 삭제 대기, cache·Swift object·task cleanup은 제공하지 않습니다. Python Resource 객체 overload, cloud `delete_objects`와 session 정책 전체의 parity도 이 workflow 범위에 포함되지 않습니다.
 
