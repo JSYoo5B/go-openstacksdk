@@ -77,3 +77,5 @@ Glance [캐시 API 7개](../image/cache.md)는 상위 image.Service의 SDK 소�
 Glance [이미지 공유 멤버](../image/members.md)는 상위 image.Service의 concrete header·미존재·로컬 소비 옵션과 SDK 소유 모델을 제공합니다. 기존 native Member API·scoped binding을 유지하며 canonical member/status JSON·고정 부모·실제200/204 응답을 SDK가 관리합니다.
 
 Glance [metadata namespace](../image/v2/metadefnamespaces/README.md)는 SDK 소유 전용 API로 scalar 생성·교체·조회·삭제와 lazy 목록을 제공합니다. Native inventory에 없는 연산은 합성하지 않으며 concrete 옵션이 생략/false/zero와 미존재·목록 소비 기본값을 관리합니다.
+
+Glance [metadata object](../image/v2/metadefobjects/README.md)는 namespace 범위의 전용 CRUD·일괄 삭제·유한 lazy 목록을 제공합니다. Concrete 옵션이 nested raw property와 required 배열의 생략/빈 값을 보존하며 개별 삭제는 기본404 무시, 일괄 삭제는404 오류입니다.
