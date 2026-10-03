@@ -2073,6 +2073,15 @@
     "wait": false
   },
   {
+    "package": "gophercloudsdk/image/v2/serviceinfo",
+    "source": "sdk_owned",
+    "model": "UsageInfo",
+    "kind": "service_info",
+    "find": false,
+    "delete": false,
+    "wait": false
+  },
+  {
     "package": "gophercloudsdk/keymanager/v1/secretstores",
     "source": "sdk_owned",
     "model": "SecretStore",
