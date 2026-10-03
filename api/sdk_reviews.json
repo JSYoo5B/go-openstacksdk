@@ -23634,6 +23634,101 @@
         "Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.",
         "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned."
       ]
+    },
+    {
+      "operation": "python:image/v2/image_tasks",
+      "source_fingerprint": "f40e1f6467074035027cadf33d0211ec8aca2c0a079f9664f14be1347597ce87",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.ImageTasks",
+        "gophercloudsdk/image.Service.AllImageTasks",
+        "gophercloudsdk/image.WithListImageTasksOpts",
+        "gophercloudsdk/image.WithListImageTasksHeader",
+        "gophercloudsdk/image.WithListImageTasksHeaders",
+        "gophercloudsdk/image.WithListImageTasksMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "Required validated image Ref fixes parent route. DirectID has no metadata GET/UUID/localmaxlength gate; literalUTF8 safe segments escapeonce. Name is explicitGo extension using captured existing exact image resolver with uniqueness/missing/nativepagination semantics; no Python literal string lookup equivalence.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords",
+            "image/image_tasks_core_test.go:TestImageTaskCoreCompletePreflight",
+            "image/image_tasks_core_test.go:TestImageTaskCoreExactNameAndSourceGuards",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Lazy ImageTasks copies option slice atconstruction, prepares perexecution; concrete Headers/MaxItems0unlimited/positivecap/negativeerror, FullOpts replacement/lastwins, initialized callback headerconfig copiedbeforeafter, immediate headerfactory snapshots and reusable/parallel execution without caller mutation.",
+          "tests": [
+            "image/image_tasks_options_test.go:TestImageTaskOptionsImmediateHeaderSnapshots",
+            "image/image_tasks_options_test.go:TestImageTaskOptionsReplacementAndLastWins",
+            "image/image_tasks_options_test.go:TestImageTaskOptionsCallbacksLazyAndOwned",
+            "image/image_tasks_options_test.go:TestImageTaskOptionsParallelReusablePolicies",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsLazyConsumptionAndLocalCaps",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "One finite bodyless/queryfree fixed images/{id}/tasks actual200 periteration. WholeUTF8/syntax plus canonicalnonnulltasksarray, consumedrows only; localcap/earlybreak skipunusedinvalidrows. next/Link/first/schema/self entirelypassive/no validation/follow/fallback/wirehint; Allnonnilempty ornilerror withoutpartials.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords",
+            "image/image_tasks_core_test.go:TestImageTaskCoreFiniteConsumptionAndEnvelope",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsLazyConsumptionAndLocalCaps"
+          ]
+        },
+        {
+          "behavior": "Distinct ImageTaskInfo embeds unchangedTaskInfo but explicitly decodes deletion atomically: deleted nullableboolpresence/deleted_atliteralstring; canonical optional13strings/rawobjectInputResult/unknownprecision/Header/status independentlyowned. NoID/defaultseeding; actualrequest_id/user_id only, officialsample request-id/user rawaliases remainpassive.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreDeletionPresenceAndAtomicDecoder",
+            "image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsCanonicalDetailAndRawOwnership",
+            "connection_image_tasks_associated_test.go:TestConnectionImageAssociatedTasksSharesClientAndResolvesName"
+          ]
+        },
+        {
+          "behavior": "Capturedoriginalsource/provider/Type/Endpoint/base/Microversion and ordinaryheaders fixedbeforecallbacks throughName resolver/singleGET; stableoptionheadersoverride/originalproviderliveauth. Recheckbeforework/afterresolver/acceptedbody/beforeafterconsumedrows, no source/provider retarget orborrowedsource mutation.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreExactNameAndSourceGuards",
+            "image/image_tasks_options_test.go:TestImageTaskOptionsCallbacksLazyAndOwned",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsOwnedOptionsAndSource",
+            "connection_image_tasks_associated_test.go:TestConnectionImageAssociatedTasksSharesClientAndResolvesName"
+          ]
+        },
+        {
+          "behavior": "Strictactual200; acceptedread/Close/context/customcause/source/envelope/model errors retain wholeactualResponseError andnilrow, closeonce/no accepted replay. Nativeunexpectedstatus and configuredprebodyretry/reauth/backoff/identicaltargetredirect/body/status guards remain; direct404 stays error andName resolver nativeownership remainsseparate.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreOwnedErrorsAndNativePolicy",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Existing TaskInfo/nativegeneralTask/generatedaliases/WaitForTask byteexact and nativeimages has no associatedendpoint; upperaugmentation needsno syntheticnative/catalog/resource/registry operation. Version2.12 sourceendpoint andPython2.17maxcap distinction, no version/policy/Schema discovery or task wait.",
+          "tests": [
+            "image/image_tasks_core_test.go:TestImageTaskCoreFixedRouteAndFullRecords",
+            "image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity",
+            "internal/cmd/sdkgen/glance_image_tasks_test.go:TestGlanceImageAssociatedTasksPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-tasks.md"
+      ],
+      "differences": [
+        "Pinned Python Resource._get_id uses literalstring or Resource.id despite name prose. Go requires Ref and offers explicit Name resolver with native exactlookup requests; absent/ambiguous/forbidden parent errors remainerrors.",
+        "Pinned Python mutableResource/untypedBody/sessionAdapter/configuredcache/microversion/generalpager behavior is broader than fixed concrete functionoptions and independentlyowned canonical ImageTaskInfo. No Resource dirty/cache/session or same-object parity claim.",
+        "SQL JSONEncodedDict reads arbitraryJSON and Python Body values are untyped, while unchanged TaskInfo restricts Input/Result to nullable objects. Nonobject response values are owned200 decode errors, not full JSON parity; literal date/boolshape semantics are explicitGo policy.",
+        "Actual endpoint is finite queryfree fullDBrow response. Go ignores passive next/Link/schema regardlesstype and applieslocalcap only; Python generalResource list mayusebodyfilters/max_items-to-limit hints and broaderpagercontinuation. Server visibility/expiry/deletion/order and authorization remainserver-owned.",
+        "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence."
+      ],
+      "remaining": [
+        "Pinned Python Resource._get_id uses literalstring or Resource.id despite name prose. Go requires Ref and offers explicit Name resolver with native exactlookup requests; absent/ambiguous/forbidden parent errors remainerrors.",
+        "Pinned Python mutableResource/untypedBody/sessionAdapter/configuredcache/microversion/generalpager behavior is broader than fixed concrete functionoptions and independentlyowned canonical ImageTaskInfo. No Resource dirty/cache/session or same-object parity claim.",
+        "SQL JSONEncodedDict reads arbitraryJSON and Python Body values are untyped, while unchanged TaskInfo restricts Input/Result to nullable objects. Nonobject response values are owned200 decode errors, not full JSON parity; literal date/boolshape semantics are explicitGo policy.",
+        "Actual endpoint is finite queryfree fullDBrow response. Go ignores passive next/Link/schema regardlesstype and applieslocalcap only; Python generalResource list mayusebodyfilters/max_items-to-limit hints and broaderpagercontinuation. Server visibility/expiry/deletion/order and authorization remainserver-owned.",
+        "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence."
+      ]
     }
   ]
 }

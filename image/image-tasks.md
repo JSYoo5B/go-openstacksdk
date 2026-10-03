@@ -69,3 +69,5 @@ Input/Result는 missing/null이면 nil, `{}`면 nonnil raw object map입니다. 
 요청은 callback 전에 client/provider·Type·Endpoint·base·microversion과 ordinary source headers를 캡처합니다. source headers는 Name resolver와 단일 task GET 동안 고정되며 option headers가 덮어씁니다. 원래 provider의 auth는 live입니다. 요청 전·resolver 후·accepted 응답 후·소비 row 전후의 source/context 확인은 retargeting을 막습니다. native RetryFunc의 명시적 ordinary header 정책과 설정된 same-target redirect 동작은 유지됩니다.
 
 actual GET 200만 decode합니다. accepted read·Close·context/custom cause·source·envelope/model 오류는 nil row와 실제 whole body·header·status를 가진 `ResponseError`를 반환합니다. body는 한 번 닫고 accepted 요청을 replay하지 않습니다. native unexpected status·prebody retry/reauth/backoff와 method/URL/body/status ownership guard는 기존 정책을 유지합니다. direct 404는 오류이고 missing suppression은 없습니다. 이 가이드는 고정 source의 동작을 설명하며 실제 cloud 실행·task 완료·권한 통과를 검증했다는 의미가 아닙니다.
+
+이 동작은 [core 테스트](image_tasks_core_test.go), [options 테스트](image_tasks_options_test.go), [외부 HTTP 계약 테스트](image_tasks_contracts_test.go), [Connection 통합 테스트](../connection_image_tasks_associated_test.go), [native·registry 보존 테스트](../internal/cmd/sdkgen/glance_image_tasks_test.go)에서 고정 source와 로컬 fixture로 검증합니다.
