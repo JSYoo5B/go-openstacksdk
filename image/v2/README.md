@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 image/v2 API를 하나의 인증된 서비스 객체에�
 
 감사한 상태 리소스에는 `WaitForState(ctx, ref, target, options...)`와 `WaitForDelete(ctx, ref, options...)`를 추가합니다. 상태 대기는 서비스의 정확한 ERROR/error 실패 기본값과 무제한 SDK timeout, 삭제 관찰은 120초 기본값을 사용하며 간격은 2초입니다. Compute Server의 `WaitForServer`는 ACTIVE·120초, Cinder Volume/Snapshot의 `WaitForAvailable`은 available을 기본 목표로 제공합니다. caller의 `resource.With...` 옵션은 뒤에 적용합니다. 기존 공통 `WaitFor/WaitForDeletion`의 5분 기본과 native `WaitForStatus`의 별도 계약은 유지합니다. [Python/Go 대기 정책 비교](../../docs/service-waits.md)에 실제 대상·사용법·차이를 설명합니다.
 
+상위 `image.Service.UpdateImage/SetImageProperties`는 concrete `ImagePatch`와 속성 옵션으로 ordered PATCH·add upsert를 제공합니다. SDK가 JSON Pointer key를 escape하고 application/openstack-images-v2.1-json-patch로 한 번 제출하며 실제200 `ImageInfo`를 반환합니다. 빈 변경도 []를 제출하고 metadata를 관찰합니다. [이미지 수정의 Python/Go 사용법](../update.md)은 필드 helper·raw 값·null과 삭제·패치 순서, 속성 이름의 공백 검증과 Python dirty Resource·coercion·bool 결과의 차이를 설명합니다.
+
 상위 `image.Service.GetImage/ListImages/AllImages`는 concrete 옵션과 SDK 소유 `ImageInfo`로 이미지 조회·목록을 제공합니다. 이름 해석과 ID 조회를 지원하며 nullable canonical 필드·정확한 숫자·추가 속성의 raw JSON을 보존합니다. 목록은 canonical body next를 검증하고 반복 필터를 다음 요청에서도 보존합니다. MaxItems·SinglePage는 로컬 소비 정책입니다. [이미지 조회·목록의 Python/Go 사용법](../images.md)은 선택 값의 생략·빈 값·false·0, 확장 필터와 응답 소유권의 차이를 설명합니다.
 
 상위 `image.Service.ImageTasks/AllImageTasks`는 필수 image Ref와 concrete header·MaxItems 옵션으로 이미지별 Task를 조회합니다. ID는 바로 사용하고 Name은 정확한 이름을 해석합니다. 유한 배열을 GET 한 번으로 받아 SDK 소유 `ImageTaskInfo`의 nullable deleted·deleted_at와 raw JSON을 보존하며 MaxItems는 로컬 소비 정책입니다. [이미지별 Task의 Python/Go 사용법](../image-tasks.md)은 이름 해석 확장·응답 소유권·Python JSON/Resource 차이를 설명합니다.
