@@ -26700,6 +26700,122 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_directory_marker_object",
+      "source_fingerprint": "0efe3c943ef3c3ecf0aba4e6aedfbdbfbebd0c4692dd7e64c5c4595497ae01e3",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.CreateDirectoryMarkerObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithDirectoryMarkerOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithDirectoryMarkerHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithDirectoryMarkerHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithDirectoryMarkerMetadata",
+        "gophercloudsdk/objectstorage/v1/objects.WithDirectoryMarkerMetadataValue"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/directory-marker.md"
+      ],
+      "differences": [
+        "Pinned cloud marker sets lowercase content-type=application/directory and delegates empty string data with generate_checksums=False through cloud/canonical create_object to one raw Object PUT. Go owns explicit empty bytes at a fixed literal route and returns existing CreateObjectResult Source=bytes/Mode=ordinary/Size0 and Ordinary raw physical-attempt evidence rather than mutable Object.",
+        "Neither actual marker/data call chain creates a missing container despite the shared create_object docstring claim, nor normalizes name suffix, hashes, reads file, probes HEAD/info/stale, segments or cleans up. Go exposes only concrete Headers/Metadata options instead of Python kwargs that may bind real create controls or conflict with explicit data/checksum arguments.",
+        "Go validates canonical headers and suffix-only metadata snapshots before forcing application/directory. Python Resource case aliases depend on insertion order, unknown kwargs are not universal HTTP headers, and BaseResource system metadata can overwrite prepared Content-Type. Go strict maps deliberately differ from descriptor coercion/alias semantics.",
+        "Marker Content-Type remains owned across native callbacks and physical wire requests; X-Detect-Content-Type is rejected at options/source/native/raw boundaries because pinned Swift can otherwise ignore explicit media and guess from the route. This marker-specific policy leaves ordinary CreateObject media behavior separate.",
+        "Go preserves native physical retry/backoff/reauth/redirect evidence within one logical PUT and retains independent acknowledgement/attempt/error response snapshots.201/202 are raw acknowledgements, and accepted processing/source/context faults can return both evidence and error; no cluster/staticweb completion result is invented."
+      ],
+      "remaining": [
+        "Python mutable Object/Resource descriptor coercion, dirty/cache state, kwargs/system-metadata alias precedence and adapter/session/exception policies are not reproduced wholesale by the concrete owned Go workflow.",
+        "Server Static Web/Web Listings, permissions, replica consistency and visibility after acknowledgement require server behavior; a zero-byte directory media observation does not establish those outcomes.",
+        "This is one real cloud helper operation, not a synthetic direct Proxy declaration. The other actual cloud workflows and inherited Proxy/Resource/session/cache support remain separate unfinished scope; whole Swift SDK parity is not complete."
+      ],
+      "contracts": [
+        {
+          "behavior": "One logical zero-byte PUT uses escaped literal container/object under captured ResourceBase, preserves leading/repeated/trailing slashes in the object name and forces one application/directory value over valid caller/source media. Actual201/202 returns Source=bytes, Mode=ordinary, Size0, empty MD5/SHA256 and only Ordinary phase;404 remains rejected with no acknowledgement or container creation.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreWireAndMetadata",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsLiteralWireAndRawAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Headers and suffix-only metadata factories and every callback own map snapshots. Later caller or retained callback-map mutation cannot alter prepared request headers; literal metadata and present empty values survive. Acknowledgement and attempt header/body snapshots remain independent.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreWireAndMetadata",
+            "objectstorage/v1/objects/directory_marker_options_test.go:TestDirectoryMarkerOptionsFactoryAndCallbackSnapshots",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsPreflightAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Full DirectoryMarkerOpts replaces earlier header/metadata settings and an empty full value resets them. Header and metadata helpers apply canonical case-insensitive overlays while the final directory media remains owned.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_options_test.go:TestDirectoryMarkerOptionsReplacementAndOverlay"
+          ]
+        },
+        {
+          "behavior": "Nil options, invalid targets, duplicate header/metadata aliases, malformed media, raw metadata/manifest/framing/auth headers and X-Detect-Content-Type fail before HTTP. Invalid original source or canceled context stops before option callbacks; callback/source/context causes remain jointly inspectable.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_options_test.go:TestDirectoryMarkerOptionsPreflightAndJoinedCauses",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsPreflightAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Shared API and reusable option factories keep per-call map/callback state and independent acknowledgement/physical response proof across parallel marker calls.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_options_test.go:TestDirectoryMarkerOptionsParallelReuse"
+          ]
+        },
+        {
+          "behavior": "Native503 retry,429 backoff,401 reauth and same-target307 redirect replay the owned empty marker within one Ordinary phase, retaining all actual physical responses and recovered causes. Options prepare once, captured ordinary headers remain stable, live auth refreshes and native callback mutation cannot rewrite retained rejected proof.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreNativeReplay",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsNativeReplayAndPhysicalEvidence"
+          ]
+        },
+        {
+          "behavior": "Native callbacks cannot change/remove/alias owned Content-Type or metadata, inject raw/JSON data, mutate the raw replay carrier, broaden accepted codes or add X-Detect-Content-Type. These faults stop before another physical send with the actual rejected response and original/native guard causes.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreNativeOwnership",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsNativeMediaAndDetectGuards"
+          ]
+        },
+        {
+          "behavior": "Raw redirect requests must retain one owned media value and exact empty framing. Media removal/change/alias/multiple values, detect flags, injected body, length and transfer changes stop before the redirected send and preserve the real307 proof plus callback/guard causes.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreRedirectOwnership",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsNativeMediaAndDetectGuards"
+          ]
+        },
+        {
+          "behavior": "Accepted201/202 read/Close faults retain raw acknowledgement and response-error proof without retrying; bodies close once. Context, transient Endpoint and detect-source faults stay observed even after restoration at Close. Acknowledgement, physical attempt and error header/body evidence do not alias.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreAcceptedFaultProof",
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsAcceptedFaultsAndSourceGuards"
+          ]
+        },
+        {
+          "behavior": "An actual response returned together with transport error retains its physical status/header observation without fabricating acknowledgement or consumed body. No cleanup phase is added.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_contracts_test.go:TestDirectoryMarkerContractsAcceptedFaultsAndSourceGuards"
+          ]
+        },
+        {
+          "behavior": "Marker source X-Detect-Content-Type rejects before callbacks, while the existing ordinary CreateObject still accepts its separate valid media/detect/metadata policy.",
+          "tests": [
+            "objectstorage/v1/objects/directory_marker_core_test.go:TestDirectoryMarkerCoreOrdinaryPolicyIsolation"
+          ]
+        },
+        {
+          "behavior": "Connection ObjectStorage/ObjectStorageV1 shares the original service client and marker facade; each workflow freshly captures ordinary source headers and auth. Reused factory maps stay owned,201/202 are returned as raw acknowledgements and result snapshots do not mutate the source or another observation.",
+          "tests": [
+            "connection_objectstorage_directory_marker_test.go:TestConnectionSwiftDirectoryMarkerOwnsMediaAndFreshCapture"
+          ]
+        },
+        {
+          "behavior": "Swift generated native/service files remain byte-exact, accounts/containers/objects gain no generated Collections and generated guidance includes the dedicated marker method/media/guide together with existing CreateObject, WaitForDelete and DeleteObject.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_directory_marker_test.go:TestSwiftDirectoryMarkerPreservesNativeAPIs"
+          ]
+        }
+      ]
     }
   ]
 }
