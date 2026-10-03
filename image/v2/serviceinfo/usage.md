@@ -64,6 +64,8 @@ def get_usage_http(image_endpoint, token):
 
 전체 body는 valid UTF-8의 flat object이고 canonical `usage`는 필수 nonnull object입니다. 각 resource 값도 nonnull object여야 합니다. `Usage`·`Limit` 같은 대소문자 decoy는 raw unknown 필드로 남고 typed 값을 바꾸지 않습니다. alternate quota envelope를 자동으로 풀지 않으며 unknown root 값은 `UsageInfo.Body`에 보존합니다. `Header`·`StatusCode`는 실제 HTTP 응답에서 복사합니다.
 
+고정된 서버의 [usage schema](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L235-L236)는 array를 선언하지만 이 schema의 validation은 응답에 적용되지 않으므로, DTO는 controller·serializer·실제 response sample의 object를 따릅니다.
+
 ## Disabled 결과와 요청·오류 정책
 
 확인한 [Glance 설정](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/common/config.py#L479-L480)의 `use_keystone_limits` 기본값은 false입니다. 비활성화된 서버는 정상 200의 `{"usage": {}}`를 반환하며 Go는 nonnil empty map으로 받습니다. 빈 map을 404·unsupported·무제한 quota·모두 0으로 해석하지 않고, 응답이 비었다는 사실만으로 서버 설정을 단정하지 않습니다. 다른 project의 limit 조회나 quota 변경, upload/import 자동 차단도 수행하지 않습니다.
@@ -75,3 +77,5 @@ context·image source·provider·base·headers를 옵션 전에 검사하고 cal
 실제 200만 허용하며 404나 disabled 응답을 다른 discovery/static quota로 fallback하지 않습니다. accepted body read·Close·context·UTF-8·JSON·schema·numeric 실패는 전체 raw Body·Header·StatusCode를 가진 `resource.ResponseError`와 원래 원인을 보존합니다. body는 한 번 닫고 accepted read/Close 실패 뒤 replay하지 않습니다. 공통 `DoJSON`은 retry callback의 body 소유권 변경을 거부하고 원래 expected 200을 다시 검사합니다. native가 거부한 status의 body 처리와 reauth wrapper는 기존 native 정책을 따르며 `ErrUnableToReauthenticate.ErrOriginal`·`ErrReauth`는 `errors.As`로 얻은 wrapper의 필드에서 확인합니다.
 
 서버 비교는 Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`의 [usage controller·serializer](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L197-L213), quota helper와 실제 response example을 기준으로 합니다. 이 조회의 local HTTP 테스트는 실제 배포의 authentication·권한·limit 설정·quota enforcement 결과를 대신하지 않습니다.
+
+실제 route·disabled empty 결과·optional 정수·schema 오류·옵션 소유권은 [core 테스트](usage_core_test.go), 외부 호출의 accepted evidence·strict status·provider/retry 경계는 [계약 테스트](usage_contracts_test.go)에서 확인합니다. [Connection 테스트](../../../connection_image_usage_test.go)는 공유 client·prefix·live token 경로를, [generator 테스트](../../../internal/cmd/sdkgen/glance_serviceinfo_test.go)는 기존 native API를 유지하면서 UsageInfo를 SDK 소유 모델로 등록하는 경계를 확인합니다.
