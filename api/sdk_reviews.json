@@ -23729,6 +23729,237 @@
         "Actual endpoint is finite queryfree fullDBrow response. Go ignores passive next/Link/schema regardlesstype and applieslocalcap only; Python generalResource list mayusebodyfilters/max_items-to-limit hints and broaderpagercontinuation. Server visibility/expiry/deletion/order and authorization remainserver-owned.",
         "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence."
       ]
+    },
+    {
+      "operation": "python:image/v2/get_image",
+      "source_fingerprint": "53f9e38eaad08c16a694a176d90d1370875478d3695092a95984679de87f3caa",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImage",
+        "gophercloudsdk/image.WithGetImageOpts",
+        "gophercloudsdk/image.WithGetImageHeader",
+        "gophercloudsdk/image.WithGetImageHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImage requires validated Ref; safe literal directID escapesonce and does no metadata/name lookup; exact queryfree/bodyless GET200, no IgnoreMissing/find fallback/UUID/readmaxlength gate.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreFixedGetAndCanonicalRawOwnership",
+            "image/images_core_test.go:TestImageCoreCompletePreflight",
+            "image/images_contracts_test.go:TestImageContractsGetRouteAndReference",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Name is an explicit Go extension: captured existing exact native Images.ResolveID with duplicate/missing/model/pager boundaries, source and resolved safeID recheck, followed by fresh raw GET; Python get_image usesliteralID or Resource.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreExactNameSourceAndOwnedFailures",
+            "image/images_contracts_test.go:TestImageContractsGetRouteAndReference",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "Concrete GetImageOpts Headers/full replacement/lastwins; immediate mapsnapshots and copiedbeforeafter initializedcallbacks; nil/custom error preflight; no builder or borrowed source/header mutation.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreCompletePreflight",
+            "image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence",
+            "image/images_options_test.go:TestImageOptionsReplacementExtensionsAndLastWins",
+            "image/images_options_test.go:TestImageOptionsLazyCallbacksAndRetainedOwnership",
+            "image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "ImageInfo explicitly decodes exact25 nullable canonicalfields atomically; exactint64/bool/stringpresence/tags and existing ImageLocation decoder; rawProperties projects noncanonical root values independently, no forced wirepropertiesobject/alias/ID/headerpseudoJSON seeding/outputschema gate.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreFixedGetAndCanonicalRawOwnership",
+            "image/images_core_test.go:TestImageCoreCanonicalPresenceAndAtomicDecoder",
+            "image/images_contracts_test.go:TestImageContractsCanonicalMetadataAndRawOwnership",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Source/provider/Type/Endpoint/base/Microversion and ordinaryheaders capturedbeforecallbacks throughName+firstGET, fixed optionheaders override/liveoriginalproviderauth; source/context checks beforework/afterName/accepted/afterdecode prevent retargeting.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreExactNameSourceAndOwnedFailures",
+            "image/images_options_test.go:TestImageOptionsLazyCallbacksAndRetainedOwnership",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Strictactual200, direct404 remains error; acceptedread/Close/context/customcause/source/JSON/model failures niltypedresult with wholeactualResponseError bytes/Header/status, closeonce/no acceptedreplay; native unexpectedstatus/prebodypolicy remains.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreExactNameSourceAndOwnedFailures",
+            "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Existing Service.Images collection/generated/native Get/List/Image aliases/Find/Wait and previous workflows preserved. APIv2.0/sourcepolicy404mask/version and responseenum/date/name255 schema are server facts, no discovery/cache/Resource mutation/header normalization parity claim.",
+          "tests": [
+            "image/images_contracts_test.go:TestImageContractsGetRouteAndReference",
+            "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy",
+            "internal/cmd/sdkgen/glance_image_read_test.go:TestGlanceImageReadFacadePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/images.md"
+      ],
+      "differences": [
+        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
+        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
+        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
+        "Go explicitName Ref extension performs existing native exactName lookup then freshGET. Python get_image is literalID/Resource fetch, no find/name fallback or Resource same-instance/cache semantics equivalence."
+      ],
+      "remaining": [
+        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
+        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
+        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
+        "Go explicitName Ref extension performs existing native exactName lookup then freshGET. Python get_image is literalID/Resource fetch, no find/name fallback or Resource same-instance/cache semantics equivalence."
+      ]
+    },
+    {
+      "operation": "python:image/v2/images",
+      "source_fingerprint": "55a5b8eabd360632cb91b0a0221c7c747fd5907d087b95b114fcc8bb55f59d69",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.ListImages",
+        "gophercloudsdk/image.Service.AllImages",
+        "gophercloudsdk/image.WithListImagesOpts",
+        "gophercloudsdk/image.WithListImagesHeader",
+        "gophercloudsdk/image.WithListImagesHeaders",
+        "gophercloudsdk/image.WithListImagesLimit",
+        "gophercloudsdk/image.WithListImagesMarker",
+        "gophercloudsdk/image.WithListImagesID",
+        "gophercloudsdk/image.WithListImagesName",
+        "gophercloudsdk/image.WithListImagesVisibility",
+        "gophercloudsdk/image.WithListImagesMemberStatus",
+        "gophercloudsdk/image.WithListImagesOwner",
+        "gophercloudsdk/image.WithListImagesStatus",
+        "gophercloudsdk/image.WithListImagesSizeMin",
+        "gophercloudsdk/image.WithListImagesSizeMax",
+        "gophercloudsdk/image.WithListImagesProtected",
+        "gophercloudsdk/image.WithListImagesHidden",
+        "gophercloudsdk/image.WithListImagesSort",
+        "gophercloudsdk/image.WithListImagesSortKeys",
+        "gophercloudsdk/image.WithListImagesSortDirs",
+        "gophercloudsdk/image.WithListImagesTags",
+        "gophercloudsdk/image.WithListImagesCreatedAt",
+        "gophercloudsdk/image.WithListImagesUpdatedAt",
+        "gophercloudsdk/image.WithListImagesContainerFormat",
+        "gophercloudsdk/image.WithListImagesDiskFormat",
+        "gophercloudsdk/image.WithListImagesFilter",
+        "gophercloudsdk/image.WithListImagesFilters",
+        "gophercloudsdk/image.WithListImagesMaxItems",
+        "gophercloudsdk/image.WithListImagesSinglePage"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete pointer query preserves nilomission versus explicitempty/0/false; emptyMarkeromitted, nonnegativeLimit/Size bounds withoutminmax inference; queryVALUEUTF8-only with escaped controls/no clientenum/date/UUID/length normalization/defaultserver injection.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreCompletePreflight",
+            "image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence",
+            "image/images_options_test.go:TestImageOptionsReplacementExtensionsAndLastWins",
+            "image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "Filters ownedurl.Values unknownkeyextension, nonemptyUTF8/noncontrolkeys andnonemptyvalueslices; exact reservedknown/local/deleted keys fail. PluralFilters replacesentiremap; singularFilter replacescopiedvalues/zeroargsdeleteskey; no Pythonaliases/clientBodyfilters/builders.",
+          "tests": [
+            "image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence",
+            "image/images_options_test.go:TestImageOptionsReplacementExtensionsAndLastWins",
+            "image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "Tags/SortKeys/SortDirs preserve ordered repeats andemptyvalues. Sortpointerpresence excludesnonemptyclassicstyles; multipleSortDirs count matchesSortKeys, remainingservergrammar preserved. Immediate helpers/fullopts own maps/slices/pointers before reusableparallel execution.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreAdvertisedPagingAndQueryRestoration",
+            "image/images_options_test.go:TestImageOptionsImmediateSnapshotsAndPresence",
+            "image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "Lazy ListImages copies optionslice atconstruction andappliesinitializedcallbacks perexecution; fulloptsreplacement/lastwins/customnil/error semantics, sourcerecheckaroundcallbacks; no GET when merelyconstructingiterator.",
+          "tests": [
+            "image/images_options_test.go:TestImageOptionsLazyCallbacksAndRetainedOwnership",
+            "image/images_options_test.go:TestImageOptionsValidationAndParallelReusablePolicies",
+            "image/images_contracts_test.go:TestImageContractsPagingAndConsumption",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource"
+          ]
+        },
+        {
+          "behavior": "WholeUTF8/syntax/canonicalnonnullroot/imagesarray; decodeconsumedrows only/localMaxItems0unlimited/positivecap/SinglePage/earlybreak skipunusedbadrows+next. No localfilter/order/dedup; Allnonnilempty ornilerror discards partials.",
+          "tests": [
+            "image/images_core_test.go:TestImageCorePagingGuardsAndLocalConsumption",
+            "image/images_contracts_test.go:TestImageContractsPagingAndConsumption"
+          ]
+        },
+        {
+          "behavior": "Every consumed ImageInfo row has exactnullablecanonical25/rawProperties+Body/header/status owned independently; IDs/Names/URLs/passive dates/unknown JSON retainrawprecision with no outputrange/alias/schema/enforcedID equality or extra detailGET.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreFixedGetAndCanonicalRawOwnership",
+            "image/images_core_test.go:TestImageCoreCanonicalPresenceAndAtomicDecoder",
+            "image/images_contracts_test.go:TestImageContractsCanonicalMetadataAndRawOwnership",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Onlycanonicalbody next, including short/emptyadvertisedpages; missing/null/emptyends, consumednextmuststring. Fixedsameorigin/exactescapedcapturedcollection, relative /v2/images versionroot normalization only, URLauthority/dot/fragment/pathalias/queryinvalid rejected; oneUTF8marker andURL/markercycles inclinitialmarker guarded.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreAdvertisedPagingAndQueryRestoration",
+            "image/images_core_test.go:TestImageCorePagingGuardsAndLocalConsumption",
+            "image/images_contracts_test.go:TestImageContractsPagingAndConsumption",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Advertisednonmarkerkeyset exactinitial andvalues exactorderedsequence OR knownsingletonmembercollapse only; rejectextras/drops/changed/arbitrarysubsets thenrestorewholeownedoriginalquery+newmarker. ExplicitGo repair for Glanceserializer dict(params) collapse, rawresponse unchanged; no Link/first/schema/lastID/hint fallback.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreAdvertisedPagingAndQueryRestoration",
+            "image/images_contracts_test.go:TestImageContractsPagingAndConsumption",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Followingpages refresh latestordinarysourceheaders underfixedoriginalclient/provider/Type/Endpoint/base/Microversion, fixedoptionheadersoverride/liveauth, checksaroundacceptedbody/consumedrows/callbacks; no source/providerreplacement or responseURL routing.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreAdvertisedPagingAndQueryRestoration",
+            "image/images_contracts_test.go:TestImageContractsConcreteQueriesAndSource",
+            "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy",
+            "connection_image_read_test.go:TestConnectionImageReadFacadeOwnsResponseAndPreservesFilters"
+          ]
+        },
+        {
+          "behavior": "Strictactual200 only, acceptedread/Close/context/customcause/source/envelope/model/continuation/cycle failures yieldnilrow andwholeactualResponseError/no replay/closeonce; native retry/reauth/advancedheaders/same-scope redirect andbody/status ownership remain. Native/Get/List/generator inventory preserve unchanged endpoints.",
+          "tests": [
+            "image/images_core_test.go:TestImageCoreExactNameSourceAndOwnedFailures",
+            "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy",
+            "internal/cmd/sdkgen/glance_image_read_test.go:TestGlanceImageReadFacadePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/images.md"
+      ],
+      "differences": [
+        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
+        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
+        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
+        "Go restores originalrepeatquery after boundedvalidadvertisedcollapse; pinned Python/native follow collapsed serverquery, so filter/sort preservation is an explicitGo repair. Go has body-next-only continuation andlocalcap/no serverhint; Python Resource pager has broader Link/fallback/clientBody/JMESPath/filter behavior.",
+        "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim."
+      ],
+      "remaining": [
+        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
+        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
+        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
+        "Go restores originalrepeatquery after boundedvalidadvertisedcollapse; pinned Python/native follow collapsed serverquery, so filter/sort preservation is an explicitGo repair. Go has body-next-only continuation andlocalcap/no serverhint; Python Resource pager has broader Link/fallback/clientBody/JMESPath/filter behavior.",
+        "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim."
+      ]
     }
   ]
 }
