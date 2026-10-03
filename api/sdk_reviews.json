@@ -18633,6 +18633,230 @@
         "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
         "Server permission and active/deactivated transition/idempotence validation remain server-owned. The acknowledgement does not seed an Image status model, wait for a state, or reproduce Python supplied Resource/session behavior."
       ]
+    },
+    {
+      "operation": "python:image/v2/add_image_location",
+      "source_fingerprint": "4c13c5b79261e10ee958698ba78014977bb63381047b1fa837f902590e9656f6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.AddImageLocation",
+        "gophercloudsdk/image.WithAddImageLocationOpts",
+        "gophercloudsdk/image.WithImageLocationValidation",
+        "gophercloudsdk/image.WithAddImageLocationHeader",
+        "gophercloudsdk/image.WithAddImageLocationHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Add sends one prepared flat root JSON url plus default validation_data:{} to fixed POST images/{chosenID}/locations with no query. URL is nonempty validUTF8 literal JSON data, never parsed/normalized/fetched or used as client target; scheme/case/whitespace/percent/query/fragment remain unchanged. Supplied validation pointer requires both nonempty validUTF8 strings; no local algorithm/hex/digest whitelist or normalization/verification.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsFixedRoutesAndPassiveData",
+            "image/locations_core_test.go:TestImageLocationsCoreFixedRoutesAndPassiveData",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Only actual202 establishes Add acknowledgement with fixed request ImageID/URL and independently cloned opaque Body/Header/status. Empty/nonJSON/invalidUTF8 acknowledgement is accepted without location model/ID decoding. Pinned serializer sets202/no body despite official documented200; documented200 and other statuses do not create a Go result.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsFixedRoutesAndPassiveData",
+            "image/locations_core_test.go:TestImageLocationsCoreFixedRoutesAndPassiveData",
+            "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
+            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
+          ]
+        },
+        {
+          "behavior": "Accepted202 read/Close/context failures retain partial/full result together with independent ResponseError evidence and all original read/Close/ctx.Err/custom causes. Body closes once, no accepted replay or follow-up GET/task/wait. Native rejected/transport/prebody failures remain nil result with original evidence; missing is strict.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
+            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
+          ]
+        },
+        {
+          "behavior": "Source/client/provider/base/ordinary headers/context and Ref are validated and captured before caller callbacks. Direct ID causes only the requested location endpoint; explicit exact Name uses existing native all-pages resolver once and rejects absent/ambiguous/late surfaced native lookup failures or unsafe resolved IDs before location HTTP. Native Name model/body/continuation policy remains unchanged.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Concrete option helpers snapshot caller maps and validation pointers at creation/application, own option slices and each callback config, invoke once and copy again. Full replacement and ordinary canonical header merge preserve prepared policy across retained handles and parallel helper reuse. Protected headers and nil/error callbacks fail before HTTP with original causes.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Captured original prefix/ordinary headers/body and original provider identity are fixed while latest original token remains live. Safe source changes retain captured requests; provider replacement/foreign retarget rejects. Shared prebody reauth/retry/backoff and identical-target redirects remain configured native policy; changed method/origin/path/query is guarded.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsProviderHooksAndExistingCompatibility",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictStatusesAndRetryOwnership",
+            "connection_image_locations_test.go:TestConnectionImageLocationsShareNativeClientAndPreservePassiveData",
+            "internal/cmd/sdkgen/glance_locations_test.go:TestGlanceLocationsPreserveNativeImagePatchAndDocumentDedicatedEndpoints"
+          ]
+        },
+        {
+          "behavior": "Shared DoJSON preserves original serialized Add body or nil Get body and response ownership. Equivalent serialized body replacement is normalized to the original; changed URL/hash, in-place mutation, RawBody/KeepResponseBody/JSONResponse or nil-to-JSONnull/unserializable body rejects before another request with original/hook/encoding causes. Expanded OkCodes cannot override strict original202/200. Native reauth ErrOriginal/ErrReauth remain inspectable via fields; prior image/native workflows remain unchanged.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsProviderHooksAndExistingCompatibility",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictStatusesAndRetryOwnership",
+            "connection_image_locations_test.go:TestConnectionImageLocationsShareNativeClientAndPreservePassiveData",
+            "internal/cmd/sdkgen/glance_locations_test.go:TestGlanceLocationsPreserveNativeImagePatchAndDocumentDedicatedEndpoints",
+            "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
+            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/locations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Image Resource/ID and uses inherited mutable ImageLocation Resource, descriptors, dirty/cache/session/microversion behavior. Go uses explicit ID/Name Ref, concrete owned options and actual raw response evidence; explicit Name resolution is an additional convenience.",
+        "Go retains native Name pager model/body/continuation and rejected native response policy, while owning accepted response bytes/header/status and body failures. Full Python Resource/adapter/exception/cache/transport policy remains broader.",
+        "Python ImageLocation._max_microversion2.17 is a framework capability hint. Go preserves existing source version policy without inventing a location microversion header, capability discovery or minimum deployment support gate.",
+        "Python create may swallow empty/nonJSON response JSON ValueError and return the seeded URL/validation_data Resource. Go returns actual202 acknowledgement; neither seeded Resource nor acknowledgement proves a returned location or completed asynchronous validation.",
+        "Nil Go validation defaults{} like Python None, but an explicit Go zero/partial pair is invalid while Python arbitrary dict input remains broader. Paired presence is a deliberate local rule beyond schema behavior in older allowed jsonschema drafts. do_secure_hash is server configuration, not a new client body option."
+      ],
+      "remaining": [
+        "Full mutable supplied Resource/subclass/Munch/connection/default/descriptor/coercion/unknown-body/dirty/cache/session semantics remain unresolved; typed Ref/result objects do not implement that Python object model.",
+        "Complete Python adapter/response translation, cache invalidation, generic list pagination/filtering/query coercion and arbitrary custom transport policies remain partial. Native Name continuation/body/error policy is retained.",
+        "Queued image state, permissions, configured store and HTTP URI policy, import lock, server schema/digest/algorithm support and actual asynchronous hash validation/backend persistence are server-owned. Accepted HTTP proof does not establish deployment support or task completion.",
+        "No metadata/status gate, capability discovery, synthetic location ID, RMW/PATCH, client URL fetch, cache mutation, wait/poll/task lookup, rollback or cleanup is added."
+      ]
+    },
+    {
+      "operation": "python:image/v2/image_locations",
+      "source_fingerprint": "eb9119449b0ef28e9fce175901f874aa38845c0a4506a760c3674c201c93444f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImageLocations",
+        "gophercloudsdk/image.WithGetImageLocationsOpts",
+        "gophercloudsdk/image.WithGetImageLocationsHeader",
+        "gophercloudsdk/image.WithGetImageLocationsHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get performs one bodyless/query-free fixed-parent GET accepting actual200 finite barearray only. Empty[] yields nonnil empty rows. No Link/marker/limit fallback or row ID/URL based continuation; canonical request ImageID stays fixed and returned metadata remains passive.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsFixedRoutesAndPassiveData",
+            "image/locations_core_test.go:TestImageLocationsCoreFixedRoutesAndPassiveData"
+          ]
+        },
+        {
+          "behavior": "Every row must be a nonnull object. Canonical optional url is nil for missing/null and otherwise strictstring pointer; metadata is nil for missing/null, nonnil rawmap for{} and otherwise strictobject. Unknown/case-decoy/id/status/image_id/next and raw null/zero/false/nested/large/fraction JSON are preserved without float64 conversion or target/capability inference.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight",
+            "image/locations_contracts_test.go:TestImageLocationsFixedRoutesAndPassiveData",
+            "image/locations_core_test.go:TestImageLocationsCoreFixedRoutesAndPassiveData"
+          ]
+        },
+        {
+          "behavior": "GET read/Close/context/wholeUTF8/JSON/root/schema/row errors return nil typed result, with whole actual200 bytes/header/status and every original cause retained in ResponseError. No partial rows or single-object coercion; accepted body closes once without replay. Unexpected/missing statuses remain native errors without fallback.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
+            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Source/client/provider/base/ordinary headers/context and Ref are validated and captured before caller callbacks. Direct ID causes only the requested location endpoint; explicit exact Name uses existing native all-pages resolver once and rejects absent/ambiguous/late surfaced native lookup failures or unsafe resolved IDs before location HTTP. Native Name model/body/continuation policy remains unchanged.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Concrete option helpers snapshot caller maps and validation pointers at creation/application, own option slices and each callback config, invoke once and copy again. Full replacement and ordinary canonical header merge preserve prepared policy across retained handles and parallel helper reuse. Protected headers and nil/error callbacks fail before HTTP with original causes.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsCanonicalModelsAndPreflight",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictArrayAndCanonicalSchema",
+            "image/locations_core_test.go:TestImageLocationsCoreCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Captured original prefix/ordinary headers/body and original provider identity are fixed while latest original token remains live. Safe source changes retain captured requests; provider replacement/foreign retarget rejects. Shared prebody reauth/retry/backoff and identical-target redirects remain configured native policy; changed method/origin/path/query is guarded.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsPreparedOptionsAndExactNames",
+            "image/locations_core_test.go:TestImageLocationsCoreExactNameAndPreparedPayload",
+            "image/locations_options_test.go:TestImageLocationsOptionsSnapshotsAndReplacement",
+            "image/locations_options_test.go:TestImageLocationsOptionsOwnCallbackHandlesAndSlice",
+            "image/locations_options_test.go:TestImageLocationsOptionsRejectOwnedHeadersAndAliases",
+            "image/locations_options_test.go:TestImageLocationsOptionsParallelReusableHelpers",
+            "image/locations_contracts_test.go:TestImageLocationsProviderHooksAndExistingCompatibility",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictStatusesAndRetryOwnership",
+            "connection_image_locations_test.go:TestConnectionImageLocationsShareNativeClientAndPreservePassiveData",
+            "internal/cmd/sdkgen/glance_locations_test.go:TestGlanceLocationsPreserveNativeImagePatchAndDocumentDedicatedEndpoints"
+          ]
+        },
+        {
+          "behavior": "Shared DoJSON preserves original serialized Add body or nil Get body and response ownership. Equivalent serialized body replacement is normalized to the original; changed URL/hash, in-place mutation, RawBody/KeepResponseBody/JSONResponse or nil-to-JSONnull/unserializable body rejects before another request with original/hook/encoding causes. Expanded OkCodes cannot override strict original202/200. Native reauth ErrOriginal/ErrReauth remain inspectable via fields; prior image/native workflows remain unchanged.",
+          "tests": [
+            "image/locations_contracts_test.go:TestImageLocationsProviderHooksAndExistingCompatibility",
+            "image/locations_core_test.go:TestImageLocationsCoreStrictStatusesAndRetryOwnership",
+            "connection_image_locations_test.go:TestConnectionImageLocationsShareNativeClientAndPreservePassiveData",
+            "internal/cmd/sdkgen/glance_locations_test.go:TestGlanceLocationsPreserveNativeImagePatchAndDocumentDedicatedEndpoints",
+            "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
+            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/locations.md",
+        "image/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Image Resource/ID and uses inherited mutable ImageLocation Resource, descriptors, dirty/cache/session/microversion behavior. Go uses explicit ID/Name Ref, concrete owned options and actual raw response evidence; explicit Name resolution is an additional convenience.",
+        "Go retains native Name pager model/body/continuation and rejected native response policy, while owning accepted response bytes/header/status and body failures. Full Python Resource/adapter/exception/cache/transport policy remains broader.",
+        "Python ImageLocation._max_microversion2.17 is a framework capability hint. Go preserves existing source version policy without inventing a location microversion header, capability discovery or minimum deployment support gate.",
+        "Pinned Python image_locations returns generic Resource.list with permissive nonarray-to-one-row coercion, URI attribute overlay, descriptors/filtering/cache and generic paging policies. Go reads the finite strict barearray endpoint once and retains unknown data without inventing stable location identity or collection CRUD.",
+        "Actual dedicated server GET returns all locations and strips id/status; it has no request paging or show_multiple_locations condition in this handler. Legacy image metadata locations exposure and dedicated GET permission policy are separate boundaries."
+      ],
+      "remaining": [
+        "Full mutable supplied Resource/subclass/Munch/connection/default/descriptor/coercion/unknown-body/dirty/cache/session semantics remain unresolved; typed Ref/result objects do not implement that Python object model.",
+        "Complete Python adapter/response translation, cache invalidation, generic list pagination/filtering/query coercion and arbitrary custom transport policies remain partial. Native Name continuation/body/error policy is retained.",
+        "Queued image state, permissions, configured store and HTTP URI policy, import lock, server schema/digest/algorithm support and actual asynchronous hash validation/backend persistence are server-owned. Accepted HTTP proof does not establish deployment support or task completion.",
+        "No metadata/status gate, capability discovery, synthetic location ID, RMW/PATCH, client URL fetch, cache mutation, wait/poll/task lookup, rollback or cleanup is added."
+      ]
     }
   ]
 }
