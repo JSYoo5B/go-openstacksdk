@@ -20846,6 +20846,511 @@
         "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
         "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
       ]
+    },
+    {
+      "operation": "python:image/v2/add_member",
+      "source_fingerprint": "f6e9bc16f9d6575c67003e87a9169b39c0e0ebc425f36d968e09060d1c10d339",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.AddImageMember",
+        "gophercloudsdk/image.WithImageMemberOpts",
+        "gophercloudsdk/image.WithImageMemberHeader",
+        "gophercloudsdk/image.WithImageMemberHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical ImageMember requires validUTF8 nonnull JSON object. Optional image_id/member_id/status/schema/created_at/updated_at are strict nullable strings; missing/null nil, empty present, literal dates unparsed. Unknown/case-decoy/large extension numbers are independent raw fields, links passive/nil typed. Mismatched response IDs and arbitrary response status remain passive; atomic schema errors retain original actual200 proof.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Accepted200 typed failures read/Close/context/UTF8/JSON/schema return nil model plus ownedResponseError retaining actual bytes/header/status and original read/Close/ctx.Err/customcause. Remove actual204 yields opaque actualack including nonnilack+error on handlingfailure. BodyClose once, no acceptedbody replay; rejectedstatuses keepnative ownership.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Add sends POST200 at fixedcollection with only member JSON; pending state/visibility/owner/policy/quota server-owned. Same bounded safeID preflight applies even JSON input; no metadataGET, genericattrs, statusoverride, discovery or automaticacceptance.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Python arbitraryattrs and mutable created Member differ from bounded memberID/exactmember JSON and passive actual response proof.",
+        "No full Resource/session/cache or serverpolicy/quota parity."
+      ],
+      "remaining": [
+        "Python arbitraryattrs and mutable created Member differ from bounded memberID/exactmember JSON and passive actual response proof.",
+        "No full Resource/session/cache or serverpolicy/quota parity.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_member",
+      "source_fingerprint": "6ca94da419a40f5f86451ec44287092d7d4d37c5aa8e87ef4f915f739fa2e14d",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetImageMember",
+        "gophercloudsdk/image.WithImageMemberOpts",
+        "gophercloudsdk/image.WithImageMemberHeader",
+        "gophercloudsdk/image.WithImageMemberHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical ImageMember requires validUTF8 nonnull JSON object. Optional image_id/member_id/status/schema/created_at/updated_at are strict nullable strings; missing/null nil, empty present, literal dates unparsed. Unknown/case-decoy/large extension numbers are independent raw fields, links passive/nil typed. Mismatched response IDs and arbitrary response status remain passive; atomic schema errors retain original actual200 proof.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Accepted200 typed failures read/Close/context/UTF8/JSON/schema return nil model plus ownedResponseError retaining actual bytes/header/status and original read/Close/ctx.Err/customcause. Remove actual204 yields opaque actualack including nonnilack+error on handlingfailure. BodyClose once, no acceptedbody replay; rejectedstatuses keepnative ownership.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Get direct fixedmember GET200 only; no IgnoreMissing or cache shortcut. Actual canonical response may have missing/empty/mismatched IDs and is never overwritten with requestIDs. No responseName/listfallback/schema following.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Python convenience proxy extractsIDs and builds fresh Resource; upper passive raw nullable/date DTO differs from Resource descriptors/cache/session and native time.Time model.",
+        "Strict200/fullUTF8/canonical failure evidence differs from Python broad non-error status/ValueError handling."
+      ],
+      "remaining": [
+        "Python convenience proxy extractsIDs and builds fresh Resource; upper passive raw nullable/date DTO differs from Resource descriptors/cache/session and native time.Time model.",
+        "Strict200/fullUTF8/canonical failure evidence differs from Python broad non-error status/ValueError handling.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
+    },
+    {
+      "operation": "python:image/v2/update_member",
+      "source_fingerprint": "cc945e059968d2febef970f21e08c3c8d70e47dc8cfabc9036efff7bec60fe33",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.UpdateImageMember",
+        "gophercloudsdk/image.WithImageMemberOpts",
+        "gophercloudsdk/image.WithImageMemberHeader",
+        "gophercloudsdk/image.WithImageMemberHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical ImageMember requires validUTF8 nonnull JSON object. Optional image_id/member_id/status/schema/created_at/updated_at are strict nullable strings; missing/null nil, empty present, literal dates unparsed. Unknown/case-decoy/large extension numbers are independent raw fields, links passive/nil typed. Mismatched response IDs and arbitrary response status remain passive; atomic schema errors retain original actual200 proof.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Accepted200 typed failures read/Close/context/UTF8/JSON/schema return nil model plus ownedResponseError retaining actual bytes/header/status and original read/Close/ctx.Err/customcause. Remove actual204 yields opaque actualack including nonnilack+error on handlingfailure. BodyClose once, no acceptedbody replay; rejectedstatuses keepnative ownership.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Update fixedmember PUT200 with only exactstatus pending/accepted/rejected. Empty/uppercase/whitespace/unknown input rejected before callbacks/lookup/HTTP; server controls authorization and visibility effects, no read-modify-write/cache mutation/wait.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Python **attrs/genericcommit accepts broaderbody and mutableResource semantics; Go exactstatus enum and requestbody preflight are deliberate constraints.",
+        "No cached mutation, acceptancewait, policy discovery or fullResource/session parity."
+      ],
+      "remaining": [
+        "Python **attrs/genericcommit accepts broaderbody and mutableResource semantics; Go exactstatus enum and requestbody preflight are deliberate constraints.",
+        "No cached mutation, acceptancewait, policy discovery or fullResource/session parity.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
+    },
+    {
+      "operation": "python:image/v2/remove_member",
+      "source_fingerprint": "8ebd4cda629651bc3e284cb4eeec1031c9f33c1800e1765311db2d2fc9752f21",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.RemoveImageMember",
+        "gophercloudsdk/image.WithRemoveImageMemberOpts",
+        "gophercloudsdk/image.WithRemoveImageMemberHeader",
+        "gophercloudsdk/image.WithRemoveImageMemberHeaders",
+        "gophercloudsdk/image.WithRemoveImageMemberIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Actual204 acknowledgement contains fixed chosen ImageID/requestMemberID and independent opaque Body/Header/StatusCode; no canonicalMember JSON/date model is decoded for deletion. NonJSON/invalidUTF8/partial accepted bytes remain evidence. Ignored404 never becomes acknowledgement.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Actual204 read/Close/context failure retains nonnilack plus independent ownedResponseError with actual bytes/header/status and original read/Close/ctx.Err/customcause. Owned404 handlingfailure has nilack+ResponseError404. BodyClose once, no acceptedbody replay; rejectedstatuses keepnative ownership.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Remove originalactual204 opaqueack contains fixed chosen ImageID/requestMemberID and independent actualBody/Header/status. IgnoreMissing pointer nil/defaulttrue accepts only clean physicallyowned memberDELETE404: fullread+Close+context success nil,nil; handlingfailure nil+ResponseError404, parent/logical/nested404 neverignored. Private404 bypasses nativeRetryFunc only for thatresponse; false retains native404 policy. Quiet404 is not proof ofabsence.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404",
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Pinned Python optionalimage signature does not recover supplied Member parent; Go requires explicitparent on everycall.",
+        "Python proxy returnsNone on successfuldelete/ignoredNotFound; Go returns actual204ack, narrow cause-safe physical404 and explicit privateRetryFunc boundary."
+      ],
+      "remaining": [
+        "Pinned Python optionalimage signature does not recover supplied Member parent; Go requires explicitparent on everycall.",
+        "Python proxy returnsNone on successfuldelete/ignoredNotFound; Go returns actual204ack, narrow cause-safe physical404 and explicit privateRetryFunc boundary.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
+    },
+    {
+      "operation": "python:image/v2/find_member",
+      "source_fingerprint": "5a99f9182c4cc0b1ff291006ae10cc08d92ba993a7127eb46ce334fe0f9fab7a",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.FindImageMember",
+        "gophercloudsdk/image.WithFindImageMemberOpts",
+        "gophercloudsdk/image.WithFindImageMemberHeader",
+        "gophercloudsdk/image.WithFindImageMemberHeaders",
+        "gophercloudsdk/image.WithFindImageMemberIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Canonical ImageMember requires validUTF8 nonnull JSON object. Optional image_id/member_id/status/schema/created_at/updated_at are strict nullable strings; missing/null nil, empty present, literal dates unparsed. Unknown/case-decoy/large extension numbers are independent raw fields, links passive/nil typed. Mismatched response IDs and arbitrary response status remain passive; atomic schema errors retain original actual200 proof.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Accepted200 typed failures read/Close/context/UTF8/JSON/schema return nil model plus ownedResponseError retaining actual bytes/header/status and original read/Close/ctx.Err/customcause. Remove actual204 yields opaque actualack including nonnilack+error on handlingfailure. BodyClose once, no acceptedbody replay; rejectedstatuses keepnative ownership.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Find is literal fixedmember GET only, no400/403/LIST/memberName fallback or ID equality assertion. IgnoreMissing nil/defaulttrue accepts only owned fullyhandled GET404=>nil,nil, failure retains404 ResponseError. False preserves strict200/native404 callback/retry; parentName/logical/nested404 neverignored. Server may mask authorization404, so nil is not absence proof.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404",
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Pinned Resource.find catches400/403/404 then LIST/ID-or-inherited-name/duplicate matching; Go directGET IDonly is explicitpartial difference.",
+        "No cachedResource/session/name/duplicateexception parity; quiet404 may conceal access policy."
+      ],
+      "remaining": [
+        "Pinned Resource.find catches400/403/404 then LIST/ID-or-inherited-name/duplicate matching; Go directGET IDonly is explicitpartial difference.",
+        "No cachedResource/session/name/duplicateexception parity; quiet404 may conceal access policy.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
+    },
+    {
+      "operation": "python:image/v2/members",
+      "source_fingerprint": "e9eeaf67540c23c396e71a7d8adec5408d0eb253ae1b74dc8582066d355b36a0",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.ListImageMembers",
+        "gophercloudsdk/image.WithListImageMembersOpts",
+        "gophercloudsdk/image.WithListImageMembersHeader",
+        "gophercloudsdk/image.WithListImageMembersHeaders",
+        "gophercloudsdk/image.WithListImageMembersMaxItems",
+        "gophercloudsdk/image.Service.AllImageMembers"
+      ],
+      "contracts": [
+        {
+          "behavior": "All methods require an explicit parent image Ref; direct imageID has only fixed member endpoint, explicit parentName uses unchanged native exact-name resolver. No Member parent recovery, memberName/project lookup, response-ID synthesis or response-driven routes.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersFixedParentRoutesAndBodies",
+            "image/members_core_test.go:TestImageMembersCoreFixedRoutesAndActualEvidence",
+            "connection_image_members_test.go:TestConnectionImageMembersShareClientAndConcreteDefaults",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "Finite collection requires whole validUTF8 nonnull JSONobject and canonical nonnull membersarray. Consumed ImageMember rows atomically decode nullable string fields/literaldates and own independent raw unknownfields/header/status; unusedrowcanonical errors skipped oncap/earlybreak. No envelope/schema/link pagination or response-ID routing.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreCanonicalPresenceAndAtomicDecoder",
+            "image/members_core_test.go:TestImageMembersCoreFiniteLazyListAndConsumedRows"
+          ]
+        },
+        {
+          "behavior": "Source/context/client/provider/prefix/ordinary headers captured before usercallbacks. MemberID is nonempty safeUTF8 single unescaped segment; status input exactly pending/accepted/rejected; invalid inputs/protectedheaders/nilerrorcallbacks fail before parentName/memberHTTP. ParentName failures remain errors despite missing defaults.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCompletePreflightAndParentMissing",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Concrete FullOpts replaces configuration, Header/Headers merge; map/pointer/helper input/optionslice/percallback configs independently copied and callbacks applied once. Prepared route/headers stay fixed with live originalprovider token; callback/source/provider and postName changes rejected. Reuse and parallel helpers retain owned settings.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsSnapshotsReplacementAndLastWins",
+            "image/members_options_test.go:TestImageMembersOptionsCallbacksPointersAndSliceOwnership",
+            "image/members_options_test.go:TestImageMembersOptionsParallelReusableHelpers"
+          ]
+        },
+        {
+          "behavior": "Collection acceptedread/Close/context/wholeUTF8/JSON/envelopeschema failure yields terminalnilrow+ownedResponseError retaining full original200 bytes/header/status and causes. Consumed malformedrow retains same fullproof; All discards partialrows. BodyClose once and no acceptedbody replay.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersAcceptedEvidenceAndMutationNoReplay",
+            "image/members_core_test.go:TestImageMembersCoreOwnedBodyFailuresAndPhysical404",
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreFiniteLazyListAndConsumedRows"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest keeps configured native prebody retry/reauth/backoff and identical-target redirect callbacks, blocks changedmethod/origin/path/query before transport. Owned serializedbody/RawBody/KeepResponseBody/JSONResponse cannot mutate; nilbody differsJSONnull, same serializedreplacement allowed. Actual status gate remains200/204 despite hook-expandedOkCodes. Native reauth ErrOriginal/ErrReauth fields and existing native memberABI/scopes unchanged.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersNativeHooksAndCompatibility",
+            "image/members_core_test.go:TestImageMembersCoreCapturedSourceAndRequestOwnership",
+            "internal/cmd/sdkgen/glance_members_test.go:TestGlanceMemberWorkflowsPreserveNativeScopeAndConcreteDefaults"
+          ]
+        },
+        {
+          "behavior": "List snapshot is lazy periteration; each iteration makes one finite body/query-freeGET200 after required parentresolution. Required canonical members nonnullarray, wholeUTF8/JSON before rows; rowcanonical decode onlywhenconsumed. MaxItems zero unlimited,negative invalid,positive localrawrowcap; earlybreak/cap skipsunusedrowerrors/no continuation/query/fanout. Eachrow owns metadata/header/raw, source/context checked perrow. All helper returns nonnil[] onempty and discards partial onerror.",
+          "tests": [
+            "image/members_contracts_test.go:TestImageMembersCanonicalRawModelsAndFiniteList",
+            "image/members_core_test.go:TestImageMembersCoreFiniteLazyListAndConsumedRows",
+            "image/members_contracts_test.go:TestImageMembersOwnedOptionsAndPreflight",
+            "image/members_options_test.go:TestImageMembersOptionsValidationAndDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/members.md"
+      ],
+      "differences": [
+        "Pinned proxy drops **query while genericResource.list retains frameworkpagination machinery; Go finite strict200/noquery and localcap/collect are explicit upper behavior.",
+        "No genericResource generator/cache/fieldprojection or full Python list/session parity."
+      ],
+      "remaining": [
+        "Pinned proxy drops **query while genericResource.list retains frameworkpagination machinery; Go finite strict200/noquery and localcap/collect are explicit upper behavior.",
+        "No genericResource generator/cache/fieldprojection or full Python list/session parity.",
+        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
+      ]
     }
   ]
 }
