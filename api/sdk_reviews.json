@@ -26070,6 +26070,130 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:object_store/v1/delete_object",
+      "source_fingerprint": "fdc3b3cda760b3f5a3722ab6160eb68bcd9b03b3041a2912330724c755e66add",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.DeleteObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutDeleteObjectStaticLargeObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectIgnoreMissing",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutDeleteObjectIgnoreMissing",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectVersionID",
+        "gophercloudsdk/objectstorage/v1/objects.WithDeleteObjectNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutDeleteObjectNewest",
+        "gophercloudsdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON",
+        "gophercloudsdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/delete.md"
+      ],
+      "differences": [
+        "Go requires explicit literal container/object and returns owned Discovery/Deletion responses, nullable SLO selection, missing flag and optional Bulk; Python reuses mutable Object/container metadata and returns None.",
+        "Go uses strict nullable bool options and single true/false/1/0 HEAD header parsing; Python Header(type=bool) coerces nonempty strings with bool(value), including false.",
+        "Go requires strict SLO200 bulk JSON embedded2xx plus emptyErrors and preserves failures through actual200 ResponseError/ObjectDeleteBulkError; pinned Python Resource.delete uses has_body=False and does not inspect embedded bulk failure.",
+        "Go keeps native HEAD200/204 and DELETE202/204 compatibility; SLO202/204 is raw acknowledgement with nilBulk/unknown counts, while VersionID/Newest are explicit Go extensions applied to both phases."
+      ],
+      "remaining": [
+        "Python Resource/Object/container precedence, dirty header/metadata mutation and response translation are distinct from the explicit literal Go workflow and owned phase results.",
+        "Python descriptor coercion, mutable adapter/session/microversion/cache and NotFoundException class handling are not reproduced wholesale by strict Go preflight/physical-response policies.",
+        "HEAD/DELETE races, eventual consistency and middleware deployment/permissions remain server concerns; acknowledgement or reported bulk counts do not establish cluster-wide cleanup completion."
+      ],
+      "contracts": [
+        {
+          "behavior": "Automatic HEAD and DELETE use the same literal UTF8 object and effective ResourceBase with one escape, optional opaque version-id on both phases, explicit Newest values and no request body. Known true/false SLO skips HEAD.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreWorkflowAndAcknowledgements",
+            "objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsSnapshots",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsRoutesAndSelection",
+            "connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Absent HEAD flag means ordinary deletion; one OWS-trimmed true/false/1/0 value selects SLO. Empty, malformed or duplicate flags fail with HEAD proof and no DELETE. HEAD200/204 and DELETE202/204 retain actual raw acknowledgements; SLO202/204 has nil Bulk and unknown counts.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreWorkflowAndAcknowledgements",
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreSLOFlagProjection",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsRoutesAndSelection",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes"
+          ]
+        },
+        {
+          "behavior": "Default missing policy ignores only clean physical HEAD404 or DELETE404 and retains phase-specific proof. Strict missing remains a native error, completed Discovery survives later failure, and NumberNotFound is informational.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreMissingAndPhaseProofs",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsMissingEvidence",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes",
+            "connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Only SLO actual200 decodes the required bulk JSON report after whitespace or heartbeats. The atomic decoder retains raw extensions, exact int64 counts and passive metadata. Embedded2xx plus empty Errors succeeds; other outcomes return parsed Bulk plus actual200 ResponseError and independent ObjectDeleteBulkError, retaining literal failure names and messages.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBulkDecoderAndFailure",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes"
+          ]
+        },
+        {
+          "behavior": "Invalid accepted bulk reports, fractional or exponent counts, malformed error pairs, UTF8 faults and decoded Unicode control characters in Response Status fail with raw Deletion evidence and nil Bulk. Failed direct decoding leaves the previous model unchanged.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBulkDecoderAndFailure",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes"
+          ]
+        },
+        {
+          "behavior": "Full options replace config; map and bool pointers are captured; Without helpers restore nil/default behavior. Callbacks run once and retained configs cannot change later phases. Canonical overlays and parallel reuse preserve owned requests and results, while live original auth changes remain visible.",
+          "tests": [
+            "objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsSnapshots",
+            "objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsParallelReuse",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsOptionsAndSnapshots",
+            "connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Invalid context, literal names, nil options, UTF8/control version-id, header case aliases and reserved auth/framing/metadata/Newest/SLO headers fail before HTTP. Invalid source headers fail before option callbacks.",
+          "tests": [
+            "objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsPreflight",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsOptionsAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Read, Close, EOF-plus-error, custom context and source faults retain joined causes and partial phase evidence. They cannot make dirty404 ignored, bodies close once and accepted bodies are not replayed. Source drift stays sticky even if Close restores it; result mutation cannot corrupt owned error proof.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBodyAndSourceFailures",
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreMissingAndPhaseProofs",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsMissingEvidence",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsPhaseErrorsAndGuards"
+          ]
+        },
+        {
+          "behavior": "Original API, client, provider and target guards stop callback or native retry/backoff/reauth/redirect source changes and retain native rejected-status or nested404 evidence. Later DELETE transport or rejected errors retain completed Discovery.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreNativePolicyGuards",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsPhaseErrorsAndGuards",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Every physical SLO DELETE forces one application/json Accept after native retry or redirect aliases while retaining other advanced native header overrides and live auth. Retry does not rerun callbacks, hooks cannot broaden phase codes, and original native Delete202/204 remains available.",
+          "tests": [
+            "objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreNativePolicyGuards",
+            "objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsNativeRetrySnapshots",
+            "objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsNativePolicy"
+          ]
+        },
+        {
+          "behavior": "Swift generated service/native API files remain byte-exact and accounts/containers/objects gain no generated Collections. The service guide retains the phase and SLO acknowledgement policy.",
+          "tests": [
+            "internal/cmd/sdkgen/swift_object_delete_test.go:TestSwiftObjectDeletePreservesNativeAndRegistry"
+          ]
+        }
+      ]
     }
   ]
 }
