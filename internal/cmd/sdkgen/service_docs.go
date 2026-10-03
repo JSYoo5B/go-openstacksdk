@@ -240,7 +240,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 				continue
 			}
 			if record.Kind == "named_resource" {
-				policies = append(policies, "`Create/Get/Update/Delete(ctx, namespace, options...)`, `List/All(ctx, options...)`: literal namespace 이름·concrete 기본값·명시 PUT 교체; [Python/Go 비교](metadefnamespaces/README.md); Resources·Find·상태 대기 없음")
+				policies = append(policies, "`Create/Get/Update/Delete(ctx, namespace, options...)`, `List/All(ctx, options...)`: literal namespace 이름·concrete 기본값; Create의 Properties·Objects·Tags·ResourceTypeAssociations를 한 POST로 전달; 명시 PUT 교체; [Python/Go 비교](metadefnamespaces/README.md); Resources·Find·상태 대기 없음")
 				continue
 			}
 			if record.Kind == "scoped_named_resource" {
