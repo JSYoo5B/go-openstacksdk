@@ -22344,6 +22344,517 @@
         "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
         "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
       ]
+    },
+    {
+      "operation": "python:image/v2/create_metadef_property",
+      "source_fingerprint": "782d19b4505c9652f3726c6beb70ee094f367f93ed910643c211012e10cc9030",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.Create",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateHeaders",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateType",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateTitle",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateDescription",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateAttributes",
+        "gophercloudsdk/image/v2/metadefproperties.WithCreateAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Property requires a whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/type/title/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Unknown keywords including numbers/default remain independent RawMessages in Body; canonical type failures are atomic and retain actual response evidence. Key is separate list-only wire-map-key provenance, nil on CRUD, and never rewrites passive Name or raw Body.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One flat collection POST201 sends required literal name plus nonnil Type/Title and only supplied description/raw attributes. Type is nonempty validUTF8 without a local enum; empty Title is valid, Description permits multiline/empty without an added length bound. Attributes keys are validUTF8, values any validUTF8JSON including null, with exact name/type/title/description/self/schema/created_at/updated_at/namespace_name keys reserved; the readonly keyword is forwarded. Server Schema additionalProperties=false and WSME field/type narrowing remain server behavior; no discovery/GET/schema gate/rollback or round-trip promise.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFixedScopedRoutesAndPayloads",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope",
+            "internal/cmd/sdkgen/glance_metadef_properties_test.go:TestGlanceMetadefPropertiesRegistryAndConcreteScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_metadef_property",
+      "source_fingerprint": "c66c8890c93ce20653bd51d1aa3700847adba5ea23bc422cea5092cd1689f94e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.Get",
+        "gophercloudsdk/image/v2/metadefproperties.WithGetOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithGetHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithGetHeaders",
+        "gophercloudsdk/image/v2/metadefproperties.WithGetResourceType"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Property requires a whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/type/title/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Unknown keywords including numbers/default remain independent RawMessages in Body; canonical type failures are atomic and retain actual response evidence. Key is separate list-only wire-map-key provenance, nil on CRUD, and never rewrites passive Name or raw Body.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One fixed child GET200; ResourceType nil omits query, explicit empty sends resource_type= and nonempty is a literal validUTF8 control-free query. Actual server association prefix stripping is not reproduced locally. Passive returned Name/Key/self/schema cannot retarget scope; no cache reuse, selector, fallback, discovery or follow-up request.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFixedScopedRoutesAndPayloads",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ]
+    },
+    {
+      "operation": "python:image/v2/metadef_properties",
+      "source_fingerprint": "971e8d32086cb463036f18b0bf30b78b959a9433f22ef233709a6f96c5e8a8ab",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.List",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.All",
+        "gophercloudsdk/image/v2/metadefproperties.WithListOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithListHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithListHeaders",
+        "gophercloudsdk/image/v2/metadefproperties.WithListMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Property requires a whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/type/title/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Unknown keywords including numbers/default remain independent RawMessages in Body; canonical type failures are atomic and retain actual response evidence. Key is separate list-only wire-map-key provenance, nil on CRUD, and never rewrites passive Name or raw Body.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "List is lazy and finite: one query/body-free collection GET200 with required nonnull properties dictionary; All collects a fresh request and returns nil on failure. Whole syntax and dictionary keys are checked before consumption, wire encounter order preserved, duplicate keys keep first slot and last value as Python JSONdict. Only consumed nonnull object values are decoded; MaxItems0 unlimited, negative invalid and cap/break skip unused malformed rows. Each row Key preserves wire identity separately from passive Name; no sorting, paging/query/hint/next/fallback, key autorouting or Python client Body filtering.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreOrderedDictionaryConsumption",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesCanonicalModelsAndRawOwnership"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "Python specialized list applies recognized Body keyword/nested client filters and seeds name=wirekey before value attributes override it. Go defers those filters, keeps explicit Key provenance and passive canonical Name; neither order nor identity is rewritten."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "Python specialized list applies recognized Body keyword/nested client filters and seeds name=wirekey before value attributes override it. Go defers those filters, keeps explicit Key provenance and passive canonical Name; neither order nor identity is rewritten."
+      ]
+    },
+    {
+      "operation": "python:image/v2/update_metadef_property",
+      "source_fingerprint": "7f7975eb9210d40c7886e64cfea2a9f6812c2aff650f0232e5be9f3d57ab20b1",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.Update",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateHeaders",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateName",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateType",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateTitle",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateDescription",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateAttributes",
+        "gophercloudsdk/image/v2/metadefproperties.WithUpdateAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Canonical Property requires a whole validUTF8 nonnullJSONobject. Exact-case optional nullable name/type/title/description/self/schema/literal dates remain pointers; no ID/namespace/name/links seed or time parsing. Unknown keywords including numbers/default remain independent RawMessages in Body; canonical type failures are atomic and retain actual response evidence. Key is separate list-only wire-map-key provenance, nil on CRUD, and never rewrites passive Name or raw Body.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCanonicalPresenceAndAtomicDecoder",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "One full replacement PUT200 uses fixed current-child route; body name defaults current unless explicit rename. Type/Title are required again and only supplied Description/raw attributes are sent, so omitted optional keywords reset according to server behavior. Names, typed values, raw/any snapshots and exact reserved attributes are checked before HTTP. No GET/read-modify-write/dirty cache/PATCH/automatic retention/rollback; Schema/WSME/DB conversions are not a round-trip promise.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFixedScopedRoutesAndPayloads",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_metadef_property",
+      "source_fingerprint": "08fc4f5c9f898533ad12097c449beea48d43a6793b4c3b3523af301426964af2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.Delete",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteHeaders",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteIgnoreMissing",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Individual DELETE204 defaults IgnoreMissing nil=>true, including zero/full options; explicit false retains native rejected404 policy/retry. Only the physically owned clean404 with successful read/Close/context/source handling becomes nil,nil and bypasses native404 RetryFunc. Forbidden resources can be reported404; quiet missing is not absence proof. Nested/native/Close/context/source/name-preflight failures are never ignored; no parentGET/find/unprotect/wait/cleanup.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ]
+    },
+    {
+      "operation": "python:image/v2/delete_all_metadef_properties",
+      "source_fingerprint": "f5753921ac1e4b75e421bac53e8f834d68e6c0da9ccd7ad2011078079c138ff7",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image/v2/metadefproperties.API.InNamespace",
+        "gophercloudsdk/image/v2/metadefproperties.NamespaceScope.DeleteAll",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllOpts",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllHeader",
+        "gophercloudsdk/image/v2/metadefproperties.WithDeleteAllHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Zero-HTTP InNamespace validates required literal namespace and captures API/client/original provider/type/endpoint/base/microversion for scope lifetime. Parent and child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected and colon/Unicode/space escaped once. No Ref/find/parentGET or response-driven routing. Each call copies latest ordinary source headers, uses live original authentication and rechecks scope/source/context before callbacks, after accepted body and consumed rows.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Six concrete option families use FullOpts replacement and last-option-wins with deep pointer/header/RawMessage snapshots. Custom callbacks run once with fresh ownership before and after; nil/error callbacks and invalid/conflicting owned headers fail before HTTP. Plural any Attributes helpers JSON-marshal an owned factory snapshot, validate original keys before encoding, wholly replace attributes and retain marshal causes; singular Attribute adds/replaces one key. Raw FullOpts and encoding/json arbitrary any semantics are explicit boundaries. Lazy option slices and concurrent helper reuse are owned.",
+          "tests": [
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsSnapshotsReplacementAndLastWins",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsCallbackAndFactoryOwnership",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsValidationAndDefaults",
+            "image/v2/metadefproperties/options_test.go:TestMetadefPropertiesOptionsParallelReusableHelpers",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFiniteDictionaryAndLocalControls",
+            "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
+          ]
+        },
+        {
+          "behavior": "Strict original statuses are Create201, Get/List/Update200 and Delete/DeleteAll204. Accepted read/Close/wholeUTF8/JSON/canonical/context/source failures preserve actual Body/Header/status and original causes in ResponseError, close once and never replay. Actual204 opaque acknowledgement retains requested Namespace/childName, with nil Name for DeleteAll, even on handling failures. Native rejected-body ownership stays native.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Shared REST/fixedrequest retains configured prebody retry/reauth/backoff and identical-target redirect policy. Method/origin/path/query/serializedbody and KeepResponseBody/JSONResponse/RawBody/JSONBody ownership are guarded; expanded native OkCodes cannot change original accepted statuses. Read/Close/ctx.Err/customCause and native reauth ErrOriginal/ErrReauth evidence remain available. No accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreLifetimeSourceAndNativeRetryBoundaries",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Collection DELETE204 is strict for all404 and has no IgnoreMissing option. Opaque acknowledgement fixes Namespace and nil Name; no child enumeration, count, unprotect, transaction, wait, cleanup, automatic retry after accepted body or swallowed server policy failure.",
+          "tests": [
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreAcceptedBodiesAndMissingPolicy",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreCompletePreflight",
+            "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesResponseOwnershipAndNativeHooks",
+            "image/v2/metadefproperties/core_test.go:TestMetadefPropertiesCoreFixedScopeAndCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/metadefproperties/README.md"
+      ],
+      "differences": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ],
+      "remaining": [
+        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
+        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+      ]
     }
   ]
 }

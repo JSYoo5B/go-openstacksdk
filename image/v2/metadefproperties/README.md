@@ -162,3 +162,5 @@ scope는 API/client/provider·type·endpoint·base·microversion을 수명 동�
 configured native pre-body retry·reauth·backoff·동일 target redirect 정책은 유지하고 method·origin·path·query·serialized body·owned response fields 또는 accepted status를 바꾸는 callback은 차단합니다. accepted body를 한 번 닫고 실패 뒤 replay하지 않습니다. read·Close·transport 원인과 `ctx.Err()`·custom `context.Cause`를 보존하며 native reauth 원인은 기존 `ErrOriginal`·`ErrReauth` 필드에서 확인합니다.
 
 비교 기준은 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, native Gophercloud `v2.15.0`입니다. native에는 property CRUD/list API가 없어 이 leaf를 SDK에서 소유합니다. Python 전체 Resource·client filter·adapter/session parity나 실제 서버 schema·권한·DB·cloud side effect를 검증했다고 주장하지 않습니다.
+
+소스·요청·응답 경계는 [core tests](core_test.go), [option tests](options_test.go), [외부 HTTP contracts](contracts_test.go)에서 검증합니다. Connection 경로와 생성 registry는 [Connection contract](../../../connection_image_metadef_properties_test.go)와 [generator contract](../../../internal/cmd/sdkgen/glance_metadef_properties_test.go)가 별도로 확인합니다. 이 테스트는 로컬 transport 증거이며 Python 실행이나 실제 cloud parity 검증은 아닙니다.
