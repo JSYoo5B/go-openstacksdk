@@ -25615,6 +25615,291 @@
         "Python warning/coercion and raw URL concatenation are not equivalent to Go ASCII token, literal decoded path, UTF8 and query escaping policies.",
         "Existing native Objects.CreateTempURL has its own primary-only lookup/complete-URL API; middleware method/digest/IP/expiry configuration and deployment rewrite are not guaranteed by client signing."
       ]
+    },
+    {
+      "operation": "python:object_store/v1/get_object",
+      "source_fingerprint": "2cad5fedfee2b018d9e954ca9dd00fb438727c26025ed3296a7db9a7b6a624d8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.GetObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadRange",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadFilename",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadSymlink",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadVersionID",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/read.md"
+      ],
+      "differences": [
+        "Go returns owned raw byte/evidence result; Python returns a mutable Object and only remembers decoded response.text when requested.",
+        "Go requires explicit literal parent/object and has no outfile path/open/flush or Resource data mutation option."
+      ],
+      "remaining": [
+        "Python Object/container precedence, attrs/header dirtiness, adapter/session and mutable Resource translation are outside this explicit literal Go API.",
+        "Python remember_content text decoding and outfile path ownership/borrowed flush semantics are not implemented by this byte-buffer method."
+      ],
+      "contracts": [
+        {
+          "behavior": "One fixed literal GET returns raw binary bytes; no HEAD/list/cache before content",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus",
+            "connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer"
+          ]
+        },
+        {
+          "behavior": "Literal Range/conditional headers, UTC dates and four actual query names; all option maps/pointers owned",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsOptionsAndPreflight",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsHeaderAndDateInputs",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults"
+          ]
+        },
+        {
+          "behavior": "Ordinary/source reserved headers and complete preflight fail before HTTP",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsOptionsAndPreflight",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsPreflight",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults"
+          ]
+        },
+        {
+          "behavior": "200/206 opaque body and 304 NotModified/no read; no multipart/checksum/contentlength inference",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus"
+          ]
+        },
+        {
+          "behavior": "Nullable exact-int64 and literal metadata projection, raw headers and buffers independently owned",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource",
+            "connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer"
+          ]
+        },
+        {
+          "behavior": "Read/Close/custom context faults preserve accepted status/header and actual partial bytes; Complete tracks observed EOF",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence",
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource"
+          ]
+        },
+        {
+          "behavior": "Opening source drift retains accepted proof; native rejected payload/error cleanup ABI preserved",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource"
+          ]
+        },
+        {
+          "behavior": "Fixed target/live auth/normal versus advanced native retry policy, ownership guards/actual status gate and preserved generated Download",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsNativePolicy",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries",
+            "internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/download_object",
+      "source_fingerprint": "2db2b1bb5b1262e59535a646697f2e049cd54b6ed77ac560fb926d33a6f4ef40",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.DownloadObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadRange",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadFilename",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadSymlink",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadVersionID",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/read.md"
+      ],
+      "differences": [
+        "Go DownloadObject copies into a borrowed writer and returns a byte count plus metadata/evidence; Python download_object returns response.content bytes.",
+        "The concrete Go ownership/typed options replace mutable Object/attrs request preparation, while existing native Download remains available."
+      ],
+      "remaining": [
+        "Python bytes return type and mutable Resource/attrs coercion/session behavior differ from the borrowed-writer facade.",
+        "Server middleware, HTTP client decompression, payload integrity and metadata conversion equivalence are not promised."
+      ],
+      "contracts": [
+        {
+          "behavior": "Borrowed writer receives binary content through one GET, no HEAD/no lifecycle ownership",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsPreflight",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults"
+          ]
+        },
+        {
+          "behavior": "304 writes nothing; accepted initial metadata/header/status and projection errors remain observable",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus",
+            "connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer"
+          ]
+        },
+        {
+          "behavior": "Bounded copy uses configured buffers and excludes ReaderFrom/WriterTo shortcuts",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter"
+          ]
+        },
+        {
+          "behavior": "Successful Write n defines BytesWritten; short/invalid counts and simultaneous Read+Write errors retained",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter"
+          ]
+        },
+        {
+          "behavior": "Complete independently records observed EOF plus full delivery, even full-count Write error/Close fault; skipped canceled writes stay incomplete",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter"
+          ]
+        },
+        {
+          "behavior": "Context/source checked between Read and Write; response Close once, underlying causes and metadata proof retained without whole-body buffering",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:object_store/v1/stream_object",
+      "source_fingerprint": "b6c40659e8dc46a86c921f3b17a12c23b696d145a82c67c068d8e36c5ed1c4a2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/objectstorage/v1/objects.API.StreamObject",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadOpts",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadHeaders",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadNewest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadRange",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadFilename",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadSymlink",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadVersionID",
+        "gophercloudsdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/read.md"
+      ],
+      "differences": [
+        "Go exposes an eager, explicitly closeable guarded stream with delivered-byte counters and owned evidence; Python exposes requests.iter_content byte chunks.",
+        "Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior."
+      ],
+      "remaining": [
+        "Python Requests iterator chunk sizing, iterator lifetime and mutable Resource/session behavior are not reproduced by a guarded io.ReadCloser.",
+        "Concurrent reads/Close, automatic abandoned-stream cleanup, payload integrity and complete Requests response semantics are outside the contract."
+      ],
+      "contracts": [
+        {
+          "behavior": "GET eager and payload read deferred; caller buffer controls Read size; zero-length Read does not consume underlying body",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup"
+          ]
+        },
+        {
+          "behavior": "304 yields nonnil closed-empty body/NotModified, no read, and observable Close failure",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup"
+          ]
+        },
+        {
+          "behavior": "Projection/source opening failure returns accepted proof with nil metadata/body and closes without draining",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsPreflight"
+          ]
+        },
+        {
+          "behavior": "Valid returned n contributes BytesRead before joined errors; exact EOF evidence independently sets Complete",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries"
+          ]
+        },
+        {
+          "behavior": "Early/idempotent Close exposes stable cleanup cause once; later Read/Close never reopens body",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards"
+          ]
+        },
+        {
+          "behavior": "Initial raw header/status error proof remains immutable despite exported result mutation; later underlying/context/source causes and counts preserved",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamGuards",
+            "connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer"
+          ]
+        },
+        {
+          "behavior": "Prebody retry/actual status guard cannot retarget or resend exposed body; existing native Download status/header/query ABI remains exact",
+          "tests": [
+            "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsNativePolicy",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsHeaderAndDateInputs",
+            "objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults",
+            "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries",
+            "internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry"
+          ]
+        }
+      ]
     }
   ]
 }
