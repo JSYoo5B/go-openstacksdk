@@ -89,3 +89,5 @@ Swift의 container 이름과 object 키는 해당 서비스의 식별자입니�
 Glance [metadata Property](../image/v2/metadefproperties/README.md)의 `InNamespace`는 HTTP 없이 literal parent와 서비스 target을 고정합니다. 목록의 `Key`는 dictionary의 출처이며 optional `Name`과 별도로 유지합니다. 이후 호출은 애플리케이션이 선택한 literal 이름을 받습니다.
 
 Glance [metadata Tag](../image/v2/metadeftags/README.md)는 `InNamespace`로 parent와 service target을 고정합니다. 양수 limit의 다음 marker는 yield 전에 복사한 마지막 원본 이름이며 response의 next·Link를 따라가지 않습니다.
+
+Glance [Resource type association](../image/v2/metadefresourcetypes/README.md)은 HTTP 없는 `InNamespace`로 parent를 고정합니다. 전역 catalog와 연결 목록은 별도 모델로 반환하고, 연결 해제는 전역 resource type을 지우지 않습니다.
