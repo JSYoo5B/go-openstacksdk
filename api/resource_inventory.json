@@ -2097,6 +2097,17 @@
     "parent": "gophercloudsdk/image/v2/metadefnamespaces"
   },
   {
+    "package": "gophercloudsdk/image/v2/metadefresourcetypes",
+    "source": "sdk_owned",
+    "model": "ResourceType",
+    "kind": "catalog_and_association",
+    "find": false,
+    "delete": true,
+    "wait": false,
+    "scope": "InNamespace",
+    "parent": "gophercloudsdk/image/v2/metadefnamespaces"
+  },
+  {
     "package": "gophercloudsdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "Store",
