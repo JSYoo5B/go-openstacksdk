@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Objects.CreateDirectoryMarkerObject`는 빈 객체와 `application/directory` Content-Type을 SDK가 준비하며, metadata와 추가 헤더는 함수 옵션으로 지정합니다. Python cloud helper와 비교한 사용법은 [디렉터리 마커](objects/directory-marker.md)를 참고합니다.
+
 `Objects.CreateObject`는 concrete `CreateObjectInput`의 bytes·file·Reader 중 하나를 받아 업로드합니다. bytes는 단일 PUT, file/Reader는 owned spool·checksum·fresh capability와 HEAD 뒤 skip 또는 SLO/DLO를 선택합니다. `IsObjectStale`는 별도 HEAD/hash 비교를 제공하며 `SegmentPrefix`와 각 물리적 attempt·manifest·cleanup 응답을 보존합니다. 함수 옵션과 Python 기본값·재시도·부분 실패의 차이는 [Python/Go 생성 비교](objects/create.md)를 참고합니다.
 
 `Objects.WaitForDelete`는 기본 2초 간격·120초 제한으로 HEAD를 조회해 clean 404를 기다립니다. `WaitForStatus`는 명시한 문자열 속성 또는 응답 헤더를 비교하며 기본 SDK timeout은 없습니다. Swift 객체에는 기본 status/progress 필드가 없으므로 상태 선택은 명시해야 합니다. 두 대기는 마지막 물리 요청과 응답 증거를 보존하며 기존 공통 Collection의 대기 정책과 구별합니다. [Python/Go 객체 대기 비교](objects/wait.md)를 참고합니다.
