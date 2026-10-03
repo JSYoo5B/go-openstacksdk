@@ -342,3 +342,5 @@ Glance schema 조회 16개는 상위 `conn.Image(ctx)`의 `Get*Schema(ctx, optio
 Glance 캐시 API 7개는 상위 `conn.Image(ctx)`의 전용 메서드로 사용합니다. [캐시의 Python/Go 비교](image/cache.md)는 삭제 기본값·cache/queue target 옵션·정확한 숫자·실제 응답 증거와 비동기 queue 동작을 설명합니다.
 
 Glance 이미지 공유 멤버는 상위 `conn.Image(ctx)`의 `AddImageMember/GetImageMember/UpdateImageMember/RemoveImageMember/FindImageMember/ListImageMembers/AllImageMembers`로 사용합니다. [멤버의 Python/Go 비교](image/members.md)는 필수 부모·ID·concrete 기본값·유한 목록과 실제 응답 증거를 설명합니다.
+
+Glance metadata namespace는 `conn.Image(ctx)`의 `service.API.MetadefNamespaces` 또는 `conn.ImageV2(ctx)`의 `service.MetadefNamespaces`로 사용합니다. [Namespace의 Python/Go 비교](image/v2/metadefnamespaces/README.md)는 literal 이름·concrete 기본값·PUT 교체·명시 zero limit과 서버의 다음 페이지를 설명합니다.

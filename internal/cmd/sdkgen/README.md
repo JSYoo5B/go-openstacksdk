@@ -192,3 +192,5 @@ Cinder Volume·Snapshot v2/v3의 수동 `MetadataIn` 범위는 [등록 규칙](c
 [Glance mutation 생성 테스트](glance_mutations_test.go)는 native Image API·Resources 생성물이 동일하며 상위 단일 태그·활성화 메서드의 strict204·미존재 오류 정책과 [Python/Go 사용법](../../../image/mutations.md)이 문서에 연결되는지 확인합니다. 새로운 native 선언이나 Collection capability를 합성하지 않습니다.
 
 [Glance location 생성 테스트](glance_locations_test.go)는 native Image API·Resources가 동일하며 상위 전용 POST202·finite GET200의 [Python/Go 사용법](../../../image/locations.md)이 연결되는지 확인합니다. native location set PATCH와 resource inventory를 보존하고 전용 location ID·Collection capability를 합성하지 않습니다.
+
+[Glance namespace 회귀](glance_metadef_namespaces_test.go)는 SDK 소유 `Namespace` 한 capability를 `MetadefNamespaces`에 연결하고 기존 image/member/import native API를 보존합니다. `named_resource` 정책의 전용 Create/Get/Update/Delete·List/All을 문서에 표시하며 generic Resources·Find·Wait를 생성하지 않습니다. [Python/Go 사용법](../../../image/v2/metadefnamespaces/README.md)에 concrete 기본값과 PUT 교체를 설명합니다.

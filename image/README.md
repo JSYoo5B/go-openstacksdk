@@ -174,3 +174,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.GetImageCache/QueueImage/CacheDeleteImage/ClearCache/CachedImageNodes/CleanCache/PruneCache`는 캐시 조회와 정리를 제공합니다. [캐시 사용법](cache.md)에 concrete 옵션·미존재 삭제 기본값·zero target의 cache/queue 선택·실제202/204/200과 passive node URL을 설명합니다. Queue 결과는 작업 접수이며 완료 여부는 서버의 후속 상태로 확인합니다.
 
 `service.AddImageMember/GetImageMember/UpdateImageMember/RemoveImageMember/FindImageMember/ListImageMembers/AllImageMembers`는 부모 이미지 Ref와 멤버 ID를 명시해 사용합니다. [멤버 사용법](members.md)에 직접 ID 조회·미존재 기본값·local MaxItems·timestamp 문자열과 기존 `API.Members.InImage`의 차이를 설명합니다.
+
+`service.API.MetadefNamespaces.Create/Get/Update/Delete`는 literal namespace 이름을 사용하고 `List/All`은 서버가 광고한 다음 페이지를 순회합니다. [Namespace 사용법](v2/metadefnamespaces/README.md)에 생략한 PUT 필드의 초기화·rename·`limit=0`·일반 헤더와 raw 응답을 설명합니다.
