@@ -372,3 +372,5 @@ Swift object metadata는 `conn.ObjectStorage(ctx)`의 `service.Objects.GetMetada
 Swift 컨테이너는 `service.Containers.CreateContainer(ctx, name)`와 `DeleteContainer(ctx, name)`으로 생성·삭제합니다. [Python/Go 생성·삭제 비교](objectstorage/v1/containers/README.md)는 메타데이터·시스템 헤더 옵션, 기본 404 허용과 strict 삭제, 실제 HTTP 응답을 설명합니다.
 
 Swift Temp URL key는 `service.Accounts.SetTempURLKey`, `service.Containers.SetTempURLKey`와 `service.GetTempURLKey`로 설정·조회합니다. [Python/Go 키 관리 비교](objectstorage/v1/temp_url_key.md)는 기본 primary·secondary 함수 옵션, container→account 선택 순서와 단계별 실제 응답을 설명합니다.
+
+Swift 서명은 `service.GenerateFormSignature`와 `service.GenerateTempURL`로 생성합니다. [Python/Go 서명 비교](objectstorage/v1/signing.md)는 구조체 입력과 함수 옵션, binary key·만료 시간·URL 인코딩과 자동 키 조회를 설명합니다.
