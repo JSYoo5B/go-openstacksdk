@@ -90,3 +90,5 @@ Resources·Find·CRUD·Wait·info/usage·자동 discovery gate/cache는 제공�
 Python 비교는 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [Proxy.stores/get_import_info](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L2273-L2295), [Store/Import](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/service_info.py#L22-L44), native 비교는 Gophercloud `v2.15.0`을 기준으로 합니다.
 
 실제 route·schema·source·pagination·오류 계약은 [공개 HTTP 테스트](contracts_test.go), [core 증거 테스트](core_test.go), [옵션 소유권 테스트](options_test.go)에서 확인합니다. [Connection 테스트](../../../connection_image_serviceinfo_test.go)는 shared client·prefix·live auth를, [생성기 회귀 테스트](../../../internal/cmd/sdkgen/glance_serviceinfo_test.go)는 registry와 native Get의 유지·drift 거부를 검증합니다. [응답 검증 hook 테스트](../../../internal/rest/response_validation_test.go)는 전체 body UTF-8 검사와 page별 실행·lazy break 경계를 확인합니다.
+
+인증된 프로젝트의 quota·사용량은 별도 `GetUsageInfo(ctx, options...)`로 조회합니다. [UsageInfo 사용법](usage.md)은 API 전용 기능의 Python SDK 경계·동적 resource·optional int64와 빈 결과의 정책을 설명합니다.

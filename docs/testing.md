@@ -118,3 +118,5 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 실클라우드별 확장 지원, 권한 정책, endpoint discovery 응답의 모든 형태, 대규모 결과의 성능은 현재 테스트의 범위 밖입니다. 실클라우드 acceptance test와 Python 예제의 실행은 수행하지 않았습니다. cloud 설정과 인증 소스의 주요 선택 경로는 모의 서버로 검증하고, cloud 파서 자체는 Gophercloud 구현을 사용합니다.
 
 새 리소스를 추가할 때는 API 고유의 응답 envelope, pagination link, 상태 대기 실패 값, 확장 query/body를 테스트합니다. 공통 알고리즘을 서비스마다 복사하는 대신 해당 서비스 Adapter가 공통 계약을 유지하는지 확인합니다.
+
+Glance [usage core 계약](../image/v2/serviceinfo/usage_core_test.go)과 [외부 HTTP 계약](../image/v2/serviceinfo/usage_contracts_test.go)은 고정된 current-project singleton·exact canonical JSON·int64 precision/presence·source snapshot·실제 응답/오류 소유권을 검증합니다. [Connection 계약](../connection_image_usage_test.go)은 두 facade의 공유 client·live token·독립 결과를 확인합니다.

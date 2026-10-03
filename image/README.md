@@ -162,3 +162,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.DeleteImage(ctx, ref, options...)`는 ID 조회 없이 전체 이미지 또는 선택한 저장소 복사본을 삭제합니다. Name은 기존 정확한 이름 조회로 해석하며 기본 미존재는 `nil, nil`입니다. [삭제 사용법](delete.md)은 concrete 옵션, 실제204 응답 원문·헤더·상태와 응답 처리 오류, 저장소의 마지막 복사본 정책을 설명합니다. 기존 `Images.Delete`와 native `API.Images.Delete`는 계속 사용할 수 있습니다.
 
 `service.API.ServiceInfo.ListStores/AllStores(ctx, options...)`는 기본 저장소 목록과 선택적 상세 목록을 읽고, `GetImportInfo(ctx)`는 현재 서버의 import 방식을 조회합니다. [ServiceInfo 사용법](v2/serviceinfo/README.md)은 Python 대응·concrete 옵션·실제 응답 증거·목록 제어를 설명합니다. discovery 결과로 import 실행을 자동 제한하거나 캐시하지 않습니다.
+
+`service.API.ServiceInfo.GetUsageInfo(ctx, options...)`는 인증된 프로젝트의 limit·사용량을 조회합니다. [사용량 사용법](v2/serviceinfo/usage.md)은 nullable int64·unknown resource·빈 응답과 concrete header 옵션을 설명합니다.

@@ -63,3 +63,5 @@ Glance의 [SDK staging](../image/v2/imagedata/README.md)은 `ImageData.StageImag
 상위 [이미지 삭제](../image/delete.md)는 `Service.DeleteImage`에서 전체 이미지와 선택한 저장소 복사본을 구분합니다. ID는 metadata 조회 없이 삭제하고 실제204 응답과 기본 미존재·응답 처리 오류를 구별해 반환합니다. 새 저장소 경로는 SDK 소유이며 기존 native Delete의 202/204 계약과 inventory는 보존합니다.
 
 Glance `ServiceInfo`는 SDK 소유 `Store` 목록과 `ImportInfo` singleton을 [실제 capability 목록](resource_inventory.json)에 기록합니다. `ListStores/AllStores`와 `GetImportInfo`를 제공하며 native `ImageImport.Get`은 그대로 유지합니다. [Python/Go 비교](../image/v2/serviceinfo/README.md)에 목록·상세 선택과 응답/오류 정책을 설명합니다.
+
+Glance의 [사용량 singleton](../image/v2/serviceinfo/usage.md)은 SDK 소유 `UsageInfo` capability로 기록합니다. `GetUsageInfo(ctx)`는 인증된 프로젝트의 `info/usage`를 한 번 조회하며 pinned Python/native 연산이나 parity 판정을 합성하지 않습니다.
