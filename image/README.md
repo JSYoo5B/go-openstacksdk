@@ -168,3 +168,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.AddTag/RemoveTag(ctx, ref, tag, options...)`는 태그 한 개를 변경하며 `DeactivateImage/ReactivateImage(ctx, ref, options...)`는 고정 action을 제출합니다. [태그·상태 변경 사용법](mutations.md)은 공통 concrete header 옵션·literal escaping·미존재 오류·actual204 acknowledgement와 Python cache 차이를 설명합니다.
 
 `service.AddImageLocation(ctx, ref, url, options...)`는 외부 저장소 URL과 선택 validation hash를 제출하고 실제202 응답을 보존합니다. `GetImageLocations(ctx, ref, options...)`는 유한 배열을 한 번 조회합니다. [Location 사용법](locations.md)에 서버의 비동기 검증·concrete 옵션·Python Resource와의 차이를 설명합니다.
+
+`service.GetImageSchema/GetImagesSchema`와 member·task·metadef의 16개 schema getter는 공통 `GetSchemaOption`으로 조회합니다. [Schema 사용법](schemas.md)에 고정 경로·실제200·SDK 소유 `Schema`의 canonical 필드와 raw JSON 보존을 설명합니다. 반환값의 links·이름·schema URL은 자동으로 따라가지 않습니다.

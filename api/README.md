@@ -69,3 +69,5 @@ Glance의 [사용량 singleton](../image/v2/serviceinfo/usage.md)은 SDK 소유 
 Glance [단일 태그·활성화 action](../image/mutations.md)은 상위 image.Service의 전용 메서드입니다. 실제 body 없는 PUT/DELETE/POST와 strict204·미존재 오류 정책을 제공하며 기존 native metadata Update·전체 tag set 교체와 resource inventory를 유지합니다.
 
 Glance [전용 location 추가·조회](../image/locations.md)는 상위 image.Service에서 고정 POST202와 body/query 없는 GET200 배열을 제공합니다. 기존 native metadata location set PATCH·resource inventory를 유지하며 location ID나 목록 continuation을 합성하지 않습니다.
+
+Glance [schema 조회 16개](../image/schemas.md)는 상위 image.Service의 고정 GET200 메서드와 공통 concrete header 옵션을 제공합니다. SDK 소유 Schema는 canonical 필드와 다양한 additionalProperties 값을 보존하며 native API나 Collection capability에 임의 schema 리소스를 추가하지 않습니다.
