@@ -23389,6 +23389,251 @@
         "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
         "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
       ]
+    },
+    {
+      "operation": "python:image/v2/create_task",
+      "source_fingerprint": "0b80538e18d6bc91e0695d7397e6c83a363a51c619518e0d12832034f6b21174",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.CreateTask",
+        "gophercloudsdk/image.WithCreateTaskOpts",
+        "gophercloudsdk/image.WithCreateTaskHeader",
+        "gophercloudsdk/image.WithCreateTaskHeaders",
+        "gophercloudsdk/image.WithCreateTaskInput"
+      ],
+      "contracts": [
+        {
+          "behavior": "One fixed captured image-service collection POST201 with explicit type/input only. Type nonemptyUTF8 literal without local enum/control gate; nilInput defaults{} rather than top-levelnull. Pinned nullable Schema/controller.get discrepancy is explicit deliberateGo policy; no extra GET/child/wait/cleanup.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreFixedRoutesAndObjectInput",
+            "image/tasks_core_test.go:TestTaskCoreCompletePreflight",
+            "image/tasks_contracts_test.go:TestTaskContractsFixedRoutesAndInput"
+          ]
+        },
+        {
+          "behavior": "Raw CreateTaskOpts Input independently owns top-level keys/raw validUTF8 JSON values including null/exact large numeric tokens; arbitrary inputkeys allowed. WithCreateTaskInput anymap snapshots JSON and validates original top-level keyUTF8 before marshal; nil resets{} and stored marshal cause returns during invocation; nested any uses encoding/json conventions.",
+          "tests": [
+            "image/tasks_options_test.go:TestTaskOptionsImmediateFactoriesAndRawSnapshots",
+            "image/tasks_options_test.go:TestTaskOptionsCallbacksAndCompleteValidation",
+            "image/tasks_contracts_test.go:TestTaskContractsFixedRoutesAndInput",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "WithCreateTaskOpts whole replacement, field/header helpers lastwins, option callbacks once and recursive raw/header/config snapshots prevent retained aliases; errors preserve original callback/marshal/context cause beforeHTTP; reused helpers/parallel calls do not share prepared bodies.",
+          "tests": [
+            "image/tasks_options_test.go:TestTaskOptionsReplacementPresenceAndLastWins",
+            "image/tasks_options_test.go:TestTaskOptionsCallbacksAndCompleteValidation",
+            "image/tasks_options_test.go:TestTaskOptionsParallelReusableHelpers",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource",
+            "connection_image_tasks_test.go:TestConnectionImageTaskFacadeSharesClientAndOwnsInput"
+          ]
+        },
+        {
+          "behavior": "Canonical TaskInfo wholeUTF8 nonnull object, exactcase optional strings/nullable raw Input/Result maps, literal dates and unknown precision retained. Atomic wrongtype failure, independently owned raw map/Metadata.Body/header/status; no responseID equality or request-driven synthesized fields.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreCanonicalPresenceAndAtomicModels",
+            "image/tasks_contracts_test.go:TestTaskContractsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Strict actual201 accepted only. Accepted read/Close/source/context/customcause/decode failures return niltyped plus whole actualResponseError evidence, Closeonce and no acceptedPOST replay; native rejectedstatus ownership unchanged.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAcceptedEvidenceAndStrictStatus",
+            "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Original client/provider/Type/Endpoint/base/Microversion and ordinary headers captured before callbacks; context/source recheck beforeHTTP/afterbody, original provider liveauth remains. Existing prebody retries/reauth/backoff/identicaltargetredirect plus owned method/URL/body/status guards retained, advanced native header policy remains.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource",
+            "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/tasks.md"
+      ],
+      "differences": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Go nilInput{} wholeobject policy deliberately differs from pinned nullable input Schema; controller.get does not prove null succeeds. Go forwards nonempty Type without enum gate and server validates supportedtypes.201 schedules async pendingtask, not success, no compensation/URIreachability/executor parity."
+      ],
+      "remaining": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Go nilInput{} wholeobject policy deliberately differs from pinned nullable input Schema; controller.get does not prove null succeeds. Go forwards nonempty Type without enum gate and server validates supportedtypes.201 schedules async pendingtask, not success, no compensation/URIreachability/executor parity."
+      ]
+    },
+    {
+      "operation": "python:image/v2/get_task",
+      "source_fingerprint": "a6477750099cf6a657d44bc4f1bbb6425200fac0f71852bab49ab4cc0b3c30e6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.GetTask",
+        "gophercloudsdk/image.WithGetTaskOpts",
+        "gophercloudsdk/image.WithGetTaskHeader",
+        "gophercloudsdk/image.WithGetTaskHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "One direct taskID child GET200, captured target and original liveauth. ID nonempty validUTF8 safe URI literal with no UUID/max length gate; escaped percent/spaces/query/hash accepted, dot/dotdot/slash/backslash/control rejected before callback/HTTP. No Ref/Name/find/fallback/ignoreMissing or Self/Schema/Location retargeting.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreFixedRoutesAndObjectInput",
+            "image/tasks_core_test.go:TestTaskCoreCompletePreflight",
+            "image/tasks_contracts_test.go:TestTaskContractsFixedRoutesAndInput",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "WithGetTaskOpts whole replacement and headers lastwins; input option slice/config/header ownership, callbackonce/cause preservation and pre/post source/context checks ensure fixed requested identity.",
+          "tests": [
+            "image/tasks_options_test.go:TestTaskOptionsReplacementPresenceAndLastWins",
+            "image/tasks_options_test.go:TestTaskOptionsCallbacksAndCompleteValidation",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Canonical exactcase optional nullable TaskInfo strings/date/raw objects preserve actual fullGet sparse/nullable states without native time/map coercion, inputID seeding, status normalization or routefollowing; wrongcanonicaltype/wholeinvalidUTF8/schema shape fails atomically.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreCanonicalPresenceAndAtomicModels",
+            "image/tasks_contracts_test.go:TestTaskContractsCanonicalModelsAndRawOwnership"
+          ]
+        },
+        {
+          "behavior": "Strict actual200; accepted read/Close/customcause/source/context/decoder errors retain wholeactual bytes/header/status inResponseError and niltyped, Closeonce/noacceptedGET replay. Native404 including maskedauthorization stays error; noabsenceproof/suppression.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAcceptedEvidenceAndStrictStatus",
+            "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks"
+          ]
+        },
+        {
+          "behavior": "Configured native prebody retry/reauth/backoff/sametargetredirect retains explicitproviderpolicy and native ErrOriginal/ErrReauth fields; changedtarget/method/ownedrequestbody or acceptedstatus expansion cannot replace fixed ownership. Existing native generatedTask/WaitForTask code stays byteexact; no implicitwait.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource",
+            "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks",
+            "internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/tasks.md"
+      ],
+      "differences": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Pinned Resource.fetch alwaysAdapterGET and canmutate same providedResource; configured Adapter cache may affect actualtransport. Go creates fresh ownedTaskInfo eachcall and strict404 canmask authorization."
+      ],
+      "remaining": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Pinned Resource.fetch alwaysAdapterGET and canmutate same providedResource; configured Adapter cache may affect actualtransport. Go creates fresh ownedTaskInfo eachcall and strict404 canmask authorization."
+      ]
+    },
+    {
+      "operation": "python:image/v2/tasks",
+      "source_fingerprint": "7c790e9092e795fc429503a88a7e5b032a792d33684fe46ca8a51a517f9fa274",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.Tasks",
+        "gophercloudsdk/image.Service.AllTasks",
+        "gophercloudsdk/image.WithListTasksOpts",
+        "gophercloudsdk/image.WithListTasksHeader",
+        "gophercloudsdk/image.WithListTasksHeaders",
+        "gophercloudsdk/image.WithListTasksLimit",
+        "gophercloudsdk/image.WithListTasksMarker",
+        "gophercloudsdk/image.WithListTasksType",
+        "gophercloudsdk/image.WithListTasksStatus",
+        "gophercloudsdk/image.WithListTasksSortKey",
+        "gophercloudsdk/image.WithListTasksSortDir",
+        "gophercloudsdk/image.WithListTasksMaxItems",
+        "gophercloudsdk/image.WithListTasksSinglePage"
+      ],
+      "contracts": [
+        {
+          "behavior": "Tasks is lazy reusable iter.Seq2 with construction-owned option slice and perexecution prepared headers/Limitpointer, FullOpts replacement/lastwins/callbackonce/causes. MaxItems0 unlimited, negativeinvalid; AllTasks returns nonnil empty or wholecollected results, nil/error without partialslice.",
+          "tests": [
+            "image/tasks_options_test.go:TestTaskOptionsReplacementPresenceAndLastWins",
+            "image/tasks_options_test.go:TestTaskOptionsParallelReusableHelpers",
+            "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Concrete sixquery limit/marker/type/status/sort_key/sort_dir; nilLimitomit/zeroemit/nonnegative; emptystringsomit/nonemptyUTF8controlfree literal, onlysortdirasc/desc gate. Native Typejson tagignored byqbuilder differs from explicit facadeTypewire; localcap does not invent wirelimit.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreCompletePreflight",
+            "image/tasks_options_test.go:TestTaskOptionsCallbacksAndCompleteValidation",
+            "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
+            "image/tasks_contracts_test.go:TestTaskContractsFixedRoutesAndInput",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Strict200 and canonical nonnull tasksarray with wholeUTF8/syntax before consumedrow decode; sparse pinned liststub Input/Result/Message remainnil/raw only. Canonical TaskInfo fields/no requestidentityseeding/no perrowGET; wrong consumedrowtype fails while unused malformedrows maybeskipped bycap/break.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreCanonicalPresenceAndAtomicModels",
+            "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
+            "image/tasks_contracts_test.go:TestTaskContractsCanonicalModelsAndRawOwnership",
+            "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps"
+          ]
+        },
+        {
+          "behavior": "Only canonical bodynext advances under captured exact reverseprefix/sameorigin collection; normalize /v2/tasks, preserve initialquery except single advancing marker. Reject foreign/malformed/userinfo/fragment/encoded-dot/duplicate/unknown/droppedquery and cycles before follow; no HTTPLink/first/schema/rowself orlastIDfallback.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
+            "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps"
+          ]
+        },
+        {
+          "behavior": "Empty pageends; positive localcap/earlybreak/SinglePage stop without unusedrow/nextvalidation orfollow. Iterator keeps deliveredrows at caller when latererror, AllTasks returnsnil/error. No localJSONSchema/runtime policy validation, Python general clientbodyfilters/JMESPath/max_items-to-limit continuation remains broader.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
+            "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps"
+          ]
+        },
+        {
+          "behavior": "Capture source/provider/Type/Endpoint/base/Microversion at each iteration, ordinary sourceheaders initial beforecallbacks and refreshed onnextpage with stableoptionheaderoverride; original provider authlive. Recheck source/context afterbody and before/afterconsumedrow, no borrowed source mutation.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
+            "image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy",
+            "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps",
+            "image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close/source/context/customcause/root/model/next errors preserve actualwhole response proof, Closeonce/noaccepted replay; original nativeunexpectedstatus/RetryFunc/reauth/backoff/identicalredirect ownedmethodURLbody/status guard remains. No automatictaskcompletion/wait/cleanup/versiondiscovery.",
+          "tests": [
+            "image/tasks_core_test.go:TestTaskCoreAcceptedEvidenceAndStrictStatus",
+            "image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy",
+            "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks",
+            "internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/tasks.md"
+      ],
+      "differences": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.",
+        "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned."
+      ],
+      "remaining": [
+        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
+        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
+        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
+        "Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.",
+        "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned."
+      ]
     }
   ]
 }

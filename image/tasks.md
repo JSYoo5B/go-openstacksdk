@@ -1,6 +1,6 @@
 # Glance Task 생성·조회·목록
 
-`image.Service`의 `CreateTask`, `GetTask`, `Tasks`, `AllTasks`는 `/v2/tasks`의 생성·조회·목록을 다룹니다. 결과는 실제 응답의 bytes·header·status를 소유하는 `TaskInfo`입니다. 기존 [generated/native Task API와 WaitForTask](v2/tasks/README.md)는 계속 사용할 수 있습니다. 여기의 생성은 task 접수이며 완료 대기나 이미지 import 성공 확인을 포함하지 않습니다.
+`image.Service`의 `CreateTask`, `GetTask`, `Tasks`, `AllTasks`는 `/v2/tasks`의 생성·조회·목록을 다룹니다. 결과 `TaskInfo`는 응답 필드의 raw JSON bytes·header·status를 소유합니다. 기존 [generated/native Task API와 WaitForTask](v2/tasks/README.md)는 계속 사용할 수 있습니다. 여기의 생성은 task 접수이며 완료 대기나 이미지 import 성공 확인을 포함하지 않습니다.
 
 [공식 Tasks API](https://docs.openstack.org/api-ref/image/v2/index.html#tasks)는 v2.2부터 제공되며 기본 정책상 일반 사용자에게 제한될 수 있습니다. [고정 controller](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/tasks.py#L70-L155)의 실제 계약은 POST 201, 개별 GET 200, 목록 GET 200입니다. SDK가 policy·version·Schema를 먼저 조회하지는 않습니다.
 
@@ -108,3 +108,5 @@ List query는 limit·marker·type·status·sort_key·sort_dir의 여섯 가지�
 요청은 callback 전에 service/client/provider·Type·Endpoint·base·microversion을 캡처하고 요청 전·응답 후·소비 row 전후에 source/context를 확인합니다. 원래 provider의 auth는 live이며, 다음 page의 ordinary source headers는 새로 읽고 고정 option headers가 덮어씁니다. source/option의 auth·transport·version 보호 규칙은 기존 image 정책과 같습니다. native RetryFunc의 명시적 ordinary header 정책은 유지됩니다.
 
 actual POST 201/GET 200만 성공으로 decode합니다. accepted read·Close·context/custom cause·source·JSON/model 실패는 typed nil과 실제 whole response bytes·header·status를 가진 ResponseError를 반환하며 body를 한 번 닫고 accepted 요청을 replay하지 않습니다. native unexpected status·prebody retry/reauth/backoff와 기존 same-target redirect 정책은 유지되며 method/origin/path/query와 owned body/status guard가 적용됩니다. 권한·owner·expiry에 따라 GET 404가 숨겨진 task를 뜻할 수도 있어 없음의 증거로 해석하지 않습니다. 이 facade는 import 완료·자동 wait·cleanup·policy 통과·실제 cloud 실행을 보장하지 않습니다.
+
+실행 가능한 계약 검증은 [core 테스트](tasks_core_test.go), [options 테스트](tasks_options_test.go), [외부 HTTP 계약 테스트](tasks_contracts_test.go), [Connection 통합 테스트](../connection_image_tasks_test.go), [native·registry 보존 테스트](../internal/cmd/sdkgen/glance_tasks_test.go)에 있습니다. 이 검증은 고정 source와 로컬 fixture를 대상으로 하며 실제 cloud 실행 결과는 포함하지 않습니다.
