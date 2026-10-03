@@ -384,3 +384,5 @@ Swift 객체 삭제는 `Objects.DeleteObject(ctx, container, object, options...)
 Swift 객체 생성은 `Objects.CreateObject(ctx, container, object, input, options...)`으로 사용합니다. [Python/Go 생성과 stale 비교](objectstorage/v1/objects/create.md)에 bytes·file·Reader 입력, checksum과 자동 SLO/DLO, 재시도·단계별 응답 및 보수적인 부분 정리를 설명합니다.
 
 Swift 객체 대기는 `Objects.WaitForDelete`·`WaitForStatus`로 사용합니다. [Python/Go 대기 비교](objectstorage/v1/objects/wait.md)에 HEAD 조회, 기본 2초 간격·삭제 120초 제한, 명시한 상태 속성·응답 헤더와 마지막 실제 응답을 설명합니다.
+
+Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container, name, options...)`으로 생성합니다. [Python/Go 사용법](objectstorage/v1/objects/directory-marker.md)에 SDK가 준비하는 빈 객체와 Content-Type, metadata 함수 옵션과 실제 업로드 응답을 설명합니다.
