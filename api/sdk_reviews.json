@@ -24178,6 +24178,134 @@
         "Go rejects pointer token edges that Python server strip would rename, including U+001C..U+001F; native UpdateImageProperty interpolates unescaped Names and remains separate. v2.0 draft4 media and broad Resource patch/session behavior are not replicated.",
         "Python update_image_properties copies cached property seed, kwargs int/raw/string conversion and meta precedence, truthy kernel/ramdisk Connection lookup and bool return (which can be true without PATCH); Go SetImageProperties does none of these."
       ]
+    },
+    {
+      "operation": "python:image/v2/upload_image",
+      "source_fingerprint": "8d4b2d0f924344893a63fb26f42b9b117e466bc9f857bc8392289f2356217fb6",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/image.Service.UploadImage",
+        "gophercloudsdk/image.WithImageUploadOpts",
+        "gophercloudsdk/image.WithImageUploadHeader",
+        "gophercloudsdk/image.WithImageUploadHeaders",
+        "gophercloudsdk/image.WithImageUploadSize",
+        "gophercloudsdk/image.WithoutImageUploadSize",
+        "gophercloudsdk/image.WithImageUploadField",
+        "gophercloudsdk/image.WithImageUploadFields",
+        "gophercloudsdk/image.WithImageUploadDiskFormat",
+        "gophercloudsdk/image.WithImageUploadContainerFormat",
+        "gophercloudsdk/image.WithImageUploadVisibility",
+        "gophercloudsdk/image.WithImageUploadOwner",
+        "gophercloudsdk/image.WithImageUploadProtected",
+        "gophercloudsdk/image.WithImageUploadHidden",
+        "gophercloudsdk/image.WithImageUploadMinDisk",
+        "gophercloudsdk/image.WithImageUploadMinRAM",
+        "gophercloudsdk/image.WithImageUploadTags"
+      ],
+      "contracts": [
+        {
+          "behavior": "One fixed POST201 metadata creation followed by one PUT204 binary upload uses canonical response ID, defaults qcow2/bare/private, and performs no additional detail GET, queued status gate, checksum/import/Task/Swift/wait/cleanup.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreFixedRoutesAndIndependentEvidence",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsWireAndOwnership",
+            "connection_image_upload_test.go:TestConnectionImageUploadFacadeOwnsPhases",
+            "internal/cmd/sdkgen/glance_image_upload_test.go:TestGlanceImageUploadPreservesNativeAndRegistry"
+          ]
+        },
+        {
+          "behavior": "Concrete full opts replaces whole configuration; plural Fields replaces all raw overrides; singular field/typed helpers overwrite exact keys; Headers merges ordinary headers. Maps/raw bytes/slices/pointers and initialized callbacks are independently owned across reuse and callback retention.",
+          "tests": [
+            "image/upload_image_options_test.go:TestImageUploadOptionsFactoriesAndSnapshots",
+            "image/upload_image_options_test.go:TestImageUploadOptionsReplacementAndTypedPresence",
+            "image/upload_image_options_test.go:TestImageUploadOptionsRetainedCallbacksAndSource",
+            "image/upload_image_options_test.go:TestImageUploadOptionsParallelReuseAndHeaderPolicies",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPreflightAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Flat precise JSON owns request name while forwarding other canonical/custom keys without descriptor aliases/coercion/schema/enum/readonly/range gates. Final formats must be nonempty UTF8 JSON strings; null/false/zero/negative/exact numbers remain server data.",
+          "tests": [
+            "image/upload_image_options_test.go:TestImageUploadOptionsReplacementAndTypedPresence",
+            "image/upload_image_options_test.go:TestImageUploadOptionsFactoriesAndSnapshots",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsWireAndOwnership"
+          ]
+        },
+        {
+          "behavior": "Required valid UTF8 nonblank Name and nonnil/not typed nil borrowed Data, nil callback/factory marshal cause/raw key/value/header/size validation stop before any HTTP/Reader Read/Seek/Close/length inference; literal key edges reject Python-strip-changing whitespace including U001C..001F.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreCompletePreflight",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPreflightAndSnapshots",
+            "image/upload_image_options_test.go:TestImageUploadOptionsFactoriesAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "Original service/provider/Type/Endpoint/base/reverse prefix/microversion and ordinary headers captured before callbacks remain fixed across phases; actual transport uses live original auth. Private JSON/binary media is installed without mutating source; explicit native metadata RetryFunc advanced header policy remains native.",
+          "tests": [
+            "image/upload_image_options_test.go:TestImageUploadOptionsRetainedCallbacksAndSource",
+            "image/upload_image_options_test.go:TestImageUploadOptionsParallelReuseAndHeaderPolicies",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsSourceAndBinaryPolicy",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsNativeMetadataPolicy",
+            "connection_image_upload_test.go:TestConnectionImageUploadFacadeOwnsPhases"
+          ]
+        },
+        {
+          "behavior": "Actual accepted POST201 raw Body/Header/Status remains in Metadata on read/Close/context/source/decode error. Reused atomic nullable25 ImageInfo owns raw Body+Properties independently without header pseudoJSON, seeded IDs or output enum/date parsing. Missing/null/empty/unsafe canonical ID retains created evidence and prevents PUT.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreCanonicalMetadataAndChosenID",
+            "image/upload_image_core_test.go:TestImageUploadCoreAcceptedPhaseFailures",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPartialEvidence"
+          ]
+        },
+        {
+          "behavior": "Canonical ID alone selects once-escaped fixed file PUT; Location/self/file/incidental aliases cannot redirect. Safe Unicode/space/colon/percent/question/hash literals are retained while empty/dot/dotdot/slash/backslash/control/invalidUTF8 fail before binary use.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreCanonicalMetadataAndChosenID",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsWireAndOwnership",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPartialEvidence"
+          ]
+        },
+        {
+          "behavior": "Borrowed current-position binary reader exposes only Read and receives no Close/Seek/GetBody/Len/buffering. Exactly one SDK attempt preserves configured timeout/transport/liveauth and disables native reauth/retry/backoff/redirect; failures retain completed metadata/image and native causes without replay.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreNativePolicyAndNoReplay",
+            "image/upload_image_core_test.go:TestImageUploadCoreCancellationAndBorrowedFailures",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsSourceAndBinaryPolicy",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPartialEvidence"
+          ]
+        },
+        {
+          "behavior": "Nil size omits owned size header, zero/nonnegative int64 emits exact X-OpenStack-Image-Size only on PUT; WithoutSize clears prior size. No automatic file length/seek/hash/type inference. Python Image.upload omitted-size total-file inference is explicitly different.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreFixedRoutesAndIndependentEvidence",
+            "image/upload_image_options_test.go:TestImageUploadOptionsReplacementAndTypedPresence",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsWireAndOwnership"
+          ]
+        },
+        {
+          "behavior": "Only actual accepted204 creates independent opaque acknowledgement, retained with result and whole ResponseError on read/Close/context/custom cause/source failures; closes response body once/no resend. Native/generated Create+Upload and legacy Upload/optional wait compatibility remain unchanged; deprecated Python same mutable created Resource/session/cache semantics remain partial.",
+          "tests": [
+            "image/upload_image_core_test.go:TestImageUploadCoreAcceptedPhaseFailures",
+            "image/upload_image_core_test.go:TestImageUploadCoreNativePolicyAndNoReplay",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsPartialEvidence",
+            "image/upload_image_contracts_test.go:TestImageUploadContractsNativeMetadataPolicy",
+            "internal/cmd/sdkgen/glance_image_upload_test.go:TestGlanceImageUploadPreservesNativeAndRegistry"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/upload-image.md"
+      ],
+      "differences": [
+        "Pinned deprecated Proxy.upload_image requires explicit truthy disk/container formats and returns the same mutable creation Resource after Image.upload; Go defaults qcow2/bare/private, requires valid Name/Reader, and returns owned actual phase evidence with precise ImageInfo.",
+        "Python Image.upload may seek a seekable source to infer total length and restore its cursor; Go performs no length inference/Seek/Close and uses explicit nil/zero/nonnegative size only on binary PUT.",
+        "Python Resource descriptors, aliases/type conversions, Adapter session/header translation and cached mutable model semantics differ from exact raw JSON and independent snapshots. Full parity remains unresolved.",
+        "Task/Swift/checksum/import/wait/failed-upload cleanup belong separate create_image private helpers, not this deprecated proxy declaration. No synthetic operation or native/resource inventory additions."
+      ],
+      "remaining": [
+        "Pinned Python returns the same mutable created Image Resource with descriptor aliases/coercion, cached body/header state and Adapter session translation. The owned Go phase evidence and atomic ImageInfo do not reproduce that broader Resource/session contract.",
+        "Python Image.upload can infer total seekable-file length, restore its position and accepts Python int-subclass size semantics. Go deliberately borrows current-position Read only and requires explicit nil/zero/nonnegative int64 Size; automatic inference and Python conversion parity remain unresolved.",
+        "Pinned deprecated proxy requires explicit truthy formats and uses native Python Adapter/Resource error, retry and HTTP acceptance behavior. Go chooses qcow2/bare/private defaults, strict Name/Reader/raw JSON validation and strict actual201/204 with one binary attempt; those intentional interface/policy differences remain partial."
+      ]
     }
   ]
 }
