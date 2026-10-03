@@ -80,6 +80,7 @@ var specializedCollections = map[string]collectionRecord{
 var sdkOwnedCollections = []collectionRecord{
 	{Package: "gophercloudsdk/image/v2/metadefnamespaces", Source: "sdk_owned", Model: "Namespace", Kind: "named_resource", Delete: true},
 	{Package: "gophercloudsdk/image/v2/metadefobjects", Source: "sdk_owned", Model: "Object", Kind: "scoped_named_resource", Delete: true, Scope: "InNamespace", Parent: "gophercloudsdk/image/v2/metadefnamespaces"},
+	{Package: "gophercloudsdk/image/v2/metadefproperties", Source: "sdk_owned", Model: "Property", Kind: "scoped_definition", Delete: true, Scope: "InNamespace", Parent: "gophercloudsdk/image/v2/metadefnamespaces"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "Store", Kind: "list_only"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "ImportInfo", Kind: "service_info"},
 	{Package: "gophercloudsdk/image/v2/serviceinfo", Source: "sdk_owned", Model: "UsageInfo", Kind: "service_info"},
