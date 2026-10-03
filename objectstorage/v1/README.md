@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Objects.DeleteObject`는 concrete `DeleteObjectOpts`와 함수 옵션으로 기본 HEAD 확인 뒤 같은 object를 삭제합니다. known SLO flag는 HEAD를 생략하고 true는 `multipart-manifest=delete`를 요청합니다. `Discovery`·`Deletion`은 각 phase의 실제 응답이고 기본 missing 허용은 clean404만 `IgnoredMissing`으로 표시합니다. 일반 DELETE의 202/204와 SLO200 bulk report·부분 실패·알 수 없는 cleanup 완료 상태는 [Python/Go 삭제 비교](objects/delete.md)를 참고합니다.
+
 `Objects.GetObject`는 단일 GET의 binary bytes와 metadata·원문 헤더를 반환합니다. `Objects.DownloadObject`는 borrowed `io.Writer`에 전송하고 실제 byte count를 보존하며 `Objects.StreamObject`는 호출자가 닫을 수 있는 `io.ReadCloser`를 제공합니다. 공유 concrete `ObjectReadOpts`와 함수 옵션으로 conditional headers·range·query를 설정하고 200/206/304 응답을 구별합니다. [객체 조회·다운로드·스트리밍의 Python/Go 비교](objects/read.md)는 부분 전송과 Close 오류·소유권을 설명합니다.
 
 `Objects.GetMetadata`는 literal container/object 이름과 HEAD200으로 metadata와 원문 응답을 제공합니다. `Objects.SetMetadata`와 `Objects.DeleteMetadata`는 `symlink=get` HEAD200 뒤 변경분을 병합한 POST202를 보내며 `MetadataChangeResult`에 조회와 변경 응답을 구분합니다. [객체 metadata의 Python/Go 사용법](objects/README.md)은 시스템 header 보존, 링크 제약과 동시 변경의 한계를 설명합니다.
