@@ -166,3 +166,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.API.ServiceInfo.GetUsageInfo(ctx, options...)`는 인증된 프로젝트의 limit·사용량을 조회합니다. [사용량 사용법](v2/serviceinfo/usage.md)은 nullable int64·unknown resource·빈 응답과 concrete header 옵션을 설명합니다.
 
 `service.AddTag/RemoveTag(ctx, ref, tag, options...)`는 태그 한 개를 변경하며 `DeactivateImage/ReactivateImage(ctx, ref, options...)`는 고정 action을 제출합니다. [태그·상태 변경 사용법](mutations.md)은 공통 concrete header 옵션·literal escaping·미존재 오류·actual204 acknowledgement와 Python cache 차이를 설명합니다.
+
+`service.AddImageLocation(ctx, ref, url, options...)`는 외부 저장소 URL과 선택 validation hash를 제출하고 실제202 응답을 보존합니다. `GetImageLocations(ctx, ref, options...)`는 유한 배열을 한 번 조회합니다. [Location 사용법](locations.md)에 서버의 비동기 검증·concrete 옵션·Python Resource와의 차이를 설명합니다.

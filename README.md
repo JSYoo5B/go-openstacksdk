@@ -334,3 +334,5 @@ Glance 저장소 목록·상세 목록과 import 정보는 `conn.ImageV2(ctx).Se
 Glance 인증 프로젝트의 limit·사용량은 `ServiceInfo.GetUsageInfo(ctx)`로 조회합니다. [사용량 조회](image/v2/serviceinfo/usage.md)는 동적 resource·정확한 int64·생략/null·빈 결과와 Python SDK의 지원 경계를 설명합니다.
 
 Glance의 단일 태그 추가·삭제와 이미지 비활성화·재활성화는 상위 `image.Service.AddTag/RemoveTag/DeactivateImage/ReactivateImage`로 사용합니다. [태그·상태 변경 비교](image/mutations.md)는 concrete header 옵션·ID/Name 해석·실제204 접수와 부분 응답을 설명합니다.
+
+Glance location 추가·조회는 상위 `image.Service.AddImageLocation/GetImageLocations`로 사용합니다. [Location의 Python/Go 비교](image/locations.md)는 기본 validation_data·concrete hash/header 옵션·실제202 접수와 GET200 배열을 설명합니다.

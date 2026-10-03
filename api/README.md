@@ -67,3 +67,5 @@ Glance `ServiceInfo`는 SDK 소유 `Store` 목록과 `ImportInfo` singleton을 [
 Glance의 [사용량 singleton](../image/v2/serviceinfo/usage.md)은 SDK 소유 `UsageInfo` capability로 기록합니다. `GetUsageInfo(ctx)`는 인증된 프로젝트의 `info/usage`를 한 번 조회하며 pinned Python/native 연산이나 parity 판정을 합성하지 않습니다.
 
 Glance [단일 태그·활성화 action](../image/mutations.md)은 상위 image.Service의 전용 메서드입니다. 실제 body 없는 PUT/DELETE/POST와 strict204·미존재 오류 정책을 제공하며 기존 native metadata Update·전체 tag set 교체와 resource inventory를 유지합니다.
+
+Glance [전용 location 추가·조회](../image/locations.md)는 상위 image.Service에서 고정 POST202와 body/query 없는 GET200 배열을 제공합니다. 기존 native metadata location set PATCH·resource inventory를 유지하며 location ID나 목록 continuation을 합성하지 않습니다.
