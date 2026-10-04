@@ -31606,6 +31606,368 @@
         "Source deletion default wait=false and empty input false are preserved with nullable bool Deleted. Mutation404 stays terminal; only a clean original concrete polling404 completes. Extra body-fault observation compensates for native ignored rejection Read/Close errors without bypassing native retry."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/list_volume_backups",
+      "source_fingerprint": "0dc210c73e16f0c620cb0de65632566b2054a9ebd4cea2b22a349a9e760bda3b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.ListVolumeBackups",
+        "gophercloudsdk/blockstorage.ListVolumeBackups",
+        "gophercloudsdk/blockstorage.PrepareVolumeBackupListOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListFilters",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListDetailed",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListPagination",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListMaxItems",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListMicroversion",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListHeaders",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListExpression",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListAllowUnknownParams",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListConflictingAttrs",
+        "gophercloudsdk/blockstorage.WithVolumeBackupListLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned list policy preserves omission and source defaults detailed=true and paginated=true. Default detailed GET/backups/detail and basic GET/backups return complete owned lists. Preparation is pure; original callbacks run once from a captured slice and each snapshot owns raw filters, headers, pointer controls and location. Connection validates reached binding policy before selecting only cached Cinder v3 without readiness I/O.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListDefaultDetailedAndBasicKeepCanonicalEmptyEOF",
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadOriginalOptionsOwnEveryPreparedValueAndSourceHeaders",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupOriginalOptionsRunOnceBeforeCachedCinderForEveryEntry",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJoinedCauses",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupListBindingValidationPrecedesServiceSelection",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotReplacePreparedPolicy",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListPolicyOwnsQueryLocalHeadersAndResourceSelectionAcrossReuse",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListFalseyAndInvalidRawPoliciesHaveAtomicResourceSpecificCompilation"
+          ]
+        },
+        {
+          "behavior": "Logical backups expose exactly nullable24 descriptors, distinct from typed native backups or Snapshot. force/is_incremental/has_dependent_backups use ordinary Python JSON-domain bool, links wraps a nonlist singleton, metadata uses nullable dict and size/object_count apply eager nullable integer conversion. Known conversions precede local exclusion; unknown raw fields remain only in physical evidence. Parsed duplicate insertion/alias order is preserved.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListOwnsAllTwentyFourFieldsAndRawIndependentProofs",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadInvalidIntegersAreEagerBeforeLocalExclusion",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadCollectionEnvelopeAndListConstructorControlsStayResourceSpecific",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelHasTwentyFourNullableFieldsAndOwnDescriptorOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelOrdinaryBooleanDescriptorsAreNullableAndDoNotUseBoolStr",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLinksWrapSingleValuesAndMetadataUsesOrdinaryNullableDict",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelBothIntegerDescriptorsConvertBeforeAnySelection",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelProjectAliasesFollowParsedDuplicateFirstInsertionOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelListConstructorControlsDoNotBecomeMemberResponseControls",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListCallerPredicatesAreNeverCoercedLikeBackupResponseDescriptors"
+          ]
+        },
+        {
+          "behavior": "Current/explicit scope is owned after originals and before the Connection getter, then retained across live-auth pages. Backup project wire alias and literal availability_zone recompute location; current/falsey projects retain configured names, foreign projects clear them. Caller zone/wire location cannot replace it. Physical descriptor failures and caller-local invalid location remain distinct and atomic.",
+          "tests": [
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLocationIsCapturedAfterOriginalsBeforeGetterAndKeepsRawZoneAcrossLiveAuthPages",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupExplicitLocationOwnsEveryFieldAndUsesBackupProjectAndZone",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLocationUsesBothRowProjectAndLiteralAvailabilityZone",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelPhysicalAndLocalLocationFailuresAreAtomicAndOutputIsOwned"
+          ]
+        },
+        {
+          "behavior": "List separates actual server query mappings from ordered local Body predicates. Raw all_projects is literal all_tenants data and canonical presence beats its wire alias even falsey; late conflicting attrs bypass earlier Proxy bindings. Typed controls override the final applicable raw controls while preserving stage collisions. Unknown, Snapshot-only, native-only and creation-only names are ignored; caller predicates are uncoerced and use nested Python bool/numeric equality.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadAllProjectsIsLiteralWhileSnapshotProxyBindsTruthiness",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadLocalAttributesDifferFromIgnoredSnapshotAndCreationNames",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadLocalFilterOrderIsLazyAfterEagerBoolNormalization",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListAllProjectsPreservesRawValuesInsteadOfSnapshotProxyTruthiness",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListCanonicalAllProjectsPresenceWinsWireAliasEvenWhenFalsey",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListLateAliasOverlayDoesNotPassThroughEitherProxyAgain",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListQueryUsesItsOwnBodyPredicatesAndPreservesServerOnlyParameters",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListCallerPredicatesAreNeverCoercedLikeBackupResponseDescriptors",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListControlsKeepBindingStageAndTypedOverridesIndependentOfResourceModel",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListFalseyAndInvalidRawPoliciesHaveAtomicResourceSpecificCompilation"
+          ]
+        },
+        {
+          "behavior": "Raw canonical backups pages preserve actual rows, duplicate identities and plural backups_links continuation. Empty canonical collection ends before unused links. Source body-link precedence/falsey fallback, advertised query merge and repeated/null Requests-domain values are preserved within safe fixed-origin/path URLs; source HTTP uri/url mismatch is explicitly repaired. A truthy initial limit may follow the last consumed arbitrary raw ID even from an excluded short-page row into a second empty EOF.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadShortLimitUsesExcludedArbitraryMarkerThenEmptyEOF",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadBackupsLinksMaterializeDistinctRowsAcrossPages"
+          ]
+        },
+        {
+          "behavior": "Maximum counts consumed raw rows including local exclusions; source zero is unlimited and negative maximum still fetches/parses the first canonical response before stopping. Unconsumed row constructors remain lazy. At an exact page-end maximum, source continuation and another canonical HTTP response may occur before the next raw-count check. Detailed/pagination/max/header/microversion policies remain per call and cannot alter cached source or Snapshot schema.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadMaximumCountsExcludedRowsAndDefersUnusedConstruction",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadMaximumAtPageEndStillFetchesAndDecodesNextResponse",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupListControlsStayPerCallAndDoNotLeakSnapshotQueryOrModel",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListControlsKeepBindingStageAndTypedOverridesIndependentOfResourceModel",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListPolicyOwnsQueryLocalHeadersAndResourceSelectionAcrossReuse"
+          ]
+        },
+        {
+          "behavior": "Explicit list expression evaluates the completed normalized backup array, including empty syntax errors, and returns arbitrary owned JSON without fabricated raw-row association. Raw falsey expression controls remain omitted. This whole-value behavior deliberately repairs the source expression-on-generator defect, while ordinary successful empty selection exposes an owned nonnil empty Backups slice.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListExpressionUsesCompletedBackupValueAndNoRowAssociation",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListFalseyAndInvalidRawPoliciesHaveAtomicResourceSpecificCompilation",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListDefaultDetailedAndBasicKeepCanonicalEmptyEOF"
+          ]
+        },
+        {
+          "behavior": "Logical Value/Backups publish only after requested completion. Admitted Pages own original100..399 body/header/status, independent from row values/errors. Accepted Read/Close/source/context faults retain current proof and joined cancellation causes; later rejected/unreceived phases retain earlier pages without borrowing their response. Fixed bodyless requests keep live native reauth/retry and captured headers; concurrent Snapshot/Backup calls cannot change either closed schema.",
+          "tests": [
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadAcceptedReadCloseCancellationRetainsCurrentPhysicalStage",
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadNativeReauthRetryKeepLiveTokenAndOwnedSourceOnce",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupAcceptedIOJoinsReadCloseCancellationAndSourceDriftWithCurrentProof",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMemberEvidence",
+            "blockstorage/volume_backup_read_isolation_test.go:TestVolumeBackupReadConcurrentSnapshotAndBackupCallsKeepSchemaPolicyIsolated",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListPolicyOwnsQueryLocalHeadersAndResourceSelectionAcrossReuse"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backups.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin cloud helper is mapped with selected Cinder v3 and Gophercloud v2.15.0. Independent Proxy, native typed leaf, v2 Backup, generic Resource/session/adapter and backup mutation/export declarations retain separate reviews; the full SDK remains incomplete.",
+        "Python mutable kwargs/runtime objects map to owned Go request strings, nullable concrete With/Prepare policy, finite UTF8 JSON, raw-resource evidence and a separate normalized nullable24-field view. Go does not reproduce Resource identity, stale dict caches, session memoization, deprecated warning emission or arbitrary Python object coercion.",
+        "Parsed JSON dictionary insertion order and duplicate-key first-position/last-value alias traversal are preserved. Exact decimal truthiness/equality and arbitrary integers do not reproduce Python float rounding/underflow or configurable CPython integer digit limits; the Go Unicode16 decimal table is an explicit version boundary.",
+        "The selected Cinder microversion is retained, including explicit list overrides. Source Backup max3.64 limits absent-default negotiation only; Go performs no automatic negotiation, cap, upgrade or v2 selection. Selected and operation-owned headers are captured and validated while provider auth/reauth/retry tokens remain live.",
+        "Captured current or explicit location is recomputed from the actual backup project alias and literal availability_zone. Raw location and caller zone cannot replace the owned scope. This connected cloud-helper model is distinct from standalone/disconnected Resource constructor behavior.",
+        "Go validates consumed UTF8 JSON and safe literal member/continuation URLs, same origin/escaped path and canonical full-URL cycles. Source relative /v joining, query-only physical duplication and same-marker cycle rules are bounded by those deliberate safety rules. Robust HTTP Link URL support repairs the source uri/url mismatch.",
+        "Direct source snapshots precede original callbacks; Connection originals run once before only cached Cinder v3 selection, with location captured after originals before the getter. Fixed bodyless requests, sticky source/cause guards, independently owned phase proof and atomic logical publication are Go extensions; caller-configured native retry remains live and the SDK adds no orchestration replay.",
+        "Accepted response Read/Close/context/source faults retain their own physical evidence. Ordinary member native400/403/404 has a scoped body-fault observer so only fault-free original concrete rejections permit lookup fallback, without admitting those statuses or fabricating Observed. Rejected list responses and other rejected member statuses retain Gophercloud v2.15.0 discarded unexpected-body Read/Close behavior; this is not a universal rejection-I/O observer.",
+        "Local descriptor/predicate/selection errors keep completed independently admitted proof and do not borrow a successful response as a new local failure. Source probes use explicit AST/session/response/location stand-ins and are source-only, not authenticated Python/OpenStack runtime evidence.",
+        "Backup Proxy has no named all_projects argument: raw all_projects is a literal Resource alias to all_tenants. Snapshot named-argument truthiness/drop is intentionally isolated. Server-query versus local descriptor predicates, late conflicting-attribute remapping and inherited pagination/max/header/microversion controls have explicit owned Go equivalents; unsupported unknown keys remain ignored.",
+        "Explicit list expression evaluates the completed normalized list, including empty-expression syntax failure. Raw falsey jmespath_filters skips evaluation. This repairs the source generator passed to selected Python JMESPath reference, whose projection can return None before iteration; it is a whole-value Go mapping, not a claim to reproduce that generator defect."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/search_volume_backups",
+      "source_fingerprint": "3ced0aea350d602ddccc934921eec1edb1e8f9b268b3297db734903d44d89eec",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.SearchVolumeBackups",
+        "gophercloudsdk/blockstorage.SearchVolumeBackups",
+        "gophercloudsdk/blockstorage.PrepareVolumeBackupSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchFilters",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchExpression",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Search always completes a queryless default-detailed backup list and every reached nullable descriptor before applying local identifier/filter selection. A matching first row cannot hide a later excluded malformed descriptor or later page failure; no partial Value/Backups is published. Search does not send a name hint or caller filter as list query.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchDoesNotHideExcludedLaterDescriptorFailure",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadInvalidIntegersAreEagerBeforeLocalExclusion"
+          ]
+        },
+        {
+          "behavior": "Within finite JSON, optional NameOrID uses source per-row exact ID/name OR case-sensitive fnmatch over Python-style value stringification. It preserves source order, duplicate match occurrences, Unicode/rune and dot-all glob/class behavior. Empty identifier skips that stage rather than becoming an ordinary member lookup.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterIdentifierPreservesPerRowExactGlobMatchesDuplicatesAndSourceOrder",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterGlobUsesCPythonRuneDotAllClassesAndLiteralBackslashes",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterIdentifiersUsePythonJSONDomainStringAndContainerRepresentation",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterMissingAndNullIdentifiersDifferFromEmptyStringsAndRemainCaseSensitive"
+          ]
+        },
+        {
+          "behavior": "Mapping filters evaluate normalized backups as ordered recursive subsets. Reached unknown keys and invalid filter shape are local errors; preceding identifier or predicate mismatch can leave later keys unused. Actual truthiness precedes empty-object matching, nested arrays keep exact shape and bool/number equality follows Python within the precise JSON numeric domain.",
+          "tests": [
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadLocalAttributesDifferFromIgnoredSnapshotAndCreationNames",
+            "internal/cloudsnapshot/backup_query_test.go:TestBackupListCallerPredicatesAreNeverCoercedLikeBackupResponseDescriptors",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterOrderedMappingConsumesOnlyReachedKeysAndKeepsDuplicateFirstPosition",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNestedEmptyObjectsUseActualTruthinessBeforeShapeOrMissingKeys",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterLeafEqualityKeepsExactArrayShapeAndPythonBooleanNumberPrecision",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNonmappingFilterShapeIsLazyAfterIdentifierAndActualTruthiness",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterInvalidJSONIsLocalAtomicAndStillValidatedAfterEmptyIdentifierSelection"
+          ]
+        },
+        {
+          "behavior": "String/explicit expression filters evaluate the complete selected normalized JSON through the full owned JMESPath engine and may return any JSON value. Projection has nil raw Backups association; ordinary selection retains its real rows. Expression/selection errors are local, preserve completed Pages, and do not invent an HTTP response or partial output.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetArbitraryExpressionRetainsNoBackupAssociation",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionBridgeReturnsArbitraryOwnedJSONWithoutInventedRowIndices",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionsStillParseEmptySelectionAndKeepRuntimeFailuresAtomic"
+          ]
+        },
+        {
+          "behavior": "Search consumes the same closed Backup nullable24 descriptor policy: ordinary Boolean values, singleton links, nullable dict/integers, duplicate alias order and project plus literal zone location. Unknown raw fields stay in owned RawResource proof; mutable descriptor globals and concurrent Snapshot calls cannot leak Snapshot BoolStr, query all-projects or zoneless policy into Backup.",
+          "tests": [
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelHasTwentyFourNullableFieldsAndOwnDescriptorOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelOrdinaryBooleanDescriptorsAreNullableAndDoNotUseBoolStr",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLinksWrapSingleValuesAndMetadataUsesOrdinaryNullableDict",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelBothIntegerDescriptorsConvertBeforeAnySelection",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelProjectAliasesFollowParsedDuplicateFirstInsertionOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLocationUsesBothRowProjectAndLiteralAvailabilityZone",
+            "blockstorage/volume_backup_read_isolation_test.go:TestVolumeBackupReadConcurrentSnapshotAndBackupCallsKeepSchemaPolicyIsolated",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListOwnsAllTwentyFourFieldsAndRawIndependentProofs"
+          ]
+        },
+        {
+          "behavior": "Concrete With/Prepare search options own raw filters/expression/location across reusable factories and callbacks. Direct service capture precedes originals; Connection originals run once before only cached Cinder v3 selection, then explicit/current location is captured before getter/auth changes. Preflight/callback/getter errors retain operation and custom context causes with no invented physical stage.",
+          "tests": [
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupOriginalOptionsRunOnceBeforeCachedCinderForEveryEntry",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLocationIsCapturedAfterOriginalsBeforeGetterAndKeepsRawZoneAcrossLiveAuthPages",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupExplicitLocationOwnsEveryFieldAndUsesBackupProjectAndZone",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJoinedCauses",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotReplacePreparedPolicy",
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadOriginalOptionsOwnEveryPreparedValueAndSourceHeaders"
+          ]
+        },
+        {
+          "behavior": "Search Value/Backups is atomic after completion; admitted Pages and raw rows own independent bytes/header/status. Accepted Read/Close/cancel/source failures preserve their current stage and all joined causes, while a later rejected or blocked phase keeps only actual earlier pages. Physical errors are not borrowed from a suppressed member or an earlier successful response.",
+          "tests": [
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadAcceptedReadCloseCancellationRetainsCurrentPhysicalStage",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupAcceptedIOJoinsReadCloseCancellationAndSourceDriftWithCurrentProof",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMemberEvidence",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFallbackLaterNativeFailureNeverBorrowsSuppressedMemberProof"
+          ]
+        },
+        {
+          "behavior": "Original source HTTP100..399 policy, fixed GET URL/query/body/decoder ownership and live native authentication/retry remain in force. Per-call or captured microversion is preserved without automatic max3.64 negotiation/cap. Safe continuation and source guards are shared closed reader rules; cached-client header/microversion state remains unchanged by prior Backup list controls.",
+          "tests": [
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadNativeReauthRetryKeepLiveTokenAndOwnedSourceOnce",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupListControlsStayPerCallAndDoNotLeakSnapshotQueryOrModel",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMemberEvidence",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadSearchCompletesQuerylessPagesBeforeBackupExpression"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backups.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin cloud helper is mapped with selected Cinder v3 and Gophercloud v2.15.0. Independent Proxy, native typed leaf, v2 Backup, generic Resource/session/adapter and backup mutation/export declarations retain separate reviews; the full SDK remains incomplete.",
+        "Python mutable kwargs/runtime objects map to owned Go request strings, nullable concrete With/Prepare policy, finite UTF8 JSON, raw-resource evidence and a separate normalized nullable24-field view. Go does not reproduce Resource identity, stale dict caches, session memoization, deprecated warning emission or arbitrary Python object coercion.",
+        "Parsed JSON dictionary insertion order and duplicate-key first-position/last-value alias traversal are preserved. Exact decimal truthiness/equality and arbitrary integers do not reproduce Python float rounding/underflow or configurable CPython integer digit limits; the Go Unicode16 decimal table is an explicit version boundary.",
+        "The selected Cinder microversion is retained, including explicit list overrides. Source Backup max3.64 limits absent-default negotiation only; Go performs no automatic negotiation, cap, upgrade or v2 selection. Selected and operation-owned headers are captured and validated while provider auth/reauth/retry tokens remain live.",
+        "Captured current or explicit location is recomputed from the actual backup project alias and literal availability_zone. Raw location and caller zone cannot replace the owned scope. This connected cloud-helper model is distinct from standalone/disconnected Resource constructor behavior.",
+        "Go validates consumed UTF8 JSON and safe literal member/continuation URLs, same origin/escaped path and canonical full-URL cycles. Source relative /v joining, query-only physical duplication and same-marker cycle rules are bounded by those deliberate safety rules. Robust HTTP Link URL support repairs the source uri/url mismatch.",
+        "Direct source snapshots precede original callbacks; Connection originals run once before only cached Cinder v3 selection, with location captured after originals before the getter. Fixed bodyless requests, sticky source/cause guards, independently owned phase proof and atomic logical publication are Go extensions; caller-configured native retry remains live and the SDK adds no orchestration replay.",
+        "Accepted response Read/Close/context/source faults retain their own physical evidence. Ordinary member native400/403/404 has a scoped body-fault observer so only fault-free original concrete rejections permit lookup fallback, without admitting those statuses or fabricating Observed. Rejected list responses and other rejected member statuses retain Gophercloud v2.15.0 discarded unexpected-body Read/Close behavior; this is not a universal rejection-I/O observer.",
+        "Local descriptor/predicate/selection errors keep completed independently admitted proof and do not borrow a successful response as a new local failure. Source probes use explicit AST/session/response/location stand-ins and are source-only, not authenticated Python/OpenStack runtime evidence.",
+        "Search completes a queryless detailed list before identifier and recursive mapping/expression filters. Finite JSON filter values replace arbitrary Python filters; JMESPath output is returned as owned arbitrary JSON with no invented association to physical backup rows. Object key traversal is deterministic where JMESPath objects are unordered.",
+        "Source identifier stringification/fnmatch and ordered mapping lazy errors are preserved within the selected JSON domain. List server-query kwargs, inherited list controls and the source generator-expression defect are not silently reapplied to cloud Search."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_backup",
+      "source_fingerprint": "a61b58fceee5c98e2ef2a6ac2bd80474ab5cb09515faf0207f432e5153f9c18c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.GetVolumeBackup",
+        "gophercloudsdk/blockstorage.GetVolumeBackup",
+        "gophercloudsdk/blockstorage.PrepareVolumeBackupSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchFilters",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchExpression",
+        "gophercloudsdk/blockstorage.WithVolumeBackupSearchLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted or JSONnull filter uses ordinary exact member-first find. A physically absent member ID seeds only normalized logical id with RequestedID/SeededID evidence; raw Backup fields stay actual. Explicit null, false, zero, empty/container or a different returned ID is preserved passively. An actual empty object Resource remains present, distinct from completed lookup absence, which returns nil Value and Backup.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetKeepsActualIDsAndSeparatesSeedFromPhysicalBody",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetAllowsPartialFlatMalformedAndSub400MemberResponses",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelMemberSeedsOnlyAbsentInheritedIDAndKeepsPhysicalBytes",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupMemberSeedsOnlyLogicalMissingIDAndCleanFallbackKeepsListProof",
+            "blockstorage/volume_backup_read_isolation_test.go:TestVolumeBackupReadSuccessfulAbsenceIsDistinctFromPresentEmptyMember"
+          ]
+        },
+        {
+          "behavior": "Only fault-free original direct concrete native400/403/404 permits detailed name-hinted fallback. Fallback treats ID/name literally, including wildcard or unsafe-member names, and preserves actual response identity. A second exact match raises ambiguity before unused bad tail/link construction; a unique result must exhaust all pages, and later errors never publish it or borrow suppressed member proof.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindCleanNativeFallbackIsExactAndUsesActualResponseID",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindUnsafeLiteralAndWildcardNamesNeverBecomeSearchPatterns",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindAmbiguityPrecedesUnusedBadTailAndUniqueMustExhaust",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFallbackLaterNativeFailureNeverBorrowsSuppressedMemberProof",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupMemberSeedsOnlyLogicalMissingIDAndCleanFallbackKeepsListProof",
+            "blockstorage/cinder_member_rejection_test.go:TestCinderMemberCleanCompatibleRejectionsRetainFallbackAndByIDContrast"
+          ]
+        },
+        {
+          "behavior": "Every explicitly nonnull filter, including false, zero, empty string/object/array, follows complete queryless Search plus first-selection behavior; only omitted/null follows ordinary find. This dispatch preserves full-list errors and source deprecation path semantics without warning emission, shortcut IDs, glob ordinary names or fabricated member observation.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetEveryNonNullFalseyFilterUsesFullSearchWhileNullFinds",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupSelectionErrorRetainsBackupIdentityWithoutChangingSnapshotErrorShape"
+          ]
+        },
+        {
+          "behavior": "Arbitrary expression output uses source JSON-domain truthiness, length and integer-index first-selection without retesting a selected falsey value. Multiple output produces distinct VolumeBackupSelectionError carrying NameOrID and Length; projection never gains invented raw Backup association, and the existing Snapshot selection-error shape is unchanged.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetArbitraryExpressionRetainsNoBackupAssociation",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupSelectionErrorRetainsBackupIdentityWithoutChangingSnapshotErrorShape",
+            "internal/cloudfilter/results_test.go:TestCloudFilterFirstFollowsTruthyLengthAndIntegerIndexWithoutRetestingSelectedFalsyValue",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionBridgeReturnsArbitraryOwnedJSONWithoutInventedRowIndices"
+          ]
+        },
+        {
+          "behavior": "Original admitted100..399 member responses allow canonical backup object, flat object and validUTF8 empty/malformed body tolerance. Parsed wrong shape/null envelope, nonobject valid JSON or invalidUTF8 is terminal with the actual current response. List-constructor controls are not applied to member response fields; absent-ID seeding stays separate from physical proof.",
+          "tests": [
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetAllowsPartialFlatMalformedAndSub400MemberResponses",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadGetValidShapeAndUTF8FailuresRemainTerminalPhysicalErrors",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelListConstructorControlsDoNotBecomeMemberResponseControls",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelPhysicalAndLocalLocationFailuresAreAtomicAndOutputIsOwned",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelMemberSeedsOnlyAbsentInheritedIDAndKeepsPhysicalBytes"
+          ]
+        },
+        {
+          "behavior": "Selected logical member/fallback values use the same eager nullable24 Backup descriptors, ordinary Boolean/list/int/dict conversions and parsed alias order as List/Search. Captured project scope and literal availability_zone determine location independently of caller/raw location. Physical raw resource, normalized value and admitted response proof own distinct storage.",
+          "tests": [
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelHasTwentyFourNullableFieldsAndOwnDescriptorOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelOrdinaryBooleanDescriptorsAreNullableAndDoNotUseBoolStr",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLinksWrapSingleValuesAndMetadataUsesOrdinaryNullableDict",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelBothIntegerDescriptorsConvertBeforeAnySelection",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelProjectAliasesFollowParsedDuplicateFirstInsertionOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLocationUsesBothRowProjectAndLiteralAvailabilityZone",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupExplicitLocationOwnsEveryFieldAndUsesBackupProjectAndZone",
+            "blockstorage/volume_backup_read_contract_test.go:TestVolumeBackupReadListOwnsAllTwentyFourFieldsAndRawIndependentProofs"
+          ]
+        },
+        {
+          "behavior": "Direct source facts and ordinary headers are captured before original options; owned slices/retained pointers cannot replace prepared policy. Connection originals run once before cached Cinder v3 and captured location before the getter. Invalid/context/callback/getter and reached local location failures retain operation/custom causes; accepted member I/O keeps current proof while failed selection remains atomic.",
+          "tests": [
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadOriginalOptionsOwnEveryPreparedValueAndSourceHeaders",
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadAcceptedReadCloseCancellationRetainsCurrentPhysicalStage",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupOriginalOptionsRunOnceBeforeCachedCinderForEveryEntry",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupPreflightAndGetterFailuresKeepBackupOperationAndJoinedCauses",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupCapturedOptionSliceAndRetainedPointersCannotReplacePreparedPolicy",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupAcceptedIOJoinsReadCloseCancellationAndSourceDriftWithCurrentProof",
+            "connection_volume_backups_test.go:TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMemberEvidence"
+          ]
+        },
+        {
+          "behavior": "Fixed original bodyless member GET, native live reauth/caller-configured retry and original status policy remain owned. Expanded native OkCodes400/403/404 or callback/transport wrappers are terminal and never compatible absence. The scoped native400/403/404 body observer preserves rejected Read/Close faults and native causes without fabricated admitted Observed/Pages; clean native retries may still continue under guarded source/auth policy.",
+          "tests": [
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadNativeReauthRetryKeepLiveTokenAndOwnedSourceOnce",
+            "blockstorage/backup_read_transport_test.go:TestVolumeBackupReadNativeExpandedFallbackStatusIsTerminalOriginalPolicyRejection",
+            "blockstorage/cinder_member_rejection_test.go:TestCinderMemberCompatibleRejectionsKeepPureReadAndCloseFaultsTerminal",
+            "blockstorage/cinder_member_rejection_test.go:TestCinderMemberNativeRetryCannotSwallowRejectedIOOrReplaceOriginalStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backups.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin cloud helper is mapped with selected Cinder v3 and Gophercloud v2.15.0. Independent Proxy, native typed leaf, v2 Backup, generic Resource/session/adapter and backup mutation/export declarations retain separate reviews; the full SDK remains incomplete.",
+        "Python mutable kwargs/runtime objects map to owned Go request strings, nullable concrete With/Prepare policy, finite UTF8 JSON, raw-resource evidence and a separate normalized nullable24-field view. Go does not reproduce Resource identity, stale dict caches, session memoization, deprecated warning emission or arbitrary Python object coercion.",
+        "Parsed JSON dictionary insertion order and duplicate-key first-position/last-value alias traversal are preserved. Exact decimal truthiness/equality and arbitrary integers do not reproduce Python float rounding/underflow or configurable CPython integer digit limits; the Go Unicode16 decimal table is an explicit version boundary.",
+        "The selected Cinder microversion is retained, including explicit list overrides. Source Backup max3.64 limits absent-default negotiation only; Go performs no automatic negotiation, cap, upgrade or v2 selection. Selected and operation-owned headers are captured and validated while provider auth/reauth/retry tokens remain live.",
+        "Captured current or explicit location is recomputed from the actual backup project alias and literal availability_zone. Raw location and caller zone cannot replace the owned scope. This connected cloud-helper model is distinct from standalone/disconnected Resource constructor behavior.",
+        "Go validates consumed UTF8 JSON and safe literal member/continuation URLs, same origin/escaped path and canonical full-URL cycles. Source relative /v joining, query-only physical duplication and same-marker cycle rules are bounded by those deliberate safety rules. Robust HTTP Link URL support repairs the source uri/url mismatch.",
+        "Direct source snapshots precede original callbacks; Connection originals run once before only cached Cinder v3 selection, with location captured after originals before the getter. Fixed bodyless requests, sticky source/cause guards, independently owned phase proof and atomic logical publication are Go extensions; caller-configured native retry remains live and the SDK adds no orchestration replay.",
+        "Accepted response Read/Close/context/source faults retain their own physical evidence. Ordinary member native400/403/404 has a scoped body-fault observer so only fault-free original concrete rejections permit lookup fallback, without admitting those statuses or fabricating Observed. Rejected list responses and other rejected member statuses retain Gophercloud v2.15.0 discarded unexpected-body Read/Close behavior; this is not a universal rejection-I/O observer.",
+        "Local descriptor/predicate/selection errors keep completed independently admitted proof and do not borrow a successful response as a new local failure. Source probes use explicit AST/session/response/location stand-ins and are source-only, not authenticated Python/OpenStack runtime evidence.",
+        "Omitted or JSONnull filter uses exact ordinary find, with safe member-first lookup and a literal name-hinted fallback. Every nonnull filter, even falsey JSON, follows full Search plus source truthy/length/index selection; arbitrary expression output is not invented into a Resource list or raw-row association.",
+        "Logical member lookup seeds only a physically absent ID; RequestedID and SeededID make that state explicit while raw Backup evidence remains actual. Explicit null, false, zero, empty/container or different returned IDs remain passive response values; Go does not require equality with the request or silently manufacture a physical ID."
+      ],
+      "remaining": []
     }
   ]
 }
