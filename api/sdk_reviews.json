@@ -28921,6 +28921,299 @@
         "This go_mapping covers only the direct pinned get_volumes declaration under the explicit documented Go policies. Generic RawResource and jsonfilter additions are library-owned support extensions rather than blanket promotion of unrelated Python Resource/session/cache/native/Proxy or whole-SDK capabilities."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/search_volumes",
+      "source_fingerprint": "3cd734715de5116131678bdfe5fe9ee8aa07032efa0168ab25b6f205202b83b8",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.SearchVolumes",
+        "gophercloudsdk/blockstorage.SearchVolumes",
+        "gophercloudsdk/blockstorage.PrepareVolumeSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeSearchFilters",
+        "gophercloudsdk/blockstorage.WithVolumeSearchExpression",
+        "gophercloudsdk/blockstorage.WithVolumeSearchLocation",
+        "gophercloudsdk.Connection.CurrentLocation",
+        "gophercloudsdk.WithCloudLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "The public Connection and direct ServiceClient entry points always request Cinder v3 detailed collection with no caller identifier query/member GET shortcut; complete accepted pages are collected before local identifier/filter/expression phases. Every known descriptor of every row is normalized eagerly before continuation, so a malformed unselected row blocks the next page and wins over caller filter errors.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchVolumesCompletePagesExactOrGlobPreservesDuplicatesAndWireOwnership",
+            "blockstorage/volume_search_test.go:TestSearchVolumesNormalizesEveryRowBeforeNextAndConsumesFiltersAfterFullList"
+          ]
+        },
+        {
+          "behavior": "Identifier matching is a per-row exact ID/name shortcut followed by full case-sensitive CPython-style glob; exact matches do not remove wildcard matches on other rows, row order/duplicate physical rows remain distinct, and slash/newline/dot/Unicode/backslash/classes/reversed ranges/unmatched brackets are ordinary pattern semantics.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchVolumesCompletePagesExactOrGlobPreservesDuplicatesAndWireOwnership",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterIdentifierPreservesPerRowExactGlobMatchesDuplicatesAndSourceOrder",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterGlobUsesCPythonRuneDotAllClassesAndLiteralBackslashes"
+          ]
+        },
+        {
+          "behavior": "Untyped id/name values use Python JSON-domain strings including None/True/False and insertion-ordered quoted containers; null/missing differ from empty strings and case is never folded. Empty search NameOrID bypasses local identity selection without a member route.",
+          "tests": [
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterIdentifiersUsePythonJSONDomainStringAndContainerRepresentation",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterMissingAndNullIdentifiersDifferFromEmptyStringsAndRemainCaseSensitive"
+          ]
+        },
+        {
+          "behavior": "Raw filters are consumed only after complete list and identifier phases. Omitted/null and ordinary falsey JSON filters return selected rows; truthy nonmapping filters remain lazy on empty selections. Invalid full syntax/UTF8 still errors after an empty identifier result, without an old physical ResponseError.",
+          "tests": [
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNonmappingFilterShapeIsLazyAfterIdentifierAndActualTruthiness",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterInvalidJSONIsLocalAtomicAndStillValidatedAfterEmptyIdentifierSelection",
+            "blockstorage/volume_search_test.go:TestSearchVolumesNormalizesEveryRowBeforeNextAndConsumesFiltersAfterFullList"
+          ]
+        },
+        {
+          "behavior": "Filter keys retain raw insertion order and duplicate last-value/first-position semantics; earlier mismatches hide later missing keys. Nested objects recurse as subsets only when consumed, checking actual truthiness before nested shape/membership, so empty nested objects match truthy values but not falsey ones. Leaves keep complete array/object equality and exact Python bool-number compatibility.",
+          "tests": [
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterOrderedMappingConsumesOnlyReachedKeysAndKeepsDuplicateFirstPosition",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNestedEmptyObjectsUseActualTruthinessBeforeShapeOrMissingKeys",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterLeafEqualityKeepsExactArrayShapeAndPythonBooleanNumberPrecision"
+          ]
+        },
+        {
+          "behavior": "A nonempty filter JSON string uses full JMESPath, even after no identifier matches; parser and evaluated runtime/function errors propagate atomically and lazy unvisited projection/boolean branches remain unvisited. Value can be arbitrary object/array/string/number/bool/null; expressions never fabricate physical source rows, IDs or HTTP metadata.",
+          "tests": [
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionBridgeReturnsArbitraryOwnedJSONWithoutInventedRowIndices",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionsStillParseEmptySelectionAndKeepRuntimeFailuresAtomic",
+            "blockstorage/volume_search_test.go:TestSearchAndGetVolumeExpressionsKeepDynamicValuesAndSingleFalseyElement",
+            "blockstorage/volume_search_test.go:TestSearchVolumesExpressionErrorsEvenWithoutIdentifierMatchesKeepOnlyPageEvidence"
+          ]
+        },
+        {
+          "behavior": "The service view exposes all 38 known normalized keys and excludes unknown wire-only fields, preserving raw originals separately. Aliases are consumed in textual order before eager descriptor conversion, including hidden invalid earlier alias; list/dict/BoolStr/bool/size conversions retain source presence/null/untyped semantics without borrowed strict workflow-model extraction.",
+          "tests": [
+            "blockstorage/volume_search_view_test.go:TestVolumeSearchViewKnownNullsAliasesAndIndependentLocation",
+            "blockstorage/volume_search_view_test.go:TestVolumeSearchViewDescriptorConversionsAndSourceSize",
+            "blockstorage/volume_search_view_test.go:TestVolumeSearchViewEagerErrorsAndDiscardedAlias",
+            "blockstorage/volume_search_mapping_boundaries_test.go:TestSearchVolumesMappingDuplicateWireKeysKeepTextualAliasOrderAndRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Computed independent row location uses current recorded scope plus known configuration, preserves raw zone and truthy foreign project ID, clears current project human names for foreign rows, and ignores wire location. Connection config, direct/adopted unknown facts and owned per-call complete overrides need no caller adapter or location lookup request.",
+          "tests": [
+            "connection_volume_search_test.go:TestConnectionVolumeSearchCachedCinderOriginalCallbacksOnceAndOwnedLocation",
+            "connection_volume_search_test.go:TestConnectionCloudLocationOverrideAndOperationLocationFactoriesOwnInputs",
+            "connection_location_test.go:TestConnectVolumeSearchCapturesAutomaticCloudRegionConfiguredProjectAndForeignOwner",
+            "resource/cloud_location_test.go:TestCloudLocationForeignProjectsAndRawZoneSourceTruthiness",
+            "internal/cloudlocation/provider_test.go:TestRecordedCloudLocationNativeScopeShapesNeedNoExpiryOrHTTP",
+            "connection_location_mapping_boundaries_test.go:TestConnectCloudLocationMappingIDScopeLosesNativeDomainFactsAndOwnedOverrideRestores"
+          ]
+        },
+        {
+          "behavior": "Original callback slice/inputs/retained config/result bytes, raw rows, page proof and headers are independently owned; original callbacks run once in order and cannot replace a later option slot. Direct source/header capture precedes original callbacks while native authentication remains live; reusable owned options preserve lazy malformed filters for operation phase.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchVolumesOwnedOptionsOriginalCallbacksAndSliceSnapshot",
+            "internal/cloudfilter/results_test.go:TestCloudFilterSelectOwnsViewsFiltersIndicesAndResultsBeforeGuardCallbacks",
+            "connection_volume_search_test.go:TestConnectionVolumeSearchCachedCinderOriginalCallbacksOnceAndOwnedLocation"
+          ]
+        },
+        {
+          "behavior": "Preflight nil/canceled context, wrong/missing service role/source, nil options and terminal callback source mutation/cancel prevent HTTP and later callbacks. Connection applies originals before cached Cinder getter and propagates explicit cancellation cause without selecting a service on option failure.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchVolumesPreflightContextOptionsAndFixedSourceRejectBeforeHTTP",
+            "connection_volume_search_test.go:TestConnectionVolumeSearchOptionsBeforeGetterAndNilCancellationPreventSelection",
+            "internal/cloudfilter/results_test.go:TestCloudFilterGuardInterruptsTraversalAndRetainsCancellationCauseWithoutPartialSelection"
+          ]
+        },
+        {
+          "behavior": "Native continuation is authoritative only for exact canonical volumes_links; same-origin escaped collection path is fixed, physical query spelling remains advertised and canonical query-cycle equivalence cannot restart traversal. Empty volumes[] ends before unused unsafe next; physical malformed/UTF8/null envelope or read/Close failures retain actual admitted page without Value/Volumes.",
+          "tests": [
+            "blockstorage/volume_search_transport_test.go:TestSearchVolumesContinuationAuthorityCyclesAndEmptySourceEOF",
+            "blockstorage/volume_search_transport_test.go:TestSearchVolumesAcceptedReadCloseEnvelopeAndUTF8ErrorsKeepPhysicalProof"
+          ]
+        },
+        {
+          "behavior": "Later native HTTP/transport/cancellation errors never replace their actual cause with old accepted evidence; earlier admitted Pages remain independent. Cancellation while blocked continuation preserves cause and prior Pages, and all five source facts mutated after response are terminal with current admitted proof and no next exchange.",
+          "tests": [
+            "blockstorage/volume_search_transport_test.go:TestSearchVolumesLaterNativeAndTransportErrorsNeverBorrowAcceptedPage",
+            "blockstorage/volume_search_transport_test.go:TestSearchVolumesBlockedContinuationCancellationKeepsPriorPageAndCause",
+            "blockstorage/volume_search_transport_test.go:TestSearchVolumesPostResponseSourceMutationIsTerminalWithCurrentEvidence"
+          ]
+        },
+        {
+          "behavior": "The shared physical reader retains native 401 reauthentication,429 backoff and503 retry behavior with live token, owned snapshot headers/microversion, fixed bodyless route and original200 policy; hook body/response ownership violations and expanded non200 acceptance cannot produce admitted helper success.",
+          "tests": [
+            "blockstorage/get_volumes_test.go:TestGetVolumesNativeAuthBackoffRetryKeepsBodylessExactListAndLiveHeaders"
+          ]
+        },
+        {
+          "behavior": "Repaired unchanged pinned Python AST reference cases retain values and meaningful lazy error phases; exact-decimal truthiness and local guard interruptions are deliberate Go boundaries rather than source error swallowing.",
+          "tests": [
+            "internal/cloudfilter/reference_test.go:TestCloudFilterRepairedPinnedReferenceSnapshotsRetainValuesAndErrorPhases",
+            "internal/cloudfilter/results_test.go:TestCloudFilterPythonTruthyPreservesExactDecimalZeroPolicyAndNullableResults"
+          ]
+        },
+        {
+          "behavior": "The full JMESPath fork retains all26 standard functions and grammar composition, arbitrary values, lazy unvisited branches and propagated evaluated child errors; an independently generated146-case fixture separates110 selected Python runtime goldens from36 explicit Go ordering/numeric/grammar boundaries, with every case checking input immutability. Literal numbers stay json.Number; compiled literal results are deeply independent and concurrent compiled evaluation cannot inherit result mutation. Corrected syntax rejects third-colon slices and declared malformed repeated bounds/function comma spellings.",
+          "tests": [
+            "internal/jmespath/engine_test.go:TestSearchReferenceAndDeclaredBoundaries",
+            "internal/jmespath/engine_test.go:TestSearchLiteralNumberRepresentation",
+            "internal/jmespath/engine_test.go:TestCompiledLiteralResultOwnership",
+            "internal/jmespath/engine_test.go:TestCompiledSearchConcurrent",
+            "internal/jmespath/engine_test.go:TestCompiledLiteralConcurrentOwnership",
+            "internal/jmespath/engine_test.go:TestLexerSyntaxBoundaries"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/search-volumes.md",
+        "blockstorage/README.md",
+        "README.md",
+        "internal/jmespath/README.md"
+      ],
+      "differences": [
+        "Only the two direct BlockStorageCloudMixin declarations search_volumes and get_volume are proposed here, pinned to openstacksdk ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe and native Gophercloud v2.15.0. Related list_volumes/get_volumes/get_volume_id/volume_exists, proxy/resource/native APIs and full SDK completeness retain independent review status.",
+        "The public typed NameOrID string replaces Python duck-typed call values and None search input; empty search string means no local identifier restriction. JSON response id/name preserve untyped values and are stringified with Python-style null/bool/ordered-container representation. Identifier floating spellings use Go shortest float64 rendering at Python cutoffs, including overflow inf and underflow signed zero; exact CPython float repr and Unicode printability database behavior are explicit representation boundaries.",
+        "The source mutable Volume Resource/Munch and class descriptors are represented by an owned normalized 38-key JSON view plus independent original RawResource wire evidence. The view covers the 34 direct v3 Body members, inherited id/name/metadata and computed location used by these helpers, without implementing mutable Resource identity, custom mappings/equality, arbitrary Python objects, plugin/session cache, resource mutation or arbitrary inherited APIs. Python typing.cast does not constrain expression results; Go Value likewise permits any ordinary JSON shape.",
+        "Ordinary mapping equality and location project equality keep Python bool-number recursive compatibility but compare mathematical JSON decimals exactly rather than binary-float JSON rounding. Ordinary truthiness also uses exact mantissa zero; for example 1e-9999 stays truthy rather than underflowing to Python float zero. JMESPath scalar boolean-number equality is distinct, container/contains equality follows the selected Python reference, and JMESPath numeric zero stays truthy.",
+        "The engine is a licensed adapted source fork of official go-jmespath v0.4.0 with full grammar and all 26 standard functions. Independently selected jmespath.py 1.0.1 is a comparison reference satisfying SDK jmespath>=0.9.0, not an installed-version SDK pin or a claim that every version in that range has identical runtime behavior. Custom Python functions/classes and nonordinary JSON values are outside this API representation.",
+        "JMESPath equality/order/min/max/sort/by-key preserve exact decimals, including large integers and arbitrary exponent text. Exact abs/ceil/floor and integral sum differ from Python float spelling/rounding; nonintegral sum/avg/floating to_number use finite IEEE-754 conversion and return errors on nonfinite results. Integer arithmetic needing more than 1048576 coefficient digits errors instead of allocating unbounded memory. Numeric ordering never rounds or expands exponent-sized coefficients.",
+        "JMESPath object keys/values/object projections/JSON serialization use deterministic lexical key order, replacing Python dictionary insertion order for expression evaluation. Raw cloud filter objects retain original key order and duplicate last-value at first insertion position. Original nested wire JSON order is retained for identifier container representation; normalized top-level Volume descriptor order follows source MRO.",
+        "Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.",
+        "Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.",
+        "Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.",
+        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
+        "The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.",
+        "Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.",
+        "Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.",
+        "Standard function arity and types are validated for every variadic argument, so merge requires all arguments to be objects; selected Python1.0.1 can accept some iterable key/value pairs through dict.update. Standard grammar rejects repeated slice bounds without intervening colons, omitted function commas and trailing commas that the selected Python parser permissively accepts. These stricter malformed-input boundaries are declared rather than falsely reported as matching every Python parser spelling. All valid grammar branches and26 standard function names remain provided.",
+        "Location timing is explicit: Connection defaults snapshot recorded current scope after original option callbacks and before service selection; the owned operation Location is not rewritten by a later native reauthentication scope change. A direct ServiceClient with no Location override reads recorded scope when each row is normalized. Python current_project_id may refresh session authentication during Resource location construction; Go does not add such location-triggered I/O."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume",
+      "source_fingerprint": "59596949692d2023faa85ee82e10774e5df9b5e93d419aac9eb72caf8341fd4f",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.GetVolume",
+        "gophercloudsdk/blockstorage.GetVolume",
+        "gophercloudsdk/blockstorage.PrepareVolumeSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeSearchOptions",
+        "gophercloudsdk/blockstorage.WithVolumeSearchFilters",
+        "gophercloudsdk/blockstorage.WithVolumeSearchExpression",
+        "gophercloudsdk/blockstorage.WithVolumeSearchLocation",
+        "gophercloudsdk.Connection.CurrentLocation",
+        "gophercloudsdk.WithCloudLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted Filters and explicit JSON null choose the shared ordinary GET-first exact FindIdentity path. Safe member route success does no collection read; only clean native400/403/404 fall back to detailed exact-name query, preserving actual admitted Observed or Pages independently.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestGetVolumeOmittedNullGETFirstAndCompatibleListFallback"
+          ]
+        },
+        {
+          "behavior": "Standard Find retains safe unescaped identity routes and exact ID/name list matching rather than local glob; unsafe names use detailed name query, successful logical absence returns nil Value/Volume, and multiple exact results produce ErrAmbiguous without consuming an unused next page.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestGetVolumeDefaultExactListMissingAndAmbiguityKeepSharedIteratorPolicy"
+          ]
+        },
+        {
+          "behavior": "Every explicit nonnull filter, including false/zero/empty string/array/object, chooses complete SearchVolumes with no member GET. Falsey filter values skip local mapping only after materialization and identifier selection; nil/null dispatch remains distinct.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestGetVolumeEveryFalseyNonnullFilterUsesFullListOnly",
+            "blockstorage/volume_search_test.go:TestSearchVolumesNormalizesEveryRowBeforeNextAndConsumesFiltersAfterFullList"
+          ]
+        },
+        {
+          "behavior": "Filtered Get consumes arbitrary expression output exactly in outer truthiness then len then integer index0 order, with no second selected-value truth test: [false]/[0]/[empty string] remain present, [null] and empty outer outputs are absent, Unicode singleton string survives, longer strings/lists/objects are ambiguous, and truthy scalars/singleton objects produce local selection errors.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchAndGetVolumeExpressionsKeepDynamicValuesAndSingleFalseyElement",
+            "internal/cloudfilter/results_test.go:TestCloudFilterFirstFollowsTruthyLengthAndIntegerIndexWithoutRetestingSelectedFalsyValue"
+          ]
+        },
+        {
+          "behavior": "Filtered ambiguity includes concrete VolumeSelectionError NameOrID/Length and ErrAmbiguous without fabricated IDs; malformed filter/expression/selection errors retain ErrInvalidOption and original local cause rather than attached earlier HTTP evidence. Dynamic expression selection never populates Volume/Observed.",
+          "tests": [
+            "blockstorage/volume_search_test.go:TestSearchAndGetVolumeExpressionsKeepDynamicValuesAndSingleFalseyElement",
+            "blockstorage/volume_search_test.go:TestSearchVolumesExpressionErrorsEvenWithoutIdentifierMatchesKeepOnlyPageEvidence",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionsStillParseEmptySelectionAndKeepRuntimeFailuresAtomic"
+          ]
+        },
+        {
+          "behavior": "Accepted canonical volume{} is a real resource with complete normalized id/name:null and an empty physical RawResource.Body; request identity is never fabricated into response proof. Missing/wrong-case/null/array/malformed canonical member envelope is terminal with only current admitted Observed and no list replay/fallback.",
+          "tests": [
+            "blockstorage/volume_search_additional_test.go:TestGetVolumeCanonicalEmptyMemberDoesNotAdoptRequestIdentityAndRejectsNoncanonicalEnvelopes"
+          ]
+        },
+        {
+          "behavior": "MemberGET accepted schema/descriptor/readClose/source/cancellation errors retain actual200 Body/Header/StatusCode in Observed, with no selected Value/Volume, list fallback, replay or invented NotFound. Cancellation includes caller cause.",
+          "tests": [
+            "blockstorage/volume_search_transport_test.go:TestGetVolumeAcceptedMemberErrorsKeepObservedAndNeverReplayList",
+            "blockstorage/volume_search_additional_test.go:TestGetVolumeCanonicalEmptyMemberDoesNotAdoptRequestIdentityAndRejectsNoncanonicalEnvelopes"
+          ]
+        },
+        {
+          "behavior": "Native memberGET supports original401 reauthentication,429 backoff and503 general retry while keeping fixed bodyless route, live provider token, pre-option headers and microversion, callbacks once and a single final admitted proof. Native retry hook body/response-target violations retain original503 and ErrInvalidOption; expanded201 policy is rejected with original expected200 and no admitted Observed.",
+          "tests": [
+            "blockstorage/volume_search_additional_test.go:TestGetVolumeNativeMemberAuthenticationRetriesKeepFixedBodylessRouteAndSingleAcceptedProof"
+          ]
+        },
+        {
+          "behavior": "Returned normalized JSON, original wire resource metadata and accepted member/list proof are independent snapshots; original options/location ownership and cached Cinder selection work through Connection with originals exactly once and no hidden name/location/auth lookup.",
+          "tests": [
+            "blockstorage/volume_search_additional_test.go:TestGetVolumeCanonicalEmptyMemberDoesNotAdoptRequestIdentityAndRejectsNoncanonicalEnvelopes",
+            "blockstorage/volume_search_additional_test.go:TestGetVolumeNativeMemberAuthenticationRetriesKeepFixedBodylessRouteAndSingleAcceptedProof",
+            "connection_volume_search_test.go:TestConnectionVolumeSearchCachedCinderOriginalCallbacksOnceAndOwnedLocation",
+            "connection_volume_search_test.go:TestConnectionCloudLocationOverrideAndOperationLocationFactoriesOwnInputs"
+          ]
+        },
+        {
+          "behavior": "Complete filtered search preserves eager descriptors/alias/location normalization and actual late physical errors before selection; Connection option/cancellation preflight prevents service selection, and pure first selection keeps nullable/falsey values without fabricated object schema.",
+          "tests": [
+            "blockstorage/volume_search_view_test.go:TestVolumeSearchViewDescriptorConversionsAndSourceSize",
+            "blockstorage/volume_search_test.go:TestSearchVolumesNormalizesEveryRowBeforeNextAndConsumesFiltersAfterFullList",
+            "connection_volume_search_test.go:TestConnectionVolumeSearchOptionsBeforeGetterAndNilCancellationPreventSelection",
+            "internal/cloudfilter/reference_test.go:TestCloudFilterRepairedPinnedReferenceSnapshotsRetainValuesAndErrorPhases"
+          ]
+        },
+        {
+          "behavior": "The full JMESPath fork retains all26 standard functions and grammar composition, arbitrary values, lazy unvisited branches and propagated evaluated child errors; an independently generated146-case fixture separates110 selected Python runtime goldens from36 explicit Go ordering/numeric/grammar boundaries, with every case checking input immutability. Literal numbers stay json.Number; compiled literal results are deeply independent and concurrent compiled evaluation cannot inherit result mutation. Corrected syntax rejects third-colon slices and declared malformed repeated bounds/function comma spellings.",
+          "tests": [
+            "internal/jmespath/engine_test.go:TestSearchReferenceAndDeclaredBoundaries",
+            "internal/jmespath/engine_test.go:TestSearchLiteralNumberRepresentation",
+            "internal/jmespath/engine_test.go:TestCompiledLiteralResultOwnership",
+            "internal/jmespath/engine_test.go:TestCompiledSearchConcurrent",
+            "internal/jmespath/engine_test.go:TestCompiledLiteralConcurrentOwnership",
+            "internal/jmespath/engine_test.go:TestLexerSyntaxBoundaries"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/search-volumes.md",
+        "blockstorage/README.md",
+        "README.md",
+        "internal/jmespath/README.md"
+      ],
+      "differences": [
+        "Only the two direct BlockStorageCloudMixin declarations search_volumes and get_volume are proposed here, pinned to openstacksdk ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe and native Gophercloud v2.15.0. Related list_volumes/get_volumes/get_volume_id/volume_exists, proxy/resource/native APIs and full SDK completeness retain independent review status.",
+        "The public typed NameOrID string replaces Python duck-typed call values and None search input; empty search string means no local identifier restriction. JSON response id/name preserve untyped values and are stringified with Python-style null/bool/ordered-container representation. Identifier floating spellings use Go shortest float64 rendering at Python cutoffs, including overflow inf and underflow signed zero; exact CPython float repr and Unicode printability database behavior are explicit representation boundaries.",
+        "The source mutable Volume Resource/Munch and class descriptors are represented by an owned normalized 38-key JSON view plus independent original RawResource wire evidence. The view covers the 34 direct v3 Body members, inherited id/name/metadata and computed location used by these helpers, without implementing mutable Resource identity, custom mappings/equality, arbitrary Python objects, plugin/session cache, resource mutation or arbitrary inherited APIs. Python typing.cast does not constrain expression results; Go Value likewise permits any ordinary JSON shape.",
+        "Ordinary mapping equality and location project equality keep Python bool-number recursive compatibility but compare mathematical JSON decimals exactly rather than binary-float JSON rounding. Ordinary truthiness also uses exact mantissa zero; for example 1e-9999 stays truthy rather than underflowing to Python float zero. JMESPath scalar boolean-number equality is distinct, container/contains equality follows the selected Python reference, and JMESPath numeric zero stays truthy.",
+        "The engine is a licensed adapted source fork of official go-jmespath v0.4.0 with full grammar and all 26 standard functions. Independently selected jmespath.py 1.0.1 is a comparison reference satisfying SDK jmespath>=0.9.0, not an installed-version SDK pin or a claim that every version in that range has identical runtime behavior. Custom Python functions/classes and nonordinary JSON values are outside this API representation.",
+        "JMESPath equality/order/min/max/sort/by-key preserve exact decimals, including large integers and arbitrary exponent text. Exact abs/ceil/floor and integral sum differ from Python float spelling/rounding; nonintegral sum/avg/floating to_number use finite IEEE-754 conversion and return errors on nonfinite results. Integer arithmetic needing more than 1048576 coefficient digits errors instead of allocating unbounded memory. Numeric ordering never rounds or expands exponent-sized coefficients.",
+        "JMESPath object keys/values/object projections/JSON serialization use deterministic lexical key order, replacing Python dictionary insertion order for expression evaluation. Raw cloud filter objects retain original key order and duplicate last-value at first insertion position. Original nested wire JSON order is retained for identifier container representation; normalized top-level Volume descriptor order follows source MRO.",
+        "Response aliases and duplicate exact response keys use textual last-consumed-wins. Python JSON dictionary duplicate collapse preserves first insertion position before Resource alias consumption, so duplicates interleaved with distinct aliases can produce a different value. This is an explicit ambiguous-wire Go policy, not an assertion of every possible duplicate-key Python response equivalence.",
+        "Volume size uses source int descriptor behavior: bool remains bool, JSON integers are arbitrary precision, finite float JSON truncates its actual float64 value, decimal digit strings convert, signed/padded/nondigit strings and nonnumeric containers become zero, and digit-only nondecimal strings fail. The volume descriptor uses audited Unicode16 tables and does not emulate CPython configurable decimal string digit limits. JMESPath numeric-string digits and identifier printability follow Go Unicode tables; ordinary UTF-8/JSON parser and byte syntax offsets differ from arbitrary Python Unicode objects.",
+        "Computed location never trusts HTTP location: Connection retains known selected cloud/region/auth name/domain facts and the provider recorded native token project scope; row project/zone are raw JSON values with foreign-project names cleared. Direct ServiceClient calls and FromProvider manual/custom auth results cannot reconstruct absent cloud/configuration facts and leave them null unless explicit owned options supply them. Recorded scope does not force authentication refresh; native HTTP reauthentication remains live.",
+        "Native clouds.Parse discards configured project-domain metadata when selecting project ID scope and collapses absent versus empty configuration strings. Go cannot reconstruct those facts from returned AuthOptions or token names; WithCloudLocation/WithVolumeSearchLocation are explicit complete owned overrides. This configuration parser representation boundary is independent from the direct helper body control flow.",
+        "The library owns concrete option callbacks/defaults rather than requiring caller builders. Direct calls capture source facts/header snapshot before original callbacks; Connection applies originals once before cached Cinder selection, then direct delegation snapshots the resulting source. Retained config pointers, callback-slice slot edits and ordinary MoreHeaders edits cannot change prepared owned options. Provider authentication stays live; source fact mutation/cancellation is terminal at checked boundaries.",
+        "Go retains only actually admitted response Body/Header/StatusCode in independent Pages/Observed. Accepted read/Close/schema/source/context errors keep that physical proof without SDK replay; rejected native HTTP/transport failures retain their own native error and never borrow an older accepted page. Safe same-origin/same escaped collection continuation and cycle checks intentionally reject unsafe routes instead of following Python session pagination beyond those guards. Empty arrays terminate before unused continuation links are inspected.",
+        "Go errors are OperationError with actual operation/resource and original causes; local consumed filter/selection errors wrap ErrInvalidOption, ambiguity wraps ErrAmbiguous, and no fabricated HTTP/NotFound evidence is attached. Python deprecation warnings and diagnostic log messages are not reproduced. Concurrent mutation of caller mutable source/config/model data is outside the race-safe contract; independent-result ownership does not claim such mutations are safe.",
+        "Python no-filter Resource.find seeds id=name_or_id into its mutable object and can retain seeded state when a member response omits id. Go accepts only a canonical full volume object and exposes its actual normalized missing id:null plus raw omission, without fabricating request ID or retained object state.",
+        "Go standard Find validates nonempty UTF8/control-free identity and sends only safe unescaped ID segments to member routes; unsafe names use encoded name query. Python can attempt a member request for arbitrary duck-typed strings; strict envelope/full JSON/UTF8 and fixed route rules are explicit Go safeguards. These restrictions do not narrow the separate full-list local glob/filter branch.",
+        "The nil-filter branch reuses shared iterator early ambiguity behavior, while the explicit-filter branch always materializes complete search before outer selection. Python standard Find and deprecated explicit filter branches likewise have different lookup/selection control flow; no cache/direct-get/refresh options or related cloud helpers are added here.",
+        "Standard function arity and types are validated for every variadic argument, so merge requires all arguments to be objects; selected Python1.0.1 can accept some iterable key/value pairs through dict.update. Standard grammar rejects repeated slice bounds without intervening colons, omitted function commas and trailing commas that the selected Python parser permissively accepts. These stricter malformed-input boundaries are declared rather than falsely reported as matching every Python parser spelling. All valid grammar branches and26 standard function names remain provided.",
+        "Location timing is explicit: Connection defaults snapshot recorded current scope after original option callbacks and before service selection; the owned operation Location is not rewritten by a later native reauthentication scope change. A direct ServiceClient with no Location override reads recorded scope when each row is normalized. Python current_project_id may refresh session authentication during Resource location construction; Go does not add such location-triggered I/O."
+      ],
+      "remaining": []
     }
   ]
 }
