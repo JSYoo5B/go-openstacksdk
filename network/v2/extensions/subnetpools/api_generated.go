@@ -245,8 +245,9 @@ func WithUpdateField(key string, value any) UpdateOption {
 }
 
 type updateOptsBuilder struct {
-	base   UpdateOpts
-	config request.Config[UpdateOpts]
+	base           UpdateOpts
+	config         request.Config[UpdateOpts]
+	RevisionNumber *int "json:\"-\" h:\"If-Match\""
 }
 
 func (b updateOptsBuilder) ToSubnetPoolUpdateMap() (map[string]any, error) {
@@ -276,7 +277,7 @@ func (a *API) Update(ctx context.Context, subnetPoolID string, opts UpdateOpts, 
 		var zero0 *SubnetPool
 		return zero0, err
 	}
-	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
+	_opts := updateOptsBuilder{base: cfg.Options, config: cfg, RevisionNumber: cfg.Options.RevisionNumber}
 	result := upstream.Update(ctx, a.client, subnetPoolID, _opts)
 	value0, err := result.Extract()
 	err = request.Wrap("Update", "subnetpools", err)
