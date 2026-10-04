@@ -28221,6 +28221,199 @@
         "This go_mapping closes only the directly declared cloud detach_volume parameter/control-flow contract and its documented Go adaptation. Separately inventoried Compute delete_volume_attachment, cloud get_volume, Cinder find/wait and inherited Resource declarations retain independent reviews; native leaves and other volume workflows are not promoted."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/create_volume",
+      "source_fingerprint": "5b7997bd920d62aa8706c3009060e0e4bc92f327c787a7d8efba6a66110eb40b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.CreateVolume",
+        "gophercloudsdk/blockstorage.CreateVolume",
+        "gophercloudsdk/blockstorage.PrepareCreateVolumeOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeAttributes",
+        "gophercloudsdk/blockstorage.WithCreateVolumeWait",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBootable",
+        "gophercloudsdk/blockstorage.WithCreateVolumeWaitPolicy",
+        "gophercloudsdk/blockstorage.WithCreateVolumeName",
+        "gophercloudsdk/blockstorage.WithCreateVolumeDescription",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshot",
+        "gophercloudsdk/blockstorage.WithCreateVolumeType",
+        "gophercloudsdk/blockstorage.WithCreateVolumeMetadata",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSchedulerHints",
+        "gophercloudsdk/blockstorage.WithCreateVolumeFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateVolume maps required Size and optional Image reference with default enabled fresh available waiting, unlimited SDK deadline, two-second interval and exact error failure policy. Cinder POST accepts only202; explicit Size, including0 or negative, always overrides any attribute size rather than being omitted. No initial volume, snapshot/source/backup lookup, Nova server creation or attachment operation is introduced.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsDefaultFreshWaitAndIndependentOwnedResults",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsNoWaitSizeAndLiteralSourcesAreOwnedWithoutLookups",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement"
+          ]
+        },
+        {
+          "behavior": "Optional image ID is captured and used without a Glance client or request; image Name requires Glance and resolves once through the existing exact Collection before Cinder creation. Missing/ambiguous/unsafe image identity aborts creation, the selected imageRef overrides normalized attributes and later caller reference mutation cannot change the selection.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsImageNameResolvesOnceAndReferenceWinsAllAttributes",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsNoWaitSizeAndLiteralSourcesAreOwnedWithoutLookups",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeCachedCinderLiveTokenAndOwnedImageSelection",
+            "resource/resolve_test.go:TestResolveIDUsesExactNamesAndNeverFetchesExplicitIDs"
+          ]
+        },
+        {
+          "behavior": "The owned attribute schema covers all34 pinned direct Cinder v3 Volume Body declarations and inherited id/name/metadata by Python attribute or exact wire key, with source_replica an explicit Go-native extension. Unknown attributes and base_path/microversion/private route controls fail before lookup/POST. Caller request builders are unnecessary.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAllPinnedAttributesAndWireAliasesAreSerialized",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsPreflightValidatesEveryProvidedSourceBeforeCallbacks",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsValidateKnownFieldBoundaryInactiveWaitAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Alias mapping preserves source_volume_id/source_volid, image_id/imageRef, consistency_group_id/consistencygroup_id, bool names and host/project/migration/replication extension wires. When both attribute alias and wire key exist the wire key wins deterministically; nonnil concrete common attributes replace corresponding raw canonical values. Literal raw JSON values keep false/zero/null/empty and large numeric precision rather than applying Python descriptor coercion.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAllPinnedAttributesAndWireAliasesAreSerialized",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsEveryTypedCommonAttributeOverridesRawWireValues",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAliasesPresenceConcreteOverridesMetadataAndHints"
+          ]
+        },
+        {
+          "behavior": "Canonical name and description presence wins over display_name/display_description; selected null,false,numeric-zero,empty string/array/object is omitted and aliases never leak into the body. Required input Size and selected Image still override the resulting volume envelope independently of attribute order.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAliasesPresenceConcreteOverridesMetadataAndHints",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsNoWaitSizeAndLiteralSourcesAreOwnedWithoutLookups",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsImageNameResolvesOnceAndReferenceWinsAllAttributes"
+          ]
+        },
+        {
+          "behavior": "String Metadata nil omits, nonnil empty emits{}, and raw Fields metadata:null is retained. Scheduler hints accept an object or null; null/empty object is omitted while a nonempty object moves to the top-level OS-SCH-HNT:scheduler_hints key outside volume without losing raw values, duplicates within arrays or unknown numeric precision.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsDefaultFreshWaitAndIndependentOwnedResults",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAliasesPresenceConcreteOverridesMetadataAndHints",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsEveryTypedCommonAttributeOverridesRawWireValues",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsFactoriesOwnPointersMapsRawValuesAndReusableSnapshots"
+          ]
+        },
+        {
+          "behavior": "Whole/attribute/wait replacement factories and scalar/map helpers own pointers, maps, slices and raw JSON at factory capture and after each ordered callback. Retained callback configuration or reusable caller data cannot change the prepared execution. All inactive wait, JSON, attribute and selected source policies are validated before lookup or mutation, preserving nil versus empty behavior.",
+          "tests": [
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsFactoriesOwnPointersMapsRawValuesAndReusableSnapshots",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsCallbacksRunOnceAndPreparedStateDoesNotAliasRetainedHandles",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsValidateKnownFieldBoundaryInactiveWaitAndCancellation",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsPreflightValidatesEveryProvidedSourceBeforeCallbacks"
+          ]
+        },
+        {
+          "behavior": "PrepareCreateVolumeOptions applies original callbacks once locally and returns an independently owned complete effective policy. Connection validates context/receiver/image reference, prepares before cached Cinder/required Glance discovery, and delegates with that policy without rerunning originals or holding a mutex through callback phases. Explicit image ID or absent Image selects no Glance.",
+          "tests": [
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsCallbacksRunOnceAndPreparedStateDoesNotAliasRetainedHandles",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeCachedCinderLiveTokenAndOwnedImageSelection",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeOptionsPrecedeDiscoveryAndReuseMicroversion",
+            "connection_create_volume_test.go:TestConnectionCreateVolumePreflightBeforeCallbacksAndServiceSelection"
+          ]
+        },
+        {
+          "behavior": "Only the actual lower-case canonical creation id, validated as a nonempty safe segment, binds VolumeID and future GET/action paths. Canonical nonnull status is required; actual literal lowercase initial error fails immediately even with waiting disabled, while differently cased ERROR follows the separate no-wait or waiter semantics. Response aliases, request attribute id, foreign Location or later response id cannot retarget the workflow.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsDefaultFreshWaitAndIndependentOwnedResults",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAllPinnedAttributesAndWireAliasesAreSerialized",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsInitialLiteralErrorAndExactFreshWaitStates",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAcceptedCreateAndActionFailuresPreservePhaseEvidence",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCreation"
+          ]
+        },
+        {
+          "behavior": "Any nonnil Bootable forces effective waiting regardless of Wait option order. False waits but sends no false bootable action; true sends fixed POST200 os-set_bootable true only after a fresh successful available observation. Omitted Bootable with Wait(false) returns after valid202 creation without polling or an action.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsBootableTriStateAlwaysWaitsButOnlyTrueSendsAction",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeOptionsPrecedeDiscoveryAndReuseMicroversion"
+          ]
+        },
+        {
+          "behavior": "Waiting begins after creation response reading, Close, canonical identity binding and source validation. Nil/zero Timeout is unlimited and negative/inactive-invalid policy fails before mutation. Positive context deadline cancels Cinder poll HTTP and timers; parent context bounds every phase. Target available is tested before exact case-insensitive failures, no error-prefix inference occurs and nonnil empty failure states disable matching.",
+          "tests": [
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentContext",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCreation",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement",
+            "blockstorage/create_volume_options_test.go:TestCreateVolumeOptionsValidateKnownFieldBoundaryInactiveWaitAndCancellation",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsInitialLiteralErrorAndExactFreshWaitStates"
+          ]
+        },
+        {
+          "behavior": "Nonterminal ProgressCallback receives zero rather than arbitrary response progress extensions. Its error, source change or caller cancellation preserves inspectable callback/context/custom causes and prior Created plus LastAccepted proof. Target/failure observations suppress callback and source/context violations prevent another poll or action.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsInitialLiteralErrorAndExactFreshWaitStates",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCreation",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeepProof",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportEntrySnapshotsLiveImageTokenAndSourceMutationGuards"
+          ]
+        },
+        {
+          "behavior": "Created and LastAccepted capture independent actual accepted202/200 raw bytes, cloned headers and status before read/Close/decode/post-source failures. Ready independently owns the successful available VolumeInfo. Later rejected HTTP/transport failures preserve native physical status/body/header/method/URL or original causes without overwriting prior LastAccepted or fabricating accepted evidence. Accepted processing failures never start a new logical creation or cleanup.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsDefaultFreshWaitAndIndependentOwnedResults",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAcceptedCreateAndActionFailuresPreservePhaseEvidence",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeepProof",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCreation",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportUnacceptedCauseAndCanceledContextDoNotInventProof",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportNativeRetryCannotRewritePhaseBodyOrPromoteStatus"
+          ]
+        },
+        {
+          "behavior": "VolumeInfo atomically decodes exact canonical nullable string/int/flag fields, literal timestamps, inherited links, raw MetadataFields and reused attachment records. Bootable/encrypted accept bool or exact case-insensitive true/false strings; other typed flags require JSON bool. Absent/null/empty metadata or attachment containers retain distinct raw evidence, wrong known types/UTF8/null rows fail without partial assignment, and remaining response fields keep raw JSON precision rather than falsely gaining typed Python parity.",
+          "tests": [
+            "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsCanonicalNullableTypesAndLiteralMetadataPrecision",
+            "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsKnownFieldFailuresAreAtomicAndNullEmptyRemainDistinct",
+            "blockstorage/attach_volume_models_test.go:TestAttachVolumeModelsRejectInvalidFieldsAtomically"
+          ]
+        },
+        {
+          "behavior": "BootableSet retains actual opaque POST200 body/header/status on action acknowledgement or accepted handling errors without requiring JSON decoding, rewriting Ready.IsBootable, fetching again or certifying a later bootable observation. The action uses the original caller context after the wait-only budget has ended; action failure leaves Created/LastAccepted/Ready and its own native or accepted proof intact.",
+          "tests": [
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsBootableTriStateAlwaysWaitsButOnlyTrueSendsAction",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsAcceptedCreateAndActionFailuresPreservePhaseEvidence",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentContext",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeepProof",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportNativeAuthBackoffRetryOwnsCreateAndBootableJSON"
+          ]
+        },
+        {
+          "behavior": "Provided Cinder/Glance sources are captured before original package options, keep effective prefixed bases, canonical ordinary entry headers and consistent service role/microversion, and use original live providers for authentication. Provider/Endpoint/ResourceBase/Type/Microversion replacements are terminal after callbacks, lookup or phase handling. Configured native reauthentication/backoff/retry remain separate from SDK method/URL/serialized-body/accepted-policy ownership guards.",
+          "tests": [
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportEntrySnapshotsLiveImageTokenAndSourceMutationGuards",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportNativeAuthBackoffRetryOwnsCreateAndBootableJSON",
+            "blockstorage/create_volume_transport_test.go:TestCreateVolumeTransportNativeRetryCannotRewritePhaseBodyOrPromoteStatus",
+            "blockstorage/create_volume_contracts_test.go:TestCreateVolumeContractsPreflightValidatesEveryProvidedSourceBeforeCallbacks"
+          ]
+        },
+        {
+          "behavior": "Connection cache reuse, optional Glance selection, local preparation failures before discovery and service-initialization cancellation/custom causes are exposed through CreateVolume/volume operation errors. Existing native Cinder Create/SetBootable APIs, generated inventory, attachment workflows and Collection error-prefix waiter remain independent; no dependency declaration is promoted by this direct cloud-helper review.",
+          "tests": [
+            "connection_create_volume_test.go:TestConnectionCreateVolumeCachedCinderLiveTokenAndOwnedImageSelection",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeOptionsPrecedeDiscoveryAndReuseMicroversion",
+            "connection_create_volume_test.go:TestConnectionCreateVolumePreflightBeforeCallbacksAndServiceSelection",
+            "connection_create_volume_test.go:TestConnectionCreateVolumeInitializationRetainsCancellationCause"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/create-volume.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go uses an explicit optional resource.Ref Image instead of Python image dict/Resource/string identity polymorphism; ID requires no Glance request/client and Name resolves exactly once. Snapshot/source volume/backup attrs remain literal IDs with no extra lookup in either helper. SourceReplica is a declared native Go extension, not a missing pinned Python Body field.",
+        "Go covers known Cinder attribute/wire names with concrete common controls and owned raw JSON. It deliberately preserves chosen JSON values without Python int/bool/BoolStr/dict/list descriptor coercion and rejects unknown/private/base_path/microversion controls instead of changing the selected route/session. Wire keys win duplicate alias representations deterministically because Go maps have no Python insertion-order contract; canonical name/description presence and falsey omission still match the cloud helper.",
+        "Go fixes every follow-up route to a validated canonical creation id and requires usable canonical status, rejecting unsafe/missing/contradictory response identity without adopting request id, alternate identity or Location. Rich nullable models and raw precision are independent from mutable Python Resource hydration/descriptors, and fields without public typed projection remain in Metadata.Body.",
+        "Go always fetches a fresh available observation after creation when effective waiting is enabled; Python may short-circuit a created Resource already in the target cached state. Both apply the literal initial lowercase error check even with wait disabled. Both nonnull bootable values force waiting, false sends no action and true sends a true action after readiness; Go preserves opaque action proof without synthesizing observed bootable state.",
+        "Go intentionally uses nil/numeric-zero Timeout as unlimited waiting and rejects negative/inactive-invalid policies before mutation. Python forwards timeout and its iterate_timeout treats numeric zero/negative as immediate post-creation timeout unless an already-target Resource short-circuits. Positive Go wait context interrupts HTTP/timers while Python checks between fetches. The bootable action uses the original parent context after the wait-only phase, and caller context bounds the full Go workflow.",
+        "Go returns Created/LastAccepted/Ready/BootableSet evidence and original errors after accepted side effects rather than Python returning one mutable Volume or raising without phase results. Error-returning progress callbacks, explicit failure controls and local preparation are Go extensions; no automatic delete or second logical create is added. Accepted phases are not a complete physical-attempt trace.",
+        "Connection prepares original callbacks once before cached service selection and chooses Glance only for image Name; package calls capture every supplied source before originals. Configured current authentication and native retry/reauthentication remain in place while source and request ownership are guarded. This is not a packet-level exactly-once promise or arbitrary mutable provider configuration contract.",
+        "This mapping closes only the directly declared cloud create_volume size/wait/timeout/image/bootable/known-kwargs workflow under documented Go policies. Separate Python Cinder create/wait/set_bootable, Glance find, inherited Resource/session/cache/API-version declarations retain independent reviews. Connection selects Cinder v3 and this row does not assert full Cinder v2 Resource object semantics or whole-SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
