@@ -38,7 +38,7 @@ gophercloudsdk/
 | Network | 포트 | 지원 | 지원 | 지원 | 개별 API |
 | Network | floating IP | ID 조회·Find·목록 | 지원 | 지원 | 네트워크·서버·포트 해석, IPv4 선택, 선택적 대기 |
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | metadata 생성·직접 업로드·생성→staging→import·선택적 대기·기존 이미지 import·checksum 다운로드·저장소 복사본 삭제 |
-| [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
+| [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 이미지 선택·속성 매핑·기본 available 대기·선택적 bootable 설정 |
 
 기존 Cinder 볼륨을 서버에 연결할 때는 `conn.AttachVolume`이 이름 해석·새 상태 확인·Nova 연결 요청·기본 완료 대기를 처리합니다. `blockstorage.WithAttachVolumeWait(false)`로 접수 결과만 받거나 대기 정책을 지정할 수 있으며, 대기 실패에도 연결 응답을 보존합니다. [Python과의 호출 비교 및 부분 결과](blockstorage/attach-volume.md)를 참고하세요. 기존 볼륨 분리는 `conn.DetachVolume`이 Nova DELETE와 기본 Cinder 완료 대기를 처리합니다. 대기를 끄고 볼륨 ID를 지정하면 Cinder 초기화 없이 호출할 수 있습니다. [분리 사용법과 Python 비교](blockstorage/detach-volume.md)에 실제 timeout과 접수 결과를 설명합니다. 새 볼륨은 `conn.CreateVolume`이 생성·기본 대기·선택적인 bootable 처리를 묶습니다. [생성 사용법과 Python 비교](blockstorage/create-volume.md)에 이미지 선택과 생성 속성을 설명합니다. 삭제는 `conn.DeleteVolume`이 초기 조회·선택적 강제 요청·기본 완료 대기를 처리합니다. [삭제 사용법과 Python 비교](blockstorage/delete-volume.md)에 초기 부재와 삭제 경합, 단계별 결과를 설명합니다.
 
@@ -397,4 +397,3 @@ Swift 객체 생성은 `Objects.CreateObject(ctx, container, object, input, opti
 Swift 객체 대기는 `Objects.WaitForDelete`·`WaitForStatus`로 사용합니다. [Python/Go 대기 비교](objectstorage/v1/objects/wait.md)에 HEAD 조회, 기본 2초 간격·삭제 120초 제한, 명시한 상태 속성·응답 헤더와 마지막 실제 응답을 설명합니다.
 
 Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container, name, options...)`으로 생성합니다. [Python/Go 사용법](objectstorage/v1/objects/directory-marker.md)에 SDK가 준비하는 빈 객체와 Content-Type, metadata 함수 옵션과 실제 업로드 응답을 설명합니다.
-
