@@ -2,12 +2,8 @@ package cinderaction
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"slices"
 
 	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
 )
 
 // ReadonlyOptions owns the optional flag. Nil selects the Proxy default true.
@@ -36,28 +32,10 @@ func PrepareReadonly(ctx context.Context, options ...ReadonlyOption) (ReadonlyOp
 }
 
 func prepareReadonly(options []ReadonlyOption, guard func() error) (ReadonlyOptions, error) {
-	options = slices.Clone(options)
-	value := ReadonlyOptions{}
-	if err := guard(); err != nil {
-		return value, err
-	}
-	for _, option := range options {
-		if err := guard(); err != nil {
-			return ReadonlyOptions{}, err
+	return prepareOptions(options, cloneReadonly, func(value *ReadonlyOptions) {
+		if value.Readonly == nil {
+			yes := true
+			value.Readonly = &yes
 		}
-		if option == nil {
-			return ReadonlyOptions{}, fmt.Errorf("%w: nil volume readonly option", resource.ErrInvalidOption)
-		}
-		next := cloneReadonly(value)
-		err := option(&next)
-		value = cloneReadonly(next)
-		if err = errors.Join(err, guard()); err != nil {
-			return ReadonlyOptions{}, err
-		}
-	}
-	if value.Readonly == nil {
-		yes := true
-		value.Readonly = &yes
-	}
-	return cloneReadonly(value), guard()
+	}, guard)
 }
