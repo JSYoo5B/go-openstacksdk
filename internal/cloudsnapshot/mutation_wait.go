@@ -30,6 +30,9 @@ func (w *mutationWait) boundary(ctx context.Context, p *reader) error {
 		return err
 	}
 	if w.timeout != nil && (*w.timeout <= 0 || time.Since(w.started) >= *w.timeout) {
+		if p.schema.singular == "backup" {
+			return &BackupWaitTimeoutError{Timeout: *w.timeout}
+		}
 		return &WaitTimeoutError{Timeout: *w.timeout}
 	}
 	return nil
@@ -40,7 +43,7 @@ func (w *mutationWait) sleep(ctx context.Context, p *reader) error {
 		return err
 	}
 	if w.interval < 0 {
-		return invalid("snapshot poll interval must be nonnegative when sleeping")
+		return invalid("%s poll interval must be nonnegative when sleeping", p.schema.singular)
 	}
 	timer := time.NewTimer(w.interval)
 	defer timer.Stop()

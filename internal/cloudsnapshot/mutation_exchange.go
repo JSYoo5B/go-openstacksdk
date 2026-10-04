@@ -46,3 +46,7 @@ func (p *reader) mergeMutationFields(ctx context.Context, values []json.RawMessa
 	}
 	return view, actual, nil
 }
+
+func (p *reader) mergeBackupMutation(ctx context.Context, state *backupMutationState, wire *rest.Response) (json.RawMessage, *resource.RawResource, error) {
+	return p.mergeMutationFields(ctx, state[:], backupDescriptors[:], wire)
+}
