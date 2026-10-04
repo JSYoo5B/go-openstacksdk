@@ -29950,6 +29950,299 @@
         "Go exposes independently owned normalized values, raw resources and actual physical response proof with errors and joined cancellation causes. Native protected request retry is retained; SDK workflow replay, mutable session negotiation and cached object lifecycle are separate scope."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_type_access",
+      "source_fingerprint": "3588bcd2e77565d2aeb5652a8a700ea2617c4fdee967e1b9b4a510904f5a91a3",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.GetVolumeTypeAccess",
+        "gophercloudsdk/blockstorage.GetVolumeTypeAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resolve the ordinary unfiltered exact Type once through the captured reader. Safe identities use member GET with lowercase is_public=none; clean compatible member400/403/404 can fall back to exact list without a name hint. Lookup errors and completed absence retain Resolved; no access/action request follows.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessCompletedAbsenceAndEarlyAmbiguityStopBeforeSecondStage",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessFallbackFindUsesNoneThenReturnedIDWithoutVisibilityQuery",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Construct the queryless second route only from the actual returned canonical wire id. Missing, null, nonstring, empty or unsafe id is a local ErrInvalidOption with Resolved retained and no invented ResponseError; no input-ID seeding, coercion, refetch or Identity lookup occurs.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessRejectsInvalidCanonicalResponseIDLocallyAfterLookup",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Read one bodyless queryless /types/{returnedID}/os-volume-type-access response. Exact volume_type_access absence gives raw[]; present null/scalar/object/arbitrary arrays are preserved without typed field coercion. Unused links never paginate.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestGetVolumeTypeAccessPreservesMissingAndEveryArbitraryFieldShape",
+            "blockstorage/volume_type_access_contract_test.go:TestGetVolumeTypeAccessUsesReturnedIDAndOwnsRawAccessRowsWithoutProjectionOrPaging",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "A complete all-object array, including empty[], may additionally project into owned RawResource rows with every unknown field and response metadata. Any nonobject item disables the entire convenience projection while the full successful Value remains. Value, Accesses, Observed and Resolved do not alias.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestGetVolumeTypeAccessUsesReturnedIDAndOwnsRawAccessRowsWithoutProjectionOrPaging",
+            "blockstorage/volume_type_access_contract_test.go:TestGetVolumeTypeAccessPreservesMissingAndEveryArbitraryFieldShape",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Admit every final valid HTTP100..399 under the direct source exception policy, independently from ordinary lookup200. Then require a UTF8 JSON object: empty204, malformed JSON or nonobject envelopes fail with actual admitted proof and no logical Value/Accesses; rejected>=400 remains native failure.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessAdmitsSub400StatusWhileAccessJSONRemainsRequired",
+            "blockstorage/volume_type_access_transport_test.go:TestGetVolumeTypeAccessInvalidJSONAndTopLevelShapeRetainOnlyActualAccessProof"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture selected Cinder facts and canonical header copies before original options. Connection prepares originals once before recorded location and cached Cinder selection. Owned option/location snapshots and the same reader persist through both phases; source drift is sticky and blocks subsequent work.",
+          "tests": [
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalOptionsOwnLocationAndSliceAcrossBothPhysicalStages",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalSourceViolationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessPreflightContextRoleAndOptionsStopBeforeLookup",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessMalformedCallerLocationKeepsLookupProofWithoutPhysicalError",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOwnsLocationFactoriesAndOriginalCallbackSlice",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessRecordedScopeSnapshotsBetweenStagesAndRefreshesNextCall",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessPreflightAndGetterFailuresKeepOuterOperationAndCause"
+          ]
+        },
+        {
+          "behavior": "Physical lookup and second-phase evidence remain separate. Admitted body/header/status survive read, Close, cancellation and post-response source errors; native rejected responses preserve their own native evidence. Wrappers retain errors.Is/As, ctx.Err and context.Cause without replaying the SDK workflow.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllCauses",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLookupProof",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessSourceFactsRemainFrozenAfterLookupAndAcceptedSecondResponse",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessBlockedSecondStageCancellationKeepsLookupWithoutInventedPhaseProof",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellationSourceDriftAndRejection"
+          ]
+        },
+        {
+          "behavior": "Native authentication and retry preserve live token behavior and fixed method/URL/body/response ownership. Retry changes to body/decoder/KeepResponseBody are rejected before altered resend. Ordinary native header and OkCodes updates remain allowed, while an actual status>=400 cannot become SDK success outside the original owned policy.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeReauthenticationAndBoundedRetryKeepPayloadTargetAndLiveHeaders",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeRetryCannotReplaceOwnedBodiesDecoderOrBroadenOriginalStatus",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessRedirectCannotChangeFixedSecondStageTargetOrMethod"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-type-access.md",
+        "blockstorage/volume-types.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual cloud helper is mapped to Cinder v3 under Gophercloud v2.15.0. Independent native/Proxy/v2 declarations, inherited Resource descriptors/session negotiation/cache and other Type workflows are not promoted by this row.",
+        "Python consumes a mutable returned Type and utils.urljoin coercion of its id. Go uses a fresh canonical response id that must be a safe nonempty UTF8 string URL segment; input identity is never inherited or used as a fallback route. Local target validation retains Resolved without borrowing HTTP200.",
+        "Lookup reuses the existing Go exact identity, six-descriptor view, owned location and canonical accepted200 reader policy. Its safe input routing, complete-URL pagination safety and fresh response-field rules are declared mappings; this access row does not claim full Resource runtime equivalence.",
+        "The direct access/action status gate preserves valid HTTP 100..399 rather than narrowing to native GET200/204/300 or action202. Fixed request origin, escaped path, exact query and method guards can block source-session redirect behavior before another exchange.",
+        "Go exposes independently owned physical response evidence and joined native/read/Close/context causes; Python raises its own SDK exception classes and returns its ordinary helper value. Accepted evidence is not proof of subsequent server completion.",
+        "Original caller options execute once from owned snapshots. Direct calls capture sources before originals; Connection runs originals before recorded location and service selection. Live native authentication/retry remains distinct from SDK-level replay, which is absent.",
+        "Python cast is a runtime no-op and present access fields may be arbitrary values. Go preserves finite valid UTF8 raw JSON, requiring a top-level object; its optional all-object RawResource projection adds no schema coercion, descriptors, location or pagination.",
+        "Python returns the selected untyped field or absent[]. Go returns Value plus optional Accesses and lookup/access proof. Nonarray or mixed arrays remain successful Value and do not fabricate partial row resources.",
+        "Raw access Value and row field JSON retain original numeric spelling and precision, while Python response.json decodes integers/floats before returning them; finite valid JSON and Go string semantics do not emulate every Python runtime value."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/add_volume_type_access",
+      "source_fingerprint": "d705a3429385853bea5aa21416a1f5604acbe1e0a2375f5eacbe81d6101db97e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.AddVolumeTypeAccess",
+        "gophercloudsdk/blockstorage.AddVolumeTypeAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resolve the ordinary unfiltered exact Type once through the captured reader. Safe identities use member GET with lowercase is_public=none; clean compatible member400/403/404 can fall back to exact list without a name hint. Lookup errors and completed absence retain Resolved; no access/action request follows.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessCompletedAbsenceAndEarlyAmbiguityStopBeforeSecondStage",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessFallbackFindUsesNoneThenReturnedIDWithoutVisibilityQuery",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Construct the queryless second route only from the actual returned canonical wire id. Missing, null, nonstring, empty or unsafe id is a local ErrInvalidOption with Resolved retained and no invented ResponseError; no input-ID seeding, coercion, refetch or Identity lookup occurs.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessRejectsInvalidCanonicalResponseIDLocallyAfterLookup",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Post one queryless /types/{returnedID}/action body with the exact addProjectAccess nested project string. ProjectID is literal, including empty, nonexistent, control, Unicode, slash, query and percent characters; no project existence or Identity resolution. InvalidUTF8 project is a local error after Type lookup and before POST.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessInvalidUTF8ProjectIsLocalAfterResolvedType",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Admit every final valid HTTP100..399 under the direct source exception policy, independently from ordinary lookup200. Accepted action bodies are opaque, including empty or nonJSON/nonUTF8 bytes; no JSON decode or membership refresh occurs. Rejected>=400 is a native terminal failure with its own evidence.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessAdmitsSub400StatusWhileAccessJSONRemainsRequired",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture selected Cinder facts and canonical header copies before original options. Connection prepares originals once before recorded location and cached Cinder selection. Owned option/location snapshots and the same reader persist through both phases; source drift is sticky and blocks subsequent work.",
+          "tests": [
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalOptionsOwnLocationAndSliceAcrossBothPhysicalStages",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalSourceViolationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessPreflightContextRoleAndOptionsStopBeforeLookup",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessMalformedCallerLocationKeepsLookupProofWithoutPhysicalError",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOwnsLocationFactoriesAndOriginalCallbackSlice",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessRecordedScopeSnapshotsBetweenStagesAndRefreshesNextCall",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessPreflightAndGetterFailuresKeepOuterOperationAndCause"
+          ]
+        },
+        {
+          "behavior": "Physical lookup and second-phase evidence remain separate. Admitted body/header/status survive read, Close, cancellation and post-response source errors; native rejected responses preserve their own native evidence. Wrappers retain errors.Is/As, ctx.Err and context.Cause without replaying the SDK workflow.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllCauses",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLookupProof",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessSourceFactsRemainFrozenAfterLookupAndAcceptedSecondResponse",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessBlockedSecondStageCancellationKeepsLookupWithoutInventedPhaseProof",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellationSourceDriftAndRejection"
+          ]
+        },
+        {
+          "behavior": "Native authentication and retry preserve live token behavior and fixed method/URL/body/response ownership. Retry changes to body/decoder/KeepResponseBody are rejected before altered resend. Ordinary native header and OkCodes updates remain allowed, while an actual status>=400 cannot become SDK success outside the original owned policy.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeReauthenticationAndBoundedRetryKeepPayloadTargetAndLiveHeaders",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeRetryCannotReplaceOwnedBodiesDecoderOrBroadenOriginalStatus",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessRedirectCannotChangeFixedSecondStageTargetOrMethod"
+          ]
+        },
+        {
+          "behavior": "Return the actual accepted Applied acknowledgement proof without claiming membership change, completion or idempotency. Applied remains independently owned from Resolved; no verification, wait, rollback or SDK action replay occurs, including after accepted response I/O failures.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellationSourceDriftAndRejection"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-type-access.md",
+        "blockstorage/volume-types.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual cloud helper is mapped to Cinder v3 under Gophercloud v2.15.0. Independent native/Proxy/v2 declarations, inherited Resource descriptors/session negotiation/cache and other Type workflows are not promoted by this row.",
+        "Python consumes a mutable returned Type and utils.urljoin coercion of its id. Go uses a fresh canonical response id that must be a safe nonempty UTF8 string URL segment; input identity is never inherited or used as a fallback route. Local target validation retains Resolved without borrowing HTTP200.",
+        "Lookup reuses the existing Go exact identity, six-descriptor view, owned location and canonical accepted200 reader policy. Its safe input routing, complete-URL pagination safety and fresh response-field rules are declared mappings; this access row does not claim full Resource runtime equivalence.",
+        "The direct access/action status gate preserves valid HTTP 100..399 rather than narrowing to native GET200/204/300 or action202. Fixed request origin, escaped path, exact query and method guards can block source-session redirect behavior before another exchange.",
+        "Go exposes independently owned physical response evidence and joined native/read/Close/context causes; Python raises its own SDK exception classes and returns its ordinary helper value. Accepted evidence is not proof of subsequent server completion.",
+        "Original caller options execute once from owned snapshots. Direct calls capture sources before originals; Connection runs originals before recorded location and service selection. Live native authentication/retry remains distinct from SDK-level replay, which is absent.",
+        "The actual cloud project_id parameter maps to a literal Go string, including empty/nonexistent values. Independent Proxy Project Resource overloads are outside this row; Go rejects invalidUTF8 project locally after lookup to avoid JSON serializer replacement.",
+        "Python returns None after an accepted response and does not parse its body. Go adds Applied as opaque acknowledgement evidence; it does not expose a Changed/completion boolean or infer membership, verify, wait, rollback or retry the workflow."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/remove_volume_type_access",
+      "source_fingerprint": "2a6e515fca81504450b752c9e3c55b12f7223e12161be5a0c2c85651670bf695",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.RemoveVolumeTypeAccess",
+        "gophercloudsdk/blockstorage.RemoveVolumeTypeAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resolve the ordinary unfiltered exact Type once through the captured reader. Safe identities use member GET with lowercase is_public=none; clean compatible member400/403/404 can fall back to exact list without a name hint. Lookup errors and completed absence retain Resolved; no access/action request follows.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessCompletedAbsenceAndEarlyAmbiguityStopBeforeSecondStage",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessFallbackFindUsesNoneThenReturnedIDWithoutVisibilityQuery",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Construct the queryless second route only from the actual returned canonical wire id. Missing, null, nonstring, empty or unsafe id is a local ErrInvalidOption with Resolved retained and no invented ResponseError; no input-ID seeding, coercion, refetch or Identity lookup occurs.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessRejectsInvalidCanonicalResponseIDLocallyAfterLookup",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Post one queryless /types/{returnedID}/action body with the exact removeProjectAccess nested project string. ProjectID is literal, including empty, nonexistent, control, Unicode, slash, query and percent characters; no project existence or Identity resolution. InvalidUTF8 project is a local error after Type lookup and before POST.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessInvalidUTF8ProjectIsLocalAfterResolvedType",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessLocalResolutionFailuresRetainLookupWithoutSecondStage"
+          ]
+        },
+        {
+          "behavior": "Admit every final valid HTTP100..399 under the direct source exception policy, independently from ordinary lookup200. Accepted action bodies are opaque, including empty or nonJSON/nonUTF8 bytes; no JSON decode or membership refresh occurs. Rejected>=400 is a native terminal failure with its own evidence.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessAdmitsSub400StatusWhileAccessJSONRemainsRequired",
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture selected Cinder facts and canonical header copies before original options. Connection prepares originals once before recorded location and cached Cinder selection. Owned option/location snapshots and the same reader persist through both phases; source drift is sticky and blocks subsequent work.",
+          "tests": [
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalOptionsOwnLocationAndSliceAcrossBothPhysicalStages",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessOriginalSourceViolationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessPreflightContextRoleAndOptionsStopBeforeLookup",
+            "blockstorage/volume_type_access_options_test.go:TestVolumeTypeAccessMalformedCallerLocationKeepsLookupProofWithoutPhysicalError",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOwnsLocationFactoriesAndOriginalCallbackSlice",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessRecordedScopeSnapshotsBetweenStagesAndRefreshesNextCall",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessPreflightAndGetterFailuresKeepOuterOperationAndCause"
+          ]
+        },
+        {
+          "behavior": "Physical lookup and second-phase evidence remain separate. Admitted body/header/status survive read, Close, cancellation and post-response source errors; native rejected responses preserve their own native evidence. Wrappers retain errors.Is/As, ctx.Err and context.Cause without replaying the SDK workflow.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllCauses",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLookupProof",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessSourceFactsRemainFrozenAfterLookupAndAcceptedSecondResponse",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessBlockedSecondStageCancellationKeepsLookupWithoutInventedPhaseProof",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellationSourceDriftAndRejection"
+          ]
+        },
+        {
+          "behavior": "Native authentication and retry preserve live token behavior and fixed method/URL/body/response ownership. Retry changes to body/decoder/KeepResponseBody are rejected before altered resend. Ordinary native header and OkCodes updates remain allowed, while an actual status>=400 cannot become SDK success outside the original owned policy.",
+          "tests": [
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeReauthenticationAndBoundedRetryKeepPayloadTargetAndLiveHeaders",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessNativeRetryCannotReplaceOwnedBodiesDecoderOrBroadenOriginalStatus",
+            "blockstorage/volume_type_access_transport_test.go:TestVolumeTypeAccessRedirectCannotChangeFixedSecondStageTargetOrMethod"
+          ]
+        },
+        {
+          "behavior": "Return the actual accepted Applied acknowledgement proof without claiming membership change, completion or idempotency. Applied remains independently owned from Resolved; no verification, wait, rollback or SDK action replay occurs, including after accepted response I/O failures.",
+          "tests": [
+            "blockstorage/volume_type_access_contract_test.go:TestVolumeTypeAccessActionsForwardLiteralProjectAndOpaqueAcknowledgement",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessOriginalsPrecedeCachedCinderAndPreserveRawAcknowledgements",
+            "connection_volume_type_access_test.go:TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellationSourceDriftAndRejection"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-type-access.md",
+        "blockstorage/volume-types.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual cloud helper is mapped to Cinder v3 under Gophercloud v2.15.0. Independent native/Proxy/v2 declarations, inherited Resource descriptors/session negotiation/cache and other Type workflows are not promoted by this row.",
+        "Python consumes a mutable returned Type and utils.urljoin coercion of its id. Go uses a fresh canonical response id that must be a safe nonempty UTF8 string URL segment; input identity is never inherited or used as a fallback route. Local target validation retains Resolved without borrowing HTTP200.",
+        "Lookup reuses the existing Go exact identity, six-descriptor view, owned location and canonical accepted200 reader policy. Its safe input routing, complete-URL pagination safety and fresh response-field rules are declared mappings; this access row does not claim full Resource runtime equivalence.",
+        "The direct access/action status gate preserves valid HTTP 100..399 rather than narrowing to native GET200/204/300 or action202. Fixed request origin, escaped path, exact query and method guards can block source-session redirect behavior before another exchange.",
+        "Go exposes independently owned physical response evidence and joined native/read/Close/context causes; Python raises its own SDK exception classes and returns its ordinary helper value. Accepted evidence is not proof of subsequent server completion.",
+        "Original caller options execute once from owned snapshots. Direct calls capture sources before originals; Connection runs originals before recorded location and service selection. Live native authentication/retry remains distinct from SDK-level replay, which is absent.",
+        "The actual cloud project_id parameter maps to a literal Go string, including empty/nonexistent values. Independent Proxy Project Resource overloads are outside this row; Go rejects invalidUTF8 project locally after lookup to avoid JSON serializer replacement.",
+        "Python returns None after an accepted response and does not parse its body. Go adds Applied as opaque acknowledgement evidence; it does not expose a Changed/completion boolean or infer membership, verify, wait, rollback or retry the workflow."
+      ],
+      "remaining": []
     }
   ]
 }
