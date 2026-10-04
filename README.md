@@ -42,6 +42,8 @@ gophercloudsdk/
 
 기존 Cinder 볼륨을 서버에 연결할 때는 `conn.AttachVolume`이 이름 해석·새 상태 확인·Nova 연결 요청·기본 완료 대기를 처리합니다. `blockstorage.WithAttachVolumeWait(false)`로 접수 결과만 받거나 대기 정책을 지정할 수 있으며, 대기 실패에도 연결 응답을 보존합니다. [Python과의 호출 비교 및 부분 결과](blockstorage/attach-volume.md)를 참고하세요. 기존 볼륨 분리는 `conn.DetachVolume`이 Nova DELETE와 기본 Cinder 완료 대기를 처리합니다. 대기를 끄고 볼륨 ID를 지정하면 Cinder 초기화 없이 호출할 수 있습니다. [분리 사용법과 Python 비교](blockstorage/detach-volume.md)에 실제 timeout과 접수 결과를 설명합니다. 새 볼륨은 `conn.CreateVolume`이 생성·기본 대기·선택적인 bootable 처리를 묶습니다. [생성 사용법과 Python 비교](blockstorage/create-volume.md)에 이미지 선택과 생성 속성을 설명합니다. 삭제는 `conn.DeleteVolume`이 초기 조회·선택적 강제 요청·기본 완료 대기를 처리합니다. [삭제 사용법과 Python 비교](blockstorage/delete-volume.md)에 초기 부재와 삭제 경합, 단계별 결과를 설명합니다.
 
+이미 받은 owned/native 볼륨의 attachment device는 `blockstorage.GetVolumeAttachDevice`로 조회합니다. 원래 JSON 값은 `GetVolumeAttachDeviceFields`로 읽으며 두 함수 모두 HTTP 없이 동작합니다. [서버별 device 조회와 Python 비교](blockstorage/volume-attachment-device.md)에 네 가지 typed 입력, 첫 일치와 local 오류를 설명합니다.
+
 [Glance Task 생성·조회·목록](image/tasks.md)은 `image.Service`의 공통 옵션과 기본 입력, 원문 응답 모델, lazy 페이지 순회를 제공합니다.
 
 [이미지별 Task 목록](image/image-tasks.md)은 이미지 ID·이름 선택과 공통 옵션, 삭제 여부·시각과 원문 응답을 제공합니다.

@@ -15,6 +15,7 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.detach_volume(server, volume, wait=True)` | `conn.DetachVolume(ctx, blockstorage.DetachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.create_volume(size, wait=True, image=None, bootable=None, **kwargs)` | `conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: size}, options...)` |
 | `conn.delete_volume(name_or_id, wait=True, force=False)` | `conn.DeleteVolume(ctx, blockstorage.DeleteVolumeRequest{Volume: resource.ID(volumeID)}, options...)` |
+| `conn.get_volume_attach_device(volume, server_id)` | `blockstorage.GetVolumeAttachDevice(volume, serverID)` 또는 `GetVolumeAttachDeviceFields(fields, serverID)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
@@ -85,3 +86,5 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 `blockstorage.WaitForAvailable(ctx, service.Volumes, ref)`는 available·정확한 error 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForState`는 다른 대상을 명시하고 `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. v2/v3 Volume·Snapshot leaf에도 같은 메서드가 있습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
 
 `conn.DeleteVolume`은 초기 조회·선택적 강제 삭제·기본 완료 대기를 묶고 초기 부재와 조회 후 삭제 경합을 구별합니다. [삭제 사용법과 Python 비교](delete-volume.md)에 선택된 microversion, `Deleted` 반환값과 오류 시 단계별 결과를 설명합니다.
+
+`blockstorage.GetVolumeAttachDevice`는 owned observation·VolumeInfo와 native Cinder v2/v3 Volume의 현재 attachment를 읽는 순수 helper입니다. 서버 ID의 첫 정확한 일치가 반환되며 HTTP와 refresh는 없습니다. raw JSON 값, nil·빈 문자열과 전체 decoder의 경계는 [서버별 device 조회](volume-attachment-device.md)에 설명합니다.
