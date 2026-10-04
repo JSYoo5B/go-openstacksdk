@@ -170,6 +170,10 @@ Nova 서버/flavor·Cinder v3 볼륨·Glance v2 이미지·Neutron 네트워크/
 | Shared File System | [v2](sharedfilesystems/v2/README.md) | `SharedFileSystem(ctx)` |
 | Workflow | [v2](workflow/v2/README.md) | `Workflow(ctx)` |
 
+Trove `Instances.IsRootEnabled(ctx, instanceID)`는 root 조회의 native 오류를 panic 없이 반환합니다.
+[Python/Go root 접근 상태 사용법](db/v1/instances/root-access.md)에 boolean 판정과 오류 정책을 설명합니다.
+
+
 각 문서에는 openstacksdk와의 입력·결과 형식 비교, 실제 서비스 필드, API 패키지 링크, 이름 조회·삭제·대기가 적용되는 리소스를 기록합니다. DNS zone이나 Octavia pool의 자식 리소스는 [부모 범위를 지정](docs/scoped-resources.md)해서 사용합니다.
 
 [Senlin 목록](clustering/v1/listing/README.md)은 11개 typed `List/All`의 `WithListFilter`, `WithListMaxItems`, `WithListPaginated`, `WithListHeader`, `WithListMicroversion`으로 로컬 필터·소비량·호출별 헤더와 버전을 선택합니다. [Manila access scope](sharedfilesystems/v2/shareaccessrules/README.md)의 목록도 raw cap과 한 응답 제어를 제공하며, 실제 service type·version header·부모 식별자를 SDK가 검증합니다. 기본값과 옵션 병합은 라이브러리가 처리하므로 별도 builder나 resource interface를 구현할 필요가 없습니다.

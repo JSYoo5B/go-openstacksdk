@@ -169,6 +169,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "containerinfra/v1":
 		out.WriteString("`conn.ContainerInfraProjectQuotas(ctx, project)`와 `CurrentContainerInfraProjectQuotas(ctx)`로 프로젝트를 고정한 뒤 `ForResource(quotas.Cluster)`로 quota를 선택합니다. Get/Create/PATCH Update/DELETE와 explicit hard limit, API.List/All의 페이지 순회·all_tenants 보존, Python에 quota 선언이 없는 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
 	case "db/v1":
+		out.WriteString("`Instances.IsRootEnabled(ctx, instanceID)`는 native root 조회의 bool을 반환합니다. HTTP·전송·JSON 오류는 panic 없이 원래 cause를 반환하고 성공 응답의 `rootEnabled`는 literal true만 true로 읽습니다. [Root 접근 상태 Python/Go 사용법](instances/root-access.md)에 응답 객체·오류와 Python Resource method의 차이를 설명합니다.\n\n")
 		out.WriteString("`Databases.InInstance(ctx, instanceRef)`와 `Users.InInstance(ctx, instanceRef)`는 instance를 한 번 고정합니다. pinned SDK가 자식별 fetch를 노출하지 않아 Get/Find는 같은 instance의 목록에서 정확한 이름을 검색합니다. 단일 Create와 CreateBatch는 배열 요청을 전송하며 비동기 응답에 객체가 없으므로 error를 반환합니다. [데이터베이스](databases/README.md), [사용자](users/README.md)의 식별자·삭제·지원 제약을 참고합니다.\n\n")
 	case "objectstorage/v1":
 		out.WriteString("`Objects.CreateDirectoryMarkerObject`는 빈 객체와 `application/directory` Content-Type을 SDK가 준비하며, metadata와 추가 헤더는 함수 옵션으로 지정합니다. Python cloud helper와 비교한 사용법은 [디렉터리 마커](objects/directory-marker.md)를 참고합니다.\n\n")
