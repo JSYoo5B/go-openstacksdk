@@ -17,6 +17,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.delete_volume(name_or_id, wait=True, force=False)` | `conn.DeleteVolume(ctx, blockstorage.DeleteVolumeRequest{Volume: resource.ID(volumeID)}, options...)` |
 | `conn.get_volume_attach_device(volume, server_id)` | `blockstorage.GetVolumeAttachDevice(volume, serverID)` 또는 `GetVolumeAttachDeviceFields(fields, serverID)` |
 | `conn.get_volumes(server)` | `conn.GetVolumes(ctx, blockstorage.GetVolumesRequest{ServerID: serverID})` |
+| `conn.search_volumes(name_or_id, filters)` | `conn.SearchVolumes(ctx, blockstorage.SearchVolumesRequest{NameOrID: name}, options...)` |
+| `conn.get_volume(name_or_id, filters=None)` | `conn.GetVolume(ctx, blockstorage.GetVolumeRequest{NameOrID: name}, options...)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
@@ -91,3 +93,7 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 `blockstorage.GetVolumeAttachDevice`는 owned observation·VolumeInfo와 native Cinder v2/v3 Volume의 현재 attachment를 읽는 순수 helper입니다. 서버 ID의 첫 정확한 일치가 반환되며 HTTP와 refresh는 없습니다. raw JSON 값, nil·빈 문자열과 전체 decoder의 경계는 [서버별 device 조회](volume-attachment-device.md)에 설명합니다.
 
 `conn.GetVolumes`는 Cinder v3 상세 목록을 모두 읽은 뒤 서버별 association을 선택합니다. Device나 상태를 조건으로 삼지 않고 같은 볼륨의 중복 일치도 유지합니다. RawResource 결과, 선택적인 typed projection과 오류 시 실제 페이지 증거는 [서버에 연결된 볼륨 목록](server-volumes.md)에 설명합니다.
+
+`conn.SearchVolumes`는 glob·중첩 JSON 필터·전체 JMESPath와 계산된 location을 제공합니다.
+`conn.GetVolume`은 필터 생략·null의 GET-first 조회와 명시적 필터의 전체 검색을 구분합니다.
+임의 JSON 결과와 원본 row, 기본값, Python 비교는 [볼륨 검색과 단일 선택](search-volumes.md)에 설명합니다.

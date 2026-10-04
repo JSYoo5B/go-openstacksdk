@@ -82,5 +82,10 @@ object projection's extra nil-prefix bug, variadic type checks, container-safe
 `contains`, singleton by-key validation, and nonmutating stable sorting.
 Projection and boolean short circuit behavior stays lazy: unvisited runtime
 errors remain unvisited, while parser errors always occur before evaluation.
+Extra slice colons, repeated bounds without a separating colon, omitted function
+argument commas and trailing commas are rejected according to the standard
+grammar. The Python 1.0.1 parser accepts some of those malformed expressions;
+this fork's stricter syntax is an explicit correction, rather than a claim that
+the Python parser rejects every same spelling.
 This engine does not implement Python Resource classes, descriptors,
 connection location, custom functions or Python object identity/equality.

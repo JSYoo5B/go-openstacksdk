@@ -401,3 +401,5 @@ Swift 객체 생성은 `Objects.CreateObject(ctx, container, object, input, opti
 Swift 객체 대기는 `Objects.WaitForDelete`·`WaitForStatus`로 사용합니다. [Python/Go 대기 비교](objectstorage/v1/objects/wait.md)에 HEAD 조회, 기본 2초 간격·삭제 120초 제한, 명시한 상태 속성·응답 헤더와 마지막 실제 응답을 설명합니다.
 
 Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container, name, options...)`으로 생성합니다. [Python/Go 사용법](objectstorage/v1/objects/directory-marker.md)에 SDK가 준비하는 빈 객체와 Content-Type, metadata 함수 옵션과 실제 업로드 응답을 설명합니다.
+
+볼륨 cloud 검색은 `Connection.SearchVolumes`와 `Connection.GetVolume`이 glob·중첩 필터·JMESPath와 계산된 location을 제공합니다. 필터 생략·null의 기본 조회와 명시적 필터의 전체 검색, 임의 JSON 결과와 원본 응답은 [서비스별 Python/Go 비교](blockstorage/search-volumes.md)에 설명합니다.
