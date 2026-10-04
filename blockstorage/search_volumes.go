@@ -45,20 +45,8 @@ func captureVolumeSearch(ctx context.Context, cinder *gophercloud.ServiceClient,
 }
 
 func (p *preparedVolumeSearch) search(ctx context.Context, nameOrID string) (*SearchVolumesResult, error) {
-	proof := &GetVolumesResult{}
-	result := &SearchVolumesResult{}
-	entries := make([]getVolumesEntry, 0)
-	views := make([]json.RawMessage, 0)
-	err := p.reader.readVolumes(ctx, proof, func(entry getVolumesEntry) (bool, error) {
-		view, err := p.view(ctx, entry)
-		if err != nil {
-			return false, err
-		}
-		entries = append(entries, entry)
-		views = append(views, view)
-		return true, nil
-	})
-	result.Pages = proof.Pages
+	entries, views, proof, err := p.collectViews(ctx)
+	result := &SearchVolumesResult{Pages: proof.Pages}
 	if err != nil {
 		return result, err
 	}

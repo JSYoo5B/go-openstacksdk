@@ -3,16 +3,11 @@ package blockstorage
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"iter"
-	"net/http"
-	"net/url"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/resource"
 )
 
@@ -51,119 +46,6 @@ func GetVolume(ctx context.Context, cinder *gophercloud.ServiceClient, input Get
 		}
 		return result, nil
 	}
-	collection := p.identityCollection(ctx, result)
-	record, err := collection.FindIdentity(ctx, input.NameOrID)
-	if err != nil {
-		// Shared identity lookup gives cancellation precedence after GET.
-		// Retain this member's actual read/Close/source failure as well.
-		// The fallback iterator clears it before a later list can fail.
-		if ctx.Err() != nil && p.memberFailure != nil {
-			err = errors.Join(p.memberFailure, err)
-		}
-		return result, wrapVolumeSearchError(ctx, "GetVolume", err)
-	}
-	if err := p.reader.guard(ctx); err != nil {
-		return result, wrapVolumeSearchError(ctx, "GetVolume", err)
-	}
-	if record != nil {
-		result.Value = bytes.Clone(record.view)
-		result.Volume = record.entry.volume
-	}
-	return result, nil
-}
-
-type volumeIdentityRecord struct {
-	entry    getVolumesEntry
-	view     json.RawMessage
-	id, name string
-}
-
-// The binding is library owned. It reuses shared FindIdentity policy while
-// retaining actual complete wire rows instead of reserializing native Volume.
-func (p *preparedVolumeSearch) identityCollection(ctx context.Context, result *GetVolumeResult) *resource.Collection[volumeIdentityRecord] {
-	get := func(ctx context.Context, id string) (record *volumeIdentityRecord, err error) {
-		defer func() { p.memberFailure = err }()
-		if err := p.reader.guard(ctx); err != nil {
-			return nil, err
-		}
-		target := p.reader.cinder.client.ServiceURL("volumes", url.PathEscape(id))
-		if err := validateAttachTarget(&p.reader.cinder.client, target); err != nil {
-			return nil, err
-		}
-		response, err := rest.DoJSON(ctx, &p.reader.cinder.client, http.MethodGet, target, nil, nil, http.StatusOK)
-		if response != nil {
-			result.Observed = &GetVolumesPage{Body: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
-		}
-		if observed := p.reader.guard(ctx); observed != nil {
-			err = errors.Join(err, observed)
-			if response != nil {
-				err = response.Fail(err)
-			}
-		}
-		if err != nil {
-			return nil, attachContextError(ctx, err)
-		}
-		fields, err := attachmentObject(response.Body)
-		if err != nil {
-			return nil, response.Fail(err)
-		}
-		row, present := fields["volume"]
-		if !present {
-			return nil, response.Fail(attachInvalid("member response must contain canonical volume object"))
-		}
-		var volume resource.RawResource
-		if err := json.Unmarshal(row, &volume); err != nil {
-			return nil, response.Fail(err)
-		}
-		volume.Header, volume.StatusCode = response.Header.Clone(), response.StatusCode
-		return p.identityRecord(ctx, getVolumesEntry{volume: &volume, origin: response, raw: bytes.Clone(row)})
-	}
-	iterate := func(ctx context.Context, query url.Values, details bool) iter.Seq2[*volumeIdentityRecord, error] {
-		return func(yield func(*volumeIdentityRecord, error) bool) {
-			p.memberFailure = nil
-			reader := *p.reader
-			initial := *reader.initialURL
-			initial.RawQuery = query.Encode()
-			reader.initialURL = &initial
-			proof := &GetVolumesResult{}
-			err := reader.readVolumes(ctx, proof, func(entry getVolumesEntry) (bool, error) {
-				record, err := p.identityRecord(ctx, entry)
-				if err != nil {
-					return false, err
-				}
-				return yield(record, nil), nil
-			})
-			result.Pages = append(result.Pages, proof.Pages...)
-			if err != nil {
-				yield(nil, err)
-			}
-		}
-	}
-	return resource.NewCollection(resource.Adapter[volumeIdentityRecord]{Kind: "volume", IdentityFind: true,
-		Get: get, IterateIdentity: iterate, IdentityAllProjectsQuery: "all_tenants",
-		ID:                 func(value *volumeIdentityRecord) string { return value.id },
-		IdentityResponseID: func(value *volumeIdentityRecord) (string, error) { return value.id, nil },
-		Name:               func(value *volumeIdentityRecord) string { return value.name }, NameQuery: func(name string) string { return name },
-	})
-}
-
-func (p *preparedVolumeSearch) identityRecord(ctx context.Context, entry getVolumesEntry) (*volumeIdentityRecord, error) {
-	view, err := p.view(ctx, entry)
-	if err != nil {
-		return nil, err
-	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(view, &fields); err != nil {
-		return nil, entry.origin.Fail(err)
-	}
-	// Ordinary Resource.find compares untyped attributes directly to a string;
-	// numeric/bool/container values do not become textual identity matches.
-	stringField := func(raw json.RawMessage) string {
-		var value string
-		if len(raw) > 0 && raw[0] == '"' {
-			_ = json.Unmarshal(raw, &value)
-		}
-		return value
-	}
-	return &volumeIdentityRecord{entry: entry, view: view, id: stringField(fields["id"]), name: stringField(fields["name"])}, p.reader.guard(ctx)
+	result, err = p.find(ctx, input.NameOrID)
+	return result, wrapVolumeSearchError(ctx, "GetVolume", err)
 }
