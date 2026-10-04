@@ -33293,6 +33293,208 @@
         "Only the actual pinned v3 Proxy declaration is mapped here. Native/v2/Resource/inherited targets and direct bootable/readonly setters remain independent. Source hashes, static review, Go compile and offline HTTP/race tests do not establish authenticated OpenStack or Python SDK runtime parity or full SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/set_volume_bootable_status",
+      "source_fingerprint": "a8521964bbf6b0e56bd8d52b7b7ddc04a4e2dc0673edd8c0bd5c2030fe4049b2",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.SetVolumeBootableStatus",
+        "gophercloudsdk.Connection.SetVolumeBootableStatus",
+        "gophercloudsdk/blockstorage/v3/volumes.API.SetVolumeBootableStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetVolumeBootableStatus requires a bool and sends exactly {\"os-set_bootable\":{\"bootable\":value}}, including false, through the direct package, Connection and v3 service APIs without a default.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "blockstorage/volume_flag_transport_test.go:TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectActionsKeepRequiredBootableAndReadonlyDefaultWithoutLookup"
+          ]
+        },
+        {
+          "behavior": "Use one safe explicit ID and fixed volumes/action route without name resolution.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsPreflightAndGetterErrorsKeepCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectPreflightPrecedesReadonlyOriginalsAndGuardsCapturedSource"
+          ]
+        },
+        {
+          "behavior": "Selected version wins without cap; empty selection negotiates operation-owned Volume ceiling3.71.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsKeepNegotiationAndAppliedStagesSeparate",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsSelectedLiteralAndDiscoveryUseOwnedVolumeMicroversionPolicy"
+          ]
+        },
+        {
+          "behavior": "Admitted response is opaque acknowledgement; no model refresh or server state assertion.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsKeepNegotiationAndAppliedStagesSeparate",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectActionsKeepRequiredBootableAndReadonlyDefaultWithoutLookup",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/source/cancellation failures retain current Applied and every cause, without replay.",
+          "tests": [
+            "blockstorage/volume_flag_transport_test.go:TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses"
+          ]
+        },
+        {
+          "behavior": "Connection uses cached Cinder v3 and preserves typed preflight/getter causes without location work.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsPreflightAndGetterErrorsKeepCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagServiceMethodsKeepNative200AndCloudLookupDefaultsIndependent"
+          ]
+        },
+        {
+          "behavior": "Exact body and version ownership reuse common scoped POST policy.",
+          "tests": [
+            "blockstorage/volume_flag_transport_test.go:TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "New required-bool API remains independent of native200-only API and existing cloud defaultTrue lookup helper.",
+          "tests": [
+            "blockstorage/volume_flags_test.go:TestVolumeFlagServiceMethodsKeepNative200AndCloudLookupDefaultsIndependent"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-flags.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Proxy requires bootable; Resource defaultTrue does not create a Proxy/Go default.",
+        "Go bool narrows dynamic Python value domain; Source forwards values without descriptor BoolStr coercion.",
+        "Source accepts ID/Resource/dict/Munch/None through local _get_resource; safe UTF-8 single-segment ID Go input excludes those dynamic constructor paths and unsafe IDs.",
+        "No connected/disconnected Volume conversion, location computation, descriptor normalization or constructor warnings are claimed.",
+        "Finite discovery/first usable v3/max-before-min handling is a bounded SDK policy, not complete Keystoneauth endpoint discovery/cache/links/status-priority parity.",
+        "Missing maximum yields noMV; malformed accepted discovery is terminal evidence; clean direct404/405 fallback only.",
+        "Current official Keystoneauth normalization reference is not a verified pinned dependency runtime.",
+        "Source methods return None; Go deliberately returns owned Result and local completion evidence.",
+        "Go explicit100..399 admission is a bounded HTTP mapping of Source status<400.",
+        "SDK publishes response/error proof and local Completedfalse instead of Source None/raised error alone.",
+        "Current new flag case covers joined Read+Close+source+customcancel for bootableFalse with Close1 and native retry0.",
+        "Connection and typed service wrappers are SDK surfaces; no new Python cloud method or v2 promotion is inferred.",
+        "Underlying Python Adapter auth/retry/redirect behavior is dependency-owned; SDK imposes stronger sticky fixed scope/body/framing/header ownership.",
+        "New bootableFalse native503 retry with expanded400 rejection has an actual public assertion; dedicated bootable changed-body/version/307 matrix is not a new flag-specific case. Shared state transport remains explicit common-policy reuse only.",
+        "Native BootableOpts zero valueFalse serializes; nativeSetBootable accepts200 only; new acknowledgement mapping accepts wider Source sub400 codes.",
+        "New service test independently exercises native200/error-only, new Source203 acknowledgement, nilAPI labels, and existing cloud lookup/defaultTrue. It does not promote the native or cloud targets.",
+        "Only this actual pinned v3 Proxy declaration is mapped. Resource/inherited/v2/native targets, authenticated OpenStack/Python SDK runtime and full SDK completion are not classified by these offline Go contracts. Rejected POST body IO discarded by native Gophercloud remains a limitation."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/set_volume_readonly",
+      "source_fingerprint": "59e998ec1ddbaa5921edb1af8522e28d2e26efbc613a641afcbbb050be552aff",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.SetVolumeReadonly",
+        "gophercloudsdk.Connection.SetVolumeReadonly",
+        "gophercloudsdk/blockstorage/v3/volumes.API.SetVolumeReadonly",
+        "gophercloudsdk/blockstorage.WithVolumeReadonly",
+        "gophercloudsdk/blockstorage.WithVolumeReadonlyOptions",
+        "gophercloudsdk/blockstorage.PrepareVolumeReadonlyOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeReadonly",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeReadonlyOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeReadonlyOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetVolumeReadonly sends exactly {\"os-update_readonly_flag\":{\"readonly\":value}}. Omitted options or a nil Readonly field default to true; WithVolumeReadonly(false) and a nonnil false pointer retain explicit false.",
+          "tests": [
+            "blockstorage/volume_boolean_options_test.go:TestVolumeReadonlyOptionsDefaultsFalseReplacementAndFactoryCopies",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectActionsKeepRequiredBootableAndReadonlyDefaultWithoutLookup"
+          ]
+        },
+        {
+          "behavior": "Complete replacement, order and reusable factories own caller and returned bool pointers.",
+          "tests": [
+            "blockstorage/volume_boolean_options_test.go:TestVolumeReadonlyOptionsDefaultsFalseReplacementAndFactoryCopies",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectActionsKeepRequiredBootableAndReadonlyDefaultWithoutLookup"
+          ]
+        },
+        {
+          "behavior": "Original callbacks run in captured order and cannot replace callback slice or retained prior config.",
+          "tests": [
+            "blockstorage/volume_boolean_options_test.go:TestVolumeReadonlyOriginalsOwnCallbackSliceAndRetainedPointersThroughHTTP"
+          ]
+        },
+        {
+          "behavior": "Service-free Prepare preserves context/callback causes and stops later originals on failure.",
+          "tests": [
+            "blockstorage/volume_boolean_options_test.go:TestVolumeReadonlyPrepareStopsNilContextCancellationNilCallbackAndErrors",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagServiceMethodsKeepNative200AndCloudLookupDefaultsIndependent"
+          ]
+        },
+        {
+          "behavior": "Direct source capture and safe-ID validation precede originals; observed source violations are sticky.",
+          "tests": [
+            "blockstorage/volume_boolean_options_test.go:TestVolumeReadonlyDirectPreflightAndStickySourceErrorsStopLaterOriginals",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectPreflightPrecedesReadonlyOriginalsAndGuardsCapturedSource"
+          ]
+        },
+        {
+          "behavior": "Connection originals run once before cached getter, then only owned config factory reaches core.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeReadonlyPreparesOriginalsOnceBeforeGetter",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsUseCachedCinderAndIgnoreLocation",
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsPreflightAndGetterErrorsKeepCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagServiceMethodsKeepNative200AndCloudLookupDefaultsIndependent"
+          ]
+        },
+        {
+          "behavior": "Shared Volume3.71 negotiation and opaque evidence keep Discovery separate from Applied/Completed.",
+          "tests": [
+            "connection_volume_flags_test.go:TestConnectionVolumeFlagsKeepNegotiationAndAppliedStagesSeparate",
+            "blockstorage/volume_flag_transport_test.go:TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsDirectActionsKeepRequiredBootableAndReadonlyDefaultWithoutLookup",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsSelectedLiteralAndDiscoveryUseOwnedVolumeMicroversionPolicy"
+          ]
+        },
+        {
+          "behavior": "Owned false request survives bounded native retry and rejects changed bool before resend while preserving native evidence.",
+          "tests": [
+            "blockstorage/volume_flag_transport_test.go:TestVolumeReadonlyRetryPreservesFalseAndRejectsChangedFlag",
+            "blockstorage/volume_flag_transport_test.go:TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements",
+            "blockstorage/volume_flags_test.go:TestVolumeFlagServiceMethodsKeepNative200AndCloudLookupDefaultsIndependent"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-flags.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Proxy defaultsTrue; Resource requires readonly.",
+        "Go bool pointer omits/defaults nil; Source explicit dynamic None would forward JSONnull rather than become defaultTrue.",
+        "Options, full replacement and pointer ownership are SDK additions to a positional Source bool.",
+        "Source has no option callback layer; owned ordinary headers plus live auth are SDK policy.",
+        "Service-free preparation and nil callback validation are SDK additions; no HTTP/catalog selection occurs in Prepare.",
+        "Source Resource/dict/Munch/None constructor/model/location paths are excluded by typed safe-ID input.",
+        "SDK observes source/context around callback boundaries; it does not claim to detect a mutation restored entirely inside a single callback.",
+        "SDK Connection sequencing is distinct from direct Source capture sequencing; Prepare runs before selecting service.",
+        "No CurrentLocation, model normalization, lookup or v2 promotion is introduced.",
+        "Source None becomes SDK owned Result; no refreshed Volume/read-only/status model is fabricated.",
+        "Finite discovery and explicit100..399 admission remain bounded mappings; actual public tests bind per-target3.71/belowcap/minabovecap/missingmax and native/expanded400 rejection.",
+        "Current readonly-specific retry covers one503retry unchangedFalse and changedTrue rejection with original503method/URL/body/header via errors.As.",
+        "Exhaustive framing/version/307/auth variants are shared policy reuse, not additional new readonly flag cases.",
+        "Native AttachMode ReadOnly ro is unrelated; no native readonly action was invented.",
+        "Only this actual pinned v3 Proxy declaration is mapped. Resource/inherited/v2/native targets, authenticated OpenStack/Python SDK runtime and full SDK completion are not classified by these offline Go contracts. Rejected POST body IO discarded by native Gophercloud remains a limitation."
+      ],
+      "remaining": []
     }
   ]
 }

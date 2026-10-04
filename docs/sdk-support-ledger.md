@@ -1023,3 +1023,14 @@ catalog3362개에서 go_mapping140→144, unsupported1 유지, unresolved3221→
 전체 SDK는 계속 진행 중입니다.
 
 Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=144, unsupported=1, unresolved=3217.
+
+
+## Cinder v3 직접 bootable·readonly flag action
+
+실제 pinned Proxy `set_volume_bootable_status`와 `set_volume_readonly` 두 선언을 Go mapping으로 추가했습니다. `Connection`·package·v3 Volumes service는 명시적인 ID와 정확한 nested bool body를 사용합니다. bootable은 필수 bool이며 false를 생략하지 않습니다. readonly는 옵션 생략이나 nil Readonly 필드에서 true를 선택하고 `WithVolumeReadonly(false)`로 false를 보냅니다. 전체 policy 교체·원본 callback slice·각 bool pointer를 SDK가 복사하므로 caller builder 구현이 필요 없습니다. [사용법과 Python 비교](../blockstorage/volume-flags.md)에 세 호출 경로와 실행 가능한 한 action 예제를 제공합니다.
+
+직접 호출은 선택 Cinder source와 ID를 검사한 뒤 원본 readonly 옵션을 실행합니다. Connection은 provider/context preflight 뒤 원본을 한 번 준비하고 cached Cinder를 선택합니다. CurrentLocation·이름 조회·모델 변환·wait·refresh를 추가하지 않습니다. 선택된 nonempty version은 그대로 사용하고 나머지는 기존 Volume ceiling3.71의 유한 discovery를 재사용합니다. `Discovery`와 opaque `Applied`를 구분하며 `Completed`는 응답 처리의 acknowledgement입니다. 실제 서버 flag를 조회해 증명하는 상태가 아닙니다. 기존 native200-only `SetBootable`과 NameOrID/defaulttrue cloud helper는 별도 계약으로 유지합니다.
+
+[공개·service 5그룹](../blockstorage/volume_flags_test.go), [옵션 4그룹](../blockstorage/volume_boolean_options_test.go), [Connection 4그룹](../connection_volume_flags_test.go), [transport 2그룹](../blockstorage/volume_flag_transport_test.go)이 literal true/false·default·full replacement·factory 복사·원본 한 번 실행·오류 원인·3.71 선택·opaque 응답·native status·retry 중 body 변경 거부를 확인했습니다. 새 15개 테스트 그룹과 전체 39개 테스트 패키지가 `go test -mod=readonly -race -count=1 -timeout 60s ./...`에서 통과했습니다(전체 프로세스93.53초). `go vet -mod=readonly ./...`와 가이드의 정확한 단일 Go 예제 컴파일도 통과했습니다. Go 소스1714개는 전체 QA 중 변경되지 않았습니다. 이전1705개 중 common action 함수 한 파일만 분리하고 나머지1704개와 generated Go338개를 보존했습니다.
+
+기존 review451개와 source pins의 literal prefix·필드를 유지하고 이번 두 선언의 16개 계약·12개 공개 Go API 참조만 추가했습니다. 최종 declared inventory3362개 중 supported=0, go_mapping=146, unsupported=1, unresolved=3215입니다. typed safe ID/bool·owned acknowledgement·유한 discovery는 문서화한 Go 차이입니다. Resource/inherited/v2/native 선언이나 authenticated Python/OpenStack runtime을 함께 승격하지 않았으며 전체 SDK 목표는 진행 중입니다.

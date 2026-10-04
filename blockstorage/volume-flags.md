@@ -159,7 +159,7 @@ conn.block_storage.set_volume_readonly(volume_id, False)
 
 Bootable의 `bool`은 필수 인자이고 `false`도 그대로 body에 포함됩니다. Proxy에는 bootable 기본값이 없지만 Source Resource의 `Volume.set_bootable_status`만 defaulttrue입니다. Readonly는 Proxy의 defaulttrue를 nullable `VolumeReadonlyOpts.Readonly *bool`로 표현합니다. nil 또는 옵션 생략은 true이고, false pointer와 `WithVolumeReadonly(false)`는 false입니다.
 
-`WithVolumeReadonlyOptions(value)`는 생성 시 입력 pointer를 복사하고 호출할 때 전체 policy를 복사하여 교체합니다. 뒤에 온 옵션이 선택을 바꾸며, `WithVolumeReadonly(false)` 뒤에 `WithVolumeReadonlyOptions(VolumeReadonlyOpts{})`를 적용하면 최종 기본값 true로 돌아갑니다. Prepare가 반환한 default도 owned true pointer입니다. SDK는 callback마다 pointer와 original 옵션 slice를 복사하므로 caller가 보관한 입력·중간 policy가 이후 HTTP 값을 바꾸지 않습니다. nil 옵션과 callback 오류는 오류로 반환합니다.
+`WithVolumeReadonlyOptions(value)`는 생성 시 입력 pointer를 복사하고 호출할 때 전체 policy를 복사하여 교체합니다. 뒤에 온 옵션이 선택을 바꾸며, `WithVolumeReadonly(false)` 뒤에 `WithVolumeReadonlyOptions(VolumeReadonlyOpts{})`를 적용하면 최종 기본값 true로 돌아갑니다. Prepare가 반환한 default도 owned true pointer입니다. SDK는 original 옵션 slice를 실행 전에 복사하고 callback마다 bool pointer와 policy를 복사하므로 caller가 보관한 입력·중간 policy가 이후 HTTP 값을 바꾸지 않습니다. nil 옵션과 callback 오류는 오류로 반환합니다.
 
 직접 package/service readonly는 context·선택 source를 capture하고 ID를 검사한 **뒤** originals를 실행합니다. callback 전후 source/context guard를 확인합니다. Connection readonly는 context·Connection·provider preflight → originals Prepare 한 번 → ID 검사 → cached Cinder v3 선택 순서이고, core에는 owned complete policy를 전달합니다. 따라서 두 경로의 callback과 ID 검사 순서를 같다고 가정하지 않습니다. Bootable에는 옵션 callback이 없으며 Connection preflight와 ID 검사 후 cached Cinder를 선택합니다.
 
