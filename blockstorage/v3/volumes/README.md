@@ -66,3 +66,5 @@ SDK가 적용하며 SDK 시간 제한이 없습니다. `WaitForState`는 caller�
 [서비스 대기 가이드](../../../docs/service-waits.md)를 참고하세요.
 
 The service API adds `ReserveVolume(ctx, id)`, `UnreserveVolume(ctx, id)`, `BeginVolumeDetaching(ctx, id)` and `AbortVolumeDetaching(ctx, id)`. Each sends the pinned source's null action value and returns owned opaque acknowledgement plus separate discovery proof. Existing native `Reserve`, `Unreserve` and `BeginDetaching` retain their original body/status policy. See [the package and Connection examples](../../volume-actions.md).
+
+The service API adds `SetVolumeBootableStatus(ctx, id, bool)` and `SetVolumeReadonly(ctx, id, options...)`. Bootable requires an explicit bool; readonly defaults to true and `WithVolumeReadonly(false)` sends false. `WithVolumeReadonlyOptions` and `PrepareVolumeReadonlyOptions` own reusable policies without caller builders. Both actions return `VolumeActionResult` with separate discovery and opaque acknowledgement proof. Existing native `SetBootable` and attach modes keep their original contracts. See [the Connection and package flag examples](../../volume-flags.md).

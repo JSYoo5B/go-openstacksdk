@@ -16,6 +16,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.create_volume(size, wait=True, image=None, bootable=None, **kwargs)` | `conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: size}, options...)` |
 | `conn.update_volume(name_or_id, **kwargs)` | `conn.UpdateVolume(ctx, blockstorage.UpdateVolumeRequest{NameOrID: name}, options...)` |
 | `conn.set_volume_bootable(name_or_id, bootable=True)` | `conn.SetVolumeBootable(ctx, blockstorage.SetVolumeBootableRequest{NameOrID: name}, options...)` |
+| `conn.block_storage.set_volume_bootable_status(id, False)` | `conn.SetVolumeBootableStatus(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, false)` |
+| `conn.block_storage.set_volume_readonly(id, readonly=True)` | `conn.SetVolumeReadonly(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, options...)` |
 | `conn.delete_volume(name_or_id, wait=True, force=False)` | `conn.DeleteVolume(ctx, blockstorage.DeleteVolumeRequest{Volume: resource.ID(volumeID)}, options...)` |
 | `conn.get_volume_attach_device(volume, server_id)` | `blockstorage.GetVolumeAttachDevice(volume, serverID)` 또는 `GetVolumeAttachDeviceFields(fields, serverID)` |
 | `conn.get_volumes(server)` | `conn.GetVolumes(ctx, blockstorage.GetVolumesRequest{ServerID: serverID})` |
@@ -169,3 +171,5 @@ Backup 복원은 `RestoreVolumeBackup`의 With 옵션으로 volume ID 또는 새
 Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupService, BackupURL}`을 전달합니다. [Import 사용법과 Python/native 비교](volume-backup-import.md)에 package·Connection·v3 service 호출, opaque locator 문자열과 nullable Backup 결과를 설명합니다.
 
 명시적인 volume ID의 reserve·unreserve·begin/abort detaching은 [Volume action 사용법](volume-actions.md)을 참고합니다. 네 helper에는 lookup/wait 옵션이 없으며, `Completed`는 action acknowledgement입니다. 기존 cloud bootable helper와 직접 Proxy bootable/readonly의 범위를 구별합니다.
+
+직접 ID flag action은 `SetVolumeBootableStatus`의 필수 bool과 `SetVolumeReadonly`의 defaulttrue·`WithVolumeReadonly(false)`를 SDK가 처리합니다. [Flag action 사용법](volume-flags.md)은 기존 NameOrID/defaulttrue cloud `SetVolumeBootable`과 native200-only `SetBootable`의 차이, 세 호출 경로 및 부분 응답 증거를 설명합니다.
