@@ -79,6 +79,10 @@ func (c *Connection) prepareSnapshotSearch(ctx context.Context, options []blocks
 }
 
 func (c *Connection) snapshotClient(ctx context.Context, location **resource.CloudLocation) (*gophercloud.ServiceClient, error) {
+	return c.cinderCloudReadClient(ctx, location)
+}
+
+func (c *Connection) cinderCloudReadClient(ctx context.Context, location **resource.CloudLocation) (*gophercloud.ServiceClient, error) {
 	if *location == nil {
 		owned, err := c.CurrentLocation()
 		if err != nil {
