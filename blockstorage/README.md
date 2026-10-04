@@ -25,6 +25,10 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.get_volume_by_id(id)` | `conn.GetVolumeByID(ctx, blockstorage.GetVolumeByIDRequest{ID: id}, options...)` |
 | `conn.get_volume_id(name_or_id)` | `conn.GetVolumeID(ctx, blockstorage.GetVolumeIDRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_limits(name_or_id=None)` | `conn.GetVolumeLimits(ctx, blockstorage.GetVolumeLimitsRequest{NameOrID: name})` |
+| `conn.list_volume_snapshots(detailed=True, filters=None)` | `conn.ListVolumeSnapshots(ctx, options...)` |
+| `conn.search_volume_snapshots(name_or_id, filters)` | `conn.SearchVolumeSnapshots(ctx, blockstorage.SearchVolumeSnapshotsRequest{NameOrID: name}, options...)` |
+| `conn.get_volume_snapshot(name_or_id, filters=None)` | `conn.GetVolumeSnapshot(ctx, blockstorage.GetVolumeSnapshotRequest{NameOrID: name}, options...)` |
+| `conn.get_volume_snapshot_by_id(id)` | `conn.GetVolumeSnapshotByID(ctx, blockstorage.GetVolumeSnapshotByIDRequest{ID: id}, options...)` |
 | `conn.list_volume_types()` | `conn.ListVolumeTypes(ctx, options...)` |
 | `conn.search_volume_types(name_or_id, filters)` | `conn.SearchVolumeTypes(ctx, blockstorage.SearchVolumeTypesRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_type(name_or_id, filters=None)` | `conn.GetVolumeType(ctx, blockstorage.GetVolumeTypeRequest{NameOrID: name}, options...)` |
@@ -122,3 +126,5 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 타입의 프로젝트 접근 권한은 `GetVolumeTypeAccess`·`AddVolumeTypeAccess`·`RemoveVolumeTypeAccess`로 조회·변경합니다. [접근 권한 사용법과 Python 비교](volume-type-access.md)에 타입 조회 후의 실제 응답 ID 사용, 원본 JSON 값, literal 프로젝트 ID, 단계별 응답 증거와 오류를 설명합니다. 프로젝트 존재 확인은 서버가 처리하며, 변경 응답은 권한 변경의 완료를 보장하지 않습니다.
 
 [볼륨 limits 조회](volume-limits.md)는 빈 입력의 Identity 생략, 다른 프로젝트의 strict 조회, raw/nullable 모델과 단계별 증거를 설명합니다. 기본값과 옵션 적용은 SDK가 담당합니다.
+
+Snapshot의 상세 목록·서버/local 필터와 Search 필터, exact 이름/ID 조회·literal ID 조회는 [Snapshot 사용법과 Python 비교](volume-snapshots.md)에 설명합니다. `Value`는 nullable 16-field logical JSON이고 일반 조회의 `Snapshot`·`Snapshots`는 actual wire rows입니다. 일반 빈 목록의 `Snapshots`는 nonnil 빈 slice이며 expression 결과에는 raw row 연결을 만들지 않습니다. 오류에도 실제 `Observed`·`Pages` 증거를 유지합니다.

@@ -42,6 +42,8 @@ gophercloudsdk/
 
 기존 Cinder 볼륨을 서버에 연결할 때는 `conn.AttachVolume`이 이름 해석·새 상태 확인·Nova 연결 요청·기본 완료 대기를 처리합니다. `blockstorage.WithAttachVolumeWait(false)`로 접수 결과만 받거나 대기 정책을 지정할 수 있으며, 대기 실패에도 연결 응답을 보존합니다. [Python과의 호출 비교 및 부분 결과](blockstorage/attach-volume.md)를 참고하세요. 기존 볼륨 분리는 `conn.DetachVolume`이 Nova DELETE와 기본 Cinder 완료 대기를 처리합니다. 대기를 끄고 볼륨 ID를 지정하면 Cinder 초기화 없이 호출할 수 있습니다. [분리 사용법과 Python 비교](blockstorage/detach-volume.md)에 실제 timeout과 접수 결과를 설명합니다. 새 볼륨은 `conn.CreateVolume`이 생성·기본 대기·선택적인 bootable 처리를 묶습니다. [생성 사용법과 Python 비교](blockstorage/create-volume.md)에 이미지 선택과 생성 속성을 설명합니다. 삭제는 `conn.DeleteVolume`이 초기 조회·선택적 강제 요청·기본 완료 대기를 처리합니다. [삭제 사용법과 Python 비교](blockstorage/delete-volume.md)에 초기 부재와 삭제 경합, 단계별 결과를 설명합니다.
 
+Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolumeSnapshot`, `GetVolumeSnapshotByID`로 조회합니다. SDK가 상세 목록 기본값·서버와 로컬 필터 분류·검색·nullable 변환·단계별 응답 증거를 처리합니다. [Snapshot 조회와 Python 비교](blockstorage/volume-snapshots.md)에 source의 seeded ID, maximum/pagination 경계와 raw resource 사용법을 설명합니다.
+
 이미 받은 owned/native 볼륨의 attachment device는 `blockstorage.GetVolumeAttachDevice`로 조회합니다. 원래 JSON 값은 `GetVolumeAttachDeviceFields`로 읽으며 두 함수 모두 HTTP 없이 동작합니다. [서버별 device 조회와 Python 비교](blockstorage/volume-attachment-device.md)에 네 가지 typed 입력, 첫 일치와 local 오류를 설명합니다.
 
 서버에 연결된 볼륨은 `conn.GetVolumes`로 조회합니다. 전체 목록을 읽은 뒤 attachment를 비교하고 raw resource를 반환하며, 오류 시 실제 페이지 증거를 남깁니다. [서버별 볼륨 목록과 Python 비교](blockstorage/server-volumes.md)에 ServerFields·중복 pointer·Decode·Clone을 설명합니다.
