@@ -161,3 +161,7 @@ Python v3 cloud의 raw Response를 대상으로 하며 native typed Export와 �
 `ExportVolumeBackupRecord`는 UTF-8의 전체 JSON 한 값을 owned literal `Value`로 반환합니다.
 [Raw/JSON/native typed export 비교](volume-backup-export-record.md)에 이름이 비슷한 Python Proxy 두 선언,
 기존 native typed `Export`, Connection/direct 경로와 parse 오류의 phase proof를 설명합니다.
+
+Backup 복원은 `RestoreVolumeBackup`의 With 옵션으로 volume ID 또는 새 이름과 cached Seed를 지정합니다.
+상태 변경은 `ResetVolumeBackupStatus`에 status 문자열을 명시합니다.
+[복원·상태 변경 사용법과 Python/native 비교](volume-backup-actions.md)에 Connection·직접 package·v3 service 호출과 부분 결과를 설명합니다.

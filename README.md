@@ -439,3 +439,7 @@ opaque bytes·header·status, literal ID 요청과 오류 시 실제 응답 증�
 Backup export의 JSON 값은 `conn.ExportVolumeBackupRecord(ctx, blockstorage.ExportVolumeBackupRecordRequest{BackupID: backupID})`로 받습니다.
 [Raw/JSON/native typed export 비교](blockstorage/volume-backup-export-record.md)에 cached Cinder의
 `Backups.ExportRecord`·`ExportBackup`, owned JSON literal과 오류 시 실제 응답 증거를 설명합니다.
+
+Backup 복원과 상태 변경은 `conn.RestoreVolumeBackup`·`conn.ResetVolumeBackupStatus`로 호출합니다.
+[사용법과 Python/native 비교](blockstorage/volume-backup-actions.md)에 With 옵션, cached 필드 병합,
+선택한 restore microversion과 reset의 3.64 정책, 오류 시 실제 응답 증거를 설명합니다.
