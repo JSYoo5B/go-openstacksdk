@@ -29605,6 +29605,351 @@
         "Computed location follows the existing owned Volume/recorded-scope mapping. Local caller Location errors remain separate from physical response/descriptor errors. Disconnected mutable Resource and Type constructor raw computed-location edge cases remain independent profiles, with no current connected Volume helper defect indicated."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/list_volume_types",
+      "source_fingerprint": "a8e74aa4cb422e7dfc847f9174733c22de2bf33fa35749b5ceff5303da853e3e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.ListVolumeTypes",
+        "gophercloudsdk/blockstorage.ListVolumeTypes"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListVolumeTypes completes the raw v3 /types sequence with no initial visibility/name/detail/limit query or per-type extra-spec request. Every row view is constructed before continuation, response order and duplicate occurrences survive, and Value/Types commit only after complete success with an owned empty array for an empty list.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestListVolumeTypesCompletesQuerylessPagesAndOwnsSixFieldViewsAndWireProof",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypesEmptyCanonicalListIgnoresUnusedLinksAndLocation",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesCachedCinderOriginalOptionsPrecedeSelection"
+          ]
+        },
+        {
+          "behavior": "Every visited row is eagerly normalized to exactly id, name, description, extra_specs, is_public and location. Untyped attributes and original unknown wire fields stay owned; dictionary null is retained and nonobjects become an empty object; public aliases use ordinary JSON truthiness. RawResource, normalized Value and physical proof do not alias.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewHasOnlySixDescriptorsAndOwnsAllValues",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewBooleanAndDictionaryDescriptorsRetainDeclaredJSONPolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewAliasOrderAndDeclaredDuplicatePolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewRejectsNonobjectsMalformedJSONAndUTF8Atomically",
+            "blockstorage/volume_types_contract_test.go:TestListVolumeTypesCompletesQuerylessPagesAndOwnsSixFieldViewsAndWireProof"
+          ]
+        },
+        {
+          "behavior": "List construction preserves arbitrary canonical wire location only when no recognized Body attribute was consumed; a known null also counts as presence. Member translation always uses computed location. Unknown metadata/project/zone fields do not become descriptors or inferred scope. Caller-invalid owned Location is consumed lazily and stays a local ErrInvalidOption without borrowing200 ResponseError; admitted proof remains.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewListWireLocationIsLazyAndMemberAlwaysUsesOwnedLocation",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewKnownPresenceIncludingNullDiscardsRawLocation",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeInvalidOwnedLocationIsLazyAndNeverFabricatesResponseError",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase"
+          ]
+        },
+        {
+          "behavior": "After a nonempty canonical page, source top-level links presence suppresses plural volume_types_links. The first exact next relation with present href is consumed; falsey href ends that scan and falls to body next, then usable HTTP and finally native singular compatibility. Consumed errors stop fallback. Next nonblank query values replace matching current keys after old marker/limit removal, while omitted nonpagination keys persist. Reader validates origin, escaped path and canonical URL cycles before another request; empty resource array stops without consuming unused continuation.",
+          "tests": [
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextSourcePrecedenceAndFirstConsumedHref",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextConsumedShapesAndFalseyValues",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextBodyThenHTTPThenNativeCompatibility",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextHTTPQuotedLinksUseLastNextAcrossHeaders",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextQueryMergeDropsBlankValuesAndOwnsInputs",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextChecksOriginalHrefBeforeURLSerialization",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextRequiresReaderOriginPathAndCycleValidation",
+            "internal/rest/header_next_test.go:TestHeaderNextLinksPreservesQuotedDelimitersAndRelationOrder",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypesEmptyCanonicalListIgnoresUnusedLinksAndLocation",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRespectsSourcePrecedenceAndLazyFirstMatchingHref",
+            "blockstorage/volume_types_pagination_test.go:TestGetVolumeTypeContinuationMergesVisibilityDropsPaginationAndBlankAdvertisedValues",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRejectsConsumedLinksOriginPathFragmentsAndQueryCycles"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture Cinder/service/header facts before originals. Original callbacks and retained factory values run once from owned snapshots; source provider/endpoint/resource base/type/microversion drift is sticky and stops a restoring callback or later exchange. Captured ordinary headers remain fixed and live authentication is available. Connection executes originals before CurrentLocation and cached Cinder v3 selection, then delegates an owned policy.",
+          "tests": [
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalOptionsOwnFactoriesRetainedStateHeadersAndCallbackSlice",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalSourceMutationStopsBeforeRestoringOptionAndHTTP",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypePreflightContextRoleAndOriginalCallbacksFailBeforeHTTP",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesPreflightAndGetterFailuresKeepExactOperationContext"
+          ]
+        },
+        {
+          "behavior": "Fixed bodyless accepted200 exchanges retain native rejected status/header/body and authentication behavior without SDK orchestration replay. Admitted read, Close, canonical-schema, source and cancellation failures preserve actual independent proof and joined context.Cause while logical values remain uncommitted. A later failed page never borrows an earlier accepted response as its physical error.",
+          "tests": [
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesAcceptedReadCloseCancellationRetainsAllCausesAndIndependentCurrentProof",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesStrictCanonicalAcceptedEnvelopesNeverProduceLogicalValues",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesPostResponseSourceChangesKeepCurrentAdmittedProofAndStop",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesBlockedContinuationCancellationKeepsPriorPageAndCallerCause",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesAcceptedProofSurvivesReadCloseCancellationAndSourceDrift"
+          ]
+        },
+        {
+          "behavior": "Connection snapshots current location after originals for each operation and refreshes it on the next call. Complete read/search overrides and callback output own their pointers/raw JSON, keep an explicit Zone and leave defaults unchanged. Invalid recorded scope prevents cached service selection unless a complete override supplies the facts; direct recorded project scope is a snapshot without enrichment I/O.",
+          "tests": [
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesInvalidRecordedScopePreventsSelectionButOwnedLocationWorks",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-types.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Deprecated get_extra is a warning-only no-op in pinned list_volume_types and is omitted from Go; no extra-spec enrichment is lost. Go does not reproduce warning delivery.",
+        "Go selects Cinder v3 under Gophercloud v2.15.0. Only this actual cloud helper is mapped; independent v2 Type, native/Proxy declarations, generic Resource/session/cache, access and mutation profiles are not promoted by this row.",
+        "The six-field view follows v3 Type descriptors, with unknown original wire fields retained only in RawResource. Go owns raw JSON and exact numeric text; this is not a claim that a plain Go map reproduces the complete mutable Python Resource runtime.",
+        "Go public aliases and repeated wire keys consume textual order and the last value wins. Python json.loads collapses repeated keys at their first insertion position before alias descriptor consumption; interleaved duplicate/alias inputs can differ. Existing exact mathematical JSON truthiness also keeps 1e-9999 nonzero whereas ordinary Python float decoding can underflow to false.",
+        "List rows with no recognized Body key preserve canonical wire location, including false/null/arbitrary JSON; known-key presence discards it and member translation always ignores wire computed location. Go supplies owned current scope or a complete override, retaining override Zone and performing no unknown owner/zone inference. Local caller Location failures remain separate from physical response failures.",
+        "Usable HTTP Link fallback is a declared Go repair: pinned Resource._get_next_link reads response.links[next][uri] but ordinary Requests returns url. Existing quoted Link parsing handles multiple angle targets, quoted delimiters, case-insensitive/multi-relation next and last-next replacement across headers. Native canonical singular volume_type_links is an explicit lower-priority compatibility extension; Python derives plural volume_types_links.",
+        "Next query uses source-style nonblank parse_qs merge, with old marker/limit removed and omitted nonpagination keys retained; explicit advertised keys replace current keys. Go encodes one merged query and preserves effective advertised paths instead of copying source relative /v prefix stripping or query-only URL-plus-params duplication. No initial caller limit or invented numeric marker fallback is exposed.",
+        "Strict canonical UTF-8 envelopes and accepted200, fragment/userinfo/opaque/query/origin/escaped-path checks and complete-URL cycle detection are Go safety boundaries. Source Resource.list permits other shapes and has separate same-marker bookkeeping, so these rules are intentional mappings rather than generic pagination equivalence.",
+        "Go exposes independently owned normalized values, raw resources and actual physical response proof with errors and joined cancellation causes. Native protected request retry is retained; SDK workflow replay, mutable session negotiation and cached object lifecycle are separate scope."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/search_volume_types",
+      "source_fingerprint": "5dbcf81e2e92d115cd368d5c0800e42419afbca026897a49d29dc19b31d76b97",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.SearchVolumeTypes",
+        "gophercloudsdk/blockstorage.SearchVolumeTypes"
+      ],
+      "contracts": [
+        {
+          "behavior": "SearchVolumeTypes first completes queryless ListVolumeTypes and all eager descriptor/location views, then performs row-by-row exact or fnmatch-style name/ID selection followed by filters. Source order and duplicate occurrences remain. A later page/descriptor failure wins before filter interpretation; local filter errors do not borrow a successful response as ResponseError.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestSearchVolumeTypesCompletesAllPagesAndPreservesExactGlobDuplicateSelection",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeLocalFiltersFollowCompleteEagerNormalizationAndKeepOnlyOriginPages",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesCachedCinderOriginalOptionsPrecedeSelection"
+          ]
+        },
+        {
+          "behavior": "Owned JSON filters preserve omission and arbitrary explicit values. Falsey filters retain identifier-selected rows; dictionaries compare normalized nested fields with selected Python JSON equality and lazy error consumption. Nonempty strings evaluate the shared full JMESPath engine and can return any JSON type. Expressions never invent a RawResource association.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeExpressionsKeepDynamicSearchAndGetterFirstValueSemantics",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeLocalFiltersFollowCompleteEagerNormalizationAndKeepOnlyOriginPages",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeSearchMappingUsesNormalizedSubsetsAndOrderedLazyErrors",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesExpressionFactoriesOwnFiltersAndDoNotInventRawRows"
+          ]
+        },
+        {
+          "behavior": "Every visited row is eagerly normalized to exactly id, name, description, extra_specs, is_public and location. Untyped attributes and original unknown wire fields stay owned; dictionary null is retained and nonobjects become an empty object; public aliases use ordinary JSON truthiness. RawResource, normalized Value and physical proof do not alias.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewHasOnlySixDescriptorsAndOwnsAllValues",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewBooleanAndDictionaryDescriptorsRetainDeclaredJSONPolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewAliasOrderAndDeclaredDuplicatePolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewRejectsNonobjectsMalformedJSONAndUTF8Atomically",
+            "blockstorage/volume_types_contract_test.go:TestListVolumeTypesCompletesQuerylessPagesAndOwnsSixFieldViewsAndWireProof"
+          ]
+        },
+        {
+          "behavior": "List construction preserves arbitrary canonical wire location only when no recognized Body attribute was consumed; a known null also counts as presence. Member translation always uses computed location. Unknown metadata/project/zone fields do not become descriptors or inferred scope. Caller-invalid owned Location is consumed lazily and stays a local ErrInvalidOption without borrowing200 ResponseError; admitted proof remains.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewListWireLocationIsLazyAndMemberAlwaysUsesOwnedLocation",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewKnownPresenceIncludingNullDiscardsRawLocation",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeInvalidOwnedLocationIsLazyAndNeverFabricatesResponseError",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase"
+          ]
+        },
+        {
+          "behavior": "After a nonempty canonical page, source top-level links presence suppresses plural volume_types_links. The first exact next relation with present href is consumed; falsey href ends that scan and falls to body next, then usable HTTP and finally native singular compatibility. Consumed errors stop fallback. Next nonblank query values replace matching current keys after old marker/limit removal, while omitted nonpagination keys persist. Reader validates origin, escaped path and canonical URL cycles before another request; empty resource array stops without consuming unused continuation.",
+          "tests": [
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextSourcePrecedenceAndFirstConsumedHref",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextConsumedShapesAndFalseyValues",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextBodyThenHTTPThenNativeCompatibility",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextHTTPQuotedLinksUseLastNextAcrossHeaders",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextQueryMergeDropsBlankValuesAndOwnsInputs",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextChecksOriginalHrefBeforeURLSerialization",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextRequiresReaderOriginPathAndCycleValidation",
+            "internal/rest/header_next_test.go:TestHeaderNextLinksPreservesQuotedDelimitersAndRelationOrder",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypesEmptyCanonicalListIgnoresUnusedLinksAndLocation",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRespectsSourcePrecedenceAndLazyFirstMatchingHref",
+            "blockstorage/volume_types_pagination_test.go:TestGetVolumeTypeContinuationMergesVisibilityDropsPaginationAndBlankAdvertisedValues",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRejectsConsumedLinksOriginPathFragmentsAndQueryCycles"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture Cinder/service/header facts before originals. Original callbacks and retained factory values run once from owned snapshots; source provider/endpoint/resource base/type/microversion drift is sticky and stops a restoring callback or later exchange. Captured ordinary headers remain fixed and live authentication is available. Connection executes originals before CurrentLocation and cached Cinder v3 selection, then delegates an owned policy.",
+          "tests": [
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalOptionsOwnFactoriesRetainedStateHeadersAndCallbackSlice",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalSourceMutationStopsBeforeRestoringOptionAndHTTP",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypePreflightContextRoleAndOriginalCallbacksFailBeforeHTTP",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesPreflightAndGetterFailuresKeepExactOperationContext"
+          ]
+        },
+        {
+          "behavior": "Fixed bodyless accepted200 exchanges retain native rejected status/header/body and authentication behavior without SDK orchestration replay. Admitted read, Close, canonical-schema, source and cancellation failures preserve actual independent proof and joined context.Cause while logical values remain uncommitted. A later failed page never borrows an earlier accepted response as its physical error.",
+          "tests": [
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesAcceptedReadCloseCancellationRetainsAllCausesAndIndependentCurrentProof",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesStrictCanonicalAcceptedEnvelopesNeverProduceLogicalValues",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesPostResponseSourceChangesKeepCurrentAdmittedProofAndStop",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesBlockedContinuationCancellationKeepsPriorPageAndCallerCause",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesAcceptedProofSurvivesReadCloseCancellationAndSourceDrift"
+          ]
+        },
+        {
+          "behavior": "Connection snapshots current location after originals for each operation and refreshes it on the next call. Complete read/search overrides and callback output own their pointers/raw JSON, keep an explicit Zone and leave defaults unchanged. Invalid recorded scope prevents cached service selection unless a complete override supplies the facts; direct recorded project scope is a snapshot without enrichment I/O.",
+          "tests": [
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesInvalidRecordedScopePreventsSelectionButOwnedLocationWorks",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-types.md",
+        "blockstorage/search-volumes.md",
+        "internal/jmespath/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Pinned search_volume_types warns for non-None get_extra then calls list_volume_types without that value; get_extra produces no enrichment and is omitted. Go also omits the deprecated JMESPath/logging warning channel while retaining functional filter behavior.",
+        "Go models name_or_id as a string and JSON filters as owned bytes. Arbitrary Python object coercions are outside the ordinary JSON direct-helper contract. The reused shared JMESPath engine declares exact-number, finite arithmetic/allocation and deterministic unordered-object boundaries in its independent guide; this row does not promote that dependency declaration.",
+        "Go selects Cinder v3 under Gophercloud v2.15.0. Only this actual cloud helper is mapped; independent v2 Type, native/Proxy declarations, generic Resource/session/cache, access and mutation profiles are not promoted by this row.",
+        "The six-field view follows v3 Type descriptors, with unknown original wire fields retained only in RawResource. Go owns raw JSON and exact numeric text; this is not a claim that a plain Go map reproduces the complete mutable Python Resource runtime.",
+        "Go public aliases and repeated wire keys consume textual order and the last value wins. Python json.loads collapses repeated keys at their first insertion position before alias descriptor consumption; interleaved duplicate/alias inputs can differ. Existing exact mathematical JSON truthiness also keeps 1e-9999 nonzero whereas ordinary Python float decoding can underflow to false.",
+        "List rows with no recognized Body key preserve canonical wire location, including false/null/arbitrary JSON; known-key presence discards it and member translation always ignores wire computed location. Go supplies owned current scope or a complete override, retaining override Zone and performing no unknown owner/zone inference. Local caller Location failures remain separate from physical response failures.",
+        "Usable HTTP Link fallback is a declared Go repair: pinned Resource._get_next_link reads response.links[next][uri] but ordinary Requests returns url. Existing quoted Link parsing handles multiple angle targets, quoted delimiters, case-insensitive/multi-relation next and last-next replacement across headers. Native canonical singular volume_type_links is an explicit lower-priority compatibility extension; Python derives plural volume_types_links.",
+        "Next query uses source-style nonblank parse_qs merge, with old marker/limit removed and omitted nonpagination keys retained; explicit advertised keys replace current keys. Go encodes one merged query and preserves effective advertised paths instead of copying source relative /v prefix stripping or query-only URL-plus-params duplication. No initial caller limit or invented numeric marker fallback is exposed.",
+        "Strict canonical UTF-8 envelopes and accepted200, fragment/userinfo/opaque/query/origin/escaped-path checks and complete-URL cycle detection are Go safety boundaries. Source Resource.list permits other shapes and has separate same-marker bookkeeping, so these rules are intentional mappings rather than generic pagination equivalence.",
+        "Go exposes independently owned normalized values, raw resources and actual physical response proof with errors and joined cancellation causes. Native protected request retry is retained; SDK workflow replay, mutable session negotiation and cached object lifecycle are separate scope."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_type",
+      "source_fingerprint": "9243377a5876483887b0679af882a08b14630f20964897e7ce67cd43e717ffaf",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.GetVolumeType",
+        "gophercloudsdk/blockstorage.GetVolumeType"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted or literal-null filters use exact identity lookup. Safe identities send a fixed bodyless member GET with lowercase is_public=none; compatible clean rejected400/403/404 fall back to a /types list retaining is_public=none but no name hint. Successful member values keep actual untyped response identity rather than an input-ID shortcut. Unsafe literal identities use existing exact list-only routing.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestGetVolumeTypeOmittedAndNullFiltersKeepMemberQueryAndFreshCanonicalIdentity",
+            "blockstorage/volume_types_contract_test.go:TestGetVolumeTypeDefaultFallbackUsesNoneWithoutNameHintAndWaitsForExactAbsence",
+            "connection_volume_types_test.go:TestConnectionGetVolumeTypeDefaultAndExplicitFalseyFilterRoutes"
+          ]
+        },
+        {
+          "behavior": "Default exact fallback confirms absence only after successful complete search and stops on its second exact match before unused bad rows or links. Visited descriptors remain eager. Later native/transport/admitted failures retain their own evidence without borrowing the suppressed member400/404; no incomplete Type/Value is committed.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestGetVolumeTypeDefaultFallbackUsesNoneWithoutNameHintAndWaitsForExactAbsence",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeExactFindStopsAtSecondMatchWhileSearchConsumesUnusedBadRowAndLink",
+            "blockstorage/volume_types_transport_test.go:TestGetVolumeTypeFallbackFailuresKeepOnlyActualCurrentPhaseEvidence"
+          ]
+        },
+        {
+          "behavior": "Every explicit nonnull filter, including {}, [], false, zero and empty string, selects complete queryless SearchVolumeTypes. Getter then applies source truthiness, length and integer-index-zero semantics to any JSON expression output: successful absence is nil Value, selected false/zero/empty string remain values, multiple matches wrap ErrAmbiguous, and invalid length/index operations remain errors. Expression output never invents a Type pointer.",
+          "tests": [
+            "blockstorage/volume_types_contract_test.go:TestGetVolumeTypeEveryNonnullFalseyFilterUsesFullQuerylessSearch",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypeExpressionsKeepDynamicSearchAndGetterFirstValueSemantics",
+            "connection_volume_types_test.go:TestConnectionGetVolumeTypeDefaultAndExplicitFalseyFilterRoutes",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesExpressionFactoriesOwnFiltersAndDoNotInventRawRows"
+          ]
+        },
+        {
+          "behavior": "Every visited row is eagerly normalized to exactly id, name, description, extra_specs, is_public and location. Untyped attributes and original unknown wire fields stay owned; dictionary null is retained and nonobjects become an empty object; public aliases use ordinary JSON truthiness. RawResource, normalized Value and physical proof do not alias.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewHasOnlySixDescriptorsAndOwnsAllValues",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewBooleanAndDictionaryDescriptorsRetainDeclaredJSONPolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewAliasOrderAndDeclaredDuplicatePolicy",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewRejectsNonobjectsMalformedJSONAndUTF8Atomically",
+            "blockstorage/volume_types_contract_test.go:TestListVolumeTypesCompletesQuerylessPagesAndOwnsSixFieldViewsAndWireProof"
+          ]
+        },
+        {
+          "behavior": "List construction preserves arbitrary canonical wire location only when no recognized Body attribute was consumed; a known null also counts as presence. Member translation always uses computed location. Unknown metadata/project/zone fields do not become descriptors or inferred scope. Caller-invalid owned Location is consumed lazily and stays a local ErrInvalidOption without borrowing200 ResponseError; admitted proof remains.",
+          "tests": [
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewListWireLocationIsLazyAndMemberAlwaysUsesOwnedLocation",
+            "blockstorage/volume_type_view_test.go:TestVolumeTypeViewKnownPresenceIncludingNullDiscardsRawLocation",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeInvalidOwnedLocationIsLazyAndNeverFabricatesResponseError",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase"
+          ]
+        },
+        {
+          "behavior": "After a nonempty canonical page, source top-level links presence suppresses plural volume_types_links. The first exact next relation with present href is consumed; falsey href ends that scan and falls to body next, then usable HTTP and finally native singular compatibility. Consumed errors stop fallback. Next nonblank query values replace matching current keys after old marker/limit removal, while omitted nonpagination keys persist. Reader validates origin, escaped path and canonical URL cycles before another request; empty resource array stops without consuming unused continuation.",
+          "tests": [
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextSourcePrecedenceAndFirstConsumedHref",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextConsumedShapesAndFalseyValues",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextBodyThenHTTPThenNativeCompatibility",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextHTTPQuotedLinksUseLastNextAcrossHeaders",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextQueryMergeDropsBlankValuesAndOwnsInputs",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextChecksOriginalHrefBeforeURLSerialization",
+            "blockstorage/volume_types_next_test.go:TestVolumeTypesNextRequiresReaderOriginPathAndCycleValidation",
+            "internal/rest/header_next_test.go:TestHeaderNextLinksPreservesQuotedDelimitersAndRelationOrder",
+            "blockstorage/volume_types_contract_test.go:TestVolumeTypesEmptyCanonicalListIgnoresUnusedLinksAndLocation",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRespectsSourcePrecedenceAndLazyFirstMatchingHref",
+            "blockstorage/volume_types_pagination_test.go:TestGetVolumeTypeContinuationMergesVisibilityDropsPaginationAndBlankAdvertisedValues",
+            "blockstorage/volume_types_pagination_test.go:TestVolumeTypesPaginationRejectsConsumedLinksOriginPathFragmentsAndQueryCycles"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture Cinder/service/header facts before originals. Original callbacks and retained factory values run once from owned snapshots; source provider/endpoint/resource base/type/microversion drift is sticky and stops a restoring callback or later exchange. Captured ordinary headers remain fixed and live authentication is available. Connection executes originals before CurrentLocation and cached Cinder v3 selection, then delegates an owned policy.",
+          "tests": [
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalOptionsOwnFactoriesRetainedStateHeadersAndCallbackSlice",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeOriginalSourceMutationStopsBeforeRestoringOptionAndHTTP",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypePreflightContextRoleAndOriginalCallbacksFailBeforeHTTP",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesPreflightAndGetterFailuresKeepExactOperationContext"
+          ]
+        },
+        {
+          "behavior": "Fixed bodyless accepted200 exchanges retain native rejected status/header/body and authentication behavior without SDK orchestration replay. Admitted read, Close, canonical-schema, source and cancellation failures preserve actual independent proof and joined context.Cause while logical values remain uncommitted. A later failed page never borrows an earlier accepted response as its physical error. Native auth retry preserves exact is_public=none request ownership; caller retry body/response-decoder mutation rejects before resend; ordinary native retry headers and OkCodes expansion remain supported, while an actual unrequested status is rejected afterward with native response evidence and no admitted proof.",
+          "tests": [
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesAcceptedReadCloseCancellationRetainsAllCausesAndIndependentCurrentProof",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesStrictCanonicalAcceptedEnvelopesNeverProduceLogicalValues",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesPostResponseSourceChangesKeepCurrentAdmittedProofAndStop",
+            "blockstorage/volume_types_transport_test.go:TestVolumeTypesBlockedContinuationCancellationKeepsPriorPageAndCallerCause",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesAcceptedProofSurvivesReadCloseCancellationAndSourceDrift",
+            "blockstorage/volume_types_transport_test.go:TestGetVolumeTypeNativeAuthenticationRetriesKeepNoneQueryAndOneAcceptedProof",
+            "blockstorage/volume_types_transport_test.go:TestGetVolumeTypeNativeRetryPreservesBodyOwnershipAndOriginalAcceptedStatus",
+            "blockstorage/volume_types_transport_test.go:TestGetVolumeTypeAcceptedReadContainingNative404IsTerminalWithoutFallback"
+          ]
+        },
+        {
+          "behavior": "Connection snapshots current location after originals for each operation and refreshes it on the next call. Complete read/search overrides and callback output own their pointers/raw JSON, keep an explicit Zone and leave defaults unchanged. Invalid recorded scope prevents cached service selection unless a complete override supplies the facts; direct recorded project scope is a snapshot without enrichment I/O.",
+          "tests": [
+            "connection_volume_types_test.go:TestConnectionVolumeTypesLocationSnapshotAndListMemberPhase",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesOwnedFactoriesAndOriginalOptionSliceSnapshots",
+            "connection_volume_types_test.go:TestConnectionVolumeTypesInvalidRecordedScopePreventsSelectionButOwnedLocationWorks",
+            "blockstorage/volume_types_options_test.go:TestVolumeTypeRecordedProjectScopeSnapshotsAfterOptionsAndFailsOnlyWhenConsumed"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-types.md",
+        "blockstorage/search-volumes.md",
+        "internal/jmespath/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Pinned get_volume_type treats every filters is not None value as the deprecated Search branch, independently of filter truthiness, and Go preserves that dispatch. Go omits warning delivery.",
+        "Pinned Resource.find attempts member GET for all identities and carries mutable seeded request ID/is_public state. Go uses safe single-segment exact-routing policy for slash/backslash/query/fragment/percent/Unicode whitespace names and retains only fresh canonical response ID/public fields, producing null when absent rather than fabricating the seed.",
+        "Go returns nullable Value plus optional actual Type and Observed/Pages proof. Python returns Resource/None or arbitrary expression first values; Go distinguishes absence from a selected false/zero/empty string and exposes a library-owned VolumeTypeSelectionError wrapping ErrAmbiguous instead of an SDKException class.",
+        "Go selects Cinder v3 under Gophercloud v2.15.0. Only this actual cloud helper is mapped; independent v2 Type, native/Proxy declarations, generic Resource/session/cache, access and mutation profiles are not promoted by this row.",
+        "The six-field view follows v3 Type descriptors, with unknown original wire fields retained only in RawResource. Go owns raw JSON and exact numeric text; this is not a claim that a plain Go map reproduces the complete mutable Python Resource runtime.",
+        "Go public aliases and repeated wire keys consume textual order and the last value wins. Python json.loads collapses repeated keys at their first insertion position before alias descriptor consumption; interleaved duplicate/alias inputs can differ. Existing exact mathematical JSON truthiness also keeps 1e-9999 nonzero whereas ordinary Python float decoding can underflow to false.",
+        "List rows with no recognized Body key preserve canonical wire location, including false/null/arbitrary JSON; known-key presence discards it and member translation always ignores wire computed location. Go supplies owned current scope or a complete override, retaining override Zone and performing no unknown owner/zone inference. Local caller Location failures remain separate from physical response failures.",
+        "Usable HTTP Link fallback is a declared Go repair: pinned Resource._get_next_link reads response.links[next][uri] but ordinary Requests returns url. Existing quoted Link parsing handles multiple angle targets, quoted delimiters, case-insensitive/multi-relation next and last-next replacement across headers. Native canonical singular volume_type_links is an explicit lower-priority compatibility extension; Python derives plural volume_types_links.",
+        "Next query uses source-style nonblank parse_qs merge, with old marker/limit removed and omitted nonpagination keys retained; explicit advertised keys replace current keys. Go encodes one merged query and preserves effective advertised paths instead of copying source relative /v prefix stripping or query-only URL-plus-params duplication. No initial caller limit or invented numeric marker fallback is exposed.",
+        "Strict canonical UTF-8 envelopes and accepted200, fragment/userinfo/opaque/query/origin/escaped-path checks and complete-URL cycle detection are Go safety boundaries. Source Resource.list permits other shapes and has separate same-marker bookkeeping, so these rules are intentional mappings rather than generic pagination equivalence.",
+        "Go exposes independently owned normalized values, raw resources and actual physical response proof with errors and joined cancellation causes. Native protected request retry is retained; SDK workflow replay, mutable session negotiation and cached object lifecycle are separate scope."
+      ],
+      "remaining": []
     }
   ]
 }
