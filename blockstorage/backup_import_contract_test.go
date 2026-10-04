@@ -205,6 +205,13 @@ func TestImportVolumeBackupUsesEnvelopePresenceAndOnlyMalformedJSONLeavesDefault
 				if err == nil || result.Value != nil || !errors.As(err, &physical) || physical.StatusCode != 202 || !bytes.Equal(physical.Body, tc.body) || physical.Header.Get("X-Proof") != "current" {
 					t.Fatal(result, err, physical)
 				}
+				wantID := "null"
+				if tc.name == "descriptor failure" {
+					wantID = `"physical"`
+				}
+				if string(result.BackupID) != wantID {
+					t.Fatal("failed model conversion changed the consumed response ID", string(result.BackupID), wantID)
+				}
 				bmwOperation(t, err, "ImportVolumeBackup")
 			}
 		})
