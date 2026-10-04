@@ -29,6 +29,9 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.search_volume_snapshots(name_or_id, filters)` | `conn.SearchVolumeSnapshots(ctx, blockstorage.SearchVolumeSnapshotsRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_snapshot(name_or_id, filters=None)` | `conn.GetVolumeSnapshot(ctx, blockstorage.GetVolumeSnapshotRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_snapshot_by_id(id)` | `conn.GetVolumeSnapshotByID(ctx, blockstorage.GetVolumeSnapshotByIDRequest{ID: id}, options...)` |
+| `conn.list_volume_backups(detailed=True, filters=None)` | `conn.ListVolumeBackups(ctx, options...)` |
+| `conn.search_volume_backups(name_or_id, filters)` | `conn.SearchVolumeBackups(ctx, blockstorage.SearchVolumeBackupsRequest{NameOrID: name}, options...)` |
+| `conn.get_volume_backup(name_or_id, filters=None)` | `conn.GetVolumeBackup(ctx, blockstorage.GetVolumeBackupRequest{NameOrID: name}, options...)` |
 | `conn.list_volume_types()` | `conn.ListVolumeTypes(ctx, options...)` |
 | `conn.search_volume_types(name_or_id, filters)` | `conn.SearchVolumeTypes(ctx, blockstorage.SearchVolumeTypesRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_type(name_or_id, filters=None)` | `conn.GetVolumeType(ctx, blockstorage.GetVolumeTypeRequest{NameOrID: name}, options...)` |
@@ -130,3 +133,10 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 Snapshot의 상세 목록·서버/local 필터와 Search 필터, exact 이름/ID 조회·literal ID 조회는 [Snapshot 사용법과 Python 비교](volume-snapshots.md)에 설명합니다. `Value`는 nullable 16-field logical JSON이고 일반 조회의 `Snapshot`·`Snapshots`는 actual wire rows입니다. 일반 빈 목록의 `Snapshots`는 nonnil 빈 slice이며 expression 결과에는 raw row 연결을 만들지 않습니다. 오류에도 실제 `Observed`·`Pages` 증거를 유지합니다.
 
 Snapshot 생성·삭제는 `CreateVolumeSnapshot`·`DeleteVolumeSnapshot`으로 호출합니다. 생성의 기본 `wait=true`와 삭제의 기본 `wait=false`, 네 가지 생성 속성, exact 이름/ID 해석과 단계별 결과는 [Snapshot 생성·삭제와 Python 비교](volume-snapshot-mutations.md)에 설명합니다.
+
+
+Backup의 상세 목록·서버/local 필터·Search 필터와 exact 이름/ID 조회는 [Backup 사용법과 Python 비교](volume-backups.md)에
+설명합니다. `Value`는 nullable 24-field logical JSON이고 `Backup`·`Backups`는 actual wire rows입니다.
+`"false"` 문자열도 true인 ordinary Boolean, row project와 zone을 사용하는 location, normal absence,
+오류 시 `Observed`·`Pages`와 선택적인 raw `Clone`·`Decode`를 구분합니다. 이 세 cloud read helper는
+기존 native Backup, v2, 생성·삭제·restore/import/export/action의 지원 검토와 독립적입니다.

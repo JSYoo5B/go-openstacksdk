@@ -419,3 +419,9 @@ Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container
 볼륨 수정과 bootable 설정은 `conn.UpdateVolume`·`conn.SetVolumeBootable`로 호출합니다. [사용법과 Python 비교](blockstorage/volume-mutations.md)에 변경된 속성만 보내는 옵션, 부분 응답 병합, 기본 true·명시적인 false와 조회·변경 응답의 구분을 설명합니다.
 
 볼륨 limits는 `conn.GetVolumeLimits(ctx, blockstorage.GetVolumeLimitsRequest{})`로 조회합니다. 프로젝트를 지정하면 SDK가 Identity v3 조회를 먼저 완료하고 실제 ID를 query에 전달합니다. [현재/다른 프로젝트 limits와 Python 비교](blockstorage/volume-limits.md)에 기본값, 함수 옵션, nullable 모델, 단계별 응답 증거와 기존 singleton 스코프의 차이를 설명합니다.
+
+
+Cinder backup은 `conn.ListVolumeBackups`·`SearchVolumeBackups`·`GetVolumeBackup`으로 조회합니다.
+SDK가 상세 목록 기본값·서버/local 필터 분류·검색·nullable 24-field 변환·cached Cinder 선택과 실제
+응답 증거를 처리합니다. [Backup 조회와 Python 비교](blockstorage/volume-backups.md)에 ordinary Boolean,
+project/zone location, raw 응답과 seeded logical ID, nonnull 필터의 전체 검색을 설명합니다.
