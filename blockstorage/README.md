@@ -165,3 +165,5 @@ Python v3 cloud의 raw Response를 대상으로 하며 native typed Export와 �
 Backup 복원은 `RestoreVolumeBackup`의 With 옵션으로 volume ID 또는 새 이름과 cached Seed를 지정합니다.
 상태 변경은 `ResetVolumeBackupStatus`에 status 문자열을 명시합니다.
 [복원·상태 변경 사용법과 Python/native 비교](volume-backup-actions.md)에 Connection·직접 package·v3 service 호출과 부분 결과를 설명합니다.
+
+Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupService, BackupURL}`을 전달합니다. [Import 사용법과 Python/native 비교](volume-backup-import.md)에 package·Connection·v3 service 호출, opaque locator 문자열과 nullable Backup 결과를 설명합니다.

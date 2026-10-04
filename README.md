@@ -443,3 +443,5 @@ Backup export의 JSON 값은 `conn.ExportVolumeBackupRecord(ctx, blockstorage.Ex
 Backup 복원과 상태 변경은 `conn.RestoreVolumeBackup`·`conn.ResetVolumeBackupStatus`로 호출합니다.
 [사용법과 Python/native 비교](blockstorage/volume-backup-actions.md)에 With 옵션, cached 필드 병합,
 선택한 restore microversion과 reset의 3.64 정책, 오류 시 실제 응답 증거를 설명합니다.
+
+Backup import는 `conn.ImportVolumeBackup(ctx, blockstorage.ImportVolumeBackupRequest{BackupService: service, BackupURL: locator})`로 호출합니다. [Python·package·service 사용법 비교](blockstorage/volume-backup-import.md)에 literal record, operation microversion 선택, disconnected `location:null` 모델과 오류 시 HTTP 증거를 설명합니다.
