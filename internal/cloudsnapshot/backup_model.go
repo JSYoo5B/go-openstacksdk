@@ -37,6 +37,11 @@ var backupDescriptors = [...]descriptor{
 }
 
 func normalizeBackup(row json.RawMessage, seed *string, list bool, location resource.CloudLocation) (json.RawMessage, bool, error) {
+	return normalizeBackupView(row, seed, list, &location)
+}
+
+// A nil location describes an unconnected Resource, whose Computed location is null.
+func normalizeBackupView(row json.RawMessage, seed *string, list bool, location *resource.CloudLocation) (json.RawMessage, bool, error) {
 	members, err := cloudfilter.ObjectMembers(row)
 	if err != nil {
 		return nil, false, err
@@ -59,9 +64,12 @@ func normalizeBackup(row json.RawMessage, seed *string, list bool, location reso
 	if seeded {
 		selected[22], _ = json.Marshal(*seed)
 	}
-	computed, err := location.ForResource(selected[14], selected[0])
-	if err != nil {
-		return nil, false, &locationError{err}
+	computed := json.RawMessage("null")
+	if location != nil {
+		computed, err = location.ForResource(selected[14], selected[0])
+		if err != nil {
+			return nil, false, &locationError{err}
+		}
 	}
 	var output bytes.Buffer
 	output.WriteByte('{')
