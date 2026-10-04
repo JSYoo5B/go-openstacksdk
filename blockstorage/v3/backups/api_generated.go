@@ -9,6 +9,7 @@ import (
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
+	maps "maps"
 )
 
 // API owns typed operations and their shared resource policies.
@@ -365,6 +366,10 @@ func (b updateOptsBuilder) ToBackupUpdateMap() (map[string]any, error) {
 		var zero0 map[string]any
 		return zero0, err
 	}
+	if b.base.Metadata != nil {
+		value0["metadata"] = maps.Clone(b.base.Metadata)
+	}
+	value0 = map[string]any{"backup": value0}
 	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
 	if err != nil {
 		var zero0 map[string]any

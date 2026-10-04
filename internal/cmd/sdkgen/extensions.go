@@ -71,6 +71,11 @@ func emitConfiguredBuilderMethod(e *emitter, b builder, method *types.Func, call
 		e.printf("return %s,err}\n", strings.Join(zeros, ","))
 	}
 	errReturn()
+	if backupUpdateBody(e.pkg, b, method) {
+		maps := e.use("maps")
+		e.printf("if b.base.Metadata!=nil{value0[\"metadata\"]=%s.Clone(b.base.Metadata)}\n", maps)
+		e.printf("value0=map[string]any{\"backup\":value0}\n")
+	}
 	req := e.use("gophercloudsdk/request")
 	for i := 0; i < sig.Results().Len()-1; i++ {
 		t := sig.Results().At(i).Type()
