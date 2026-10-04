@@ -220,13 +220,14 @@ func TestConnectionDetachVolumeServiceInitializationCancellationCause(t *testing
 func TestConnectionDetachVolumeNoWaitNeedsOnlyNova(t *testing.T) {
 	cloud := testcloud.New(t)
 	var novaLocates, cinderLocates, deletes, callbacks atomic.Int32
+	noCinder := errors.New("no Cinder endpoint in this cloud")
 	cloud.Provider.EndpointLocator = func(o gophercloud.EndpointOpts) (string, error) {
 		if o.Type == "compute" {
 			novaLocates.Add(1)
 			return cloud.Server.URL + "/nova/v2.1/p/", nil
 		}
 		cinderLocates.Add(1)
-		return "", errors.New("no Cinder endpoint in this cloud")
+		return "", noCinder
 	}
 	cloud.Mux.HandleFunc("DELETE /nova/v2.1/p/servers/server/os-volume_attachments/data", func(w http.ResponseWriter, r *http.Request) {
 		deletes.Add(1)
@@ -244,5 +245,10 @@ func TestConnectionDetachVolumeNoWaitNeedsOnlyNova(t *testing.T) {
 	}
 	if novaLocates.Load() != 1 || cinderLocates.Load() != 0 || deletes.Load() != 2 || callbacks.Load() != 2 {
 		t.Fatal(novaLocates.Load(), cinderLocates.Load(), deletes.Load(), callbacks.Load())
+	}
+
+	result, err := conn.DetachVolume(context.Background(), blockstorage.DetachVolumeRequest{Server: resource.ID("server"), Volume: resource.Name("data")}, blockstorage.WithDetachVolumeWait(false))
+	if result != nil || !errors.Is(err, noCinder) || novaLocates.Load() != 1 || cinderLocates.Load() != 1 || deletes.Load() != 2 {
+		t.Fatal(result, err, novaLocates.Load(), cinderLocates.Load(), deletes.Load())
 	}
 }
