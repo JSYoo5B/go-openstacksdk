@@ -707,3 +707,64 @@ new distinct test anchor60개·공개 함수/메서드23개를 연결해439개 r
 catalog3362개에서 go_mapping129→132, unsupported1 유지, unresolved3232→3229이며 supported는0입니다.
 최종 parity CLI도 통과했습니다.
 독립 Proxy/native/Resource/v2·생성/삭제·export/action을 함께 승격하지 않습니다. 전체 SDK는 계속 진행 중입니다.
+
+### Backup cloud 생성·삭제 helper 2개
+
+고정된 BlockStorageCloudMixin의 실제 `create_volume_backup`·`delete_volume_backup`만
+Connection 및 blockstorage 함수에 연결했습니다. SDK가 concrete With/Prepare 옵션의 nullable
+문자열·bool·timeout/location을 소유하고 original callback을 한 번 실행합니다. Connection은
+그 뒤 기록된 scope와 cached Cinder v3를 선택합니다. 빈 delete는 context/options를 확인한 뒤
+서비스를 선택하지 않는 false 결과이며 nil Connection에서도 사용할 수 있습니다.
+
+생성은 literal VolumeID와 정확히 여섯 body field를 보냅니다. 생략 name/description/snapshot_id는
+null, force/incremental은 false이며 자동 이름·Volume/Snapshot resolver·임의 kwargs를 추가하지 않습니다.
+wire incremental과 logical is_incremental을 구분하고 응답의 알려진 필드만 request seed에 병합합니다.
+Backup 고유 23 Body descriptors와 computed location을 유지하며 physical raw는 별도 증거입니다.
+wait 기본 true, available은 cached completion, 나머지는 fresh GET이며 initial error만으로 실패하지 않습니다.
+
+삭제는 같은 captured Backup reader로 정확히 한 번 찾아 selected/seeded logical ID를 사용합니다.
+기본은 body 없는 DELETE이며 force는 POST action의 정확한 `os-force_delete:null`입니다.
+force만 operation copy에 microversion 3.64를 적용하고 normal lookup/poll의 선택 버전을 유지합니다.
+native RetryFunc가 required version alias를 변경·삭제하거나 OmitHeaders로 제거해도 재전송하지 않습니다.
+초기 private helper 감사에서 alias 전체 삭제 시 원래 native 오류를 잃을 수 있음을 발견하고
+presence 검사도 추가했습니다. force 수정과 실제 retry/redirect 회귀 테스트를 각각 기록했습니다.
+
+두 mutation의 acknowledgement는 원래 HTTP100..399 정책이며 delete는 body를 해석하지 않습니다.
+mutation404는 엄격한 오류이며 absence로 바꾸지 않습니다. delete wait 기본 false, true이면 cached
+deleted여도 fresh GET부터 시작하고 fresh deleted 또는 fault-free original native GET404만 완료입니다.
+create의 null status는 nonterminal이지만 delete의 reached null status는 오류입니다.
+
+cloud timeout nil은 unlimited, 사용된 zero/negative는 첫 poll 전에 timeout입니다. 양의 budget은
+초기 mutation/merge 뒤 loop boundary에서 검사하며 HTTP deadline을 합성하지 않습니다. parent
+context는 HTTP/sleep을 중단하고 custom cause를 보존합니다. poll 기본2s, zero100ms는 더 작은
+명시 timeout까지 줄이며 negative interval은 실제 sleep이 필요한 때 검사합니다.
+
+Created/Resolved/Applied/LastAccepted/Ready/Absent와 최종 성공 결과는 독립적으로 소유합니다.
+accepted Read/Close/decode/source/context 실패는 실제 응답과 이전 phase를 보존합니다.
+ordinary member400403404와 deletionpoll404의 scoped rejection IO만 관찰하며 List·다른 member
+status·mutation rejection의 native discarded-body IO를 universal 보장으로 확장하지 않습니다.
+
+Source 실제 Python43개·native10개 선언과 추가 `_convert_type` 원문을 대조하고 고정된 model/read/wait
+기반 검토를 재사용했습니다. AST/stand-in probe는 source-only이며 인증된 Python SDK나 실제
+OpenStack runtime 결과로 합산하지 않습니다. Python arbitrary runtime object/cache identity·warning,
+Go safe member route/UTF8 typed domain·decimal/Unicode 경계와 absent-default MV 자동 협상 차이를
+문서와 각 review에 명시했습니다. 독립 Proxy/native/Resource/v2/export/action은 함께 승격하지 않습니다.
+
+신규40개 테스트 그룹은 options5·공개 body/phase11·wait9·transport6·Connection9입니다. 첫 public
+실행의 object_count=[] invalid 기대는 Source가 비숫자 container를 logical0으로 바꾸는 규칙과
+달라 fixture만 수정했습니다. []→logical0/physical[] 유지 확인과 실제 변환 오류 문자열 사례를
+추가하고 최초 실패 receipt/private 원본을 보존했습니다. production/assertion을 약화하지 않았습니다.
+
+최종1645개 Go 파일에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(95.11초),
+`go vet -mod=readonly ./...`(7.95초), 전체 gofmt와 exact 문서 fence 독립 컴파일(2.89초)을 통과했습니다.
+기존1625개 Go 중1621개를 byte-identical로 보존하고 shared closed mutation fields/wait/ID의4개만
+변경했습니다. 새 production15개·test5개이며 generated/native/resource 및 inventory41개를 유지합니다.
+Git archive로 기존308개 Go fence의 exact raw bytes를 확인하고 standalone 한 개를 더해309개입니다.
+
+기존439개 review의 literal 내용·모든 필드·source pins를 보존한 채 실제 cloud2개에 계약26개와
+공개 함수/메서드20개를 연결해441개 review가 되었습니다. catalog3362개에서 go_mapping132→134,
+unsupported1 유지, unresolved3229→3227이며 supported는0입니다. 전체 SDK는 계속 진행 중입니다.
+
+26개 계약은 신규40개와 실제 공유 model/overlay/finder 의존성13개를 포함한53개 distinct test anchor에
+연결했습니다. 각 anchor의 현재 선언과 assertion을 확인했으며 최종 parity CLI도 통과했습니다.
