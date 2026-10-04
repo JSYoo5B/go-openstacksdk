@@ -409,3 +409,5 @@ Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container
 `conn.GetVolumeID`는 이름·ID를 실제 조회하고 응답의 ID JSON을 그대로 반환합니다. [ID 조회와 Python 비교](blockstorage/volume-id.md)에 정상 부재·null ID·오류와 실제 응답 증거의 구분을 설명합니다.
 
 볼륨 타입 목록·검색·조회는 `conn.ListVolumeTypes`, `conn.SearchVolumeTypes`, `conn.GetVolumeType`으로 호출합니다. [타입 사용법과 Python 비교](blockstorage/volume-types.md)에 함수 옵션, nullable 여섯 필드 view, 기본 조회와 명시적 필터의 검색 경로를 설명합니다.
+
+타입의 프로젝트 접근 권한은 `conn.GetVolumeTypeAccess`, `conn.AddVolumeTypeAccess`, `conn.RemoveVolumeTypeAccess`로 조회·변경합니다. [접근 권한 사용법과 Python 비교](blockstorage/volume-type-access.md)에 이름·ID 조회, 원본 access JSON, 프로젝트 ID 전달과 단계별 응답 증거를 설명합니다.

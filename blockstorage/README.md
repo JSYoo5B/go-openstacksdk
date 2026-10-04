@@ -25,6 +25,9 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.list_volume_types()` | `conn.ListVolumeTypes(ctx, options...)` |
 | `conn.search_volume_types(name_or_id, filters)` | `conn.SearchVolumeTypes(ctx, blockstorage.SearchVolumeTypesRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_type(name_or_id, filters=None)` | `conn.GetVolumeType(ctx, blockstorage.GetVolumeTypeRequest{NameOrID: name}, options...)` |
+| `conn.get_volume_type_access(name_or_id)` | `conn.GetVolumeTypeAccess(ctx, blockstorage.GetVolumeTypeAccessRequest{NameOrID: name}, options...)` |
+| `conn.add_volume_type_access(name_or_id, project_id)` | `conn.AddVolumeTypeAccess(ctx, blockstorage.VolumeTypeAccessRequest{NameOrID: name, ProjectID: projectID}, options...)` |
+| `conn.remove_volume_type_access(name_or_id, project_id)` | `conn.RemoveVolumeTypeAccess(ctx, blockstorage.VolumeTypeAccessRequest{NameOrID: name, ProjectID: projectID}, options...)` |
 | `conn.volume_exists(name_or_id)` | `conn.VolumeExists(ctx, blockstorage.VolumeExistsRequest{NameOrID: name}, options...)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
@@ -110,3 +113,5 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 `GetVolumeID`는 이름·ID를 실제 조회하고 응답의 ID JSON을 반환합니다. [ID 조회와 Python 비교](volume-id.md)에 정상 부재, 발견한 null ID, 오류와 실제 응답 증거의 구분을 설명합니다.
 
 볼륨 타입의 [목록·검색·조회 사용법과 Python 비교](volume-types.md)에 `is_public=none`을 사용하는 기본 조회, nonnull 필터의 전체 검색, Type location과 원본 응답 증거를 설명합니다. `WithVolumeTypeReadLocation`과 `WithVolumeTypeSearchLocation`으로 호출별 location을 지정합니다.
+
+타입의 프로젝트 접근 권한은 `GetVolumeTypeAccess`·`AddVolumeTypeAccess`·`RemoveVolumeTypeAccess`로 조회·변경합니다. [접근 권한 사용법과 Python 비교](volume-type-access.md)에 타입 조회 후의 실제 응답 ID 사용, 원본 JSON 값, literal 프로젝트 ID, 단계별 응답 증거와 오류를 설명합니다. 프로젝트 존재 확인은 서버가 처리하며, 변경 응답은 권한 변경의 완료를 보장하지 않습니다.
