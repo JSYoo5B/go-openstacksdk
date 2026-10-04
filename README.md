@@ -44,6 +44,8 @@ gophercloudsdk/
 
 Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolumeSnapshot`, `GetVolumeSnapshotByID`로 조회합니다. SDK가 상세 목록 기본값·서버와 로컬 필터 분류·검색·nullable 변환·단계별 응답 증거를 처리합니다. [Snapshot 조회와 Python 비교](blockstorage/volume-snapshots.md)에 source의 seeded ID, maximum/pagination 경계와 raw resource 사용법을 설명합니다.
 
+생성·삭제는 `conn.CreateVolumeSnapshot`·`DeleteVolumeSnapshot`이 속성 매핑·이름/ID 해석·선택적인 완료 대기를 처리합니다. 생성은 기본으로 기다리고 삭제는 접수 후 반환합니다. [Snapshot 생성·삭제와 Python 비교](blockstorage/volume-snapshot-mutations.md)에 기본값·timeout·단계별 부분 결과를 설명합니다.
+
 이미 받은 owned/native 볼륨의 attachment device는 `blockstorage.GetVolumeAttachDevice`로 조회합니다. 원래 JSON 값은 `GetVolumeAttachDeviceFields`로 읽으며 두 함수 모두 HTTP 없이 동작합니다. [서버별 device 조회와 Python 비교](blockstorage/volume-attachment-device.md)에 네 가지 typed 입력, 첫 일치와 local 오류를 설명합니다.
 
 서버에 연결된 볼륨은 `conn.GetVolumes`로 조회합니다. 전체 목록을 읽은 뒤 attachment를 비교하고 raw resource를 반환하며, 오류 시 실제 페이지 증거를 남깁니다. [서버별 볼륨 목록과 Python 비교](blockstorage/server-volumes.md)에 ServerFields·중복 pointer·Decode·Clone을 설명합니다.

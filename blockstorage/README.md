@@ -128,3 +128,5 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 [볼륨 limits 조회](volume-limits.md)는 빈 입력의 Identity 생략, 다른 프로젝트의 strict 조회, raw/nullable 모델과 단계별 증거를 설명합니다. 기본값과 옵션 적용은 SDK가 담당합니다.
 
 Snapshot의 상세 목록·서버/local 필터와 Search 필터, exact 이름/ID 조회·literal ID 조회는 [Snapshot 사용법과 Python 비교](volume-snapshots.md)에 설명합니다. `Value`는 nullable 16-field logical JSON이고 일반 조회의 `Snapshot`·`Snapshots`는 actual wire rows입니다. 일반 빈 목록의 `Snapshots`는 nonnil 빈 slice이며 expression 결과에는 raw row 연결을 만들지 않습니다. 오류에도 실제 `Observed`·`Pages` 증거를 유지합니다.
+
+Snapshot 생성·삭제는 `CreateVolumeSnapshot`·`DeleteVolumeSnapshot`으로 호출합니다. 생성의 기본 `wait=true`와 삭제의 기본 `wait=false`, 네 가지 생성 속성, exact 이름/ID 해석과 단계별 결과는 [Snapshot 생성·삭제와 Python 비교](volume-snapshot-mutations.md)에 설명합니다.
