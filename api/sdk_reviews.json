@@ -27722,6 +27722,87 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.GetPayload",
+      "source_fingerprint": "876b423bba4d6c3406f29d443bb26ac466b6db7cab7ba812edccd5ae9f58499d",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/secrets.API.GetPayload",
+        "gophercloudsdk/keymanager/v1/secrets.WithGetPayloadOptions",
+        "gophercloudsdk/keymanager/v1/secrets.WithGetPayloadHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "A real HTTP payload request uses the effective ResourceBase without metadata or name lookup, returns exact binary or empty []byte, reads the accepted response and closes it exactly once before return. Callers own bytes without a response Close obligation.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsExactBufferedBytes"
+          ]
+        },
+        {
+          "behavior": "No options and empty full options retain native Accept text/plain; nonempty and final replacement options select Accept. Ordinary vendor headers and live authentication survive, response Content-Type does not decode bytes, and original ServiceClient MoreHeaders may override Accept.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsMediaAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Nil and failing options, unsupported body/query/argument extensions, invalid headers and case-insensitive Accept extension conflicts return nil bytes with preserved errors.Is and GetPayload/secrets OperationError before any HTTP request.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsPreflight"
+          ]
+        },
+        {
+          "behavior": "Only native HTTP200 succeeds. Physical201/204/404 errors retain native actual status, response headers and raw body through the wrapper, with one request and one native body close; no metadata fallback is introduced.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsNativeStatusErrors"
+          ]
+        },
+        {
+          "behavior": "An accepted response Read failure including context.Canceled discards partial bytes, preserves the wrapped cause and closes once without invoking native RetryFunc. An accepted response Close error is ignored and exact successful bytes are returned, following pinned native Extract.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsReadAndClose"
+          ]
+        },
+        {
+          "behavior": "Native 401 reauthentication, 429 backoff, 503 RetryFunc and transport retry remain provider-owned. Prepared typed Accept and extensions survive native replay with refreshed authentication, while explicit native request-option header replacement and OmitHeaders retain their existing behavior.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsNativeReplay"
+          ]
+        },
+        {
+          "behavior": "Original HTTPClient redirect policy is retained: 307 may be rejected as a native status error or followed with the caller-modified Accept to return the second payload, without adding a metadata workflow.",
+          "tests": [
+            "api/barbican_payload_contracts_test.go:TestBarbicanPayloadContractsNativeRedirect"
+          ]
+        },
+        {
+          "behavior": "Actual compiled pinned native types and source produce []byte/error extraction for Barbican GetPayload with exactly one Extract and no OpenDownload; Swift typed-header and Glance live-body downloads keep their existing download policy and generated declarations. Existing GetPayload option helpers remain present.",
+          "tests": [
+            "internal/cmd/sdkgen/buffered_payload_extractors_test.go:TestBufferedPayloadActualNativeFamiliesAndFacades"
+          ]
+        },
+        {
+          "behavior": "All four actual native request, options-builder, URL and consuming Extract declaration hashes are checked. Missing source or changes to Accept default, HTTP200 policy, KeepResponseBody, header serialization, route, ReadAll or Close fail generation validation.",
+          "tests": [
+            "internal/cmd/sdkgen/buffered_payload_extractors_test.go:TestBufferedPayloadRejectsPinnedDeclarationDrift"
+          ]
+        },
+        {
+          "behavior": "The typed native request/options/result/Extract graph must remain exact; changes to content-type type/tag/fields, builder return/receiver, result embedding/body/fields, extractor receiver/bytes or request context/client/id/variadic parameters fail the source/type/emission gates. Unrelated operations with the same result and unrelated GetPayload names retain the generic download policy.",
+          "tests": [
+            "internal/cmd/sdkgen/buffered_payload_extractors_test.go:TestBufferedPayloadRejectsTypedGraphDriftWithoutBroadeningPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/payload.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete GetPayloadOpts through the existing library-owned builder and headers options. It returns the []byte extracted by native PayloadResult.Extract exactly once, instead of exposing a Download whose Body has already been consumed and closed. Callers receive buffered bytes and need no Close; the corrected return is a public source change from *request.Download[[]byte].",
+        "Native Accept text/plain default, nonempty typed PayloadContentType override, payload-only route, HTTP200 policy, original shared transport/authentication/source headers/native callbacks and retries are preserved. Generic extra headers retain typed Accept protection while raw native MoreHeaders/OmitHeaders/hooks keep their existing override policy. Native read errors discard partial bytes, native extractor closes on read completion/failure and ignores Close errors, and the facade wraps original errors with GetPayload/secrets. Existing Fetch remains a separate metadata-plus-conditional-payload composition."
+      ],
+      "remaining": []
     }
   ]
 }
