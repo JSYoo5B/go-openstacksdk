@@ -14,8 +14,9 @@ import (
 )
 
 type preparedVolumeSearch struct {
-	reader  *preparedGetVolumes
-	options VolumeSearchOpts
+	reader        *preparedGetVolumes
+	options       VolumeSearchOpts
+	memberFailure error
 }
 
 // SearchVolumes materializes and normalizes Cinder's complete detail list,

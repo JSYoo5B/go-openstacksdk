@@ -54,6 +54,12 @@ func GetVolume(ctx context.Context, cinder *gophercloud.ServiceClient, input Get
 	collection := p.identityCollection(ctx, result)
 	record, err := collection.FindIdentity(ctx, input.NameOrID)
 	if err != nil {
+		// Shared identity lookup gives cancellation precedence after GET.
+		// Retain this member's actual read/Close/source failure as well.
+		// The fallback iterator clears it before a later list can fail.
+		if ctx.Err() != nil && p.memberFailure != nil {
+			err = errors.Join(p.memberFailure, err)
+		}
 		return result, wrapVolumeSearchError(ctx, "GetVolume", err)
 	}
 	if err := p.reader.guard(ctx); err != nil {
@@ -75,7 +81,8 @@ type volumeIdentityRecord struct {
 // The binding is library owned. It reuses shared FindIdentity policy while
 // retaining actual complete wire rows instead of reserializing native Volume.
 func (p *preparedVolumeSearch) identityCollection(ctx context.Context, result *GetVolumeResult) *resource.Collection[volumeIdentityRecord] {
-	get := func(ctx context.Context, id string) (*volumeIdentityRecord, error) {
+	get := func(ctx context.Context, id string) (record *volumeIdentityRecord, err error) {
+		defer func() { p.memberFailure = err }()
 		if err := p.reader.guard(ctx); err != nil {
 			return nil, err
 		}
@@ -113,6 +120,7 @@ func (p *preparedVolumeSearch) identityCollection(ctx context.Context, result *G
 	}
 	iterate := func(ctx context.Context, query url.Values, details bool) iter.Seq2[*volumeIdentityRecord, error] {
 		return func(yield func(*volumeIdentityRecord, error) bool) {
+			p.memberFailure = nil
 			reader := *p.reader
 			initial := *reader.initialURL
 			initial.RawQuery = query.Encode()
