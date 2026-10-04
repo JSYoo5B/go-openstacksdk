@@ -1,0 +1,1167 @@
+[
+  {
+    "name": "grammar/fields",
+    "expression": "people[0].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "Ada"
+  },
+  {
+    "name": "grammar/quoted_unicode",
+    "expression": "\"한글\".\"a.b\"",
+    "input_json": "{\"한글\":{\"a.b\":\"값\"}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "값"
+  },
+  {
+    "name": "grammar/negative_index",
+    "expression": "people[-1].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "Grace"
+  },
+  {
+    "name": "grammar/slice_forward",
+    "expression": "people[0:3:2].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Ada",
+      "Grace"
+    ]
+  },
+  {
+    "name": "grammar/slice_reverse",
+    "expression": "people[::-1].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Grace",
+      "Lin",
+      "Ada"
+    ]
+  },
+  {
+    "name": "grammar/slice_negative_bounds",
+    "expression": "people[-2:].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Lin",
+      "Grace"
+    ]
+  },
+  {
+    "name": "grammar/flatten",
+    "expression": "people[].tags[]",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "math",
+      "code",
+      "navy"
+    ]
+  },
+  {
+    "name": "grammar/filter_and_pipe",
+    "expression": "people[?age >= `30`].name | sort(@)",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Ada",
+      "Grace"
+    ]
+  },
+  {
+    "name": "grammar/multiselect_list",
+    "expression": "people[0].[name, age, missing]",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Ada",
+      36,
+      null
+    ]
+  },
+  {
+    "name": "grammar/multiselect_hash",
+    "expression": "people[0].{who:name, years:age}",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": {
+      "who": "Ada",
+      "years": 36
+    }
+  },
+  {
+    "name": "grammar/current_and_expression_reference",
+    "expression": "map(&length(tags), people)",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      2,
+      0,
+      1
+    ]
+  },
+  {
+    "name": "grammar/raw_apostrophe",
+    "expression": "'can\\'t'",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "can't"
+  },
+  {
+    "name": "grammar/deprecated_backtick_string",
+    "expression": "`unquoted`",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "unquoted"
+  },
+  {
+    "name": "grammar/object_null_projection_omission",
+    "expression": "obj.*.value",
+    "input_json": "{\"obj\":{\"a\":{\"value\":null},\"b\":{\"value\":2}}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      2
+    ]
+  },
+  {
+    "name": "grammar/empty_projection_lazy",
+    "expression": "rows[*].unknown_function(@)",
+    "input_json": "{\"rows\":[]}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": []
+  },
+  {
+    "name": "grammar/missing_projection_lazy",
+    "expression": "rows[*].unknown_function(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "grammar/flatten_left_error",
+    "expression": "length(missing)[]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "grammar/filter_left_error",
+    "expression": "length(missing)[?@]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "grammar/object_projection_left_error",
+    "expression": "length(missing).*",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "grammar/projection_child_error",
+    "expression": "rows[*].length(missing)",
+    "input_json": "{\"rows\":[{}]}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "grammar/map_child_error",
+    "expression": "map(&unknown_function(@), rows)",
+    "input_json": "{\"rows\":[1]}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "UnknownFunctionError"
+  },
+  {
+    "name": "grammar/map_empty_lazy",
+    "expression": "map(&unknown_function(@), rows)",
+    "input_json": "{\"rows\":[]}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": []
+  },
+  {
+    "name": "boolean/zero_truthy",
+    "expression": "`0` || unknown_function(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 0
+  },
+  {
+    "name": "boolean/and_short_circuit",
+    "expression": "`false` && unknown_function(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": false
+  },
+  {
+    "name": "boolean/or_short_circuit",
+    "expression": "`true` || unknown_function(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "boolean/falsey_collection",
+    "expression": "[`[]` || `1`, `{}` || `2`, `\"\"` || `3`, `null` || `4`]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "name": "boolean/negation",
+    "expression": "[!`0`, !`[]`, !`false`]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      false,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "comparison/large_integer",
+    "expression": "`9007199254740993` > `9007199254740992`",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "comparison/scalar_bool_number",
+    "expression": "[`true` == `1`, `false` == `0`, `true` != `1`]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      false,
+      false,
+      true
+    ]
+  },
+  {
+    "name": "comparison/nested_bool_number",
+    "expression": "[`[true,{\"value\":false}]` == `[1,{\"value\":0}]`, `{\"x\":[true]}` == `{\"x\":[1]}`]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      true,
+      true
+    ]
+  },
+  {
+    "name": "comparison/string_order",
+    "expression": "['b' > 'a', 'a' <= 'a', 'a' >= 'b']",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      true,
+      true,
+      false
+    ]
+  },
+  {
+    "name": "comparison/mixed_string_number_error",
+    "expression": "'a' > `1`",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "TypeError"
+  },
+  {
+    "name": "comparison/noncomparable_is_null",
+    "expression": "`[]` > `{}`",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "functions/abs",
+    "expression": "abs(`-9007199254740993`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740993
+  },
+  {
+    "name": "functions/avg",
+    "expression": "avg(`[1,2,3]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 2.0
+  },
+  {
+    "name": "functions/avg_empty",
+    "expression": "avg(`[]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "functions/ceil",
+    "expression": "ceil(`-1.25`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": -1
+  },
+  {
+    "name": "functions/contains_recursive",
+    "expression": "contains(`[ {\"x\":[true]}, [false] ]`, `{\"x\":[1]}`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/contains_array",
+    "expression": "contains(`[[true]]`, `[1]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/contains_boolean_numeric",
+    "expression": "contains(`[true]`, `1`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/contains_string",
+    "expression": "contains('한글😀', '😀')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/ends_with",
+    "expression": "ends_with('한글😀', '😀')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/floor",
+    "expression": "floor(`-1.25`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": -2
+  },
+  {
+    "name": "functions/join",
+    "expression": "join('-', `[\"a\",\"b\"]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "a-b"
+  },
+  {
+    "name": "functions/length_unicode",
+    "expression": "length('é한😀')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 3
+  },
+  {
+    "name": "functions/length_combining_runes",
+    "expression": "length('é')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 2
+  },
+  {
+    "name": "functions/map",
+    "expression": "map(&name, people)",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Ada",
+      "Lin",
+      "Grace"
+    ]
+  },
+  {
+    "name": "functions/map_keeps_null",
+    "expression": "map(&name, `[{}, {\"name\":\"x\"}]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      null,
+      "x"
+    ]
+  },
+  {
+    "name": "functions/max_integer",
+    "expression": "max(`[9007199254740992,9007199254740993]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740993
+  },
+  {
+    "name": "functions/max_string",
+    "expression": "max(`[\"a\",\"z\",\"b\"]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "z"
+  },
+  {
+    "name": "functions/max_by",
+    "expression": "max_by(people, &age).name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "Grace"
+  },
+  {
+    "name": "functions/merge",
+    "expression": "merge(`{\"a\":1,\"b\":2}`, `{\"b\":3,\"c\":4}`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": {
+      "a": 1,
+      "b": 3,
+      "c": 4
+    }
+  },
+  {
+    "name": "functions/min_integer",
+    "expression": "min(`[9007199254740993,9007199254740992]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740992
+  },
+  {
+    "name": "functions/min_by",
+    "expression": "min_by(people, &age).name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "Lin"
+  },
+  {
+    "name": "functions/not_null_zero",
+    "expression": "not_null(`null`, `0`, `false`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 0
+  },
+  {
+    "name": "functions/reverse_unicode",
+    "expression": "reverse('é한😀')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "😀한é"
+  },
+  {
+    "name": "functions/reverse_array",
+    "expression": "reverse(`[1,2,3]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      3,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "functions/sort_exact_integer",
+    "expression": "sort(`[9007199254740993,9007199254740992,-9007199254740993]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      -9007199254740993,
+      9007199254740992,
+      9007199254740993
+    ]
+  },
+  {
+    "name": "functions/sort_by",
+    "expression": "sort_by(people, &age)[].name",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "Lin",
+      "Ada",
+      "Grace"
+    ]
+  },
+  {
+    "name": "functions/sort_by_stable_ties",
+    "expression": "sort_by(@, &n)[].id",
+    "input_json": "[{\"n\":2,\"id\":\"last\"},{\"n\":1,\"id\":\"first\"},{\"n\":1,\"id\":\"second\"}]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "first",
+      "second",
+      "last"
+    ]
+  },
+  {
+    "name": "functions/min_by_first_tie",
+    "expression": "min_by(@, &n).id",
+    "input_json": "[{\"n\":1,\"id\":\"first\"},{\"n\":1,\"id\":\"second\"}]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "first"
+  },
+  {
+    "name": "functions/max_by_first_tie",
+    "expression": "max_by(@, &n).id",
+    "input_json": "[{\"n\":1,\"id\":\"first\"},{\"n\":1,\"id\":\"second\"}]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "first"
+  },
+  {
+    "name": "functions/starts_with",
+    "expression": "starts_with('한글😀', '한')",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": true
+  },
+  {
+    "name": "functions/sum_exact_integer",
+    "expression": "sum(`[9007199254740993,2]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740995
+  },
+  {
+    "name": "functions/sum_empty",
+    "expression": "sum(`[]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 0
+  },
+  {
+    "name": "functions/to_array_scalar",
+    "expression": "to_array(`0`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      0
+    ]
+  },
+  {
+    "name": "functions/to_array_existing",
+    "expression": "to_array(`[1,2]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      1,
+      2
+    ]
+  },
+  {
+    "name": "functions/to_array_null",
+    "expression": "to_array(`null`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      null
+    ]
+  },
+  {
+    "name": "functions/to_string_ascii",
+    "expression": "to_string(`{\"text\":\"한😀<\"}`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "{\"text\":\"\\ud55c\\ud83d\\ude00<\"}"
+  },
+  {
+    "name": "functions/to_string_large_integer",
+    "expression": "to_string(`9007199254740993`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": "9007199254740993"
+  },
+  {
+    "name": "functions/type_json",
+    "expression": "[type(`0`), type(`false`), type(`null`), type(`[]`), type(`{}`), type(`\"x\"`)]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      "number",
+      "boolean",
+      "null",
+      "array",
+      "object",
+      "string"
+    ]
+  },
+  {
+    "name": "functions/type_expression_reference",
+    "expression": "type(&name)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "errors/unknown_function",
+    "expression": "unknown_function(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "UnknownFunctionError"
+  },
+  {
+    "name": "errors/arity",
+    "expression": "length()",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ArityError"
+  },
+  {
+    "name": "errors/too_many_arguments",
+    "expression": "length(@, @)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ArityError"
+  },
+  {
+    "name": "errors/contains_wrong_string_search",
+    "expression": "contains('abc', `1`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "TypeError"
+  },
+  {
+    "name": "errors/join_nonstring_member",
+    "expression": "join(',', `[\"a\",1]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "errors/sort_mixed",
+    "expression": "sort(`[1,\"x\"]`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "errors/by_singleton_missing",
+    "expression": "sort_by(`[{}]`, &missing)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "errors/min_by_singleton_bad_key",
+    "expression": "min_by(`[{\"k\":[]}]`, &k)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "errors/max_by_child_error",
+    "expression": "max_by(`[{}]`, &length(missing))",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "JMESPathTypeError"
+  },
+  {
+    "name": "errors/not_null_arguments_eager",
+    "expression": "not_null(`1`, unknown_function(@))",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "UnknownFunctionError"
+  },
+  {
+    "name": "errors/slice_zero_step",
+    "expression": "[::0]",
+    "input_json": "[1,2]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ValueError"
+  },
+  {
+    "name": "syntax/third_colon",
+    "expression": "[:::]",
+    "input_json": "[1,2]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ParseError"
+  },
+  {
+    "name": "syntax/third_colon_after_bound",
+    "expression": "[0:::]",
+    "input_json": "[1,2]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ParseError"
+  },
+  {
+    "name": "syntax/third_colon_before_bound",
+    "expression": "[:::0]",
+    "input_json": "[1,2]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ParseError"
+  },
+  {
+    "name": "syntax/repeated_stop_number",
+    "expression": "[1:2 3]",
+    "input_json": "[1,2]",
+    "policy": "Declared slice-grammar correction: repeated bounds require colons, although selected Python 1.0.1 permissively overwrites them",
+    "error": true
+  },
+  {
+    "name": "syntax/repeated_step_number",
+    "expression": "[:1:2 3]",
+    "input_json": "[1,2]",
+    "policy": "Declared slice-grammar correction: repeated bounds require colons, although selected Python 1.0.1 permissively overwrites them",
+    "error": true
+  },
+  {
+    "name": "syntax/repeated_negative_number",
+    "expression": "[1:2-3]",
+    "input_json": "[1,2]",
+    "policy": "Declared slice-grammar correction: repeated bounds require colons, although selected Python 1.0.1 permissively overwrites them",
+    "error": true
+  },
+  {
+    "name": "syntax/unterminated_raw_string",
+    "expression": "'unfinished",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "LexerError"
+  },
+  {
+    "name": "syntax/missing_function_comma",
+    "expression": "not_null(`1` `2`)",
+    "input_json": "null",
+    "policy": "Declared function-grammar correction: arguments require commas, although selected Python 1.0.1 accepts adjacent argument expressions",
+    "error": true
+  },
+  {
+    "name": "syntax/trailing_function_comma",
+    "expression": "not_null(`1`,)",
+    "input_json": "null",
+    "policy": "Declared function-grammar correction: no trailing comma, although selected Python 1.0.1 accepts it",
+    "error": true
+  },
+  {
+    "name": "syntax/quoted_function_name",
+    "expression": "\"length\"(@)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ParseError"
+  },
+  {
+    "name": "syntax/unterminated_multiselect_hash",
+    "expression": "{a:",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "IncompleteExpressionError"
+  },
+  {
+    "name": "syntax/invalid_index_token",
+    "expression": "[1a]",
+    "input_json": "[1]",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "error": true,
+    "reference_error": "ParseError"
+  },
+  {
+    "name": "to_number/string_00",
+    "expression": "to_number(@)",
+    "input_json": "\"  +0012  \"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 12
+  },
+  {
+    "name": "to_number/string_01",
+    "expression": "to_number(@)",
+    "input_json": "\"-0002\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": -2
+  },
+  {
+    "name": "to_number/string_02",
+    "expression": "to_number(@)",
+    "input_json": "\"1_000\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 1000
+  },
+  {
+    "name": "to_number/string_03",
+    "expression": "to_number(@)",
+    "input_json": "\"\\u0661\\u0662\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 12
+  },
+  {
+    "name": "to_number/string_04",
+    "expression": "to_number(@)",
+    "input_json": "\"\\uff11\\uff12\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 12
+  },
+  {
+    "name": "to_number/string_05",
+    "expression": "to_number(@)",
+    "input_json": "\"\\u0661.\\u0665\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 1.5
+  },
+  {
+    "name": "to_number/string_06",
+    "expression": "to_number(@)",
+    "input_json": "\".5\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 0.5
+  },
+  {
+    "name": "to_number/string_07",
+    "expression": "to_number(@)",
+    "input_json": "\"1.\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 1.0
+  },
+  {
+    "name": "to_number/string_08",
+    "expression": "to_number(@)",
+    "input_json": "\"1e2\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 100.0
+  },
+  {
+    "name": "to_number/string_09",
+    "expression": "to_number(@)",
+    "input_json": "\" 1_0.5_0 \"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 10.5
+  },
+  {
+    "name": "to_number/string_10",
+    "expression": "to_number(@)",
+    "input_json": "\"-.25\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": -0.25
+  },
+  {
+    "name": "to_number/string_11",
+    "expression": "to_number(@)",
+    "input_json": "\"9007199254740993\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740993
+  },
+  {
+    "name": "to_number/string_12",
+    "expression": "to_number(@)",
+    "input_json": "\"1__0\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/string_13",
+    "expression": "to_number(@)",
+    "input_json": "\"_1\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/string_14",
+    "expression": "to_number(@)",
+    "input_json": "\"1_\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/string_15",
+    "expression": "to_number(@)",
+    "input_json": "\"0x1p2\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/string_16",
+    "expression": "to_number(@)",
+    "input_json": "\"wat\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/string_17",
+    "expression": "to_number(@)",
+    "input_json": "\"\"",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": null
+  },
+  {
+    "name": "to_number/boolean_null",
+    "expression": "[to_number(`true`),to_number(`null`),to_number(`[]`),to_number(`{}`)]",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "name": "to_number/preserve_number",
+    "expression": "to_number(`9007199254740993`)",
+    "input_json": "{}",
+    "policy": "jmespath.py 1.0.1 primary-source runtime",
+    "expected": 9007199254740993
+  },
+  {
+    "name": "object/keys_lexical",
+    "expression": "keys(@)",
+    "input_json": "{\"z\":1,\"a\":2,\"é\":3}",
+    "policy": "Declared lexical unordered-object traversal boundary; not Python insertion-order equivalence",
+    "error": false,
+    "expected_json": "[\"a\",\"z\",\"é\"]"
+  },
+  {
+    "name": "object/values_lexical",
+    "expression": "values(@)",
+    "input_json": "{\"z\":1,\"a\":2,\"é\":3}",
+    "policy": "Declared lexical unordered-object traversal boundary; not Python insertion-order equivalence",
+    "error": false,
+    "expected_json": "[2,1,3]"
+  },
+  {
+    "name": "object/projection_no_nil_prefix",
+    "expression": "object.*.length(@)",
+    "input_json": "{\"people\":[{\"name\":\"Ada\",\"age\":36,\"tags\":[\"math\",\"code\"]},{\"name\":\"Lin\",\"age\":29,\"tags\":[]},{\"name\":\"Grace\",\"age\":85,\"tags\":[\"navy\"]}],\"object\":{\"z\":[1,2],\"a\":[]}}",
+    "policy": "Declared lexical unordered-object traversal boundary; not Python insertion-order equivalence",
+    "error": false,
+    "expected_json": "[0,2]"
+  },
+  {
+    "name": "object/serialization_lexical",
+    "expression": "to_string(@)",
+    "input_json": "{\"z\":1,\"a\":2}",
+    "policy": "Declared lexical unordered-object traversal boundary; not Python insertion-order equivalence",
+    "error": false,
+    "expected_json": "\"{\\\"a\\\":2,\\\"z\\\":1}\""
+  },
+  {
+    "name": "variadic/merge_all_arguments_checked",
+    "expression": "merge(`{}`, `[[\"x\",1]]`)",
+    "input_json": "null",
+    "policy": "All variadic arguments must have the standard declared object type",
+    "error": true
+  },
+  {
+    "name": "exact/decimal_precision",
+    "expression": "a > b",
+    "input_json": "{\"a\":9007199254740993.01,\"b\":9007199254740993.00}",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "true"
+  },
+  {
+    "name": "exact/decimal_equality",
+    "expression": "a == b",
+    "input_json": "{\"a\":1000.00,\"b\":1e3}",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "true"
+  },
+  {
+    "name": "exact/decimal_sort",
+    "expression": "sort(@)",
+    "input_json": "[9007199254740993.02,9007199254740993.01,9007199254740993]",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "[9007199254740993,9007199254740993.01,9007199254740993.02]"
+  },
+  {
+    "name": "exact/ceil_precision",
+    "expression": "ceil(@)",
+    "input_json": "9007199254740993.1",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "9007199254740994"
+  },
+  {
+    "name": "exact/floor_precision",
+    "expression": "floor(@)",
+    "input_json": "-9007199254740993.1",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "-9007199254740994"
+  },
+  {
+    "name": "exact/absolute_precision",
+    "expression": "abs(@)",
+    "input_json": "-9007199254740993.125",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "9007199254740993.125"
+  },
+  {
+    "name": "exact/huge_exponent_order",
+    "expression": "a > b",
+    "input_json": "{\"a\":1e100000000000000000000,\"b\":9e99999999999999999999}",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "true"
+  },
+  {
+    "name": "exact/huge_negative_exponent_floor",
+    "expression": "floor(@)",
+    "input_json": "-1e-100000000000000000000",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "-1"
+  },
+  {
+    "name": "exact/huge_negative_exponent_ceil",
+    "expression": "ceil(@)",
+    "input_json": "1e-100000000000000000000",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "1"
+  },
+  {
+    "name": "exact/compact_integral_sum",
+    "expression": "sum(@)",
+    "input_json": "[1e1048577,2e1048577]",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "3e1048577"
+  },
+  {
+    "name": "exact/zero_does_not_expand_sum",
+    "expression": "sum(@)",
+    "input_json": "[0,1e1048577]",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "1e1048577"
+  },
+  {
+    "name": "exact/order_has_no_arithmetic_allocation_bound",
+    "expression": "max(@)",
+    "input_json": "[1e1048576,2]",
+    "policy": "Frozen exact-decimal comparison and integral arithmetic; no IEEE conversion",
+    "error": false,
+    "expected_json": "1e1048576"
+  },
+  {
+    "name": "exact/coefficient_allocation_limit",
+    "expression": "sum(@)",
+    "input_json": "[1e1048576,1]",
+    "policy": "Explicit approved 1,048,576 coefficient-digit integer-sum allocation limit",
+    "error": true
+  },
+  {
+    "name": "finite/nonintegral_sum",
+    "expression": "sum(@)",
+    "input_json": "[0.1,0.2]",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": false,
+    "expected_json": "0.30000000000000004"
+  },
+  {
+    "name": "finite/avg",
+    "expression": "avg(@)",
+    "input_json": "[1,2]",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": false,
+    "expected_json": "1.5"
+  },
+  {
+    "name": "finite/avg_overflow",
+    "expression": "avg(@)",
+    "input_json": "[1e309]",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "finite/nonintegral_sum_overflow",
+    "expression": "sum(@)",
+    "input_json": "[1e308,1e308,0.5]",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "finite/to_number_NaN",
+    "expression": "to_number(@)",
+    "input_json": "\"NaN\"",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "finite/to_number_+inf",
+    "expression": "to_number(@)",
+    "input_json": "\"+inf\"",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "finite/to_number_-Infinity",
+    "expression": "to_number(@)",
+    "input_json": "\"-Infinity\"",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "finite/to_number_1e9999",
+    "expression": "to_number(@)",
+    "input_json": "\"1e9999\"",
+    "policy": "Declared finite IEEE-754 nonintegral arithmetic and conversion boundary",
+    "error": true
+  },
+  {
+    "name": "index/huge_positive",
+    "expression": "[9999999999999999999999999999999999999999]",
+    "input_json": "[0,1,2]",
+    "policy": "Arbitrary-size Python indices/slices saturated at actual Go collection boundaries",
+    "error": false,
+    "expected_json": "null"
+  },
+  {
+    "name": "index/huge_negative",
+    "expression": "[-9999999999999999999999999999999999999999]",
+    "input_json": "[0,1,2]",
+    "policy": "Arbitrary-size Python indices/slices saturated at actual Go collection boundaries",
+    "error": false,
+    "expected_json": "null"
+  },
+  {
+    "name": "index/huge_slice_clamp",
+    "expression": "[-9999999999999999999999999999999999999999:9999999999999999999999999999999999999999]",
+    "input_json": "[0,1,2]",
+    "policy": "Arbitrary-size Python indices/slices saturated at actual Go collection boundaries",
+    "error": false,
+    "expected_json": "[0,1,2]"
+  },
+  {
+    "name": "index/huge_positive_step",
+    "expression": "[::9999999999999999999999999999999999999999]",
+    "input_json": "[0,1,2]",
+    "policy": "Arbitrary-size Python indices/slices saturated at actual Go collection boundaries",
+    "error": false,
+    "expected_json": "[0]"
+  },
+  {
+    "name": "index/huge_negative_step",
+    "expression": "[::-9999999999999999999999999999999999999999]",
+    "input_json": "[0,1,2]",
+    "policy": "Arbitrary-size Python indices/slices saturated at actual Go collection boundaries",
+    "error": false,
+    "expected_json": "[2]"
+  }
+]
