@@ -601,3 +601,47 @@ fallback된 결함을 발견해 Snapshot 전용 clean direct-native gate로 수�
 선언 catalog3362개에서 `go_mapping`123→127, unsupported1 유지, unresolved3238→3234입니다.
 `supported`는0이며 별도 Proxy/native/Resource/v2나 snapshot mutation 선언을 함께 승격하지 않습니다.
 전체 SDK 목표는 아직 완료되지 않았습니다.
+
+
+### Snapshot cloud 생성·삭제 helper 2개
+
+실제 `BlockStorageCloudMixin.create_volume_snapshot`·`delete_volume_snapshot`을 직접
+`blockstorage` 함수와 `Connection`에 매핑했습니다. [생성·삭제 사용법과 Python 비교](../blockstorage/volume-snapshot-mutations.md)에
+독립 컴파일 예제, 전체·서비스 호출, concrete With/Prepare 옵션과 단계별 부분 결과를 설명합니다.
+
+생성은 literal volume ID와 explicit force=false, 기본 wait=true를 유지합니다. 네 가지 name/description
+alias만 받으며 canonical presence·JSON truthiness·typed override와 unused alias 검증 시점을 보존합니다.
+제출한 known seed와 각 응답의 known raw fields를 병합하고 eager nullable16-field view를 만듭니다.
+raw wire object·CreatedValue·최종 Value·Ready는 독립 값이며 empty/malformed 응답에 raw object를 합성하지 않습니다.
+initial available은 unused ID/timeout을 소비하지 않고, initial error 뒤에도 fresh GET을 확인합니다.
+
+삭제는 기본 wait=false이며 exact 이름/ID 조회의 unique exhaustion을 마친 뒤 실제 logical ID로 bodyless
+DELETE를 보냅니다. 빈 입력은 context·원본 옵션 검사 뒤 서비스/location 없이 false를 반환합니다.
+실제 DELETE404는 terminal 오류입니다. 대기를 요청하면 cached deleted만으로 완료하지 않고 reached
+wait/context/route 검사를 통과한 뒤 fresh GET을 보냅니다. 병합된 deleted 또는 clean original GET404만
+완료이며 error/error_deleting은 nonterminal, fresh null/nonstring status는 오류입니다.
+
+고정 Gophercloud v2.15.0의 unexpected-code 경로가 body Read/Close 오류를 버리는 것을 확인했습니다.
+Snapshot 전용 polling404 관찰기는 원래 거부 status 정책과 native retry·reauth·live token을 유지하면서
+fault를 합칩니다. Read/Close/source/context/wrapped-native/expanded-policy 오류를 부재로 바꾸지 않습니다.
+opaque acknowledgement·Resolved·Applied·LastAccepted·Ready·Absent와 nullable Deleted는 실제 단계의 증거를 분리합니다.
+SDK timeout은 mutation 뒤 loop 경계에서 검사하며 nil만 무제한이고 explicit0/음수는 첫 poll 전 timeout입니다.
+positive timeout으로 HTTP context를 만들지 않아 느린 target GET은 성공할 수 있습니다. 부모 context는 별도로 취소합니다.
+
+변경하지 않은 pinned Python 선언46개·source hash52개, model100·wait86·독립34 source probe receipt를
+각각 보존하고 독립 최종 production 감사를 마쳤습니다. 이 source-only/stand-in 증거를 합산한 Python
+SDK runtime 성공 수나 실제 cloud 검증으로 주장하지 않습니다. standalone Proxy120초와 cloud nil 무제한
+차이는 source에서 검증했으며 Go 테스트에서120초를 실제 기다렸다는 주장도 하지 않습니다.
+
+신규69개 테스트 그룹은 options11·model13·transport4·direct source2·Connection9·공개 workflow30입니다.
+모두 focused race를 통과했고, 최종1605개 Go 파일에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(102.42초),
+`go vet -mod=readonly ./...`(20.24초), 전체 gofmt와 exact 문서 fence의 독립 컴파일(26.53초)을 통과했습니다.
+기존1580개 Go 파일과 generated338개·native operation1126개·resource235개·이전306개 Go fence를
+보존했습니다. 새 production15개·test10개와 standalone fence 한 개로1605 Go·307 fence입니다.
+
+기존434개 review의 모든 필드·bytes와 source pin을 보존하고 실제 cloud 선언 두 개에 계약18개·
+신규 distinct test anchor69개·공개 함수21개를 연결해436개 review가 되었습니다.
+catalog3362개에서 go_mapping127→129, unsupported1 유지, unresolved3234→3232이며 supported는0입니다.
+최종 parity CLI도 통과했습니다.
+별도 Proxy/native/Resource/v2와 다른 workflow를 함께 승격하지 않습니다. 전체 SDK 구현은 아직 완료되지 않았습니다.
