@@ -15,6 +15,7 @@ import (
 	"gophercloudsdk/internal/cloudread"
 	"gophercloudsdk/internal/fixedrequest"
 	"gophercloudsdk/internal/rest"
+	"gophercloudsdk/resource"
 )
 
 var pathVersion = regexp.MustCompile(`^v[0-9]+(?:\.[0-9]+)*$`)
@@ -44,7 +45,20 @@ func discoveryURLs(endpoint string) ([]string, error) {
 }
 
 func Negotiate(ctx context.Context, source *cloudread.Source, ceiling string) (string, []*rest.Response, error) {
-	if source.Client.Microversion != "" {
+	return negotiate(ctx, source, ceiling, "")
+}
+
+// NegotiateRequired always checks advertised support before accepting a
+// selected version. The same advertisement also supplies ordinary negotiation.
+func NegotiateRequired(ctx context.Context, source *cloudread.Source, ceiling, required string) (string, []*rest.Response, error) {
+	if required == "" {
+		return "", nil, invalid("a required Cinder microversion is needed")
+	}
+	return negotiate(ctx, source, ceiling, required)
+}
+
+func negotiate(ctx context.Context, source *cloudread.Source, ceiling, required string) (string, []*rest.Response, error) {
+	if required == "" && source.Client.Microversion != "" {
 		return source.Client.Microversion, nil, source.Guard(ctx)
 	}
 	targets, err := discoveryURLs(source.Client.Endpoint)
@@ -52,6 +66,7 @@ func Negotiate(ctx context.Context, source *cloudread.Source, ceiling string) (s
 		return "", nil, err
 	}
 	var pages []*rest.Response
+	var lastRejection error
 	for _, target := range targets {
 		wire, err := discoveryGet(ctx, source, target)
 		if wire != nil {
@@ -61,6 +76,7 @@ func Negotiate(ctx context.Context, source *cloudread.Source, ceiling string) (s
 			// Only a direct fault-free native rejection authorizes fallback.
 			// A joined IO/callback/source error or expanded OkCodes never does.
 			if rejection, clean := err.(gophercloud.ErrUnexpectedResponseCode); clean && (rejection.Actual == 404 || rejection.Actual == 405) {
+				lastRejection = err
 				continue
 			}
 			return "", pages, err
@@ -72,7 +88,15 @@ func Negotiate(ctx context.Context, source *cloudread.Source, ceiling string) (s
 		if !found {
 			continue
 		}
-		version, err := SelectVersion(maximum, minimum, ceiling)
+		if required != "" {
+			if err := requireSupport(maximum, minimum, source.Client.Microversion, required); err != nil {
+				return "", pages, wire.Fail(err)
+			}
+		}
+		version := source.Client.Microversion
+		if version == "" {
+			version, err = SelectVersion(maximum, minimum, ceiling)
+		}
 		if err != nil {
 			return "", pages, wire.Fail(err)
 		}
@@ -80,6 +104,13 @@ func Negotiate(ctx context.Context, source *cloudread.Source, ceiling string) (s
 			return "", pages, wire.Fail(err)
 		}
 		return version, pages, nil
+	}
+	if required != "" {
+		err := fmt.Errorf("%w: Cinder endpoint does not advertise required microversion %s", resource.ErrUnsupported, required)
+		if len(pages) != 0 {
+			return "", pages, pages[len(pages)-1].Fail(errors.Join(err, lastRejection, source.Guard(ctx)))
+		}
+		return "", pages, errors.Join(err, lastRejection, source.Guard(ctx))
 	}
 	return "", pages, source.Guard(ctx)
 }
@@ -166,6 +197,14 @@ func discoveryGet(ctx context.Context, source *cloudread.Source, target string) 
 	client, err := fixedrequest.NewGuarded(&source.Client, http.MethodGet, target, guard)
 	if err != nil {
 		return nil, err
+	}
+	// Discovery is versionless even when the action has an explicitly selected
+	// version. Change only this private client, retaining the captured source.
+	client.Microversion = ""
+	for key := range client.MoreHeaders {
+		if _, owned := versionHeader(key); owned {
+			delete(client.MoreHeaders, key)
+		}
 	}
 	parent := client.ProviderClient.HTTPClient.Transport
 	client.ProviderClient.HTTPClient.Transport = transportFunc(func(req *http.Request) (*http.Response, error) {

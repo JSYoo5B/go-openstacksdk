@@ -102,13 +102,21 @@ func Apply(ctx context.Context, client *gophercloud.ServiceClient, id string, st
 
 // applyPrepared keeps the fixed route and Cinder policy shared by direct actions.
 func applyPrepared(ctx context.Context, source *cloudread.Source, id, operation string, body json.RawMessage) (*Result, error) {
+	return applyRequired(ctx, source, id, operation, body, "")
+}
+
+func applyRequired(ctx context.Context, source *cloudread.Source, id, operation string, body json.RawMessage, required string) (*Result, error) {
 	target := source.Client.ServiceURL("volumes", id, "action")
 	if err := rest.ValidateTarget(&source.Client, target); err != nil {
 		return nil, WrapOperation(ctx, operation, err)
 	}
 	result := &Result{VolumeID: id}
 	var err error
-	result.Microversion, result.Discovery, err = cinderrequest.Negotiate(ctx, source, "3.71")
+	if required == "" {
+		result.Microversion, result.Discovery, err = cinderrequest.Negotiate(ctx, source, "3.71")
+	} else {
+		result.Microversion, result.Discovery, err = cinderrequest.NegotiateRequired(ctx, source, "3.71", required)
+	}
 	if err == nil {
 		err = source.WithPolicy(ctx, &result.Microversion, nil)
 	}
