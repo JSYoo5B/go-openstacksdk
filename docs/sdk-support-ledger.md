@@ -925,3 +925,53 @@ catalog3362개에서 go_mapping137→139, unsupported1 유지, unresolved3224→
 전체 SDK는 계속 진행 중입니다.
 
 Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=139, unsupported=1, unresolved=3222.
+
+## Cinder v3 Backup import Proxy mapping
+
+실제 pinned `python:block_storage/v3/import_backup` 한 선언에만 package
+`ImportVolumeBackup`, `Connection.ImportVolumeBackup`, service `backups.API.ImportBackup`을 연결했습니다.
+두 명시적 UTF-8 문자열은 empty·control·Unicode도 caller 값 그대로 전달합니다.
+옵션·resolver·builder·wait·URI/base64 변환은 없고 backend가 opaque locator를 판정합니다.
+Source `Backup.import_record`의 caller URL overwrite와 잘못된 `export_record` POST를
+`backups/import_record` 및 원래 caller `backup_url`로 명시적으로 보정했습니다.
+이 보정을 pinned Python과 exact wire parity라고 주장하지 않습니다.
+
+Source의 disconnected `cls()`에 맞춰 fresh nullable24 Backup의 `location`은 null입니다.
+CurrentLocation·scope lookup·request ID seed를 소비하지 않고 arbitrary response ID를 유지합니다.
+known-only overlay와 ordinary Boolean/list/dict/integer descriptor를 재사용하며
+Value·BackupID·actual raw Backup·Applied·Discovery는 독립적으로 소유합니다.
+present backup envelope가 우선하고 ordinary empty/malformed UTF-8 JSON만 all-null view로 허용합니다.
+shape/UTF8/descriptor 오류는 actual proof와 함께 terminal이며 consumed ID는 후속 descriptor 오류에도 남습니다.
+
+선택된 nonempty microversion은 literal 우선이고 original client를 변경하지 않습니다.
+그 외에는 captured endpoint의 encoded prefix를 유지한 finite bodyless discovery를 수행합니다.
+first usable v3·지원 shape/status·clean concrete native404/405 fallback은 명시한 유한 정책입니다.
+maximum-before-optional-minimum·tuple 길이/순서·3.64 cap·missing maximum 및 latest 경계를 검증했습니다.
+Unicode16 decimal/underscore/arbitrary precision parser와 current upstream Keystoneauth 참고는
+정확한 pinned dependency runtime·전체 Adapter cache/link/envelope/header-discovery 구현을 뜻하지 않습니다.
+accepted malformed discovery terminal proof 정책과 Session canonicalization 미재현은 문서에 명시했습니다.
+
+operation-local POST microversion 정책은 live native reauth·bounded caller retry와 함께 동작합니다.
+physical method/path/origin·owned body bytes·framing·modern/legacy header를 보호하고
+accepted IO/source/context 오류는 실제 단계 proof와 모든 causes를 남깁니다.
+Discovery proof를 import Applied로 빌리지 않으며 rejected native POST IO 관찰 한계도 유지합니다.
+기존 force/restore/reset helper의 정상 retry에서 case-folded map alias를 physical header 수로 잘못
+판정한 회귀를 기존 테스트로 재현하고 수정한 뒤, 변경하지 않은 기존 회귀 테스트를 다시 통과했습니다.
+기존 native Import의 []byte/base64·accepted201·ID/Name DTO는 독립적으로 유지됩니다.
+
+신규28개 테스트 그룹은 public8·service2·Connection5·discovery5·transport4·parser2·disconnected2입니다.
+focused28그룹 race(43.27초), 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(87.72초),
+`go vet -mod=readonly ./...`(2.75초)를 최종1694개 Go에서 통과했습니다.
+설치 문서의 exact standalone Go fence는 초기 compile5.69초와 최종 cache compile0.26초를 통과했고
+authenticated OpenStack 또는 Python SDK runtime을 실행한 것으로 주장하지 않습니다.
+23개 primary literal Source block을 hash로 다시 검증했으며 historical Go reuse 제안을 새 source proof로 세지 않았습니다.
+
+기존1678개 중1676개 Go가 byte-identical이며 backup_model·backup_post 두 파일만 재사용을 위해 수정했습니다.
+새 production9개·test7개이며 기존 inventory·generated Go·generated service 문서는 수정하지 않았습니다.
+기존446개 review의 literal prefix·모든 필드·source pins를 보존해 실제 Proxy review 하나를 추가했습니다.
+새 review에는 계약10개·실제 unique anchor28개·공개 API 참조3개를 연결했습니다.
+catalog3362개에서 go_mapping139→140, unsupported1 유지, unresolved3222→3221이며 supported는0입니다.
+전체 SDK는 계속 진행 중입니다.
+
+Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=140, unsupported=1, unresolved=3221.
