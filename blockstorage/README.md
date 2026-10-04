@@ -13,6 +13,7 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.block_storage.delete_volume(id)` | `service.Volumes.Delete(ctx, resource.ID(id))` |
 | `conn.attach_volume(server, volume, wait=True)` | `conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.detach_volume(server, volume, wait=True)` | `conn.DetachVolume(ctx, blockstorage.DetachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
+| `conn.create_volume(size, wait=True, image=None, bootable=None, **kwargs)` | `conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: size}, options...)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
@@ -66,7 +67,7 @@ microversion이 필요하면 연결 시 `sdk.WithMicroversion(sdk.BlockStorage, 
 
 ## 전체 API와 서버 부팅
 
-볼륨 생성·수정·크기 변경·attachment·snapshot·backup·volume type 관리는 `service.API`의 [Block Storage v3 API](v3/README.md)에서 제공합니다. 기존 볼륨으로 서버를 부팅할 때는 [Compute의 `WithBootVolume`](../compute/README.md)을 사용하며, 볼륨 이름은 이 패키지의 `Volumes.ResolveID`로 해석합니다. 기존 데이터 볼륨 연결은 `conn.AttachVolume`이 연결 전 Cinder 조회, Nova 요청과 기본 완료 대기를 묶습니다. [연결 사용법과 Python 비교](attach-volume.md)에 옵션·기본값·오류 시 부분 결과를 설명합니다. 기존 데이터 볼륨 분리는 `conn.DetachVolume`이 Nova DELETE와 선택적인 Cinder 대기를 묶습니다. [분리 사용법과 Python 비교](detach-volume.md)는 Nova만 사용하는 호출과 접수 후 대기 오류를 설명합니다. 데이터 볼륨 생성을 조합하는 상위 작업은 계속 구현할 대상입니다.
+볼륨 생성·수정·크기 변경·attachment·snapshot·backup·volume type 관리는 `service.API`의 [Block Storage v3 API](v3/README.md)에서 제공합니다. 기존 볼륨으로 서버를 부팅할 때는 [Compute의 `WithBootVolume`](../compute/README.md)을 사용하며, 볼륨 이름은 이 패키지의 `Volumes.ResolveID`로 해석합니다. 기존 데이터 볼륨 연결은 `conn.AttachVolume`이 연결 전 Cinder 조회, Nova 요청과 기본 완료 대기를 묶습니다. [연결 사용법과 Python 비교](attach-volume.md)에 옵션·기본값·오류 시 부분 결과를 설명합니다. 기존 데이터 볼륨 분리는 `conn.DetachVolume`이 Nova DELETE와 선택적인 Cinder 대기를 묶습니다. [분리 사용법과 Python 비교](detach-volume.md)는 Nova만 사용하는 호출과 접수 후 대기 오류를 설명합니다. `conn.CreateVolume`은 이미지 이름·생성 속성·기본 완료 대기와 선택적인 bootable 액션을 처리합니다. [생성 사용법과 Python 비교](create-volume.md)에 알려진 속성 매핑과 단계별 결과를 설명합니다.
 
 `service.API.Snapshots.UpdateMetadata`와 버전별 Snapshot API는 PUT 응답의 메타데이터를
 `map[string]any`로 반환합니다. 이전 `*Snapshot` 반환형은 다른 envelope를 읽어 정상 응답도
