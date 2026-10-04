@@ -31968,6 +31968,335 @@
         "Logical member lookup seeds only a physically absent ID; RequestedID and SeededID make that state explicit while raw Backup evidence remains actual. Explicit null, false, zero, empty/container or different returned IDs remain passive response values; Go does not require equality with the request or silently manufacture a physical ID."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/create_volume_backup",
+      "source_fingerprint": "e023cf01e17712ee5658ca7eabc1c886e8c69524b4b2cee5c6f73604a85c4ef6",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.CreateVolumeBackup",
+        "gophercloudsdk/blockstorage.CreateVolumeBackup",
+        "gophercloudsdk/blockstorage.PrepareCreateVolumeBackupOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupName",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupDescription",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupForce",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupIncremental",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupSnapshotID",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupWait",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupWaitPolicy",
+        "gophercloudsdk/blockstorage.WithCreateVolumeBackupLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "All fixed six body fields are present: nullable name/description/snapshot_id plus literal volume_id, explicit forcefalse/incrementalfalse defaults. No generated name/description, Volume/Snapshot resolver or extra raw kwargs/native builder; empty/slashed body IDs are forwarded after stringUTF8 validation.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupDefaultsSendSixLiteralFieldsWithoutResolvers",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationCreateTextValidationPrecedesCinderSelection"
+          ]
+        },
+        {
+          "behavior": "Incremental bool serializes wire incremental while request-seeded normalized state uses is_incremental. All six constructor fields including null/false are retained as dirty input; POST is queryless/backups and does not seed Backup.id from VolumeID.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupDefaultsSendSixLiteralFieldsWithoutResolvers",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness"
+          ]
+        },
+        {
+          "behavior": "Original admittedHTTP100..399 create responses are consumed independently of native Create202 leaf. Canonical backup or flat object merges only known fields; missing preserves prior values and explicit null replaces. Parsed duplicate-key first-position/last-value alias order is retained without dirty-equality suppression.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupMergesKnownResponseFieldsWithoutInventingPhysicalInputs",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupInitialErrorIsCheckedOnlyAfterFreshFetchAndMerge",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupNullablePollContinuesAndLatestIDIsUsedOnlyForNeededRoute",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelProjectAliasesFollowParsedDuplicateFirstInsertionOrder",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateAliasesUseParsedDuplicateInsertionOrder"
+          ]
+        },
+        {
+          "behavior": "Create and each fresh poll eagerly normalize the closed Backup23Body+computedlocation24 view, ordinary Boolean/list/dict/integer descriptors and untyped remaining values. Physical raw object keeps unknown fields and original numeric/types; snapshot descriptors/state indices do not leak.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupDefaultsSendSixLiteralFieldsWithoutResolvers",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupMergesKnownResponseFieldsWithoutInventingPhysicalInputs",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupRejectedShapesAndDescriptorsRetainCreationProof",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelHasTwentyFourNullableFieldsAndOwnDescriptorOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelOrdinaryBooleanDescriptorsAreNullableAndDoNotUseBoolStr",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLinksWrapSingleValuesAndMetadataUsesOrdinaryNullableDict",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelBothIntegerDescriptorsConvertBeforeAnySelection"
+          ]
+        },
+        {
+          "behavior": "Current or supplied owned location is captured after originals once, then recomputed for every merged Backup from actual project alias and literal availability_zone. Foreign project clears configured names/domain; rowzone overrides caller/raw location; live auth does not recapture current call scope.",
+          "tests": [
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsCaptureRecordedScopeAfterOriginalsBeforeGetterAcrossWait",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsExplicitLocationAndRetainedOriginalsStayOwned",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLocationUsesBothRowProjectAndLiteralAvailabilityZone",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelPhysicalAndLocalLocationFailuresAreAtomicAndOutputIsOwned"
+          ]
+        },
+        {
+          "behavior": "Empty or malformed validUTF8 JSON preserves prior logical state and actual proof without fabricating RawResource. Parsed{} is actual nonnil object; valid wrongshape/null envelope/invalidUTF8 or descriptor failure keeps current physical evidence and leaves final success publication atomic.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupMergesKnownResponseFieldsWithoutInventingPhysicalInputs",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupRejectedShapesAndDescriptorsRetainCreationProof"
+          ]
+        },
+        {
+          "behavior": "Wait defaults true. Initial merged case-insensitive available completes with no GET and no unused route/timeout/interval checks; noWait also avoids status/route waiting while complete descriptor normalization remains eager.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupNoWaitPreservesArbitraryIdentityAndStatus",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupCachedAvailableSkipsTimeoutIntervalAndUnusableIdentity",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot"
+          ]
+        },
+        {
+          "behavior": "Otherwise a fresh GET begins after loop boundary and safe currentID validation. Initialerror is not failed until fresh observation; available wins before exactcaselesserror failure. Explicitnullstatus remains nonterminal, nonstringstatus errors only when status wait is reached.",
+          "tests": [
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupInitialErrorIsCheckedOnlyAfterFreshFetchAndMerge",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupNullablePollContinuesAndLatestIDIsUsedOnlyForNeededRoute",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupPollIntervalIsConsumedOnlyAfterNonterminalState"
+          ]
+        },
+        {
+          "behavior": "Fresh canonical/flat/empty/malformed polls merge prior state and may change logicalID. A latest arbitrary or unusable ID is preserved passively on terminal/noWait output; it is validated only if another fixed member request is needed.",
+          "tests": [
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupInitialErrorIsCheckedOnlyAfterFreshFetchAndMerge",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupNullablePollContinuesAndLatestIDIsUsedOnlyForNeededRoute",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupNoWaitPreservesArbitraryIdentityAndStatus"
+          ]
+        },
+        {
+          "behavior": "Nil timeout is unlimited; explicitzero/negative fails before first usedpoll unless initialready/noWait. Positive budget begins after initial mutation/merge and checks loop boundaries without deriving HTTP deadline. Pollnil2s; zero100ms capped by a smaller explicit timeout, negative only errors on reachedsleep; parentctx interrupts HTTP/sleep and retains customcause.",
+          "tests": [
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveBudgetStartsAfterMutationAndAllowsSlowTerminalHTTP",
+            "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupPollIntervalIsConsumedOnlyAfterNonterminalState",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveTimeoutIsObservedAtLoopBoundaryWithoutBorrowingProof",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Created/CreatedValue/CreatedBackup, latest raw BackupID, LastAccepted and Ready/ReadyBackup are independently owned actual/logical phases. Final Value/Backup publishes only after requested policy and final guard; acceptedRead/Close/decode/source/context errors retain prior/current actual evidence without rollback.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupOwnsCreatedFinalReadyAndRawIdentityIndependently",
+            "blockstorage/backup_mutation_contract_test.go:TestCreateVolumeBackupRejectedShapesAndDescriptorsRetainCreationProof",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationAcceptedFailuresRetainOnlyCurrentProofAndAllCauses",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Concrete With/Prepare owns pointers/location/waitpolicy and snapshots original options slice. Direct capture precedes originals; Connection originals run once before ownedCurrentLocation and only cached Cinderv3 getter. Source/method/URL/body/status ownership holds through native liveauth/reauth/retry without SDK orchestration replay.",
+          "tests": [
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsPreserveOmissionAndExplicitEmptyFalseZero",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsOwnFactoryInputsAndEveryPreparedTree",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsRunOriginalsOnceAndFreezeMembershipAndWrites",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsJoinCancellationAndOriginalErrors",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsReuseFactoriesConcurrentlyWithOwnedLocations",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsExplicitLocationAndRetainedOriginalsStayOwned",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsNonemptyPreflightAndGetterFailuresKeepOperationCauses",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationCreateTextValidationPrecedesCinderSelection",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationNativeAuthAndRetryUseLiveTokenWithOwnedHeadersAndVersion",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsenceProof",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationOriginalSourceChangesAreTerminalBeforeLaterRestoration"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backup-mutations.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin helper is the candidate target with selected Cinder v3 and Gophercloudv2.15.0. Independent Proxy/native/v2/generic Resource/session/adapter and other backup helpers retain separate reviews; full SDK remains incomplete.",
+        "Python mutable/arbitrary runtime inputs map to owned Go UTF8 request strings, concrete nullable bool/string options, finite JSON raw/logical values and phase results. Python Resource object identity, stale dict caches, arbitrary Python object coercion and warning emission are not reproduced.",
+        "Normal selected microversion is retained without automatic absent-default discovery/cap/upgrade. Python Backupmax3.64 constrains absent-default negotiation only; explicit configured defaults take precedence. Forceaction is separately the exact source3.64 behavior.",
+        "Go safe consumed member IDs and fixed same-origin method/URL/body/status ownership replace source urljoin falsey/container coercion/leading slash behavior. Unsafe names use exact list lookup; passive resultIDs remain arbitrary JSON until a needed route.",
+        "Nullable23Body+computedlocation model is independent of actual RawResource and admitted/rejected HTTP proof. Unknown actual fields/numeric spelling are preserved as Go evidence extension while only known fields overlay logical state; parsed JSON alias/duplicate insertion traversal is retained.",
+        "Exact decimal truthiness/equality, arbitrary integer JSON, Go Unicode decimal runtime table and strict UTF8 are explicit boundaries from Python parsedfloat rounding/underflow/configurableintegerlimits. Nonnumeric integer containers normalize0; bool remainsbool; digit-but-nondecimal strings can fail.",
+        "Captured current/explicit configured scope recomputes from Backup project alias and literal rowzone, separate from live provider authentication. Standalone/disconnected Resource location/runtime construction are independent capabilities.",
+        "Positive SDK timeout is loop-boundary only; parentcontext cancellation/deadline adds a Go interruption/cause contract. Nil alone unlimited; zero/negative remain used-loop timeout. PollInterval is a concrete Go convenience absent from the direct Python helper.",
+        "Accepted Read/Close/decode/context/source failures retain their actual phase evidence. Only ordinary member400403404 and deletionpoll404 have bounded rejection-body fault observation; rejected Lists, other member statuses and mutations retain native discarded-bodyIO policy. This is not universal rejection-IO preservation.",
+        "Go errors retain operation/resource/custom context causes and independently owned partial phase results; Source probes use explicit AST/session/response/location stand-ins and are not authenticated Python/OpenStack runtime evidence. No orchestration replay or rollback is added.",
+        "The fixed cloud signature has no Fields/display aliases/native extraCreate attributes. Omitted nullabletext serializesnull, explicitempty retained, force/incremental defaults serializefalse; Go typed bool/string domain replaces arbitrary Python arguments.",
+        "VolumeID/SnapshotID are literal bodydata, not resource.Ref resolution or generated Backup.id/name. Create response partial merge preserves request-known state while CreatedBackup is actual only."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_backup",
+      "source_fingerprint": "f531537453b276e3ddba4112ebe4ac4d05d6d80b6c1d47d59aea33107bf1b0e7",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.DeleteVolumeBackup",
+        "gophercloudsdk/blockstorage.DeleteVolumeBackup",
+        "gophercloudsdk/blockstorage.PrepareDeleteVolumeBackupOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeBackupOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeBackupForce",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeBackupWait",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeBackupWaitPolicy",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeBackupLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Empty string input returns completed Deletedfalse after valid context/original callbacks, selecting no client/location/service/waitpolicy and allowing nil direct client/nilConnection. Successful completed lookup absence is false; any lookup/operation error leaves Deletednil.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupEmptyInputRunsOriginalsWithoutServiceOrLocation",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupLookupCompletionAndLogicalSeedControlMutation",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationEmptyDeleteIsServiceFreeEvenForNilConnection",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsJoinCancellationAndOriginalErrors"
+          ]
+        },
+        {
+          "behavior": "Nonempty delete runs one ordinary exact Backup find on the same captured reader, with member-first safe identity and detailed literal-name fallback only from clean original native400403404. Unsafe names use exact list-only route domain, duplicates/later exhaustion errors prevent mutation; no extra confirmGET or Volume/Snapshot/Identity resolution.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupLookupCompletionAndLogicalSeedControlMutation",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindCleanNativeFallbackIsExactAndUsesActualResponseID",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindUnsafeLiteralAndWildcardNamesNeverBecomeSearchPatterns",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFindAmbiguityPrecedesUnusedBadTailAndUniqueMustExhaust",
+            "blockstorage/volume_backup_read_selection_test.go:TestVolumeBackupReadFallbackLaterNativeFailureNeverBorrowsSuppressedMemberProof"
+          ]
+        },
+        {
+          "behavior": "Selected actual changedID is used; only a physically absent memberID seeds requested identity logically with Resolved RequestedID/SeededID, never physical raw fields. Explicitnull/false/zero/empty/container/unusable mutationID is a reached local route error with completed Resolved retained.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupLookupCompletionAndLogicalSeedControlMutation",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelMemberSeedsOnlyAbsentInheritedIDAndKeepsPhysicalBytes"
+          ]
+        },
+        {
+          "behavior": "Normal branch sends fixed bodyless DELETE/backups/{selectedID}, no force/cascadequery. Force branch sends fixed POST/backups/{selectedID}/action with literal os-force_deleteNull; no native{} body substitution.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupForceActionUsesNullAnd364WithoutChangingPollVersion",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupNormalAndForceMutation404NeverBecomeAbsence"
+          ]
+        },
+        {
+          "behavior": "Force action explicitly uses3.64 independently of empty/3.60/3.80 normal selection. Only copied operation client/canonical generic+legacy version headers override; original service/headers and ordinary lookup/poll microversion remain unchanged and original source facts remain guarded.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupForceActionUsesNullAnd364WithoutChangingPollVersion",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsForceKeepsCachedSelectionAndNormalWaitPolicyIndependent"
+          ]
+        },
+        {
+          "behavior": "Force nativeRetry cannot alter/remove required version aliases via MoreHeaders/OmitHeaders, and actual physical request requires exactly one exact generic/legacy3.64header each. Callback/source/policy faults keep original native evidence and block physical resend; fixed redirects/liveauth/native retry remain guarded.",
+          "tests": [
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationNativeAuthAndRetryUseLiveTokenWithOwnedHeadersAndVersion",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsForceKeepsCachedSelectionAndNormalWaitPolicyIndependent"
+          ]
+        },
+        {
+          "behavior": "Both mutations use original finiteHTTP100..399 opaque acknowledgement without JSON/UTF8/status merge. Native or expanded-policy rejected normal/force404 is terminal ignore_missingFalse and cannot become Deletedfalse/Absent or admitted Applied.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupForceActionUsesNullAnd364WithoutChangingPollVersion",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupNormalAndForceMutation404NeverBecomeAbsence",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsenceProof"
+          ]
+        },
+        {
+          "behavior": "DeleteWait defaults false, so admitted acknowledgement plus final guard yields true without later route/status/wait checks. WithWaittrue always performs firstfreshGET even cacheddeleted after used loop-boundary/currentID checks.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement",
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupForceActionUsesNullAnd364WithoutChangingPollVersion",
+            "blockstorage/backup_mutation_wait_test.go:TestDeleteVolumeBackupFreshFetchMergesCachedDeletedButRejectsExplicitNullStatus",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness"
+          ]
+        },
+        {
+          "behavior": "Fresh merged case-insensitivedeleted or clean original nativeGET404 completes. Error/error_deleting are nonterminal; explicitnull/nonstringstatus is error when reached, unlike create nullstatus. Missing/partial/flat/malformed poll fields retain semantic prior state and changedID controls needed laterpoll only.",
+          "tests": [
+            "blockstorage/backup_mutation_wait_test.go:TestDeleteVolumeBackupFreshFetchMergesCachedDeletedButRejectsExplicitNullStatus",
+            "blockstorage/backup_mutation_wait_test.go:TestDeleteVolumeBackupErrorStatesContinueAndLatestIDDoesNotRouteTerminalFalse"
+          ]
+        },
+        {
+          "behavior": "Poll404 keeps native rejection/retry/reauth and bounded Read/Close observation. Only direct fault-free native404 can become Absent; wrapped/callback/expandedOkCodes/IO/source/context404 remains terminal with Deletednil. Rejected proof never overwrites admitted LastAccepted or earlier Applied.",
+          "tests": [
+            "blockstorage/backup_mutation_transport_test.go:TestDeleteVolumeBackupPolling404RequiresCleanBodyAndOriginalNativePolicy",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsenceProof",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationAcceptedFailuresRetainOnlyCurrentProofAndAllCauses"
+          ]
+        },
+        {
+          "behavior": "Nil cloud timeout overrides Proxy standalone120 with unlimited. Explicitzero/negative timeout fails after acknowledgement before firstfreshpoll. Positive loop budget does not derive HTTP deadline and may accept slowterminal response; parentctx/customcause separately interrupts request/sleep.",
+          "tests": [
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveBudgetStartsAfterMutationAndAllowsSlowTerminalHTTP",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveTimeoutIsObservedAtLoopBoundaryWithoutBorrowingProof",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Resolved, raw BackupID, opaque Applied, admitted LastAccepted, Ready/ReadyBackup from deleted GET and clean404Absent are independently owned phase evidence. Deleted is nil on error and true only after requested policy/finalguard; no partial remote-completion bool or rollback is invented.",
+          "tests": [
+            "blockstorage/backup_mutation_contract_test.go:TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement",
+            "blockstorage/backup_mutation_wait_test.go:TestDeleteVolumeBackupFreshFetchMergesCachedDeletedButRejectsExplicitNullStatus",
+            "blockstorage/backup_mutation_wait_test.go:TestDeleteVolumeBackupErrorStatesContinueAndLatestIDDoesNotRouteTerminalFalse",
+            "blockstorage/backup_mutation_transport_test.go:TestDeleteVolumeBackupPolling404RequiresCleanBodyAndOriginalNativePolicy",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationAcceptedFailuresRetainOnlyCurrentProofAndAllCauses",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Known24 Backup descriptor/projectzone/alias semantics are preserved from selected logical prior values without claiming original wire provenance; fresh physicalRawResource remains actual. Caller options/source/headers/scope remain owned and concurrent snapshot/backup tables independent.",
+          "tests": [
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelHasTwentyFourNullableFieldsAndOwnDescriptorOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelOrdinaryBooleanDescriptorsAreNullableAndDoNotUseBoolStr",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLinksWrapSingleValuesAndMetadataUsesOrdinaryNullableDict",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelBothIntegerDescriptorsConvertBeforeAnySelection",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelProjectAliasesFollowParsedDuplicateFirstInsertionOrder",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelLocationUsesBothRowProjectAndLiteralAvailabilityZone",
+            "internal/cloudsnapshot/backup_model_test.go:TestBackupModelPhysicalAndLocalLocationFailuresAreAtomicAndOutputIsOwned",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateAliasesUseParsedDuplicateInsertionOrder",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsOwnFactoryInputsAndEveryPreparedTree",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsReuseFactoriesConcurrentlyWithOwnedLocations",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsCaptureRecordedScopeAfterOriginalsBeforeGetterAcrossWait",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsExplicitLocationAndRetainedOriginalsStayOwned"
+          ]
+        },
+        {
+          "behavior": "Original callbacks execute once before ConnectionCurrentLocation/cachedCinderv3 getter; direct source capture precedes callbacks. Fixed method/URL/body/originalstatus, sticky source and parentcause guards preserve native liveauth/reauth/caller retry; no SDK workflow replay or automatic cleanup.",
+          "tests": [
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsRunOriginalsOnceAndFreezeMembershipAndWrites",
+            "blockstorage/backup_mutation_options_test.go:TestBackupMutationOptionsJoinCancellationAndOriginalErrors",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsNonemptyPreflightAndGetterFailuresKeepOperationCauses",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationNativeAuthAndRetryUseLiveTokenWithOwnedHeadersAndVersion",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsenceProof",
+            "blockstorage/backup_mutation_transport_test.go:TestVolumeBackupMutationOriginalSourceChangesAreTerminalBeforeLaterRestoration",
+            "connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backup-mutations.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin helper is the candidate target with selected Cinder v3 and Gophercloudv2.15.0. Independent Proxy/native/v2/generic Resource/session/adapter and other backup helpers retain separate reviews; full SDK remains incomplete.",
+        "Python mutable/arbitrary runtime inputs map to owned Go UTF8 request strings, concrete nullable bool/string options, finite JSON raw/logical values and phase results. Python Resource object identity, stale dict caches, arbitrary Python object coercion and warning emission are not reproduced.",
+        "Normal selected microversion is retained without automatic absent-default discovery/cap/upgrade. Python Backupmax3.64 constrains absent-default negotiation only; explicit configured defaults take precedence. Forceaction is separately the exact source3.64 behavior.",
+        "Go safe consumed member IDs and fixed same-origin method/URL/body/status ownership replace source urljoin falsey/container coercion/leading slash behavior. Unsafe names use exact list lookup; passive resultIDs remain arbitrary JSON until a needed route.",
+        "Nullable23Body+computedlocation model is independent of actual RawResource and admitted/rejected HTTP proof. Unknown actual fields/numeric spelling are preserved as Go evidence extension while only known fields overlay logical state; parsed JSON alias/duplicate insertion traversal is retained.",
+        "Exact decimal truthiness/equality, arbitrary integer JSON, Go Unicode decimal runtime table and strict UTF8 are explicit boundaries from Python parsedfloat rounding/underflow/configurableintegerlimits. Nonnumeric integer containers normalize0; bool remainsbool; digit-but-nondecimal strings can fail.",
+        "Captured current/explicit configured scope recomputes from Backup project alias and literal rowzone, separate from live provider authentication. Standalone/disconnected Resource location/runtime construction are independent capabilities.",
+        "Positive SDK timeout is loop-boundary only; parentcontext cancellation/deadline adds a Go interruption/cause contract. Nil alone unlimited; zero/negative remain used-loop timeout. PollInterval is a concrete Go convenience absent from the direct Python helper.",
+        "Accepted Read/Close/decode/context/source failures retain their actual phase evidence. Only ordinary member400403404 and deletionpoll404 have bounded rejection-body fault observation; rejected Lists, other member statuses and mutations retain native discarded-bodyIO policy. This is not universal rejection-IO preservation.",
+        "Go errors retain operation/resource/custom context causes and independently owned partial phase results; Source probes use explicit AST/session/response/location stand-ins and are not authenticated Python/OpenStack runtime evidence. No orchestration replay or rollback is added.",
+        "Empty typed identity is a service-free Go no-op but still context/originalcallback checked. Actual Resource presence is not ID truthiness; member missingID seed is logical only, while changed/unusable responseID drives reached safe route policy.",
+        "Forced deletion deliberately uses sourceNull action at explicit3.64, even when normal selected version differs; native ForceDelete202/{} remains independently reviewed. Mutation404 is terminal, cleanpoll404 completes only after proof/source/cause guards."
+      ],
+      "remaining": []
     }
   ]
 }
