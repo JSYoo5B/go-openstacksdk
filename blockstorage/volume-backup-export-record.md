@@ -199,11 +199,11 @@ Go 결과에는 Python `requests.Response`의 mutable request/history/cookies/en
 
 openstacksdk pin 자체가 Requests/simplejson/interpreter의 정확한 버전이나 JSON backend를
 고정하지는 않습니다. 참고로 Requests `v2.32.5`의
-[Response.json](https://github.com/psf/requests/blob/v2.32.5/src/requests/models.py#L873)은
+[Response.json](https://github.com/psf/requests/blob/v2.32.5/src/requests/models.py#L947)은
 encoding detection과 text fallback을 사용하고,
-[compat](https://github.com/psf/requests/blob/v2.32.5/src/requests/compat.py#L53)는
+[compat](https://github.com/psf/requests/blob/v2.32.5/src/requests/compat.py#L57-L64)는
 설치한 simplejson 또는 표준 json을 선택합니다.
-[guess_json_utf](https://github.com/psf/requests/blob/v2.32.5/src/requests/utils.py#L871)은
+[guess_json_utf](https://github.com/psf/requests/blob/v2.32.5/src/requests/utils.py#L947)은
 BOM과 UTF-16/UTF-32도 다룹니다. 이 참고 버전은 SDK의 dependency pin이 아닙니다.
 Go는 위의 UTF-8 literal JSON domain을 사용합니다. Python semantic 숫자의 float rounding,
 중복 key 처리, string/surrogate 표현, backend의 nonfinite 정책 및 interpreter digit/depth 제한을
