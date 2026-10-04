@@ -29214,6 +29214,295 @@
         "Location timing is explicit: Connection defaults snapshot recorded current scope after original option callbacks and before service selection; the owned operation Location is not rewritten by a later native reauthentication scope change. A direct ServiceClient with no Location override reads recorded scope when each row is normalized. Python current_project_id may refresh session authentication during Resource location construction; Go does not add such location-triggered I/O."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/list_volumes",
+      "source_fingerprint": "77d9278a008cc4084f046be2066cd7c7e62d9753d9885fba3d6b8d72cc3623af",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.ListVolumes",
+        "gophercloudsdk/blockstorage.ListVolumes",
+        "gophercloudsdk/blockstorage.PrepareVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListVolumes is the direct cloud complete detailed list. Its initial bodyless GET200 is /volumes/detail without identity/status/all-project/page/filter controls; complete materialization returns all source rows in order and never performs member GETs or name resolution. The deprecated Python cache argument is warning-only/no-op and is omitted in Go.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesMaterializesAllPagesAndOwnsNormalizedAndWireRows",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection"
+          ]
+        },
+        {
+          "behavior": "Every raw row is converted through the complete eager normalized v3 descriptor/location view while consuming that row, before any continuation is inspected or requested. Malformed visited descriptor/location errors stop the collector; a later page error never exposes earlier partial Value/Volumes.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEagerDescriptorFailureStopsBeforeNextAndDiscardsPartialValues",
+            "blockstorage/volume_reads_contract_test.go:TestVolumeExistsAmbiguityStopsBeforeUnusedTailThatFullListMustConsume",
+            "blockstorage/volume_reads_transport_test.go:TestListVolumesLaterNativeOrTransportErrorKeepsOnlyActualPriorPages",
+            "blockstorage/volume_search_test.go:TestSearchVolumesNormalizesEveryRowBeforeNextAndConsumesFiltersAfterFullList"
+          ]
+        },
+        {
+          "behavior": "Value is an owned JSON array of normalized resources and Volumes is the corresponding owned raw source-row slice. Empty success is nonnull [] plus a nonnil empty slice. Duplicate IDs remain separate original rows/pointers in wire order; unrelated unknown fields and exact numeric text remain in RawResource.Body rather than being fabricated into the normalized view.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesMaterializesAllPagesAndOwnsNormalizedAndWireRows",
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEmptyPageStopsWithoutConsumingUnusedContinuation"
+          ]
+        },
+        {
+          "behavior": "Canonical volumes [] ends the list before unused next-link consumption. Nonempty pages use exact native volumes_links continuation extraction with same collection escaped path/origin and cycle guards. Source-advertised queries are retained; no HTTP Link/data.next/marker fallback, local pagination restart or page cap is invented.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesMaterializesAllPagesAndOwnsNormalizedAndWireRows",
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEmptyPageStopsWithoutConsumingUnusedContinuation",
+            "blockstorage/get_volumes_test.go:TestGetVolumesContinuationScopeCyclesAndCanonicalEnvelopeUseActualPageProof"
+          ]
+        },
+        {
+          "behavior": "Each physically admitted200 list response contributes independently cloned Pages body/header/status even when its read/Close/decoder/source/context phase fails. Rejected HTTP/native/transport failures add no admitted page and keep their own error evidence, never an old page proof. Every error leaves Value/Volumes nil while actual Pages remain inspectable.",
+          "tests": [
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValues",
+            "blockstorage/volume_reads_transport_test.go:TestListVolumesLaterNativeOrTransportErrorKeepsOnlyActualPriorPages",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsPostResponseSourceChangesStopWithCurrentAdmittedProof",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadBlockedContinuationCancellationRetainsActualPagesAndCause",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsAcceptedProofSurvivesReadCloseCancellationAndSourceFailure"
+          ]
+        },
+        {
+          "behavior": "Owned VolumeReadOpts.Location is the only read policy. Original callbacks apply once in order; direct package captures Cinder/header facts before originals and guards sticky context/source through every phase. Connection prepares originals once before its cached Cinder v3 getter and delegates an owned policy, supplying recorded CurrentLocation unless overridden. Captured ordinary headers are independent while provider authentication stays live; empty source Type is normalized only on the execution copy.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestPrepareVolumeReadOptionsOwnsFactoriesCallbacksAndOriginalSlice",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsApplyOriginalOptionsOnceWithCapturedHeadersAndOwnedLocation",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsOriginalSourceMutationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadPreflightStopsOptionsAndHTTPOnInvalidSourceOrContext",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsLocationFactoriesOwnInputsAndLeaveConnectionDefault",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsOriginalCallbackSliceAndRetainedLocationAreSnapshots",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeIsCapturedAfterOptionsAndRefreshedPerCall",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsPreflightAndOptionFailuresSelectNoService",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsGetterFailureRetainsOperationAndCancellationCause",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeFailurePrecedesGetterAndOwnedOverrideBypassesIt"
+          ]
+        },
+        {
+          "behavior": "Caller-owned Location JSON is validated only when an actual resource is normalized; an empty ListVolumes list does not consume an unused invalid location. Invalid caller location remains a local ErrInvalidOption without borrowing a200 ResponseError, while any independently admitted Pages/Observed evidence remains available and logical outputs stay uncommitted. Physical canonical row/descriptor failures retain their own originating accepted response error evidence.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadLocationIsConsumedOnlyByActualRowsWithoutBorrowingResponseFailure",
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEagerDescriptorFailureStopsBeforeNextAndDiscardsPartialValues",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-reads.md",
+        "blockstorage/search-volumes.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go selects Cinder v3 under Gophercloud v2.15.0 and uses the audited 38-field normalized Volume view plus an independent RawResource physical row and response proof. Pinned cloud can select v2; this row does not implement a v2 projection or promote native/Proxy/Resource/session/cache declarations.",
+        "Complete canonical UTF-8 volume(s) envelopes and accepted200 responses are the deliberate Go decoder boundary. Python generic Resource translation can tolerate invalid JSON on member fetch, unwrap absent envelopes more permissively, wrap nonarray resource lists, strip self, and preserve seeded omitted IDs. Go raw evidence preserves unknown/self fields while normalized known fields exclude them.",
+        "Computed location follows existing owned CloudLocation/recorded provider-scope mapping. Exact decimal raw precision, Unicode/version and configurable Python numeric conversion boundaries are inherited from the already audited normalized view; no Python object identity, mutable Resource lifecycle or warning subsystem is recreated.",
+        "Go returns richer owned result/evidence structures with an error; rejected native status/body/header remain in their original error. Admitted phase proof survives later failures without establishing successful resource/boolean output, and no SDK orchestration replay or swallowed cancellation is introduced.",
+        "Pinned list_volumes(cache=None) warns for every non-None cache value, including False, without changing list behavior. The Go API deliberately has no obsolete cache/warning parameter and exposes none of the lower Proxy query/details/all_projects controls.",
+        "Go continuation policy maps native canonical volumes_links only. Pinned generic Resource.list can consult links/data.next/HTTP Link and limited marker fallback; this direct workflow does not promote those generic capabilities.",
+        "Local caller Location errors are separate from physical response/descriptor errors: actual admitted proof remains inspectable, but a local error is not reclassified as a200 response failure. This preserves the existing shared GetVolume/SearchVolumes normalizer behavior."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_by_id",
+      "source_fingerprint": "7a0280e1ba0da096dd9c739d7af9cc99fe215ffe0f980a182a790291b0058181",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.GetVolumeByID",
+        "gophercloudsdk/blockstorage.GetVolumeByID",
+        "gophercloudsdk/blockstorage.PrepareVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetVolumeByIDRequest.ID is a literal direct member identifier, never a name or a Name Ref. Required UTF-8/control/Unicode-whitespace/single unescaped segment validation protects the fixed bodyless GET200 /volumes/{escaped-id}; no query/list/search/ref lookup is performed.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDUsesOnlyLiteralMemberAndKeepsResponseIdentity",
+            "blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDAcceptsUnicodeLiteralSingleSegment",
+            "blockstorage/volume_reads_options_test.go:TestGetVolumeByIDRejectsUnsafeIDsAfterOptionsWithoutHTTP"
+          ]
+        },
+        {
+          "behavior": "All rejected member HTTP codes, including404/400/403, remain errors with original native status/body/header/cause and never trigger name fallback or a successful absent value. The misleading Python docstring else None is not treated as source behavior; actual proxy _get fetch propagates NotFoundException.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDPropagatesNativeClientErrorsWithoutFindFallback",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsMember404IsErrorButCompletedExistenceAbsenceIsFalse"
+          ]
+        },
+        {
+          "behavior": "A successful canonical volume object produces the eager complete normalized v3/location Value and the actual independently owned RawResource Volume. Omitted response ID remains absent raw and null normalized; a present different/untyped ID is preserved rather than silently replaced with the request ID.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDUsesOnlyLiteralMemberAndKeepsResponseIdentity",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsLocationFactoriesOwnInputsAndLeaveConnectionDefault"
+          ]
+        },
+        {
+          "behavior": "Observed clones the actual admitted member response before the workflow returns read/Close, post-source/context or decoding errors. On any failure Value/Volume remain nil, Observed remains available if200 was admitted, and Pages stays empty. Read+Close+context.Cause failures retain all causes without inventing a successful completion or replaying a list.",
+          "tests": [
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValues",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsPostResponseSourceChangesStopWithCurrentAdmittedProof",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsAcceptedProofSurvivesReadCloseCancellationAndSourceFailure"
+          ]
+        },
+        {
+          "behavior": "Response headers/raw body and normalized Value are independent from Volume.Body/Header and ResponseError snapshots. The member getter shares the existing guarded transport/normalizer with default GetVolume without changing existing find fallback/selection behavior.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestGetVolumeByIDUsesOnlyLiteralMemberAndKeepsResponseIdentity",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof",
+            "blockstorage/volume_search_test.go:TestGetVolumeOmittedNullGETFirstAndCompatibleListFallback",
+            "blockstorage/volume_search_test.go:TestGetVolumeEveryFalseyNonnullFilterUsesFullListOnly",
+            "blockstorage/volume_search_test.go:TestSearchAndGetVolumeExpressionsKeepDynamicValuesAndSingleFalseyElement",
+            "blockstorage/volume_search_test.go:TestGetVolumeDefaultExactListMissingAndAmbiguityKeepSharedIteratorPolicy"
+          ]
+        },
+        {
+          "behavior": "Owned VolumeReadOpts.Location is the only read policy. Original callbacks apply once in order; direct package captures Cinder/header facts before originals and guards sticky context/source through every phase. Connection prepares originals once before its cached Cinder v3 getter and delegates an owned policy, supplying recorded CurrentLocation unless overridden. Captured ordinary headers are independent while provider authentication stays live; empty source Type is normalized only on the execution copy.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestPrepareVolumeReadOptionsOwnsFactoriesCallbacksAndOriginalSlice",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsApplyOriginalOptionsOnceWithCapturedHeadersAndOwnedLocation",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsOriginalSourceMutationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadPreflightStopsOptionsAndHTTPOnInvalidSourceOrContext",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsLocationFactoriesOwnInputsAndLeaveConnectionDefault",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsOriginalCallbackSliceAndRetainedLocationAreSnapshots",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeIsCapturedAfterOptionsAndRefreshedPerCall",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsPreflightAndOptionFailuresSelectNoService",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsGetterFailureRetainsOperationAndCancellationCause",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeFailurePrecedesGetterAndOwnedOverrideBypassesIt",
+            "blockstorage/volume_reads_transport_test.go:TestGetVolumeByIDNativeAuthenticationAndRetryKeepFixedOwnedRequest",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadNativeRetryCannotChangeBodyDecoderOrAcceptedStatus"
+          ]
+        },
+        {
+          "behavior": "Caller-owned Location JSON is validated only when an actual resource is normalized; an empty ListVolumes list does not consume an unused invalid location. Invalid caller location remains a local ErrInvalidOption without borrowing a200 ResponseError, while any independently admitted Pages/Observed evidence remains available and logical outputs stay uncommitted. Physical canonical row/descriptor failures retain their own originating accepted response error evidence.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadLocationIsConsumedOnlyByActualRowsWithoutBorrowingResponseFailure",
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEagerDescriptorFailureStopsBeforeNextAndDiscardsPartialValues",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-reads.md",
+        "blockstorage/search-volumes.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go selects Cinder v3 under Gophercloud v2.15.0 and uses the audited 38-field normalized Volume view plus an independent RawResource physical row and response proof. Pinned cloud can select v2; this row does not implement a v2 projection or promote native/Proxy/Resource/session/cache declarations.",
+        "Complete canonical UTF-8 volume(s) envelopes and accepted200 responses are the deliberate Go decoder boundary. Python generic Resource translation can tolerate invalid JSON on member fetch, unwrap absent envelopes more permissively, wrap nonarray resource lists, strip self, and preserve seeded omitted IDs. Go raw evidence preserves unknown/self fields while normalized known fields exclude them.",
+        "Computed location follows existing owned CloudLocation/recorded provider-scope mapping. Exact decimal raw precision, Unicode/version and configurable Python numeric conversion boundaries are inherited from the already audited normalized view; no Python object identity, mutable Resource lifecycle or warning subsystem is recreated.",
+        "Go returns richer owned result/evidence structures with an error; rejected native status/body/header remain in their original error. Admitted phase proof survives later failures without establishing successful resource/boolean output, and no SDK orchestration replay or swallowed cancellation is introduced.",
+        "Go direct identifier validation is stronger than dynamic Python Resource/URL interpolation. Existing Python Volume instances or arbitrary proxy values are not new direct cloud id APIs; this typed helper accepts a literal string ID only.",
+        "Go direct getter errors on404 instead of returning an absence flag. The Python get_volume_by_id declaration delegates proxy get_volume/_get/fetch directly and also raises despite its inaccurate else-None docstring.",
+        "Local caller Location errors are separate from physical response/descriptor errors: actual admitted proof remains inspectable, but a local error is not reclassified as a200 response failure. This preserves the existing shared GetVolume/SearchVolumes normalizer behavior."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/volume_exists",
+      "source_fingerprint": "6d4d8c74ada4f48947e6b1935c9a77963629099a4f2f646974c974b955d53b06",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.VolumeExists",
+        "gophercloudsdk/blockstorage.VolumeExists",
+        "gophercloudsdk/blockstorage.PrepareVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeReadLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "VolumeExists performs default unfiltered exact GetVolume lookup and tests the returned resource identity against nil. Any successfully returned raw resource, including canonical empty volume {}, completes Exists=true independently of body truthiness or normalized ID presence. Successful completed absence completes Exists=false; every error leaves Exists=nil and no successful Value/Volume.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestVolumeExistsDistinguishesPresentResourceFromSuccessfulAbsence",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsMember404IsErrorButCompletedExistenceAbsenceIsFalse"
+          ]
+        },
+        {
+          "behavior": "Safe identity segments attempt the exact bodyless member GET first. Only rejected compatible400/403/404 allow the detailed name-hinted list fallback; accepted read/Close/schema/source/context errors and native/transport/authentication errors never establish absence or trigger that fallback. Lookup Value/Volume/Observed/Pages evidence is retained consistently without borrowed stale native errors.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestVolumeExistsDistinguishesPresentResourceFromSuccessfulAbsence",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeExistsFallbackFailureNeverBorrowsEarlierRejectedMember",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsPostResponseSourceChangesStopWithCurrentAdmittedProof"
+          ]
+        },
+        {
+          "behavior": "Names unsafe for a direct ID route use the exact name-hinted list directly under the existing Go safety policy. Wildcard characters remain literal exact ID/name matches; no SearchVolumes glob/dictionary/JMESPath branch is introduced and no filter or all-project/details controls are exposed.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestVolumeExistsUnsafeNamesAndWildcardTextUseExactNameSemantics"
+          ]
+        },
+        {
+          "behavior": "The fallback iterator consumes full visited normalized descriptors while searching exact ID/name matches and reports ambiguity on the second match. It stops before unused later rows or continuation; any rejected list response or later read/decoder/source/context failure propagates with Exists=nil rather than being treated as false.",
+          "tests": [
+            "blockstorage/volume_reads_contract_test.go:TestVolumeExistsAmbiguityStopsBeforeUnusedTailThatFullListMustConsume",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeExistsFallbackFailureNeverBorrowsEarlierRejectedMember",
+            "blockstorage/volume_search_test.go:TestGetVolumeDefaultExactListMissingAndAmbiguityKeepSharedIteratorPolicy"
+          ]
+        },
+        {
+          "behavior": "Existing GetVolume cancellation precedence and original memberFailure joining survive shared getter/default-find factoring. Connection and package original callbacks are not applied again by an outer exists wrapper; prepared state and response sinks are reused.",
+          "tests": [
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeExistsFallbackFailureNeverBorrowsEarlierRejectedMember",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsAcceptedProofSurvivesReadCloseCancellationAndSourceFailure",
+            "blockstorage/volume_search_test.go:TestGetVolumeOmittedNullGETFirstAndCompatibleListFallback"
+          ]
+        },
+        {
+          "behavior": "Owned VolumeReadOpts.Location is the only read policy. Original callbacks apply once in order; direct package captures Cinder/header facts before originals and guards sticky context/source through every phase. Connection prepares originals once before its cached Cinder v3 getter and delegates an owned policy, supplying recorded CurrentLocation unless overridden. Captured ordinary headers are independent while provider authentication stays live; empty source Type is normalized only on the execution copy.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestPrepareVolumeReadOptionsOwnsFactoriesCallbacksAndOriginalSlice",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsApplyOriginalOptionsOnceWithCapturedHeadersAndOwnedLocation",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadsOriginalSourceMutationIsTerminalBeforeRestoringOption",
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadPreflightStopsOptionsAndHTTPOnInvalidSourceOrContext",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsCachedCinderOriginalOptionsPrecedeSelection",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsLocationFactoriesOwnInputsAndLeaveConnectionDefault",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsOriginalCallbackSliceAndRetainedLocationAreSnapshots",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeIsCapturedAfterOptionsAndRefreshedPerCall",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsPreflightAndOptionFailuresSelectNoService",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsGetterFailureRetainsOperationAndCancellationCause",
+            "connection_volume_reads_test.go:TestConnectionVolumeReadsRecordedScopeFailurePrecedesGetterAndOwnedOverrideBypassesIt"
+          ]
+        },
+        {
+          "behavior": "Caller-owned Location JSON is validated only when an actual resource is normalized; an empty ListVolumes list does not consume an unused invalid location. Invalid caller location remains a local ErrInvalidOption without borrowing a200 ResponseError, while any independently admitted Pages/Observed evidence remains available and logical outputs stay uncommitted. Physical canonical row/descriptor failures retain their own originating accepted response error evidence.",
+          "tests": [
+            "blockstorage/volume_reads_options_test.go:TestVolumeReadLocationIsConsumedOnlyByActualRowsWithoutBorrowingResponseFailure",
+            "blockstorage/volume_reads_contract_test.go:TestListVolumesEagerDescriptorFailureStopsBeforeNextAndDiscardsPartialValues",
+            "blockstorage/volume_reads_transport_test.go:TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-reads.md",
+        "blockstorage/search-volumes.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go selects Cinder v3 under Gophercloud v2.15.0 and uses the audited 38-field normalized Volume view plus an independent RawResource physical row and response proof. Pinned cloud can select v2; this row does not implement a v2 projection or promote native/Proxy/Resource/session/cache declarations.",
+        "Complete canonical UTF-8 volume(s) envelopes and accepted200 responses are the deliberate Go decoder boundary. Python generic Resource translation can tolerate invalid JSON on member fetch, unwrap absent envelopes more permissively, wrap nonarray resource lists, strip self, and preserve seeded omitted IDs. Go raw evidence preserves unknown/self fields while normalized known fields exclude them.",
+        "Computed location follows existing owned CloudLocation/recorded provider-scope mapping. Exact decimal raw precision, Unicode/version and configurable Python numeric conversion boundaries are inherited from the already audited normalized view; no Python object identity, mutable Resource lifecycle or warning subsystem is recreated.",
+        "Go returns richer owned result/evidence structures with an error; rejected native status/body/header remain in their original error. Admitted phase proof survives later failures without establishing successful resource/boolean output, and no SDK orchestration replay or swallowed cancellation is introduced.",
+        "Pinned volume_exists returns self.get_volume(name_or_id) is not None with no filters argument. Go uses a nullable *bool to distinguish completed true/false from errors and retains owned lookup proof; it does not call filtered SearchVolumes or test JSON truthiness.",
+        "The existing Go safe-route FindIdentity policy skips member GET for identities containing slash/backslash/query/fragment/percent or whitespace and searches exact list identity directly. Pinned Resource.find unconditionally attempts GET first and catches400/403/404. This routing safety boundary is explicit, rather than claimed as unchanged Python dispatch.",
+        "The exact find branch keeps its own v3 canonical/native pagination and strict normalized-view boundaries; generic Resource.find/list/fetch, warnings, proxy lifecycle and cache declarations remain independently reviewed.",
+        "Local caller Location errors are separate from physical response/descriptor errors: actual admitted proof remains inspectable, but a local error is not reclassified as a200 response failure. This preserves the existing shared GetVolume/SearchVolumes normalizer behavior."
+      ],
+      "remaining": []
     }
   ]
 }
