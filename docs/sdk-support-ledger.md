@@ -556,3 +556,48 @@ Limits·Absolute·Rate·RateLimit의 실제 nullable descriptor 5/13/6/8개를 �
 최종 Go 1,546개는 full race·vet·문서 compile·parity 검증 동안 동일했습니다. 이전 Go 1,527개 중 공유 integer 추출용 blockstorage/volume_search_view.go와 guarded request용 internal/rest/response.go·internal/fixedrequest/client.go만 변경했고 나머지 1,524개와 생성 Go 338개는 보존했습니다. native 연산 1,126개·resource 235개 및 선언 inventory는 그대로입니다. 이전 Go fence 304개를 모두 보존하고 새 standalone fence 한 개를 컴파일해 누적 305개입니다. 실제 고정 SDK AST 소스 check 159개와 unpinned Requests/urllib context check 29개, 실제 literal declaration 28개·fingerprint 4개·관련 source hash 52개 검증은 source-only/stand-in 증거이며 설치된 Python SDK 통합 실행이나 실클라우드 실행을 주장하지 않습니다.
 
 기존 review 429개에서 앞서 밝힌 unresolved Proxy cap 설명 한 문자열만 정정하고 다른 row bytes와 필드를 보존했습니다. 실제 cloud get_volume_limits 직접 선언 하나에 계약 21개·신규 test anchor 54개와 공유 descriptor 회귀 2개(총 distinct 56개)·공개 entry point 5개를 연결했습니다. 전체 review는 430개(Go mapping 123·미완료 검토 306·unsupported 1), catalog 3,362개 중 go_mapping 123·unsupported 1·unresolved 3,238·supported 0이며 parity CLI를 통과했습니다. 별도 native/Proxy·Identity find·Cinder v2·inherited Resource 및 다른 workflow 판정은 독립적으로 유지합니다. 전체 SDK 구현은 아직 완료되지 않았으며 목표는 계속 활성 상태입니다.
+
+### Snapshot cloud read helper 4개
+
+실제 `BlockStorageCloudMixin.list_volume_snapshots`, `search_volume_snapshots`,
+`get_volume_snapshot`, `get_volume_snapshot_by_id`를 Go 함수와 Connection에 매핑했습니다.
+기본값과 확장 정책은 concrete `With...`·`Prepare...` 옵션으로 SDK가 처리합니다.
+[조회 사용법과 Python 비교](../blockstorage/volume-snapshots.md)에 전체 실행 예제와 차이를 설명합니다.
+
+| 실제 cloud helper | Go API | 주요 계약 |
+|---|---|---|
+| `list_volume_snapshots` | `Connection.ListVolumeSnapshots`, `blockstorage.ListVolumeSnapshots` | detailed/basic route, server/local filter 구분, inherited controls, raw query·paging·maximum, 전체 normalized list |
+| `search_volume_snapshots` | `Connection.SearchVolumeSnapshots`, `blockstorage.SearchVolumeSnapshots` | queryless 상세 목록 완료 뒤 identifier/glob·lazy mapping·JMESPath, arbitrary JSON Value |
+| `get_volume_snapshot` | `Connection.GetVolumeSnapshot`, `blockstorage.GetVolumeSnapshot` | 생략/null exact Find, nonnull falsey filters 전체 Search, clean400/403/404 fallback, ambiguity·exhaustion |
+| `get_volume_snapshot_by_id` | `Connection.GetVolumeSnapshotByID`, `blockstorage.GetVolumeSnapshotByID` | safe literal member GET, fallback 없음, 실제 HTTP 오류와 독립 raw proof |
+
+Snapshot의 실제 16개 nullable 필드, parsed duplicate/alias 순서, eager BoolStr·integer·metadata
+변환과 zone 없는 current/foreign-project location을 확인했습니다. member의 누락 ID는 logical
+Value와 `RequestedID`·`SeededID`에만 유지하고 실제 `RawResource.Body`에 없는 값을 만들지 않습니다.
+일반 빈 목록의 row association은 nonnil 빈 slice이며 arbitrary expression에는 association을 만들지 않습니다.
+원본 옵션과 location·header·raw JSON·단계별 physical proof는 각 호출이 독립적으로 소유합니다.
+
+List의 완성된 JSON expression 평가는 pinned generator 경로의 명시적 교정입니다. typed 빈 표현식은
+전체 목록 후 engine 오류를 반환하고 raw legacy falsey control은 건너뜁니다. HTTP Link의 `uri`/`url`,
+quoted multi-rel/case/last-next 처리와 canonical query·origin/path/URL-cycle 보호 역시 Go 차이입니다.
+source marker/limit 제거·advertised blank 제외·excluded 마지막 raw ID synthesis·maximum 소비 시점은
+유지합니다. raw maximum의 소수·음수·boolean/null과 exact decimal counter를 제공하되 Python float
+rounding/underflow, Unicode16·CPython digit limit·mutable Resource/session/cache는 review 차이에 기록합니다.
+
+변경하지 않은 pinned AST의 initial61, model75, reader124(107+17), supplemental81 검증을 각각
+보존했습니다. 이는 서로 겹칠 수 있는 source-only probe이며 인증된 Python SDK나 cloud runtime
+통과 수로 합산하지 않습니다. 실제 constructor/cache refresh까지 확인해 local exclusion과
+identity 판단 전에 descriptor가 변환되는 시점을 검토했고 독립 최종 source audit를 추가했습니다.
+
+신규 테스트94개 그룹은 foundation26, pure query/local/pager20, 공개 HTTP36, Connection9,
+추가 pagination2, direct/Connection ID 경계1입니다. 최초 HTTP 검증에서 expanded native400/403/404가
+fallback된 결함을 발견해 Snapshot 전용 clean direct-native gate로 수정했습니다. 최종 바이트에서
+저장소 전체 `go test -mod=readonly -race -count=1 -timeout 60s ./...`의39개 테스트 패키지,
+`go vet -mod=readonly ./...`, 전체1580개 Go 파일의 gofmt와 독립 문서 예제 컴파일을 통과했습니다.
+기존1546개 Go 파일·338개 generated 파일·1126개 native operation·235개 resource·305개 Go fence를
+보존했고, 새 fence 한 개를 더해306개입니다. 실제 OpenStack cloud 실행 검증은 아닙니다.
+
+기존430개 review와 source pin을 보존하고 이 네 실제 cloud 선언만 추가해434개가 되었습니다.
+선언 catalog3362개에서 `go_mapping`123→127, unsupported1 유지, unresolved3238→3234입니다.
+`supported`는0이며 별도 Proxy/native/Resource/v2나 snapshot mutation 선언을 함께 승격하지 않습니다.
+전체 SDK 목표는 아직 완료되지 않았습니다.
