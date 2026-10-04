@@ -63,6 +63,9 @@ func operationReturnPolicy(fn *types.Func) string {
 	if normalizerFor(fn) != nil {
 		return "normalize"
 	}
+	if bufferedPayloadOperation(fn.Pkg(), fn.Name()) {
+		return "extract"
+	}
 	policy := returnPolicy(fn.Type().(*types.Signature))
 	if policy == "result" {
 		if _, ex := operationExtractor(fn); ex != nil {

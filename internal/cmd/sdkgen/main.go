@@ -346,6 +346,9 @@ func (g *generator) generate(path string) error {
 	if err := validateReflectedHeaderRequests(pkg, decls, sourceFiles); err != nil {
 		return err
 	}
+	if err := validateBufferedPayloadDeclarations(pkg, nativeDecls); err != nil {
+		return err
+	}
 	snapshotDeclarations, err := g.snapshotMetadataDeclarations(pkg.Path())
 	if err != nil {
 		return err
@@ -720,6 +723,9 @@ func returnPolicy(sig *types.Signature) string {
 }
 
 func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors map[string]string) error {
+	if err := validateBufferedPayloadTypes(e.pkg, fn); err != nil {
+		return err
+	}
 	if err := validateSnapshotMetadataTypes(e.pkg, fn); err != nil {
 		return err
 	}
