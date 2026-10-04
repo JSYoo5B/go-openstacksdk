@@ -411,3 +411,5 @@ Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container
 볼륨 타입 목록·검색·조회는 `conn.ListVolumeTypes`, `conn.SearchVolumeTypes`, `conn.GetVolumeType`으로 호출합니다. [타입 사용법과 Python 비교](blockstorage/volume-types.md)에 함수 옵션, nullable 여섯 필드 view, 기본 조회와 명시적 필터의 검색 경로를 설명합니다.
 
 타입의 프로젝트 접근 권한은 `conn.GetVolumeTypeAccess`, `conn.AddVolumeTypeAccess`, `conn.RemoveVolumeTypeAccess`로 조회·변경합니다. [접근 권한 사용법과 Python 비교](blockstorage/volume-type-access.md)에 이름·ID 조회, 원본 access JSON, 프로젝트 ID 전달과 단계별 응답 증거를 설명합니다.
+
+볼륨 수정과 bootable 설정은 `conn.UpdateVolume`·`conn.SetVolumeBootable`로 호출합니다. [사용법과 Python 비교](blockstorage/volume-mutations.md)에 변경된 속성만 보내는 옵션, 부분 응답 병합, 기본 true·명시적인 false와 조회·변경 응답의 구분을 설명합니다.

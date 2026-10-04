@@ -14,6 +14,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.attach_volume(server, volume, wait=True)` | `conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.detach_volume(server, volume, wait=True)` | `conn.DetachVolume(ctx, blockstorage.DetachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.create_volume(size, wait=True, image=None, bootable=None, **kwargs)` | `conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: size}, options...)` |
+| `conn.update_volume(name_or_id, **kwargs)` | `conn.UpdateVolume(ctx, blockstorage.UpdateVolumeRequest{NameOrID: name}, options...)` |
+| `conn.set_volume_bootable(name_or_id, bootable=True)` | `conn.SetVolumeBootable(ctx, blockstorage.SetVolumeBootableRequest{NameOrID: name}, options...)` |
 | `conn.delete_volume(name_or_id, wait=True, force=False)` | `conn.DeleteVolume(ctx, blockstorage.DeleteVolumeRequest{Volume: resource.ID(volumeID)}, options...)` |
 | `conn.get_volume_attach_device(volume, server_id)` | `blockstorage.GetVolumeAttachDevice(volume, serverID)` 또는 `GetVolumeAttachDeviceFields(fields, serverID)` |
 | `conn.get_volumes(server)` | `conn.GetVolumes(ctx, blockstorage.GetVolumesRequest{ServerID: serverID})` |
@@ -34,6 +36,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
 
 SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Cloud 수준 삭제의 `WithDeleteVolumeForce`는 선택된 microversion에 맞는 요청을 사용합니다. Proxy의 별도 `cascade` 옵션은 이 workflow에 포함하지 않으며 snapshot까지 삭제하는 옵션은 native API 계층에서 명시적으로 선택합니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
+
+볼륨 수정의 변경 필드 처리와 부분 응답 병합, bootable 기본값과 명시적인 false는 [사용법과 Python 비교](volume-mutations.md)에 설명합니다. SDK가 옵션과 실제 단계별 응답을 소유하며, 인터페이스 builder를 구현할 필요는 없습니다.
 
 ## 조회와 목록
 
