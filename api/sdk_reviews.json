@@ -32388,6 +32388,203 @@
         "FiniteHTTP100..399 mirrors source<400 in realHTTPdomain. Local source/probe evidence uses frozen literals and explicitly labeled AST/session/response stand-ins; authenticated Python/OpenStack execution is not claimed."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/export_record",
+      "source_fingerprint": "a0595f3a65839cb12caf609fb43ff7aae3f0b079d203cdc86c790da2409f4b56",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/backups.API.ExportRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "API.ExportRecord requires context and one safe nonempty literal UTF-8 backup ID, escaped once; names remain literal IDs. The captured raw engine validates source before ID and performs no member/list/Identity resolution or generated identity. Python Resource/dict/Munch/None construction and local location/descriptor side effects map to the explicit Go string-ID boundary.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupPreflightCapturesSourceBeforeSafeIDAndNeverMakesLookupRequests",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext"
+          ]
+        },
+        {
+          "behavior": "The raw operation requests bodyless queryless GET backups/{ID}/export_record through one captured source without wait, model normalization, cleanup, rollback or SDK workflow replay. Fixed method/URL/source and physical Body/ContentLength/TransferEncoding policy remain guarded through redirects and native callbacks.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOpaqueSub400ResponseUsesOneBodylessFixedGETAndSelectedMicroversion",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRedirectCannotChangeFixedTargetOrSendTokenToAnotherOrigin",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupSameTargetRedirectCannotAddPhysicalBodyFraming",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupRedirectBodyRejectionSurvivesNativeRetryRestorationAndJoinedCauses",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "Keep selected microversion including omission, captured ordinary source headers and existing live token/native reauthentication/bounded caller retry. No forced 3.64, discovery, default or cap is added. The raw engine consumes no CurrentLocation and never recaptures resource scope.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOpaqueSub400ResponseUsesOneBodylessFixedGETAndSelectedMicroversion",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupNativeReauthAndBoundedRetryUseLiveTokensAndOwnedHeaders",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "Original finite HTTP 100..399 responses return an independently owned opaque Body/Header/StatusCode snapshot, including binary, invalid UTF-8, malformed/nonobject JSON and empty 204, without JSON or native base64/BackupRecord projection. Result BackupID is the requested string.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOpaqueSub400ResponseUsesOneBodylessFixedGETAndSelectedMicroversion",
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOwnsOpaqueBodyAndHeadersAcrossIndependentCalls",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/source/context errors retain current Exported and independently owned ResponseError evidence, simultaneous caller causes and outer operation wrapping; Exported alone is not success. Rejected >=400 including 404 or failed redirect has no Exported and no lookup/absence fallback. Rejected response-body IO retains native limitations; no universal observer claim.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupNativeRejectionsAreTerminalAndDoNotInventAdmittedProof",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupAcceptedIOCancellationAndSourceFailuresKeepCurrentOwnedOpaqueProof",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupNativeExpandedStatusCannotCreateAdmittedProof",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRedirectCannotChangeFixedTargetOrSendTokenToAnotherOrigin",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportAcceptedOpaqueIOOwnsCurrentProofAndAllCauses",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext"
+          ]
+        },
+        {
+          "behavior": "Retry body/decoder/retention or five captured service fact changes, and physical redirected request body/framing mutation, stop underlying resend with sticky policy errors. Restoration or swallowed callback errors cannot erase physical body rejection. Original rejection, callback and context.Cause remain reachable without fabricated admitted proof.",
+          "tests": [
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRejectsNativeRetryBodyDecoderRetentionOrSourceMutationBeforeResend",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRedirectCannotChangeFixedTargetOrSendTokenToAnotherOrigin",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupSameTargetRedirectCannotAddPhysicalBodyFraming",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupRedirectBodyRejectionSurvivesNativeRetryRestorationAndJoinedCauses",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext"
+          ]
+        },
+        {
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "tests": [
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backup-export-record.md",
+        "blockstorage/v3/backups/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only actual v3 Proxy.export_record is this target. Its bodyless raw path is shared with separately reviewed cloud export_volume_backup. Parsed Proxy.export_backup/Resource Backup.export_record, deprecated Backup.export, native typed Export and v2 retain independent declaration reviews; full SDK remains incomplete.",
+        "Python permits connected mutable Resource, dict/Munch, None and permissive urljoin falsey/container/leading-slash identity. Go requires one safe literal UTF-8 string ID and intentionally omits Resource construction/update/current_location/descriptor/cache/object-identity side effects.",
+        "Both deprecated Proxy and Backup source warnings, including warning filters that can raise before construction or HTTP, are omitted from Go. API.ExportRecord/backups outer OperationError wraps the shared ExportVolumeBackup/volume backup engine while retaining causes.",
+        "The same mutable requests.Response maps to owned actual Body/Header/StatusCode rather than request/history/cookies/encoding/elapsed/response convenience methods. No UTF-8/JSON/base64/schema requirement is applied to raw bytes.",
+        "Go adds parent context interruption, joined custom causes and separately owned accepted partial/error proof. Original/native >=400 has no Exported, and native rejected response Read/Close limitations remain; no generic response-body observer promotion.",
+        "Safe fixed route/method/option policy and export-only physical body/framing guard constrain mutable native hooks/redirects. Native ordinary header hooks, live token and native retry/reauth remain; there is no force-style 3.64 override or universal header enforcement.",
+        "Finite real HTTP100..399 maps source <400. Source literals and local tests are distinct evidence; no authenticated Python/OpenStack execution, exhaustive HTTP/runtime-object domain or generic transport/Resource parity claim."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/export_backup",
+      "source_fingerprint": "76281c0f61e1c43accfc7fc48aff3816a24d772de58f9db57e8ee43bda6b6993",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/backups.API.ExportBackup",
+        "gophercloudsdk.Connection.ExportVolumeBackupRecord",
+        "gophercloudsdk/blockstorage.ExportVolumeBackupRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "ExportVolumeBackupRecord package and Connection plus API.ExportBackup accept one safe nonempty literal UTF-8 ID with no resolver, generated identity, options, wait or CurrentLocation conversion. Direct/service engine captures selected source before ID; Connection performs local context/provider/ID preflight before cached Cinder v3 selection.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordPreflightUsesCapturedSourceAndSafeLiteralID",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordGetterFailuresJoinCustomAndContextCauses",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext"
+          ]
+        },
+        {
+          "behavior": "One captured reader owns bodyless queryless GET backups/{ID}/export_record, pure parse and final source check; source is not recaptured after response. Original HTTP100..399 and selected microversion including omission remain, without forced3.64/discovery/cap. Live token/native authentication/retry and fixed request policies are shared with raw exchange.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordAcceptsArbitraryJSONAndPreservesLiteralValue",
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordNativeReauthAndBoundedRetryUseLiveTokensAndOwnedHeaders",
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordRejectsNativeRetryBodyDecoderRetentionOrSourceMutationBeforeResend",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "Value is one whole arbitrary JSON value without backup-record extraction, runtime dict/object assertion, base64 projection or Backup descriptor conversion. Object/array/string/number/bool/null and falsey/empty values are valid; successful null is nonnil bytes null, while no published Value is nil.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordAcceptsArbitraryJSONAndPreservesLiteralValue",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "The chosen Go representation is independently owned literal UTF-8 json.RawMessage: document leading/trailing whitespace excluded; interior whitespace, number spelling/precision, escapes and duplicate member literals retained. No float64/UseNumber tree or serialization normalization is introduced. This is explicitly different from semantic mutable Python dict/list/scalar decoding.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordAcceptsArbitraryJSONAndPreservesLiteralValue",
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordValuePhysicalProofAndSeparateCallsOwnDifferentStorage",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
+          ]
+        },
+        {
+          "behavior": "A complete ordinary UTF-8 JSON document and EOF are required. Empty/malformed/trailing-second-value/trailing-garbage, unsupported UTF16/UTF32/BOM/invalidUTF8 and nonfinite NaN/Infinity tokens fail parsing without another HTTP request or native JSONResponse retry. Original rejected HTTP errors precede JSON parsing and never invent Exported/Value.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordRejectsInvalidDocumentWithoutParserRetryAndKeepsActualProof",
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordHTTPRejectionPrecedesJSONParsingAndHasOnlyNativeProof",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordParserFailureRetainsOpaqueProofWithParsedOperationAndNoNativeRetry",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceParsedFailuresKeepCurrentProofAndNeverRetryDecoder"
+          ]
+        },
+        {
+          "behavior": "Actual opaque Exported is copied before accepted IO/source/context or JSON failures. Value is published only after full parse and last guard on the same captured source succeeds. Partial/current physical bytes/header/status and joined custom causes remain separately owned; Value, Exported and ResponseError do not alias. Exported presence alone does not establish success.",
+          "tests": [
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordRejectsInvalidDocumentWithoutParserRetryAndKeepsActualProof",
+            "blockstorage/backup_export_record_contract_test.go:TestExportVolumeBackupRecordValuePhysicalProofAndSeparateCallsOwnDifferentStorage",
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordAcceptedIOCancellationAndSourceFailuresKeepCurrentOwnedOpaqueProof",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordAcceptedOpaqueIOOwnsCurrentProofAndAllCauses",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordParserFailureRetainsOpaqueProofWithParsedOperationAndNoNativeRetry",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceParsedFailuresKeepCurrentProofAndNeverRetryDecoder"
+          ]
+        },
+        {
+          "behavior": "Bodyless/decoder/retention/method/URL and sticky five-fact source policy apply through native retry/reauth and redirects, including physical Body/ContentLength/TransferEncoding rejection before transport and terminal rejection after restoration. Expanded native OkCodes cannot admit original-policy >=400; safe changed-path/foreign-origin redirects cannot resend credentials. No SDK replay/rollback occurs.",
+          "tests": [
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordRejectsNativeRetryBodyDecoderRetentionOrSourceMutationBeforeResend",
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordNativeExpandedStatusCannotCreateAdmittedProof",
+            "blockstorage/backup_export_record_transport_test.go:TestExportVolumeBackupRecordRejectsPhysicalRedirectMutationAndKeepsStickyCause",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupSameTargetRedirectCannotAddPhysicalBodyFraming",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupRedirectBodyRejectionSurvivesNativeRetryRestorationAndJoinedCauses"
+          ]
+        },
+        {
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "tests": [
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordGetterFailuresJoinCustomAndContextCauses",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordAcceptedOpaqueIOOwnsCurrentProofAndAllCauses",
+            "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordParserFailureRetainsOpaqueProofWithParsedOperationAndNoNativeRetry",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection",
+            "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceParsedFailuresKeepCurrentProofAndNeverRetryDecoder"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backup-export-record.md",
+        "blockstorage/v3/backups/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only actual v3 Proxy.export_backup is this target. ExportVolumeBackupRecord is a Go convenience spelling for this Proxy operation, not a new Python cloud declaration. Raw Proxy.export_record, Backup.export_record method, native typed/base64 Export, v2 and generic Resource remain independent reviews; full SDK is incomplete.",
+        "Go uses a safe literal UTF-8 BackupID string and skips Python _get_resource construction/update of connected Resource/dict/Munch/None, mutable descriptor/location/cache/object identity and permissive urljoin coercion. Connection consumes no CurrentLocation.",
+        "Python response.json returns a semantic backend/interpreter object. Go preserves a validated one-document UTF-8 literal RawMessage of any shape, with number/escape/duplicate text and interior spacing intact; document exterior whitespace is excluded. Duplicate last-value semantics, float rounding/underflow, unpaired string surrogate interpretation and interpreter/backend number/depth limits are not replicated. Value must be explicitly decoded by callers who need a semantic Go structure.",
+        "The SDK source pin does not lock Requests/simplejson/interpreter versions or selected decoder. Requests v2.32.5 references show optional simplejson/stdlib, encoding detection including UTF16/32/BOM and text replacement fallback; those references are not SDK exact dependency pins. Go accepts only ordinary UTF8 JSON, rejects unsupported encoding/BOM/nonfinite tokens and applies Go parser structural limits.",
+        "Source annotations/cast do not enforce a dict, BackupRecord envelope or base64; Go likewise admits arbitrary JSON shapes. Source .json occurs after session.get, so parsing is local after the opaque exchange and never causes another HTTP attempt. Existing native JSONResponse/BackupRecord projection remains untouched.",
+        "Go adds raw admitted Exported and joined partial IO/context/source/parser proof, with nil Value on any failure and nonnil null on successful JSON null. Parent context, independently owned result/error bytes/header and operation wrapping replace Python exception/session/Response identities. Native rejected body Read/Close discarded errors remain a bounded limitation.",
+        "Safe fixed route/method/native option and export-only physical body/framing policy constrain mutable native callbacks/redirects. Ordinary native header hooks and live authentication/retry remain; source/body rejection is sticky, selected microversion unchanged and no 3.64 forced action/default/cap/discovery is added.",
+        "Parsed source path contains neither the raw Proxy nor Backup deprecated warning emission; Go does not recreate the Python warning machinery. Local source/tests/docs gates and backend references do not establish authenticated Python/OpenStack runtime or automatic native/v2/Resource parity."
+      ],
+      "remaining": []
     }
   ]
 }
