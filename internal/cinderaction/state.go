@@ -75,7 +75,11 @@ func ValidateID(id string) error {
 	return nil
 }
 func Wrap(ctx context.Context, state State, err error) error {
-	return request.Wrap(state.Operation(), "volumes", cloudread.ContextError(ctx, err))
+	return WrapOperation(ctx, state.Operation(), err)
+}
+
+func WrapOperation(ctx context.Context, operation string, err error) error {
+	return request.Wrap(operation, "volumes", cloudread.ContextError(ctx, err))
 }
 
 // Apply captures the selected service, negotiates only when necessary, and
@@ -92,24 +96,30 @@ func Apply(ctx context.Context, client *gophercloud.ServiceClient, id string, st
 	if err != nil {
 		return nil, Wrap(ctx, state, err)
 	}
+	body, _ := json.Marshal(map[string]any{action: nil})
+	return applyPrepared(ctx, source, id, state.Operation(), body)
+}
+
+// applyPrepared keeps the fixed route and Cinder policy shared by direct actions.
+func applyPrepared(ctx context.Context, source *cloudread.Source, id, operation string, body json.RawMessage) (*Result, error) {
 	target := source.Client.ServiceURL("volumes", id, "action")
 	if err := rest.ValidateTarget(&source.Client, target); err != nil {
-		return nil, Wrap(ctx, state, err)
+		return nil, WrapOperation(ctx, operation, err)
 	}
 	result := &Result{VolumeID: id}
+	var err error
 	result.Microversion, result.Discovery, err = cinderrequest.Negotiate(ctx, source, "3.71")
 	if err == nil {
 		err = source.WithPolicy(ctx, &result.Microversion, nil)
 	}
 	if err != nil {
-		return result, Wrap(ctx, state, err)
+		return result, WrapOperation(ctx, operation, err)
 	}
-	body, _ := json.Marshal(map[string]any{action: nil})
 	codes := make([]int, 300)
 	for i := range codes {
 		codes[i] = 100 + i
 	}
 	result.Applied, err = cinderrequest.Post(ctx, source, target, body, &result.Microversion, codes...)
 	result.Completed = err == nil
-	return result, Wrap(ctx, state, err)
+	return result, WrapOperation(ctx, operation, err)
 }
