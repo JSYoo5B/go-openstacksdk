@@ -356,6 +356,13 @@ func (g *generator) generate(path string) error {
 	if err := validateSnapshotMetadataDeclarations(pkg, snapshotDeclarations); err != nil {
 		return err
 	}
+	troveRootDeclarations, err := g.troveRootEnabledDeclarations(pkg.Path())
+	if err != nil {
+		return err
+	}
+	if err := validateTroveRootEnabledDeclarations(pkg, troveRootDeclarations); err != nil {
+		return err
+	}
 	extractors := extractorsByPage(pkg, decls)
 	plan, err := identifyCollectionBinding(pkg, decls, extractors)
 	if err != nil {
@@ -530,6 +537,9 @@ func (g *generator) generate(path string) error {
 			}
 			if snapshotMetadataExtractor(fn) {
 				op.ResultPolicy = "sdk_snapshot_metadata_object"
+			}
+			if troveRootEnabledExtractor(fn) {
+				op.ResultPolicy = "sdk_trove_root_enabled_boolean"
 			}
 		}
 		g.inventory.Operations = append(g.inventory.Operations, op)
@@ -727,6 +737,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		return err
 	}
 	if err := validateSnapshotMetadataTypes(e.pkg, fn); err != nil {
+		return err
+	}
+	if err := validateTroveRootEnabledTypes(e.pkg, fn); err != nil {
 		return err
 	}
 	override := requestCallOverride(e.pkg, fn.Name())
@@ -1055,6 +1068,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 		if snapshotMetadataExtractor(fn) {
 			helper := e.use("gophercloudsdk/internal/snapshotmetadata")
+			e.printf("%s:=%s.Extract(result.Result)\n", strings.Join(vals, ","), helper)
+		} else if troveRootEnabledExtractor(fn) {
+			helper := e.use("gophercloudsdk/internal/troveroot")
 			e.printf("%s:=%s.Extract(result.Result)\n", strings.Join(vals, ","), helper)
 		} else {
 			e.printf("%s:=result.%s()\n", strings.Join(vals, ","), resultExtractor)
