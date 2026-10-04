@@ -102,7 +102,7 @@ func (p *reader) waitDelete(ctx context.Context, state *mutationState, policy Mu
 		if err != nil {
 			return err
 		}
-		wire, err := p.mutationExchange(ctx, http.MethodGet, target, nil)
+		wire, err := p.deletePoll(ctx, target)
 		if wire != nil {
 			result.LastAccepted = mutationProof(wire)
 		}
