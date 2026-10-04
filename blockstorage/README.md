@@ -178,3 +178,5 @@ Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupServic
 직접 ID flag action은 `SetVolumeBootableStatus`의 필수 bool과 `SetVolumeReadonly`의 defaulttrue·`WithVolumeReadonly(false)`를 SDK가 처리합니다. [Flag action 사용법](volume-flags.md)은 기존 NameOrID/defaulttrue cloud `SetVolumeBootable`과 native200-only `SetBootable`의 차이, 세 호출 경로 및 부분 응답 증거를 설명합니다.
 
 [Extend·retype·completion 사용법](volume-resize-retype.md)은 size 0·음수의 서버 검증, migration 기본 never와 명시적 빈 값의 생략, completion 기본 false, Prepare·옵션 복사 및 부분 응답을 설명합니다.
+
+명시 ID의 `ResetVolumeStatus`·`MigrateVolume`·`CompleteVolumeMigration`은 owned 옵션과 실제 action acknowledgement를 제공합니다. [Python/package/Connection/service 사용법](volume-migration-reset.md)에 nullable host/cluster, required 3.16 검증과 부분 응답을 설명합니다.
