@@ -875,3 +875,53 @@ native1126개·resource235개를 유지하고 기존310개 raw Go fence를 보�
 unsupported1 유지, unresolved3226→3224이며 supported는0입니다. 전체 SDK는 계속 진행 중입니다.
 
 Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=137, unsupported=1, unresolved=3224.
+
+### Backup v3 Proxy의 restore·status reset
+
+고정 소스의 실제 `restore_backup`·`reset_backup_status` 두 Proxy 선언을
+`Backups.API.RestoreBackup`·`Backups.API.ResetBackupStatus`에 연결했습니다.
+blockstorage 직접 함수와 Connection의 `RestoreVolumeBackup`·`ResetVolumeBackupStatus`도 제공합니다.
+이 Go 편의 함수는 별도 Python cloud 선언을 의미하지 않으며 Resource·native·v2·deprecated alias·import는 독립 검토 대상입니다.
+
+Restore의 library-owned With 옵션은 literal volume ID·name, copied JSON Seed와 owned Location을 받습니다.
+둘 다 비어 있으면 요청 전 오류이고 nonempty 필드만 restore body에 넣습니다.
+선택한 microversion을 유지하고 조회·wait·cap·discovery를 하지 않습니다.
+입력 ID에 고정한 한 POST 뒤 present restore→backup→flat 순으로 실제 object를 선택하고
+known cached Backup 필드를 병합한 nullable 24-field Value를 반환합니다.
+일반 UTF8 malformed/empty body는 cached 상태를 유지하되 실제 object를 합성하지 않습니다.
+valid wrong shape·invalidUTF8·descriptor/location 오류에는 actual Applied를 보존하고 Value를 공개하지 않습니다.
+결과 BackupID는 병합한 logical RawMessage이며 응답이 바꾸더라도 고정 request route는 바뀌지 않습니다.
+
+Reset은 required UTF8 status string을 빈 값·알 수 없는 값까지 그대로 전달합니다.
+Source action에 맞춰 operation copy만 3.64로 고정하고 original client를 유지합니다.
+nullable model·CurrentLocation·constructor 부수효과를 소비하지 않으며 실제 sub400 opaque acknowledgement를 반환합니다.
+Completed는 response Read·Close·guard까지 성공했다는 뜻이고 서버 상태 조회나 완료 대기를 뜻하지 않습니다.
+
+두 API와 기존 force delete의 scoped backupPost는 physical method/route/body bytes/framing을 검사하고
+reset/force의 3.64 header를 보호합니다. native reauth·bounded caller retry와 live token을 유지하면서
+physical mutation/read/Close rejection은 retry restoration 이후에도 sticky하게 보존합니다.
+accepted IO/source/context 오류는 실제 Applied와 독립 ResponseError 및 simultaneous custom causes를 남깁니다.
+expanded native OkCodes는 원래 >=400을 성공 증거로 바꾸지 않습니다. rejected IO의 native 관찰 한계를 그대로 명시합니다.
+
+신규 테스트 30개 그룹은 options5·public contracts7·service2·transport9·Connection7입니다.
+입력/Seed 소유권, sparse merge와 envelope presence, arbitrary response ID, opaque reset,
+live auth/retry·physical body/headers·redirect·joined errors, cached Cinder/scope와 native facade 경계를 검증했습니다.
+Source graph33·38개 선언은 겹치는 source-only 증거이며 합산하거나 새로운 Python/OpenStack runtime으로 주장하지 않습니다.
+mutable Resource/dict/Munch/None·warning·constructor/location/cache 정체성과 동적 nonstring 인자는
+safe UTF8 string ID, copied Seed·Location과 owned proof의 명시한 Go mapping 경계입니다.
+Requests encoding/backend와 Go UTF8 JSON 표현의 차이도 문서화했습니다.
+
+최종1678개 Go에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(90.54초),
+`go vet -mod=readonly ./...`(2.40초), focused30그룹(5.75초), gofmt와 exact standalone 문서 fence 컴파일을 통과했습니다.
+문서의 initial compile13.61초는1676개 Go 당시이며 최종 동일 production의 cache 검증0.31초는1678개 Go에 바인딩했습니다.
+기존1663개 중1662개 Go는 byte-identical이고 기존 force helper1개만 선언한 범위에서 수정했습니다.
+새 production10개·test5개이며 inventory41·generated Go338·generated service 문서25·native1126·resource235개를 유지했습니다.
+기존311개 raw Go fence를 보존해 새 문서1개를 포함한312개입니다.
+
+기존444개 review의 literal prefix·모든 필드·source pins를 보존해 두 실제 Proxy review만 추가했습니다.
+두 review에는 계약24개·실제 anchor36개(신규30·직접 재사용 model6)·공개 API 참조6개를 연결했습니다.
+catalog3362개에서 go_mapping137→139, unsupported1 유지, unresolved3224→3222이며 supported는0입니다.
+전체 SDK는 계속 진행 중입니다.
+
+Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=139, unsupported=1, unresolved=3222.
