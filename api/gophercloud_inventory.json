@@ -3138,7 +3138,8 @@
       "name": "IsRootEnabled",
       "sdk_package": "gophercloudsdk/db/v1/instances",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "result_policy": "sdk_trove_root_enabled_boolean"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances",

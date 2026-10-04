@@ -7,6 +7,7 @@ import (
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	users "github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
+	troveroot "gophercloudsdk/internal/troveroot"
 	request "gophercloudsdk/request"
 	resource "gophercloudsdk/resource"
 	iter "iter"
@@ -122,7 +123,7 @@ func (a *API) Get(ctx context.Context, id string) (*Instance, error) {
 // IsRootEnabled invokes the upstream API with library-owned builders and result handling.
 func (a *API) IsRootEnabled(ctx context.Context, id string) (bool, error) {
 	result := upstream.IsRootEnabled(ctx, a.client, id)
-	value0, err := result.Extract()
+	value0, err := troveroot.Extract(result.Result)
 	err = request.Wrap("IsRootEnabled", "instances", err)
 	return value0, err
 }
