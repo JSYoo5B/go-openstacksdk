@@ -645,3 +645,65 @@ SDK runtime 성공 수나 실제 cloud 검증으로 주장하지 않습니다. s
 catalog3362개에서 go_mapping127→129, unsupported1 유지, unresolved3234→3232이며 supported는0입니다.
 최종 parity CLI도 통과했습니다.
 별도 Proxy/native/Resource/v2와 다른 workflow를 함께 승격하지 않습니다. 전체 SDK 구현은 아직 완료되지 않았습니다.
+
+
+### Backup cloud 목록·검색·단일 조회 helper 3개
+
+실제 `BlockStorageCloudMixin.list_volume_backups`·`search_volume_backups`·`get_volume_backup`을
+직접 `blockstorage` 함수와 cached Cinder v3를 사용하는 `Connection`에 매핑했습니다.
+[Backup 조회와 Python 비교](../blockstorage/volume-backups.md)에 독립 Go 예제와 전체·서비스 호출,
+concrete With/Prepare 옵션, 검색·부재·실패의 실제 단계별 결과를 설명합니다.
+
+Snapshot의 검증된 읽기 엔진에 SDK 소유의 private closed schema와 named Backup facade를
+추가했습니다. 호출자는 schema 또는 interface builder를 구현하지 않습니다. Backup은 own22 Body·
+inherited id·계산 location의 nullable24-field view, ordinary Boolean 세 필드, singleton-wrapped links,
+nullable metadata·size·object_count와 project/availability_zone location을 사용합니다.
+Snapshot의 BoolStr·zoneless 모델·mutation descriptors는 보존합니다. 원문 raw·logical Value·
+실제 body/header/status·선택 오류는 독립 값이며, 실패에 partial logical 결과를 발표하지 않습니다.
+
+List는 기본 detailed/paginated=true, Backup 고유 query/local 판별과 literal all_projects alias,
+late binding·typed override·constructor collision·Source 순서의 eager 변환과 lazy predicates를 처리합니다.
+backups_links·빈 collection EOF·raw row 기준 maximum·마지막 제외 row marker·page-end maximum의
+추가 GET 시점과 고정 origin/path·cycle 검사를 유지합니다. Source의 HTTP Link uri/url와
+List generator-expression 결함은 명시적인 Go 교정입니다.
+
+Search는 queryless 상세 목록을 끝까지 읽은 뒤 exact/glob·중첩 Mapping·JMESPath를 적용합니다.
+Get의 omitted/null 필터는 member-first exact find, 모든 nonnull 필터는 falsey여도 전체 Search입니다.
+member의 missing id만 logical seed에 넣고 actual raw id를 만들지 않습니다. unique find는 필요한
+목록을 끝까지 소비하며 두 번째 exact match는 unused tail 전에 ambiguity를 반환합니다.
+projection의 임의 JSON 결과에는 raw Resource 연결을 합성하지 않습니다.
+
+최종 검토에서 Gophercloud v2.15.0 native unexpected-status 경로가 body Read/Close fault를
+버려 faulty400/403/404 member가 clean fallback으로 처리될 수 있음을 확인하고 수정했습니다.
+ordinary Snapshot/Backup member의 compatibility status만 scoped observer로 관찰하여
+순수 IO fault를 native status/callback cause와 함께 보존합니다. 거부 응답을 admitted proof로
+만들지 않으며 fault 뒤 native retry callback이 nil이어도 resend·fallback을 차단합니다.
+정상 native status의 기존 fallback·live reauth/retry는 유지합니다. List와 다른 native 거부 status의
+body IO 정책은 기존 Gophercloud 범위로 남아 있으며 universal observer를 주장하지 않습니다.
+
+Source whole declaration48개·file pin33개, 별도 model declaration36개·file pin21개와
+48 protocol·202 descriptor AST/stand-in probe receipts를 보존했습니다. 이 증거는 source-only이며
+인증된 Python SDK나 실제 OpenStack runtime 성공으로 합산하지 않습니다. 기존 독립 감사 뒤
+새 IO 결함 발견·수정과 helper/doc v2 검토를 별도 보존했습니다. Source Backup max3.64는
+absent-default negotiation 상한이며 supplied/default MV를 cap하는 규칙이 아닙니다. Go는
+선택된 microversion을 유지하고 별도 자동 cap·협상을 추가하지 않습니다.
+
+신규60개 테스트 그룹은 model9·query8·transport4·Connection11·공개 HTTP25·shared Cinder IO3입니다.
+IO 회귀54개 하위 사례는 Backup Get·Snapshot Get/ByID와400/403/404의 pure Read/Close/both,
+clean fallback과 bounded native callback을 검증했습니다. 첫 Connection 실행의 local port sandbox
+제한은 허용된 localhost 실행으로 해결했고, native retry fixture의 남은 Snapshot 기대 경로는
+Backup 계약으로 교정했습니다. 원래 실패 receipts도 보존하며 production/assertion을 약화하지 않았습니다.
+
+IO 수정 후 최종1625개 Go 파일에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(95.37초),
+`go vet -mod=readonly ./...`(16.59초), 전체 gofmt와 exact 문서 fence 독립 컴파일(24.83초)을
+통과했습니다. 앞선1623개 Go 파일에서의 검증은 당시 결과로 보존하고 최종 코드 검증으로 대체했습니다.
+기존1605개 Go 경로 중1595개가 byte-identical이며 변경10개는 shared read dispatch/정책과
+Cinder Connection 이름 공유입니다. 새 production12개·test8개, generated338개·native1126개·
+resource235개·모든 inventory41개·기존307개 Go fence를 보존하고 standalone fence 한 개를 더해308개입니다.
+
+기존436개 review의 bytes·모든 필드와 source pins를 보존한 채 실제 cloud3개에 계약24개·
+new distinct test anchor60개·공개 함수/메서드23개를 연결해439개 review가 되었습니다.
+catalog3362개에서 go_mapping129→132, unsupported1 유지, unresolved3232→3229이며 supported는0입니다.
+최종 parity CLI도 통과했습니다.
+독립 Proxy/native/Resource/v2·생성/삭제·export/action을 함께 승격하지 않습니다. 전체 SDK는 계속 진행 중입니다.
