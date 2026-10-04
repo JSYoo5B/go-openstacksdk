@@ -64,3 +64,5 @@ SDK가 적용하며 SDK 시간 제한이 없습니다. `WaitForState`는 caller�
 적용됩니다. 기존 공통 `WaitFor`/`WaitForDeletion`의 5분 정책과 네이티브
 `WaitForStatus`는 유지됩니다. 전체 예제와 Python Resource/cache의 차이는
 [서비스 대기 가이드](../../../docs/service-waits.md)를 참고하세요.
+
+The service API adds `ReserveVolume(ctx, id)`, `UnreserveVolume(ctx, id)`, `BeginVolumeDetaching(ctx, id)` and `AbortVolumeDetaching(ctx, id)`. Each sends the pinned source's null action value and returns owned opaque acknowledgement plus separate discovery proof. Existing native `Reserve`, `Unreserve` and `BeginDetaching` retain their original body/status policy. See [the package and Connection examples](../../volume-actions.md).

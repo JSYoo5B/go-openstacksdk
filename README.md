@@ -445,3 +445,5 @@ Backup 복원과 상태 변경은 `conn.RestoreVolumeBackup`·`conn.ResetVolumeB
 선택한 restore microversion과 reset의 3.64 정책, 오류 시 실제 응답 증거를 설명합니다.
 
 Backup import는 `conn.ImportVolumeBackup(ctx, blockstorage.ImportVolumeBackupRequest{BackupService: service, BackupURL: locator})`로 호출합니다. [Python·package·service 사용법 비교](blockstorage/volume-backup-import.md)에 literal record, operation microversion 선택, disconnected `location:null` 모델과 오류 시 HTTP 증거를 설명합니다.
+
+Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·`UnreserveVolume`·`BeginVolumeDetaching`·`AbortVolumeDetaching`으로 명시적인 ID에 호출합니다. [Volume state action과 Python/native 비교](blockstorage/volume-actions.md)에 null action body, 호출별 microversion, opaque acknowledgement와 오류 시 단계별 응답을 설명합니다. 서버 상태 완료를 기다리지 않습니다.

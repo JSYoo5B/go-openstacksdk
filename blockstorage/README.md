@@ -167,3 +167,5 @@ Backup 복원은 `RestoreVolumeBackup`의 With 옵션으로 volume ID 또는 새
 [복원·상태 변경 사용법과 Python/native 비교](volume-backup-actions.md)에 Connection·직접 package·v3 service 호출과 부분 결과를 설명합니다.
 
 Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupService, BackupURL}`을 전달합니다. [Import 사용법과 Python/native 비교](volume-backup-import.md)에 package·Connection·v3 service 호출, opaque locator 문자열과 nullable Backup 결과를 설명합니다.
+
+명시적인 volume ID의 reserve·unreserve·begin/abort detaching은 [Volume action 사용법](volume-actions.md)을 참고합니다. 네 helper에는 lookup/wait 옵션이 없으며, `Completed`는 action acknowledgement입니다. 기존 cloud bootable helper와 직접 Proxy bootable/readonly의 범위를 구별합니다.
