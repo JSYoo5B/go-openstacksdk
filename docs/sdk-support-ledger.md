@@ -820,3 +820,58 @@ catalog3362개에서 go_mapping134→135, unsupported1 유지, unresolved3227→
 supported는0입니다. 전체 SDK는 계속 진행 중입니다.
 
 Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=135, unsupported=1, unresolved=3226.
+
+### Backup v3 Proxy의 raw·JSON export
+
+고정된 v3 Proxy의 실제 `export_record`와 `export_backup` 두 선언만 각각
+`Backups.API.ExportRecord`와 `Backups.API.ExportBackup`에 연결했습니다.
+JSON 반환은 `Connection.ExportVolumeBackupRecord` 및 blockstorage 직접 함수로도 제공합니다.
+기존 cloud raw export, native typed/base64 `API.Export`, Resource/v2 선언은 독립 검토 상태를 유지합니다.
+
+raw API는 기존 opaque exchange를 재사용하고 JSON API는 같은 captured reader의 body 없는
+GET `backups/{id}/export_record` 뒤 한 문서를 로컬에서 해석합니다. source를 재캡처하거나
+native JSONResponse·decoder retry·resolver·location·wait·사용자 builder·빈 options를 추가하지 않습니다.
+선택한 microversion을 그대로 유지하며 Connection은 local context/provider/safe ID 검사 뒤
+cached Cinder v3만 선택합니다. 서비스 API는 nil receiver의 로컬 오류와 정확한 outer operation을 제공합니다.
+
+JSON 결과는 object·array·string·number·bool·null 어느 형태든 허용하는 독립 `json.RawMessage`입니다.
+문서 앞뒤 whitespace만 제외하고 내부 spacing·숫자 표기/정밀도·escape·duplicate member 원문을
+유지합니다. 성공한 null은 nonnil `null` bytes이며 모든 실패의 Value는 nil입니다.
+완전한 ordinary UTF8 JSON과 EOF를 요구하고 empty/malformed/두 번째 값·잘못된 UTF8·BOM·
+UTF16/32·NaN/Infinity tokens는 거부합니다. 이 literal 결과는 Python semantic dict/list/scalar,
+중복 키 마지막 값·float 변환·decoder/interpreter 제한을 그대로 복제한 결과가 아닙니다.
+
+실제 admitted HTTP100..399의 Exported를 IO/source/context/parser 오류 전에 독립 복사합니다.
+Value는 parse와 같은 captured source의 마지막 guard가 모두 성공한 뒤에만 공개합니다.
+Exported 존재만으로 성공을 뜻하지 않으며 native >=400은 parser 전에 실패하고 Exported/Value가 없습니다.
+공유 raw engine의 sticky physical Body/ContentLength/TransferEncoding·고정 target/source 정책과
+live auth·native reauth/bounded retry를 유지합니다. 거절 응답의 native Read/Close 관찰 한계는 유지합니다.
+
+Source graph와 실제 고정 선언/file hashes를 대조하고 기존 constructor/descriptor/Response 분석을
+재사용했습니다. Python Resource/dict/Munch/None 입력과 local location/cache 부수효과, deprecated
+raw warning/filter-as-error는 명시한 Go 경계입니다. SDK pin이 Requests/simplejson/interpreter를
+고정하지 않음을 문서화했고 Requests v2.32.5 공식 소스는 decoder/encoding 차이의 참고 근거입니다.
+문서의 세 참고 링크 fragment는 실제 선언에 맞게 별도 수정했으며 Go fence bytes는 그대로입니다.
+기존 AST/stand-in probe는 source-only이며 재실행하거나 실제 Python/OpenStack runtime으로 합산하지 않습니다.
+
+신규18개 실제 테스트 그룹은 public JSON 계약5·transport5·Connection5·서비스 facade3입니다.
+12개 arbitrary JSON/status 사례와16개 invalid document 사례, 독립 bytes/header/value/error proof,
+preflight·cached service·custom cancellation·accepted IO/source·live auth/retry·physical redirect·
+expanded native status 및 기존 typed Export의 별도 상태/모델을 검증했습니다.
+신규18개와 실제 공유 raw engine13개를 선택해31개 distinct actual anchor로 두 후보의15개 계약을
+연결했습니다. source-only의 parse 뒤 guard와 runtime accepted-fault assertions를 구분하며
+테스트하지 않은 동시 parser mutation이나 injected Body.Close branch를 runtime 성공으로 주장하지 않습니다.
+
+최종1663개 Go 파일에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(97.10초),
+`go vet -mod=readonly ./...`(3.33초), gofmt와 exact standalone 문서 fence 독립 컴파일(39.50초)을
+통과했습니다. 기존1654개 Go는 모두 byte-identical이며 새 production5개·test4개입니다.
+공개/Connection focused15개(34.97초)는1662개 Go, service focused3개(5.72초)는1663개 Go에서
+실행한 당시 증거로 보존했습니다. 모든 inventory41개·generated Go338개·generated service 문서25개·
+native1126개·resource235개를 유지하고 기존310개 raw Go fence를 보존해 총311개입니다.
+
+기존442개 review의 literal prefix·모든 필드·source pins를 보존한 채 실제 Proxy2개에 계약15개·
+공개 API 참조4개를 연결해444개 review가 되었습니다. catalog3362개에서 go_mapping135→137,
+unsupported1 유지, unresolved3226→3224이며 supported는0입니다. 전체 SDK는 계속 진행 중입니다.
+
+Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=137, unsupported=1, unresolved=3224.
