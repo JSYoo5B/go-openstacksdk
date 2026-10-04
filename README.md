@@ -58,6 +58,8 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
+Neutron의 [9개 리소스 조건부 Update](network/v2/revision-updates.md)는 concrete `UpdateOpts.RevisionNumber`를 HTTP `If-Match` 조건으로 전달합니다. nil과 revision 0을 구별하고 `WithUpdateOptions`로 선택한 최종 조건을 사용합니다. 412 충돌은 오류로 반환하므로 호출자가 충돌 처리 정책을 선택합니다.
+
 목록의 로컬 조건도 SDK 옵션으로 선택합니다. QoS rules·Address Group addresses·Subnet Pool prefixes·Network subnets는
 `resource.WithBodyFilter`/`WithBodyFilters`로 field 선택·snapshot·배열 비교를 처리합니다.
 Subnet은 [선언된 query 24개·로컬 필드 9개](network/v2/subnets/README.md)를
