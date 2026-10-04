@@ -31339,6 +31339,273 @@
         "Missing member ID is retained as explicit logical requested seed/RequestedID/SeededID while physical Body remains unchanged. Actual explicit null/false/zero/empty/containers or mismatched IDs remain actual response values; direct lookup does not invent a request-ID equality policy."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/create_volume_snapshot",
+      "source_fingerprint": "a68b3eb69545f7586ea5e96eea85200bd48bfd23990eb560426a4c1c951a44a6",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.CreateVolumeSnapshot",
+        "gophercloudsdk/blockstorage.CreateVolumeSnapshot",
+        "gophercloudsdk/blockstorage.PrepareCreateVolumeSnapshotOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotOptions",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotForce",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotWait",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotWaitPolicy",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotAttributes",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotFields",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotName",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotDisplayName",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotDescription",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotDisplayDescription",
+        "gophercloudsdk/blockstorage.WithCreateVolumeSnapshotLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete With/Prepare policy preserves omitted versus explicit false/zero, complete replacement and all raw nullable attributes/location/wait subtrees. Original callbacks run exactly once in captured slice order with an owned snapshot after each callback; factories support concurrent reuse. Preparation is pure and defers reached-value validation. Nil options/context, cancellation including custom causes and callback errors return no partial policy or HTTP.",
+          "tests": [
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedValues",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsAttributeFactoriesRetainAllAliasesWithoutNormalizing",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRawFactoriesPreserveNilEmptyMapsAndExactByteShapes",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteReplacementClearsPriorPolicyAndSubtrees",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRejectMissingCanceledOrExpiredContextBeforeCallbacks",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsStopOnNilErrorOrCancellationWithoutPartialPolicy",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation"
+          ]
+        },
+        {
+          "behavior": "Direct workflows capture provider/endpoint/ResourceBase/type/microversion before originals and ordinary headers as owned snapshots while auth tokens remain live. Sticky source changes and original failures join context causes before HTTP. Connection prepares originals once before only cached Cinder v3 selection without readiness probing; recorded/explicit scope is owned after originals and before getter, retaining snapshot location across phases.",
+          "tests": [
+            "blockstorage/snapshot_mutation_source_test.go:TestVolumeSnapshotMutationOriginalFailuresJoinSourceAndContextBeforeHTTP",
+            "blockstorage/snapshot_mutation_source_test.go:TestVolumeSnapshotMutationDirectCaptureOwnsHeadersOptionsAndEveryPublishedStage",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsCaptureRecordedScopeAfterOriginalsBeforeGetterAcrossWait",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsExplicitLocationAndRetainedOriginalsStayOwned",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsNonemptyPreflightAndGetterFailuresKeepOperationCauses"
+          ]
+        },
+        {
+          "behavior": "Snapshot logical state merges only known descriptors while preserving raw descriptor values, duplicate-key insertion/alias order and eager nullable16-field conversion. Location is recomputed from captured current/foreign-project scope and zone is null. Partial/flat responses merge prior state; valid UTF8 empty/malformed JSON has no actual object, parsed {} is an actual empty resource, and valid wrong shape/envelope/null or invalid UTF8 fails with current physical proof.",
+          "tests": [
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateMergesKnownPartialFieldsWithoutChangingRawDescriptorValues",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateAliasesUseParsedDuplicateInsertionOrder",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateConversionIsEagerAndErrorsDoNotRewriteRawState",
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationObjectDistinguishesToleranceFromActualEmptyAndRejectsWrongShape",
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationObjectOwnsActualFieldsAndMetadataSeparatelyFromLogicalView"
+          ]
+        },
+        {
+          "behavior": "Accepted physical body/header/status, raw resources, logical stages and errors own independent copies. Admitted read/Close/source/context failures keep the actual current phase and all causes while completed logical outputs remain unpublished. Later blocked/canceled/rejected requests keep prior phase proof without borrowing it as the new failure response. Opaque mutation acknowledgement bytes remain actual proof.",
+          "tests": [
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationProofKeepsOpaqueBytesAndEveryPhaseOwnsItsCopy",
+            "blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationAcceptedFailuresRetainCurrentPhaseAndCauses",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsDescriptorAndDeleteRejectionRetainTheirOwnPhase",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Create forwards literal volume_id including empty string with explicit force=false by default, without generated ID/name/description. Only name/display_name/description/display_description kwargs are accepted. Canonical key presence suppresses aliases even when falsey; selected falsey JSON is omitted, typed fields overlay the same key, and invalid unused aliases remain unused. Reached input validation occurs before POST and Connection getter; body data is not routed.",
+          "tests": [
+            "internal/cloudsnapshot/mutation_body_test.go:TestSnapshotMutationCreateBodyPreservesOnlyFourCloudAttributesAndDefaultFalse",
+            "internal/cloudsnapshot/mutation_body_test.go:TestSnapshotMutationCreateBodyCanonicalPresenceSuppressesAliasesByJSONTruthiness",
+            "internal/cloudsnapshot/mutation_body_test.go:TestSnapshotMutationCreateBodyTypedOverridesAndUnusedAliasValidation",
+            "internal/cloudsnapshot/mutation_body_test.go:TestSnapshotMutationCreateBodyInputValidationIsAtomicAndBodyDataDoesNotUseRoutes",
+            "internal/cloudsnapshot/mutation_body_test.go:TestSnapshotMutationCreateBodyOwnsSuppliedFieldsAndIndependentState",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotDefaultsForwardLiteralBodyAndPreserveRequestSeed",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotAliasesUseCanonicalPresenceAndLiteralJSONValues",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotValidatesConsumedInputBeforePOSTButIgnoresShadowedAlias",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotOriginalOptionsAndFactoriesCannotChangeCapturedRequestAfterBoundary",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationCreateInvalidLiteralAndUnknownAttributesFailBeforeGetter"
+          ]
+        },
+        {
+          "behavior": "POST accepts original HTTP100..399 and merges the submitted known seed with actual response fields. Created physical proof and successfully normalized CreatedValue remain separate from final Value/Ready; malformed responses retain submitted values without manufacturing a raw object. Eager descriptor/shape failure keeps parsed current raw resource when available and never publishes final Snapshot/Value.",
+          "tests": [
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotMergesPartialFlatEmptyAndMalformedCreationResponses",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotAcceptedWrongShapesAndDescriptorsKeepOnlyCreationProof",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotOwnsEveryLogicalAndPhysicalPhaseIndependently"
+          ]
+        },
+        {
+          "behavior": "Create defaults wait=true. Initial case-insensitive available is terminal before unused ID/timeout/interval validation; no-wait returns merged values even arbitrary/null IDs or statuses. Waiting consumes initial nonstring status locally; initial error never shortcuts the fresh GET. Fresh available succeeds before fresh case-insensitive error failure, while null status is nonterminal. Every poll merges prior fields and uses the latest logical ID only when another safe member request is reached, so terminal unsafe IDs need no route.",
+          "tests": [
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotCachedReadySkipsUnusedWaitAndRouteControls",
+            "blockstorage/snapshot_mutation_create_contract_test.go:TestCreateVolumeSnapshotNoWaitKeepsArbitraryNullableIdentityAndStatus",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotFreshPollOverridesInitialErrorBeforeFailure",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotFreshErrorOrInvalidStatusKeepsCreatedAndLastAccepted",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotInitialNonstringStatusIsConsumedOnlyWhenWaiting",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotWaitRebindsLatestLogicalIDButDoesNotRouteTerminalUnsafeID",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotNonterminalUnsafeIDFailsBeforeAnotherPhysicalPoll",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotToleratedPollBodiesMergePriorStateBeforeTerminalCheck",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateRawIDsAndNullableStatusesValidateOnlyAtReachedPhases"
+          ]
+        },
+        {
+          "behavior": "Create SDK wait budget starts after POST/initial readiness check. Nil is unlimited, explicit nonpositive timeout fails before polling, and positive expiry is checked at loop boundaries without deriving an HTTP context deadline; a slow target GET succeeds. Interval defaults2s, zero normalizes100ms or a smaller positive timeout, and negative interval fails only at reached nonterminal sleep. Parent context cancellation still governs transport/sleep.",
+          "tests": [
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotExplicitNonpositiveTimeoutIsPostCreateAndPrePoll",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveWaitBudgetBeginsAfterCreationAndDoesNotAbortSlowTargetGET",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveTimeoutIsNoticedAtNextLoopBoundary",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPollIntervalsAreConsumedOnlyAtNonterminalSleep"
+          ]
+        },
+        {
+          "behavior": "Native retry cannot replace owned POST body, fixed route, method, decoder, retention, original status policy or captured source. Native auth is live but orchestration does not independently replay create or roll back accepted resources.",
+          "tests": [
+            "blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationCreateRetryCannotReplaceOwnedBodyOrDecoder"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-snapshot-mutations.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin cloud helper is mapped with selected Cinder v3 and Gophercloud v2.15.0. Independent Proxy/native/v2/Resource/session/adapter declarations retain separate reviews; full SDK remains incomplete.",
+        "Python defaults/kwargs and mutable runtime objects map to explicit Go request types and library-owned concrete With/Prepare options. Go controls use finite JSON, typed pointers and time.Duration rather than Python runtime objects or arbitrary Resource identity.",
+        "Owned raw HTTP/resource proof and normalized nullable logical stages are separate Go representations. Unknown raw fields and number spelling remain physical evidence; source stale dict cache, mutable Resource identity and session memoization are not reproduced.",
+        "Ordinary eager descriptor and parsed dictionary duplicate/alias semantics are preserved. Exact decimal truthiness/equality, Unicode16 decimal tables and arbitrary integers do not reproduce Python float rounding/underflow or configurable CPython integer digit limits.",
+        "Go requires complete valid UTF8 for consumed JSON and safe unescaped UTF8 member route segments; arbitrary runtime/route-changing coercion is excluded. Request VolumeID is literal body data and does not require route validation. Only reached fields/status/route/wait controls are validated.",
+        "Direct source capture, owned ordinary headers, sticky fixed-request/source/cause guards and atomic logical publication are Go safety/proof extensions. Native token/reauth/retry stays live; SDK orchestration adds no replay, rollback or cache invalidation.",
+        "Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.",
+        "Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.",
+        "Source creation default force=false/wait=true, four kwargs, merged request seed and initial available shortcut are preserved. No automatic native projection, generated names or metadata kwargs are added."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_snapshot",
+      "source_fingerprint": "4cfd5a4497bbdf49a620a1b33c39480a439023268b082f6ad2512a2296b53cc6",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.DeleteVolumeSnapshot",
+        "gophercloudsdk/blockstorage.DeleteVolumeSnapshot",
+        "gophercloudsdk/blockstorage.PrepareDeleteVolumeSnapshotOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeSnapshotOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeSnapshotWait",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeSnapshotWaitPolicy",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeSnapshotLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "Concrete With/Prepare policy preserves omitted versus explicit false/zero, complete replacement and all raw nullable attributes/location/wait subtrees. Original callbacks run exactly once in captured slice order with an owned snapshot after each callback; factories support concurrent reuse. Preparation is pure and defers reached-value validation. Nil options/context, cancellation including custom causes and callback errors return no partial policy or HTTP.",
+          "tests": [
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedValues",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsAttributeFactoriesRetainAllAliasesWithoutNormalizing",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRawFactoriesPreserveNilEmptyMapsAndExactByteShapes",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCompleteReplacementClearsPriorPolicyAndSubtrees",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsRejectMissingCanceledOrExpiredContextBeforeCallbacks",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsStopOnNilErrorOrCancellationWithoutPartialPolicy",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation"
+          ]
+        },
+        {
+          "behavior": "Direct workflows capture provider/endpoint/ResourceBase/type/microversion before originals and ordinary headers as owned snapshots while auth tokens remain live. Sticky source changes and original failures join context causes before HTTP. Connection prepares originals once before only cached Cinder v3 selection without readiness probing; recorded/explicit scope is owned after originals and before getter, retaining snapshot location across phases.",
+          "tests": [
+            "blockstorage/snapshot_mutation_source_test.go:TestVolumeSnapshotMutationOriginalFailuresJoinSourceAndContextBeforeHTTP",
+            "blockstorage/snapshot_mutation_source_test.go:TestVolumeSnapshotMutationDirectCaptureOwnsHeadersOptionsAndEveryPublishedStage",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsOriginalsPrecedeOnlyCinderV3AndReuseCacheWithoutReadiness",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsCaptureRecordedScopeAfterOriginalsBeforeGetterAcrossWait",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsExplicitLocationAndRetainedOriginalsStayOwned",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsNonemptyPreflightAndGetterFailuresKeepOperationCauses"
+          ]
+        },
+        {
+          "behavior": "Snapshot logical state merges only known descriptors while preserving raw descriptor values, duplicate-key insertion/alias order and eager nullable16-field conversion. Location is recomputed from captured current/foreign-project scope and zone is null. Partial/flat responses merge prior state; valid UTF8 empty/malformed JSON has no actual object, parsed {} is an actual empty resource, and valid wrong shape/envelope/null or invalid UTF8 fails with current physical proof.",
+          "tests": [
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateMergesKnownPartialFieldsWithoutChangingRawDescriptorValues",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateAliasesUseParsedDuplicateInsertionOrder",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateConversionIsEagerAndErrorsDoNotRewriteRawState",
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationObjectDistinguishesToleranceFromActualEmptyAndRejectsWrongShape",
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationObjectOwnsActualFieldsAndMetadataSeparatelyFromLogicalView"
+          ]
+        },
+        {
+          "behavior": "Accepted physical body/header/status, raw resources, logical stages and errors own independent copies. Admitted read/Close/source/context failures keep the actual current phase and all causes while completed logical outputs remain unpublished. Later blocked/canceled/rejected requests keep prior phase proof without borrowing it as the new failure response. Opaque mutation acknowledgement bytes remain actual proof.",
+          "tests": [
+            "internal/cloudsnapshot/mutation_response_test.go:TestSnapshotMutationProofKeepsOpaqueBytesAndEveryPhaseOwnsItsCopy",
+            "blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationAcceptedFailuresRetainCurrentPhaseAndCauses",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsDescriptorAndDeleteRejectionRetainTheirOwnPhase",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
+          ]
+        },
+        {
+          "behavior": "Delete defaults wait=false. Empty NameOrID runs original policy/context checks once then returns false without consuming service/location, including nil Connection/client. Nonempty uses exact member lookup with only clean original concrete400/403/404 fallback, preserves normal absence and ambiguity, and requires exhausted unique fallback before mutation. Actual selected logical ID, including the missing-member-ID seed, determines the safe DELETE route; explicit null cannot route and raw fields are not manufactured.",
+          "tests": [
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotDefaultWaitOffDeletesActualResolvedIDWithOpaqueAcknowledgement",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotEmptyInputRunsOriginalsOnceWithoutConsumingServiceOrLocation",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotFallbackRequiresCompletedExactLookupAndPreservesAbsenceOrAmbiguity",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotMemberMissingIDSeedsLookupButExplicitNullCannotRoute",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationEmptyDeleteIsServiceFreeEvenForNilConnection",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateDeleteLogicalSeedDoesNotManufacturePhysicalFields"
+          ]
+        },
+        {
+          "behavior": "DELETE is bodyless without force/cascade and original HTTP100..399 acknowledgement is opaque, including nonJSON or binary bytes. No-wait returns true only after acknowledgement and guards. Original DELETE404 is terminal with mutation evidence and can never be treated as completed polling absence.",
+          "tests": [
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotDefaultWaitOffDeletesActualResolvedIDWithOpaqueAcknowledgement",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotMutation404IsTerminalAndNeverPollAbsence",
+            "connection_volume_snapshot_mutations_test.go:TestConnectionSnapshotMutationsDescriptorAndDeleteRejectionRetainTheirOwnPhase"
+          ]
+        },
+        {
+          "behavior": "With wait=true, cached deleted alone cannot complete: after reached timeout/context/route guards, delete performs a fresh GET. Fresh case-insensitive deleted or a clean original concrete GET404 completes; error/error_deleting are nonterminal, fresh null/nonstring status is local failure, and omitted/empty/malformed fresh body merges prior state before terminal checks. The latest merged ID routes only a subsequent needed request. Deleted stays nil on error, false on initial absence/empty input, true only after completion.",
+          "tests": [
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotWaitAlwaysFetchesFreshAndToleratesMalformedBodyByMergingPriorDeleted",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotFreshNullOrNonstringStatusIsAnErrorAfterAcknowledgement",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotErrorsAreNonterminalAndLatestMergedIDControlsNextPoll",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotCleanPolling404CompletesWithSeparateAbsenceProof",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateRawIDsAndNullableStatusesValidateOnlyAtReachedPhases",
+            "internal/cloudsnapshot/mutation_state_test.go:TestSnapshotMutationStateDeleteLogicalSeedDoesNotManufacturePhysicalFields"
+          ]
+        },
+        {
+          "behavior": "Delete wait budget starts after acknowledgement, overrides the standalone Proxy120-second default with cloud nil-unlimited behavior, and explicit nonpositive timeout fails before even a cached-deleted fresh GET. Positive SDK expiry is loop-only and does not abort a slow terminal GET; parent contexts still cancel HTTP/sleep. Nil-unlimited routing and multi-poll behavior are runtime fixtures; Python120-second default contrast is pinned source evidence, not a120-second live Go run.",
+          "tests": [
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotErrorsAreNonterminalAndLatestMergedIDControlsNextPoll",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotNonpositiveWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotPositiveBudgetStartsAfterDELETEAndAcceptsSlowFreshDeleted",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero",
+            "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation"
+          ]
+        },
+        {
+          "behavior": "Polling404 needs completed clean body Read/Close and source/context guards. Gophercloud v2.15.0 ignores unexpected-code read/Close errors, so the private observer preserves original rejection policy and joins all faults, including joined EOF/custom Read and Close EOF, preventing false absence. Wrapped native errors or expanded >=400 policy never complete. Native404 retry-to200 and401 reauth remain live with fixed request guards; clean404 has separate Absent proof rather than LastAccepted proof.",
+          "tests": [
+            "blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard",
+            "blockstorage/snapshot_mutation_transport_test.go:TestVolumeSnapshotMutationDeletePollingPreservesLiveAuthAndNative404Retry",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotCleanPolling404CompletesWithSeparateAbsenceProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-snapshot-mutations.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only this actual direct BlockStorageCloudMixin cloud helper is mapped with selected Cinder v3 and Gophercloud v2.15.0. Independent Proxy/native/v2/Resource/session/adapter declarations retain separate reviews; full SDK remains incomplete.",
+        "Python defaults/kwargs and mutable runtime objects map to explicit Go request types and library-owned concrete With/Prepare options. Go controls use finite JSON, typed pointers and time.Duration rather than Python runtime objects or arbitrary Resource identity.",
+        "Owned raw HTTP/resource proof and normalized nullable logical stages are separate Go representations. Unknown raw fields and number spelling remain physical evidence; source stale dict cache, mutable Resource identity and session memoization are not reproduced.",
+        "Ordinary eager descriptor and parsed dictionary duplicate/alias semantics are preserved. Exact decimal truthiness/equality, Unicode16 decimal tables and arbitrary integers do not reproduce Python float rounding/underflow or configurable CPython integer digit limits.",
+        "Go requires complete valid UTF8 for consumed JSON and safe unescaped UTF8 member route segments; arbitrary runtime/route-changing coercion is excluded. Request VolumeID is literal body data and does not require route validation. Only reached fields/status/route/wait controls are validated.",
+        "Direct source capture, owned ordinary headers, sticky fixed-request/source/cause guards and atomic logical publication are Go safety/proof extensions. Native token/reauth/retry stays live; SDK orchestration adds no replay, rollback or cache invalidation.",
+        "Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.",
+        "Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.",
+        "Source deletion default wait=false and empty input false are preserved with nullable bool Deleted. Mutation404 stays terminal; only a clean original concrete polling404 completes. Extra body-fault observation compensates for native ignored rejection Read/Close errors without bypassing native retry."
+      ],
+      "remaining": []
     }
   ]
 }
