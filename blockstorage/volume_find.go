@@ -14,6 +14,14 @@ import (
 // find is the prepared ordinary lookup shared by GetVolume and VolumeExists.
 // It applies no search/glob/filter phase and never reruns original options.
 func (p *preparedVolumeSearch) find(ctx context.Context, nameOrID string) (*GetVolumeResult, error) {
+	result, _, err := p.findSelected(ctx, nameOrID)
+	return result, err
+}
+
+// findSelected also retains the already selected wire row. Mutation workflows
+// need its raw attribute order and values for dirty comparison, without another
+// lookup or consuming unused list rows. Ordinary read behavior remains shared.
+func (p *preparedVolumeSearch) findSelected(ctx context.Context, nameOrID string) (*GetVolumeResult, *volumeIdentityRecord, error) {
 	result := &GetVolumeResult{}
 	collection := p.identityCollection(ctx, result)
 	record, err := collection.FindIdentity(ctx, nameOrID)
@@ -24,16 +32,16 @@ func (p *preparedVolumeSearch) find(ctx context.Context, nameOrID string) (*GetV
 		if ctx.Err() != nil && p.memberFailure != nil {
 			err = errors.Join(p.memberFailure, err)
 		}
-		return result, err
+		return result, nil, err
 	}
 	if err := p.reader.guard(ctx); err != nil {
-		return result, err
+		return result, nil, err
 	}
 	if record != nil {
 		result.Value = bytes.Clone(record.view)
 		result.Volume = record.entry.volume
 	}
-	return result, nil
+	return result, record, nil
 }
 
 type volumeIdentityRecord struct {
