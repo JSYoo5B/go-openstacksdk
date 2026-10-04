@@ -41,7 +41,7 @@ func ExportBackup(ctx context.Context, client *gophercloud.ServiceClient, id str
 		return nil, wrapRead(ctx, backupReadSchema(), "ExportVolumeBackup", err)
 	}
 	result := &BackupExportResult{BackupID: id}
-	wire, err := p.source.Get(ctx, target, sourceCodes()...)
+	wire, err := p.backupExportExchange(ctx, target)
 	if wire != nil {
 		result.Exported = &BackupExportResponse{
 			Body: bytes.Clone(wire.Body), Header: wire.Header.Clone(), StatusCode: wire.StatusCode,
