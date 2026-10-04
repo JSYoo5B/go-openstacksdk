@@ -32297,6 +32297,97 @@
         "Forced deletion deliberately uses sourceNull action at explicit3.64, even when normal selected version differs; native ForceDelete202/{} remains independently reviewed. Mutation404 is terminal, cleanpoll404 completes only after proof/source/cause guards."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/export_volume_backup",
+      "source_fingerprint": "a395704f44bfac2a5960e6375cc33f1189b66a808df7b5ea5d5a881ca9569ae0",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.ExportVolumeBackup",
+        "gophercloudsdk/blockstorage.ExportVolumeBackup"
+      ],
+      "contracts": [
+        {
+          "behavior": "Required BackupID is one safe nonempty literal UTF-8 member segment. Export requests bodyless queryless GET backups/{ID}/export_record without member/list/Volume/Snapshot/Identity resolution, generated identity, wait or SDK workflow replay. Unicode is escaped once; result retains the requested ID string rather than a response-derived identity.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOpaqueSub400ResponseUsesOneBodylessFixedGETAndSelectedMicroversion",
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupPreflightCapturesSourceBeforeSafeIDAndNeverMakesLookupRequests",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportPreflightAndSafeIDRejectBeforeCinder",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption"
+          ]
+        },
+        {
+          "behavior": "The original finite HTTP 100..399 policy preserves final opaque body bytes, headers and status without JSON, UTF-8, envelope, Backup descriptor or native base64/typed-record parsing. Selected service microversion, including omission, is unchanged; no automatic 3.64 override, default, discovery or cap is added.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOpaqueSub400ResponseUsesOneBodylessFixedGETAndSelectedMicroversion",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption"
+          ]
+        },
+        {
+          "behavior": "Exported Body, multivalue Header and StatusCode form an independently owned physical response snapshot. Different calls and physical fixtures do not alias, and error response evidence is separately owned. Full requests.Response object identity is an intentional Go mapping.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupOwnsOpaqueBodyAndHeadersAcrossIndependentCalls",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupAcceptedIOCancellationAndSourceFailuresKeepCurrentOwnedOpaqueProof",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportAcceptedOpaqueIOOwnsCurrentProofAndAllCauses"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture and validate the selected Cinder source before literal ID validation. Connection validates context/provider/ID before selecting cached Cinder v3 and passes service.RawClient; no CurrentLocation or Backup model/readiness is consumed. Invalid context/ID/source/getter is local, with outer ExportVolumeBackup/volume backup operation and caller causes preserved.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupPreflightCapturesSourceBeforeSafeIDAndNeverMakesLookupRequests",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportPreflightAndSafeIDRejectBeforeCinder",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportGetterFailuresJoinCustomAndContextCauses"
+          ]
+        },
+        {
+          "behavior": "Admitted response proof is published before accepted Read/Close/source/context errors are returned. Current partial bytes, status and headers remain in Exported with joined caller causes and independently owned ResponseError. Exported presence alone does not establish success; accepted faults do not trigger retry, SDK replay or rollback.",
+          "tests": [
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupAcceptedIOCancellationAndSourceFailuresKeepCurrentOwnedOpaqueProof",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportAcceptedOpaqueIOOwnsCurrentProofAndAllCauses"
+          ]
+        },
+        {
+          "behavior": "Original native 400/403/404 and other rejected >=400 responses are terminal with native evidence and Exported nil; no lookup fallback or normal absence is introduced. Native expanded OkCodes cannot fabricate admitted proof outside the original policy. Rejected response body IO retains native discarded Read/Close limitations, independent of member/poll response-body observers.",
+          "tests": [
+            "blockstorage/backup_export_contract_test.go:TestExportVolumeBackupNativeRejectionsAreTerminalAndDoNotInventAdmittedProof",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupNativeExpandedStatusCannotCreateAdmittedProof"
+          ]
+        },
+        {
+          "behavior": "Live provider authentication, native 401 reauthentication and bounded caller retry retain the fixed request and captured ordinary source headers while allowing existing native header hooks. Export changes no selected microversion/client state; cached Connection calls consume no CurrentLocation and use later live tokens and later call header snapshots.",
+          "tests": [
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupNativeReauthAndBoundedRetryUseLiveTokensAndOwnedHeaders",
+            "connection_volume_backup_export_test.go:TestConnectionBackupExportOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption"
+          ]
+        },
+        {
+          "behavior": "Fixed method/URL, native option bodylessness/body retention/decoder policy and five sticky service facts remain SDK-owned through retries and redirects. Export also rejects physical nonnil Body other than http.NoBody, nonzero ContentLength and nonempty TransferEncoding before underlying transport. That physical body rejection remains terminal after native retry restores the request, preserving original rejection, callback and cancellation causes without fabricated admitted proof. Changed-path/foreign-origin redirects stop before a new physical request or token transmission; no SDK workflow replay occurs.",
+          "tests": [
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRejectsNativeRetryBodyDecoderRetentionOrSourceMutationBeforeResend",
+            "blockstorage/backup_export_transport_test.go:TestExportVolumeBackupRedirectCannotChangeFixedTargetOrSendTokenToAnotherOrigin",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupSameTargetRedirectCannotAddPhysicalBodyFraming",
+            "blockstorage/backup_export_redirect_body_test.go:TestExportVolumeBackupRedirectBodyRejectionSurvivesNativeRetryRestorationAndJoinedCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-backup-export.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Only actual direct v3 BlockStorageCloudMixin.export_volume_backup is mapped. Independently parsed Proxy.export_backup/Backup.export_record, deprecated aliases, native typed Export/base64 BackupRecord, v2 dict-return path and remaining Backup actions retain independent reviews. Full SDK remains incomplete.",
+        "Python dynamic resource/dict/Munch/None and permissive urljoin falsey/container/leading-slash behavior map to a safe single literal UTF8 Go BackupID string. No NameOrID resolver, generatedID or Resource._get_id shortcut is introduced.",
+        "Source Proxy._get_resource creates or updates a connected mutable Backup with incidental constructor location/descriptor/to_dict side effects. ID-only Go export deliberately skips those effects and consumes no configured CurrentLocation; these constructor failures/caches/identity are not replicated.",
+        "v3 returns the same requests.Response without response.json. Go snapshots actual raw Body/Header/StatusCode rather than mutable Response request/history/cookies/encoding/elapsed/methods and deprecated warnings. Numeric spelling and arbitrarybinarybytes remain physical data.",
+        "The source has no options or wait policy. Go adds parent context interruption/customcause and ownedpartialproof, not empty With/Prepare builders, wait/location options, readinesspoll or SDKtimeout. Selected microversion is preserved without automatic discovery/cap or forceaction3.64.",
+        "Fixed same-origin method/route/request-policy and sticky source guards constrain redirects and native callbacks. A closed export-only physical guard also rejects Body, ContentLength and TransferEncoding mutations after redirect hooks; it does not alter old shared request code or apply rejected response-body IO observers. Existing native ordinary header hooks remain; this is not force-style per-header microversion enforcement.",
+        "Accepted Read/Close/context/source failures retain actual admitted proof and simultaneous causes. Originalnative or originalpolicy>=400 rejection has no Exported; native rejectedbodyRead/Close discardedfault scope remains, not a universal IOobserver repair.",
+        "FiniteHTTP100..399 mirrors source<400 in realHTTPdomain. Local source/probe evidence uses frozen literals and explicitly labeled AST/session/response stand-ins; authenticated Python/OpenStack execution is not claimed."
+      ],
+      "remaining": []
     }
   ]
 }
