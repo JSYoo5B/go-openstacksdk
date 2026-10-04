@@ -28414,6 +28414,195 @@
         "This mapping closes only the directly declared cloud create_volume size/wait/timeout/image/bootable/known-kwargs workflow under documented Go policies. Separate Python Cinder create/wait/set_bootable, Glance find, inherited Resource/session/cache/API-version declarations retain independent reviews. Connection selects Cinder v3 and this row does not assert full Cinder v2 Resource object semantics or whole-SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume",
+      "source_fingerprint": "d9095afbf5a6a84c3719cc67bf6a9b4413194b425df82923326a0e0d37077727",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.DeleteVolume",
+        "gophercloudsdk/blockstorage.DeleteVolume",
+        "gophercloudsdk/blockstorage.PrepareDeleteVolumeOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeOptions",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeWait",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeForce",
+        "gophercloudsdk/blockstorage.WithDeleteVolumeWaitPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteVolume maps the direct cloud name_or_id/wait/timeout/force controls using explicit Volume Ref, default enabled waiting, Forcefalse, unlimited SDK deadline and two-second polling. Explicit IDs always perform an initial fixed-ID GET200/404 before any deletion, even with Waitfalse; no other service is selected.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins"
+          ]
+        },
+        {
+          "behavior": "Direct package preparation validates caller context, safe owned Ref, required Cinder source and canonical selected microversion before original callbacks. It checks sources and context before/after each ordered callback, owns the resulting policy, rejects nil callbacks and validates inactive timeout/interval policies before lookup or mutation.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsPreflightRejectsInvalidMicroversionsSourceAndReferenceBeforeCallbacks",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsValidateInactivePolicyAndPreserveCancellationCause",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards"
+          ]
+        },
+        {
+          "behavior": "Whole and wait-subtree factories snapshot reusable nullable pointers and apply ordered complete replacement. PrepareDeleteVolumeOptions locally applies originals once and fills independent effective defaults without HTTP. The deletion policy exposes no FailureStates and does not inherit attachment error-state behavior.",
+          "tests": [
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsOwnFactoryPointersAndConcurrentReusablePolicies",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsCallbacksRunOnceAndRetainedHandlesCannotRewritePreparedState",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsValidateInactivePolicyAndPreserveCancellationCause"
+          ]
+        },
+        {
+          "behavior": "Connection validates receiver/context/Ref and locally prepares original callbacks once before cached Cinder v3 discovery. It delegates with an owned complete replacement without rerunning originals or holding its mutex around callbacks. NoWait still requires Cinder and the initial existence GET; initialization cancellation retains custom context causes.",
+          "tests": [
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeCachedCinderLiveTokenAndNoWaitStillLocates",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeOptionsPrecedeDiscoveryAndReuseSelectedForceProtocol",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumePreflightSelectsNoService",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeInitializationRetainsCancellationCause"
+          ]
+        },
+        {
+          "behavior": "Volume Name resolves once through the existing exact Cinder Collection. Only a direct logical NotFoundError with nil Cause and a clean source/context guard produces an initial false result with no mutation or invented404 evidence. Ambiguity, unsafe returned IDs, paging/decode/transport/list HTTP failures and nested missing errors remain errors.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsInitialMissingHasFalseResultAndOnlyActualGET404Proof",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNameResolutionIsExactOnceAndErrorsNeverMutate",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards",
+            "resource/resolve_test.go:TestResolveIDUsesExactNamesAndNeverFetchesExplicitIDs"
+          ]
+        },
+        {
+          "behavior": "Resolved or explicit ID binds fixed volume/action/deletion routes once. Initial GET200 requires a safe nonnull exact canonical id matching that selection; status may be absent/null and no current-state predicate blocks deletion. Located.Volume and Foundtrue are assigned only after clean identity/source processing; request names, response aliases and Location never retarget routes.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNameResolutionIsExactOnceAndErrorsNeverMutate",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsCanonicalIdentityAndAcceptedDecodeFailuresNeverRetarget",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence"
+          ]
+        },
+        {
+          "behavior": "Initial clean GET404 returns Foundfalse/Deletedfalse without mutation, retaining independent Located and Absent raw physical proof. GET404 bodies are opaque. Admitted404 read/Close/context/source handling failures retain evidence and remain terminal errors rather than logical absence.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsInitialMissingHasFalseResultAndOnlyActualGET404Proof",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportAccepted404ReadCloseContextAndSourceFailuresAreTerminal",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence"
+          ]
+        },
+        {
+          "behavior": "Selected microversion is either empty or canonical ASCII3.<minor> without leading zeros, overflow or another major. Values at least3.23 select modern behavior; empty or lower selects legacy without helper discovery, capability inference or branch fallback. Empty original Type is normalized only in the copied client to volumev3 while the original source facts remain guarded.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsFiniteMicroversionsChooseExactNormalOrForceWireContract",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsPreflightRejectsInvalidMicroversionsSourceAndReferenceBeforeCallbacks",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeOptionsPrecedeDiscoveryAndReuseSelectedForceProtocol"
+          ]
+        },
+        {
+          "behavior": "Normal deletion is a bodyless fixed DELETE admitting202/204/404 and always sends exact lowercase cascade=false. Modern selected3.23+ also sends owned force=true/false, including explicitfalse. No arbitrary query, cascade, JSON/body/header builder control or second normal-to-force mutation is exposed.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsFiniteMicroversionsChooseExactNormalOrForceWireContract",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsRejectedMutationsReturnCurrentNativeProofAndNoFallback",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportRedirectCannotChangeOwnedFiniteQueryOrActionRoute"
+          ]
+        },
+        {
+          "behavior": "Legacy Force=true sends only fixed POST /volumes/{id}/action with exact os-force_delete:null JSON, no query, and admits201/202/404. Its null body deliberately follows pinned Python while leaving native ForceDelete empty-string behavior independent.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsFiniteMicroversionsChooseExactNormalOrForceWireContract",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsRejectedMutationsReturnCurrentNativeProofAndNoFallback",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNativeAuthBackoffRetryPreservesNormalAndForceRequests",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNativeRetryCannotChangeOwnedBodyResponseOrSuccessCodes"
+          ]
+        },
+        {
+          "behavior": "A clean deletion/action404 after a clean initial200 is an ignored race. NoWait then sets Deletedtrue while preserving Foundtrue and Deletion404; waiting instead continues with an immediate fresh GET. Absent never borrows a mutation404. Read/Close/source/context failures or nested native404 causes never establish a clean race.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsFiniteMicroversionsChooseExactNormalOrForceWireContract",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsWaitHasNoFailureStatesAndFresh404OwnsAbsenceProof",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportAccepted404ReadCloseContextAndSourceFailuresAreTerminal",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence"
+          ]
+        },
+        {
+          "behavior": "Wait-only positive deadline begins after initial lookup and clean mutation acknowledgement reading/Close/guard. Nil/zero Timeout is unlimited; negative Timeout or nonpositive interval fails before HTTP even with waiting disabled. Parent context bounds all phases, while positive wait context interrupts polling HTTP and timers.",
+          "tests": [
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnlimited",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousProof",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins",
+            "blockstorage/delete_volume_options_test.go:TestDeleteVolumeOptionsValidateInactivePolicyAndPreserveCancellationCause"
+          ]
+        },
+        {
+          "behavior": "Every waiting GET is fresh, fixed-ID and admits only200/404. Clean404 completes with Deletedtrue and independent Absent proof without synthesizing Ready; clean200 requires matching canonical ID. Exact case-insensitive deleted produces independently decoded Ready. Missing/null/empty status and error/error_deleting/in-use continue with no failure-state predicate; wrong known field types or mismatched IDs fail.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsWaitHasNoFailureStatesAndFresh404OwnsAbsenceProof",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsCanonicalIdentityAndAcceptedDecodeFailuresNeverRetarget",
+            "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsCanonicalNullableTypesAndLiteralMetadataPrecision",
+            "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsKnownFieldFailuresAreAtomicAndNullEmptyRemainDistinct"
+          ]
+        },
+        {
+          "behavior": "ProgressCallback receives0 only for nonterminal200 observations, and terminal404/deleted suppresses it. Its original error, cancellation custom cause or source change prevents another poll, preserves accepted proof and exposes inspectable causes. Timer expiration retains the latest accepted observation; blocked/rejected HTTP never gains an older accepted ResponseError wrapper.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsWaitHasNoFailureStatesAndFresh404OwnsAbsenceProof",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousProof",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnlimited"
+          ]
+        },
+        {
+          "behavior": "VolumeID, Found and Deleted retain their actual phase meanings: Found marks clean initial200; Deleted maps successful no-wait mutation/race handling or completed waiting and remainsfalse on earlier handling errors. Located/Deletion/LastAccepted/Absent capture actual admitted raw response before read/Close/decode/guard errors, and Ready/raw bodies/headers/nested model fields own independent data. Later rejected/native/plain transport errors preserve their own evidence without overwriting prior LastAccepted.",
+          "tests": [
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsDefaultFreshWaitAndIndependentPhaseEvidence",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsInitialMissingHasFalseResultAndOnlyActualGET404Proof",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsNoWaitAlwaysLooksUpAndMutation404StillReturnsTrue",
+            "blockstorage/delete_volume_contracts_test.go:TestDeleteVolumeContractsCanonicalIdentityAndAcceptedDecodeFailuresNeverRetarget",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportAccepted404ReadCloseContextAndSourceFailuresAreTerminal",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousProof"
+          ]
+        },
+        {
+          "behavior": "Captured effective Cinder bases, selected type/microversion and ordinary entry headers remain fixed while original provider authentication is live. Provider/Endpoint/ResourceBase/Type/Microversion replacement is terminal. Configured native reauthentication/backoff/retry remain provider-owned while fixed-request guards reject changes to logical method/URL/query/serialized body or accepted response policy; SDK does not orchestrate replay or rollback.",
+          "tests": [
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNativeAuthBackoffRetryPreservesNormalAndForceRequests",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportNativeRetryCannotChangeOwnedBodyResponseOrSuccessCodes",
+            "blockstorage/delete_volume_transport_test.go:TestDeleteVolumeTransportRedirectCannotChangeOwnedFiniteQueryOrActionRoute"
+          ]
+        },
+        {
+          "behavior": "The direct cloud helper mapping leaves native Delete/ForceDelete/Get/List, standalone Collection removal and waiter defaults, attachment/create workflows and generated inventories independent. Connection cache/options/source/model regressions remain validated without promoting separately reviewed Python find/delete/wait or inherited Resource/session/cache/discovery declarations.",
+          "tests": [
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeCachedCinderLiveTokenAndNoWaitStillLocates",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeOptionsPrecedeDiscoveryAndReuseSelectedForceProtocol",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumePreflightSelectsNoService",
+            "connection_delete_volume_test.go:TestConnectionDeleteVolumeInitializationRetainsCancellationCause",
+            "blockstorage/create_volume_models_test.go:TestCreateVolumeModelsKnownFieldFailuresAreAtomicAndNullEmptyRemainDistinct"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/delete-volume.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go replaces ambiguous Python name_or_id strings with explicit resource.Ref. IDs use only an initial member GET; Names use exact Collection resolution and then a fresh fixed-ID confirmation GET. Python Resource.find first tries member GET and can fall back after400/403/404 to a detail list matching ID or name. The extra Go confirmation shifts initial absence after a name-list race: Go can returnfalse where Python would ignore a later mutation404 and returntrue.",
+        "Go branches on the selected Cinder Microversion, with strict canonical3.<minor> validation and3.23 as the threshold, rather than Python utils.supports_microversion endpoint/default support discovery. Connection may discover a configured latest/range before helper capture; direct helper does no discovery or fallback. Empty Type is normalized on the copied client for consistent native version headers.",
+        "Go normal DELETE always includes canonical lowercase cascade=false and selected modern force=true/false. Legacy Force sends pinned Python os-force_delete:null rather than native Gophercloud empty string. Go admits only the documented/native finite mutation status sets plus clean404, preserves opaque responses and rejects arbitrary route/query/body/session controls; existing native leaves retain independent behavior.",
+        "Both helpers default to waiting forever after deletion rather than proxy standalone120s. Go nil/numeric-zero Timeout is unlimited and negative/inactive-invalid policy is rejected before HTTP. Python iterate_timeout treats numeric-zero/negative wait as immediate post-mutation timeout before the first deletion fetch. Positive Go context deadlines interrupt HTTP/timers while Python checks elapsed time between fetches; caller context additionally controls lookup and mutation.",
+        "Go fresh200 observations require matching safe canonical IDs and strict known nullable types. Missing/null/empty status continues with no failure predicate; pinned Resource.wait_for_delete invokes resource.status.lower() when the Resource has status and may fail forNone. Python falsy fetch and mutable cached Resource behavior are represented by explicit Go404/deleted proof rather than arbitrary object truthiness or seeded hydration.",
+        "Python returns one bool or raises. Go exposes Found/Deleted plus independently owned Located/Deletion/LastAccepted/Absent/Ready evidence even after accepted processing errors. Waitfalse Deletedtrue denotes completed request handling, not an observed absence. GET404 is independent absence evidence; mutation404 is retained only as Deletion proof. Error-returning callback0, raw nullable models and local option preparation are explicit Go extensions.",
+        "Go only treats a clean direct logical Name miss or clean admitted physical404 as absence/race. Nested transport/native/list/read/Close/context/source failures remain errors with original causes. Captured client settings and fixed request ownership preserve current native authentication/retry without claiming packet-level exactly-once, arbitrary provider mutation, cleanup or rollback.",
+        "This candidate maps only the direct cloud delete_volume declaration under its documented Go policies after implementation and meaningful QA. Separately inventoried Python find_volume/delete_volume/wait_for_delete and inherited Resource/session/cache/API-version behavior keep independent reviews. Cinder v3 selection does not assert full Cinder v2 Resource semantics or whole-SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
