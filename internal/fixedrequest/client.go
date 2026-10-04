@@ -16,6 +16,12 @@ import (
 // retries and reauthentication. It owns its token locks and HTTP policy without
 // changing the shared provider. Configure source clients before concurrent use.
 func New(source *gophercloud.ServiceClient, method, target string) (*gophercloud.ServiceClient, error) {
+	return NewGuarded(source, method, target, nil)
+}
+
+// NewGuarded also checks a library-owned source snapshot before each physical
+// attempt and after waiting for authentication or running reauthentication.
+func NewGuarded(source *gophercloud.ServiceClient, method, target string, sourceGuard func(context.Context) error) (*gophercloud.ServiceClient, error) {
 	if source == nil || source.ProviderClient == nil {
 		return nil, fmt.Errorf("%w: service client is required", resource.ErrInvalidOption)
 	}
@@ -24,6 +30,11 @@ func New(source *gophercloud.ServiceClient, method, target string) (*gophercloud
 		return nil, fmt.Errorf("%w: invalid scoped request endpoint", resource.ErrInvalidOption)
 	}
 	guard := func(req *http.Request) error {
+		if sourceGuard != nil {
+			if err := sourceGuard(req.Context()); err != nil {
+				return err
+			}
+		}
 		if req.Method != method || req.URL == nil || req.URL.User != nil || req.URL.Opaque != "" || req.URL.Scheme != expected.Scheme || req.URL.Host != expected.Host || (req.Host != "" && req.Host != expected.Host) || req.URL.EscapedPath() != expected.EscapedPath() || req.URL.RawQuery != expected.RawQuery {
 			return fmt.Errorf("%w: request changes fixed scope target or method", resource.ErrInvalidOption)
 		}
@@ -56,6 +67,9 @@ func New(source *gophercloud.ServiceClient, method, target string) (*gophercloud
 		if err != nil {
 			return nil, err
 		}
+		if err := guard(req); err != nil {
+			return nil, err
+		}
 		copy := req.Clone(req.Context())
 		copy.Header.Del("X-Auth-Token")
 		if token, present := headers["X-Auth-Token"]; present {
@@ -68,8 +82,18 @@ func New(source *gophercloud.ServiceClient, method, target string) (*gophercloud
 	})
 	if parent.ReauthFunc != nil {
 		provider.ReauthFunc = func(ctx context.Context) error {
+			if sourceGuard != nil {
+				if err := sourceGuard(ctx); err != nil {
+					return err
+				}
+			}
 			if err := parent.Reauthenticate(ctx, sentToken.Load().(string)); err != nil {
 				return err
+			}
+			if sourceGuard != nil {
+				if err := sourceGuard(ctx); err != nil {
+					return err
+				}
 			}
 			provider.CopyTokenFrom(parent)
 			return nil

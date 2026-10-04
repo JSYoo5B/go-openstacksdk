@@ -38,10 +38,26 @@ func (r *Response) Fail(cause error) error {
 // read, Close and context errors retain the actual response without a resend.
 // Resource decoders enforce envelopes; empty accepted responses are valid here.
 func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
+	return DoJSONGuarded(ctx, source, nil, method, endpoint, body, headers, codes...)
+}
+
+// DoJSONGuarded keeps a library-owned source invariant sticky across native
+// callbacks, authentication and accepted read/Close failures. Its nil-guard
+// form retains DoJSON's existing behavior.
+func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
 	if err := ctx.Err(); err != nil {
+		return nil, responseContextError(ctx, err)
+	}
+	checkSource := func() error {
+		if sourceGuard != nil {
+			return sourceGuard(ctx)
+		}
+		return nil
+	}
+	if err := checkSource(); err != nil {
 		return nil, responseContextError(ctx, err)
 	}
 	if err := ValidateTarget(source, endpoint); err != nil {
@@ -63,15 +79,17 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 		expectedBody = append([]byte(nil), encoded...)
 		options.JSONBody = json.RawMessage(append([]byte(nil), encoded...))
 	}
-	client, err := fixedrequest.New(source, method, endpoint)
+	client, err := fixedrequest.NewGuarded(source, method, endpoint, sourceGuard)
 	if err != nil {
 		return nil, responseContextError(ctx, err)
 	}
 	if retry := client.ProviderClient.RetryFunc; retry != nil {
 		client.ProviderClient.RetryFunc = func(ctx context.Context, method, endpoint string, options *gophercloud.RequestOpts, original error, count uint) error {
 			callbackErr := retry(ctx, method, endpoint, options, original, count)
-			if ownershipErr := responseRequestOwnership(options, expectedBody); ownershipErr != nil {
-				return responseContextError(ctx, joinResponseErrors(original, callbackErr, ownershipErr))
+			ownershipErr := responseRequestOwnership(options, expectedBody)
+			sourceErr := checkSource()
+			if ownershipErr != nil || sourceErr != nil {
+				return responseContextError(ctx, joinResponseErrors(original, callbackErr, ownershipErr, sourceErr))
 			}
 			if callbackErr != nil || ctx.Err() != nil {
 				return responseContextError(ctx, joinResponseErrors(original, callbackErr))
@@ -83,12 +101,12 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 	if err != nil {
 		// Native errors already retain status/body/header and their original
 		// cause. Do not mask them with a successful-response decode error.
-		return nil, responseContextError(ctx, err)
+		return nil, responseContextError(ctx, joinResponseErrors(err, checkSource()))
 	}
 	result := &Response{Header: wire.Header.Clone(), StatusCode: wire.StatusCode}
 	var readErr error
 	result.Body, readErr = io.ReadAll(wire.Body)
-	bodyErr := responseContextError(ctx, joinResponseErrors(readErr, wire.Body.Close()))
+	bodyErr := responseContextError(ctx, joinResponseErrors(readErr, wire.Body.Close(), checkSource()))
 	if !slices.Contains(expectedCodes, result.StatusCode) {
 		// Native hooks can expand OkCodes. Actual response evidence still
 		// cannot establish success outside the SDK's original policy.
@@ -96,13 +114,26 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 			Method: method, URL: endpoint, Expected: append([]int(nil), expectedCodes...), Actual: result.StatusCode,
 			Body: append([]byte(nil), result.Body...), ResponseHeader: result.Header.Clone(),
 		}
-		return nil, joinResponseErrors(native, bodyErr)
+		rejection := joinResponseErrors(native, bodyErr)
+		if sourceGuard != nil {
+			// This is a completed native attempt rejected by our original
+			// policy, not a clean native error eligible for lookup fallback.
+			return nil, &statusPolicyError{cause: rejection}
+		}
+		return nil, rejection
 	}
 	if bodyErr != nil {
 		return result, result.Fail(bodyErr)
 	}
 	return result, nil
 }
+
+// statusPolicyError preserves native status evidence through errors.As while
+// distinguishing original-policy rejection from a direct native HTTP error.
+type statusPolicyError struct{ cause error }
+
+func (e *statusPolicyError) Error() string { return e.cause.Error() }
+func (e *statusPolicyError) Unwrap() error { return e.cause }
 
 // responseRequestOwnership checks serialized bytes, not interface identity.
 // A nil expected body means no request body; an explicit JSON null has bytes.
