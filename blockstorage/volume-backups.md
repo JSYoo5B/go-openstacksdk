@@ -301,6 +301,14 @@ member response의 body/header/status이고 logical 완료를 보장하지 않�
 목록으로 fallback하면 그 member를 list의 `Observed`로 남기지 않습니다. physical read·Close·cancel·
 descriptor·pagination/source 실패에도 이미 admitted된 proof를 유지합니다. mapping/expression/local filter·
 선택 오류는 local 오류이며 이전 응답을 새로운 HTTP 실패로 빌리지 않습니다.
+
+Gophercloud는 native unexpected-status 응답에서 body `Read`·`Close` 오류를 버립니다.
+SDK는 ordinary Cinder member의 400·403·404를 따로 관찰해, IO 실패가 있으면 목록
+fallback을 금지하고 native status 오류와 IO cause를 함께 반환합니다. native에서 거부된
+이 응답을 admitted `Observed`·`Pages`로 만들지 않습니다. 같은 member 보호는 Snapshot
+일반 조회에도 적용됩니다. 목록의 native 거부와 다른 거부 status의 body IO는 기존
+Gophercloud 오류 정책을 따릅니다. admitted 응답의 `Read`·`Close`·cancel 보호와는 별도 범위입니다.
+
 일반 빈 List·Search는 `Value: []`와 nonnil 빈 `Backups`, expression 결과는 성공한 `[]`여도
 raw association이 없어서 `Backups: nil`입니다. 목록 실패는 `Value`·`Backups`가 nil이며 부분 logical rows를
 발표하지 않습니다. normal Get absence는 오류 없이 `Value`·`Backup`가 nil입니다.
