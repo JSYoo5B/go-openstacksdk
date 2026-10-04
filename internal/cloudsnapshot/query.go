@@ -29,6 +29,10 @@ type listPolicy struct {
 // Explicit Go Resource controls override the final raw/injected controls;
 // already-bound Proxy controls cannot erase later argument collisions.
 func compileList(options ListOptions) (*listPolicy, error) {
+	return compileListFor(options, snapshotReadSchema())
+}
+
+func compileListFor(options ListOptions, schema readSchema) (*listPolicy, error) {
 	options = cloneList(options)
 	policy := &listPolicy{detailed: true, paginated: true, query: make(map[string]json.RawMessage), headers: map[string]string{"Accept": "application/json"}}
 	attrs, err := snapshotQueryMembers(options.Filters)
@@ -44,14 +48,16 @@ func compileList(options ListOptions) (*listPolicy, error) {
 	if options.Detailed != nil {
 		policy.detailed = *options.Detailed
 	}
-	allProjects, exists := snapshotQueryTake(&attrs, "all_projects")
-	if exists {
-		truthy, err := cloudfilter.PythonTruthy(allProjects)
-		if err != nil {
-			return nil, snapshotQueryCause("all_projects", err)
-		}
-		if truthy {
-			snapshotQuerySet(&attrs, "all_projects", json.RawMessage("true"))
+	if schema.bindAllProjects {
+		allProjects, exists := snapshotQueryTake(&attrs, "all_projects")
+		if exists {
+			truthy, err := cloudfilter.PythonTruthy(allProjects)
+			if err != nil {
+				return nil, snapshotQueryCause("all_projects", err)
+			}
+			if truthy {
+				snapshotQuerySet(&attrs, "all_projects", json.RawMessage("true"))
+			}
 		}
 	}
 	paginated, exists := snapshotQueryTake(&attrs, "paginated")
@@ -172,8 +178,8 @@ func compileList(options ListOptions) (*listPolicy, error) {
 		if queryKeys[member.Key] {
 			continue
 		}
-		for _, field := range descriptors {
-			if member.Key == field.attribute {
+		for _, attribute := range schema.bodyAttributes {
+			if member.Key == attribute {
 				policy.local = append(policy.local, cloudfilter.JSONMember{Key: member.Key, Value: bytes.Clone(member.Value)})
 				break
 			}
@@ -389,8 +395,8 @@ func snapshotMaximumDecimal(text string) (string, *big.Int) {
 	return digits, exponent
 }
 func snapshotQueryError(format string, args ...any) error {
-	return fmt.Errorf("%w: snapshot list: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
+	return fmt.Errorf("%w: Cinder resource list: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
 func snapshotQueryCause(control string, cause error) error {
-	return fmt.Errorf("%w: snapshot list %s: %w", resource.ErrInvalidOption, control, cause)
+	return fmt.Errorf("%w: Cinder resource list %s: %w", resource.ErrInvalidOption, control, cause)
 }

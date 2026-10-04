@@ -42,7 +42,7 @@ func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter
 	}
 	actual, err := cloudfilter.ObjectMembers(ownedView)
 	if err != nil {
-		return false, fmt.Errorf("snapshot local-filter view: %w", err)
+		return false, fmt.Errorf("Cinder resource local-filter view: %w", err)
 	}
 	values := make(map[string]json.RawMessage, len(actual))
 	for _, member := range actual {
@@ -58,7 +58,7 @@ func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter
 		}
 		matched, err := snapshotLocalValue(value, filter.Value, check)
 		if err != nil {
-			return false, fmt.Errorf("snapshot local filter %q: %w", filter.Key, err)
+			return false, fmt.Errorf("Cinder resource local filter %q: %w", filter.Key, err)
 		}
 		if err := check(); err != nil {
 			return false, err

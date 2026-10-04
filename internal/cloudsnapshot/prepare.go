@@ -17,17 +17,22 @@ import (
 )
 
 type reader struct {
+	schema        readSchema
 	source        *cloudread.Source
 	location      resource.CloudLocation
 	memberFailure error
 }
 
 func capture(ctx context.Context, client *gophercloud.ServiceClient) (*reader, error) {
+	return captureWithSchema(ctx, client, snapshotReadSchema())
+}
+
+func captureWithSchema(ctx context.Context, client *gophercloud.ServiceClient, schema readSchema) (*reader, error) {
 	source, err := cloudread.Capture(ctx, client, "volume")
 	if err != nil {
 		return nil, err
 	}
-	return &reader{source: source}, nil
+	return &reader{source: source, schema: schema}, nil
 }
 
 // Own the recorded authentication scope after original options, before HTTP.
@@ -49,14 +54,14 @@ func (p *reader) ownLocation(ctx context.Context, supplied *resource.CloudLocati
 }
 
 // ValidateLocation is shared with Connection's service-free preparation.
-// Snapshot has no availability-zone descriptor, so supplied Zone is ignored.
+// The resource descriptor supplies Zone; the configured Zone is not used.
 func ValidateLocation(location *resource.CloudLocation) error {
 	if location == nil {
-		return invalid("snapshot location is required")
+		return invalid("Cinder resource location is required")
 	}
 	for _, text := range []*string{location.Cloud, location.RegionName, location.Project.Name, location.Project.DomainID, location.Project.DomainName} {
 		if text != nil && !utf8.ValidString(*text) {
-			return invalid("snapshot location text must be UTF-8")
+			return invalid("Cinder resource location text must be UTF-8")
 		}
 	}
 	_, err := location.ForResource(nil, nil)

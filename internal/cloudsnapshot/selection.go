@@ -15,7 +15,11 @@ import (
 )
 
 func prepareSearch(ctx context.Context, client *gophercloud.ServiceClient, options []SearchOption) (*reader, SearchOptions, error) {
-	p, err := capture(ctx, client)
+	return prepareSearchFor(ctx, client, snapshotReadSchema(), options)
+}
+
+func prepareSearchFor(ctx context.Context, client *gophercloud.ServiceClient, schema readSchema, options []SearchOption) (*reader, SearchOptions, error) {
+	p, err := captureWithSchema(ctx, client, schema)
 	if err != nil {
 		return nil, SearchOptions{}, err
 	}
@@ -27,18 +31,22 @@ func prepareSearch(ctx context.Context, client *gophercloud.ServiceClient, optio
 }
 
 func Search(ctx context.Context, client *gophercloud.ServiceClient, nameOrID string, options ...SearchOption) (*SearchResult, error) {
-	p, policy, err := prepareSearch(ctx, client, options)
+	return searchResource(ctx, client, snapshotReadSchema(), nameOrID, options...)
+}
+
+func searchResource(ctx context.Context, client *gophercloud.ServiceClient, schema readSchema, nameOrID string, options ...SearchOption) (*SearchResult, error) {
+	p, policy, err := prepareSearchFor(ctx, client, schema, options)
 	if err != nil {
-		return nil, wrap(ctx, "SearchVolumeSnapshots", err)
+		return nil, wrapRead(ctx, schema, schema.searchOperation, err)
 	}
 	result, err := p.search(ctx, nameOrID, policy.Filters)
-	return result, wrap(ctx, "SearchVolumeSnapshots", err)
+	return result, wrapRead(ctx, schema, schema.searchOperation, err)
 }
 
 func (p *reader) search(ctx context.Context, nameOrID string, filters *json.RawMessage) (*SearchResult, error) {
 	result := &SearchResult{}
 	proof := &ListResult{}
-	policy, err := compileList(ListOptions{})
+	policy, err := compileListFor(ListOptions{}, p.schema)
 	if err != nil {
 		return result, err
 	}
@@ -54,7 +62,7 @@ func (p *reader) search(ctx context.Context, nameOrID string, filters *json.RawM
 	}
 	selected, err := cloudfilter.Select(rows, nameOrID, filters, func() error { return p.source.Guard(ctx) })
 	if err != nil {
-		return result, fmt.Errorf("%w: snapshot search: %w", resource.ErrInvalidOption, err)
+		return result, fmt.Errorf("%w: Cinder resource search: %w", resource.ErrInvalidOption, err)
 	}
 	result.Value = bytes.Clone(selected.Value)
 	if !selected.Expression {
@@ -78,29 +86,37 @@ func (e *SelectionError) Error() string {
 func (e *SelectionError) Unwrap() error { return resource.ErrAmbiguous }
 
 func Get(ctx context.Context, client *gophercloud.ServiceClient, nameOrID string, options ...SearchOption) (*Result, error) {
-	p, policy, err := prepareSearch(ctx, client, options)
+	return getResource(ctx, client, snapshotReadSchema(), nameOrID, options...)
+}
+
+func getResource(ctx context.Context, client *gophercloud.ServiceClient, schema readSchema, nameOrID string, options ...SearchOption) (*Result, error) {
+	p, policy, err := prepareSearchFor(ctx, client, schema, options)
 	if err != nil {
-		return nil, wrap(ctx, "GetVolumeSnapshot", err)
+		return nil, wrapRead(ctx, schema, schema.getOperation, err)
 	}
 	result := &Result{}
 	if policy.Filters != nil && !bytes.Equal(bytes.TrimSpace(*policy.Filters), []byte("null")) {
 		search, err := p.search(ctx, nameOrID, policy.Filters)
 		result.Pages = search.Pages
 		if err != nil {
-			return result, wrap(ctx, "GetVolumeSnapshot", err)
+			return result, wrapRead(ctx, schema, schema.getOperation, err)
 		}
 		selected, err := cloudfilter.First(search.Value)
 		if err != nil {
 			var multiple *cloudfilter.MultipleError
 			if errors.As(err, &multiple) {
-				err = &SelectionError{NameOrID: nameOrID, Length: multiple.Length}
+				if schema.singular == "backup" {
+					err = &BackupSelectionError{NameOrID: nameOrID, Length: multiple.Length}
+				} else {
+					err = &SelectionError{NameOrID: nameOrID, Length: multiple.Length}
+				}
 			} else {
-				err = fmt.Errorf("%w: snapshot selection: %w", resource.ErrInvalidOption, err)
+				err = fmt.Errorf("%w: Cinder resource selection: %w", resource.ErrInvalidOption, err)
 			}
-			return result, wrap(ctx, "GetVolumeSnapshot", err)
+			return result, wrapRead(ctx, schema, schema.getOperation, err)
 		}
 		if err := p.source.Guard(ctx); err != nil {
-			return result, wrap(ctx, "GetVolumeSnapshot", err)
+			return result, wrapRead(ctx, schema, schema.getOperation, err)
 		}
 		result.Value = bytes.Clone(selected)
 		if selected != nil && len(search.Snapshots) == 1 {
@@ -113,10 +129,10 @@ func Get(ctx context.Context, client *gophercloud.ServiceClient, nameOrID string
 		if ctx.Err() != nil && p.memberFailure != nil {
 			err = errors.Join(p.memberFailure, err)
 		}
-		return result, wrap(ctx, "GetVolumeSnapshot", err)
+		return result, wrapRead(ctx, schema, schema.getOperation, err)
 	}
 	if err := p.source.Guard(ctx); err != nil {
-		return result, wrap(ctx, "GetVolumeSnapshot", err)
+		return result, wrapRead(ctx, schema, schema.getOperation, err)
 	}
 	if value != nil {
 		result.Value, result.Snapshot = bytes.Clone(value.view), value.resource
@@ -145,7 +161,7 @@ func (p *reader) collection(result *Result) *resource.Collection[entry] {
 		return func(yield func(*entry, error) bool) {
 			// A suppressed native member error is not the list's observation.
 			p.memberFailure, result.Observed = nil, nil
-			policy, err := compileList(ListOptions{Detailed: &details})
+			policy, err := compileListFor(ListOptions{Detailed: &details}, p.schema)
 			if err != nil {
 				yield(nil, err)
 				return
@@ -162,7 +178,7 @@ func (p *reader) collection(result *Result) *resource.Collection[entry] {
 			}
 		}
 	}
-	return resource.NewCollection(resource.Adapter[entry]{Kind: "volume snapshot", IdentityFind: true, Get: get, IterateIdentity: iterate,
+	return resource.NewCollection(resource.Adapter[entry]{Kind: p.schema.kind, IdentityFind: true, Get: get, IterateIdentity: iterate,
 		ID: func(value *entry) string { return value.id }, IdentityResponseID: func(value *entry) (string, error) { return value.id, nil },
 		Name: func(value *entry) string { return value.name }, NameQuery: func(name string) string { return name },
 	})

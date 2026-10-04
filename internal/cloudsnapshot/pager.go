@@ -19,9 +19,13 @@ import (
 // snapshotNext follows source body precedence. The caller owns the canonical
 // empty-list EOF check, physical response failure and continuation/cycle guards.
 func snapshotNext(fields map[string]json.RawMessage, headers http.Header) (json.RawMessage, error) {
+	return resourceNext(fields, headers, "snapshots")
+}
+
+func resourceNext(fields map[string]json.RawMessage, headers http.Header, plural string) (json.RawMessage, error) {
 	links, present := fields["links"]
 	if !present {
-		links, present = fields["snapshots_links"]
+		links, present = fields[plural+"_links"]
 	}
 	if present {
 		next, err := snapshotSourceLinks(links)
@@ -54,11 +58,11 @@ func snapshotNext(fields map[string]json.RawMessage, headers http.Header) (json.
 			continue
 		}
 		if !utf8.ValidString(header) {
-			return nil, snapshotPagerInvalid("snapshot Link header must be UTF-8")
+			return nil, snapshotPagerInvalid("Cinder resource Link header must be UTF-8")
 		}
 		for _, character := range header {
 			if unicode.IsControl(character) && character != '\t' {
-				return nil, snapshotPagerInvalid("snapshot Link header contains controls")
+				return nil, snapshotPagerInvalid("Cinder resource Link header contains controls")
 			}
 		}
 		links, err := rest.HeaderNextLinks(header)
@@ -79,7 +83,7 @@ func snapshotNext(fields map[string]json.RawMessage, headers http.Header) (json.
 func snapshotSourceLinks(raw json.RawMessage) (json.RawMessage, error) {
 	value := bytes.TrimSpace(raw)
 	if !utf8.Valid(raw) || !json.Valid(value) {
-		return nil, snapshotPagerInvalid("snapshot links must be complete UTF-8 JSON")
+		return nil, snapshotPagerInvalid("Cinder resource links must be complete UTF-8 JSON")
 	}
 	switch value[0] {
 	case '{':
@@ -94,7 +98,7 @@ func snapshotSourceLinks(raw json.RawMessage) (json.RawMessage, error) {
 		if text == "" {
 			return nil, nil
 		}
-		return nil, snapshotPagerInvalid("snapshot links contains a nonobject row")
+		return nil, snapshotPagerInvalid("Cinder resource links contains a nonobject row")
 	case '[':
 		var rows []json.RawMessage
 		if err := json.Unmarshal(value, &rows); err != nil {
@@ -103,10 +107,10 @@ func snapshotSourceLinks(raw json.RawMessage) (json.RawMessage, error) {
 		for _, rawRow := range rows {
 			var row map[string]json.RawMessage
 			if err := json.Unmarshal(rawRow, &row); err != nil {
-				return nil, fmt.Errorf("snapshot pagination link row: %w", err)
+				return nil, fmt.Errorf("Cinder resource pagination link row: %w", err)
 			}
 			if row == nil {
-				return nil, snapshotPagerInvalid("snapshot pagination link row must be an object")
+				return nil, snapshotPagerInvalid("Cinder resource pagination link row must be an object")
 			}
 			var rel string
 			if err := json.Unmarshal(row["rel"], &rel); err != nil || rel != "next" {
@@ -120,7 +124,7 @@ func snapshotSourceLinks(raw json.RawMessage) (json.RawMessage, error) {
 		}
 		return nil, nil
 	default:
-		return nil, snapshotPagerInvalid("snapshot links must be iterable rows")
+		return nil, snapshotPagerInvalid("Cinder resource links must be iterable rows")
 	}
 }
 
@@ -150,7 +154,7 @@ func snapshotContinuation(current string, next json.RawMessage, collection strin
 	if truthy {
 		var href string
 		if err := json.Unmarshal(next, &href); err != nil {
-			return "", nil, false, snapshotPagerInvalid("a truthy snapshot next link must be a string")
+			return "", nil, false, snapshotPagerInvalid("a truthy Cinder resource next link must be a string")
 		}
 		reference, err := snapshotPagerURL(href, false)
 		if err != nil {
@@ -158,16 +162,16 @@ func snapshotContinuation(current string, next json.RawMessage, collection strin
 		}
 		advertised, err := url.ParseQuery(reference.RawQuery)
 		if err != nil {
-			return "", nil, false, snapshotPagerInvalid("snapshot advertised query: %v", err)
+			return "", nil, false, snapshotPagerInvalid("Cinder resource advertised query: %v", err)
 		}
 		for key, values := range advertised {
 			if !utf8.ValidString(key) {
-				return "", nil, false, snapshotPagerInvalid("snapshot advertised query key must be UTF-8")
+				return "", nil, false, snapshotPagerInvalid("Cinder resource advertised query key must be UTF-8")
 			}
 			var retained []string
 			for _, value := range values {
 				if !utf8.ValidString(value) {
-					return "", nil, false, snapshotPagerInvalid("snapshot advertised query value must be UTF-8")
+					return "", nil, false, snapshotPagerInvalid("Cinder resource advertised query value must be UTF-8")
 				}
 				if value != "" {
 					retained = append(retained, value)
@@ -235,22 +239,22 @@ func snapshotPageKey(rawURL, collection string) (string, error) {
 		return "", err
 	}
 	if base.RawQuery != "" || base.ForceQuery {
-		return "", snapshotPagerInvalid("snapshot collection URL must not have a query")
+		return "", snapshotPagerInvalid("Cinder resource collection URL must not have a query")
 	}
 	if !strings.EqualFold(target.Scheme, base.Scheme) || !strings.EqualFold(target.Host, base.Host) || target.EscapedPath() != base.EscapedPath() {
-		return "", snapshotPagerInvalid("snapshot pagination changes collection origin or escaped path")
+		return "", snapshotPagerInvalid("Cinder resource pagination changes collection origin or escaped path")
 	}
 	query, err := url.ParseQuery(target.RawQuery)
 	if err != nil {
-		return "", snapshotPagerInvalid("snapshot pagination query: %v", err)
+		return "", snapshotPagerInvalid("Cinder resource pagination query: %v", err)
 	}
 	for key, values := range query {
 		if !utf8.ValidString(key) {
-			return "", snapshotPagerInvalid("snapshot pagination query key must be UTF-8")
+			return "", snapshotPagerInvalid("Cinder resource pagination query key must be UTF-8")
 		}
 		for _, value := range values {
 			if !utf8.ValidString(value) {
-				return "", snapshotPagerInvalid("snapshot pagination query value must be UTF-8")
+				return "", snapshotPagerInvalid("Cinder resource pagination query value must be UTF-8")
 			}
 		}
 	}
@@ -259,34 +263,34 @@ func snapshotPageKey(rawURL, collection string) (string, error) {
 
 func snapshotPagerURL(raw string, absolute bool) (*url.URL, error) {
 	if !utf8.ValidString(raw) || strings.Contains(raw, "#") {
-		return nil, snapshotPagerInvalid("snapshot pagination URL must be UTF-8 without a fragment")
+		return nil, snapshotPagerInvalid("Cinder resource pagination URL must be UTF-8 without a fragment")
 	}
 	for _, character := range raw {
 		if unicode.IsControl(character) {
-			return nil, snapshotPagerInvalid("snapshot pagination URL contains controls")
+			return nil, snapshotPagerInvalid("Cinder resource pagination URL contains controls")
 		}
 	}
 	parsed, err := url.Parse(raw)
 	if err != nil {
-		return nil, snapshotPagerInvalid("snapshot pagination URL: %v", err)
+		return nil, snapshotPagerInvalid("Cinder resource pagination URL: %v", err)
 	}
 	if parsed.User != nil || parsed.Opaque != "" || parsed.Fragment != "" {
-		return nil, snapshotPagerInvalid("snapshot pagination URL changes authority or form")
+		return nil, snapshotPagerInvalid("Cinder resource pagination URL changes authority or form")
 	}
 	if absolute && (parsed.Host == "" || parsed.Hostname() == "" || (parsed.Scheme != "http" && parsed.Scheme != "https")) {
-		return nil, snapshotPagerInvalid("snapshot pagination URL must be absolute HTTP(S)")
+		return nil, snapshotPagerInvalid("Cinder resource pagination URL must be absolute HTTP(S)")
 	}
 	if !utf8.ValidString(parsed.Path) || strings.Contains(parsed.Path, "\\") {
-		return nil, snapshotPagerInvalid("snapshot pagination path must be UTF-8 without backslashes")
+		return nil, snapshotPagerInvalid("Cinder resource pagination path must be UTF-8 without backslashes")
 	}
 	for _, character := range parsed.Path {
 		if unicode.IsControl(character) {
-			return nil, snapshotPagerInvalid("snapshot pagination path contains controls")
+			return nil, snapshotPagerInvalid("Cinder resource pagination path contains controls")
 		}
 	}
 	for _, segment := range strings.Split(parsed.Path, "/") {
 		if segment == "." || segment == ".." {
-			return nil, snapshotPagerInvalid("snapshot pagination path traverses dot segments")
+			return nil, snapshotPagerInvalid("Cinder resource pagination path traverses dot segments")
 		}
 	}
 	return parsed, nil

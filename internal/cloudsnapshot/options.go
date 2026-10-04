@@ -131,7 +131,7 @@ func prepare[T any](ctx context.Context, options []Option[T], clone func(T) T, g
 		}
 		if option == nil {
 			var zero T
-			return zero, fmt.Errorf("%w: nil snapshot option", resource.ErrInvalidOption)
+			return zero, fmt.Errorf("%w: nil Cinder resource option", resource.ErrInvalidOption)
 		}
 		next := clone(value)
 		err := option(&next)

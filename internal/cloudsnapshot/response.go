@@ -30,8 +30,12 @@ func sourceCodes() []int {
 // Resource.fetch tolerates a JSON ValueError only. A valid non-object and an
 // invalid UTF-8 response cannot be promoted to an empty successful resource.
 func memberObject(response *rest.Response) (json.RawMessage, error) {
+	return memberObjectFor(response, snapshotReadSchema())
+}
+
+func memberObjectFor(response *rest.Response, schema readSchema) (json.RawMessage, error) {
 	if !utf8.Valid(response.Body) {
-		return nil, response.Fail(fmt.Errorf("snapshot response must be UTF-8 JSON"))
+		return nil, response.Fail(fmt.Errorf("Cinder resource response must be UTF-8 JSON"))
 	}
 	if !json.Valid(response.Body) {
 		return json.RawMessage("{}"), nil
@@ -41,9 +45,9 @@ func memberObject(response *rest.Response) (json.RawMessage, error) {
 		return nil, response.Fail(err)
 	}
 	if fields == nil {
-		return nil, response.Fail(fmt.Errorf("snapshot response must be a nonnull JSON object"))
+		return nil, response.Fail(fmt.Errorf("Cinder resource response must be a nonnull JSON object"))
 	}
-	raw, present := fields["snapshot"]
+	raw, present := fields[schema.singular]
 	if !present {
 		raw = response.Body
 	}
@@ -52,22 +56,26 @@ func memberObject(response *rest.Response) (json.RawMessage, error) {
 		return nil, response.Fail(err)
 	}
 	if object == nil {
-		return nil, response.Fail(fmt.Errorf("snapshot member must be a nonnull JSON object"))
+		return nil, response.Fail(fmt.Errorf("Cinder resource member must be a nonnull JSON object"))
 	}
 	return bytes.Clone(raw), nil
 }
 
 func listObjects(response *rest.Response) (map[string]json.RawMessage, []json.RawMessage, error) {
+	return listObjectsFor(response, snapshotReadSchema())
+}
+
+func listObjectsFor(response *rest.Response, schema readSchema) (map[string]json.RawMessage, []json.RawMessage, error) {
 	if !utf8.Valid(response.Body) {
-		return nil, nil, response.Fail(fmt.Errorf("snapshot list response must be UTF-8 JSON"))
+		return nil, nil, response.Fail(fmt.Errorf("Cinder resource list response must be UTF-8 JSON"))
 	}
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(response.Body, &fields); err != nil {
 		return nil, nil, response.Fail(err)
 	}
-	raw, present := fields["snapshots"]
+	raw, present := fields[schema.plural]
 	if !present {
-		return nil, nil, response.Fail(fmt.Errorf("snapshot list response must contain snapshots"))
+		return nil, nil, response.Fail(fmt.Errorf("Cinder resource list response must contain %s", schema.plural))
 	}
 	trimmed := bytes.TrimSpace(raw)
 	if len(trimmed) != 0 && trimmed[0] == '[' {
@@ -82,7 +90,7 @@ func listObjects(response *rest.Response) (map[string]json.RawMessage, []json.Ra
 }
 
 func (p *reader) materialize(ctx context.Context, raw json.RawMessage, seed *string, list bool, wire *rest.Response) (*entry, error) {
-	view, seeded, err := normalize(raw, seed, list, p.location)
+	view, seeded, err := p.schema.normalize(raw, seed, list, p.location)
 	if err != nil {
 		var own *locationError
 		if errors.As(err, &own) {

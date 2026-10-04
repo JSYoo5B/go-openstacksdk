@@ -13,7 +13,7 @@ func (p *reader) member(ctx context.Context, id string, result *Result) (value *
 	if err := p.source.Guard(ctx); err != nil {
 		return nil, err
 	}
-	target, err := p.target("snapshots", url.PathEscape(id))
+	target, err := p.target(p.schema.route, url.PathEscape(id))
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (p *reader) member(ctx context.Context, id string, result *Result) (value *
 	if err != nil {
 		return nil, err
 	}
-	raw, err := memberObject(wire)
+	raw, err := memberObjectFor(wire, p.schema)
 	if err != nil {
 		return nil, err
 	}

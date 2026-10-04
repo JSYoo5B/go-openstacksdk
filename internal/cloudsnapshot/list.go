@@ -15,26 +15,30 @@ import (
 // List owns source/query policy before making the first request. Logical rows
 // are published together only after successful exhaustion and projection.
 func List(ctx context.Context, client *gophercloud.ServiceClient, options ...ListOption) (*ListResult, error) {
-	p, err := capture(ctx, client)
+	return listResource(ctx, client, snapshotReadSchema(), options...)
+}
+
+func listResource(ctx context.Context, client *gophercloud.ServiceClient, schema readSchema, options ...ListOption) (*ListResult, error) {
+	p, err := captureWithSchema(ctx, client, schema)
 	if err != nil {
-		return nil, wrap(ctx, "ListVolumeSnapshots", err)
+		return nil, wrapRead(ctx, schema, schema.listOperation, err)
 	}
 	owned, err := prepare(ctx, options, cloneList, func() error { return p.source.Guard(ctx) })
 	var policy *listPolicy
 	if err == nil {
-		policy, err = compileList(owned)
+		policy, err = compileListFor(owned, schema)
 	}
 	if err == nil {
 		err = p.ownLocation(ctx, owned.Location)
 	}
 	if err != nil {
-		return nil, wrap(ctx, "ListVolumeSnapshots", err)
+		return nil, wrapRead(ctx, schema, schema.listOperation, err)
 	}
 	result := &ListResult{}
 	var values []*entry
 	err = p.readList(ctx, policy, result, func(value *entry) (bool, error) { values = append(values, value); return true, nil })
 	if err != nil {
-		return result, wrap(ctx, "ListVolumeSnapshots", err)
+		return result, wrapRead(ctx, schema, schema.listOperation, err)
 	}
 	rows := make([]json.RawMessage, len(values))
 	for i, value := range values {
@@ -42,7 +46,7 @@ func List(ctx context.Context, client *gophercloud.ServiceClient, options ...Lis
 	}
 	selected, err := p.projectList(ctx, rows, policy.expression)
 	if err != nil {
-		return result, wrap(ctx, "ListVolumeSnapshots", fmt.Errorf("%w: list expression: %w", resource.ErrInvalidOption, err))
+		return result, wrapRead(ctx, schema, schema.listOperation, fmt.Errorf("%w: list expression: %w", resource.ErrInvalidOption, err))
 	}
 	result.Value = bytes.Clone(selected.Value)
 	if !selected.Expression {
@@ -71,7 +75,7 @@ func (p *reader) readList(ctx context.Context, policy *listPolicy, proof *ListRe
 	if err := p.source.WithPolicy(ctx, policy.microversion, headers); err != nil {
 		return err
 	}
-	parts := []string{"snapshots"}
+	parts := []string{p.schema.route}
 	if policy.detailed {
 		parts = append(parts, "detail")
 	}
@@ -109,7 +113,7 @@ func (p *reader) readList(ctx context.Context, policy *listPolicy, proof *ListRe
 		if err != nil {
 			return err
 		}
-		fields, rows, err := listObjects(wire)
+		fields, rows, err := listObjectsFor(wire, p.schema)
 		if err != nil {
 			return err
 		}
@@ -138,7 +142,7 @@ func (p *reader) readList(ctx context.Context, policy *listPolicy, proof *ListRe
 			lastID = bytes.Clone(normalized["id"])
 			matched, err := matchLocal(ctx, value.view, policy.local, func() error { return p.source.Guard(ctx) })
 			if err != nil {
-				return fmt.Errorf("%w: local snapshot filter: %w", resource.ErrInvalidOption, err)
+				return fmt.Errorf("%w: local Cinder resource filter: %w", resource.ErrInvalidOption, err)
 			}
 			if matched {
 				more, err := yield(value)
@@ -154,7 +158,7 @@ func (p *reader) readList(ctx context.Context, policy *listPolicy, proof *ListRe
 		if len(rows) == 0 || !policy.paginated {
 			return p.source.Guard(ctx)
 		}
-		next, err := snapshotNext(fields, wire.Header)
+		next, err := resourceNext(fields, wire.Header, p.schema.plural)
 		if err != nil {
 			return wire.Fail(err)
 		}
