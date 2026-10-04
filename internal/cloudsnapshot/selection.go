@@ -128,7 +128,19 @@ func Get(ctx context.Context, client *gophercloud.ServiceClient, nameOrID string
 }
 
 func (p *reader) collection(result *Result) *resource.Collection[entry] {
-	get := func(ctx context.Context, id string) (*entry, error) { return p.member(ctx, id, result) }
+	get := func(ctx context.Context, id string) (*entry, error) {
+		value, err := p.member(ctx, id, result)
+		if err != nil {
+			// Only the original direct native rejection can enable fallback.
+			// Expanded OkCodes and callback/transport wrappers retain native
+			// evidence through Unwrap but cannot establish compatible absence.
+			_, clean := err.(gophercloud.ErrUnexpectedResponseCode)
+			if !clean && (gophercloud.ResponseCodeIs(err, 400) || gophercloud.ResponseCodeIs(err, 403) || gophercloud.ResponseCodeIs(err, 404)) {
+				return value, &terminalMemberError{cause: err}
+			}
+		}
+		return value, err
+	}
 	iterate := func(ctx context.Context, query url.Values, details bool) iter.Seq2[*entry, error] {
 		return func(yield func(*entry, error) bool) {
 			// A suppressed native member error is not the list's observation.
@@ -155,3 +167,9 @@ func (p *reader) collection(result *Result) *resource.Collection[entry] {
 		Name: func(value *entry) string { return value.name }, NameQuery: func(name string) string { return name },
 	})
 }
+
+type terminalMemberError struct{ cause error }
+
+func (e *terminalMemberError) Error() string        { return e.cause.Error() }
+func (e *terminalMemberError) Unwrap() error        { return e.cause }
+func (e *terminalMemberError) Is(target error) bool { return target == resource.ErrInvalidOption }
