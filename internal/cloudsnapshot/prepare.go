@@ -84,16 +84,18 @@ func wrap(ctx context.Context, operation string, err error) error {
 
 // ValidateID deliberately admits only one unescaped UTF-8 member segment.
 // Automatic name lookup uses the shared safe-route/list-only decision instead.
-func ValidateID(id string) error {
+func ValidateID(id string) error { return validateIDFor(id, "snapshot") }
+
+func validateIDFor(id, kind string) error {
 	if err := resource.ID(id).Validate(); err != nil {
 		return err
 	}
 	if !utf8.ValidString(id) {
-		return invalid("snapshot ID must be UTF-8")
+		return invalid("%s ID must be UTF-8", kind)
 	}
 	for _, char := range id {
 		if unicode.IsControl(char) || unicode.IsSpace(char) {
-			return invalid("snapshot ID must not contain whitespace or controls")
+			return invalid("%s ID must not contain whitespace or controls", kind)
 		}
 	}
 	return nil

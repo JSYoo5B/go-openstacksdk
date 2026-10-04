@@ -20,16 +20,20 @@ func (p *reader) mutationExchange(ctx context.Context, method, target string, bo
 // The physical object is returned even if subsequent descriptor conversion
 // fails. A merged logical state never changes that object's actual fields.
 func (p *reader) mergeMutation(ctx context.Context, state *mutationState, wire *rest.Response) (json.RawMessage, *resource.RawResource, error) {
-	raw, actual, err := mutationObject(wire)
+	return p.mergeMutationFields(ctx, state[:], descriptors[:], wire)
+}
+
+func (p *reader) mergeMutationFields(ctx context.Context, values []json.RawMessage, fields []descriptor, wire *rest.Response) (json.RawMessage, *resource.RawResource, error) {
+	raw, actual, err := mutationObjectFor(wire, p.schema.singular)
 	if err != nil {
 		return nil, actual, err
 	}
 	if raw != nil {
-		if err := state.overlay(raw); err != nil {
+		if err := overlayMutationFields(values, fields, raw); err != nil {
 			return nil, actual, wire.Fail(err)
 		}
 	}
-	view, err := state.view(p.location)
+	view, _, err := p.schema.normalize(mutationFieldsObject(values, fields), nil, false, p.location)
 	if err != nil {
 		var own *locationError
 		if errors.As(err, &own) {
