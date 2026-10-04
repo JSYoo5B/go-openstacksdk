@@ -27930,6 +27930,135 @@
         "Native GET URL, JSON decoding, HTTP200 policy, original shared ServiceClient/ProviderClient/auth/source headers/retries/redirects remain unchanged. Public native result aliases still expose the pinned native Extract; other instance operations and result families retain their contracts. The actual Python Instance.is_root_enabled Resource method casts a dictionary field without runtime bool coercion and has different missing/nonbool behavior; no synthetic Proxy operation or full inherited Resource/session/cache parity is claimed."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/attach_volume",
+      "source_fingerprint": "aaebba1ca6f514e94c1b749d96741c3878d730d5da09ad3695afe92e7d25c2f3",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk.Connection.AttachVolume",
+        "gophercloudsdk/blockstorage.AttachVolume",
+        "gophercloudsdk/blockstorage.WithAttachVolumeOptions",
+        "gophercloudsdk/blockstorage.WithAttachVolumeDevice",
+        "gophercloudsdk/blockstorage.WithAttachVolumeWait",
+        "gophercloudsdk/blockstorage.WithAttachVolumeWaitPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "AttachVolume defaults to omitted device, enabled waiting, no SDK wait deadline, two-second polling and exact case-insensitive error failure state. Explicit IDs perform fresh Cinder GET200, Nova POST200 with volumeAttachment.volumeId and optional nonempty device, then fresh fixed-ID Cinder waiting GET200; Wait(false) keeps the precondition GET and omits polling.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsDefaultSequenceAndIndependentProof",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExplicitNoWaitAndLiteralDevice",
+            "blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder"
+          ]
+        },
+        {
+          "behavior": "Nil or canceled contexts, invalid request references, either invalid source, malformed device or wait policy and nil options stop before name resolution and workflow requests. Disabled wait fields still receive complete validation. Ordered callbacks are applied once and pointer/slice values are copied after callbacks; whole and subtree replacement helpers preserve nil versus nonnil empty failures.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsPreflightBeforeCallbacksOrHTTP",
+            "blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsFactoriesOwnReusablePointersAndSlices",
+            "blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsExternalCallbacksRunOnceAndRetainedConfigIsolated",
+            "blockstorage/attach_volume_options_test.go:TestAttachVolumeOptionsValidateInactiveWaitPolicyAndStopOnGuardFailure"
+          ]
+        },
+        {
+          "behavior": "Server and volume names use their existing ordinary native Resources.ResolveID once in order with exact names, duplicate and missing handling; explicit IDs do not fetch the server. Resolved IDs become fixed routes, and response IDs, Location and mutable source configuration cannot select another logical target.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsNamesResolveOnceBeforeFreshCheck"
+          ]
+        },
+        {
+          "behavior": "The fresh Cinder precondition requires canonical id equal to the fixed volume ID, exact available status and an explicit nonnull attachments array. It rejects any association with the target server even if device is omitted or empty, rejects null rows and preserves the accepted Checked evidence without a Nova POST on failure.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsFreshPreconditionForbidsUnsafeMutation"
+          ]
+        },
+        {
+          "behavior": "Nova POST uses the actual server os-volume_attachments route and the minimal volumeAttachment envelope rather than Cinder attachments. Canonical volumeId must match the fixed volume ID; present nonnull serverId must match the server. Attachment id, attachment_id and bdm_uuid remain passive response fields and a mismatch preserves actual Created proof before stopping.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsNovaStatusAndCreatedDecodeFailuresAreTerminal",
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsDistinctProvidersAndNullableOptionalServer"
+          ]
+        },
+        {
+          "behavior": "Owned Cinder observation, nested association and Nova attachment models decode exact canonical keys atomically. Known optional fields distinguish nullable pointers while raw metadata retains omission versus null, unknown fields, exact large numeric literals and literal timestamps; malformed UTF-8, nonobject envelopes, wrong known field types and malformed attachment rows fail without partial typed assignment.",
+          "tests": [
+            "blockstorage/attach_volume_models_test.go:TestAttachVolumeModelsCanonicalNullableFieldsAndRawExtensions",
+            "blockstorage/attach_volume_models_test.go:TestAttachVolumeModelsDistinguishAbsentNullAndEmptyAttachments",
+            "blockstorage/attach_volume_models_test.go:TestAttachVolumeModelsRejectInvalidFieldsAtomically"
+          ]
+        },
+        {
+          "behavior": "Checked, Created and LastAccepted retain actual accepted response bytes, cloned headers and status before read, Close, decode or later guard failures. Responses, raw fields, typed models and Ready from separate phases own independent data. A nonnil result alone does not establish a mutation; Created HTTP200 records acknowledgement and only successful waiting populates Ready.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsDefaultSequenceAndIndependentProof",
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsAcceptedBodyFailuresRetainPhaseProofWithoutResend"
+          ]
+        },
+        {
+          "behavior": "Waiting begins after the Nova response is decoded and verified. Nil or zero timeout is unlimited; positive timeout is wait-only and caller context bounds all phases. Each poll requires matching canonical Cinder id and known status, checks case-insensitive in-use before exact failures and does not infer error-prefix states. Nonnil empty failure states disable failure matching. Negative timeout fails before lookup or mutation even when waiting is disabled. A positive wait deadline cancels polling HTTP and timer waits through context; this deliberately differs from Python zero/negative and between-fetch timer semantics.",
+          "tests": [
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsWaitBudgetStartsAfterCreatedResponse",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExactWaitStatesTargetFirstAndCallback",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsWaitTimeoutAndCancellationKeepLastAccepted"
+          ]
+        },
+        {
+          "behavior": "Nonterminal waiting responses invoke a synchronous ProgressCallback with zero rather than reading an unmodeled extension progress field. Callback errors and cancellation retain their original inspectable causes and already accepted evidence; target and failure observations do not invoke progress and timer/context waiting remains cancellable.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExactWaitStatesTargetFirstAndCallback",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsWaitTimeoutAndCancellationKeepLastAccepted"
+          ]
+        },
+        {
+          "behavior": "Rejected HTTP errors preserve native method, URL, accepted-code policy, physical status/body/header and original causes without synthesizing accepted phase wrappers. LastAccepted means the last accepted waiting Cinder response and remains intact when a later rejected request or context error occurs. Later failure never triggers automatic detach, delete or a new logical attach operation.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsCreatedProofSurvivesWaitFailures",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsWaitTimeoutAndCancellationKeepLastAccepted",
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsNovaStatusAndCreatedDecodeFailuresAreTerminal"
+          ]
+        },
+        {
+          "behavior": "Both selected clients retain their effective prefixed ResourceBase, validated service type and microversion with entry-snapshotted canonical ordinary source headers and original live provider authentication. Provider/Endpoint/ResourceBase/Type/Microversion changes are terminal before another phase. Native configured reauthentication and retry remain distinct from SDK guards for method, URL, serialized JSON and accepted-response ownership.",
+          "tests": [
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsSourceSnapshotsLiveTokenAndConsistentVersions",
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation",
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsNativeReauthenticationBackoffAndOwnedRetry",
+            "blockstorage/attach_volume_transport_test.go:TestAttachVolumeContractsNativeRetryCannotReplaceOwnedRequestOrStatusPolicy"
+          ]
+        },
+        {
+          "behavior": "Connection.AttachVolume validates context, receiver and references before selecting cached ComputeV2 and BlockStorageV3 clients, then delegates to the package workflow without holding a Connection mutex through callbacks. Lazy service initialization or microversion discovery can precede package option validation, while options still complete before name/precondition/mutation/poll requests.",
+          "tests": [
+            "connection_attach_volume_test.go:TestConnectionAttachVolumeSharesCachedClientsAndLiveToken",
+            "connection_attach_volume_test.go:TestConnectionAttachVolumeDiscoveryPrecedesOptionsAndIsCached",
+            "connection_attach_volume_test.go:TestConnectionAttachVolumeValidatesBeforeClientDiscovery",
+            "connection_attach_volume_test.go:TestConnectionAttachVolumeServiceInitializationCancellationCause"
+          ]
+        },
+        {
+          "behavior": "The workflow owns exact case-insensitive error matching without changing the existing high-level Cinder Collection waiter, which retains its error-prefix failure policy.",
+          "tests": [
+            "blockstorage/attach_volume_contracts_test.go:TestAttachVolumeContractsExactWaitStatesTargetFirstAndCallback",
+            "blockstorage/blockstorage_test.go:TestCinderFailurePrefixAndMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/attach-volume.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go accepts resource.Ref inputs and performs fresh Cinder checks after optional name resolution. Pinned Python accepts caller-owned mutable server and volume Resource/dict values, reads their supplied available status and attachment records and only rejects a matching server when get_volume_attach_device returns a truthy device. Go deliberately rejects a matching association independent of device and requires explicit canonical identity/status/attachments proof.",
+        "Go waiting always fetches fresh fixed-ID Cinder responses and uses its owned exact-error policy. Python may immediately return a supplied Resource whose cached status already equals in-use; dict inputs are refetched before passing a Resource into the waiter. Both default to enabled wait, two-second polls and an unlimited wait-only SDK timeout, while caller context and error-returning progress callbacks are Go controls.",
+        "Go returns completed accepted phase proof and last accepted waiting evidence alongside read/decode/callback/context/native errors and leaves existing side effects to the caller. Python raises on waiting failure without returning the Nova attachment. Raw evidence is separate from successfully decoded typed results and is not a complete physical-attempt log.",
+        "Go uses strict owned canonical JSON fields, nullable response pointers, raw extension precision, literal timestamps and fixed route identities. Absent Nova id stays nil rather than adopting volumeId as Python alternate identity; serverId reads only actual response data, while selected server identity remains in the workflow result. It does not reproduce Python descriptor coercion or Resource object mutation to choose status or route. Optional Nova response attributes remain passive and no arbitrary attachment attrs are added to this device-only cloud helper.",
+        "Go captures selected source clients and normal headers while using their original live provider authentication. Source configuration changes between phases are terminal; Connection may initialize or discover services before package callback application. Configured native retry/reauthentication remain in place and packet-level exactly-once is not claimed.",
+        "Go intentionally uses nil or numeric-zero Timeout as no SDK wait deadline and rejects negative Timeout before any name lookup or workflow mutation, including when Wait is false. Pinned Python forwards timeout to Resource waiting after the Nova mutation; utils.iterate_timeout treats numeric zero or negative timeout as immediate ResourceTimeout before its first poll unless an already-target Resource short-circuits first. Positive Go wait deadlines cancel HTTP and timers via context, whereas Python checks elapsed time between fetches and does not interrupt an in-flight fetch or sleep with that loop deadline.",
+        "This mapping closes the directly declared cloud attach_volume parameter/control-flow contract using the documented Go-native representation. It does not promote the separately inventoried Compute create_volume_attachment, Cinder get_volume or generic wait_for_status declarations or their inherited Resource/session/cache behavior; their full SDK reviews remain independent."
+      ],
+      "remaining": []
     }
   ]
 }

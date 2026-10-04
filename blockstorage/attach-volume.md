@@ -95,6 +95,8 @@ Checked·Created·LastAccepted는 실제 Body·Header·StatusCode와 검증한 �
 
 대기 실패·취소·callback 오류가 발생하면 이미 받은 Created와 마지막 접수 관찰을 반환합니다. 거부된 HTTP 응답은 원래 native 오류의 상태·본문·header로 확인하며, LastAccepted를 거부 응답으로 덮어쓰지 않습니다. LastAccepted는 모든 물리적인 전송 시도나 마지막 실패 응답의 기록을 뜻하지 않습니다. 자동 detach·delete·새 연결 요청은 수행하지 않습니다. caller가 보존한 접수 결과를 바탕으로 후속 확인과 정리를 결정합니다.
 
+Nova 원문에 `id`가 없으면 `Created.Attachment.ID`는 nil입니다. 볼륨 대상은 `Created.Attachment.VolumeID`와 result의 `VolumeID`로 확인합니다. Python Resource의 alternate ID fallback과 URI의 server identity를 응답에 합성하지 않으며, 선택한 서버 ID는 result의 `ServerID`에 남습니다.
+
 `in-use`는 Cinder에서 관찰한 상태이며 대상 서버의 연결 완료 여부까지 증명하지 않습니다. 연결 전 기록 검사와 Nova 응답의 대상 검증은 별도이고, 다른 요청과 동시에 상태가 바뀔 수 있습니다.
 
 ## openstacksdk와의 범위
