@@ -20,23 +20,37 @@ type getVolumesEntry struct {
 	volume *resource.RawResource
 	origin *rest.Response
 	index  int
+	raw    json.RawMessage
 }
 
 // materialize finishes the list before any attachment or server field is read.
 func (p *preparedGetVolumes) materialize(ctx context.Context, result *GetVolumesResult) ([]getVolumesEntry, error) {
 	entries := make([]getVolumesEntry, 0)
+	err := p.readVolumes(ctx, result, func(entry getVolumesEntry) (bool, error) {
+		entries = append(entries, entry)
+		return true, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return entries, nil
+}
+
+// readVolumes owns transport and raw rows. SDK bindings choose whether to
+// consume the complete list or stop at the shared identity iterator's yield.
+func (p *preparedGetVolumes) readVolumes(ctx context.Context, result *GetVolumesResult, consume func(getVolumesEntry) (bool, error)) error {
 	current := p.initialURL
 	seen := make(map[string]bool)
 	for {
 		if err := p.guard(ctx); err != nil {
-			return nil, err
+			return err
 		}
 		key, err := p.pageKey(current)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if seen[key] {
-			return nil, &resource.PaginationCycleError{URL: current.String()}
+			return &resource.PaginationCycleError{URL: current.String()}
 		}
 		seen[key] = true
 		response, err := p.exchange(ctx, current)
@@ -44,49 +58,55 @@ func (p *preparedGetVolumes) materialize(ctx context.Context, result *GetVolumes
 			result.Pages = append(result.Pages, &GetVolumesPage{Body: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode})
 		}
 		if err != nil {
-			return nil, err
+			return err
 		}
 		fields, rows, err := getVolumesPageRows(response)
 		if err != nil {
-			return nil, response.Fail(err)
+			return response.Fail(err)
 		}
 		for index, row := range rows {
 			if err := p.guard(ctx); err != nil {
-				return nil, err
+				return err
 			}
 			var volume resource.RawResource
 			if err := json.Unmarshal(row, &volume); err != nil {
-				return nil, response.Fail(fmt.Errorf("volumes[%d]: %w", index, err))
+				return response.Fail(fmt.Errorf("volumes[%d]: %w", index, err))
 			}
 			volume.Header = response.Header.Clone()
 			volume.StatusCode = response.StatusCode
-			entries = append(entries, getVolumesEntry{volume: &volume, origin: response, index: index})
+			more, err := consume(getVolumesEntry{volume: &volume, origin: response, index: index, raw: bytes.Clone(row)})
+			if err != nil {
+				return err
+			}
+			if !more {
+				return p.guard(ctx)
+			}
 		}
 		if err := p.guard(ctx); err != nil {
-			return nil, err
+			return err
 		}
 		// Both pinned Resource.list and the native volume pager terminate on an
 		// empty resource array, without consuming an unused continuation.
 		if len(rows) == 0 {
-			return entries, nil
+			return nil
 		}
 		next, err := getVolumesNativeNext(response, current, fields)
 		if err != nil {
-			return nil, response.Fail(err)
+			return response.Fail(err)
 		}
 		if next == "" {
-			return entries, p.guard(ctx)
+			return p.guard(ctx)
 		}
 		continuation, err := p.continuation(current, next)
 		if err != nil {
-			return nil, response.Fail(err)
+			return response.Fail(err)
 		}
 		key, err = p.pageKey(continuation)
 		if err != nil {
-			return nil, response.Fail(err)
+			return response.Fail(err)
 		}
 		if seen[key] {
-			return nil, response.Fail(&resource.PaginationCycleError{URL: continuation.String()})
+			return response.Fail(&resource.PaginationCycleError{URL: continuation.String()})
 		}
 		current = continuation
 	}
