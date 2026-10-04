@@ -975,3 +975,51 @@ catalog3362개에서 go_mapping139→140, unsupported1 유지, unresolved3222→
 전체 SDK는 계속 진행 중입니다.
 
 Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=140, unsupported=1, unresolved=3221.
+
+## Cinder v3 volume reservation/detach state action mapping
+
+실제 pinned Proxy `reserve_volume`·`unreserve_volume`·`begin_volume_detaching`·
+`abort_volume_detaching` 네 선언을 package·Connection·service에 연결했습니다.
+명시적인 safe UTF-8 volume ID를 그대로 사용하며 queryless `volumes/{ID}/action`으로
+각각 `os-reserve:null`·`os-unreserve:null`·`os-begin_detaching:null`·`os-roll_detaching:null`을 보냅니다.
+UUID 형식/서버 existence 조회를 요구하지 않고 lookup·wait·refresh·rollback·Resource conversion을 추가하지 않습니다.
+기존 native Reserve/Unreserve/BeginDetaching은 {} body와 좁은 response code 정책을 그대로 유지합니다.
+
+Source Volume의 class ceiling3.71을 호출별로 협상합니다. selected nonempty version은 literal 우선이며
+원본 client/cache는 변경하지 않습니다. 공통 `internal/cinderrequest`로 기존 backup parser/discovery/POST를
+옮기고 Backup import ceiling3.64·restore selected policy·force/reset3.64를 보존했습니다.
+같은 server advertisement에서 volume3.71과 backup3.64가 독립적인지 실제 HTTP 테스트로 검증했습니다.
+finite captured endpoint·encoded prefix·first usable v3·지원 JSON shape/status·clean concrete404/405 fallback과
+maximum-before-optional-minimum·tuple length/order·missing bounds 정책의 범위를 문서화했습니다.
+selected Session canonicalization·전체 Keystoneauth cache/link/header/discovery exception/runtime을 복제했다고 주장하지 않습니다.
+
+새 VolumeActionResult는 literal ID·Microversion·admitted Discovery·actual Applied·Completed를 제공합니다.
+sub400 action response는 empty/malformed/invalid UTF8까지 opaque bytes이고 logical Volume 모델을 만들지 않습니다.
+Completed는 accepted Read/Close/source 검사까지 성공한 helper acknowledgement이며 server status postcondition이 아닙니다.
+accepted IO/source/custom context 오류는 현재 proof와 모든 causes를 유지하고 Completed=false입니다.
+native>=400 및 mutable OkCodes로 확장한 actual400은 성공 proof로 바꾸지 않습니다.
+exact null body/framing·fixed method/route/origin·operation version header를 physical redirects/retry에도 적용합니다.
+live native authentication과 bounded caller retry를 유지하며 accepted faults를 SDK가 replay하지 않습니다.
+
+Source `_get_resource`의 mutable Resource/dict/Munch/constructor/to_dict/location side effect는
+safe-ID-only Go domain으로 대체했습니다. CurrentLocation·scope lookup을 소비하지 않습니다.
+직접 Proxy bootable/readonly의 required/default bool 차이는 별도 미완료이며 기존 cloud SetVolumeBootable은 그대로 유지합니다.
+네 실제 Proxy 선언만 분류하고 native/v2/Resource/inherited surface나 전체 SDK 완료를 선언하지 않습니다.
+
+신규16개 테스트 그룹은 public/service/discovery8·transport4·Connection4입니다.
+최종1705개 Go에서 focused16 race5.59초, 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`85.61초,
+`go vet -mod=readonly ./...`1.39초를 통과했습니다.
+exact standalone 문서 fence는 초기 compile5.80초 및 최종 cache compile0.25초이며 cloud runtime 실행이 아닙니다.
+초기 service import-cycle compile 실패와 internal core alias/delegate 수정, Connection method-expression
+fixture compile 실패와 인자 순서 수정 후 통과를 구분해 기록했습니다. 기대를 약화하지 않았습니다.
+Source23개 및 native/current SDK11개 literal range와 hash를 검증했으며 Python SDK/OpenStack runtime probe는 없습니다.
+
+기존1694개 중1691개 Go가 byte-identical이고 backup import discovery/version/post 세 파일만
+새 공통 계층에 위임하도록 수정했습니다. 새 production8·test3개이며 inventory·generated Go·generated service 문서는 보존했습니다.
+기존447개 review의 literal prefix·모든 필드·source pins를 보존해 네 actual Proxy row만 추가했습니다.
+새 review에는 계약32개·unique actual anchor18개(신규16·재사용 parser2)·공개 API 참조12개를 연결했습니다.
+catalog3362개에서 go_mapping140→144, unsupported1 유지, unresolved3221→3217이며 supported는0입니다.
+전체 SDK는 계속 진행 중입니다.
+
+Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=144, unsupported=1, unresolved=3217.

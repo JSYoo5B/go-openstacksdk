@@ -32945,6 +32945,354 @@
         "Fixed source/target/body/framing and microversion ownership constrain mutable native retry/redirect hooks while live authentication and bounded caller retry remain. This review covers only the actual pinned v3 Proxy.import_backup declaration; native/v2/Resource/inherited declarations and the full SDK remain independent. Source bindings and offline HTTP tests are not Python SDK execution or authenticated OpenStack integration."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/reserve_volume",
+      "source_fingerprint": "f0d9823eb35b58b538f886be697cf5983d40528fd4d9adeb8f1dac792c57aa34",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.ReserveVolume",
+        "gophercloudsdk.Connection.ReserveVolume",
+        "gophercloudsdk/blockstorage.ReserveVolume"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReserveVolume sends exactly {\"os-reserve\":null}. Use one explicit safe nonempty UTF-8 volume ID and the exact pinned null action through queryless POST volumes/{ID}/action. Unicode literal IDs are preserved, and VolumeDetail never inserts detail into the route. There is no UUID-only restriction, lookup, Resource conversion, status enum, options/defaults, builder, wait, refresh or rollback.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsPostSourceNullBodiesAndAcceptOpaqueHTTPReplies",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsRejectInvalidIDAndSourceBeforeAnyHTTP"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture the Cinder service and validate context/role/provider/endpoint/resource/header before ID admission. Connection checks context/provider/ID before selecting only cached Cinder v3, without CurrentLocation or recorded scope consumption. Getter errors retain the actual outer operation and custom cancellation causes before any request or fabricated proof.",
+          "tests": [
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsUseOnlyCachedCinderAndIgnoreLocation",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsPreflightNeverSelectsCinder",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsGetterErrorsKeepOperationAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Selected nonempty microversion wins literally without discovery/cap. Otherwise operation-owned finite negotiation uses the Volume3.71 ceiling and server maximum before optional minimum, with tuple length/order retained; minimum above ceiling omits version and missing maximum ignores unused minimum. Original client/cache stays unchanged, each call owns its selected policy, and independent Backup import retains3.64 on the same server advertisement.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsSelectedVersionKeepsOwnedHeadersAndLiveNativeAuthentication",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsOwnDiscoveryPerCallAndKeepStageProof",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentStringAndHeaderCases",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentMaximumMinimumCases"
+          ]
+        },
+        {
+          "behavior": "Finite discovery preserves captured encoded reverse-proxy prefix, admits200/300 supported body forms and first usable v3, and keeps admitted pages separate from action Applied. Only clean concrete native404/405 permits unavailable fallback. Accepted malformed/null/invalid-UTF8 or other discovery failures stop before action, with current ResponseError proof; later native rejection cannot borrow an earlier admitted page as current error proof.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsDiscoveryFailuresRetainCurrentStageAndNeverBorrowProof"
+          ]
+        },
+        {
+          "behavior": "Action replies are opaque finite HTTP100..399 acknowledgements including empty, malformed and invalid-UTF8 bytes. Applied owns actual body/header/status, independently of separate calls or error proof. Completed means accepted Read/Close/source validation succeeded, never a server status postcondition. Original-policy>=400 and expanded native OkCodes retain native rejected evidence without Applied or Completed. Existing native Reserve/Unreserve/BeginDetaching keep their {} body and narrower status policy; all four new service methods and nil API preserve actual labels.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionAdmissionUsesOriginalSub400PolicyAndKeepsNativeRejections",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionServiceMethodsPreserveNativeBodiesCodesAndNilAPILabels"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close, captured-source drift and custom cancellation retain actual Applied and every joined cause, with Completed=false and an independently owned ResponseError. Body closes once and accepted IO errors invoke no caller retry or SDK replay; proof storage never aliases the caller response or another result.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsAcceptedFaultsKeepActualProofAndAllCauses",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        },
+        {
+          "behavior": "Live native401 reauthentication and bounded503 caller retry retain exact owned null body, captured ordinary headers, selected source and operation version. Body/decoder/retention changes, version conflicts or source drift stop before resend while original/callback/custom cancellation causes remain reachable.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionLiveReauthAndBoundedRetryKeepLiteralNullBody",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionRetryMutationStopsBodyVersionAndSourceBeforeResend"
+          ]
+        },
+        {
+          "behavior": "Every physical POST including same-target307 redirects verifies exact method/path/origin, body bytes/framing and modern/legacy version policy. Changed body/framing/header/target stops before second transport attempt. Physical body Read/Close and header faults remain sticky after caller repair, close inspected body once and preserve actual causes.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionPhysicalRedirectMutationRemainsStickyAfterRepair"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-actions.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go takes safe literal UTF-8 ID only. Source accepts mutable Volume/VolumeDetail/Resource/dict/Munch inputs through _get_resource with constructor/to_dict/descriptor/computed location side effects and Python urljoin coercion. Go skips those identities/side effects and name lookup deliberately; this does not classify separate Resource declarations.",
+        "Source Proxy and Resource methods return None without translating response or updating local fields. Go adds independently owned Microversion, Discovery, Applied and Completed acknowledgement with literal input VolumeID. No semantic server-state confirmation, wait, follow-up GET or rollback is added.",
+        "Volume uses class ceiling3.71 while Backup import keeps3.64 through the shared Cinder policy. Selected nonempty version is forwarded literally; Keystoneauth Session canonicalization, dynamic nonstring defaults, full Adapter cache/link/envelope/header discovery and deployment HTTP behavior are outside this owned Go mapping.",
+        "Finite same-origin body-only first usable v3 discovery, typed advertisement shapes/status and clean concrete404/405 fallback are explicit mapping policy. Accepted malformed discovery is terminal with current proof rather than reproducing every caught Keystoneauth DiscoveryFailure/None path or endpoint-data exception order.",
+        "Utility tuple selection retains maximum-before-optional-minimum, length/order and missing bounds. Shared arbitrary-precision Unicode16 decimal/underscore string parsing and latest handling are bounded Go behavior; exact installed CPython digit limits, nonstring input normalization and pinned dependency runtime are not claimed.",
+        "Owned finite HTTP100..399 policy preserves opaque action bytes and admitted IO/source/context proof separately from native>=400 rejection. Native discarded rejected POST body Read/Close faults remain a documented limitation; mutable OkCodes cannot widen SDK acknowledgement. No response model conversion is introduced.",
+        "Fixed source/method/route/body/framing and operation microversion ownership constrain mutable native retry/redirect hooks while live authentication and bounded caller retry remain. Native Reserve/Unreserve/BeginDetaching keep {} and narrower success codes; new null action APIs remain separate.",
+        "Only the actual pinned v3 Proxy declaration is mapped here. Native/v2/Resource/inherited targets and direct bootable/readonly setters remain independent. Source hashes, static review, Go compile and offline HTTP/race tests do not establish authenticated OpenStack or Python SDK runtime parity or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/unreserve_volume",
+      "source_fingerprint": "f5a8ac68d2ee374a52387d4df343c62e30a74d3c148765171a3fe48b1558723f",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.UnreserveVolume",
+        "gophercloudsdk.Connection.UnreserveVolume",
+        "gophercloudsdk/blockstorage.UnreserveVolume"
+      ],
+      "contracts": [
+        {
+          "behavior": "UnreserveVolume sends exactly {\"os-unreserve\":null}. Use one explicit safe nonempty UTF-8 volume ID and the exact pinned null action through queryless POST volumes/{ID}/action. Unicode literal IDs are preserved, and VolumeDetail never inserts detail into the route. There is no UUID-only restriction, lookup, Resource conversion, status enum, options/defaults, builder, wait, refresh or rollback.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsPostSourceNullBodiesAndAcceptOpaqueHTTPReplies",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsRejectInvalidIDAndSourceBeforeAnyHTTP"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture the Cinder service and validate context/role/provider/endpoint/resource/header before ID admission. Connection checks context/provider/ID before selecting only cached Cinder v3, without CurrentLocation or recorded scope consumption. Getter errors retain the actual outer operation and custom cancellation causes before any request or fabricated proof.",
+          "tests": [
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsUseOnlyCachedCinderAndIgnoreLocation",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsPreflightNeverSelectsCinder",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsGetterErrorsKeepOperationAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Selected nonempty microversion wins literally without discovery/cap. Otherwise operation-owned finite negotiation uses the Volume3.71 ceiling and server maximum before optional minimum, with tuple length/order retained; minimum above ceiling omits version and missing maximum ignores unused minimum. Original client/cache stays unchanged, each call owns its selected policy, and independent Backup import retains3.64 on the same server advertisement.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsSelectedVersionKeepsOwnedHeadersAndLiveNativeAuthentication",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsOwnDiscoveryPerCallAndKeepStageProof",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentStringAndHeaderCases",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentMaximumMinimumCases"
+          ]
+        },
+        {
+          "behavior": "Finite discovery preserves captured encoded reverse-proxy prefix, admits200/300 supported body forms and first usable v3, and keeps admitted pages separate from action Applied. Only clean concrete native404/405 permits unavailable fallback. Accepted malformed/null/invalid-UTF8 or other discovery failures stop before action, with current ResponseError proof; later native rejection cannot borrow an earlier admitted page as current error proof.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsDiscoveryFailuresRetainCurrentStageAndNeverBorrowProof"
+          ]
+        },
+        {
+          "behavior": "Action replies are opaque finite HTTP100..399 acknowledgements including empty, malformed and invalid-UTF8 bytes. Applied owns actual body/header/status, independently of separate calls or error proof. Completed means accepted Read/Close/source validation succeeded, never a server status postcondition. Original-policy>=400 and expanded native OkCodes retain native rejected evidence without Applied or Completed. Existing native Reserve/Unreserve/BeginDetaching keep their {} body and narrower status policy; all four new service methods and nil API preserve actual labels.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionAdmissionUsesOriginalSub400PolicyAndKeepsNativeRejections",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionServiceMethodsPreserveNativeBodiesCodesAndNilAPILabels"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close, captured-source drift and custom cancellation retain actual Applied and every joined cause, with Completed=false and an independently owned ResponseError. Body closes once and accepted IO errors invoke no caller retry or SDK replay; proof storage never aliases the caller response or another result.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsAcceptedFaultsKeepActualProofAndAllCauses",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        },
+        {
+          "behavior": "Live native401 reauthentication and bounded503 caller retry retain exact owned null body, captured ordinary headers, selected source and operation version. Body/decoder/retention changes, version conflicts or source drift stop before resend while original/callback/custom cancellation causes remain reachable.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionLiveReauthAndBoundedRetryKeepLiteralNullBody",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionRetryMutationStopsBodyVersionAndSourceBeforeResend"
+          ]
+        },
+        {
+          "behavior": "Every physical POST including same-target307 redirects verifies exact method/path/origin, body bytes/framing and modern/legacy version policy. Changed body/framing/header/target stops before second transport attempt. Physical body Read/Close and header faults remain sticky after caller repair, close inspected body once and preserve actual causes.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionPhysicalRedirectMutationRemainsStickyAfterRepair"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-actions.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go takes safe literal UTF-8 ID only. Source accepts mutable Volume/VolumeDetail/Resource/dict/Munch inputs through _get_resource with constructor/to_dict/descriptor/computed location side effects and Python urljoin coercion. Go skips those identities/side effects and name lookup deliberately; this does not classify separate Resource declarations.",
+        "Source Proxy and Resource methods return None without translating response or updating local fields. Go adds independently owned Microversion, Discovery, Applied and Completed acknowledgement with literal input VolumeID. No semantic server-state confirmation, wait, follow-up GET or rollback is added.",
+        "Volume uses class ceiling3.71 while Backup import keeps3.64 through the shared Cinder policy. Selected nonempty version is forwarded literally; Keystoneauth Session canonicalization, dynamic nonstring defaults, full Adapter cache/link/envelope/header discovery and deployment HTTP behavior are outside this owned Go mapping.",
+        "Finite same-origin body-only first usable v3 discovery, typed advertisement shapes/status and clean concrete404/405 fallback are explicit mapping policy. Accepted malformed discovery is terminal with current proof rather than reproducing every caught Keystoneauth DiscoveryFailure/None path or endpoint-data exception order.",
+        "Utility tuple selection retains maximum-before-optional-minimum, length/order and missing bounds. Shared arbitrary-precision Unicode16 decimal/underscore string parsing and latest handling are bounded Go behavior; exact installed CPython digit limits, nonstring input normalization and pinned dependency runtime are not claimed.",
+        "Owned finite HTTP100..399 policy preserves opaque action bytes and admitted IO/source/context proof separately from native>=400 rejection. Native discarded rejected POST body Read/Close faults remain a documented limitation; mutable OkCodes cannot widen SDK acknowledgement. No response model conversion is introduced.",
+        "Fixed source/method/route/body/framing and operation microversion ownership constrain mutable native retry/redirect hooks while live authentication and bounded caller retry remain. Native Reserve/Unreserve/BeginDetaching keep {} and narrower success codes; new null action APIs remain separate.",
+        "Only the actual pinned v3 Proxy declaration is mapped here. Native/v2/Resource/inherited targets and direct bootable/readonly setters remain independent. Source hashes, static review, Go compile and offline HTTP/race tests do not establish authenticated OpenStack or Python SDK runtime parity or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/begin_volume_detaching",
+      "source_fingerprint": "112e2397fa0e7bb7a4fc40e743a8af53f3183630fcf371cf33e8535ed7a1d9dd",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.BeginVolumeDetaching",
+        "gophercloudsdk.Connection.BeginVolumeDetaching",
+        "gophercloudsdk/blockstorage.BeginVolumeDetaching"
+      ],
+      "contracts": [
+        {
+          "behavior": "BeginVolumeDetaching sends exactly {\"os-begin_detaching\":null}. Use one explicit safe nonempty UTF-8 volume ID and the exact pinned null action through queryless POST volumes/{ID}/action. Unicode literal IDs are preserved, and VolumeDetail never inserts detail into the route. There is no UUID-only restriction, lookup, Resource conversion, status enum, options/defaults, builder, wait, refresh or rollback.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsPostSourceNullBodiesAndAcceptOpaqueHTTPReplies",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsRejectInvalidIDAndSourceBeforeAnyHTTP"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture the Cinder service and validate context/role/provider/endpoint/resource/header before ID admission. Connection checks context/provider/ID before selecting only cached Cinder v3, without CurrentLocation or recorded scope consumption. Getter errors retain the actual outer operation and custom cancellation causes before any request or fabricated proof.",
+          "tests": [
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsUseOnlyCachedCinderAndIgnoreLocation",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsPreflightNeverSelectsCinder",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsGetterErrorsKeepOperationAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Selected nonempty microversion wins literally without discovery/cap. Otherwise operation-owned finite negotiation uses the Volume3.71 ceiling and server maximum before optional minimum, with tuple length/order retained; minimum above ceiling omits version and missing maximum ignores unused minimum. Original client/cache stays unchanged, each call owns its selected policy, and independent Backup import retains3.64 on the same server advertisement.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsSelectedVersionKeepsOwnedHeadersAndLiveNativeAuthentication",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsOwnDiscoveryPerCallAndKeepStageProof",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentStringAndHeaderCases",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentMaximumMinimumCases"
+          ]
+        },
+        {
+          "behavior": "Finite discovery preserves captured encoded reverse-proxy prefix, admits200/300 supported body forms and first usable v3, and keeps admitted pages separate from action Applied. Only clean concrete native404/405 permits unavailable fallback. Accepted malformed/null/invalid-UTF8 or other discovery failures stop before action, with current ResponseError proof; later native rejection cannot borrow an earlier admitted page as current error proof.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsDiscoveryFailuresRetainCurrentStageAndNeverBorrowProof"
+          ]
+        },
+        {
+          "behavior": "Action replies are opaque finite HTTP100..399 acknowledgements including empty, malformed and invalid-UTF8 bytes. Applied owns actual body/header/status, independently of separate calls or error proof. Completed means accepted Read/Close/source validation succeeded, never a server status postcondition. Original-policy>=400 and expanded native OkCodes retain native rejected evidence without Applied or Completed. Existing native Reserve/Unreserve/BeginDetaching keep their {} body and narrower status policy; all four new service methods and nil API preserve actual labels.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionAdmissionUsesOriginalSub400PolicyAndKeepsNativeRejections",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionServiceMethodsPreserveNativeBodiesCodesAndNilAPILabels"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close, captured-source drift and custom cancellation retain actual Applied and every joined cause, with Completed=false and an independently owned ResponseError. Body closes once and accepted IO errors invoke no caller retry or SDK replay; proof storage never aliases the caller response or another result.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsAcceptedFaultsKeepActualProofAndAllCauses",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        },
+        {
+          "behavior": "Live native401 reauthentication and bounded503 caller retry retain exact owned null body, captured ordinary headers, selected source and operation version. Body/decoder/retention changes, version conflicts or source drift stop before resend while original/callback/custom cancellation causes remain reachable.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionLiveReauthAndBoundedRetryKeepLiteralNullBody",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionRetryMutationStopsBodyVersionAndSourceBeforeResend"
+          ]
+        },
+        {
+          "behavior": "Every physical POST including same-target307 redirects verifies exact method/path/origin, body bytes/framing and modern/legacy version policy. Changed body/framing/header/target stops before second transport attempt. Physical body Read/Close and header faults remain sticky after caller repair, close inspected body once and preserve actual causes.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionPhysicalRedirectMutationRemainsStickyAfterRepair"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-actions.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go takes safe literal UTF-8 ID only. Source accepts mutable Volume/VolumeDetail/Resource/dict/Munch inputs through _get_resource with constructor/to_dict/descriptor/computed location side effects and Python urljoin coercion. Go skips those identities/side effects and name lookup deliberately; this does not classify separate Resource declarations.",
+        "Source Proxy and Resource methods return None without translating response or updating local fields. Go adds independently owned Microversion, Discovery, Applied and Completed acknowledgement with literal input VolumeID. No semantic server-state confirmation, wait, follow-up GET or rollback is added.",
+        "Volume uses class ceiling3.71 while Backup import keeps3.64 through the shared Cinder policy. Selected nonempty version is forwarded literally; Keystoneauth Session canonicalization, dynamic nonstring defaults, full Adapter cache/link/envelope/header discovery and deployment HTTP behavior are outside this owned Go mapping.",
+        "Finite same-origin body-only first usable v3 discovery, typed advertisement shapes/status and clean concrete404/405 fallback are explicit mapping policy. Accepted malformed discovery is terminal with current proof rather than reproducing every caught Keystoneauth DiscoveryFailure/None path or endpoint-data exception order.",
+        "Utility tuple selection retains maximum-before-optional-minimum, length/order and missing bounds. Shared arbitrary-precision Unicode16 decimal/underscore string parsing and latest handling are bounded Go behavior; exact installed CPython digit limits, nonstring input normalization and pinned dependency runtime are not claimed.",
+        "Owned finite HTTP100..399 policy preserves opaque action bytes and admitted IO/source/context proof separately from native>=400 rejection. Native discarded rejected POST body Read/Close faults remain a documented limitation; mutable OkCodes cannot widen SDK acknowledgement. No response model conversion is introduced.",
+        "Fixed source/method/route/body/framing and operation microversion ownership constrain mutable native retry/redirect hooks while live authentication and bounded caller retry remain. Native Reserve/Unreserve/BeginDetaching keep {} and narrower success codes; new null action APIs remain separate.",
+        "Only the actual pinned v3 Proxy declaration is mapped here. Native/v2/Resource/inherited targets and direct bootable/readonly setters remain independent. Source hashes, static review, Go compile and offline HTTP/race tests do not establish authenticated OpenStack or Python SDK runtime parity or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/abort_volume_detaching",
+      "source_fingerprint": "2af45e2019041c45393fc4c90264955346bd43810874819b740de53d09a9e9d7",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage/v3/volumes.API.AbortVolumeDetaching",
+        "gophercloudsdk.Connection.AbortVolumeDetaching",
+        "gophercloudsdk/blockstorage.AbortVolumeDetaching"
+      ],
+      "contracts": [
+        {
+          "behavior": "AbortVolumeDetaching sends exactly {\"os-roll_detaching\":null}. Use one explicit safe nonempty UTF-8 volume ID and the exact pinned null action through queryless POST volumes/{ID}/action. Unicode literal IDs are preserved, and VolumeDetail never inserts detail into the route. There is no UUID-only restriction, lookup, Resource conversion, status enum, options/defaults, builder, wait, refresh or rollback.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsPostSourceNullBodiesAndAcceptOpaqueHTTPReplies",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsRejectInvalidIDAndSourceBeforeAnyHTTP"
+          ]
+        },
+        {
+          "behavior": "Direct calls capture the Cinder service and validate context/role/provider/endpoint/resource/header before ID admission. Connection checks context/provider/ID before selecting only cached Cinder v3, without CurrentLocation or recorded scope consumption. Getter errors retain the actual outer operation and custom cancellation causes before any request or fabricated proof.",
+          "tests": [
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsUseOnlyCachedCinderAndIgnoreLocation",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsPreflightNeverSelectsCinder",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsGetterErrorsKeepOperationAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Selected nonempty microversion wins literally without discovery/cap. Otherwise operation-owned finite negotiation uses the Volume3.71 ceiling and server maximum before optional minimum, with tuple length/order retained; minimum above ceiling omits version and missing maximum ignores unused minimum. Original client/cache stays unchanged, each call owns its selected policy, and independent Backup import retains3.64 on the same server advertisement.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsSelectedVersionKeepsOwnedHeadersAndLiveNativeAuthentication",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap",
+            "connection_volume_state_actions_test.go:TestConnectionVolumeStateActionsOwnDiscoveryPerCallAndKeepStageProof",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentStringAndHeaderCases",
+            "internal/cloudsnapshot/backup_import_version_test.go:TestBackupImportVersionIndependentMaximumMinimumCases"
+          ]
+        },
+        {
+          "behavior": "Finite discovery preserves captured encoded reverse-proxy prefix, admits200/300 supported body forms and first usable v3, and keeps admitted pages separate from action Applied. Only clean concrete native404/405 permits unavailable fallback. Accepted malformed/null/invalid-UTF8 or other discovery failures stop before action, with current ResponseError proof; later native rejection cannot borrow an earlier admitted page as current error proof.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsDiscoveryFailuresRetainCurrentStageAndNeverBorrowProof"
+          ]
+        },
+        {
+          "behavior": "Action replies are opaque finite HTTP100..399 acknowledgements including empty, malformed and invalid-UTF8 bytes. Applied owns actual body/header/status, independently of separate calls or error proof. Completed means accepted Read/Close/source validation succeeded, never a server status postcondition. Original-policy>=400 and expanded native OkCodes retain native rejected evidence without Applied or Completed. Existing native Reserve/Unreserve/BeginDetaching keep their {} body and narrower status policy; all four new service methods and nil API preserve actual labels.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionAdmissionUsesOriginalSub400PolicyAndKeepsNativeRejections",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionServiceMethodsPreserveNativeBodiesCodesAndNilAPILabels"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close, captured-source drift and custom cancellation retain actual Applied and every joined cause, with Completed=false and an independently owned ResponseError. Body closes once and accepted IO errors invoke no caller retry or SDK replay; proof storage never aliases the caller response or another result.",
+          "tests": [
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsAcceptedFaultsKeepActualProofAndAllCauses",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        },
+        {
+          "behavior": "Live native401 reauthentication and bounded503 caller retry retain exact owned null body, captured ordinary headers, selected source and operation version. Body/decoder/retention changes, version conflicts or source drift stop before resend while original/callback/custom cancellation causes remain reachable.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionLiveReauthAndBoundedRetryKeepLiteralNullBody",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionRetryMutationStopsBodyVersionAndSourceBeforeResend"
+          ]
+        },
+        {
+          "behavior": "Every physical POST including same-target307 redirects verifies exact method/path/origin, body bytes/framing and modern/legacy version policy. Changed body/framing/header/target stops before second transport attempt. Physical body Read/Close and header faults remain sticky after caller repair, close inspected body once and preserve actual causes.",
+          "tests": [
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionPhysicalRedirectMutationRemainsStickyAfterRepair"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-actions.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go takes safe literal UTF-8 ID only. Source accepts mutable Volume/VolumeDetail/Resource/dict/Munch inputs through _get_resource with constructor/to_dict/descriptor/computed location side effects and Python urljoin coercion. Go skips those identities/side effects and name lookup deliberately; this does not classify separate Resource declarations.",
+        "Source Proxy and Resource methods return None without translating response or updating local fields. Go adds independently owned Microversion, Discovery, Applied and Completed acknowledgement with literal input VolumeID. No semantic server-state confirmation, wait, follow-up GET or rollback is added.",
+        "Volume uses class ceiling3.71 while Backup import keeps3.64 through the shared Cinder policy. Selected nonempty version is forwarded literally; Keystoneauth Session canonicalization, dynamic nonstring defaults, full Adapter cache/link/envelope/header discovery and deployment HTTP behavior are outside this owned Go mapping.",
+        "Finite same-origin body-only first usable v3 discovery, typed advertisement shapes/status and clean concrete404/405 fallback are explicit mapping policy. Accepted malformed discovery is terminal with current proof rather than reproducing every caught Keystoneauth DiscoveryFailure/None path or endpoint-data exception order.",
+        "Utility tuple selection retains maximum-before-optional-minimum, length/order and missing bounds. Shared arbitrary-precision Unicode16 decimal/underscore string parsing and latest handling are bounded Go behavior; exact installed CPython digit limits, nonstring input normalization and pinned dependency runtime are not claimed.",
+        "Owned finite HTTP100..399 policy preserves opaque action bytes and admitted IO/source/context proof separately from native>=400 rejection. Native discarded rejected POST body Read/Close faults remain a documented limitation; mutable OkCodes cannot widen SDK acknowledgement. No response model conversion is introduced.",
+        "Fixed source/method/route/body/framing and operation microversion ownership constrain mutable native retry/redirect hooks while live authentication and bounded caller retry remain. Native Reserve/Unreserve/BeginDetaching keep {} and narrower success codes; new null action APIs remain separate.",
+        "Only the actual pinned v3 Proxy declaration is mapped here. Native/v2/Resource/inherited targets and direct bootable/readonly setters remain independent. Source hashes, static review, Go compile and offline HTTP/race tests do not establish authenticated OpenStack or Python SDK runtime parity or full SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
