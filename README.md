@@ -40,6 +40,8 @@ gophercloudsdk/
 | [Image](image/README.md) | 이미지 | 지원 | 지원 | 지원 | metadata 생성·직접 업로드·생성→staging→import·선택적 대기·기존 이미지 import·checksum 다운로드·저장소 복사본 삭제 |
 | [Block Storage](blockstorage/README.md) | 볼륨 | 지원 | 지원 | 지원 | 미지원 |
 
+기존 Cinder 볼륨을 서버에 연결할 때는 `conn.AttachVolume`이 이름 해석·새 상태 확인·Nova 연결 요청·기본 완료 대기를 처리합니다. `blockstorage.WithAttachVolumeWait(false)`로 접수 결과만 받거나 대기 정책을 지정할 수 있으며, 대기 실패에도 연결 응답을 보존합니다. [Python과의 호출 비교 및 부분 결과](blockstorage/attach-volume.md)를 참고하세요.
+
 [Glance Task 생성·조회·목록](image/tasks.md)은 `image.Service`의 공통 옵션과 기본 입력, 원문 응답 모델, lazy 페이지 순회를 제공합니다.
 
 [이미지별 Task 목록](image/image-tasks.md)은 이미지 ID·이름 선택과 공통 옵션, 삭제 여부·시각과 원문 응답을 제공합니다.
@@ -395,3 +397,4 @@ Swift 객체 생성은 `Objects.CreateObject(ctx, container, object, input, opti
 Swift 객체 대기는 `Objects.WaitForDelete`·`WaitForStatus`로 사용합니다. [Python/Go 대기 비교](objectstorage/v1/objects/wait.md)에 HEAD 조회, 기본 2초 간격·삭제 120초 제한, 명시한 상태 속성·응답 헤더와 마지막 실제 응답을 설명합니다.
 
 Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container, name, options...)`으로 생성합니다. [Python/Go 사용법](objectstorage/v1/objects/directory-marker.md)에 SDK가 준비하는 빈 객체와 Content-Type, metadata 함수 옵션과 실제 업로드 응답을 설명합니다.
+
