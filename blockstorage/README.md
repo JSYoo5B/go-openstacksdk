@@ -21,6 +21,7 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.get_volume(name_or_id, filters=None)` | `conn.GetVolume(ctx, blockstorage.GetVolumeRequest{NameOrID: name}, options...)` |
 | `conn.list_volumes()` | `conn.ListVolumes(ctx, options...)` |
 | `conn.get_volume_by_id(id)` | `conn.GetVolumeByID(ctx, blockstorage.GetVolumeByIDRequest{ID: id}, options...)` |
+| `conn.get_volume_id(name_or_id)` | `conn.GetVolumeID(ctx, blockstorage.GetVolumeIDRequest{NameOrID: name}, options...)` |
 | `conn.volume_exists(name_or_id)` | `conn.VolumeExists(ctx, blockstorage.VolumeExistsRequest{NameOrID: name}, options...)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
@@ -102,3 +103,5 @@ Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)
 임의 JSON 결과와 원본 row, 기본값, Python 비교는 [볼륨 검색과 단일 선택](search-volumes.md)에 설명합니다.
 
 전체 목록·ID 직접 조회·존재 확인은 [읽기 사용법과 Python 비교](volume-reads.md)에 설명합니다. `GetVolumeByID`의 404는 오류이며, `VolumeExists`의 `false`는 정상 부재만 나타냅니다. `WithVolumeReadLocation`으로 각 호출의 기본 location을 교체할 수 있습니다.
+
+`GetVolumeID`는 이름·ID를 실제 조회하고 응답의 ID JSON을 반환합니다. [ID 조회와 Python 비교](volume-id.md)에 정상 부재, 발견한 null ID, 오류와 실제 응답 증거의 구분을 설명합니다.

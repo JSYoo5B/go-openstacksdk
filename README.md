@@ -405,3 +405,5 @@ Swift 디렉터리 마커는 `Objects.CreateDirectoryMarkerObject(ctx, container
 볼륨 cloud 검색은 `Connection.SearchVolumes`와 `Connection.GetVolume`이 glob·중첩 필터·JMESPath와 계산된 location을 제공합니다. 필터 생략·null의 기본 조회와 명시적 필터의 전체 검색, 임의 JSON 결과와 원본 응답은 [서비스별 Python/Go 비교](blockstorage/search-volumes.md)에 설명합니다.
 
 볼륨 전체 목록·ID 직접 조회·존재 확인은 `conn.ListVolumes`, `conn.GetVolumeByID`, `conn.VolumeExists`로 호출합니다. [조회 사용법과 Python 비교](blockstorage/volume-reads.md)에 404 오류, 정상 부재와 조회 실패, 원본 응답·정규화 값·페이지 증거를 설명합니다.
+
+`conn.GetVolumeID`는 이름·ID를 실제 조회하고 응답의 ID JSON을 그대로 반환합니다. [ID 조회와 Python 비교](blockstorage/volume-id.md)에 정상 부재·null ID·오류와 실제 응답 증거의 구분을 설명합니다.

@@ -5,6 +5,8 @@ Cinder v3 읽기 작업을 같은 옵션·location·오류 방식으로 제공�
 원본 옵션을 한 번 적용한 뒤 cached Cinder 클라이언트를 선택합니다. Nova 클라이언트는
 필요하지 않습니다. 직접 `ServiceClient`를 전달하는 같은 이름의 package 함수도 있습니다.
 
+이름·ID에서 응답 ID를 얻는 `GetVolumeID`는 [별도 사용법과 Python 비교](volume-id.md)에 설명합니다.
+
 | openstacksdk cloud helper | Go |
 |---|---|
 | `conn.list_volumes()` | `conn.ListVolumes(ctx)` |
