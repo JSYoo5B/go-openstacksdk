@@ -425,3 +425,9 @@ Cinder backup은 `conn.ListVolumeBackups`·`SearchVolumeBackups`·`GetVolumeBack
 SDK가 상세 목록 기본값·서버/local 필터 분류·검색·nullable 24-field 변환·cached Cinder 선택과 실제
 응답 증거를 처리합니다. [Backup 조회와 Python 비교](blockstorage/volume-backups.md)에 ordinary Boolean,
 project/zone location, raw 응답과 seeded logical ID, nonnull 필터의 전체 검색을 설명합니다.
+
+
+Backup 생성·삭제는 `conn.CreateVolumeBackup`·`conn.DeleteVolumeBackup`으로 호출합니다.
+SDK가 six-field 생성 기본값, 정확한 이름/ID 조회, normal DELETE와 force 3.64 action, 부분 응답 병합과
+대기를 처리합니다. [Backup 생성·삭제와 Python 비교](blockstorage/volume-backup-mutations.md)에
+기본 생성 wait=true·삭제 wait=false, nil timeout, nullable 24-field logical 값과 실제 phase proof를 설명합니다.
