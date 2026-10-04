@@ -18,17 +18,35 @@ import (
 // backupPost owns the exact serialized POST through physical redirects too.
 // Forced actions select3.64 on an operation copy; restore keeps selected MV.
 func (p *reader) backupPost(ctx context.Context, target string, body json.RawMessage, forceVersion bool) (*rest.Response, error) {
+	var version *string
+	if forceVersion {
+		selected := "3.64"
+		version = &selected
+	}
+	return p.backupPostPolicy(ctx, target, body, version)
+}
+
+// An explicit version policy owns both presence and value. Nil preserves the
+// restore policy; an empty override suppresses negotiation headers for import.
+func (p *reader) backupPostPolicy(ctx context.Context, target string, body json.RawMessage, version *string) (*rest.Response, error) {
 	client, err := fixedrequest.NewGuarded(&p.source.Client, http.MethodPost, target, p.source.Guard)
 	if err != nil {
 		return nil, err
 	}
-	if forceVersion {
-		client.Microversion = "3.64"
+	if version != nil {
+		client.Microversion = *version
 		if client.MoreHeaders == nil {
 			client.MoreHeaders = make(map[string]string)
 		}
-		client.MoreHeaders["Openstack-Api-Version"] = "volume 3.64"
-		client.MoreHeaders["X-Openstack-Volume-Api-Version"] = "3.64"
+		for key := range client.MoreHeaders {
+			if _, owned := backupActionVersion(key); owned {
+				delete(client.MoreHeaders, key)
+			}
+		}
+		if *version != "" {
+			client.MoreHeaders["Openstack-Api-Version"] = "volume " + *version
+			client.MoreHeaders["X-Openstack-Volume-Api-Version"] = *version
+		}
 	}
 	expected, err := json.Marshal(body)
 	if err != nil {
@@ -38,8 +56,8 @@ func (p *reader) backupPost(ctx context.Context, target string, body json.RawMes
 	guard := func(ctx context.Context) error { return errors.Join(p.source.Guard(ctx), faults.error()) }
 	parent := client.ProviderClient.HTTPClient.Transport
 	client.ProviderClient.HTTPClient.Transport = rejectedPollTransport(func(req *http.Request) (*http.Response, error) {
-		if forceVersion {
-			faults.add(backupActionHeaders(req.Header))
+		if version != nil {
+			faults.add(backupPostHeaderVersion(req.Header, *version))
 		}
 		faults.add(backupPostBody(req, expected))
 		if err := guard(req.Context()); err != nil {
@@ -50,8 +68,8 @@ func (p *reader) backupPost(ctx context.Context, target string, body json.RawMes
 	if retry := client.ProviderClient.RetryFunc; retry != nil {
 		client.ProviderClient.RetryFunc = func(ctx context.Context, method, target string, options *gophercloud.RequestOpts, original error, count uint) error {
 			callbackErr := retry(ctx, method, target, options, original, count)
-			if forceVersion {
-				faults.add(backupPostRetryVersion(options))
+			if version != nil {
+				faults.add(backupPostRetryVersion(options, *version))
 			}
 			if err := guard(ctx); err != nil {
 				return errors.Join(original, callbackErr, err)
@@ -91,28 +109,59 @@ func backupPostBody(req *http.Request, expected []byte) error {
 	return nil
 }
 
-func backupPostRetryVersion(options *gophercloud.RequestOpts) error {
-	if options == nil {
-		return invalid("backup action retry options are required")
-	}
-	for _, required := range []string{"Openstack-Api-Version", "X-Openstack-Volume-Api-Version"} {
-		present := false
-		for key, value := range options.MoreHeaders {
-			if strings.EqualFold(key, required) {
-				present = true
-				expected, _ := backupActionVersion(required)
-				if value != expected {
-					return invalid("backup action retry changes microversion header %q", key)
-				}
+func backupPostHeaderVersion(headers http.Header, version string) error {
+	for _, name := range []string{"Openstack-Api-Version", "X-Openstack-Volume-Api-Version"} {
+		count := 0
+		for key, values := range headers {
+			if !strings.EqualFold(key, name) {
+				continue
+			}
+			count += len(values)
+			expected := version
+			if name == "Openstack-Api-Version" {
+				expected = "volume " + version
+			}
+			if version == "" || len(values) != 1 || values[0] != expected {
+				return invalid("backup POST changes physical microversion header %q", key)
 			}
 		}
-		if !present {
-			return invalid("backup action retry removes microversion header %q", required)
+		if version != "" && count != 1 {
+			return invalid("backup POST removes physical microversion header %q", name)
 		}
 	}
-	for _, key := range options.OmitHeaders {
-		if _, owned := backupActionVersion(key); owned {
-			return invalid("backup action retry omits microversion header %q", key)
+	return nil
+}
+
+func backupPostRetryVersion(options *gophercloud.RequestOpts, version string) error {
+	if options == nil {
+		return invalid("backup POST retry options are required")
+	}
+	// Native options retain both service and generated spelling aliases. They
+	// collapse to one physical header; reject conflicting values, not aliases.
+	for _, name := range []string{"Openstack-Api-Version", "X-Openstack-Volume-Api-Version"} {
+		present := false
+		for key, value := range options.MoreHeaders {
+			if !strings.EqualFold(key, name) {
+				continue
+			}
+			present = true
+			expected := version
+			if name == "Openstack-Api-Version" {
+				expected = "volume " + version
+			}
+			if version == "" || value != expected {
+				return invalid("backup POST retry changes microversion header %q", key)
+			}
+		}
+		if version != "" && !present {
+			return invalid("backup POST retry removes microversion header %q", name)
+		}
+	}
+	if version != "" {
+		for _, key := range options.OmitHeaders {
+			if _, owned := backupActionVersion(key); owned {
+				return invalid("backup POST retry omits microversion header %q", key)
+			}
 		}
 	}
 	return nil
