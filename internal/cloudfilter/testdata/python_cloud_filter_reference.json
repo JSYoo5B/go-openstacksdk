@@ -1,0 +1,1080 @@
+{
+  "source": "/private/tmp/gophercloudsdk-cloud-volume-filter-python-probes-repaired.json",
+  "source_sha256": "aa2ad7d6375d70247183d807a2826a04a042a5ce169b1f22dbf6051a18a3e044",
+  "pinned_source_sha256": {
+    "/private/tmp/gophercloudsdk-openstacksdk/openstack/cloud/_utils.py": "611c554e40f4ba06c3787b824fd2c6cc0cde29f351b9d3638b11dde93d5259fa",
+    "/private/tmp/gophercloudsdk-openstacksdk/openstack/cloud/_block_storage.py": "4ae060a48a5dbedab6c790ba6b2c9100b7694fd7fa5e1f82402bbeca6962abc3",
+    "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/fnmatch.py": "ce582bc266922e4c682e2a85d72095124430a6bf58716c6f2537103480eae742",
+    "/private/tmp/gophercloudsdk-jmespath-reference/python-1.0.1/jmespath/__init__.py": "58d7fc41d5aaa51846eb0c10668148fc608cfdbf2ed81cd110dd1e810b0fab5c"
+  },
+  "scope": "Portable representative pure cloudfilter regression snapshots, source rows are ordinary JSON mappings; standard find dispatch excluded. Full 104-case differential harness reports that one branch separately.",
+  "cases": [
+    {
+      "name": "null_or_missing_id_name_stringifies_None",
+      "input": [
+        {},
+        {
+          "id": "different",
+          "name": null
+        },
+        {
+          "id": "None",
+          "name": "other"
+        }
+      ],
+      "name_or_id": "None",
+      "filters": null,
+      "entry": "_filter_list",
+      "result": [
+        {},
+        {
+          "id": "different",
+          "name": null
+        },
+        {
+          "id": "None",
+          "name": "other"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "fnmatch_a?b",
+      "input": [
+        {
+          "id": "a/b",
+          "name": "unrelated"
+        },
+        {
+          "id": "a\nb",
+          "name": "unrelated"
+        },
+        {
+          "id": "a중b",
+          "name": "unrelated"
+        }
+      ],
+      "name_or_id": "a?b",
+      "filters": null,
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "a/b",
+          "name": "unrelated"
+        },
+        {
+          "id": "a\nb",
+          "name": "unrelated"
+        },
+        {
+          "id": "a중b",
+          "name": "unrelated"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "fnmatch_[z-a]",
+      "input": [
+        {
+          "id": "a",
+          "name": "unrelated"
+        },
+        {
+          "id": "z",
+          "name": "unrelated"
+        },
+        {
+          "id": "[z-a]",
+          "name": "unrelated"
+        }
+      ],
+      "name_or_id": "[z-a]",
+      "filters": null,
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "[z-a]",
+          "name": "unrelated"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "early_mismatch_hides_later_missing_key",
+      "input": [
+        {
+          "id": "v",
+          "status": "bad"
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "status": "good",
+        "unknown": null
+      },
+      "entry": "_filter_list",
+      "result": [],
+      "type": "list"
+    },
+    {
+      "name": "missing_key_before_mismatch_errors",
+      "input": [
+        {
+          "id": "v",
+          "status": "bad"
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "unknown": null,
+        "status": "good"
+      },
+      "entry": "_filter_list",
+      "error_type": "AttributeError",
+      "error": "unknown"
+    },
+    {
+      "name": "explicit_null_filter_matches",
+      "input": [
+        {
+          "id": "v",
+          "x": null
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "x": null
+      },
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "v",
+          "x": null
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "nested_empty_filter_False",
+      "input": [
+        {
+          "id": "v",
+          "metadata": false
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "metadata": {}
+      },
+      "entry": "_filter_list",
+      "result": [],
+      "type": "list"
+    },
+    {
+      "name": "nested_empty_filter_a",
+      "input": [
+        {
+          "id": "v",
+          "metadata": "a"
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "metadata": {}
+      },
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "v",
+          "metadata": "a"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "nested_nonempty_filter_truthy_string_get_error",
+      "input": [
+        {
+          "id": "v",
+          "metadata": "x"
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "metadata": {
+          "x": 1
+        }
+      },
+      "entry": "_filter_list",
+      "error_type": "AttributeError",
+      "error": "'str' object has no attribute 'get'"
+    },
+    {
+      "name": "leaf_python_bool_number_recursive",
+      "input": [
+        {
+          "id": "v",
+          "x": [
+            true,
+            {
+              "a": false
+            }
+          ]
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "x": [
+          1,
+          {
+            "a": 0
+          }
+        ]
+      },
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "v",
+          "x": [
+            true,
+            {
+              "a": false
+            }
+          ]
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "jmes_[?size==`9007199254740993`]",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": null,
+      "filters": "[?size==`9007199254740993`]",
+      "entry": "_filter_list",
+      "result": [
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "invalid_expression_after_empty_identifier_result",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "missing",
+      "filters": "[?",
+      "entry": "_filter_list",
+      "error_type": "IncompleteExpressionError",
+      "error": "Invalid jmespath expression: Incomplete expression:\n\"[?\"\n   ^"
+    },
+    {
+      "name": "unknown_function_unvisited_empty_projection",
+      "input": [],
+      "name_or_id": null,
+      "filters": "[].unknown(@)",
+      "entry": "_filter_list",
+      "result": [],
+      "type": "list"
+    },
+    {
+      "name": "get_expression_`[0]`",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "`[0]`",
+      "entry": "get_volume",
+      "result": 0,
+      "type": "int",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "`[0]`"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "get_expression_`[false]`",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "`[false]`",
+      "entry": "get_volume",
+      "result": false,
+      "type": "bool",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "`[false]`"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "get_expression_`[null]`",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "`[null]`",
+      "entry": "get_volume",
+      "result": null,
+      "type": "NoneType",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "`[null]`"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "get_expression_`{\"id\":\"v\"}`",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "`{\"id\":\"v\"}`",
+      "entry": "get_volume",
+      "error_type": "KeyError",
+      "error": "0",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "`{\"id\":\"v\"}`"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "get_expression_`{\"id\":\"v\",\"name\":\"n\"}`",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "`{\"id\":\"v\",\"name\":\"n\"}`",
+      "entry": "get_volume",
+      "error_type": "SDKException",
+      "error": "Multiple matches found for ",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "`{\"id\":\"v\",\"name\":\"n\"}`"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "supplemental_glob_[a--b]",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "]",
+          "name": "outside"
+        },
+        {
+          "id": "[",
+          "name": "outside"
+        },
+        {
+          "id": "^",
+          "name": "outside"
+        },
+        {
+          "id": "a",
+          "name": "outside"
+        },
+        {
+          "id": "b",
+          "name": "outside"
+        },
+        {
+          "id": "c",
+          "name": "outside"
+        },
+        {
+          "id": "-",
+          "name": "outside"
+        },
+        {
+          "id": "q",
+          "name": "outside"
+        },
+        {
+          "id": "z",
+          "name": "outside"
+        },
+        {
+          "id": "x",
+          "name": "outside"
+        },
+        {
+          "id": "&",
+          "name": "outside"
+        },
+        {
+          "id": "~",
+          "name": "outside"
+        },
+        {
+          "id": "|",
+          "name": "outside"
+        },
+        {
+          "id": "\\x",
+          "name": "outside"
+        },
+        {
+          "id": "a/b",
+          "name": "outside"
+        },
+        {
+          "id": "a\nb",
+          "name": "outside"
+        },
+        {
+          "id": "a중b",
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "[a--b]",
+      "filters": null,
+      "result": [
+        {
+          "id": "b",
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_glob_[!z-a]",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "]",
+          "name": "outside"
+        },
+        {
+          "id": "[",
+          "name": "outside"
+        },
+        {
+          "id": "^",
+          "name": "outside"
+        },
+        {
+          "id": "a",
+          "name": "outside"
+        },
+        {
+          "id": "b",
+          "name": "outside"
+        },
+        {
+          "id": "c",
+          "name": "outside"
+        },
+        {
+          "id": "-",
+          "name": "outside"
+        },
+        {
+          "id": "q",
+          "name": "outside"
+        },
+        {
+          "id": "z",
+          "name": "outside"
+        },
+        {
+          "id": "x",
+          "name": "outside"
+        },
+        {
+          "id": "&",
+          "name": "outside"
+        },
+        {
+          "id": "~",
+          "name": "outside"
+        },
+        {
+          "id": "|",
+          "name": "outside"
+        },
+        {
+          "id": "\\x",
+          "name": "outside"
+        },
+        {
+          "id": "a/b",
+          "name": "outside"
+        },
+        {
+          "id": "a\nb",
+          "name": "outside"
+        },
+        {
+          "id": "a중b",
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "[!z-a]",
+      "filters": null,
+      "result": [
+        {
+          "id": "]",
+          "name": "outside"
+        },
+        {
+          "id": "[",
+          "name": "outside"
+        },
+        {
+          "id": "^",
+          "name": "outside"
+        },
+        {
+          "id": "a",
+          "name": "outside"
+        },
+        {
+          "id": "b",
+          "name": "outside"
+        },
+        {
+          "id": "c",
+          "name": "outside"
+        },
+        {
+          "id": "-",
+          "name": "outside"
+        },
+        {
+          "id": "q",
+          "name": "outside"
+        },
+        {
+          "id": "z",
+          "name": "outside"
+        },
+        {
+          "id": "x",
+          "name": "outside"
+        },
+        {
+          "id": "&",
+          "name": "outside"
+        },
+        {
+          "id": "~",
+          "name": "outside"
+        },
+        {
+          "id": "|",
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_glob_[a-z-y-x-b-a]",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "]",
+          "name": "outside"
+        },
+        {
+          "id": "[",
+          "name": "outside"
+        },
+        {
+          "id": "^",
+          "name": "outside"
+        },
+        {
+          "id": "a",
+          "name": "outside"
+        },
+        {
+          "id": "b",
+          "name": "outside"
+        },
+        {
+          "id": "c",
+          "name": "outside"
+        },
+        {
+          "id": "-",
+          "name": "outside"
+        },
+        {
+          "id": "q",
+          "name": "outside"
+        },
+        {
+          "id": "z",
+          "name": "outside"
+        },
+        {
+          "id": "x",
+          "name": "outside"
+        },
+        {
+          "id": "&",
+          "name": "outside"
+        },
+        {
+          "id": "~",
+          "name": "outside"
+        },
+        {
+          "id": "|",
+          "name": "outside"
+        },
+        {
+          "id": "\\x",
+          "name": "outside"
+        },
+        {
+          "id": "a/b",
+          "name": "outside"
+        },
+        {
+          "id": "a\nb",
+          "name": "outside"
+        },
+        {
+          "id": "a중b",
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "[a-z-y-x-b-a]",
+      "filters": null,
+      "result": [
+        {
+          "id": "a",
+          "name": "outside"
+        },
+        {
+          "id": "b",
+          "name": "outside"
+        },
+        {
+          "id": "c",
+          "name": "outside"
+        },
+        {
+          "id": "-",
+          "name": "outside"
+        },
+        {
+          "id": "q",
+          "name": "outside"
+        },
+        {
+          "id": "z",
+          "name": "outside"
+        },
+        {
+          "id": "x",
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_repr_1e-05",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": 1e-05,
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "1e-05",
+      "filters": null,
+      "result": [
+        {
+          "id": 1e-05,
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_repr_1e+16",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": 1e+16,
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "1e+16",
+      "filters": null,
+      "result": [
+        {
+          "id": 1e+16,
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_repr_{'z': False, 'a': 1}",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": {
+            "z": false,
+            "a": 1
+          },
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "{'z': False, 'a': 1}",
+      "filters": null,
+      "result": [
+        {
+          "id": {
+            "z": false,
+            "a": 1
+          },
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_repr_[\"a'b\", 'a\"b', 'a\\\\b', '\\x00', '\\xa0', '중']",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": [
+            "a'b",
+            "a\"b",
+            "a\\b",
+            "\u0000",
+            " ",
+            "중"
+          ],
+          "name": "outside"
+        }
+      ],
+      "name_or_id": "[\"a'b\", 'a\"b', 'a\\\\b', '\\x00', '\\xa0', '중']",
+      "filters": null,
+      "result": [
+        {
+          "id": [
+            "a'b",
+            "a\"b",
+            "a\\b",
+            "\u0000",
+            " ",
+            "중"
+          ],
+          "name": "outside"
+        }
+      ],
+      "type": "list"
+    },
+    {
+      "name": "supplemental_get_'중'",
+      "entry": "get_volume",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "'중'",
+      "result": "중",
+      "type": "str",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "'중'"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "supplemental_get_'중a'",
+      "entry": "get_volume",
+      "input": [
+        {
+          "id": "a",
+          "size": 0,
+          "flag": false,
+          "metadata": {
+            "role": "db"
+          }
+        },
+        {
+          "id": "b",
+          "size": 1,
+          "flag": true,
+          "metadata": {
+            "role": "web"
+          }
+        },
+        {
+          "id": "c",
+          "size": 9007199254740993
+        }
+      ],
+      "name_or_id": "",
+      "filters": "'중a'",
+      "error_type": "SDKException",
+      "error": "Multiple matches found for ",
+      "calls": [
+        [
+          "search_volumes",
+          "",
+          "'중a'"
+        ],
+        [
+          "list_volumes"
+        ]
+      ]
+    },
+    {
+      "name": "supplemental_order_{\"status\":\"good\",\"unknown\":null,\"status\":\"bad\"}",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "v",
+          "status": "bad",
+          "metadata": 0
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "status": "bad",
+        "unknown": null
+      },
+      "error_type": "AttributeError",
+      "error": "unknown",
+      "filters_raw": "{\"status\":\"good\",\"unknown\":null,\"status\":\"bad\"}"
+    },
+    {
+      "name": "supplemental_order_{\"unknown\":null,\"status\":\"good\",\"unknown\":null}",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "v",
+          "status": "bad",
+          "metadata": 0
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "unknown": null,
+        "status": "good"
+      },
+      "error_type": "AttributeError",
+      "error": "unknown",
+      "filters_raw": "{\"unknown\":null,\"status\":\"good\",\"unknown\":null}"
+    },
+    {
+      "name": "supplemental_order_{\"metadata\":{\"missing\":null},\"status\":\"good\"}",
+      "entry": "_filter_list",
+      "input": [
+        {
+          "id": "v",
+          "status": "bad",
+          "metadata": 0
+        }
+      ],
+      "name_or_id": null,
+      "filters": {
+        "metadata": {
+          "missing": null
+        },
+        "status": "good"
+      },
+      "result": [],
+      "type": "list",
+      "filters_raw": "{\"metadata\":{\"missing\":null},\"status\":\"good\"}"
+    }
+  ]
+}
