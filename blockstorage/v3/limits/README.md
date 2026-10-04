@@ -52,8 +52,12 @@ numeric 3.39+ version permits the filter. Symbolic `latest` remains valid for
 unfiltered `Fetch`, but fails project-filter preflight because a deployment's
 maximum may be below 3.39. Connection microversion range discovery can select a
 numeric version before binding the scope; the SDK does not upgrade it here.
-The pinned Python resource caps its selected microversion at 3.39. This Go layer
-retains the service client's selected version and never raises or caps it.
+The pinned Python resource uses 3.39 as the negotiation ceiling only when
+`session.default_microversion` is absent. An explicit session default is returned
+without that cap. This Go scope retains the selected service version and keeps
+its own numeric 3.39+ project-filter preflight. The separate
+[cloud GetVolumeLimits helper](../../volume-limits.md) resolves Identity projects
+first and does not add that minimum-version preflight.
 
 Cinder silently ignores `project_id` for non-admin callers, even at 3.39+,
 and returns the authenticated project's limits. The response has no project
