@@ -449,3 +449,5 @@ Backup import는 `conn.ImportVolumeBackup(ctx, blockstorage.ImportVolumeBackupRe
 Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·`UnreserveVolume`·`BeginVolumeDetaching`·`AbortVolumeDetaching`으로 명시적인 ID에 호출합니다. [Volume state action과 Python/native 비교](blockstorage/volume-actions.md)에 null action body, 호출별 microversion, opaque acknowledgement와 오류 시 단계별 응답을 설명합니다. 서버 상태 완료를 기다리지 않습니다.
 
 명시적인 Cinder volume ID의 `conn.SetVolumeBootableStatus(ctx, request, bool)`은 필수 bootable 값을 전달하고, `conn.SetVolumeReadonly(ctx, request, options...)`는 생략 시 true와 명시적 false를 구별합니다. [Flag action 사용법과 Python 비교](blockstorage/volume-flags.md)에 package·Connection·v3 service 호출, 옵션 소유권, microversion과 opaque 응답 증거를 설명합니다.
+
+명시적인 Cinder volume ID의 `ExtendVolume`·`RetypeVolume`·`CompleteVolumeExtend`는 필수 size/type 값, migration 기본 never·명시적 생략과 completion 기본 false를 SDK가 처리합니다. [Extend·retype·completion 사용법과 Python 비교](blockstorage/volume-resize-retype.md)에 세 호출 경로, 옵션 소유권과 opaque action acknowledgement를 설명합니다.

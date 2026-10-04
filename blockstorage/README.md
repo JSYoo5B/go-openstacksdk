@@ -49,6 +49,9 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
+| `conn.block_storage.extend_volume(id, size)` | `conn.ExtendVolume(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, newSize)` |
+| `conn.block_storage.retype_volume(id, type_id, migration_policy="never")` | `conn.RetypeVolume(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, newType, options...)` |
+| `conn.block_storage.complete_volume_extend(id, error=False)` | `conn.CompleteVolumeExtend(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, options...)` |
 
 SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Cloud 수준 삭제의 `WithDeleteVolumeForce`는 선택된 microversion에 맞는 요청을 사용합니다. Proxy의 별도 `cascade` 옵션은 이 workflow에 포함하지 않으며 snapshot까지 삭제하는 옵션은 native API 계층에서 명시적으로 선택합니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
 
@@ -173,3 +176,5 @@ Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupServic
 명시적인 volume ID의 reserve·unreserve·begin/abort detaching은 [Volume action 사용법](volume-actions.md)을 참고합니다. 네 helper에는 lookup/wait 옵션이 없으며, `Completed`는 action acknowledgement입니다. 기존 cloud bootable helper와 직접 Proxy bootable/readonly의 범위를 구별합니다.
 
 직접 ID flag action은 `SetVolumeBootableStatus`의 필수 bool과 `SetVolumeReadonly`의 defaulttrue·`WithVolumeReadonly(false)`를 SDK가 처리합니다. [Flag action 사용법](volume-flags.md)은 기존 NameOrID/defaulttrue cloud `SetVolumeBootable`과 native200-only `SetBootable`의 차이, 세 호출 경로 및 부분 응답 증거를 설명합니다.
+
+[Extend·retype·completion 사용법](volume-resize-retype.md)은 size 0·음수의 서버 검증, migration 기본 never와 명시적 빈 값의 생략, completion 기본 false, Prepare·옵션 복사 및 부분 응답을 설명합니다.
