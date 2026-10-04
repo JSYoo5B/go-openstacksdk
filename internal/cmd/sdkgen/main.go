@@ -195,6 +195,7 @@ type emitter struct {
 	pkg             *types.Package
 	imports         map[string]string
 	sourceImports   map[string]*types.Package
+	sourceFiles     map[*ast.FuncDecl]*ast.File
 	controlledLists map[string]bool
 	pythonFilters   *pythonFilterManifest
 	body            bytes.Buffer
@@ -295,6 +296,7 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	decls := map[string]*ast.FuncDecl{}
+	sourceFiles := map[*ast.FuncDecl]*ast.File{}
 	nativeDecls := map[string]*ast.FuncDecl{}
 	nativeConstants := map[string]string{}
 	sourceImports := map[string]*types.Package{}
@@ -326,6 +328,7 @@ func (g *generator) generate(path string) error {
 			if !ok {
 				continue
 			}
+			sourceFiles[fn] = f
 			if key := identityDeclarationKey(fn); key != "" {
 				nativeDecls[key] = fn
 			}
@@ -338,6 +341,9 @@ func (g *generator) generate(path string) error {
 		}
 	}
 	if err := validateAuditedRequestCalls(pkg, decls); err != nil {
+		return err
+	}
+	if err := validateReflectedHeaderRequests(pkg, decls, sourceFiles); err != nil {
 		return err
 	}
 	snapshotDeclarations, err := g.snapshotMetadataDeclarations(pkg.Path())
@@ -454,7 +460,7 @@ func (g *generator) generate(path string) error {
 	if len(names) == 0 {
 		return nil
 	}
-	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports, controlledLists: collectionControlledLists(plan, scopes)}
+	e := emitter{pkg: pkg, imports: map[string]string{}, sourceImports: sourceImports, sourceFiles: sourceFiles, controlledLists: collectionControlledLists(plan, scopes)}
 	e.use(pkg.Path())
 	e.use(upstreamModule)
 	specialized, hasSpecialized := specializedCollections[path]
@@ -663,6 +669,7 @@ type builder struct {
 	base    types.Type
 	iface   *types.Interface
 	adapter string
+	headers []reflectedHeaderField
 }
 
 func extraction(t types.Type) *types.Signature {
@@ -752,6 +759,11 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	for i := range builders {
 		builders[i] = withOptionalBuilders(e.pkg, builders[i], decl, e.sourceImports)
+		var err error
+		builders[i], err = withReflectedHeaders(e.pkg, builders[i], decl, e.sourceFiles[decl])
+		if err != nil {
+			return err
+		}
 	}
 	contextAlias := e.use("context")
 	requestAlias := e.use("gophercloudsdk/request")
@@ -992,13 +1004,13 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		errReturn()
 		e.printf("}\n")
 		if primary.iface != nil {
-			e.printf("_%s := %s{base:cfg.Options,config:cfg}\n", primary.name, primary.adapter)
+			e.printf("_%s := %s\n", primary.name, builderLiteral(primary, "cfg.Options", "cfg"))
 		}
 		for _, b := range builders[1:] {
 			e.printf("var _%s %s\n", b.name, e.typ(sig.Params().At(b.index).Type()))
 			e.printf("{base,provided,err:=%s.Argument[%s](cfg,%q)\nif err!=nil{\n", requestAlias, e.typ(b.base), b.name)
 			errReturn()
-			e.printf("}\nif provided{_%s=%s{base:base,config:%s.Config[%s]{Options:base}}}}\n", b.name, b.adapter, requestAlias, e.typ(b.base))
+			e.printf("}\nif provided{_%s=%s}}\n", b.name, builderLiteral(b, "base", requestAlias+".Config["+e.typ(b.base)+"]{Options:base}"))
 		}
 	}
 	call := "upstream." + op + "(" + strings.Join(args, ",") + ")"
@@ -1093,7 +1105,11 @@ func importedExtractor(imports map[string]*types.Package, decl *ast.FuncDecl) *t
 
 func emitBuilder(e *emitter, b builder) {
 	req := e.use("gophercloudsdk/request")
-	e.printf("type %s struct{base %s;config %s.Config[%s]}\n", b.adapter, e.typ(b.base), req, e.typ(b.base))
+	e.printf("type %s struct{base %s;config %s.Config[%s]", b.adapter, e.typ(b.base), req, e.typ(b.base))
+	for _, header := range b.headers {
+		e.printf(";%s %s %q", header.field.Name(), e.typ(header.field.Type()), header.tag)
+	}
+	e.printf("}\n")
 	for i := 0; i < b.iface.NumMethods(); i++ {
 		method := b.iface.Method(i)
 		sig := method.Type().(*types.Signature)
