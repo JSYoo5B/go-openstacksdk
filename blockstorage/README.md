@@ -14,11 +14,12 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.attach_volume(server, volume, wait=True)` | `conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.detach_volume(server, volume, wait=True)` | `conn.DetachVolume(ctx, blockstorage.DetachVolumeRequest{Server: resource.ID(serverID), Volume: resource.ID(volumeID)})` |
 | `conn.create_volume(size, wait=True, image=None, bootable=None, **kwargs)` | `conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: size}, options...)` |
+| `conn.delete_volume(name_or_id, wait=True, force=False)` | `conn.DeleteVolume(ctx, blockstorage.DeleteVolumeRequest{Volume: resource.ID(volumeID)}, options...)` |
 | `conn.block_storage.fetch_volume_metadata(id)` | `conn.VolumeMetadata(ctx, resource.ID(id))`의 `Get(ctx)` |
 | `conn.block_storage.set_volume_metadata(id, owner="worker")` | 같은 범위의 `Merge(ctx, map[string]string{"owner":"worker"})` |
 | `conn.block_storage.delete_volume_metadata(id, keys)` | 같은 범위의 `DeleteKeys(ctx, keys)` |
 
-SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Python의 `force`·`cascade` 삭제 옵션은 현재 상위 계층에 노출하지 않았습니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
+SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Cloud 수준 삭제의 `WithDeleteVolumeForce`는 선택된 microversion에 맞는 요청을 사용합니다. Proxy의 별도 `cascade` 옵션은 이 workflow에 포함하지 않으며 snapshot까지 삭제하는 옵션은 native API 계층에서 명시적으로 선택합니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
 
 ## 조회와 목록
 
@@ -82,3 +83,5 @@ native options의 nil/빈 Metadata map은 `omitempty`로 생략되며, core 필�
 Volume·Snapshot의 메타데이터는 v2/v3 버전별 `API.MetadataIn(ctx, ref)`로 고정합니다. v3는 `conn.VolumeMetadata`·`conn.SnapshotMetadata`가 공유 클라이언트를 연결합니다. Get은 실제 map을 조회하고 Merge는 POST 병합, Replace는 PUT 전체 교체를 실행합니다. nil/빈 map도 명시적인 객체를 보내며 DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음입니다. 문자열 map·header 옵션·순서별 부분 성공과 Python Resource/cache 차이는 [공통 사용법](metadata/README.md), [v3 Volume](v3/volumes/README.md)·[Snapshot](v3/snapshots/README.md)을 참고합니다. [서버 계약](../docs/cinder-metadata-server-contracts.md)은 Cinder의 ETag와 Backup 경로 차이를 고정 소스로 설명합니다.
 
 `blockstorage.WaitForAvailable(ctx, service.Volumes, ref)`는 available·정확한 error 실패 상태와 무제한 SDK timeout을 기본으로 사용합니다. `WaitForState`는 다른 대상을 명시하고 `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. v2/v3 Volume·Snapshot leaf에도 같은 메서드가 있습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
+
+`conn.DeleteVolume`은 초기 조회·선택적 강제 삭제·기본 완료 대기를 묶고 초기 부재와 조회 후 삭제 경합을 구별합니다. [삭제 사용법과 Python 비교](delete-volume.md)에 선택된 microversion, `Deleted` 반환값과 오류 시 단계별 결과를 설명합니다.
