@@ -431,3 +431,7 @@ Backup 생성·삭제는 `conn.CreateVolumeBackup`·`conn.DeleteVolumeBackup`으
 SDK가 six-field 생성 기본값, 정확한 이름/ID 조회, normal DELETE와 force 3.64 action, 부분 응답 병합과
 대기를 처리합니다. [Backup 생성·삭제와 Python 비교](blockstorage/volume-backup-mutations.md)에
 기본 생성 wait=true·삭제 wait=false, nil timeout, nullable 24-field logical 값과 실제 phase proof를 설명합니다.
+
+Backup export는 `conn.ExportVolumeBackup(ctx, blockstorage.ExportVolumeBackupRequest{BackupID: backupID})`로
+호출합니다. [Backup export와 Python 비교](blockstorage/volume-backup-export.md)에 Cinder v3의
+opaque bytes·header·status, literal ID 요청과 오류 시 실제 응답 증거를 설명합니다.

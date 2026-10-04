@@ -31,6 +31,7 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.get_volume_snapshot_by_id(id)` | `conn.GetVolumeSnapshotByID(ctx, blockstorage.GetVolumeSnapshotByIDRequest{ID: id}, options...)` |
 | `conn.create_volume_backup(volume_id, force=False, wait=True, incremental=False)` | `conn.CreateVolumeBackup(ctx, blockstorage.CreateVolumeBackupRequest{VolumeID: volumeID}, options...)` |
 | `conn.delete_volume_backup(name_or_id, force=False, wait=False)` | `conn.DeleteVolumeBackup(ctx, blockstorage.DeleteVolumeBackupRequest{NameOrID: name}, options...)` |
+| `conn.export_volume_backup(backup_id)` | `conn.ExportVolumeBackup(ctx, blockstorage.ExportVolumeBackupRequest{BackupID: backupID})` |
 | `conn.list_volume_backups(detailed=True, filters=None)` | `conn.ListVolumeBackups(ctx, options...)` |
 | `conn.search_volume_backups(name_or_id, filters)` | `conn.SearchVolumeBackups(ctx, blockstorage.SearchVolumeBackupsRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_backup(name_or_id, filters=None)` | `conn.GetVolumeBackup(ctx, blockstorage.GetVolumeBackupRequest{NameOrID: name}, options...)` |
@@ -149,3 +150,8 @@ null/false 보존, 기본 wait와 timeout, 조회·변경·poll의 실제 결과
 [Backup 생성·삭제와 Python 비교](volume-backup-mutations.md)에 설명합니다. force는
 `os-force_delete: null` POST와 독립 3.64 action이며 normal selected microversion과 다릅니다.
 이 두 cloud workflow와 v2·native·restore/import/export/reset/update/metadata 검토는 독립적입니다.
+
+Backup export는 `ExportVolumeBackup`으로 호출합니다. [Backup export와 Python 비교](volume-backup-export.md)에
+이름 조회·wait·location 변환 없이 ID를 요청하는 API, 실제 opaque 응답과 부분 오류 증거를 설명합니다.
+Python v3 cloud의 raw Response를 대상으로 하며 native typed Export와 별도 parsed Proxy 선언의
+지원 검토는 독립적입니다.
