@@ -768,3 +768,55 @@ unsupported1 유지, unresolved3229→3227이며 supported는0입니다. 전체 
 
 26개 계약은 신규40개와 실제 공유 model/overlay/finder 의존성13개를 포함한53개 distinct test anchor에
 연결했습니다. 각 anchor의 현재 선언과 assertion을 확인했으며 최종 parity CLI도 통과했습니다.
+
+
+### Backup cloud raw export helper
+
+고정된 BlockStorageCloudMixin의 실제 `export_volume_backup` 한 개를 Connection 및
+`blockstorage.ExportVolumeBackup`에 연결했습니다. 이름처럼 보이는 값도 literal BackupID이며
+safe UTF8 single segment를 검증하고 body/query 없는 GET `backups/{id}/export_record`만 수행합니다.
+Resolver·location·Backup descriptor 정규화·wait·사용자 builder/빈 options를 추가하지 않습니다.
+Connection은 context/provider/ID를 확인한 뒤 cached Cinder v3만 선택하며 recorded scope나
+configured location의 변환을 요구하지 않습니다.
+
+Source의 raw requests.Response를 Go의 독립적으로 소유하는 Body/Header/StatusCode로 매핑합니다.
+HTTP100..399의 빈 body·임의 bytes·배열·malformed JSON도 opaque evidence이며 JSON 또는
+backup-record/base64 해석은 없습니다. 선택된 microversion은 absent/3.60/3.70 이상을 그대로
+유지하고 absent-default discovery/cap/3.64 action 정책을 추가하지 않습니다.
+
+Exported가 있더라도 accepted Read/Close/source/context 오류이면 성공 완료가 아닙니다.
+실제 현재 응답과 독립 ResponseError 증거·원래/custom cancellation cause를 보존하며 SDK가
+operation을 재실행하지 않습니다. native 또는 expanded original-policy400 이상은 Exported가 없고
+오류입니다. native rejected-body Read/Close 정책을 universal observer로 확장하지 않습니다.
+
+최초 source 감사와 public9 테스트가 통과한 뒤 Root가 same-target redirect hook의 physical GET
+Body/ContentLength/TransferEncoding 주입 결함을 추가로 발견했습니다. 수정 전 회귀2그룹9사례는
+모두 잘못된 두 번째 physical request를 재현했습니다. export 전용 guard는 실제 전송 전에 이를
+거부하고 body Close fault와 sticky source/context 원인을 보존합니다. native retry가 요청을 복구하거나
+nil을 반환해도 최초 거부를 지우거나 resend할 수 없습니다. 기존 shared Go bytes는 변경하지 않았고
+초기 감사·실패·수정·독립 실제 helper 감사 receipts를 각각 보존했습니다.
+
+신규15개 테스트 그룹은 public contract4·transport5·redirect body2·Connection4입니다.
+수정 후 전체 focused 검증을 통과했습니다. 최초 installer 오류 뒤 zero-test 실행과 문서 runner의
+잘못된 cwd/sandbox localhost 실패는 검증 증거에서 제외하고 원래 receipts를 보존했습니다.
+문서 runner를 explicit cwd로 고쳐 actual standalone fence를 독립 컴파일했습니다.
+
+최종1654개 Go 파일에서 전체39개 테스트 패키지의
+`go test -mod=readonly -race -count=1 -timeout 60s ./...`(126.01초),
+`go vet -mod=readonly ./...`(27.37초), 전체 gofmt와 exact 문서 fence 독립 컴파일(47.39초)을
+통과했습니다. 기존1645개 Go는 모두 byte-identical이며 새 production5개·test4개입니다.
+모든 inventory41개와 Git archive의 기존309개 raw Go fence를 보존하고 총310개 fence입니다.
+
+Source의 실제 Python49개 선언과 독립31개 선언/현재 file hashes를 대조하고 기존 AST/stand-in
+17사례를 재사용했습니다. 이 증거는 source-only이며 인증된 Python SDK 또는 실제 OpenStack
+runtime 성공으로 합산하지 않습니다. Python Resource/dict constructor의 location/descriptor 부수효과,
+mutable Response 객체, warning emission은 typed literal-ID 및 owned evidence 경계로 문서화했습니다.
+독립 parsed Proxy.export_backup·deprecated Proxy.export_record·native typed Export·Resource/v2는
+이 cloud helper 검토로 함께 승격하지 않습니다.
+
+기존441개 review의 literal bytes·모든 필드·source pins를 보존한 채 이 실제 cloud target에
+8개 계약·15개 distinct actual test anchor·공개 함수/메서드2개를 연결해442개 review가 되었습니다.
+catalog3362개에서 go_mapping134→135, unsupported1 유지, unresolved3227→3226이며
+supported는0입니다. 전체 SDK는 계속 진행 중입니다.
+
+Final parity CLI PASS: declared inventory 3362; supported=0, go_mapping=135, unsupported=1, unresolved=3226.
