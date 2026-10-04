@@ -2,12 +2,10 @@ package blockstorage
 
 import (
 	"context"
-	"errors"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
 )
@@ -121,75 +119,14 @@ func (p *preparedAttach) validateCreated(attachment *VolumeAttachmentInfo) error
 }
 
 func (p *preparedAttach) wait(ctx context.Context, result *AttachVolumeResult) error {
-	waitCtx := ctx
-	if p.options.timeout > 0 {
-		var cancel context.CancelFunc
-		waitCtx, cancel = context.WithTimeout(ctx, p.options.timeout)
-		defer cancel()
-	}
-	for {
-		// The first observation is immediate and fresh; the precondition
-		// response cannot establish post-creation readiness.
-		response, err := p.exchange(waitCtx, http.MethodGet, p.volumeURL, nil)
-		if response != nil {
-			result.LastAccepted = attachObservationProof(response)
-		}
-		if err != nil {
-			// A rejected request keeps its own native status/body/header error.
-			// Do not make an earlier accepted response its HTTP evidence.
-			return attachContextError(waitCtx, err)
-		}
-		volume, err := decodeAttachObservation(response)
-		if err != nil {
-			return attachContextError(waitCtx, err)
-		}
-		result.LastAccepted.Volume = volume
-		if err := p.validateObservation(volume); err != nil {
-			return response.Fail(attachContextError(waitCtx, err))
-		}
-		if err := p.guard(waitCtx); err != nil {
-			return response.Fail(err)
-		}
-		status := *volume.Status
-		if strings.EqualFold(status, "in-use") {
-			// Decode independently so Ready and LastAccepted never share
-			// nullable pointers, raw fields, attachment records or headers.
-			ready, err := decodeAttachObservation(response)
-			if err != nil {
-				return attachContextError(waitCtx, err)
-			}
-			if err := p.guard(waitCtx); err != nil {
-				return response.Fail(err)
-			}
-			result.Ready = ready
-			return nil
-		}
-		for _, failure := range p.options.failures {
-			if strings.EqualFold(status, failure) {
-				return response.Fail(&resource.FailedStateError{Resource: "volume", ID: p.volumeID, Status: status})
-			}
-		}
-		if progress := p.options.policy.WaitPolicy.ProgressCallback; progress != nil {
-			if err := p.guard(waitCtx); err != nil {
-				return response.Fail(err)
-			}
-			callbackErr := progress(0)
-			if err := errors.Join(callbackErr, p.guard(waitCtx)); err != nil {
-				return response.Fail(attachContextError(waitCtx, err))
-			}
-		}
-		if err := p.guard(waitCtx); err != nil {
-			return response.Fail(err)
-		}
-		timer := time.NewTimer(p.options.interval)
-		select {
-		case <-waitCtx.Done():
-			timer.Stop()
-			return response.Fail(attachContextError(waitCtx, waitCtx.Err()))
-		case <-timer.C:
-		}
-		if err := p.guard(waitCtx); err != nil {
-			return response.Fail(err)
-		}
-	}
+	return waitVolumeAttachment(ctx, volumeAttachmentWait{
+		volumeID: p.volumeID, target: "in-use",
+		timeout: p.options.timeout, interval: p.options.interval,
+		failures: p.options.failures, progress: p.options.policy.WaitPolicy.ProgressCallback,
+		guard: p.guard,
+		exchange: func(waitCtx context.Context) (*rest.Response, error) {
+			return p.exchange(waitCtx, http.MethodGet, p.volumeURL, nil)
+		},
+		lastAccepted: &result.LastAccepted, ready: &result.Ready,
+	})
 }
