@@ -26816,6 +26816,912 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/networks.Update",
+      "source_fingerprint": "5eeef505cd3b9ef72588695538aa9e16f2c6fe87b03da2ac9b006dfd9f626efd",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/networks.API.Update",
+        "gophercloudsdk/network/v2/networks.WithUpdateOptions",
+        "gophercloudsdk/network/v2/networks.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Representative Network API exercises the shared native escape path: service-wide If-Match override, RetryFunc explicit condition override and OmitHeaders removal remain effective. This is one Network fixture, not separate per-API raw-override coverage for all nine.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsRawNativeHeaderEscapePolicy"
+          ]
+        },
+        {
+          "behavior": "Representative Network API exercises native307 redirect refusal or following with retained PUT/body/live auth and callback-overridden If-Match. This is one shared-path fixture, not per-API redirect coverage for the other eight.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeRedirectPolicy"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_network",
+      "source_fingerprint": "a7166c371aa58f6652efcb1116b65c83e78da2ccc0e3f58669702d45b6dbf923",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/networks.API.Update",
+        "gophercloudsdk/network/v2/networks.WithUpdateOptions",
+        "gophercloudsdk/network/v2/networks.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Representative Network API exercises the shared native escape path: service-wide If-Match override, RetryFunc explicit condition override and OmitHeaders removal remain effective. This is one Network fixture, not separate per-API raw-override coverage for all nine.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsRawNativeHeaderEscapePolicy"
+          ]
+        },
+        {
+          "behavior": "Representative Network API exercises native307 redirect refusal or following with retained PUT/body/live auth and callback-overridden If-Match. This is one shared-path fixture, not per-API redirect coverage for the other eight.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeRedirectPolicy"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/ports.Update",
+      "source_fingerprint": "28aad40d54490443024c8affc0bb022df08181bd44473b6739839f0d492e760f",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/ports.API.Update",
+        "gophercloudsdk/network/v2/ports.WithUpdateOptions",
+        "gophercloudsdk/network/v2/ports.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_port",
+      "source_fingerprint": "3b2426817960e0dcea08cbf1768ac41c8496bc4a2ae6af130f55b6d1e137365e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/ports.API.Update",
+        "gophercloudsdk/network/v2/ports.WithUpdateOptions",
+        "gophercloudsdk/network/v2/ports.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/subnets.Update",
+      "source_fingerprint": "693249c6be579d22cfd7d871d162f3970f6fcf4b26b717da77a680d823aaf7d0",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/subnets.API.Update",
+        "gophercloudsdk/network/v2/subnets.WithUpdateOptions",
+        "gophercloudsdk/network/v2/subnets.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_subnet",
+      "source_fingerprint": "53d476b728ff148a1c88821cbe33df72983790085e1058d6172b55e8efc89b32",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/subnets.API.Update",
+        "gophercloudsdk/network/v2/subnets.WithUpdateOptions",
+        "gophercloudsdk/network/v2/subnets.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/trunks.Update",
+      "source_fingerprint": "097ce9167b613efeddc5840abcba225a983c13a708f77e78907466754165932b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/trunks.API.Update",
+        "gophercloudsdk/network/v2/extensions/trunks.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/trunks.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_trunk",
+      "source_fingerprint": "a2d7ee9ac21cd63abcf193f85a3fe02f21c5f59a00267fd1dce4a4e3fc1bca09",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/trunks.API.Update",
+        "gophercloudsdk/network/v2/extensions/trunks.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/trunks.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/subnetpools.Update",
+      "source_fingerprint": "98c037bab58c4b01b4407636a0605a4f147e4b32ed1fc35ac93ebe7e637d891e",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/subnetpools.API.Update",
+        "gophercloudsdk/network/v2/extensions/subnetpools.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/subnetpools.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_subnet_pool",
+      "source_fingerprint": "a94e7fd3f02199d8dc94c5e3484d52f54c651d9df82d69b923b2bccbea821f70",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/subnetpools.API.Update",
+        "gophercloudsdk/network/v2/extensions/subnetpools.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/subnetpools.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.Update",
+      "source_fingerprint": "52e6e75fcb5e27f7dc8b7bcd0746c60b2eb32740960e7524158c50cbb8207095",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/layer3/routers.API.Update",
+        "gophercloudsdk/network/v2/extensions/layer3/routers.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/layer3/routers.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_router",
+      "source_fingerprint": "c018ceb55813205ff916e05097b9e43368a1a6db33c8cd5818576312e1129186",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/layer3/routers.API.Update",
+        "gophercloudsdk/network/v2/extensions/layer3/routers.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/layer3/routers.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.Update",
+      "source_fingerprint": "21f0d5ce32d45e21a542e111b23db30dc05e4fe0fd9de71ad3cc2e94a6a1d9d1",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.API.Update",
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_ip",
+      "source_fingerprint": "5d69ee42ae64d42f207ab83b4c8aab1f3d6f3bd7a43fe136d548cf8d9b580fb2",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.API.Update",
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/layer3/floatingips.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/policies.Update",
+      "source_fingerprint": "819934c2e108aac39fb47081944b7db586a21da83edde96978fecc8e82f5e74a",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/qos/policies.API.Update",
+        "gophercloudsdk/network/v2/extensions/qos/policies.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/qos/policies.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_qos_policy",
+      "source_fingerprint": "e93a9a42a74dc4bf53f7f62145f0ea3f6ce061e9c4e88296c30ae4637e134f69",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/qos/policies.API.Update",
+        "gophercloudsdk/network/v2/extensions/qos/policies.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/qos/policies.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/groups.Update",
+      "source_fingerprint": "04aacad5ec19f76a8ce3b2a9040c6a20887075d537be3f8acc72bf8e11b4da95",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/security/groups.API.Update",
+        "gophercloudsdk/network/v2/extensions/security/groups.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/security/groups.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "The facade accepts native concrete UpdateOpts with library-owned private header/body adapter rather than requiring a caller UpdateOptsBuilder. Final WithUpdateOptions selects the original header-tagged concrete fields and body together, while WithUpdateField adds permitted body fields. Public signatures, aliases and extension capabilities are retained.",
+        "Native execution still formats If-Match from nil/non-nil signed revision pointers, preserves request/body/success/result behavior and raw MoreHeaders/OmitHeaders/native callbacks, and wraps errors in inspectable OperationError. The bridge preserves the header through adaptation; it does not protect it from native raw overrides or add unconditional conflict fallback."
+      ],
+      "remaining": [],
+      "contracts": [
+        {
+          "behavior": "For this API among all nine native facades, actual HTTP Update retains PUT, effective ResourceBase route, native JSON envelope, description and extension body values, auth and ordinary source headers. Typed RevisionNumber nil/zero/positive/signed emits no header or exact revision_number=N respectively, never a JSON revision field, and returns the native typed response ID without source-client mutation.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "For all nine APIs, final WithUpdateOptions replacement chooses body fields and revision condition together while retaining permitted extension fields and input scalar values. Existing query/header extension and nil-option errors remain preflight OperationError/ErrInvalidOption without HTTP; no new header capability is introduced.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "All nine retain native200 success and their exact201 policy: networks/ports/subnets accept201, the other six reject it. Native412 keeps status/body under OperationError with no SDK fallback or additional request.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict"
+          ]
+        },
+        {
+          "behavior": "For all nine, native401 reauth,429 backoff and503 retry replay the prepared body and serialized revision through four physical requests with refreshed live auth and permitted native header addition. Caller revision mutation during reauth does not reselect the condition; the shared client remains intact.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        },
+        {
+          "behavior": "Generator checks all nine current native source declarations and regenerated adapter declarations against stored facades, retaining RevisionNumber *int json:-/h:If-Match from final validated cfg.Options and existing Update/WithUpdateOptions/WithUpdateField without new helpers. Source/field/import drift mutations use Network as the representative case; owning-import/lexical alias-shadow and optional-builder/secondary-input tests are generic fixtures, not all-nine drift-case coverage.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersActualNineNativeAdapters",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersRejectNativeSourceAndRevisionDrift",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersOwningImportsAndLexicalScope",
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_security_group",
+      "source_fingerprint": "0b789cecbe364dd3cd470cb91c119855d6314ae68f396c7a8ddcf1e2a87bd473",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network/v2/extensions/security/groups.API.Update",
+        "gophercloudsdk/network/v2/extensions/security/groups.WithUpdateOptions",
+        "gophercloudsdk/network/v2/extensions/security/groups.WithUpdateField"
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
+      ],
+      "remaining": [
+        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+      ],
+      "contracts": [
+        {
+          "behavior": "The concrete Go update for this operation emits exact revision_number=N for typed zero/positive/signed values, omits a nil generated condition and preserves the native route/body/response envelope. This all-nine Go matrix is evidence of Go behavior; Python conditional similarity or difference is established from the pinned class/helper sources.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsAllNativeUpdates"
+          ]
+        },
+        {
+          "behavior": "Final typed replacement selects body and condition together, preserves allowed body extensions, and rejects unsupported query/header/nil options before HTTP. These concrete option semantics do not emulate Python mutable Resource/attrs state.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsReplacementChoosesBodyAndCondition",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsPreflightRetainsExtensionCapabilities"
+          ]
+        },
+        {
+          "behavior": "Native accepted-code and412 policies remain inspectable with no SDK unconditional fallback; native401/429/503 replay retains the prepared condition/body and live auth despite caller pointer mutation. Python adapter/session retry/error semantics remain a documented difference.",
+          "tests": [
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
+            "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
+          ]
+        }
+      ]
     }
   ]
 }
