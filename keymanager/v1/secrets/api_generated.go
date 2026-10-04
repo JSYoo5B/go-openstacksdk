@@ -263,21 +263,24 @@ func (b getPayloadOptsBuilder) ToSecretPayloadGetParams() (map[string]string, er
 }
 
 // GetPayload invokes the upstream API with library-owned builders and result handling.
-func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOption) (*request.Download[[]byte], error) {
+func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOption) ([]byte, error) {
 	var opts GetPayloadOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("GetPayload", "secrets", err)
-		return nil, err
+		var zero0 []byte
+		return zero0, err
 	}
 	if err = request.ValidateCapabilities(cfg, false, false, true); err != nil {
 		err = request.Wrap("GetPayload", "secrets", err)
-		return nil, err
+		var zero0 []byte
+		return zero0, err
 	}
 	_opts := getPayloadOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.GetPayload(ctx, a.client, id, _opts)
-	header, err := result.Extract()
-	return request.OpenDownload(result.Body, header, request.Wrap("GetPayload", "secrets", err))
+	value0, err := result.Extract()
+	err = request.Wrap("GetPayload", "secrets", err)
+	return value0, err
 }
 
 type ListOption = request.Option[ListOpts]
