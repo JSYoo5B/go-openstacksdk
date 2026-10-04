@@ -17,12 +17,21 @@ import (
 // validation. The workflow validates its complete policy before name lookup,
 // the fresh Cinder guard, attachment creation or polling.
 func (c *Connection) AttachVolume(ctx context.Context, input blockstorage.AttachVolumeRequest, options ...blockstorage.AttachVolumeOption) (*blockstorage.AttachVolumeResult, error) {
-	wrap := func(err error) error { return request.Wrap("AttachVolume", "volume", err) }
+	wrap := func(err error) error {
+		if ctx != nil && ctx.Err() != nil {
+			for _, cause := range []error{ctx.Err(), context.Cause(ctx)} {
+				if cause != nil && !errors.Is(err, cause) {
+					err = errors.Join(err, cause)
+				}
+			}
+		}
+		return request.Wrap("AttachVolume", "volume", err)
+	}
 	if ctx == nil {
 		return nil, wrap(fmt.Errorf("%w: context is required", resource.ErrInvalidOption))
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, wrap(errors.Join(err, context.Cause(ctx)))
+		return nil, wrap(err)
 	}
 	if c == nil {
 		return nil, wrap(fmt.Errorf("%w: Connection is required", resource.ErrInvalidOption))
