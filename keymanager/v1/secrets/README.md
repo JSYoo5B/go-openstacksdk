@@ -4,6 +4,9 @@
 requests the secret's JSON representation and conditionally requests its payload.
 The existing native `Get`, `GetPayload`, user-metadata operations, and `Resources`
 contracts remain available.
+`GetPayload` returns buffered `[]byte` and closes the native response before
+returning; [payload retrieval and migration](payload.md) explains its separate
+request and the corrected return type.
 
 `FindIdentity(ctx, identity, options...)` also provides library-owned ID/name
 lookup with conditional payload on direct success and metadata-only list

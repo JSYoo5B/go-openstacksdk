@@ -112,6 +112,9 @@ SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증�
 `SecretConsumers.InSecret(ctx, resource.ID(secretID))`는 consumer association의 생성·삭제와
 offset 목록을 제공합니다. [SecretConsumer 비교](keymanager/v1/secretconsumers/README.md)에서
 association 입력과 실제 secret 응답을 구별합니다.
+`Secrets.GetPayload(ctx, secretID)`는 payload GET의 전체 bytes를 반환하고 응답을 닫습니다.
+[payload 조회와 반환형 변경](keymanager/v1/secrets/payload.md)에 native 기본 Accept·옵션·오류와
+기존 Download 반환에서 `[]byte`로 바꾸는 방법을 설명합니다.
 `Secrets.Fetch(ctx, resource.ID(secretID))`는 metadata를 조회한 뒤 content type이 있을 때만
 payload를 가져옵니다. [Secret 조회 비교](keymanager/v1/secrets/README.md)에 기본 선택 규칙,
 metadata 전용 옵션, 텍스트·바이너리 결과와 실패 시 응답 보존을 설명합니다.
