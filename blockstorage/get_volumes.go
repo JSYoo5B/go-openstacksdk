@@ -47,25 +47,11 @@ func GetVolumes(ctx context.Context, cinder *gophercloud.ServiceClient, input Ge
 }
 
 func captureGetVolumes(ctx context.Context, cinder *gophercloud.ServiceClient, input GetVolumesRequest, options []GetVolumesOption) (*preparedGetVolumes, error) {
-	if err := attachContext(ctx); err != nil {
-		return nil, err
-	}
-	source, err := captureAttachSource(ctx, cinder, "volume")
+	p, err := captureCinderReader(ctx, cinder, "volumes", "detail")
 	if err != nil {
 		return nil, err
 	}
-	if source.client.Type == "" {
-		source.client.Type = "volumev3"
-	}
-	target := source.client.ServiceURL("volumes", "detail")
-	if err := validateAttachTarget(&source.client, target); err != nil {
-		return nil, err
-	}
-	initial, err := url.Parse(target)
-	if err != nil {
-		return nil, err
-	}
-	p := &preparedGetVolumes{cinder: source, input: input, initialURL: initial}
+	p.input = input
 	p.options, err = applyGetVolumesOptions(options, func() error { return p.guard(ctx) })
 	if err != nil {
 		return nil, attachContextError(ctx, errors.Join(err, p.guard(ctx)))
