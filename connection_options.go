@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/resource"
 )
 
 type Service string
@@ -34,6 +35,8 @@ type connectionOptions struct {
 	microversionSelections map[string]MicroversionSelection
 	versionedEndpoints     map[string]string
 	messagingClientID      string
+	locationFacts          resource.CloudLocation
+	cloudLocation          *resource.CloudLocation
 }
 
 type ConnectionOption func(*connectionOptions) error

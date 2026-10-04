@@ -79,9 +79,15 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 		transport.TLSClientConfig = o.tlsConfig.Clone()
 		client.Transport = transport
 	}
+	// Preserve configured facts before native authentication derives/mutates
+	// its internal scope. Token response names are not configuration names.
+	o.locationFacts = configuredLocation(cloudName, auth)
 	provider, err := config.NewProviderClient(ctx, auth, config.WithHTTPClient(client))
 	if err != nil {
 		return nil, fmt.Errorf("authenticate: %w", err)
+	}
+	if _, present := os.LookupEnv("OS_REGION_NAME"); present || cloudName != "" || eo.Region != "" {
+		o.locationFacts.RegionName = locationString(eo.Region)
 	}
 	return newConnection(provider, o, eo)
 }
@@ -98,7 +104,7 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 		return nil, err
 	}
 	if o.auth != nil || o.cloud != "" || len(o.cloudFiles) != 0 || o.httpConfigured {
-		return nil, invalid("FromProvider accepts only endpoint, region, interface and microversion options")
+		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion and location options")
 	}
 	return newConnection(provider, o, gophercloud.EndpointOpts{})
 }
@@ -106,6 +112,7 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 func newConnection(provider *gophercloud.ProviderClient, o connectionOptions, eo gophercloud.EndpointOpts) (*Connection, error) {
 	if o.region != nil {
 		eo.Region = *o.region
+		o.locationFacts.RegionName = locationString(*o.region)
 	}
 	if o.availability != nil {
 		eo.Availability = *o.availability
