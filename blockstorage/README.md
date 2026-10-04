@@ -32,6 +32,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.create_volume_backup(volume_id, force=False, wait=True, incremental=False)` | `conn.CreateVolumeBackup(ctx, blockstorage.CreateVolumeBackupRequest{VolumeID: volumeID}, options...)` |
 | `conn.delete_volume_backup(name_or_id, force=False, wait=False)` | `conn.DeleteVolumeBackup(ctx, blockstorage.DeleteVolumeBackupRequest{NameOrID: name}, options...)` |
 | `conn.export_volume_backup(backup_id)` | `conn.ExportVolumeBackup(ctx, blockstorage.ExportVolumeBackupRequest{BackupID: backupID})` |
+| `conn.block_storage.export_record(id)` | `cinder.Backups.ExportRecord(ctx, id)` — opaque raw 응답 |
+| `conn.block_storage.export_backup(id)` | `cinder.Backups.ExportBackup(ctx, id)` 또는 `conn.ExportVolumeBackupRecord(ctx, request)` — JSON `Value`와 raw proof |
 | `conn.list_volume_backups(detailed=True, filters=None)` | `conn.ListVolumeBackups(ctx, options...)` |
 | `conn.search_volume_backups(name_or_id, filters)` | `conn.SearchVolumeBackups(ctx, blockstorage.SearchVolumeBackupsRequest{NameOrID: name}, options...)` |
 | `conn.get_volume_backup(name_or_id, filters=None)` | `conn.GetVolumeBackup(ctx, blockstorage.GetVolumeBackupRequest{NameOrID: name}, options...)` |
@@ -155,3 +157,7 @@ Backup export는 `ExportVolumeBackup`으로 호출합니다. [Backup export와 P
 이름 조회·wait·location 변환 없이 ID를 요청하는 API, 실제 opaque 응답과 부분 오류 증거를 설명합니다.
 Python v3 cloud의 raw Response를 대상으로 하며 native typed Export와 별도 parsed Proxy 선언의
 지원 검토는 독립적입니다.
+
+`ExportVolumeBackupRecord`는 UTF-8의 전체 JSON 한 값을 owned literal `Value`로 반환합니다.
+[Raw/JSON/native typed export 비교](volume-backup-export-record.md)에 이름이 비슷한 Python Proxy 두 선언,
+기존 native typed `Export`, Connection/direct 경로와 parse 오류의 phase proof를 설명합니다.

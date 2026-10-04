@@ -435,3 +435,7 @@ SDK가 six-field 생성 기본값, 정확한 이름/ID 조회, normal DELETE와 
 Backup export는 `conn.ExportVolumeBackup(ctx, blockstorage.ExportVolumeBackupRequest{BackupID: backupID})`로
 호출합니다. [Backup export와 Python 비교](blockstorage/volume-backup-export.md)에 Cinder v3의
 opaque bytes·header·status, literal ID 요청과 오류 시 실제 응답 증거를 설명합니다.
+
+Backup export의 JSON 값은 `conn.ExportVolumeBackupRecord(ctx, blockstorage.ExportVolumeBackupRecordRequest{BackupID: backupID})`로 받습니다.
+[Raw/JSON/native typed export 비교](blockstorage/volume-backup-export-record.md)에 cached Cinder의
+`Backups.ExportRecord`·`ExportBackup`, owned JSON literal과 오류 시 실제 응답 증거를 설명합니다.
