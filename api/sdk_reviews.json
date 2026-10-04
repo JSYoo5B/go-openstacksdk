@@ -28603,6 +28603,142 @@
         "This candidate maps only the direct cloud delete_volume declaration under its documented Go policies after implementation and meaningful QA. Separately inventoried Python find_volume/delete_volume/wait_for_delete and inherited Resource/session/cache/API-version behavior keep independent reviews. Cinder v3 selection does not assert full Cinder v2 Resource semantics or whole-SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_attach_device",
+      "source_fingerprint": "81b84e011a1765acf8ebeec279cab30586ea1813a0e1c6c5c9267109aec3afd3",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.GetVolumeAttachDevice",
+        "gophercloudsdk/blockstorage.GetVolumeAttachDeviceFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "The direct cloud helper maps to two pure package functions: typed GetVolumeAttachDevice accepts the closed four-model constraint covering both SDK-owned models and native Cinder v2/v3 Volume pointers, and GetVolumeAttachDeviceFields consumes supplied raw JSON fields. Neither takes clients/context/Ref/options nor performs lookup, HTTP, refresh or status validation; existing workflow VolumeInfo values require no caller adapter.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedModelsUseLiteralCurrentSelectionWithoutCloudState",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceNativeV2V3ModelsExposeDeclaredZeroStringPresenceLoss",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDevicePureOwnershipAndTypedCurrentVersusOriginalRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Typed nil pointers for all four accepted concrete types and nil Attachments produce local invalid-input errors; a nonnil empty attachment slice returns nil success. Current supplied owned attachments remain authoritative even when original volume Body lacks attachments or contains stale/null evidence.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedModelsUseLiteralCurrentSelectionWithoutCloudState",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedManualPresenceAndTypedCurrentAuthority",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceNativeV2V3ModelsExposeDeclaredZeroStringPresenceLoss"
+          ]
+        },
+        {
+          "behavior": "Owned selection reads attachment order and compares current ServerID literally with case-sensitive equality, including empty strings, spaces and path/query punctuation. Returned device text is unchanged; unmatched rows do not require a device, and unrelated volume ID/status and attachment metadata do not affect selection.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedModelsUseLiteralCurrentSelectionWithoutCloudState",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedManualPresenceAndTypedCurrentAuthority"
+          ]
+        },
+        {
+          "behavior": "The first owned match immediately returns a copied nonnil empty/nonempty device or nil for explicit null. Missing canonical device on that first match errors with no later duplicate fallback. Visited nil rows or absent/wrong-case canonical server_id error in order; schema-invalid rows after an accepted empty/null match remain unvisited.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedFirstMatchStopsOnEmptyNullOrMissingAndVisitsOnlyPrefix"
+          ]
+        },
+        {
+          "behavior": "Manual owned records with Body nil interpret nil ServerID as explicit null/nonmatch and matching nil Device as explicit null success. A nonnil Body distinguishes missing consumed canonical keys; present canonical keys with nil typed pointers represent current null without decoding stale raw values.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedFirstMatchStopsOnEmptyNullOrMissingAndVisitsOnlyPrefix",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedManualPresenceAndTypedCurrentAuthority"
+          ]
+        },
+        {
+          "behavior": "Nonnull caller-supplied/current owned ServerID and Device override original absent/stale/wrong-type Body fields. Typed-current selection never silently hydrates original raw evidence; the explicit raw companion reading VolumeInfo.Body observes the original response rather than later edited typed values.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedManualPresenceAndTypedCurrentAuthority",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDevicePureOwnershipAndTypedCurrentVersusOriginalRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Both native Cinder model versions expose their current ordered string fields directly without an adapter or invented raw proof. Omitted/null/empty native Device becomes a copied nonnil empty string, and zero ServerID can match an empty selector; the native decoder case-folding and presence loss are declared representation differences.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceNativeV2V3ModelsExposeDeclaredZeroStringPresenceLoss"
+          ]
+        },
+        {
+          "behavior": "Raw access reads only the exact top-level attachments key and ignores unrelated supplied field types, including invalid raw JSON in unconsumed fields. Nil/missing/wrong-case top-level input and a present nil RawMessage are local consumed-input errors; unrelated id/status/attachment metadata need no owned-model schema validation.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawFirstMatchPreservesTypingCastValuesAndNumericPrecision",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceWholeModelDecoderAndDirectRawHaveExplicitDifferentBoundaries"
+          ]
+        },
+        {
+          "behavior": "Raw attachments valid empty array, object or string return nil success as ordinary plain JSON mapping iterables. Null/bool/number and nonempty object/string fail locally; arrays preserve ordered prefix consumption and reject visited null/nonobject rows or missing exact server_id/device only when those fields are consumed.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawFirstMatchPreservesTypingCastValuesAndNumericPrecision"
+          ]
+        },
+        {
+          "behavior": "Raw attachments syntax and UTF-8 are validated across the entire supplied JSON before selection. Empty/whitespace-only bytes, trailing extra JSON, malformed tail syntax and invalid UTF-8 including an unvisited tail return local errors; JSON SyntaxError remains available in the error chain.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors"
+          ]
+        },
+        {
+          "behavior": "Raw row server_id must have the exact canonical key. Null and every nonstring JSON value are nonmatches against the supplied Go string, without text coercion or device inspection. JSON strings compare literally and case-sensitively, including punctuation and empty selectors.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawFirstMatchPreservesTypingCastValuesAndNumericPrecision"
+          ]
+        },
+        {
+          "behavior": "The first raw matching device is returned unchanged as a copied nonnull RawMessage for strings, empty strings, escaped strings, bool, zero, arbitrary-precision integer/decimal, arrays and objects. Null match and no match both return nil success. Missing first matched device cannot fall back, and a schema-invalid tail after a match is not visited.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawFirstMatchPreservesTypingCastValuesAndNumericPrecision"
+          ]
+        },
+        {
+          "behavior": "All consumed-input failures use resource.OperationError with the actual public operation name, Resource volume, ErrInvalidOption identity and visited key/index where applicable. Parsing causes are preserved, and local failures never manufacture ResponseError or NotFoundError.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedModelsUseLiteralCurrentSelectionWithoutCloudState",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedFirstMatchStopsOnEmptyNullOrMissingAndVisitsOnlyPrefix",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceOwnedManualPresenceAndTypedCurrentAuthority",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceNativeV2V3ModelsExposeDeclaredZeroStringPresenceLoss",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors"
+          ]
+        },
+        {
+          "behavior": "Accessors do not mutate supplied model fields, attachments, Body, headers or status evidence. Returned owned/native device pointers and raw JSON bytes are independent copies; caller mutation of results does not change a repeated selection. Concurrent mutation of the supplied mutable input is outside the contract.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceNativeV2V3ModelsExposeDeclaredZeroStringPresenceLoss",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDevicePureOwnershipAndTypedCurrentVersusOriginalRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Raw prefix consumption is independent from existing strict whole-model decoding: ignored wrong-type known fields and schema-invalid tails may be accepted by the direct raw helper after the first match, while the unchanged owned observation/VolumeInfo decoders reject full malformed models. JSON syntax/UTF-8 validity remains a whole-input boundary.",
+          "tests": [
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceRawIterableBoundaryAndLocalConsumedInputErrors",
+            "blockstorage/volume_attachment_device_test.go:TestVolumeAttachDeviceWholeModelDecoderAndDirectRawHaveExplicitDifferentBoundaries"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-attachment-device.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "This direct declaration is pinned to openstacksdk ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; native accepted models are pinned to Gophercloud v2.15.0. Only get_volume_attach_device is mapped here. The helper uses no self/session/cache calls; separately inventoried Resource descriptors, attachment workflows, native operations and other SDK declarations retain independent review statuses.",
+        "Python volume/server_id duck-typed values are represented by a library-owned closed Go generic constraint for four existing model pointers plus an explicit ordinary-JSON raw-fields companion. Go serverID is a string and equality is literal; custom mapping/equality/iterables, sets/tuples and user-defined object behavior are outside this Go representation, rather than requirements for caller interfaces or adapters.",
+        "Python typing.cast returns the matched device unchanged, including nonstrings, with Python object identity. The Go typed function returns copied string/null values already representable in the selected model; the raw function returns copied arbitrary nonnull JSON values, preserving bytes and numeric precision without coercion. Neither returns aliasing Python object identity.",
+        "Go owned mutable current fields are authoritative; passive original Body is consulted only for canonical-key presence when a typed pointer is nil. Manual Body nil treats nullable pointers as explicit null, while nonnil Body can retain omission. Calling the raw companion with volume.Body explicitly chooses original evidence and never silently overrides edited typed values.",
+        "Native Gophercloud v2/v3 Volume attachment ServerID/Device strings collapse omitted/null/empty evidence, and native decoding can fold key case or eagerly reject other known fields/timestamps. The typed accessor uses those current strings literally, including zero ServerID matching an empty selector and nonnil empty Device, without reconstructing lost null/presence proof. Raw fields are the explicit presence-sensitive alternative.",
+        "Go raw input validates full attachments JSON syntax and UTF-8 before ordered field consumption; a schema-invalid unvisited tail can be ignored, but syntax/encoding errors anywhere fail. Python operates on already supplied objects and has no corresponding JSON parser boundary. Go decoding/string equality follows Go JSON/UTF-8 representation; arbitrary Python Unicode/custom object semantics are not silently reproduced.",
+        "Python plain dict empty attachments []/{} or empty string iterates empty, which the raw Go function represents. Inherited Python v2 attachments Body is untyped, whereas v3 type=list can wrap a nonnull object/string into a singleton list. Descriptor conversion is independent Resource behavior rather than an additional HTTP/control flow in this direct helper. Go typed nil attachments is invalid evidence and nonnil empty slices represent an empty list.",
+        "Python missing consumed keys/noniterable values raise KeyError/TypeError and runtime cast performs no validation. Go uses local OperationError wrapping ErrInvalidOption with function/resource/key/index context and JSON causes; no HTTP/NotFound evidence is invented. The nil successful result deliberately joins first matched null with no match, and empty string remains a nonnil first match.",
+        "Existing owned whole-model strict decoding remains independent from this direct accessor. It validates all rows and known field types before selection, while raw direct access examines only fields consumed by the pinned helper after a full JSON syntax/UTF-8 check. This mapping does not promote whole-Resource/session/cache or whole-SDK completeness."
+      ],
+      "remaining": []
     }
   ]
 }
