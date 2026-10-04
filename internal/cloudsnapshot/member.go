@@ -17,7 +17,7 @@ func (p *reader) member(ctx context.Context, id string, result *Result) (value *
 	if err != nil {
 		return nil, err
 	}
-	wire, err := p.source.Get(ctx, target, sourceCodes()...)
+	wire, err := p.memberGet(ctx, target)
 	result.Observed = observed(wire)
 	if err != nil {
 		return nil, err
