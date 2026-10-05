@@ -453,3 +453,5 @@ Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·
 명시적인 Cinder volume ID의 `ExtendVolume`·`RetypeVolume`·`CompleteVolumeExtend`는 필수 size/type 값, migration 기본 never·명시적 생략과 completion 기본 false를 SDK가 처리합니다. [Extend·retype·completion 사용법과 Python 비교](blockstorage/volume-resize-retype.md)에 세 호출 경로, 옵션 소유권과 opaque action acknowledgement를 설명합니다.
 
 명시 ID의 `ResetVolumeStatus`·`MigrateVolume`·`CompleteVolumeMigration`은 상태 생략, nullable host/cluster, cluster의 required 3.16 검증과 완료의 기본 error:false를 SDK가 처리합니다. [Volume status·migration 사용법과 Python 비교](blockstorage/volume-migration-reset.md)를 참고하세요.
+
+명시 ID의 `RevertVolumeToSnapshot`·`UnmanageVolume`은 required3.40 복원과 null 관리 해제를 SDK가 처리합니다. [Python/package/Connection/service 사용법](blockstorage/volume-revert-unmanage.md)을 참고하세요.
