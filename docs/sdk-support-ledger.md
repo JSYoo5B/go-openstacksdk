@@ -1101,3 +1101,17 @@ delete는 Keys pointer nil을 전체 삭제, nonnil pointer의 nil·빈 slice를
 최종1760개 Go는 모든 QA 중 동일했고 기존1750개는 모두 byte-identical입니다. production6·test4를 추가했으며 inventory·generated Go338개를 보존했습니다. 이전 review463개의 literal prefix·source pins·의미를 유지하고 이번 두 실제 Proxy row의12계약·24 공개 함수·42 test 참조(14 unique 실제 선언)만 추가해465개로 기록했습니다. declared inventory3362개 중 supported=0, go_mapping=158, unsupported=1, unresolved=3203입니다. lazy Python iterable·동적 모델·serializer·Adapter/cache/session과 native/v2/Resource 범위는 명시한 Go 차이이며 함께 승격하지 않았습니다. 전체 SDK 목표는 진행 중입니다.
 
 Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=158, unsupported=1, unresolved=3203.
+
+### Cinder v3 volume image export
+
+핀된 Proxy `upload_volume_to_image`를 package·Connection·v3 Volumes service의 `UploadVolumeToImage`에 연결했습니다. [Python 비교와 세 호출 경로](../blockstorage/volume-upload-image.md)에 실행 예제와 기본값을 설명합니다. required image name은 빈 값도 명시적으로 보내고 force는 기본 false로 항상 포함합니다. formats·visibility·protected의 nil은 생략하며 명시적인 빈 문자열·false는 포함합니다. SDK가 재사용 가능한 factory·Prepare와 pointer·callback slice·callback 경계의 복사를 제공하므로 caller builder를 요구하지 않습니다. 최종 UTF-8 값만 검사해 뒤 옵션에서 이전 값을 교체할 수 있습니다.
+
+visibility 또는 protected가 지정됐을 때만 fixed 3.1의 지원 여부를 확인합니다. 빈 문자열·false도 이 조건에 포함됩니다. 양쪽 server bounds가 3.1을 포함하고 selected version이 같은 major에서 3.1 이상인지 확인합니다. selected 3.90이 server maximum 3.50을 넘어도 fixed 3.1이 지원되면 그대로 action에 보냅니다. 미선택 호출은 probe를 공유해 ordinary cap 3.71과 server maximum으로 버전을 선택합니다. 원본 client version을 변경하지 않습니다.
+
+응답의 정확한 os-volume_upload_image 값은 object·array·scalar·null 모두 반환할 수 있고 image_id를 요구하지 않습니다. 선택한 RawMessage는 큰 숫자·escape·내부 표현과 독립 byte 소유권을 유지합니다. outer object·정확한 key·UTF-8 JSON 파싱 실패는 실제 Applied와 독립된 오류 증거를 남깁니다. Discovery·Applied·Upload를 구분하고 accepted Read/Close/source/custom-context 오류의 모든 원인을 보존합니다. native 거부를 이전 discovery의 proof로 바꾸지 않습니다. Completed는 helper 응답 처리가 끝났다는 뜻이며 Glance 이미지 준비 완료를 증명하지 않습니다.
+
+[공개·service 5그룹](../blockstorage/volume_image_upload_test.go), [옵션 4그룹](../blockstorage/volume_image_upload_options_test.go), [Connection 3그룹](../connection_volume_image_upload_test.go), [transport 2그룹](../blockstorage/volume_image_upload_transport_test.go)의 신규14그룹 집중 race(35.16초), 전체40개 테스트 패키지 race(96.21초), 전체 vet(9.41초)가 통과했습니다. 설치 가이드의 정확한 독립 Go fence는 별도 module cwd에서 컴파일(6.54초)했습니다. 최초 isolated module의 누락된 go.sum 때문에 발생한 sumdb network 실패는 성공 증거에서 제외했고, 검증된 repository checksums를 복사한 후 예제 원문 그대로 재검증했습니다. authenticated OpenStack/Python runtime은 실행하지 않았습니다. live401 reauthentication·제한된503 retry와 physical redirect에서 body/header/target/framing/version 변조를 실제 로컬 요청으로 검증했고 기존 native UploadImage의 omitempty·202-only·typed 결과도 유지했습니다.
+
+최종1769개 Go는 QA 중 동일했고 기존1760개 모두 byte-identical입니다. production5·test4개를 추가했으며 inventory·generated Go338개를 보존했습니다. 기존465 reviews의 literal prefix·source pins·의미를 유지하고 실제 Proxy 한 row의6계약·17 공개 함수·24 test 참조(14 unique 선언)만 추가해466개로 기록했습니다. 22개 실제 assertion window와 27개 Source/native/dependency literal을 재검증했습니다. declared inventory3362개 중 supported=0, go_mapping=159, unsupported=1, unresolved=3202입니다. typed bool/string·안전한 현재 ID·UTF-8 JSON·유한 discovery·소유한 결과는 명시한 Go 매핑이며 native/v2/Resource·Glance workflow·전체 Adapter/cache/session을 함께 승격하지 않았습니다. 전체 SDK 목표는 진행 중입니다.
+
+Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=159, unsupported=1, unresolved=3202.

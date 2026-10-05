@@ -34562,6 +34562,103 @@
         "Only the actual pinned v3 Proxy target is classified as go_mapping. Native/v2/Resource/MetadataMixin/ordinary MetadataIn and shared discovery dependencies are not promoted. Source/static comparison and Root offline Go HTTP/example checks do not imply Python/dependency/authenticated OpenStack execution or full SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/upload_volume_to_image",
+      "source_fingerprint": "41c9127d58e3974ba274ee41856ee0aecff6c6fb4420e00de7e1389ddc5020f7",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadOptions",
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadForce",
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadDiskFormat",
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadContainerFormat",
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadVisibility",
+        "gophercloudsdk/blockstorage.WithVolumeImageUploadProtected",
+        "gophercloudsdk/blockstorage.PrepareVolumeImageUploadOptions",
+        "gophercloudsdk/blockstorage.UploadVolumeToImage",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadForce",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadDiskFormat",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadContainerFormat",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadVisibility",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageUploadProtected",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeImageUploadOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.API.UploadVolumeToImage",
+        "gophercloudsdk.Connection.UploadVolumeToImage"
+      ],
+      "contracts": [
+        {
+          "behavior": "The required image name is literal UTF-8 text, including empty/control/path-like strings. Force defaults to an owned false pointer and is always sent; nil formats/visibility/protected are omitted, while explicit empty formats/visibility and false protected are included without format/visibility enums or invented defaults.",
+          "tests": [
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageSerializesLiteralNamesDefaultsAndOptionalPresence",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageDirectPreflightAndOwnedOriginalsKeepFixedRequestPolicy",
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadOptionFactoriesOwnPointersDefaultsAndFullReplacement",
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadPrepareValidatesOnlyFinalUTF8AndPreservesLiteralStrings"
+          ]
+        },
+        {
+          "behavior": "Only nonnil Visibility or Protected requests advertised 3.1 support, including empty/false. Both server bounds must contain fixed3.1 and any selected version must have the same major and satisfy3.1; a selected version above the advertised maximum can still pass. No-presence selected3.0 skips discovery; unselected required selection shares one probe and uses the ordinary3.71 cap/lower server maximum without rewriting the client.",
+          "tests": [
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageConditional31GateUsesAdvertisedBoundsAndOrdinaryActionSelection",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageSerializesLiteralNamesDefaultsAndOptionalPresence",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageServiceKeepsNativeUploadImageOmission202AndTypedResult"
+          ]
+        },
+        {
+          "behavior": "Owned factories/full replacement and HTTP-free Prepare preserve all pointer presence and reusable policy independence. The original option slice is copied before callbacks; every intermediate/final pointer is detached, final UTF-8 can be repaired by later replacement, and nil/callback/custom-cancellation failures return zero policy with every cause. Direct Source/ID/image admission precedes originals; Connection prepares originals once before image/ID/cached Cinder selection and consumes no CurrentLocation.",
+          "tests": [
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadOptionFactoriesOwnPointersDefaultsAndFullReplacement",
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadOriginalsOwnCallbackSliceAndIntermediatePointers",
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadPrepareValidatesOnlyFinalUTF8AndPreservesLiteralStrings",
+            "blockstorage/volume_image_upload_options_test.go:TestVolumeImageUploadPrepareNilCallbacksAndCancellationKeepZeroPolicyAndEveryCause",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageDirectPreflightAndOwnedOriginalsKeepFixedRequestPolicy",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadOriginalsRunOnceBeforeGetterAndRetainedPointersStayDetached",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadPreflightOptionsLiteralAndGetterFailuresKeepEveryCause",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence"
+          ]
+        },
+        {
+          "behavior": "Accepted action handling requires one UTF-8 JSON object and the exact os-volume_upload_image key. Its selected value can be any JSON shape including null, nonobject and object without image_id; interior whitespace/numeric/escape literals are preserved and the last outer duplicate wins. Missing/bad key/root/malformed/trailing/UTF8/empty204 failures retain current Applied and independent error proof, keep Upload nil/Completed false and issue no parser replay.",
+          "tests": [
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageAcceptsArbitrarySelectedJSONAndKeepsFailedDecodeProof",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageServiceKeepsNativeUploadImageOmission202AndTypedResult",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence"
+          ]
+        },
+        {
+          "behavior": "Discovery, Applied, selected Upload and response-error snapshots own independent bytes/headers. Accepted Read/Close/source/custom-cancellation failures keep the current actual phase and every cause, retain earlier completed discovery independently, close once and leave Upload nil/Completed false. Completed reports successful helper response handling without a Glance lookup, image wait, refresh or rollback.",
+          "tests": [
+            "blockstorage/volume_image_upload_transport_test.go:TestUploadVolumeToImageAcceptedDiscoveryOrActionFailureKeepsCurrentProofAndNoValue",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageAcceptsArbitrarySelectedJSONAndKeepsFailedDecodeProof",
+            "connection_volume_image_upload_test.go:TestConnectionVolumeImageUploadUsesCachedCinderAndGatesOnlyOptionalPresence"
+          ]
+        },
+        {
+          "behavior": "Live native401 reauthentication and bounded503 retry preserve the original serialized upload body, captured ordinary headers, chosen version and100..399 admission. Retry body/version/source mutations and physical redirected body/header/target/framing mutations block resend; original rejected HTTP retains native status/body/header with Applied nil and no borrowed discovery proof. The service facade keeps native UploadImage omitempty/202-only/typed VolumeImage behavior independently unchanged.",
+          "tests": [
+            "blockstorage/volume_image_upload_transport_test.go:TestUploadVolumeToImageLiveNativeRetriesAndPhysicalGuardsKeepBodyAndOriginalAdmission",
+            "blockstorage/volume_image_upload_test.go:TestUploadVolumeToImageServiceKeepsNativeUploadImageOmission202AndTypedResult"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-upload-image.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go safe explicit current volume ID and UTF-8 literal image name replace Source supplied Resource/dict/Munch/None/dynamic inherited ID and constructor/descriptor/location/cache/session side effects. This helper adds no name finder, CurrentLocation, Volume model refresh, Glance lookup, image-byte upload, wait or rollback.",
+        "Source annotations do not constrain runtime arguments: its own extended Proxy mock test forwards protected=\"5\", and Python None/dynamic force can be forwarded literally. Go uses nullable typed strings/bools; Force nil means defaultfalse, optional nil means omission, and explicit empty/false remains present. Arbitrary Python runtime objects/custom serializers are outside this typed mapping.",
+        "Source performs the3.1 requirement through endpoint-data utilities, then ordinary action selection through the Resource. Go captures one Source and uses finite operation-owned discovery/shared3.71 selection; this does not reproduce full Keystoneauth endpoint cache/getter count/canonicalization/exception order. Nonempty selected text is preserved; Go empty selection cannot represent every distinction between Python None and explicit empty default.",
+        "The fixed3.1 gate compares3.1 with both advertised bounds and selected same-major minimum, not selected against the server maximum. A selected3.90 can pass advertised3.0..3.50 and is sent literally; global latest fails the same-major gate whereas3.latest passes. Dependency Session normalization/header behavior remains a separate declared boundary.",
+        "The Source cast(dict, ...) is only an annotation cast and returns the exact selected JSON value; image_id and object shape are not required. Go returns owned literal RawMessage, preserving interior numeric/escape/whitespace spelling rather than Python mutable parsed objects/float rounding. Outer duplicate envelope keys follow ordinary last-key JSON decoding; successful null is nonnil literalnull, unlike error nil Upload.",
+        "Go validates accepted UTF-8 JSON and an exact object envelope before exposing Upload, and exposes separate Discovery/Applied/Upload/Completed evidence. Accepted decode/IO/source/context faults keep actual completed HTTP proof without replay. These error/evidence choices do not promise identical Python exception taxonomy or final image/backend availability.",
+        "Source raise_from_response admits status<400; Go uses finite100..399 and constrains native retry/redirect through fixed physical method/URL/body/framing/version and captured Source while permitting live provider auth. Original rejected HTTP remains native; discarded native rejected-body IO is not claimed fully reconstructed.",
+        "Only the actual pinned v3 Proxy upload_volume_to_image target is classified as go_mapping. Native UploadImage omitempty/202-only/typed VolumeImage, Glance image.Service.UploadImage, v2/Resource/shared discovery dependencies are not promoted. Static Source/dependency comparison and Root offline Go HTTP/example checks do not imply Python/dependency/authenticated OpenStack runtime or full SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
