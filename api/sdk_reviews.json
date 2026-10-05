@@ -33787,6 +33787,262 @@
         "Only this actual pinned v3 Proxy declaration is a verified Go mapping. Native/resource/inherited/v2/cloud targets and shared dependencies remain independently classified; no full SDK completion or automatic support promotion is inferred."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/reset_volume_status",
+      "source_fingerprint": "1ad51b0e7410c0e756b284d97200ef76f74176776bfb77f0fdff3abbd06d3cd7",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.ResetVolumeStatus",
+        "gophercloudsdk.Connection.ResetVolumeStatus",
+        "gophercloudsdk/blockstorage/v3/volumes.API.ResetVolumeStatus",
+        "gophercloudsdk/blockstorage.WithVolumeStatusResetOptions",
+        "gophercloudsdk/blockstorage.WithVolumeStatusResetStatus",
+        "gophercloudsdk/blockstorage.WithVolumeStatusResetAttachStatus",
+        "gophercloudsdk/blockstorage.WithVolumeStatusResetMigrationStatus",
+        "gophercloudsdk/blockstorage.PrepareVolumeStatusResetOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeStatusResetOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeStatusResetStatus",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeStatusResetAttachStatus",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeStatusResetMigrationStatus",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeStatusResetOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reset defaults all three statuses to omitted. Nil and empty typed strings are omitted, all nonempty UTF-8 strings are sent independently without enum/default injection; empty options still POST {os-reset_status:{}}.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups"
+          ]
+        },
+        {
+          "behavior": "Reusable owned option factories/full replacement and service-free preparation preserve copied pointers, original callback slice and effective policy; no caller builder is needed.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallbackOrder",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached"
+          ]
+        },
+        {
+          "behavior": "Direct/source admission and Connection prepare-before-cached-Cinder ordering retain operation/context/getter faults before HTTP, without lookup or CurrentLocation.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsCaptureSourcesBeforeOriginalsAndStopBeforeRestoration",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsPreflightAndCallbackFailuresPreservePriorityAndCauses",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationPreflightAndGetterFailuresRetainCauses"
+          ]
+        },
+        {
+          "behavior": "Selected literal/cap3.71 uses ordinary shared Cinder negotiation with no API minimum gate; opaque action proof and Completed acknowledgement remain distinct.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap"
+          ]
+        },
+        {
+          "behavior": "ResetVolumeStatus reaches the same applyRequired/Post accepted-fault policy whose existing Cinder regression retains actual Applied/all joined causes without completion or replay. New reset cases directly verify original native400/expanded503retry rejection keeps native evidence and cannot become Applied or Completed.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmission",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        },
+        {
+          "behavior": "New package/Connection/service ResetVolumeStatus methods share the exact typed action and preserve nil API operation labels without originals or HTTP. Existing native ResetStatus remains a separately inspected source/static API; its always-included status/202/error-only behavior is not asserted by this new service test.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-migration-reset.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source truthy status accepts arbitrary dynamic values; Go deliberately narrows to nullable UTF-8 strings and nonempty omission. Existing native required string body is not reused as Source-equivalent.",
+        "Native Volume ResetStatus always-included status/202/error-only separation is established by current native/generated Source declarations and unchanged signature, not a newly executed native reset preservation scenario.",
+        "Go takes one safe UTF-8 current volume ID and typed strings/bools rather than supplied mutable Volume/VolumeDetail/Resource/dict/Munch inputs and Source constructor/descriptor/location/urljoin side effects. Separate Resource/native/v2 declarations remain independent.",
+        "Source returns None without response translation or refresh. Go adds owned VolumeID, Microversion, Discovery, Applied and Completed acknowledgement. No lookup, CurrentLocation, asynchronous wait/poll, cleanup or undo is added.",
+        "Finite call-owned discovery and typed advertisement/evidence policy are explicit Go mappings. Complete Keystoneauth cache/link/envelope/canonicalization/discovery exception ordering and authenticated backend behavior are not claimed. Empty Go selection cannot represent Python explicit default empty separately from None.",
+        "Opaque finite100..399 action policy maps Source<400. Accepted body IO/source/context proof remains separate from native rejection; native discarded rejected POST body IO remains a limitation. Exact method/route/body/framing/version guards constrain native retry/redirect while live auth remains.",
+        "New11 groups cover typed body/defaults, options/capture/preflight, conditional required discovery, original admission and facade/service behavior. Accepted action IO, ordinary cap details and complete reauth/307/framing matrices use declared shared Cinder engine reuse where applicable; no new operation-specific exhaustive transport matrix is claimed. Standalone Prepare wrappers are compiled and exercised through Connection preparation, not a separate new reusable-Prepare return mutation matrix.",
+        "Only the actual pinned v3 Proxy target is reviewed here. Root offline local HTTP race tests, vet and exact documentation compilation passed. Static Source hashes and offline Go checks do not prove authenticated OpenStack/Python runtime parity or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/migrate_volume",
+      "source_fingerprint": "6888f2b469c6296b373dac3c068f38153e0ba4c8a8acd17e89f59fe63749d741",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.MigrateVolume",
+        "gophercloudsdk.Connection.MigrateVolume",
+        "gophercloudsdk/blockstorage/v3/volumes.API.MigrateVolume",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationOptions",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationHost",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationCluster",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationForceHostCopy",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationLockVolume",
+        "gophercloudsdk/blockstorage.PrepareVolumeMigrationOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationHost",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationCluster",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationForceHostCopy",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationLockVolume",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeMigrationOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Host/Cluster nil omission differs from explicit empty inclusion. False/default ForceHostCopy/LockVolume fields are omitted; true fields are included. No host/cluster resolver, requirement or mutual-exclusion check is added.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority"
+          ]
+        },
+        {
+          "behavior": "Cluster nonnil, including empty, requires advertised server min/max to support3.16 before action, even when a selected version exists; compatible selected same-major>=3.16 is additionally required. Failure prevents POST. The pinned Keystoneauth5.16.0 version_match has exact same-major/tuple semantics: global latest fails required3.16, while3.latest can pass the gate and keeps its literal POST policy.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestMigrateVolumeRequiresAdvertisedSupportBeforeSelectedOrComputedVersion",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery"
+          ]
+        },
+        {
+          "behavior": "Required server range tests3.16 rather than selected literal; high compatible selected version stays literal above advertised maximum. Unselected calls select cap3.71 from the same captured advertisement; no original client version mutation or dependency cache emulation.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestMigrateVolumeRequiresAdvertisedSupportBeforeSelectedOrComputedVersion",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery"
+          ]
+        },
+        {
+          "behavior": "Owned option preparation and original callback once/direct capture/Connection cached Cinder preserve caller-owned values and fixed payload across retry.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallbackOrder",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsCaptureSourcesBeforeOriginalsAndStopBeforeRestoration",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmission"
+          ]
+        },
+        {
+          "behavior": "Discovery and action phases own separate current proof; malformed accepted discovery, missing/unsupported gate bounds and source/context faults prevent action and preserve actual admitted evidence.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestMigrateVolumeRequiresAdvertisedSupportBeforeSelectedOrComputedVersion",
+            "blockstorage/volume_migration_test.go:TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPages"
+          ]
+        },
+        {
+          "behavior": "New MigrateVolume cases verify opaque action acknowledgement and original native rejection through the shared action engine, with no asynchronous wait, host GET, volume refresh or rollback. Existing shared Cinder accepted Read/Close/source/custom-context regression verifies the common Post failure path; it is not a new cluster-action IO matrix.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmission",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-migration-reset.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source host/cluster arbitrary non-None values and flags arbitrary truthy values are narrowed to typed nullable strings/bools; explicit cluster empty retains required gate.",
+        "Source require calls endpoint getter and both server bounds before default normalization; Go shares one finite guarded probe with ordinary action version selection and explicitly omits full Keystoneauth cache/canonicalization/taxonomy. Python selected default empty versus None is not independently expressible in Go.",
+        "Keystoneauth5.16.0 commit e759cf88c072d5bc7e21fc3fa884708ace9630af statically binds normalize_version_number/version_between/version_match. Source requires>=5.16.0; this does not execute installed dependency/runtime or promote Adapter cache/Session behavior. Bounds normalize up front, required3.16 range is tuple comparison and selected gate requires equal major plus candidate>=required. Literal selected POST header forwarding remains a declared Go-versus-Session canonicalization boundary.",
+        "Go takes one safe UTF-8 current volume ID and typed strings/bools rather than supplied mutable Volume/VolumeDetail/Resource/dict/Munch inputs and Source constructor/descriptor/location/urljoin side effects. Separate Resource/native/v2 declarations remain independent.",
+        "Source returns None without response translation or refresh. Go adds owned VolumeID, Microversion, Discovery, Applied and Completed acknowledgement. No lookup, CurrentLocation, asynchronous wait/poll, cleanup or undo is added.",
+        "Finite call-owned discovery and typed advertisement/evidence policy are explicit Go mappings. Complete Keystoneauth cache/link/envelope/canonicalization/discovery exception ordering and authenticated backend behavior are not claimed. Empty Go selection cannot represent Python explicit default empty separately from None.",
+        "Opaque finite100..399 action policy maps Source<400. Accepted body IO/source/context proof remains separate from native rejection; native discarded rejected POST body IO remains a limitation. Exact method/route/body/framing/version guards constrain native retry/redirect while live auth remains.",
+        "New11 groups cover typed body/defaults, options/capture/preflight, conditional required discovery, original admission and facade/service behavior. Accepted action IO, ordinary cap details and complete reauth/307/framing matrices use declared shared Cinder engine reuse where applicable; no new operation-specific exhaustive transport matrix is claimed. Standalone Prepare wrappers are compiled and exercised through Connection preparation, not a separate new reusable-Prepare return mutation matrix.",
+        "Only the actual pinned v3 Proxy target is reviewed here. Root offline local HTTP race tests, vet and exact documentation compilation passed. Static Source hashes and offline Go checks do not prove authenticated OpenStack/Python runtime parity or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/complete_volume_migration",
+      "source_fingerprint": "be1f0d3dc3d3eb6aff455e907e653c195b956584f57949e9630aa5575f53d516",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.CompleteVolumeMigration",
+        "gophercloudsdk.Connection.CompleteVolumeMigration",
+        "gophercloudsdk/blockstorage/v3/volumes.API.CompleteVolumeMigration",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationCompletionOptions",
+        "gophercloudsdk/blockstorage.WithVolumeMigrationCompletionError",
+        "gophercloudsdk/blockstorage.PrepareVolumeMigrationCompletionOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeMigrationCompletionError",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeMigrationCompletionOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Required newVolume is a literal UTF-8 body string, including empty/route-like text; it is not resolved or validated as the current route ID. new_volume and error are always sent.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery"
+          ]
+        },
+        {
+          "behavior": "Omitted/nil Error defaultsfalse, explicitfalse/true is always transmitted; reusable full policy factories own pointers and preserve callback once semantics.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationOriginalOptionsOwnFactoryPointersRetainedConfigsAndCallbackOrder",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached"
+          ]
+        },
+        {
+          "behavior": "Direct/current ID and Connection prepare-before-Cinder admission keep operation/context/getter errors with no new-volume GET or CurrentLocation.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsCaptureSourcesBeforeOriginalsAndStopBeforeRestoration",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsPreflightAndCallbackFailuresPreservePriorityAndCauses",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationPreflightAndGetterFailuresRetainCauses"
+          ]
+        },
+        {
+          "behavior": "No API minimum gate is added; selected literal/ordinary cap3.71 selection, separate Discovery and opaque Applied are operation-owned.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap"
+          ]
+        },
+        {
+          "behavior": "Completed proves accepted body read/close/source helper completion only; Error=true informs Cinder, not SDK cleanup, migration completion, wait or undo.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsSerializeTypedDefaultsAndPresenceWithoutLookups",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority",
+            "connection_volume_migration_test.go:TestConnectionVolumeMigrationUsesCachedCinderAndSelectedVersionStillRequiresDiscovery"
+          ]
+        },
+        {
+          "behavior": "Package/Connection/service completion and nil service labels match the actual helper. New cases verify rejected action/native policy and preflight causes; the shared Post accepted IO/source/custom-context regression retains current proof/all causes without replay and is explicit reused engine evidence.",
+          "tests": [
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsPreflightAndCallbackFailuresPreservePriorityAndCauses",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmission",
+            "blockstorage/volume_migration_test.go:TestVolumeMigrationServiceMethodsKeepSDKContractsAndNilAPIPriority",
+            "blockstorage/volume_state_action_transport_test.go:TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompletion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-migration-reset.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source positional new_volume/error annotations do not perform coercion and allow dynamic null/nonbool values; Go deliberately uses required UTF-8 string and owned optionalbool.",
+        "No native completion API is invented and no new-volume Resource constructor/_get_id shortcut or resolver is introduced.",
+        "Go takes one safe UTF-8 current volume ID and typed strings/bools rather than supplied mutable Volume/VolumeDetail/Resource/dict/Munch inputs and Source constructor/descriptor/location/urljoin side effects. Separate Resource/native/v2 declarations remain independent.",
+        "Source returns None without response translation or refresh. Go adds owned VolumeID, Microversion, Discovery, Applied and Completed acknowledgement. No lookup, CurrentLocation, asynchronous wait/poll, cleanup or undo is added.",
+        "Finite call-owned discovery and typed advertisement/evidence policy are explicit Go mappings. Complete Keystoneauth cache/link/envelope/canonicalization/discovery exception ordering and authenticated backend behavior are not claimed. Empty Go selection cannot represent Python explicit default empty separately from None.",
+        "Opaque finite100..399 action policy maps Source<400. Accepted body IO/source/context proof remains separate from native rejection; native discarded rejected POST body IO remains a limitation. Exact method/route/body/framing/version guards constrain native retry/redirect while live auth remains.",
+        "New11 groups cover typed body/defaults, options/capture/preflight, conditional required discovery, original admission and facade/service behavior. Accepted action IO, ordinary cap details and complete reauth/307/framing matrices use declared shared Cinder engine reuse where applicable; no new operation-specific exhaustive transport matrix is claimed. Standalone Prepare wrappers are compiled and exercised through Connection preparation, not a separate new reusable-Prepare return mutation matrix.",
+        "Only the actual pinned v3 Proxy target is reviewed here. Root offline local HTTP race tests, vet and exact documentation compilation passed. Static Source hashes and offline Go checks do not prove authenticated OpenStack/Python runtime parity or full SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
