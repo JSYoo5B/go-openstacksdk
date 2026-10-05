@@ -209,6 +209,7 @@ openstacksdk는 `Connection`에서 서비스 Proxy에 접근합니다. 이 프�
 | 오류 | 예외 | 반환된 `error`, `errors.Is`, `errors.As` |
 | 리소스 재사용 | Resource 인스턴스 전달 가능 | `resource.ID(server.ID)`로 명시적으로 참조 |
 | 상태 대기 선택 인자 | `attribute`, `failures`, `callback`, `wait=None` | `WithStatusAttribute`, `WithFailureStates`, `WithProgressCallback`, `WithUnlimitedWait` |
+| 볼륨 이미지 내보내기 | `conn.block_storage.upload_volume_to_image(volume, image_name, ...)` | `conn.UploadVolumeToImage(ctx, request, imageName, options...)` |
 
 이름과 ID를 하나의 문자열로 추측하지 않습니다. UUID처럼 생긴 이름도 `resource.Name(...)`이면 이름으로 찾습니다. 기본 응답 모델은 Gophercloud 타입의 alias를 사용합니다. 인증·virtual media·Swift 리소스에는 SDK가 추가 정보를 보관하는 모델을 제공합니다. 응답 변경을 추적하고 자동 저장하는 Resource 객체는 아직 제공하지 않습니다. 대기 옵션은 SDK가 모델의 필드와 진행률을 읽으며 호출자가 builder를 구현하지 않습니다. [초기 조회·callback·context의 Go 정책](resource/README.md)은 Python의 캐시된 Resource 대기와 다른 부분을 설명합니다.
 
@@ -459,3 +460,5 @@ Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·
 직접 Cinder `os-attach`·`os-detach`·`os-force_detach` action은 `AttachCinderVolume`·`DetachCinderVolume`이 owned options와 acknowledgement proof를 제공합니다. 서버 연결의 Nova+Cinder workflow인 기존 `AttachVolume`·`DetachVolume`과 호출 목적·인자가 다릅니다. [직접 Cinder 사용법과 Python 비교](blockstorage/cinder-volume-attachment.md)에 기본값·selector 우선순위·force connector 경계를 설명합니다.
 
 Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션과 `DeleteVolumeImageMetadata`의 키별 부분 결과로 처리합니다. 기본 전체 삭제는 현재 이미지 메타데이터를 조회하며, 명시적 빈 키 목록은 HTTP 없이 마칩니다. [Python·Connection·package·service 사용법](blockstorage/volume-image-metadata.md)을 참고하세요.
+
+`UploadVolumeToImage`는 Cinder의 볼륨 이미지 내보내기에 필요한 기본값, 옵션 생략 여부, 조건부 3.1 지원 확인과 응답 처리를 제공합니다. [Python·Connection·package·service 사용법](blockstorage/volume-upload-image.md)을 참고하세요.
