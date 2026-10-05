@@ -76,3 +76,5 @@ The direct-ID service methods `ExtendVolume(ctx, id, size)`, `RetypeVolume(ctx, 
 `API.RevertVolumeToSnapshot`·`API.UnmanageVolume`은 SDK가 소유한 action 결과를 반환합니다. [사용법과 Python 비교](../../volume-revert-unmanage.md)를 참고하세요. 기존 native `Unmanage`의 `{}` body·202/error-only 계약은 유지됩니다.
 
 [직접 Cinder attach·detach](../../cinder-volume-attachment.md)의 `API.AttachCinderVolume`·`API.DetachCinderVolume`은 required literal body 인자와 owned functional options를 받고 `VolumeActionResult`를 반환합니다. 기존 native `API.Attach`·`API.Detach`의 Mode/omitempty/202/error-only 계약과 Nova+Cinder `Connection.AttachVolume`·`DetachVolume` workflow는 별도 API로 유지합니다.
+
+`API.SetVolumeImageMetadata(ctx, id, options...)`와 `API.DeleteVolumeImageMetadata(ctx, id, options...)`는 이미지 메타데이터 action을 제공합니다. 같은 패키지의 `WithVolumeImageMetadata*`·`WithVolumeImageMetadataDelete*`·Prepare로 옵션을 준비하며, 삭제는 기본 전체 삭제와 명시적 빈 목록을 구분하고 키별 실제 응답을 반환합니다. [Connection/package/service 사용법과 Python 비교](../../volume-image-metadata.md)를 참고하세요. 기존 native `SetImageMetadata`와 일반 `MetadataIn` 계약은 유지됩니다.

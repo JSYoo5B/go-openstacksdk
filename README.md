@@ -457,3 +457,5 @@ Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·
 명시 ID의 `RevertVolumeToSnapshot`·`UnmanageVolume`은 required3.40 복원과 null 관리 해제를 SDK가 처리합니다. [Python/package/Connection/service 사용법](blockstorage/volume-revert-unmanage.md)을 참고하세요.
 
 직접 Cinder `os-attach`·`os-detach`·`os-force_detach` action은 `AttachCinderVolume`·`DetachCinderVolume`이 owned options와 acknowledgement proof를 제공합니다. 서버 연결의 Nova+Cinder workflow인 기존 `AttachVolume`·`DetachVolume`과 호출 목적·인자가 다릅니다. [직접 Cinder 사용법과 Python 비교](blockstorage/cinder-volume-attachment.md)에 기본값·selector 우선순위·force connector 경계를 설명합니다.
+
+Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션과 `DeleteVolumeImageMetadata`의 키별 부분 결과로 처리합니다. 기본 전체 삭제는 현재 이미지 메타데이터를 조회하며, 명시적 빈 키 목록은 HTTP 없이 마칩니다. [Python·Connection·package·service 사용법](blockstorage/volume-image-metadata.md)을 참고하세요.

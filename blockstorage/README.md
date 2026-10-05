@@ -52,6 +52,8 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 | `conn.block_storage.extend_volume(id, size)` | `conn.ExtendVolume(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, newSize)` |
 | `conn.block_storage.retype_volume(id, type_id, migration_policy="never")` | `conn.RetypeVolume(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, newType, options...)` |
 | `conn.block_storage.complete_volume_extend(id, error=False)` | `conn.CompleteVolumeExtend(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, options...)` |
+| `conn.block_storage.set_volume_image_metadata(id, **metadata)` | `conn.SetVolumeImageMetadata(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, options...)` |
+| `conn.block_storage.delete_volume_image_metadata(id, keys=None)` | `conn.DeleteVolumeImageMetadata(ctx, blockstorage.VolumeActionRequest{VolumeID: id}, options...)` |
 
 SDK에서 볼륨 목록은 상세 목록 API를 사용합니다. Cloud 수준 삭제의 `WithDeleteVolumeForce`는 선택된 microversion에 맞는 요청을 사용합니다. Proxy의 별도 `cascade` 옵션은 이 workflow에 포함하지 않으며 snapshot까지 삭제하는 옵션은 native API 계층에서 명시적으로 선택합니다. [공식 Block Storage API](https://docs.openstack.org/openstacksdk/latest/user/proxies/block_storage_v3.html)
 
@@ -184,3 +186,5 @@ Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupServic
 [Volume revert·unmanage](volume-revert-unmanage.md)는 required3.40 스냅샷 복원과 null 관리 해제의 세 호출 경로·입력·부분 응답을 설명합니다.
 
 [직접 Cinder attach·detach](cinder-volume-attachment.md)는 Cinder action과 기존 Nova+Cinder 서버 연결 workflow를 구분하고, package·Connection·service 호출과 owned pointer/map/default policy를 설명합니다.
+
+[Volume image metadata](volume-image-metadata.md)는 설정의 빈 object 기본값, 삭제의 전체·빈 목록 구분, 키별 부분 응답과 원본의 일반 metadata 순회 문제 보정을 설명합니다. package·Connection·service 예제와 factory·Prepare를 함께 제공합니다.
