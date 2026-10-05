@@ -182,3 +182,5 @@ Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupServic
 명시 ID의 `ResetVolumeStatus`·`MigrateVolume`·`CompleteVolumeMigration`은 owned 옵션과 실제 action acknowledgement를 제공합니다. [Python/package/Connection/service 사용법](volume-migration-reset.md)에 nullable host/cluster, required 3.16 검증과 부분 응답을 설명합니다.
 
 [Volume revert·unmanage](volume-revert-unmanage.md)는 required3.40 스냅샷 복원과 null 관리 해제의 세 호출 경로·입력·부분 응답을 설명합니다.
+
+[직접 Cinder attach·detach](cinder-volume-attachment.md)는 Cinder action과 기존 Nova+Cinder 서버 연결 workflow를 구분하고, package·Connection·service 호출과 owned pointer/map/default policy를 설명합니다.

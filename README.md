@@ -455,3 +455,5 @@ Cinder v3의 reserve·unreserve·begin/abort detaching은 `conn.ReserveVolume`·
 명시 ID의 `ResetVolumeStatus`·`MigrateVolume`·`CompleteVolumeMigration`은 상태 생략, nullable host/cluster, cluster의 required 3.16 검증과 완료의 기본 error:false를 SDK가 처리합니다. [Volume status·migration 사용법과 Python 비교](blockstorage/volume-migration-reset.md)를 참고하세요.
 
 명시 ID의 `RevertVolumeToSnapshot`·`UnmanageVolume`은 required3.40 복원과 null 관리 해제를 SDK가 처리합니다. [Python/package/Connection/service 사용법](blockstorage/volume-revert-unmanage.md)을 참고하세요.
+
+직접 Cinder `os-attach`·`os-detach`·`os-force_detach` action은 `AttachCinderVolume`·`DetachCinderVolume`이 owned options와 acknowledgement proof를 제공합니다. 서버 연결의 Nova+Cinder workflow인 기존 `AttachVolume`·`DetachVolume`과 호출 목적·인자가 다릅니다. [직접 Cinder 사용법과 Python 비교](blockstorage/cinder-volume-attachment.md)에 기본값·selector 우선순위·force connector 경계를 설명합니다.

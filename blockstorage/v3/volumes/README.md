@@ -74,3 +74,5 @@ The direct-ID service methods `ExtendVolume(ctx, id, size)`, `RetypeVolume(ctx, 
 `API.ResetVolumeStatus`·`API.MigrateVolume`·`API.CompleteVolumeMigration`은 명시 ID의 opaque action helper입니다. [사용법과 Python 비교](../../volume-migration-reset.md)를 참고하세요. 기존 native `ResetStatus`의 status·202/error-only 계약은 유지됩니다.
 
 `API.RevertVolumeToSnapshot`·`API.UnmanageVolume`은 SDK가 소유한 action 결과를 반환합니다. [사용법과 Python 비교](../../volume-revert-unmanage.md)를 참고하세요. 기존 native `Unmanage`의 `{}` body·202/error-only 계약은 유지됩니다.
+
+[직접 Cinder attach·detach](../../cinder-volume-attachment.md)의 `API.AttachCinderVolume`·`API.DetachCinderVolume`은 required literal body 인자와 owned functional options를 받고 `VolumeActionResult`를 반환합니다. 기존 native `API.Attach`·`API.Detach`의 Mode/omitempty/202/error-only 계약과 Nova+Cinder `Connection.AttachVolume`·`DetachVolume` workflow는 별도 API로 유지합니다.
