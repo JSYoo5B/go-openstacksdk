@@ -1085,3 +1085,19 @@ detach는 기본 force=false이며 literal attachment ID를 빈 값·제어 문�
 최종1750개 Go에서 신규13그룹 집중 race(6.24초), 전체40개 테스트 패키지 race(89.58초), 전체 vet(2.68초)가 통과했습니다. 설치 문서의 정확한 독립 Go fence 컴파일(11.91초)은 인증된 cloud 실행이 아닙니다. 후보 manifest 구조를 잘못 읽어 전송 테스트 설치가 빠진 최초 집중 검사는 실제11그룹으로만 기록하고 13그룹 증거에서 제외했습니다. 기존1741개 Go는 모두 byte-identical이며 새 production5·test4개를 추가했습니다. inventory와 generated Go338개를 보존했습니다.
 
 기존 review461개와 source pins의 literal prefix·의미를 보존하고 이번 두 actual Proxy row의16개 계약·22개 공개 함수 참조·44개 test 참조(13개 실제 unique 선언)를 추가해463개로 기록했습니다. declared inventory3362개 중 supported=0, go_mapping=156, unsupported=1, unresolved=3205입니다. typed nullable string/bool·owned JSON connector·안전한 route ID·유한 discovery·소유한 응답은 명시한 Go 차이입니다. 원본32개 Source/native/generated/workflow literal을 재검증했으며 Python/dependency/OpenStack runtime이나 native/v2/Resource·기존 cloud workflow를 함께 승격하지 않았습니다. 전체 SDK 목표는 진행 중입니다.
+
+### Cinder v3 volume image metadata 설정·삭제
+
+고정 Proxy의 `set_volume_image_metadata`·`delete_volume_image_metadata`를 package·Connection·v3 Volumes service의 `SetVolumeImageMetadata`·`DeleteVolumeImageMetadata`에 연결했습니다. [세 호출 경로와 Python 비교](../blockstorage/volume-image-metadata.md)에 실행 예제와 기본값을 설명합니다. set은 nil·빈 map도 명시적인 metadata object로 전송하고, 문자열 map·단일 값 추가·owned raw JSON을 factory로 준비합니다. raw 값의 큰 숫자·중첩 JSON을 float로 먼저 변환하지 않으며 최종 UTF-8·JSON 입력을 검증합니다. map·각 byte slice와 callback 전후 값·original option slice를 복사하고 caller builder를 요구하지 않습니다.
+
+delete는 Keys pointer nil을 전체 삭제, nonnil pointer의 nil·빈 slice를 요청 없음으로 구분합니다. 명시한 키는 모두 먼저 검증한 뒤 순서와 중복을 유지해 body literal로 전송합니다. 기본 전체 삭제는 fixed ID member GET의 canonical volume object에서 volume_image_metadata만 읽고 정렬한 snapshot을 삭제합니다. 일반 metadata나 반환된 다른 ID·이름·location을 대상 선택에 쓰지 않습니다. missing/null/빈 image map은 POST 없이 완료하며 malformed envelope·nonobject image map에는 실제 Observed와 오류 증거를 남깁니다. 이는 원본이 inherited ordinary self.metadata를 순회하는 문제의 의도적인 Go 보정입니다. ID-only Resource에서 None 순회 실패는 정적 Source 추론이며 Python 실행 결과가 아닙니다. 동시 추가 키를 모두 지우는 원자적 clear를 보장하지 않습니다.
+
+선택된 버전은 원문으로 사용하고 미선택 시 ordinary cap3.71을 한 번 협상해 batch GET·POST에 고정합니다. action minimum gate나 CurrentLocation·이름 조회·모델 refresh·wait를 추가하지 않습니다. source/context 검사와 live provider authentication, 제한된 native retry에서도 body·framing·route·version 정책을 지킵니다. member GET에 잘못 주입된 body를 거부하는 경로가 Close 원인을 놓치는 것을 정적 리뷰에서 발견해 닫기·원인 보존을 보완했고, 실제 same-target307 테스트로 1회 Close와 다음 전송 차단을 검증했습니다.
+
+삭제 결과는 Discovery·Observed·이전 Deleted·현재 Failed의 실제 응답을 구분합니다. 첫 오류에서 멈추고 rollback하지 않으며 native 거부는 해당 error의 status/body/header를 유지하고 Failed.Response를 만들지 않습니다. accepted Read/Close/source/custom-context 오류는 현재 단계의 독립된 응답·ResponseError와 모든 원인을 보존합니다. Completed는 helper acknowledgement이며 backend의 최종 metadata 상태 증명이 아닙니다. 기존 native SetImageMetadata의 nil=>null·200-only·error-only와 일반 MetadataIn 경로는 보존했습니다.
+
+[공개·service5그룹](../blockstorage/volume_image_metadata_test.go), [옵션4그룹](../blockstorage/volume_image_metadata_options_test.go), [Connection3그룹](../connection_volume_image_metadata_test.go), [transport2그룹](../blockstorage/volume_image_metadata_transport_test.go)의 신규14그룹 집중 race(44.45초), 전체40개 테스트 패키지 race(98.08초), 전체 vet(2.71초)가 통과했습니다. 설치 가이드의 정확한 Go fence는 별도 module cwd에서 컴파일(15.16초)했고 authenticated cloud 실행은 하지 않았습니다. set의 정상 cap 선택은 공유 action 계층과 delete의 실제 양성 negotiation 근거로 연결하며 새로운 set 전용 exhaustive matrix라고 주장하지 않습니다.
+
+최종1760개 Go는 모든 QA 중 동일했고 기존1750개는 모두 byte-identical입니다. production6·test4를 추가했으며 inventory·generated Go338개를 보존했습니다. 이전 review463개의 literal prefix·source pins·의미를 유지하고 이번 두 실제 Proxy row의12계약·24 공개 함수·42 test 참조(14 unique 실제 선언)만 추가해465개로 기록했습니다. declared inventory3362개 중 supported=0, go_mapping=158, unsupported=1, unresolved=3203입니다. lazy Python iterable·동적 모델·serializer·Adapter/cache/session과 native/v2/Resource 범위는 명시한 Go 차이이며 함께 승격하지 않았습니다. 전체 SDK 목표는 진행 중입니다.
+
+Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=158, unsupported=1, unresolved=3203.

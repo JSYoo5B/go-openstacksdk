@@ -34382,6 +34382,186 @@
         "Only the actual pinned v3 Proxy detach_volume target is classified. Native/v2/Resource and existing cloud AttachVolume/DetachVolume workflows remain independently reviewed; the unchanged cloud boundary here is statically bound, not a new cloud workflow runtime test. No Python Source/dependency/authenticated OpenStack execution or full SDK completion is claimed."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/set_volume_image_metadata",
+      "source_fingerprint": "743ed3114cafca124788d88812f42945031753b70379f24a31386c17f85b7cfc",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataOptions",
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadata",
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataValue",
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataRaw",
+        "gophercloudsdk/blockstorage.PrepareVolumeImageMetadataOptions",
+        "gophercloudsdk/blockstorage.SetVolumeImageMetadata",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadata",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataValue",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataRaw",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.API.SetVolumeImageMetadata",
+        "gophercloudsdk.Connection.SetVolumeImageMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "Set sends exactly one os-set_image_metadata action with metadata object, including omitted/nil/empty maps as {}. Literal empty/control/path-like strings and raw null/false/exact large/nested JSON members are preserved in the body; no lookup/model refresh/wait is added. Admitted opaque 200/203/204/302/399 responses complete acknowledgement without JSON parsing.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestSetVolumeImageMetadataPreservesEmptyMapsRawValuesAndOwnedFactories",
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataServiceFacadePreservesNativeSetAndPublicPreflight",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents"
+          ]
+        },
+        {
+          "behavior": "String/raw/full factories replace policy; Value alone merges one string member. HTTP-free reusable Prepare owns maps/member bytes and fresh empty defaults, validates only final UTF-8 keys/strings/complete JSON values, permits later repair of invalid members, and returns zero policy on failures.",
+          "tests": [
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacementOrder",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareValidatesOnlyFinalMapsAndPresentKeys",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareNilCallbacksAndCancellationKeepZeroPolicyAndEveryCause"
+          ]
+        },
+        {
+          "behavior": "Originals snapshot their callback slice, run once in order, copy intermediate maps/raw bytes and join callback/custom-context causes. Direct selected Source/current-ID admission precedes originals; sticky ResourceBase mutation stops a later restoration callback before HTTP.",
+          "tests": [
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataOriginalsOwnCallbackSliceIntermediateMapsAndKeySlices",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareNilCallbacksAndCancellationKeepZeroPolicyAndEveryCause",
+            "blockstorage/volume_image_metadata_test.go:TestSetVolumeImageMetadataPreservesEmptyMapsRawValuesAndOwnedFactories",
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataServiceFacadePreservesNativeSetAndPublicPreflight"
+          ]
+        },
+        {
+          "behavior": "Connection preflights context/provider, prepares originals once before current-ID/cached Cinder selection, ignores configured CurrentLocation, and detaches retained callback maps through the getter. Local/callback/getter/cached wrong-service failures preserve operation/cause and create no HTTP proof.",
+          "tests": [
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataOriginalsRunOnceBeforeGetterAndRetainedOptionsStayDetached",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataPreflightOptionsAndGetterFailuresKeepEveryCause"
+          ]
+        },
+        {
+          "behavior": "Nonempty selected 3.60/3.90 is literal and skips discovery; common ordinary action selection has no minimum gate and cap3.71. Malformed admitted unselected discovery blocks set with only its actual Discovery/ResponseError, while valid common batch negotiation is independently exercised by delete.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestSetVolumeImageMetadataPreservesEmptyMapsRawValuesAndOwnedFactories",
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataNegotiatesOnceAndStopsAtCurrentNativeFailureWithoutBorrowedProof",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/source/custom-context failures retain independently owned current Applied/error proof with Completedfalse and no SDK replay. Live auth/reauth/bounded retry keep original body/version/admission; retry/physical307 body/framing/URL/version changes are blocked and native rejection cannot fabricate Applied. Service native SetImageMetadata nil=>null/200-only/error-only remains independent.",
+          "tests": [
+            "blockstorage/volume_image_metadata_transport_test.go:TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoinedCauses",
+            "blockstorage/volume_image_metadata_transport_test.go:TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolicy",
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataServiceFacadePreservesNativeSetAndPublicPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-image-metadata.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Python **metadata supplies a kwargs dictionary, including empty {}. Go string/raw/full factories replace request policy and Value merges; this is request assembly, not a claim that Cinder atomically replaces its stored image metadata.",
+        "Go raw metadata permits owned ordinary JSON null/bool/numbers/containers without float preconversion, but rejects invalid UTF-8/incomplete JSON/nil raw members and excludes arbitrary Python objects/datetime/UUID/custom serializer behavior. Map member order and numeric/string/escape serialization are Go JSON representation boundaries, not Python mutable kwargs identity.",
+        "Native API.SetImageMetadata remains independently map[string]string, nil metadata:null, HTTP200/error-only; ordinary MetadataIn childroutes are unchanged.",
+        "Go safe explicit current volume ID and owned option/result values replace Source supplied Resource/dict/Munch/None/dynamic inherited ID and constructor/descriptor/location/session side effects. No name finder, CurrentLocation, refresh, state wait or model conversion is introduced.",
+        "The Source helper returns None after response status<400. Go finite100..399 admission exposes owned actual stage responses and Completed acknowledgement; this does not prove the final server/backend metadata state.",
+        "Go finite operation-owned ordinary discovery/cap3.71 and literal nonempty selected version differ from complete Keystoneauth endpoint-data cache/canonicalization/exception ordering. Empty Go selection cannot represent every distinct Python default None/empty value. Original client selection is not rewritten.",
+        "Fixed method/URL/serialized-body/framing/version and captured Source constrain native retry/redirect while live provider authentication is allowed. Native original rejected HTTP remains native; discarded rejected HTTP body IO is not claimed fully reconstructed.",
+        "Only the actual pinned v3 Proxy target is classified as go_mapping. Native/v2/Resource/MetadataMixin/ordinary MetadataIn and shared discovery dependencies are not promoted. Source/static comparison and Root offline Go HTTP/example checks do not imply Python/dependency/authenticated OpenStack execution or full SDK completion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_volume_image_metadata",
+      "source_fingerprint": "561f8183ff7e439b1f1044d6f07bc84beb1a6e80ed675c5951d349363678b298",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataDeleteOptions",
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataDeleteKeys",
+        "gophercloudsdk/blockstorage.WithVolumeImageMetadataDeleteAll",
+        "gophercloudsdk/blockstorage.PrepareVolumeImageMetadataDeleteOptions",
+        "gophercloudsdk/blockstorage.DeleteVolumeImageMetadata",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteKeys",
+        "gophercloudsdk/blockstorage/v3/volumes.WithVolumeImageMetadataDeleteAll",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareVolumeImageMetadataDeleteOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.API.DeleteVolumeImageMetadata",
+        "gophercloudsdk.Connection.DeleteVolumeImageMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "Keys pointer nil/default means all; a nonnil pointer including nil/empty slice or zero-argument WithKeys means explicit none with zero HTTP/discovery after local admission. Explicit UTF-8 keys, including empty/control/path-like text, preserve order and duplicates as body literals with no GET; every final key is validated before earlier actions.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidation",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacementOrder",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareValidatesOnlyFinalMapsAndPresentKeys",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents"
+          ]
+        },
+        {
+          "behavior": "Default all intentionally corrects the pinned ordinary-metadata iteration bug: fixed-ID bodyless member GET admits sub400 but requires canonical volume object and reads only volume_image_metadata. Missing/null/empty image map emits no POST; nonobject/bad envelope/malformed JSON keeps actual Observed/error proof. Image keys are snapshotted/sorted, ignoring ordinary metadata, returned ID and unrelated typed fields.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestDeleteVolumeImageMetadataAllReadsOnlyCanonicalImageFieldAndKeepsObservation",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents"
+          ]
+        },
+        {
+          "behavior": "Owned factories/full replacement/All/Keys and reusable HTTP-free Prepare preserve pointer presence, slice order/duplicates and returned-policy independence. Original callback slice and intermediate key backing arrays stay detached; final repaired keys succeed, and nil/callback/cancellation failures return zero policy with every cause.",
+          "tests": [
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataOptionFactoriesOwnInputsReturnedValuesAndReplacementOrder",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataOriginalsOwnCallbackSliceIntermediateMapsAndKeySlices",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareValidatesOnlyFinalMapsAndPresentKeys",
+            "blockstorage/volume_image_metadata_options_test.go:TestVolumeImageMetadataPrepareNilCallbacksAndCancellationKeepZeroPolicyAndEveryCause",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataOriginalsRunOnceBeforeGetterAndRetainedOptionsStayDetached"
+          ]
+        },
+        {
+          "behavior": "Direct Source/current-ID admission precedes original callbacks even for explicit none. Connection preflight prepares originals once before current-ID/cached Cinder selection, consumes no CurrentLocation, and validates unsafe IDs/invalid final keys/getter/cached source failures without member/action HTTP or borrowed proof.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidation",
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataServiceFacadePreservesNativeSetAndPublicPreflight",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataOriginalsRunOnceBeforeGetterAndRetainedOptionsStayDetached",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataPreflightOptionsAndGetterFailuresKeepEveryCause"
+          ]
+        },
+        {
+          "behavior": "A nonempty selected version skips discovery; otherwise one ordinary cap3.71 negotiation supplies the entire batch GET/POST version and separate actual Discovery. First native action failure stops later keys, retains earlier Deleted/optional Observed, records Failed key with nil Response while the returned error retains current native status/body/header, and cannot borrow admitted ResponseError proof.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestVolumeImageMetadataNegotiatesOnceAndStopsAtCurrentNativeFailureWithoutBorrowedProof",
+            "connection_volume_image_metadata_test.go:TestConnectionVolumeImageMetadataUsesCachedCinderAndPreservesAllEmptyAndDuplicateIntents",
+            "blockstorage/volume_image_metadata_transport_test.go:TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolicy"
+          ]
+        },
+        {
+          "behavior": "Per-key opaque acknowledgement bodies/headers and member/error proofs own independent bytes. Accepted IO/source/custom cancellation retains only the current Observed or Failed.Response plus earlier completed keys, without replay/rollback; Completed only means helper acknowledgement. Live auth and bounded retry preserve batch policy, physical bodyless GET/POST/URL/version/framing mutations are blocked, and rejected injected GET Body Close runs once with close cause retained.",
+          "tests": [
+            "blockstorage/volume_image_metadata_test.go:TestDeleteVolumeImageMetadataExplicitKeysKeepOrderDuplicatesAndEagerValidation",
+            "blockstorage/volume_image_metadata_test.go:TestDeleteVolumeImageMetadataAllReadsOnlyCanonicalImageFieldAndKeepsObservation",
+            "blockstorage/volume_image_metadata_transport_test.go:TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoinedCauses",
+            "blockstorage/volume_image_metadata_transport_test.go:TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-image-metadata.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Pinned keys=None calls Volume.delete_image_metadata, which loops inherited ordinary self.metadata rather than volume_image_metadata. ID-only missing ordinary metadata defaults to None and implies iteration TypeError by static inspection; no Python execution is asserted. Go intentionally repairs this branch with fresh fixed-ID image-field GET and sorted snapshot keys.",
+        "The repaired all path is not an atomic clear: keys added after observation are not included, concurrent changes can cause a later failure, earlier deletions remain, and there is no implicit merge/write/retry/rollback promise.",
+        "Python non-None keys can be an arbitrary lazy iterable, string character iteration or generator failing after earlier POSTs. Go narrows to an eager owned UTF-8 string slice; nonnil pointer to nil/empty slice explicitly means none. Final key validation occurs before any mutation and duplicate order is preserved.",
+        "Source selects microversion separately for every key action using mutable session state. Go negotiates/captures one version for the whole batch, including the added default-all GET; this deliberate stable policy does not reproduce per-key session mutation.",
+        "Observed/Discovery/Deleted/Failed and current native/error proof are distinct owned phases. A failure before attempting the next key can leave Failed nil, while an attempted native rejected action has Failed with nil Response. Earlier acknowledgement is not borrowed as current evidence.",
+        "Go safe explicit current volume ID and owned option/result values replace Source supplied Resource/dict/Munch/None/dynamic inherited ID and constructor/descriptor/location/session side effects. No name finder, CurrentLocation, refresh, state wait or model conversion is introduced.",
+        "The Source helper returns None after response status<400. Go finite100..399 admission exposes owned actual stage responses and Completed acknowledgement; this does not prove the final server/backend metadata state.",
+        "Go finite operation-owned ordinary discovery/cap3.71 and literal nonempty selected version differ from complete Keystoneauth endpoint-data cache/canonicalization/exception ordering. Empty Go selection cannot represent every distinct Python default None/empty value. Original client selection is not rewritten.",
+        "Fixed method/URL/serialized-body/framing/version and captured Source constrain native retry/redirect while live provider authentication is allowed. Native original rejected HTTP remains native; discarded rejected HTTP body IO is not claimed fully reconstructed.",
+        "Only the actual pinned v3 Proxy target is classified as go_mapping. Native/v2/Resource/MetadataMixin/ordinary MetadataIn and shared discovery dependencies are not promoted. Source/static comparison and Root offline Go HTTP/example checks do not imply Python/dependency/authenticated OpenStack execution or full SDK completion."
+      ],
+      "remaining": []
     }
   ]
 }
