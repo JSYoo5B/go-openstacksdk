@@ -34187,6 +34187,201 @@
         "Current installed seven new groups directly verify literal/null bodies, required3.40 range/probe reuse, preflight/cache/location omission, native Unmanage separation, opaque/accepted Read+Close+source+customcontext proof and liveauth/bounded retry/body mutation. Ordinary unselected cap3.71 and global latest/3.latest version comparison use separately declared existing common-engine regression; no new operation-specific exhaustive redirect/framing matrix is claimed."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/attach_volume",
+      "source_fingerprint": "caefeb025d07f71daad909176c8041f2bf7288474a5c050933ffd97dff0c9180",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WithCinderVolumeAttachOptions",
+        "gophercloudsdk/blockstorage.WithCinderVolumeAttachInstance",
+        "gophercloudsdk/blockstorage.WithCinderVolumeAttachHostName",
+        "gophercloudsdk/blockstorage.PrepareCinderVolumeAttachOptions",
+        "gophercloudsdk/blockstorage.AttachCinderVolume",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeAttachOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeAttachInstance",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeAttachHostName",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareCinderVolumeAttachOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.API.AttachCinderVolume",
+        "gophercloudsdk.Connection.AttachCinderVolume"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attach includes required literal mountpoint and selects Instance by nonnil presence, including empty; Instance wins HostName and only one selected field is sent. HostName fallback includes explicit empty. No mode, instance/host lookup, Nova request or state/poll is added.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentServiceMethodsPreserveNativeAttachDetachContracts",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation"
+          ]
+        },
+        {
+          "behavior": "Both selectors nil fail locally; only final selected selector UTF-8 is consumed, so inactive invalid HostName is ignored. Required mountpoint accepts empty/control/path-like UTF-8 text and fails invalid UTF-8 before direct originals/HTTP.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentDirectPreflightAndStickySourceStopOriginals",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentPreflightOptionsAndGetterFailuresKeepCauses"
+          ]
+        },
+        {
+          "behavior": "Owned factories/full replacement and reusable HTTP-free Prepare copy nullable pointers, isolate returned policy from original inputs/results and reject missing/final-invalid selection with zero policy. No caller builder/interface is required.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentOptionsFactoriesDefaultsAndReplacementOwnership",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses"
+          ]
+        },
+        {
+          "behavior": "Direct Source/current-ID/required-literal admission precedes original callbacks; originals snapshot their slice, execute once in order and copy retained policy before/after each. Source faults are sticky and stop later restoration callbacks with all context/callback causes.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentOriginalsOwnSlicePointersAndConnectorThroughHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentDirectPreflightAndStickySourceStopOriginals"
+          ]
+        },
+        {
+          "behavior": "Connection preflight prepares originals once before required literal/current ID/cached Cinder getter; only Cinder is selected, configured CurrentLocation is not consumed, and retained values/getter/context/source faults preserve local operation/cause evidence.",
+          "tests": [
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentPreflightOptionsAndGetterFailuresKeepCauses"
+          ]
+        },
+        {
+          "behavior": "No action-specific minimum is added. Nonempty selected3.1/3.90/latest remains literal without discovery; unselected ordinary cap3.71/lower maximum/high minimum no-version policy owns separate admitted Discovery and action proof without source version mutation.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentUsesOrdinarySelectedOrCappedMicroversionWithoutMinimumGate",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation"
+          ]
+        },
+        {
+          "behavior": "Opaque accepted action bytes/Header/status are independently owned. Completed acknowledges admission/read/Close/source success; accepted Read/Close/source/custom-context failures retain Applied/independent ResponseError and all causes with Completedfalse and no SDK replay.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_transport_test.go:TestCinderVolumeAttachmentAcceptedFailuresKeepIndependentActualProofAndJoinedCauses"
+          ]
+        },
+        {
+          "behavior": "Live auth/reauth/bounded retry preserve original action body/selected version/admission and block changed body/header/source/physical307 body/framing/target before resend. Native Attach mode/both-selectors/202/error-only and nil service policy remain separate from SDK service AttachCinderVolume.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentServiceMethodsPreserveNativeAttachDetachContracts",
+            "blockstorage/cinder_volume_attachment_transport_test.go:TestCinderVolumeAttachmentNativeAuthRetriesAndPhysicalGuardsPreserveOriginalActionPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/cinder-volume-attachment.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source nullable selectors can hold dynamic nonstring values; Go narrows to nullable UTF-8 strings and validates only selected instance/host. Explicit empty remains present. Direct Source attach has no mode; native Mode/omitempty/two nonempty selectors is preserved independently.",
+        "Go safe current volume route ID and required UTF-8 body strings and nullable selectors replace supplied Resource/dict/Munch/None/untyped IDs, arbitrary dynamic annotations and constructor/descriptor/location/cache side effects; no name finder, refresh/model, CurrentLocation, wait/poll or additional server-state checks are introduced.",
+        "Source action helpers return None after opaque response.status_code<400. Go finite100..399 policy adds owned VolumeID/Microversion/Discovery/Applied/Completed. Completed is helper acknowledgement, not server attachment/device state or backend readiness.",
+        "Finite operation-owned ordinary discovery/max3.71 is an explicit Go mapping rather than complete Keystoneauth endpoint-data cache/link/envelope/exception ordering/Session header canonicalization. Nonempty selected literal is preserved; empty Go selection cannot separately represent Python explicit empty default versus None.",
+        "Fixed method/route/serialized body/framing/selected version and admitted response ownership constrain retry/redirect while live native auth and allowed extra retry headers remain. Original native rejected HTTP is distinct and cannot become Applied; discarded rejected POST body IO is not claimed fully reconstructed.",
+        "Only the actual pinned v3 Proxy attach_volume target is classified. Native/v2/Resource and existing cloud AttachVolume/DetachVolume workflows remain independently reviewed; the unchanged cloud boundary here is statically bound, not a new cloud workflow runtime test. No Python Source/dependency/authenticated OpenStack execution or full SDK completion is claimed."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/detach_volume",
+      "source_fingerprint": "0262e64b33b50a9cbc5ba390e6dabe221d3f3c6fe5f283bdc7839433e3ead47c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.WithCinderVolumeDetachOptions",
+        "gophercloudsdk/blockstorage.WithCinderVolumeDetachForce",
+        "gophercloudsdk/blockstorage.WithCinderVolumeDetachConnector",
+        "gophercloudsdk/blockstorage.PrepareCinderVolumeDetachOptions",
+        "gophercloudsdk/blockstorage.DetachCinderVolume",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeDetachOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeDetachForce",
+        "gophercloudsdk/blockstorage/v3/volumes.WithCinderVolumeDetachConnector",
+        "gophercloudsdk/blockstorage/v3/volumes.PrepareCinderVolumeDetachOptions",
+        "gophercloudsdk/blockstorage/v3/volumes.API.DetachCinderVolume",
+        "gophercloudsdk.Connection.DetachCinderVolume"
+      ],
+      "contracts": [
+        {
+          "behavior": "Detach Force nil/default/false sends os-detach with required attachment_id literal, including empty/control/path-like UTF-8. Inactive connector values/keys are not validated or sent, even if malformed. Force true selects os-force_detach without a separate lookup/wait/rollback workflow.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation"
+          ]
+        },
+        {
+          "behavior": "Force true omits nil/empty connector and includes all members of a nonempty object, including false/null/empty string and exact raw large/nested JSON values. Only active UTF-8 keys/complete UTF-8 JSON members are admitted; invalid/nil/trailing raw values fail locally and final repaired/inactive policy can succeed.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses"
+          ]
+        },
+        {
+          "behavior": "Owned false default pointer is fresh. Full replacement clears prior connector/force and restores defaultfalse; reusable WithOptions/Connector/Prepare own pointers/maps/every raw byte member, and failures return zero policy with joined context/callback causes.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentOptionsFactoriesDefaultsAndReplacementOwnership",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentPrepareValidatesFinalActiveValuesAndJoinsCauses"
+          ]
+        },
+        {
+          "behavior": "Original option slice/callback order/retained pointer-map-rawvalue ownership remain detached through HTTP. Direct Source/current ID/required literal preflight precedes callbacks; sticky source/cancel/callback errors stop later originals before physical proof.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentPreflightAndOwnedOriginalOptionsPrecedeHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentOriginalsOwnSlicePointersAndConnectorThroughHTTP",
+            "blockstorage/cinder_volume_attachment_options_test.go:TestCinderVolumeAttachmentDirectPreflightAndStickySourceStopOriginals"
+          ]
+        },
+        {
+          "behavior": "Connection prepares originals once before body/route/cached Cinder admission; default/force calls need no Nova or CurrentLocation. Retained maps/getter mutation cannot alter the owned prepared request, while preflight/option/getter/context/source failures retain exact operation/cause without HTTP.",
+          "tests": [
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentOriginalsRunOnceBeforeGetterAndRetainedValuesStayDetached",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentPreflightOptionsAndGetterFailuresKeepCauses"
+          ]
+        },
+        {
+          "behavior": "Normal and force detach use ordinary selected literal or finite cap3.71/max/optionalminimum negotiation with no minimum gate. Original client selection is not mutated and admitted Discovery/action proof are independent.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentUsesOrdinarySelectedOrCappedMicroversionWithoutMinimumGate",
+            "connection_cinder_volume_attachment_test.go:TestConnectionCinderVolumeAttachmentsUseCachedCinderAndIgnoreLocation"
+          ]
+        },
+        {
+          "behavior": "Opaque acknowledgement and Completed remain distinct from backend disconnect/state completion. Accepted Read/Close/source/custom cancellation retain actual independent Applied/error proof and all causes without replay; rejected HTTP cannot borrow or fabricate admitted proof.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentLiteralBranchesAcceptOpaqueAcknowledgementsWithoutLookup",
+            "blockstorage/cinder_volume_attachment_transport_test.go:TestCinderVolumeAttachmentAcceptedFailuresKeepIndependentActualProofAndJoinedCauses",
+            "blockstorage/cinder_volume_attachment_transport_test.go:TestCinderVolumeAttachmentNativeAuthRetriesAndPhysicalGuardsPreserveOriginalActionPolicy"
+          ]
+        },
+        {
+          "behavior": "SDK service DetachCinderVolume normal/force/empty-ID/connector/result behavior remains distinct from native Detach empty omission/normal-only202/error-only. Live reauth/bounded retry/physical307 guards preserve original body/framing/URL/version/status policy and nil API preflight.",
+          "tests": [
+            "blockstorage/cinder_volume_attachment_test.go:TestCinderVolumeAttachmentServiceMethodsPreserveNativeAttachDetachContracts",
+            "blockstorage/cinder_volume_attachment_transport_test.go:TestCinderVolumeAttachmentNativeAuthRetriesAndPhysicalGuardsPreserveOriginalActionPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/cinder-volume-attachment.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source arbitrary force truthiness and truthy connector objects are deliberately narrowed to nullable bool and owned JSON object map. Inactive connector is not consumed. Raw numeric precision/spelling/map serialization are Go JSON representation boundaries rather than arbitrary Python objects/insertion-order serialization.",
+        "Source force action does not call backend disconnect or a separate rollback helper; Go force flag only chooses the action. Native Detach normal-only/omitempty202/error-only remains unchanged.",
+        "Go safe current volume route ID and required UTF-8 body strings, nullable force bool and owned JSON connector replace supplied Resource/dict/Munch/None/untyped IDs, arbitrary dynamic annotations and constructor/descriptor/location/cache side effects; no name finder, refresh/model, CurrentLocation, wait/poll or additional server-state checks are introduced.",
+        "Source action helpers return None after opaque response.status_code<400. Go finite100..399 policy adds owned VolumeID/Microversion/Discovery/Applied/Completed. Completed is helper acknowledgement, not server attachment/device state or backend readiness.",
+        "Finite operation-owned ordinary discovery/max3.71 is an explicit Go mapping rather than complete Keystoneauth endpoint-data cache/link/envelope/exception ordering/Session header canonicalization. Nonempty selected literal is preserved; empty Go selection cannot separately represent Python explicit empty default versus None.",
+        "Fixed method/route/serialized body/framing/selected version and admitted response ownership constrain retry/redirect while live native auth and allowed extra retry headers remain. Original native rejected HTTP is distinct and cannot become Applied; discarded rejected POST body IO is not claimed fully reconstructed.",
+        "Only the actual pinned v3 Proxy detach_volume target is classified. Native/v2/Resource and existing cloud AttachVolume/DetachVolume workflows remain independently reviewed; the unchanged cloud boundary here is statically bound, not a new cloud workflow runtime test. No Python Source/dependency/authenticated OpenStack execution or full SDK completion is claimed."
+      ],
+      "remaining": []
     }
   ]
 }
