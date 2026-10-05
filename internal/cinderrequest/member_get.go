@@ -40,6 +40,10 @@ func MemberGet(ctx context.Context, source *cloudread.Source, target, version st
 		if req.Body != nil && req.Body != http.NoBody || req.ContentLength != 0 || len(req.TransferEncoding) != 0 {
 			faults.add(invalid("Cinder member GET changes physical body framing"))
 		}
+		if req.Body != nil && req.Body != http.NoBody {
+			faults.add(req.Body.Close())
+			req.Body = http.NoBody
+		}
 		for key, values := range req.Header {
 			if strings.EqualFold(key, "Transfer-Encoding") || strings.EqualFold(key, "Content-Length") && (len(values) != 1 || values[0] != "0") {
 				faults.add(invalid("Cinder member GET changes physical body framing"))
