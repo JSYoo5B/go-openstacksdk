@@ -34043,6 +34043,150 @@
         "Only the actual pinned v3 Proxy target is reviewed here. Root offline local HTTP race tests, vet and exact documentation compilation passed. Static Source hashes and offline Go checks do not prove authenticated OpenStack/Python runtime parity or full SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/revert_volume_to_snapshot",
+      "source_fingerprint": "5f22378d79eb884303f8cb80f71c2d96860dded3c67b33ac9ad6bd9dab7cd3a4",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.RevertVolumeToSnapshot",
+        "gophercloudsdk.Connection.RevertVolumeToSnapshot",
+        "gophercloudsdk/blockstorage/v3/volumes.API.RevertVolumeToSnapshot"
+      ],
+      "contracts": [
+        {
+          "behavior": "Revert uses a required literal UTF-8 snapshotID body string, including empty/control/path-like strings, with exact {revert:{snapshot_id:value}} and safe current volume action route. No snapshot/current-volume GET or name resolver.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageKeepLiteralBodyDomainsAndOpaqueAcknowledgements"
+          ]
+        },
+        {
+          "behavior": "Required3.40 server support is checked before action even when selected version exists: both advertisement bounds must contain3.40 and selected candidate must same-major>=3.40; compatible selected above server maximum remains raw literal. New revert range cases verify3.39/equal3.40/high selected and missing/range bounds; global latest/3.latest same-major comparisons are existing requireSupport engine regression plus actual fixed3.40 Source/code evidence.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestRevertVolumeToSnapshotRequiresAdvertised340AndReusesProbeForOrdinarySelection",
+            "blockstorage/volume_migration_test.go:TestMigrateVolumeRequiresAdvertisedSupportBeforeSelectedOrComputedVersion"
+          ]
+        },
+        {
+          "behavior": "Unselected required calls reuse the same finite admitted advertisement to select ordinary cap3.71/maximum/optionalminimum. Missing/unsupported/malformed/IO/source/context gate evidence ends before POST with admitted discovery preserved.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestRevertVolumeToSnapshotRequiresAdvertised340AndReusesProbeForOrdinarySelection",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof"
+          ]
+        },
+        {
+          "behavior": "Package, service and Connection have required parameters and no options/builder. Context/provider/typed input preflight occurs before HTTP; Connection uses cached Cinder without CurrentLocation or Resource conversion.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanagePreflightAndServiceMethodsPreserveNativeSeparation",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanageUsesCachedCinderAndLiteralSnapshotBody",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanagePreflightAndGetterFaultsKeepCauses"
+          ]
+        },
+        {
+          "behavior": "Action accepted response is opaque and independently owned; Completed acknowledges successful admission/read/close/source guard, while accepted faults retain partial Applied and joined causes without rollback/replay.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageKeepLiteralBodyDomainsAndOpaqueAcknowledgements",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof"
+          ]
+        },
+        {
+          "behavior": "Original native HTTP rejection/retry policy and fixed physical request/source/live-auth boundaries cannot fabricate current Applied from discovery proof. No asynchronous wait, status/latest-snapshot validation or backend cleanup.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageLiveAuthAndBoundedRetryPreserveBodyAndOriginalHTTPPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-revert-unmanage.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Source local snapshot Resource construction can expose arbitrary snapshot.id values; Go deliberately restricts this body operand to literal UTF-8 string without restricting it as a route. Detached/available/latest-snapshot documentation preconditions remain server concerns; no implementation GET/check is introduced.",
+        "The actual required Source default comparison uses pinned Keystoneauth5.16.0 version_match: global latest is incompatible with major3, 3.latest can pass; actual Session canonicalization is a separately documented dependency boundary.",
+        "Go safe UTF-8 current route ID and typed literal snapshot string replace mutable Resource/dict/Munch/untyped ID and constructor/descriptor/location/cache side effects. No lookup, model refresh or CurrentLocation is added.",
+        "Source returns None and discards opaque action response; Go owns VolumeID/Microversion/Discovery/Applied/Completed. Completed means helper acknowledgement, not backend completion/removal/deletion.",
+        "Finite call-owned discovery shares advertisement rather than reproducing Keystoneauth Adapter cache/link/envelope/exception order/Session canonicalization; selected literal forwarding remains a Go mapping. Empty selected Go string cannot separately represent Python explicit default empty versus None.",
+        "Source status<400 maps finite Go100..399. Original native rejection remains native with no Applied; discarded rejected POST body IO is not claimed fully reconstructed. Fixed method/URL/body/framing/version and accepted phase proof are Go-owned policies.",
+        "Only this actual pinned v3 Proxy declaration is classified. Separate native/v2/Resource/manage/read/metadata dependencies are not automatically promoted; Source static evidence and passed local Go QA do not prove authenticated Python/cloud runtime or full SDK completion.",
+        "Current installed seven new groups directly verify literal/null bodies, required3.40 range/probe reuse, preflight/cache/location omission, native Unmanage separation, opaque/accepted Read+Close+source+customcontext proof and liveauth/bounded retry/body mutation. Ordinary unselected cap3.71 and global latest/3.latest version comparison use separately declared existing common-engine regression; no new operation-specific exhaustive redirect/framing matrix is claimed."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/unmanage_volume",
+      "source_fingerprint": "383acdb500a293c565d03792ffb9918c10d45f040c61848f01489f8215a0f972",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/blockstorage.UnmanageVolume",
+        "gophercloudsdk.Connection.UnmanageVolume",
+        "gophercloudsdk/blockstorage/v3/volumes.API.UnmanageVolume"
+      ],
+      "contracts": [
+        {
+          "behavior": "UnmanageVolume sends exact {os-unmanage:null} to the safe current volume action route with no lookup, DELETE, options, force flag or model construction.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageKeepLiteralBodyDomainsAndOpaqueAcknowledgements",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanagePreflightAndServiceMethodsPreserveNativeSeparation",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanageUsesCachedCinderAndLiteralSnapshotBody"
+          ]
+        },
+        {
+          "behavior": "No minimum gate is added. Selected nonempty version remains literal; otherwise finite ordinary discovery selects cap3.71/maximum/optionalminimum without source microversion mutation. Selected unmanage policy is tested directly; ordinary unselected cap details are existing shared Negotiate regression with actual same engine reuse.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageKeepLiteralBodyDomainsAndOpaqueAcknowledgements",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanageUsesCachedCinderAndLiteralSnapshotBody",
+            "blockstorage/volume_state_actions_test.go:TestVolumeStateActionsNegotiateFiniteVolumeCapWithoutChangingBackupCap"
+          ]
+        },
+        {
+          "behavior": "Package, service and Connection share required current volume ID and no caller builder/options; context/provider/input preflight and cached Cinder selection retain operation labels/causes without CurrentLocation.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanagePreflightAndServiceMethodsPreserveNativeSeparation",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanageUsesCachedCinderAndLiteralSnapshotBody",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanagePreflightAndGetterFaultsKeepCauses"
+          ]
+        },
+        {
+          "behavior": "Opaque100..399 action response and independent Discovery/Applied proof expose helper Completed acknowledgement, not confirmed management removal or backend data deletion.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageKeepLiteralBodyDomainsAndOpaqueAcknowledgements",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanagePreflightAndServiceMethodsPreserveNativeSeparation",
+            "connection_volume_revert_unmanage_test.go:TestConnectionVolumeRevertUnmanageUsesCachedCinderAndLiteralSnapshotBody"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/source/context failures preserve current Applied/all causes with Completedfalse and no SDK automatic replay/cleanup; original rejected HTTP remains native without borrowing discovery proof.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof",
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanageLiveAuthAndBoundedRetryPreserveBodyAndOriginalHTTPPolicy"
+          ]
+        },
+        {
+          "behavior": "Existing native API.Unmanage is a separate unchanged {os-unmanage:{}}/202/error-only API; the new Source mapping exposes UnmanageVolume and does not broaden native/v2/Resource declarations.",
+          "tests": [
+            "blockstorage/volume_revert_unmanage_test.go:TestVolumeRevertAndUnmanagePreflightAndServiceMethodsPreserveNativeSeparation"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-revert-unmanage.md",
+        "blockstorage/v3/volumes/README.md",
+        "blockstorage/README.md",
+        "README.md"
+      ],
+      "differences": [
+        "Native Gophercloud v2.15.0 Unmanage differs intentionally: empty object body, only202, ErrResult. The Source null body/new owned result is implemented independently rather than changing native semantics.",
+        "Go safe UTF-8 current route ID replaces mutable Resource/dict/Munch/untyped ID and constructor/descriptor/location/cache side effects. No lookup, model refresh or CurrentLocation is added.",
+        "Source returns None and discards opaque action response; Go owns VolumeID/Microversion/Discovery/Applied/Completed. Completed means helper acknowledgement, not backend completion/removal/deletion.",
+        "Finite call-owned discovery shares advertisement rather than reproducing Keystoneauth Adapter cache/link/envelope/exception order/Session canonicalization; selected literal forwarding remains a Go mapping. Empty selected Go string cannot separately represent Python explicit default empty versus None.",
+        "Source status<400 maps finite Go100..399. Original native rejection remains native with no Applied; discarded rejected POST body IO is not claimed fully reconstructed. Fixed method/URL/body/framing/version and accepted phase proof are Go-owned policies.",
+        "Only this actual pinned v3 Proxy declaration is classified. Separate native/v2/Resource/manage/read/metadata dependencies are not automatically promoted; Source static evidence and passed local Go QA do not prove authenticated Python/cloud runtime or full SDK completion.",
+        "Current installed seven new groups directly verify literal/null bodies, required3.40 range/probe reuse, preflight/cache/location omission, native Unmanage separation, opaque/accepted Read+Close+source+customcontext proof and liveauth/bounded retry/body mutation. Ordinary unselected cap3.71 and global latest/3.latest version comparison use separately declared existing common-engine regression; no new operation-specific exhaustive redirect/framing matrix is claimed."
+      ],
+      "remaining": []
     }
   ]
 }
