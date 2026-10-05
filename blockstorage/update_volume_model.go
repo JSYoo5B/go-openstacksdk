@@ -3,9 +3,8 @@ package blockstorage
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"unicode/utf8"
 
+	"gophercloudsdk/internal/cindervolume"
 	"gophercloudsdk/internal/jsonfilter"
 	"gophercloudsdk/resource"
 )
@@ -15,31 +14,7 @@ import (
 // Unknown original fields remain a raw Go extension; unknown response fields
 // are excluded by the response merge below, as in the source Resource.
 func volumeMutationFields(raw json.RawMessage) (map[string]json.RawMessage, error) {
-	if !utf8.Valid(raw) || !json.Valid(raw) || len(bytes.TrimSpace(raw)) == 0 || bytes.TrimSpace(raw)[0] != '{' {
-		return nil, fmt.Errorf("volume mutation fields must be a UTF-8 JSON object")
-	}
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	_, _ = decoder.Token()
-	fields := make(map[string]json.RawMessage)
-	for decoder.More() {
-		key, err := decoder.Token()
-		if err != nil {
-			return nil, err
-		}
-		var value json.RawMessage
-		if err := decoder.Decode(&value); err != nil {
-			return nil, err
-		}
-		name := key.(string)
-		for _, descriptor := range volumeSearchDescriptors {
-			if name == descriptor.attribute || name == descriptor.wire {
-				name = descriptor.wire
-				break
-			}
-		}
-		fields[name] = bytes.Clone(value)
-	}
-	return fields, nil
+	return cindervolume.Fields(raw)
 }
 
 func volumeUpdateProposal(raw json.RawMessage, requested map[string]json.RawMessage) (map[string]json.RawMessage, map[string]json.RawMessage, error) {
@@ -88,28 +63,5 @@ func volumeMutationView(fields map[string]json.RawMessage, location resource.Clo
 // accepted empty/malformed bodies), but valid nonobjects and null envelopes
 // cannot be consumed. Partial/flat objects overlay only recognized fields.
 func mergeVolumeUpdateResponse(fields map[string]json.RawMessage, body []byte) error {
-	if !utf8.Valid(body) {
-		return fmt.Errorf("volume update response must be valid UTF-8")
-	}
-	if !json.Valid(body) {
-		return nil
-	}
-	var envelope map[string]json.RawMessage
-	if err := json.Unmarshal(body, &envelope); err != nil || envelope == nil {
-		return fmt.Errorf("volume update response must be a nonnull JSON object")
-	}
-	raw := json.RawMessage(body)
-	if selected, present := envelope["volume"]; present {
-		raw = selected
-	}
-	server, err := volumeMutationFields(raw)
-	if err != nil {
-		return err
-	}
-	for _, descriptor := range volumeSearchDescriptors {
-		if value, exists := server[descriptor.wire]; exists {
-			fields[descriptor.wire] = bytes.Clone(value)
-		}
-	}
-	return nil
+	return cindervolume.MergeResponse(fields, body)
 }

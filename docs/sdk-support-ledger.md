@@ -1115,3 +1115,9 @@ visibility 또는 protected가 지정됐을 때만 fixed 3.1의 지원 여부를
 최종1769개 Go는 QA 중 동일했고 기존1760개 모두 byte-identical입니다. production5·test4개를 추가했으며 inventory·generated Go338개를 보존했습니다. 기존465 reviews의 literal prefix·source pins·의미를 유지하고 실제 Proxy 한 row의6계약·17 공개 함수·24 test 참조(14 unique 선언)만 추가해466개로 기록했습니다. 22개 실제 assertion window와 27개 Source/native/dependency literal을 재검증했습니다. declared inventory3362개 중 supported=0, go_mapping=159, unsupported=1, unresolved=3202입니다. typed bool/string·안전한 현재 ID·UTF-8 JSON·유한 discovery·소유한 결과는 명시한 Go 매핑이며 native/v2/Resource·Glance workflow·전체 Adapter/cache/session을 함께 승격하지 않았습니다. 전체 SDK 목표는 진행 중입니다.
 
 Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=159, unsupported=1, unresolved=3202.
+
+### Volume 모델 변환의 공통 내부 계층
+
+기존 Volume search/update의 순수 descriptor·변환·response overlay를 `internal/cindervolume`에 공유했습니다. public package의 기존 wrapper와37개 descriptor 순서·conversion enum·VolumeType의 공통 변환 호출을 유지합니다. 기존 오류 문자열, alias member 순서, eager conversion, UTF-8 검사와 accepted malformed JSON tolerance를 바꾸지 않았습니다. 모델과 실제 응답은 분리하며 새 disconnected workflow는 빈 state와 nil location으로 같은 하위 변환을 사용할 수 있습니다. 이 구조 변경은 ManageVolume API의 지원 승격이 아닙니다.
+
+실제 변경은 기존2개 Go wrapper와 신규2개 내부 파일이며 나머지1767개 Go는 그대로입니다. 최종1771개 Go에서 전체40개 테스트 패키지 race(136.64초), 전체 vet(18.86초), parity CLI(0.60초)가 통과했습니다. 기존 의미 있는 Volume search/update/type 계약 테스트를 그대로 재검증했고 변환을 복제하는 새 테스트를 추가하지 않았습니다. 별도 정적 검토에서도37개 descriptor와 View/Convert/IntegerJSON/Fields/MergeResponse의 실행 token이 identifier·namespace 변환 뒤 동일함을 확인했습니다. inventory와466reviews는 그대로이며 declared inventory3362: supported=0, go_mapping=159, unsupported=1, unresolved=3202입니다. 전체 SDK 목표는 진행 중입니다.
