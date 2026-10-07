@@ -18,6 +18,15 @@ type FloatingIPRecord struct {
 	Wire                *resource.RawResource
 }
 
+func cloneFloatingIPRecord(record *FloatingIPRecord) *FloatingIPRecord {
+	if record == nil {
+		return nil
+	}
+	copy := *record
+	copy.Resource, copy.Wire = record.Resource.Clone(), record.Wire.Clone()
+	return &copy
+}
+
 // FloatingIPQueryResponse preserves one physical page/member response.
 type FloatingIPQueryResponse struct {
 	resource.Metadata

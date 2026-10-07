@@ -75,7 +75,7 @@ func (s *Service) CreateFloatingIP(ctx context.Context, input CreateFloatingIPRe
 				} else {
 					record = &FloatingIPRecord{Backend: backend, Wire: allocation.Wire.Clone()}
 				}
-				result.Allocation, result.FloatingIP = record, cloneCreatedFloatingIP(record)
+				result.Allocation, result.FloatingIP = record, cloneFloatingIPRecord(record)
 				if recordErr != nil {
 					recordErr = createResponseError(result.AllocationResponse, recordErr)
 				}
@@ -158,7 +158,7 @@ func (p *floatingIPQueryState) createNova(result *CreateFloatingIPResult, networ
 	wire, decodeErr := rest.Decode[resource.RawResource](response, "floating_ip", func(row *resource.RawResource) *resource.Metadata { return &row.Metadata })
 	if wire != nil {
 		result.Allocation = &FloatingIPRecord{Backend: FloatingIPNova, Wire: wire.Clone()}
-		result.FloatingIP = cloneCreatedFloatingIP(result.Allocation)
+		result.FloatingIP = cloneFloatingIPRecord(result.Allocation)
 	}
 	err = errors.Join(requestErr, decodeErr, p.state.check(p.ctx))
 	if err != nil {

@@ -26,15 +26,6 @@ type CreateFloatingIPResult struct {
 	CleanupError           error
 }
 
-func cloneCreatedFloatingIP(record *FloatingIPRecord) *FloatingIPRecord {
-	if record == nil {
-		return nil
-	}
-	copy := *record
-	copy.Resource, copy.Wire = record.Resource.Clone(), record.Wire.Clone()
-	return &copy
-}
-
 type FloatingIPCreateTimeoutError struct {
 	ID      string
 	Timeout time.Duration
