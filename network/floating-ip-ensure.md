@@ -4,6 +4,8 @@
 
 새 IP를 항상 생성하는 기존 `FloatingIPs.Create`는 그대로 사용합니다. Ensure는 기존 서버에 대한 연결 작업이며 서버의 ACTIVE 상태나 포트 생성을 기다리는 메서드는 아닙니다. 사용할 서버의 포트가 준비되어 있어야 합니다.
 
+조회와 연결을 나누면서 선택한 대상이 바뀌지 않게 하려면 [PrepareEnsure·EnsurePrepared](floating-ip-plan.md)를 사용합니다. read-only 준비에는 reuse owner 조회나 IP mutation이 없고, 실행 시 owner를 확인하고 선택한 port를 다시 검증합니다. 기존 Ensure의 owner 선확인과 한 호출 동작은 유지합니다.
+
 ## Python과 Go의 대응
 
 | 고정 openstacksdk cloud 호출 | gophercloudsdk |
