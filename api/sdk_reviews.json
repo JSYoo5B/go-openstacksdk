@@ -34659,6 +34659,201 @@
         "Only the actual pinned v3 Proxy upload_volume_to_image target is classified as go_mapping. Native UploadImage omitempty/202-only/typed VolumeImage, Glance image.Service.UploadImage, v2/Resource/shared discovery dependencies are not promoted. Static Source/dependency comparison and Root offline Go HTTP/example checks do not imply Python/dependency/authenticated OpenStack runtime or full SDK completion."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.ListProjects",
+      "source_fingerprint": "9b00c9545ff24fc2c334d68e191a6d5018f968022f3abb7234a39df67b39dd3c",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/identity/v3/users.API.ListProjects"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET users/{userID}/projects or groups retains the selected endpoint prefix, native auth token and empty initial query; each collection uses its own Project/Group type and known/unknown native model fields.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages"
+          ]
+        },
+        {
+          "behavior": "Native links.next advances the typed iterator across pages; empty 200 collections and 204 responses yield no rows.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages",
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsEmptyAndNoContent"
+          ]
+        },
+        {
+          "behavior": "HTTP 403, malformed known fields and cancellation are yielded as errors; consumer break prevents further page requests, and cancellation before iteration prevents the first request.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsPropagateErrorsAndStopEarly"
+          ]
+        },
+        {
+          "behavior": "A later-page HTTP/decode failure or cancellation leaves the already-yielded row observable and produces one terminal error.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
+          ]
+        },
+        {
+          "behavior": "Generation follows the returned foreign page owner before local name fallbacks, preserves the existing users and local Identity v2 extension extractors, and retains the pinned Trove imported Instance extractor.",
+          "tests": [
+            "internal/cmd/sdkgen/page_extractors_test.go:TestDeclaredPageExtractorUsesReturnedPageInsteadOfNamesOrNestedFields",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators",
+            "api/identity_user_memberships_test.go:TestIdentityLocalUserAndExtensionPageExtractorsRemainSeparate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/users/memberships.md"
+      ],
+      "differences": [
+        "The native Pager becomes a context-bound lazy iter.Seq2 of pointers to the native Project alias; consumers can stop without fetching the next page and receive partial rows before a terminal error.",
+        "The formerly generated *User return type and ExtractUsers assertion were incorrect for this native page. The public iterator now returns *Project; callers using the old element type must update it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.ListGroups",
+      "source_fingerprint": "99fa442333ceebb1818548a713ef82fdb84f78b9462090920c3860490e678657",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/identity/v3/users.API.ListGroups"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET users/{userID}/projects or groups retains the selected endpoint prefix, native auth token and empty initial query; each collection uses its own Project/Group type and known/unknown native model fields.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages"
+          ]
+        },
+        {
+          "behavior": "Native links.next advances the typed iterator across pages; empty 200 collections and 204 responses yield no rows.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages",
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsEmptyAndNoContent"
+          ]
+        },
+        {
+          "behavior": "HTTP 403, malformed known fields and cancellation are yielded as errors; consumer break prevents further page requests, and cancellation before iteration prevents the first request.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsPropagateErrorsAndStopEarly"
+          ]
+        },
+        {
+          "behavior": "A later-page HTTP/decode failure or cancellation leaves the already-yielded row observable and produces one terminal error.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
+          ]
+        },
+        {
+          "behavior": "Generation follows the returned foreign page owner before local name fallbacks, preserves the existing users and local Identity v2 extension extractors, and retains the pinned Trove imported Instance extractor.",
+          "tests": [
+            "internal/cmd/sdkgen/page_extractors_test.go:TestDeclaredPageExtractorUsesReturnedPageInsteadOfNamesOrNestedFields",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators",
+            "api/identity_user_memberships_test.go:TestIdentityLocalUserAndExtensionPageExtractorsRemainSeparate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/users/memberships.md"
+      ],
+      "differences": [
+        "The native Pager becomes a context-bound lazy iter.Seq2 of pointers to the native Group alias; consumers can stop without fetching the next page and receive partial rows before a terminal error.",
+        "The formerly generated *User return type and ExtractUsers assertion were incorrect for this native page. The public iterator now returns *Group; callers using the old element type must update it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/user_projects",
+      "source_fingerprint": "5fe52579c36f88cfe5512ea448cd5eb26a066eebf978cc8823810461b5df2f6f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/users.API.ListProjects"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET users/{userID}/projects or groups retains the selected endpoint prefix, native auth token and empty initial query; each collection uses its own Project/Group type and known/unknown native model fields.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages"
+          ]
+        },
+        {
+          "behavior": "Native links.next advances the typed iterator across pages; empty 200 collections and 204 responses yield no rows.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages",
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsEmptyAndNoContent"
+          ]
+        },
+        {
+          "behavior": "HTTP 403, malformed known fields and cancellation are yielded as errors; consumer break prevents further page requests, and cancellation before iteration prevents the first request.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsPropagateErrorsAndStopEarly"
+          ]
+        },
+        {
+          "behavior": "A later-page HTTP/decode failure or cancellation leaves the already-yielded row observable and produces one terminal error.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/users/memberships.md"
+      ],
+      "differences": [
+        "Pinned user_projects accepts a user ID or User resource without fetching the user first; Go requires an explicit user ID string and returns native Project aliases rather than URI-bound UserProject Resources.",
+        "Python UserProject disables CRUD and carries user_id/location/connection context. Python is_enabled maps to wire enabled; native Go Project uses Enabled, native tags/options and Extra policy."
+      ],
+      "remaining": [
+        "Implement the public **query contract: domain_id/is_domain/name/parent_id, is_enabled-to-enabled, inherited tag aliases and limit/marker, including alias-versus-wire precedence. This native operation exposes no query options.",
+        "Compare inherited Resource.list controls reachable through **query: paginated/base_path/max_items, headers/microversion, Body-field local filtering and deprecated JMESPath. Complete the URI-bound model/default/unknown-field/context policy.",
+        "Finish inherited continuation, HTTP/decode/session/cache behavior. Native ProjectPage consumes links.next; the pinned inherited Resource._get_next_link checks rel/href links, top-level next, Link headers and marker fallbacks, so the Go two-page test is not proof of Python continuation parity. UserProject inherits _max_microversion=None."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/user_groups",
+      "source_fingerprint": "e17d0ff21f36fb38bfdde4427a0ea22a56ab66b70955ae3f7332b12e176c11dc",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/identity/v3/users.API.ListGroups"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET users/{userID}/projects or groups retains the selected endpoint prefix, native auth token and empty initial query; each collection uses its own Project/Group type and known/unknown native model fields.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages"
+          ]
+        },
+        {
+          "behavior": "Native links.next advances the typed iterator across pages; empty 200 collections and 204 responses yield no rows.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsDecodeTheirOwnModelsAcrossPages",
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsEmptyAndNoContent"
+          ]
+        },
+        {
+          "behavior": "HTTP 403, malformed known fields and cancellation are yielded as errors; consumer break prevents further page requests, and cancellation before iteration prevents the first request.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsPropagateErrorsAndStopEarly"
+          ]
+        },
+        {
+          "behavior": "A later-page HTTP/decode failure or cancellation leaves the already-yielded row observable and produces one terminal error.",
+          "tests": [
+            "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/users/memberships.md"
+      ],
+      "differences": [
+        "Pinned user_groups accepts a user ID or User resource and has no public query argument; Go requires an explicit user ID string and returns native Group aliases rather than URI-bound UserGroup Resources.",
+        "Python UserGroup disables CRUD and carries user_id/location/connection context. Python Group leaves unknown Body retention disabled, while native Go Group has typed Links and unknown Extra fields."
+      ],
+      "remaining": [
+        "Complete user-reference adaptation and URI-bound UserGroup model/default/context/capability normalization. The pinned user_groups(user) method has no **query argument, so no missing public query option is inferred.",
+        "Finish inherited default pagination, HTTP/decode/session/cache comparisons. Native GroupPage consumes links.next; the pinned inherited Resource._get_next_link checks rel/href links, top-level next, Link headers and marker fallbacks, so the Go two-page test is not proof of Python continuation parity. UserGroup inherits _max_microversion=None."
+      ]
     }
   ]
 }

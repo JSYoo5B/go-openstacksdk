@@ -70,6 +70,8 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
+Keystone의 [사용자별 프로젝트·그룹 조회](identity/v3/users/memberships.md)는 각각 `Project`·`Group` iterator를 반환합니다. Python 호출과 Go 예제, 반환형 교정에 따른 호환성, 페이지 오류와 부분 결과의 처리 범위를 설명합니다.
+
 Neutron의 [9개 리소스 조건부 Update](network/v2/revision-updates.md)는 concrete `UpdateOpts.RevisionNumber`를 HTTP `If-Match` 조건으로 전달합니다. nil과 revision 0을 구별하고 `WithUpdateOptions`로 선택한 최종 조건을 사용합니다. 412 충돌은 오류로 반환하므로 호출자가 충돌 처리 정책을 선택합니다.
 
 목록의 로컬 조건도 SDK 옵션으로 선택합니다. QoS rules·Address Group addresses·Subnet Pool prefixes·Network subnets는

@@ -1123,3 +1123,20 @@ Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=159, unsu
 기존 Volume search/update의 순수 descriptor·변환·response overlay를 `internal/cindervolume`에 공유했습니다. public package의 기존 wrapper와37개 descriptor 순서·conversion enum·VolumeType의 공통 변환 호출을 유지합니다. 기존 오류 문자열, alias member 순서, eager conversion, UTF-8 검사와 accepted malformed JSON tolerance를 바꾸지 않았습니다. 모델과 실제 응답은 분리하며 새 disconnected workflow는 빈 state와 nil location으로 같은 하위 변환을 사용할 수 있습니다. 이 구조 변경은 ManageVolume API의 지원 승격이 아닙니다.
 
 실제 변경은 기존2개 Go wrapper와 신규2개 내부 파일이며 나머지1767개 Go는 그대로입니다. 최종1771개 Go에서 전체40개 테스트 패키지 race(136.64초), 전체 vet(18.86초), parity CLI(0.60초)가 통과했습니다. 기존 의미 있는 Volume search/update/type 계약 테스트를 그대로 재검증했고 변환을 복제하는 새 테스트를 추가하지 않았습니다. 별도 정적 검토에서도37개 descriptor와 View/Convert/IntegerJSON/Fields/MergeResponse의 실행 token이 identifier·namespace 변환 뒤 동일함을 확인했습니다. inventory와466reviews는 그대로이며 declared inventory3362: supported=0, go_mapping=159, unsupported=1, unresolved=3202입니다. 전체 SDK 목표는 진행 중입니다.
+
+
+### Identity v3 사용자별 프로젝트·그룹 목록
+
+핵심 user API의 기본 조회를 검토하다가 생성된 `Users.ListProjects`·`ListGroups`가 모두 User 모델과 추출기를 사용하는 오류를 확인했습니다. 실제 HTTP 응답에서 `ProjectPage`를 `UserPage`로 type assertion하다가 panic이 나는 것을 재현했습니다. 고정 Gophercloud v2.15.0의 두 생성자는 각각 외부 projects/groups 패키지의 page를 반환합니다. 생성기가 실제 반환 page의 패키지와 추출기를 우선 선택하도록 수정했고, 두 iterator를 기존 SDK alias와 동일한 `*projects.Project`·`*groups.Group`으로 교정했습니다. 명시적인 User iterator를 사용하던 호출자의 반환형 변경과 [Python/Go 사용법](../identity/v3/users/memberships.md)을 기록했습니다.
+
+반환 wrapper 내부의 nested page를 실제 반환 page로 오인하지 않도록 했습니다. Identity v2 extension의 로컬 envelope와 추출기, 일반 Users.List/ListInGroup, Trove configuration의 외부 Instance 추출기는 유지합니다. 알 수 없거나 서로 충돌하는 page 선언은 관련 없는 로컬 추출기로 대체하지 않습니다. 새 generator 2그룹과 HTTP 5그룹은 실제 반환 타입·모델 필드와 false/true, prefixed route·token·첫 query, 두 페이지·빈 200·204, 첫/후속 HTTP·decode 오류, 취소·소비자 break·이미 전달한 행 보존을 확인합니다. 이번 단위에서 live token 교체나 모든 raw-number/null·응답 snapshot을 새로 검증했다고 주장하지 않습니다.
+
+코드와 회귀 테스트는 `ff685e9`로 commit/push했습니다. 집중 race 검증이 통과했고, 같은 최종 Go 코드에서 `make check`의 전체 vet·race·parity·gofmt 검증도 통과했습니다(테스트 패키지 40개, 재사용된 cache 결과 포함). 최초 전체 검증은 오래된 임시 Python source에 `openstack/network/v2/subnet.py`가 없어 generator 검증에서 실패했습니다. 완전한 고정 checkout을 `OPENSTACKSDK_SOURCE`에, 확인한 native export metadata를 `GOPHERCLOUD_METADATA`에 지정한 재검증은 exit 0입니다. 첫 실패를 성공 근거로 사용하지 않습니다. 사용 문서의 정확한 독립 Go fence는 별도 module에서 `go build -mod=readonly`로 컴파일했고, 인증된 OpenStack 호출이나 Python 예제는 실행하지 않았습니다.
+
+최종 Go 소스는 1,773개입니다. 전체 재생성에서 비교한 기존 결과물 507개 중 users의 generated Go 하나만 변경했고, 반복 재생성은 507개 모두 byte-identical입니다. native inventory 1,126개·resource inventory 235개·source catalog 3,362개와 generated Go 338개의 범위를 바꾸지 않았습니다. 기존 review 466개의 literal prefix·필드·source pins를 유지하고 native 2개 매핑과 Python 2개 부분 판정을 추가했습니다.
+
+고정 Python `user_projects(user, **query)`의 별칭·태그·query/목록 제어와 URI-bound UserProject 모델은 남아 있습니다. `user_groups(user)`에는 공개 query 인자가 없으며 UserGroup의 부모 user_id·context·capability·모델 정책과 상속 동작을 비교해야 합니다. Python Group은 unknown Body 보존을 활성화하지 않지만 native Group은 Links/Extra를 제공합니다. Native pager의 links.next와 Python inherited rel/href·top-level next·Link header·marker 처리는 같은 것으로 판정하지 않았습니다. 두 Python 모델은 `_max_microversion=None`을 상속합니다. 소스의 정적 대조와 로컬 HTTP 테스트를 실클라우드 권한 정책·Python runtime 또는 전체 Resource 동등성으로 확대하지 않습니다.
+
+최종 판정은 declared inventory 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200입니다. 저장된 review 470개는 go_mapping 161·부분 판정 308·unsupported 1이며, 판정 없는 2,892개도 미해결에 포함됩니다. 전체 SDK 목표는 그대로 진행하며 다음 핵심 user 단위는 Nova 서버 NIC 선택입니다.
+
+Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.
