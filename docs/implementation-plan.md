@@ -12,7 +12,7 @@
 
 **현재 작업 (2026-10-08): 핵심 user 개발 preview·테스트 재사용·기존 named 계약 완료.** 공통 서버 셋업은 Gophercloud 공개 `testhelper.SetupHTTP()`로 전환했고 Cinder의 공통 method/header assertion도 재사용합니다. 기존 핵심 5개 흐름·9그룹을 `make smoke`로 실행해 PASS/FAIL 보고서를 남깁니다. Secret getter 1개와 Glance schema getter 4개는 고정 소스의 입력·기본값·결과·오류와 기존 계약 테스트를 재검토하고 Go 차이를 명시해 **170→175개**로 반영했습니다. 관련 4개 패키지 집중 race와 공유 fixture 변경의 전체 40개 테스트 package `make check`가 PASS했습니다. 외부 설치용 alpha는 [릴리즈 기준](release-milestones.md)에 모듈 경로·소비자 설치 검증을 남겼습니다.
 
-**다음 구현: `AvailableFloatingIP`의 남은 필수 2개.** 반환 view·location·strict는 구현·검증을 마쳤고, Neutron 목록404 이후의 필터·할당 순서와 Nova raw 필터 이후의 정규화·생성 순서를 보완합니다. 이 2개를 닫기 전에는 해당 API를 완료로 올리지 않습니다.
+**현재 구현: `AvailableFloatingIP`의 Nova 분기 완료, 필수 remaining 2→1.** 직접/외부 Nova는 raw null-instance→literal pool 필터 후 matching 전체를 정규화하고 첫 결과를 반환합니다. clean Nova 목록404는 fresh POST·compat GET으로 이어지며 Query/Create 엔진과 기존 fixture를 재사용합니다. 구현 `3b00178`·신규 HTTP4그룹 `b9ef579` push 완료, 관련3 package 집중 race와 전체40 package `make check` PASS입니다. **다음은 Neutron 내부 목록404→Nova 정규화 inventory→Neutron 로컬 필터·필요시 같은 selected network allocation 한 분기**입니다. 이를 닫기 전에는 Available을 완료 수에 더하지 않습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
@@ -22,7 +22,7 @@
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 미지원 | 3,186 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 505 | 아직 개별 기록 없는 선언 2,857 |
-| 기록한 부분·전체 계약 | 3,185 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,189 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -200,6 +200,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | 독립 Floating IP Create·선택적 wait/timeout 정리 | fresh·port 우선·Network/pool presence·Resource seed·wait-only60초·cleanup 비교 완료 | Neutron·Nova·Service/Connection·wait/cleanup 구현 완료 | 신규24그룹·조회 회귀3그룹·集中157그룹 race·최종40 package check 완료 | Python 비교·정확한 독립 main 컴파일·상대 링크 검증 완료 | Cloud Create1개 go_mapping; 실제19계약·24신규그룹 연결 | 코드·테스트 `bf3024a`, 가이드 `6af6a88`, 판정 `e1a580a`, 집계 `73bcfba`까지 push 완료. [사용법](../compute/floating-ip-create.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-생성과-조회-완료). 후속 미연결 IP 삭제는 다음 완료 행에서 검증했습니다 |
 | 미연결 Floating IP 일괄 정리 | Neutron gate·eager inventory·port truthiness·false/error·retry·fallback backend 비교 완료 | Service/Connection·기존 concrete Delete 옵션·owned partial Count/Items 완료 | 신규 HTTP12그룹·집중 race169그룹·`b75fc9c` 전체40 package check 통과 | Python 비교·정확한 독립 main 컴파일·문서 링크 확인 완료 | Cloud named1개 go_mapping·실제14계약·12신규그룹 연결 | 공통 `b0bcc4c`·구현 `14ed0f6`·검증 `27da548`/`b75fc9c` push 완료. 문서 `158c2fd`/`9d066b4`·판정 `0136cfa`·집계 `e56409b` push 완료. [사용법](../compute/floating-ip-unattached-delete.md)·[검증 기록](sdk-support-ledger.md#미연결-floating-ip-일괄-정리). 다음: 남은 핵심 user 계약 |
 | `AvailableFloatingIP` 반환 view와 남은 선택 순서 | 고정 소스 비교 완료 | **Resource/Wire·location·strict·옵션 snapshot/guard 구현 완료** | 신규 HTTP 7그룹·`239eb9e` 전체 40 package check PASS | Python 비교 갱신·정확한 독립 main 컴파일 PASS | unresolved 유지; 필수 3개 중 view 연결 1개 구현·집중 검증 완료 | 구현 `4897448`·검증 `cf2c5e1`/`239eb9e` push 완료. 문서·전체 검증 완료; Neutron 내부 fallback → Nova raw 필터·list404 생성 순서의 2항목을 이어서 보완 |
+| `AvailableFloatingIP` 직접·외부 Nova 선택 | 고정 raw 필터·전체 정규화·list404/fresh 순서 검토 완료 | **Query/Create 재사용·Inventory/Creation·optional typed projection 완료** | 기존 fixture 재사용 HTTP4그룹·관련3 package 집중 race·전체40 package check PASS | Python 비교·오류/부분 결과 사용법 갱신 | unresolved 유지, 필수 remaining **2→1** | 구현 `3b00178`·검증 `b9ef579`·사용법/판정 `099caaa` push 완료. Neutron 내부 목록 fallback·로컬 필터·선택 network allocation은 다음 단위 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |

@@ -10,6 +10,7 @@
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Available 직접·외부 Nova (`3b00178`, `b9ef579`) | 기존 Query/Create·fixture 재사용, raw filter→matching 전체 정규화·clean404 fresh·actual compat/partial proof의 HTTP4그룹. 관련3 package race·전체40 package check PASS. | [최종 근거](#available의-직접외부-nova-선택-완료). named unresolved 유지, remaining2→1. Neutron 내부 public-list fallback·로컬 필터·selected network allocation만 남음. |
 | Secret·schema named getter | 기존 Secret 8그룹·Glance schema HTTP5/core6/옵션3과 Connection 근거 재검토. 관련 4 package 집중 race·전체 40 package check PASS. | Secret getter 1개·schema getter 4개 go_mapping, 기존 25개 계약 보존. [최종 근거](#secret와-schema-named-getter-완료). 다른 선언·전체 Resource/session은 별도. |
 | Available 반환 view (`4897448`, `cf2c5e1`, `239eb9e`) | [신규 HTTP7그룹](../connection_floating_ip_available_view_test.go): Resource/Wire·strict/location·configured fallback mode·옵션 snapshot·guard·원본 receipt와 부분 결과. 정확한 독립 main 컴파일·`239eb9e` 전체40 package check PASS. | 기존 named Available은 unresolved 유지. Neutron 내부 목록404 후 필터·할당과 Nova raw 필터·정규화·list404 생성 순서의 2항목이 남음. [사용법](../compute/floating-ip-available.md), [이번 보완](#available-반환-view와-진척-집계-동기화). |
 | 미연결 Floating IP 일괄 정리 (`14ed0f6`, `27da548`, `b75fc9c`) | [기본9](../connection_floating_ip_unattached_delete_test.go)·[경계3](../connection_floating_ip_unattached_delete_boundaries_test.go): 전체 목록 후 순차 삭제·false 계속/error 중단·truthiness·fallback backend·partial/owned Count·한 budget/cache. 신규12·집중169그룹 race·전체40 package check·정확한 main 컴파일 통과. | Cloud named1개 go_mapping·14계약. [사용법](../compute/floating-ip-unattached-delete.md)·[최종 근거](#미연결-floating-ip-일괄-정리). 전체 Resource/session·다른 native/Proxy CRUD는 별도 목표. |
@@ -1739,3 +1740,20 @@ Glance의 네 getter는 인자 없이 각 fixed path의 schema document 하나�
 `make smoke` 실행기(`61aae2a`)는 기존 테스트 9개 그룹을 선택해 핵심 user 흐름 5개의 실제 PASS/FAIL을 `.reports/core-smoke.json`에 저장합니다. 별도 mock이나 같은 계약의 신규 테스트를 만들지 않았습니다. [개발 preview와 첫 외부 설치용 alpha](release-milestones.md)에 검증된 사용 흐름, 접수와 완료의 범위, 공개 module 경로와 외부 소비자 설치 검증의 남은 조건을 분리해 기록합니다. 실제 tag 배포와 실클라우드 acceptance는 아직 수행하지 않았습니다.
 
 공개 helper 셋업 `f76d9cf`·smoke 실행기 `61aae2a`·Cinder assertion `49f9ad0`·테스트/릴리즈 문서 `15fd40e`·5개 named 판정 `4d89708`를 작은 의미 단위로 커밋하고 원격 main에 push했습니다. 최종 smoke는 동일한 Go 소스 SHA256으로 5개 흐름·9개 그룹 PASS를 기록했습니다. 구현 계획의 전체·서비스별 자동 집계도 완료175개와 일치합니다.
+
+
+## Available의 직접·외부 Nova 선택 완료
+
+2026-10-08. `AvailableFloatingIP`의 Nova lane에서 association용 typed selection/verifier를 제거하고, 기존 Query의 raw collect·ordered cloud filter·records와 Create의 accepted raw POST/compat GET를 연결했습니다. 하나의 captured state·context·source registry를 유지하며 default non-null pool을 중복 조회하지 않습니다. default pool name null은 source None처럼 Create 기본 lookup을 수행합니다. 자동/명시 IP 연결 엔진은 그대로 유지합니다.
+
+raw `instance_id:null` → literal pool 순서로 먼저 필터하고, matching 행 전체를 정규화한 뒤 첫 결과를 반환합니다. 제외된 행의 ID·주소를 검사하지 않고, matching의 늦은 오류는 첫 성공으로 숨기지 않습니다. clean raw-list404만 빈 inventory가 되어 fresh 생성으로 이어집니다. 반환 view에는 passive null/비 IPv4/실제 compat identity를 보존하고 기존 string 기반 Nova 모델은 표현 가능한 경우에만 독립적으로 제공합니다. `Nova.Inventory/PoolQuery/Creation`은 실제 목록·원래404·allocation/compatibility 증거를 분리합니다. 완료 view를 다시 정규화하지 않으므로 location callback도 matching당 한 번입니다.
+
+[신규 HTTP4그룹](../connection_floating_ip_available_nova_test.go)은 기존 `connectionAvailableFixture`와 응답 교체 helper를 확장해 재사용합니다. raw 필터 순서/제외된 malformed 행/nullable ID·passive address, 모든 matching 정규화·location 횟수·독립 ownership·configured Neutron fallback, clean404/default pool 1회·403/malformed terminal, accepted allocation과 달라진 compat view/compat403·같은 deadline을 검증합니다. 이미 검증한 accepted Read/Close/source/cancel·options·microversion 사례는 기존 Available/view 회귀로 재사용하며 새로운 mock cloud를 만들지 않았습니다.
+
+구현 `3b00178`·검증 `b9ef579`를 작은 단위로 커밋하고 원격 main에 push했습니다. 기존 root/Compute baseline과 신규4그룹을 포함한 root/Compute/Network 집중 race, 최종 전체 `make check`가 모두 통과했습니다. 전체 gate는 vet·race40개 테스트 package·pinned parity·자동 집계·gofmt이며 Go 소스1,919개가 전후 SHA256 `16822d7b7dcf4a241a362bfa24dfbfdbed2fc36c1dff82a319e76ed259c6edd2`로 동일했습니다. baseline/focused/full 로그는 `/private/tmp/gophercloudsdk-available-nova-baseline.log`, `/private/tmp/gophercloudsdk-available-nova-focused.log`, `/private/tmp/gophercloudsdk-available-nova-check.log`, receipt는 `/private/tmp/gophercloudsdk-available-nova-gate-receipt.json`입니다.
+
+[Python/Go 가이드](../compute/floating-ip-available.md)의 기존 Go main은 그대로 유지하고 raw 필터·actual success code·optional typed projection과 Inventory/Creation 읽는 법을 갱신했습니다. 기존 main의 독립 컴파일을 이번 단위에서 재실행했다고 주장하지 않으며 인증된 OpenStack/Python 실행도 수행하지 않았습니다. source/API/fingerprint와 다른504개 review를 보존하면서 Available에 실제4계약을 추가하고 Nova remaining 하나만 제거했습니다. review505·계약3,189개, 완료175/3,362는 그대로입니다.
+
+**Available의 필수 remaining은 2→1입니다.** Neutron public unfiltered list404의 configured-normalized Nova inventory를 같은 Neutron port/network/project filter로 소비하고, 필요하면 이미 선택한 Neutron network에 fresh allocation하는 내부 분기를 이어서 구현합니다. 내부 목록 fallback과 외부 Nova availability를 구분하며 그 분기를 닫기 전에는 named 전체를 승격하지 않습니다. 다른 Resource/session·IP 소비자·후속 서비스의 전체 목표도 유지합니다.
+
+사용법·4개 계약·remaining 갱신 `099caaa`를 원격 main에 push했습니다. 최종 동일 소스의 `make smoke`는 핵심5개 흐름·기존9개 그룹 PASS이며 `.reports/core-smoke.json`에 source SHA256과 실제 테스트 결과를 보존했습니다. 구현 계획의 집계도 완료175개·계약3,189개와 일치합니다.
