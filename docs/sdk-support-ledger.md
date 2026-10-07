@@ -1574,3 +1574,32 @@ Python의 unfiltered list 내부404→Nova normalized rows와 바깥 Available f
 최종9개 Markdown의 상대 파일 링크1101개에 누락이 없고 기존7개 문서의 Go fence와 컴파일한 신규2개 main은 동일합니다. Anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-available-doc-receipt.json`). 최종 문서 검토에서 Nova의 project 로컬 검증을 암시하던 설명만 API 목록·pool/null 비교 범위로 좁혔으며 코드와 예제는 바뀌지 않았습니다. 다음 핵심 user 단위는 독립 legacy pool/IP CRUD와 남은 cloud·Resource 계약입니다.
 
 Neutron 가이드 `f7b2e8b`, 상위 가이드 `60f292a`, 기존 문서 연결 `c92120d`는 별도 커밋으로 push했습니다. 부분 판정 `2274394`와 이 진행·검증 기록도 분리 커밋 후 공유합니다. 코드의 전체 gate 이후 문서·JSON만 바뀌었고 Go source SHA는 동일합니다.
+
+## 독립 Floating IP 목록·검색·단건·pool 조회
+
+2026-10-08. 우선순위1인 핵심 서비스 user 흐름에서 고정 cloud의 `list_floating_ips`, `search_floating_ips`, `get_floating_ip`, `get_floating_ip_by_id`, `list_floating_ip_pools`, `search_floating_ip_pools`를 Service와 Connection의 별도6개 API로 추가했습니다. openstacksdk pin `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 `_network_common.py`·`_utils.py`·`resource.py` 및 Gophercloud v2.15.0을 비교했습니다. standalone availability·서버 연결의 기존 실제 모델과 조회용 cloud 정규화 view를 구분합니다.
+
+`FloatingIPQueryOption`은 SDK가 source/filter/location/strict/direct-get/deadline 기본값과 owned snapshots를 준비합니다. 호출자가 별도 builder나 resolver를 구현할 필요가 없습니다. Neutron은 known query·Body descriptor 필터와 nullable 확장 값을 소비하고, dict Search의 ID 무시·filtered List404 억제·unfiltered404 Nova 전환·member/pool404 전파를 각각 적용합니다. Nova 논리 view의 합성 ACTIVE는 실제 Wire 상태나 연결 readiness 증거가 아닙니다. Resource·Wire·Pages/Observed/Failure와 fallback/억제 원인을 별도로 반환합니다. 기본 query SDK deadline은 없고 명시 deadline은 페이지·fallback·선택 전체에서 공유합니다.
+
+새 HTTP20그룹과 순수 normalization/options5그룹을 검증했습니다. 기본7그룹은 [목록·검색 테스트](../connection_floating_ip_queries_test.go), 나머지13그룹은 [단건·pool·경계 테스트](../connection_floating_ip_queries_boundaries_test.go), 순수5그룹은 [정규화·옵션 테스트](../compute/floating_ip_query_normalize_test.go)에 있습니다. 실제 assertion은 query alias/반복값·descriptor·strict/nullable/raw 큰ID·dict ID-ignore·JMES exact output·Get zero/one/multiple·Existing identity·UUID direct·member ID seed/Wire 분리·page cap/빈 page/숫자 marker/늦은 실패·옵션 소유권/deadline·접수 Close/취소/source·native retry terminal 증거를 확인합니다. pointer형 native HTTP error helper와 큰 결과 CPU 직렬화 중 최종 guard는 정적 검토 근거이며, 별도의 동적 fixture 완료로 표시하지 않습니다.
+
+집중 race는 기존 availability15·Nova25와 합친65그룹(root32·Compute26·Network7)이며 root1.820초·Compute2.856초·Network1.658초로 통과했습니다.
+
+```sh
+go test -race -timeout 60s ./ ./compute ./network \
+  -run 'TestFloatingIPQuery|TestFloatingIPAvailable|TestConnectionAvailableIP|TestAvailableIPService|TestNovaServerIP|TestConnectionNovaIP'
+
+OPENSTACKSDK_SOURCE=/path/to/pinned/openstacksdk \
+GOPHERCLOUD_METADATA=/path/to/gophercloud-package-metadata.json \
+PATH=/opt/homebrew/bin:$PATH make check
+```
+
+코드·테스트 revision `f587320`의 전체 `make check`에서 vet·race·고정 source parity·gofmt가 통과했고 테스트 package40개·Go 파일1,892개를 확인했습니다. source SHA256은 검증 전후 `c56ec27a914b8499938581f6e5d615502e601790314d34ffd788d2f4470275fb`으로 같습니다. 실행 로그와 receipt는 `/private/tmp/gophercloudsdk-floating-ip-queries-focused.log`, `gophercloudsdk-floating-ip-queries-check.log`, `gophercloudsdk-floating-ip-queries-gate-receipt.json`에 있습니다. 최초 테스트의 First false/배열 의미·native retry 요청 개수·토큰 refresh 허용에 대한 잘못된 가정을 수정했고 최종 assertion으로 검증했습니다. production cause chain·Neutron 요청ID 유지·query omission/숫자 marker·pointer 오류 proof·최종 guard도 소스 대조로 보강했습니다.
+
+[Python/Go 사용 가이드](../compute/floating-ip-queries.md)의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-floating-query-example-o_7w4550/main.go`, SHA256 `b1c4d40854deb3c6fa7fd5909efa466df13ba7a5f3a093817d3403a5b26cbfef`). 기존5개 사용 문서의 Go fence14개는 byte-identical입니다. 변경한 사용·기록 문서8개의 상대 파일 링크를 확인했고 누락은 없으며 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-floating-ip-queries-doc-receipt.json`). 인증된 OpenStack이나 Python 예제 실행은 하지 않았습니다.
+
+기반 `47a6d62`·구현 `85e422b`·기본 테스트 `c456b3b`·경계 `f587320`·새 문서 `3964267`·기존 문서 연결 `08287de`를 분리 커밋하고 중간마다 직접 push했습니다. 진행 업데이트는 [진행표의 네 항목](implementation-plan.md#작업-단위의-진행-단계)을 따라 현재 작업·실제 검증·커밋/push·다음 행동을 알립니다.
+
+새6개 cloud review를 모두 `unresolved`로 추가하고 실제25개 테스트의 부분 계약28개를 연결했습니다. 기존496행의 내용·순서·status/fingerprint/source pins는 그대로입니다. review502=go_mapping161/unresolved340/unsupported1이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200으로 지원 승격은 없습니다. 별도 Network Proxy/native/직접 Resource ID를 생성하거나 완료로 바꾸지 않습니다.
+
+현재 bounded view 밖의 inherited mutable FloatingIP Resource·descriptor/session/Adapter/cache, 모든 query/control/pager/error ordering·특수 UUID·동적 object passthrough, 배포별 capability/auth refresh와 per-entry 실패 조합은 계속 남아 있습니다. 다음은 독립 IP create/delete와 남은 핵심 user 계약이며, Swift를 포함한 핵심 → 핵심 admin → 후속 user → 후속 admin 목표 순서는 유지합니다.
