@@ -17,6 +17,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
 | `conn.get_server_public_ip(server)` / `get_server_private_ip(server)` | [주소 선택·보충](server-addresses.md): owned view·MAC·IPv6·private 설정과 기존 association 조회 |
 | `conn.create_server(..., auto_ip=True, wait=True)` | [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md): 실제 ACTIVE·주소 준비·조건부 IP·Nova 관측 |
+| `conn.get_active_server(server, wait=False)` | [GetActiveServer](server-ready.md): supplied 상태 판정·조건부 IP 접수; 선택적 ACTIVE/주소 관측 |
+| `conn.wait_for_server(server, timeout=180)` | [Service·Connection WaitForServer](server-ready.md): 같은 ID의 raw 현재 상태·주소 준비·필요한 IP 관측 |
 | `conn.create_server(..., ip_pool="public", wait=True)` | [CreateWithFloatingIP](create-with-floating-ip.md): 서버·IP ACTIVE와 공통 timeout·부분 결과 |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=True)` | 위 호출에 `compute.WithDeleteBootVolumeOnTermination(true)` 추가 |
@@ -186,6 +188,8 @@ flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/r
 테스트는 [compute_test.go](compute_test.go), 기존 볼륨 부팅의 요청·검증·실패 정책은 [boot_volume_test.go](boot_volume_test.go), 새 부팅 볼륨과 microversion 정책은 [new_boot_volume_test.go](new_boot_volume_test.go), 연결을 통한 전체 생성 흐름은 [server_create_test.go](../server_create_test.go), 페이지·이름·대기 정책은 [collections_test.go](../collections_test.go)에 있습니다.
 
 Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사용합니다. `WaitForServerState`는 다른 대상을 120초 기본으로, `WaitForState`는 대상을 명시하고 SDK timeout 없이 기다립니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 패키지 함수 `compute.WaitForState/WaitForDelete`는 기존 typed collection을 받습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
+
+[기존 서버 readiness](server-ready.md)의 `service.WaitForServer(ctx, AutomaticFloatingIPRequest, ...)`와 `conn.WaitForServer`는 별도 상위 작업입니다. 기본180초·5초로 raw 현재 상태와 주소 준비를 기다리고 필요할 때 조건부 Neutron assignment·IP ACTIVE·Nova 관측까지 수행합니다. `GetActiveServer`는 supplied 상태만 판정하고 기본 비동기 IP 접수 결과를 반환합니다.
 
 서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.
 

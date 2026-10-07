@@ -228,7 +228,7 @@ Server·AutomaticIP 옵션과 concrete body 입력을 준비해 재사용하며 
 
 ## 전체 소스 대비 남은 범위와 검증
 
-새 compound는 실제 서버 생성과 bounded Neutron automatic 흐름을 연결합니다. 일반 Servers.Create·기존 명시 CreateWithFloatingIP·standalone cloud Wait/get_active_server의 전체 계약을 바꾸거나 완료로 승격하지 않습니다. Python pool>ips>auto 우선순위, Nova-network mutation/fallback, boot/data volume의 모든 조합·root_volume alias, security/count/group/userdata 등 추가 create 입력, returned mutable Resource/location/session, fault/exception/default180/5/integer budget·cleanup 정책은 남습니다.
+새 compound는 실제 서버 생성과 bounded Neutron automatic 흐름을 연결합니다. [기존 서버의 GetActiveServer·상위 WaitForServer](server-ready.md)는 별도로 supplied 상태 판정과 raw 현재 상태 대기를 제공합니다. 일반 Servers.Create·기존 명시 CreateWithFloatingIP와 각 source 연산 전체를 완료로 승격하지 않습니다. Python pool>ips>auto 우선순위, Nova-network mutation/fallback, boot/data volume의 모든 조합·root_volume alias, security/count/group/userdata 등 추가 create 입력, returned mutable Resource/location/session, fault/extra_data·lookup exception retry·integer budget·cleanup 정책은 남습니다.
 
 Python 예제와 비교는 고정 source 정적 검토 기준이며 인증된 cloud/Python 실행을 뜻하지 않습니다. 새 HTTP fixture의 이미지/볼륨/NIC·shared cache·known skip·later owner·실제 ACTIVE/metadata·부분 결과·whole deadline 근거와 정확한 main의 최종code 컴파일을 [지원 판정대장](../docs/sdk-support-ledger.md)에 실제 결과만 기록합니다. 해당 source 공개 연산의 remaining이 남으면 unresolved입니다.
 

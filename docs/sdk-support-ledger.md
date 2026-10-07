@@ -1386,3 +1386,30 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 공통 대기/guard `745f50d`, 생성 body/guarded dependency `3249f71`, 통합 API·기본5그룹 `f3ed74a`, 추가 경계/Connection `afee318`을 작은 커밋으로 나누어 직접 push했습니다. 중간마다 소스·구현·테스트·문서·커밋/원격 반영 상태를 대화로 공유하며 작업 계획의 업데이트 기준을 따릅니다. 문서와 판정/진행표도 별도 커밋으로 저장합니다.
 
 판정은 기존 cloud create/wait 두 row를 좁히고 공개 get_active_server의 bounded readiness dependency 부분 검토를 unresolved1행 추가합니다. 기존 status/source pin/fingerprint와 catalog/generated inventory는 그대로입니다. review495=go_mapping161/unresolved333/unsupported1, unreviewed2867이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200, native1126/resources235/generatedGo338, Go 파일1845입니다. pool>ips>auto 전체 dispatch, Nova mutation/fallback, standalone get_active_server/Wait, Python180/5·integer budget·broad lookup retry·삭제/fault/exception, 반환 Resource/location/session 및 전체 create count/group/security/data-volume 조합은 remaining입니다. 다음 핵심 user 작업은 standalone 서버 readiness/Wait의 typed 계약과 명시 IP/pool dispatch를 소스와 비교하여 이어갑니다.
+
+## 기존 서버의 ACTIVE 판정과 상위 대기
+
+2026-10-07 핵심 user 단계에서 `compute.Service`와 Connection의 `GetActiveServer`·`WaitForServer`를 추가했습니다. [Python/Go 비교와 독립 main](../compute/server-ready.md)에 receiver·입력·기본값·부분 결과를 설명합니다. 기존 collection의 `Servers.WaitForServer`는120초·2초의 상태 조회이고, 새 Service·Connection Wait는180초·5초로 현재 raw 서버·주소 준비와 필요한 IP 작업을 연결합니다. 기존 자동 Ensure/생성의5분·2초 기본값은 유지합니다.
+
+GetActive는 옵션 전에 캡처한 supplied 상태를 판정합니다. non-ACTIVE는 nil,nil, ERROR는 알려진 Fault/Server와 failed-state 오류이며 불필요한 주소 필드나 endpoint를 읽지 않습니다. ACTIVE의 nil·명시 empty map·모든 network의 null/빈 rows는 typed unavailable이며 자동 설정이 꺼져도 refresh·DELETE 없이 서버를 보존합니다. 필요한 Neutron assignment의 기본은 비동기여서 accepted DOWN IP와 Observed=false를 반환하고 IP ACTIVE 대기·raw Nova 관측을 하지 않습니다. `WithActiveServerWait(true)`는 필요한 assignment에 actual IP ACTIVE와 exact raw IPv4 floating row 관측을 요구합니다. Python async attach가 선택 IP에 port_id가 있을 때 Compute를 한 번 refresh하는 동작은 이 비동기 lane에 없습니다.
+
+Wait는 supplied status·주소·fault 대신 캡처한 ID의 raw200/203 GET부터 시작합니다. BUILD와 ACTIVE/null metadata를 poll하고 실제 주소 row 준비 후 같은 조건부 IP 정책을 실행합니다. 사용자 no-wait 옵션으로 필수 IP ACTIVE·Nova 관측을 끌 수 없습니다. actual ERROR는 사용자 failure states가 비어 있어도 실패입니다. first404/later403·wrong ID·malformed·source 오류를 source의 broad Exception/None retry로 숨기지 않고 원인과 마지막 matching Server를 반환합니다. 최초 raw 조회가 실패하면 반환 Server는 supplied 복사본이며 현재 상태를 확인한 증거가 아닙니다.
+
+공통 Neutron wait 옵션을 `WaitPolicy`로 한 번 준비해 보존하고 마지막 NoWait/Active toggle은 대기 여부만 변경합니다. 재사용한 원래 정책은 이후 호출에서도 바뀌지 않습니다. 지연 생성한 실제 cached Compute service/API/collection/client의 binding을 operation registry에 등록하여 raw readiness가 끝난 뒤 IP 작업의 callback·native retry·accepted Close에서 source가 교체되어도 다음 요청을 막습니다. matching raw GET의 유효 body는 accepted Close·취소·source·ancestor 오류와 함께 보존합니다. 새 Wait의 raw readiness·Neutron 작업·Nova 관측은 같은 전체 deadline을 공유하고, observation callback에 준 모델을 바꿔도 반환 모델과 대상 ID를 바꾸지 않습니다.
+
+신규 테스트 **17그룹**은 [Compute 상태·async/sync·대기](../compute/server_ready_test.go)7, [raw 실패·accepted proof·deadline](../compute/server_ready_boundaries_test.go)4, [옵션 1회·ID/source 캡처](../compute/server_ready_preflight_test.go)1, [Connection lazy 수명](../connection_server_ready_test.go)3, [공유 wait toggle·정책 재사용](../network/floating_ip_wait_toggle_test.go)2입니다. 테스트 함수 그룹 수이며 API 완료 수가 아닙니다. 실제 assertion은 supplied ERROR→현재 상태 조회, ACTIVE/null→203 실제 row, 정수 progress25→0, 기본180초 wire deadline, async DOWN/IPGET0/rawGET0/Compute locator0, sync capability 사전 오류·두 번째 floating row 관측, accepted203 Close/cancel/source/ancestor의 원인·header·최신 Server와 decode retry0, HTTP404/403·wrong ID·malformed·옵션 사전 오류, IP 단계 후 cached Compute API 교체 시 allocated Assignment 보존을 확인합니다. 기본5초 간격·모든 reuse/PUT/async 오류 조합·Get의 모든 중첩 ownership 입력을 새 전용 fixture로 검증했다고 주장하지 않습니다.
+
+```sh
+go test -race -timeout 60s . ./compute ./network ./resource \
+  -run 'Test(GetActiveServer|WaitForServer|ServerReady|ConnectionReady|ConnectionGetActive|EnsureNoWait|AutomaticCreate|AutomaticIP|ConnectionAutomatic)' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+집중 검증은 root·compute·network의 새17그룹과 관련 회귀에서 통과했습니다. resource는 위 focused pattern에 matching test가 없고 빌드만 확인되므로 새 테스트 package로 세지 않습니다. 코드/테스트 `61982b2`와 이번 두 판정 행 변경에서 전체 make check의 vet·race·고정 parity·gofmt가 통과했고 실제 테스트 package는40개입니다(`/private/tmp/gophercloudsdk-server-ready-check.log`, `gophercloudsdk-server-ready-check-receipt.json`). Go 파일1,852개를 확인했으며 코드 변경 없이 문서·remaining 표현만 최종 정리합니다. 테스트의 잘못된 fixed-status sentinel 기대와 중복 ServeMux route 등록은 교정한 뒤 다시 실행했으며, 이전 실패를 성공으로 기록하지 않습니다.
+
+독립 main은 최종 `61982b2`에서 `go build -mod=mod -o server-ready-example .`가 성공했습니다. 정확한 문서 fence와 main SHA-256은 `e21a868b614c67ed95e80522195af1cf5e533a00450ac3d001d6f6e4a0fb9fe1`이고 byte 일치를 확인했습니다(`/private/tmp/gophercloudsdk-server-ready-example-receipt.json`). Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다. 변경 문서8개의 상대 파일 링크989개는 missing0입니다(`/private/tmp/gophercloudsdk-server-ready-doc-receipt.json`). anchor·Python runtime·인증된 cloud는 검증 범위에 포함하지 않습니다.
+
+진행표 `559709b`, 공유 대기 `b60264d`, Compute `4a305e6`, Connection `85a3063`, raw 경계 `61982b2`를 작은 커밋으로 나누어 직접 push했습니다. 문서와 판정·진행 단계도 별도 커밋으로 보존합니다. 이번 진행표부터 작업 착수·구현·테스트·문서·검토·커밋/push 단계의 중간 안내를 계속 남깁니다.
+
+기존 get_active_server/wait_for_server 두 review에 실제 함수·assertion·문서를 추가하고 더 이상 맞지 않는 creation-only/독립 API 미제공 문구를 좁혔습니다. fingerprint·unresolved 상태·기존 계약과 다른493행은 보존하며 신규 review·지원 승격은 없습니다. review495=go_mapping161/unresolved333/unsupported1, 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200, native1126/resources235/generatedGo338입니다. pool>ips>auto 전체 dispatch·Nova mutation/fallback·dynamic Resource/location/interface/config/session·모든 fault/nullable/default/timeout/cleanup 계약은 remaining입니다. Neutron accepted201/202 body 처리 오류에서는 기존 lower layer가 Allocated=true를 보존하되 FloatingIP가 nil일 수 있는 경계도 별도 remaining이며 이번 Nova partial 모델 보존과 혼동하지 않습니다. 다음 핵심 user 단위는 순차 명시 IP와 pool 선택·연결 및 부분 성공 보존입니다.
