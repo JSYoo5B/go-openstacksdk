@@ -19,6 +19,7 @@ import (
 )
 
 type floatingDeleteState struct {
+	readError        error
 	locators, events []string
 	deadlines        []time.Time
 	reply            func(*http.Request) (int, string)
@@ -44,7 +45,8 @@ func floatingDeleteFixture(t *testing.T, source compute.FloatingIPSource) (*test
 		if r.Method != "DELETE" && r.Method != "GET" {
 			t.Error("unexpected mutation", r.Method, r.URL)
 		}
-		if r.URL.RawQuery != "" || r.ContentLength != 0 {
+		q := r.URL.Query()
+		if (len(q) > 0 && (len(q) != 1 || q.Get("marker") == "")) || r.ContentLength != 0 {
 			t.Error("unexpected request fields", r.URL, r.ContentLength)
 		}
 		state.events = append(state.events, r.Method+" "+r.URL.Path)
@@ -58,6 +60,9 @@ func floatingDeleteFixture(t *testing.T, source compute.FloatingIPSource) (*test
 		}
 		code, body := state.reply(r)
 		var reader io.ReadCloser = io.NopCloser(strings.NewReader(body))
+		if state.readError != nil {
+			reader = floatingDeleteFailingBody{Reader: strings.NewReader(body), cause: state.readError}
+		}
 		if state.afterClose != nil {
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: func() error { return state.afterClose(r) }}
 		}
@@ -255,3 +260,14 @@ func TestFloatingIPDeletePassiveBodyAndSuccessfulStatusPolicy(t *testing.T) {
 		})
 	}
 }
+
+type floatingDeleteFailingBody struct {
+	Reader *strings.Reader
+	cause  error
+}
+
+func (b floatingDeleteFailingBody) Read(p []byte) (int, error) {
+	n, _ := b.Reader.Read(p)
+	return n, b.cause
+}
+func (b floatingDeleteFailingBody) Close() error { return nil }
