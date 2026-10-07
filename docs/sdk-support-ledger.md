@@ -1354,3 +1354,35 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 공통 planner `532a1be`, context preflight `744092f`, Compute 자동 흐름 `64cb181`, 추가 경계 `a048624`, BUILD metadata 경계 `ba78cd4`, 사용 문서 `488a84a`를 작은 커밋으로 보존하여 push했습니다. 판정·진행표·검증 근거는 별도 커밋으로 저장합니다. 실제 public add_ips_to_server의 unresolved 부분 판정1개와 기존 available/public/private getter3개만 갱신했습니다. 기존 create/wait/native review·모든 status·source pin/fingerprint·catalog/generated inventory는 그대로입니다. Private needs/attach/module helper나 Go API에 Python catalog ID를 만들지 않았습니다.
 
 현재 review494개는 go_mapping161·unresolved332·unsupported1이며 unreviewed2868개입니다. 전체 선언3362의 supported0·go_mapping161·unsupported1·unresolved3200과 native1126/resources235/generatedGo338은 유지되고 Go 파일은1835개입니다. 이번 구현을 전체 cloud 연산의 지원 승격으로 세지 않습니다. pool>명시 ips>auto 전체 dispatch, Nova allocation/association/fallback, full has_service/config/session/Resource와 cloud create/get_active/wait·fault/ACTIVE-no-address·cleanup·예산/예외 정책은 남습니다. 다음 핵심 user 단위는 새 자동 흐름을 서버 생성·ACTIVE 대기와 연결하되 실제 부분 결과와 전체 시간 예산을 보존하는 작업입니다.
+
+
+## 서버 생성과 자동 Floating IP 통합
+
+핵심 user 단계에서 `Service.CreateWithAutomaticFloatingIP`와 Connection delegate를 추가했습니다. 서버 옵션과 자동 IP 정책을 생성 요청 전에 준비하고 이미지·기존 볼륨·이미지 기반 새 볼륨의 native body를 재사용합니다. 생성 응답200/202를 별도 `Creation`으로 보존하며, 원래 생성 ID의 raw Nova200/203에서 실제 ACTIVE와 최소 한 주소 row를 확인한 뒤 같은 private automatic state로 필요성 판단·고정 Neutron 계획·조건부 assignment·실제 IP ACTIVE·Nova 목표 주소 관측까지 이어갑니다. 일반 Create와 기존 명시 CreateWithFloatingIP의 계약은 유지합니다.
+
+전체 기본 예산은5분이고, Connection의 최초 Compute 서비스 발견은 이 Service 예산 시작 전이라 caller context가 제한합니다. 서버·IP waiter의 더 짧은 timeout은 전체 예산을 늘리지 않습니다. 상태 override는 POST 전 ErrUnsupported이며 실제 ERROR는 사용자 failure states를 비워도 실패입니다. ACTIVE nil 주소는 bounded polling, 명시 empty map 또는 모든 network의 null/빈 rows는 `ServerAddressesUnavailableError`입니다. Python의 truthy `{net:[]}`까지 성공으로 취급하지 않는 엄격한 차이가 있습니다. Python의 ACTIVE 무주소 DELETE를 수행하지 않고 알려진 서버를 보존합니다.
+
+공통 `WaitPolicy`가 WaitOption 적용을 한 번 준비하여 기존 WithWait에도 재사용하고, `WaitGuard`가 진행 callback 뒤 다음 HTTP 전에 source 변경을 확인합니다. 새 creation 이름 resolver는 Glance images·Neutron networks/ports·Cinder volumes/detail·Nova flavors/detail의 route와 기존 literal name/local exact matching 차이를 유지합니다.200/204/300 native list 정책을 보존하며 페이지별 owned 요청과 continuation·accepted Read/Close 검사를 사용합니다. flavor 이름 생성에 기존에 없던 `is_public=None`을 추가하지 않습니다. ordinary native Find/identity 전체 계약을 이 lane으로 바꾸지 않습니다.
+
+Compute source는 automatic 옵션 이전에 pointer와 provider/endpoint/base/microversion/type를 캡처합니다. 새 source registry에 lazy dependency의 source-only binding을 등록하여 이름 해석이 끝난 뒤 다른 callback에서 설정이 바뀌어도 이후 생성·대기·IP 작업이 중단됩니다. registry mutex를 풀고 binding을 호출하며 outer context에는 Compute-only 검사만 넣어 Network planner와 재귀하지 않습니다. nested registry는 ancestor 검사를 유지하면서 child 등록을 원래 parent로 누출하지 않습니다. configured default NIC는 explicit override 우선순위를 보존하며 같은 guarded planner snapshot을 사용합니다. 이름 NIC/default에 필요한 legitimate Network 조회를 automatic skip의 불필요한 IP 준비로 금지하지 않습니다.
+
+새 생성 lane의 accepted200/202 POST나 matching raw200 GET은 처리 중 Close/source/cancel 오류가 있어도 decode 가능한 known 모델과 실제 ResponseError를 함께 보존합니다. 최초 AdminPass는 Creation에 있고 최신 Server에 합성하지 않습니다. accepted decode 오류로 RetryFunc를 호출하거나 cleanup/새 할당 fallback을 하지 않습니다. HTTP201은 accepted-create가 아니며 configured native HTTP retry hook이 호출될 수 있습니다; fixture는 hook의 원래 오류와 한 wire POST를 확인합니다. 기존 standalone 자동 IP의 accepted GET 처리 계약은 그대로 유지합니다.
+
+신규 테스트 **16그룹**: [공통 대기 정책](../resource/prepared_wait_policy_test.go)2, [outer/중첩 guard](../internal/rest/operation_guard_test.go)2, [이름 resolver](../internal/nativefind/resolve_name_test.go)1, [생성·readiness·skip·응답](../compute/server_automatic_create_test.go)5, [부팅·accepted partial·deadline](../compute/server_automatic_create_boundaries_test.go)3, [옵션 적용·설정·resolver budget](../compute/server_automatic_create_preflight_test.go)1, [Connection 이름/기본 NIC](../connection_server_automatic_create_test.go)2입니다.16은 HTTP endpoint 수나 전체 연산의 지원 승격 수가 아닌 테스트 함수 그룹 수입니다.
+
+실제 assertion은 native userdata/security-group/metadata/extension/NIC/BDM field와 explicit-ID 조회 생략, 원래 adminPass·마지막 matching Server, BUILD progress·nil ACTIVE polling·203·typed empty 오류·wrong ID·403·ERROR/fault, progress source/cancel, accepted POST/GET Close proof, all-stage 동일 deadline와 convergence 취소 후 allocated Assignment를 확인합니다. Connection은 다섯 이름 route의 두 페이지·query 차이, resolver503 retry에서 Compute 변경 후 wire1/noPOST, 이미지 해석 뒤 flavor callback의 이미지 API 교체와 초기 nil API를 검증합니다. default fixture는 inventory1/prePOST default NIC와 existing-floating skip/noIP 요청을 증명하며 모든 default/source/NAT 조합의 새로운 통합 검증을 주장하지 않습니다.
+
+```sh
+go test -race -timeout 60s . ./compute ./internal/nativefind ./internal/rest \
+  -run 'TestAutomaticCreate|TestConnectionAutomaticCreate|TestGuardedCreation|TestNestedOperation' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+집중13그룹4 package race가 통과했습니다. 최종 code/tests `afee318`에서 전체 make check의 vet·race·parity·gofmt가 통과했고 테스트 package는40개입니다(`/private/tmp/gophercloudsdk-automatic-create-check.log`). 이 작업 중 잘못된 POST 인자와 새 fixture의 중복 주소 option/volume imageRef 기대를 교정했고 이전 실패를 PASS로 옮겨 적지 않았습니다. 기존 대기 테스트 파일을 덮어쓴 초기 실수는 push 전에 원본을 복원하고 별도 새 테스트 파일로 분리했으며 관련 package 전체 회귀를 다시 실행했습니다. 리뷰에서 early raw fingerprint·nil API·dependency lifetime·ancestor guard·기존 accepted-GET 계약을 보완했습니다.
+
+[사용 가이드](../compute/create-with-automatic-floating-ip.md)의 정확한 main SHA-256은 `e53fd37feb3c42f557b37220a9e0eb81d33e03223f4f61f407d19469528d0148`입니다. 별도 module에서 `go build -mod=mod -o automatic-create-example .`가 성공했고 production은 최종 `afee318`과 같습니다. 변경 문서7개의 상대 파일 링크982개는 최종 검토에서 missing0이고, 최종 지원 판정 정합성도 전체 gate에서 통과했습니다. Python runtime·인증된 OpenStack·anchor 검증은 수행하지 않았습니다.
+
+공통 대기/guard `745f50d`, 생성 body/guarded dependency `3249f71`, 통합 API·기본5그룹 `f3ed74a`, 추가 경계/Connection `afee318`을 작은 커밋으로 나누어 직접 push했습니다. 중간마다 소스·구현·테스트·문서·커밋/원격 반영 상태를 대화로 공유하며 작업 계획의 업데이트 기준을 따릅니다. 문서와 판정/진행표도 별도 커밋으로 저장합니다.
+
+판정은 기존 cloud create/wait 두 row를 좁히고 공개 get_active_server의 bounded readiness dependency 부분 검토를 unresolved1행 추가합니다. 기존 status/source pin/fingerprint와 catalog/generated inventory는 그대로입니다. review495=go_mapping161/unresolved333/unsupported1, unreviewed2867이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200, native1126/resources235/generatedGo338, Go 파일1845입니다. pool>ips>auto 전체 dispatch, Nova mutation/fallback, standalone get_active_server/Wait, Python180/5·integer budget·broad lookup retry·삭제/fault/exception, 반환 Resource/location/session 및 전체 create count/group/security/data-volume 조합은 remaining입니다. 다음 핵심 user 작업은 standalone 서버 readiness/Wait의 typed 계약과 명시 IP/pool dispatch를 소스와 비교하여 이어갑니다.

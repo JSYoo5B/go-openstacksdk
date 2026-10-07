@@ -34871,7 +34871,9 @@
         "gophercloudsdk/compute.WithFloatingIPOptions",
         "gophercloudsdk/compute.WithWorkflowTimeout",
         "gophercloudsdk/compute.WithUnlimitedWorkflowTimeout",
-        "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive"
+        "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive",
+        "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
       ],
       "contracts": [
         {
@@ -35029,6 +35031,73 @@
           "tests": [
             "connection_network_mutations_test.go:TestConnectionNetworkMutationRefreshesGetterDefaultNICAndFloatingRoles"
           ]
+        },
+        {
+          "behavior": "The owned compound creation POST accepts200/202 and rejects201. Accepted200/202 null/missing/malformed server envelopes and unsafe decoded IDs preserve actual response errors without invoking decode retry, raw wait, IP allocation or cleanup. Unexpected HTTP201 still reaches the configured native HTTP retry hook; it is not an accepted-create proof. The normal image path emits selected image/flavor/NIC fields, preserves original Creation.AdminPass separately, and completes actual Neutron readiness plus raw Nova floating-address observation when needed.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateAcceptedResponsePolicyAndDecodeDoNotRetry",
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment"
+          ]
+        },
+        {
+          "behavior": "The new bounded creation lane waits on matching raw Nova200/203 responses for actual ACTIVE and at least one address row. BUILD and ACTIVE/null metadata remain progress states; explicit nonempty-map/empty-row inventory returns ServerAddressesUnavailableError rather than silently proceeding. Raw ERROR remains failed even when user failure states are disabled, and wrong identity/HTTP/progress-source/cancellation failures retain the original Creation and last matching Server without automatic deletion or IP mutation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment",
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitErrorsKeepLastMatchingServer"
+          ]
+        },
+        {
+          "behavior": "After mandatory creation readiness, disabled/private/source-none or already floating/public cases return a clean automatic decision without loading IP dependencies. These fixtures use an explicit NIC ID, and still perform one NovaPOST plus one matching ACTIVE GET. This skip does not waive image/flavor/volume/NIC/default-network resolution needed by server creation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateKnownSkipsDoNotLoadIPDependencies"
+          ]
+        },
+        {
+          "behavior": "Creation uses concrete server/automatic options prepared before NovaPOST. A custom server status attribute, nil server/automatic option, unsafe floating network and image/existing-volume conflict fail before POST or role/port/raw requests. Actual-status readiness cannot be replaced with another model attribute.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateRejectsInvalidPolicyBeforePOST"
+          ]
+        },
+        {
+          "behavior": "The compound preserves image, existing-volume and image-backed-new-volume native boot mappings, empty-string imageRef for volume boot, false delete-on-termination, volume type, userdata base64, security groups, metadata, owned extension fields and combined NIC network/port/fixed-IP body. Explicit IDs require no Cinder or Neutron creation lookup.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreatePreservesBootAndNativeBodyOptions"
+          ]
+        },
+        {
+          "behavior": "Accepted NovaPOST200/202 and matching rawGET200 preserve decoded Creation or last Server alongside actual status/header/body evidence after Close errors, custom cancellation, Compute source replacement or an ancestor workflow guard failure. Accepted-response processing and decode failures do not invoke a native RetryFunc or issue follow-up mutation/cleanup.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateAcceptedPOSTAndGETCloseKeepResources"
+          ]
+        },
+        {
+          "behavior": "The same overall deadline bounds NovaPOST, raw readiness, Neutron role/selection/allocation/readiness and Nova convergence. Cancellation in convergence preserves its custom cause, the original Creation, last Server and allocated Assignment without fallback or deletion. A named resolver consumes the same overall timeout.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateSharesDeadlineAndKeepsAssignmentOnConvergenceCancel",
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions"
+          ]
+        },
+        {
+          "behavior": "SDK-owned server/automatic/address closures are prepared once before POST. Source fingerprints precede automatic options; raw endpoint changes, server-client replacement and custom resolver Compute-source mutation stop before Nova. Stored wait policy reuses application WaitOption preparation and checks a post-progress invariant before another fetch.",
+          "tests": [
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions",
+            "resource/prepared_wait_policy_test.go:TestPreparedWaitPolicyDoesNotReapplyApplicationOptions",
+            "resource/prepared_wait_policy_test.go:TestWaitGuardStopsAfterProgressBeforeAnotherFetch"
+          ]
+        },
+        {
+          "behavior": "Connection exact-name creation references use owned paginated image/network/port/volume/flavor reads while preserving route/name-query differences. A resolved dependency remains source-bound through later stages; a subsequent dependency API replacement, initial nil API, or retry callback changing Compute stops before POST. Completed late403 and duplicate-name resolver pages remain errors; accepted204 is clean not-found and resolver source mutation stays visible after resolution.",
+          "tests": [
+            "connection_server_automatic_create_test.go:TestConnectionAutomaticCreateOwnsNamedDependencyPagesAndLifetime",
+            "internal/nativefind/resolve_name_test.go:TestGuardedCreationNameResolverPagesAndRetainsSource"
+          ]
+        },
+        {
+          "behavior": "Configured default NIC selection in the automatic compound consumes one guarded role snapshot before Nova, while an existing-floating-address skip needs no IP candidate or mutation. Nested source registries keep ancestor causes and isolate child-only bindings from the original parent context.",
+          "tests": [
+            "connection_server_automatic_create_test.go:TestConnectionAutomaticCreateSharesConfiguredDefaultRoleSnapshot",
+            "internal/rest/operation_guard_test.go:TestNestedOperationSourcesRetainAncestorsAndIsolateChildBindings"
+          ]
         }
       ],
       "documentation": [
@@ -35037,18 +35106,22 @@
         "compute/server-default-network.md",
         "compute/create-with-floating-ip.md",
         "network/network-roles.md",
-        "network/network-mutations.md"
+        "network/network-mutations.md",
+        "compute/create-with-automatic-floating-ip.md",
+        "compute/server-automatic-ip.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
-        "CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow."
+        "CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow.",
+        "A new explicit Service/Connection CreateWithAutomaticFloatingIP compound now connects owned Nova creation, raw actual ACTIVE/address readiness and the bounded conditional Neutron automatic lane with separate Creation/last Server/Automatic results. It always waits, rejects alternate status selectors and preserves original creation-only AdminPass without copying it into later GET models. Ordinary Servers.Create and the older explicit-IP workflow retain their separate lanes; Python defaults wait=false and its full return/dispatch/cleanup behavior remain differences.",
+        "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
       ],
       "remaining": [
         "Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles; the owned high Network Service mutations now provide the verified bounded cache invalidation. Complete full has_service/private/source/flags, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion. Generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset; bounded roles and mutation hooks do not close the complete cloud create policy.",
-        "Finish full cloud auto_ip need/skip and explicit IP-list/pool/source branching, refreshed server interface/fault/error ordering and cleanup policies beyond the explicit prepared Neutron CreateWithFloatingIP workflow. Preserve remaining server group/scheduler hints, extra volume combinations, count/default/security-group/userdata/metadata and post-create GET/fault/wait contracts.",
+        "Complete full cloud auto_ip, explicit IP-list/pool/Nova-source branching, returned interfaces/fault/error and cleanup policies beyond the new explicit CreateWithAutomaticFloatingIP bounded Neutron compound and the older explicit-IP workflow. The new compound covers matching raw ACTIVE plus metadata readiness and conditional Neutron assignment/observation; ordinary Servers.Create remains separate. Preserve remaining server group/scheduler hints, extra/data volume combinations, count/default/security-group/userdata/metadata and full post-create GET/fault/wait contracts.",
         "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
       ]
     },
@@ -35806,7 +35879,9 @@
         "gophercloudsdk/compute.WithFloatingIPOptions",
         "gophercloudsdk/compute.WithWorkflowTimeout",
         "gophercloudsdk/compute.WithUnlimitedWorkflowTimeout",
-        "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive"
+        "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive",
+        "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
       ],
       "contracts": [
         {
@@ -35835,19 +35910,57 @@
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPOrdersWaitsAndPreservesPartialResults",
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits"
           ]
+        },
+        {
+          "behavior": "The new bounded creation lane waits on matching raw Nova200/203 responses for actual ACTIVE and at least one address row. BUILD and ACTIVE/null metadata remain progress states; explicit nonempty-map/empty-row inventory returns ServerAddressesUnavailableError rather than silently proceeding. Raw ERROR remains failed even when user failure states are disabled, and wrong identity/HTTP/progress-source/cancellation failures retain the original Creation and last matching Server without automatic deletion or IP mutation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment",
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitErrorsKeepLastMatchingServer"
+          ]
+        },
+        {
+          "behavior": "After mandatory creation readiness, disabled/private/source-none or already floating/public cases return a clean automatic decision without loading IP dependencies. These fixtures use an explicit NIC ID, and still perform one NovaPOST plus one matching ACTIVE GET. This skip does not waive image/flavor/volume/NIC/default-network resolution needed by server creation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateKnownSkipsDoNotLoadIPDependencies"
+          ]
+        },
+        {
+          "behavior": "Accepted NovaPOST200/202 and matching rawGET200 preserve decoded Creation or last Server alongside actual status/header/body evidence after Close errors, custom cancellation, Compute source replacement or an ancestor workflow guard failure. Accepted-response processing and decode failures do not invoke a native RetryFunc or issue follow-up mutation/cleanup.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateAcceptedPOSTAndGETCloseKeepResources"
+          ]
+        },
+        {
+          "behavior": "The same overall deadline bounds NovaPOST, raw readiness, Neutron role/selection/allocation/readiness and Nova convergence. Cancellation in convergence preserves its custom cause, the original Creation, last Server and allocated Assignment without fallback or deletion. A named resolver consumes the same overall timeout.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateSharesDeadlineAndKeepsAssignmentOnConvergenceCancel",
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions"
+          ]
+        },
+        {
+          "behavior": "SDK-owned server/automatic/address closures are prepared once before POST. Source fingerprints precede automatic options; raw endpoint changes, server-client replacement and custom resolver Compute-source mutation stop before Nova. Stored wait policy reuses application WaitOption preparation and checks a post-progress invariant before another fetch.",
+          "tests": [
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions",
+            "resource/prepared_wait_policy_test.go:TestPreparedWaitPolicyDoesNotReapplyApplicationOptions",
+            "resource/prepared_wait_policy_test.go:TestWaitGuardStopsAfterProgressBeforeAnotherFetch"
+          ]
         }
       ],
       "documentation": [
-        "compute/create-with-floating-ip.md"
+        "compute/create-with-floating-ip.md",
+        "compute/create-with-automatic-floating-ip.md",
+        "compute/server-automatic-ip.md"
       ],
       "differences": [
         "The Go evidence is an explicit CreateWithFloatingIP workflow for a newly created server, not a public equivalent accepting an existing dynamic Python Server. It waits typed Nova ID/actual ACTIVE and Neutron assignment/actual ACTIVE, returns Server plus Assignment, preserves observable errors/resources and omits implicit cleanup.",
-        "Go defaults to one five-minute deadline covering service preparation and creation; pinned cloud wait defaults to180s and subtracts integer elapsed server-wait time for subsequent IP work. Go context, polling, typed error and partial-result contracts differ from source broad lookup retry, Resource/interface normalization and Nova address convergence."
+        "Go defaults to one five-minute deadline covering service preparation and creation; pinned cloud wait defaults to180s and subtracts integer elapsed server-wait time for subsequent IP work. Go context, polling, typed error and partial-result contracts differ from source broad lookup retry, Resource/interface normalization and Nova address convergence.",
+        "The new creation compound adds owned raw server readiness with mandatory actual ACTIVE, nil-address polling and typed empty-row failure, then conditionally consumes the bounded Neutron automatic lane. It retains resources and does not delete ACTIVE servers with no addresses. This is not the existing-server cloud wait surface or its broad lookup retry/default180/5/integer remaining budget policy.",
+        "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
       ],
       "remaining": [
         "Provide or map the existing-server cloud wait surface with its complete dynamic Server/Resource inputs, 180-second/5-second defaults, lookup exception/missing-resource retry, exact status and fault/extra_data taxonomy, and ACTIVE-without-addresses policy.",
-        "Complete IP pool > explicit ips > auto_ip branching and automatic need/skip checks, shared configured network/NAT/service/flags/cache/source policy and Nova-network fallback.",
-        "Compare refreshed Nova address/interface visibility, Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout cleanup/error ordering. The explicit creation workflow does not close these full source contracts."
+        "Complete IP pool > explicit ips > auto_ip branching, full shared configured network/NAT/service/flags/cache/source policy and Nova-network fallback. A separate new creation compound now connects the bounded automatic Neutron need/skip/assignment/raw-observation lane after mandatory readiness; standalone cloud Wait and ordinary Create have not become the full source dispatch surface.",
+        "Compare refreshed Nova address/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout cleanup/error ordering beyond the new creation compound. Its raw observed-address lane and no-cleanup partial results do not close the full source cloud Wait contracts."
       ]
     },
     {
@@ -37745,6 +37858,87 @@
           "tests": [
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints",
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_active_server",
+      "source_fingerprint": "5508b3a684dbcde016f529707b2d9c8e3ccd66e851252e7f01bdb4c3a6ed38c4",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk/compute.WithWait",
+        "gophercloudsdk/compute.WithAutomaticIPEnabled",
+        "gophercloudsdk/compute.WithAutomaticIPTimeout",
+        "gophercloudsdk/compute.WithUnlimitedAutomaticIPTimeout",
+        "gophercloudsdk/resource.PrepareWaitOptionsFor",
+        "gophercloudsdk/resource.WaitPolicy.ValidateFixedStatus",
+        "gophercloudsdk/resource.WithWaitPolicy"
+      ],
+      "documentation": [
+        "compute/create-with-automatic-floating-ip.md",
+        "compute/server-automatic-ip.md"
+      ],
+      "differences": [
+        "This review maps bounded actual-state/address readiness plus conditional IP behavior inside an explicit Go creation compound. It does not expose the complete existing-server get_active_server surface or its None return for non-ACTIVE status; the Go operation waits and returns separate Creation/last Server/Automatic results.",
+        "Go requires actual ACTIVE, a matching raw server identity and at least one real address row; nil metadata polls, while explicit empty/null-row inventories return a typed ServerAddressesUnavailableError and keep the server. The pinned helper deletes ACTIVE servers with a falsy addresses map and may accept a truthy map containing only empty rows. Go performs no implicit DELETE.",
+        "ERROR is a mandatory failure despite a user-disabled generic failure-state policy. Go preserves the known fault in the returned Server and uses typed SDK errors instead of claiming the full Python SDKException/extra_data/model taxonomy.",
+        "The Go compound always performs mandatory raw readiness and, only when needed, the bounded Neutron automatic lane. It uses a five-minute automatic overall deadline/two-second server/raw poll defaults with concrete overrides rather than the complete source get_active_server/wait default180/5/dynamic dispatch policy. Connection resolves Compute before the Service automatic timer begins; caller context covers that earlier discovery.",
+        "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
+      ],
+      "remaining": [
+        "Provide or deliberately map the complete public existing-server get_active_server API with its dynamic Server inputs, non-ACTIVE None behavior, auto_ip/ips/ip_pool/reuse/wait/timeout/nat_destination defaults and returned Server Resource/location/interface normalization. This row is only the bounded readiness dependency of a new creation compound.",
+        "Compare the complete ERROR/fault message/extra_data exception taxonomy, source ACTIVE-without-addresses deletion and deletion-failure error ordering, mutable Resource/descriptor/adapter/session/cache semantics and every status/address/nullable input case beyond the current fixtures.",
+        "Finish pool > explicit ips > automatic dispatch, Nova-network mutation/fallback, full service/config availability and source/destination policies beyond the independently reviewed bounded Neutron lane. Preserve the full standalone cloud Wait lookup exception/missing retry,180-second/5-second/integer remaining-budget and cleanup contracts."
+      ],
+      "contracts": [
+        {
+          "behavior": "The new bounded creation lane waits on matching raw Nova200/203 responses for actual ACTIVE and at least one address row. BUILD and ACTIVE/null metadata remain progress states; explicit nonempty-map/empty-row inventory returns ServerAddressesUnavailableError rather than silently proceeding. Raw ERROR remains failed even when user failure states are disabled, and wrong identity/HTTP/progress-source/cancellation failures retain the original Creation and last matching Server without automatic deletion or IP mutation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment",
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitErrorsKeepLastMatchingServer"
+          ]
+        },
+        {
+          "behavior": "After mandatory creation readiness, disabled/private/source-none or already floating/public cases return a clean automatic decision without loading IP dependencies. These fixtures use an explicit NIC ID, and still perform one NovaPOST plus one matching ACTIVE GET. This skip does not waive image/flavor/volume/NIC/default-network resolution needed by server creation.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateKnownSkipsDoNotLoadIPDependencies"
+          ]
+        },
+        {
+          "behavior": "Creation uses concrete server/automatic options prepared before NovaPOST. A custom server status attribute, nil server/automatic option, unsafe floating network and image/existing-volume conflict fail before POST or role/port/raw requests. Actual-status readiness cannot be replaced with another model attribute.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateRejectsInvalidPolicyBeforePOST"
+          ]
+        },
+        {
+          "behavior": "The owned compound creation POST accepts200/202 and rejects201. Accepted200/202 null/missing/malformed server envelopes and unsafe decoded IDs preserve actual response errors without invoking decode retry, raw wait, IP allocation or cleanup. Unexpected HTTP201 still reaches the configured native HTTP retry hook; it is not an accepted-create proof. The normal image path emits selected image/flavor/NIC fields, preserves original Creation.AdminPass separately, and completes actual Neutron readiness plus raw Nova floating-address observation when needed.",
+          "tests": [
+            "compute/server_automatic_create_test.go:TestAutomaticCreateAcceptedResponsePolicyAndDecodeDoNotRetry",
+            "compute/server_automatic_create_test.go:TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment"
+          ]
+        },
+        {
+          "behavior": "Accepted NovaPOST200/202 and matching rawGET200 preserve decoded Creation or last Server alongside actual status/header/body evidence after Close errors, custom cancellation, Compute source replacement or an ancestor workflow guard failure. Accepted-response processing and decode failures do not invoke a native RetryFunc or issue follow-up mutation/cleanup.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateAcceptedPOSTAndGETCloseKeepResources"
+          ]
+        },
+        {
+          "behavior": "The same overall deadline bounds NovaPOST, raw readiness, Neutron role/selection/allocation/readiness and Nova convergence. Cancellation in convergence preserves its custom cause, the original Creation, last Server and allocated Assignment without fallback or deletion. A named resolver consumes the same overall timeout.",
+          "tests": [
+            "compute/server_automatic_create_boundaries_test.go:TestAutomaticCreateSharesDeadlineAndKeepsAssignmentOnConvergenceCancel",
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions"
+          ]
+        },
+        {
+          "behavior": "SDK-owned server/automatic/address closures are prepared once before POST. Source fingerprints precede automatic options; raw endpoint changes, server-client replacement and custom resolver Compute-source mutation stop before Nova. Stored wait policy reuses application WaitOption preparation and checks a post-progress invariant before another fetch.",
+          "tests": [
+            "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions",
+            "resource/prepared_wait_policy_test.go:TestPreparedWaitPolicyDoesNotReapplyApplicationOptions",
+            "resource/prepared_wait_policy_test.go:TestWaitGuardStopsAfterProgressBeforeAnotherFetch"
           ]
         }
       ]
