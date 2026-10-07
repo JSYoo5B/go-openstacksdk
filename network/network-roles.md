@@ -2,7 +2,7 @@
 
 `Connection.GetNetworkRoles(ctx)`는 Neutron 네트워크를 한 번 탐색하여 외부·내부 IPv4/IPv6, Floating IP용 외부 IPv4, NAT source/destination, 기본 인터페이스 역할을 함께 반환합니다. 개별 getter와 `network.Service.Roles.Discover(ctx)`도 같은 성공 결과를 공유합니다. 애플리케이션에서 builder나 resolver를 구현할 필요 없이 `clouds.yaml` 또는 SDK의 concrete 옵션으로 정책을 지정할 수 있습니다.
 
-이 단위는 openstacksdk의 네트워크 역할 getter와 설정 분류를 제공합니다. 서버에 Floating IP가 필요한지 판단하는 `_needs_floating_ip`, 자동 생성·연결, 서버의 `public_v4`·`private_v4`·`interface_ip` 계산까지 구현되었다는 의미는 아닙니다.
+이 가이드는 openstacksdk의 네트워크 역할 getter와 설정 분류를 설명합니다. 서버의 [자동 IP 판단·연결](../compute/server-automatic-ip.md), [생성 시 자동 IP 적용](../compute/create-with-automatic-floating-ip.md), [주소 view](../compute/server-addresses.md)는 각 API의 별도 비교 범위에서 제공합니다.
 
 ## clouds.yaml로 사용하기
 
@@ -221,7 +221,7 @@ server = conn.create_server(
 print(server.id)
 ```
 
-Go의 아래 독립 예제도 설정에서 기본 NIC와 floating source/NAT를 선택합니다. `CreateWithFloatingIP`는 floating IPv4 연결을 명시적으로 요청하며, Python `auto_ip`의 기존 주소·private cloud 등에 따른 자동 생략을 아직 적용하지 않습니다. 서버와 IP의 실제 ACTIVE는 확인하지만 Nova 주소 수렴은 별도 남은 범위입니다. `ubuntu`·`c2`는 사용할 이미지와 flavor 이름으로 바꿉니다.
+Go의 아래 독립 예제도 설정에서 기본 NIC와 floating source/NAT를 선택합니다. `CreateWithFloatingIP`는 floating IPv4 연결을 명시적으로 요청하고 서버와 IP의 실제 ACTIVE를 확인합니다. 기존 주소·private cloud에 따른 자동 생략과 raw Nova 주소 수렴을 함께 사용하는 별도 API는 [CreateWithAutomaticFloatingIP](../compute/create-with-automatic-floating-ip.md)를 참고하세요. `ubuntu`·`c2`는 사용할 이미지와 flavor 이름으로 바꿉니다.
 
 ```go
 package main
@@ -302,6 +302,10 @@ func run(ctx context.Context) error {
 
 비교 기준은 openstacksdk revision `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [NetworkCommonCloudMixin 역할 분류와 getter](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L95-L432), [CloudRegion의 역할 설정 selector](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/config/cloud_region.py#L1427-L1495)입니다. Source의 family 분류, aggregate 중복, NAT 선택 순서를 따르면서 오류 전파·호출자 소유 복사·취소·Reset의 동시성 계약을 Go API로 명시합니다.
 
-[상위 네트워크 CRUD](network-mutations.md)와 기존 `service.Networks.Delete`의 접수 후 cache hook은 구현했습니다. Raw/native/API·외부 변경 뒤에는 명시 Reset이 필요합니다. [서버 주소 view](../compute/server-addresses.md)는 같은 cache와 concrete private/IPv6/source 설정으로 주소 선택·기존 association 보충을 제공합니다. 전체 `has_service`·session 정책, 생성·대기 lifecycle에 주소 확장을 자동 적용하는 작업, 자동 Floating IP 필요 판단·생략·Nova 주소 수렴은 후속 범위입니다. 기본 NIC·source/NAT 소비와 명시적 `CreateWithFloatingIP`만으로 cloud `create_server` 전체 동작의 동등성을 주장하지 않습니다. 위 비교는 고정 소스에 대한 확인 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
+일곱 공개 목록 getter의 Go 대응은 `GetExternalIPv4Networks`, `GetInternalIPv4Networks`, `GetExternalIPv6Networks`, `GetInternalIPv6Networks`, `GetExternalIPv4FloatingNetworks`, `GetExternalNetworks`, `GetInternalNetworks`입니다. 이 named 함수들의 설정·분류·목록 순서·중복·오류 계약은 위의 concrete 정책으로 제공합니다. `RoleNetwork`는 native Network와 두 extension을 담는 DTO이며 원문 Body/Wire, 모든 nullable descriptor·vendor 필드·location 또는 Python의 mutable Resource 동작을 제공하지 않습니다. native decoder의 필드 변환과 200/204 정책을 사용하며, linked empty 페이지도 계속 읽습니다. 설정 flag의 typed/YAML 변환과 일관된 이름-or-ID 검증, 성공만 저장하는 cache·독립 복사·명시 Reset은 Python의 raw truthiness·이름만 사용하는 최종 검증·mutable cache와 다른 Go 정책입니다.
+
+Connection getter는 두 discovery flag가 false이거나 clean catalog endpoint가 없으면 탐색을 생략하고 빈 결과를 반환합니다. 전체 Python `has_service`의 disable·official-service·version·session 정책과 모든 CloudRegion loader overlay는 별도 선언 범위로 추적합니다. [상위 네트워크 CRUD](network-mutations.md)와 기존 `service.Networks.Delete`의 접수 후 cache hook은 구현했으며, raw/native/API·외부 변경 뒤에는 명시 Reset이 필요합니다. mutable Resource/session/cache lifecycle 전체도 이 일곱 목록 함수의 판정과 분리합니다.
+
+[서버 주소 view](../compute/server-addresses.md), [자동 IP 필요성·조건부 연결](../compute/server-automatic-ip.md), [명시 IP·pool 순서](../compute/server-ip-dispatch.md), [Nova backend](../compute/server-nova-floating-ip.md), [생성](../compute/create-with-automatic-floating-ip.md)과 [ready/wait](../compute/server-ready.md)는 각 가이드의 실제 API와 Go 차이를 기준으로 비교합니다. 역할 목록의 대응만으로 그 선언들이나 cloud `create_server` 전체를 완료로 판정하지 않습니다. 위 비교는 고정 소스와 로컬 HTTP 계약의 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
 
 [Network 계약 테스트](roles_test.go)와 [Connection 통합 테스트](../connection_network_roles_test.go)는 분류·페이지·오류·동시 탐색·cache/Reset·설정과 반환값 소유권을 로컬 HTTP fixture로 검증합니다. 전체 검사와 위 독립 Go 예제의 컴파일 결과는 [지원 판정대장](../docs/sdk-support-ledger.md#공유-네트워크-역할-조회와-설정)에 기록했습니다. 인증된 OpenStack 또는 Python 예제 실행 결과는 포함하지 않습니다.

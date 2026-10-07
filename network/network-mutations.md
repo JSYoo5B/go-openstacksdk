@@ -165,6 +165,8 @@ Update에 필드 또는 revision 옵션이 있으면 explicit ID는 사전 netwo
 
 DeleteNetwork는 ID도 먼저 조회합니다. 초기 조회에서 없으면 `(false, nil)`이고 DELETE와 cache 초기화를 하지 않습니다. 조회 후 DELETE가 202/204로 접수되거나 원래 DELETE의 clean404 경합이면 true를 반환하고 cache를 초기화합니다. true는 실제 삭제 완료 대기 결과가 아닙니다. 조회·권한·서버 오류와 callback/source 오류를 clean404로 숨기지 않습니다.
 
+고정 Python cloud `delete_network(name_or_id)`도 선행 조회의 미존재는 false, 찾은 network의 삭제는 true를 반환합니다. Go는 `resource.ID`·`resource.Name`으로 입력 해석을 명시하고 DELETE 성공을 202/204로 제한합니다. Python Resource의 응답 검사에는 400 미만 상태가 허용되므로 이 성공 코드 범위는 문서화된 Go 차이입니다. Cloud 함수에는 revision·wait 인자가 없으며 별도 Proxy의 `if_revision` 또는 삭제 대기는 이 bool API의 필수 옵션으로 추가하지 않습니다.
+
 기존 `service.Networks.Delete`는 error-only 반환과 explicit ID direct DELETE를 유지합니다. 기본으로 missing을 무시하고 `resource.WithMissingError()`로 미존재 오류를 선택합니다. 실제 접수된 삭제는 역할 cache를 초기화하지만 missing 응답은 accepted 삭제가 아니므로 이 direct ID 경로의404만으로 초기화하지 않습니다. Cloud DeleteNetwork의 선행 조회 및 bool 계약과 구분합니다.
 
 ## Cache와 접수 후 오류
@@ -195,7 +197,9 @@ High `WithNetworkRevision(0)`는 조건부 Update를 요청합니다. Cloud help
 
 비교 기준은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [cloud CRUD](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L491-L692), [network Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L3159-L3307), [역할 cache reset](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L95-L108), [Network 모델](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/network.py#L16-L142)입니다.
 
-Mutable Resource/descriptor coercion·dirty/no-op·전체 session/adapter/discovery 정책, dynamic kwargs와 nullable 입력 전체, native 모델에 없는 응답 extension, raw/native/out-of-band cache hooks, 자동 IP 필요성·서버 주소 수렴·Nova 분기는 남은 범위입니다. 이 상위 CRUD와 cache hook만으로 cloud 네트워크·서버 생성 또는 SDK 전체의 지원을 승격하지 않습니다.
+Cloud `delete_network`의 named Go 대응은 명시 Ref의 선행 조회, 초기 미존재 false, 접수되거나 조회 후 clean404인 삭제 true, 공유 role cache 초기화와 inspectable 오류를 제공합니다. 접수 후 read·Close·context/source 실패에서도 `(true, err)`와 원래 cache 초기화를 유지하는 것은 Python proxy 정상 반환 후 Reset과 다른 Go 정책입니다. bool 반환에는 Network model의 extension·location 변환이 필요하지 않습니다. 이 판정으로 Create·Update·Proxy의 revision·native family 또는 삭제 waiter까지 완료로 판정하지 않습니다.
+
+Mutable Resource/descriptor coercion·dirty/no-op·전체 session/adapter/discovery 정책, dynamic kwargs와 nullable 입력 전체, Create/Update의 native 모델에 없는 응답 extension은 별도 SDK 범위입니다. raw/native/out-of-band cache 변경은 위의 명시 Reset 정책을 사용합니다. [자동 IP 판단·조건부 연결](../compute/server-automatic-ip.md), [명시 IP·pool](../compute/server-ip-dispatch.md), [Nova backend](../compute/server-nova-floating-ip.md), [서버 주소 view](../compute/server-addresses.md), [생성·수렴](../compute/create-with-automatic-floating-ip.md)과 [ready/wait](../compute/server-ready.md)는 후속으로 구현된 각 API의 가이드에서 범위와 차이를 추적합니다. 이 상위 CRUD와 cache hook만으로 cloud 네트워크·서버 생성 또는 SDK 전체의 지원을 승격하지 않습니다.
 
 검증 상태는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다. 이 가이드의 독립 Go 예제는 컴파일을, HTTP 동작은 로컬 fixture를 기준으로 검증합니다.
 
