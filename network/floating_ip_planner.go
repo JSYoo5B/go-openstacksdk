@@ -80,3 +80,16 @@ func (p *FloatingIPPlanner) PrepareEnsure(ctx context.Context, input EnsureFloat
 	}
 	return p.service.prepareEnsurePlan(ctx, input, policy, p.guard, p.NetworkRoles)
 }
+
+// PrepareAttach shares this planner's source binding and lazy destination roles
+// without resolving a token owner or choosing an allocation network.
+func (p *FloatingIPPlanner) PrepareAttach(ctx context.Context, input AttachFloatingIPRequest, options ...AttachFloatingIPOption) (FloatingIPAttachPlan, error) {
+	policy, err := PrepareAttachFloatingIPOptions(ctx, options...)
+	if err != nil {
+		return FloatingIPAttachPlan{}, err
+	}
+	if err := p.Check(ctx); err != nil {
+		return FloatingIPAttachPlan{}, err
+	}
+	return p.service.prepareAttachPlan(ctx, input, policy, p.guard, p.NetworkRoles)
+}
