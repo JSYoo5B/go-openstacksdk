@@ -140,6 +140,7 @@ SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증�
 [SecretStore 비교](keymanager/v1/secretstores/README.md)와
 [Quota 비교](keymanager/v1/quotas/README.md)에 Python/Go 사용법과 범위를 설명합니다. 현재 프로젝트 quota만 읽을 때는 `service.Quotas.Get(ctx)`를 사용하며, 프로젝트 ID 없이 원문 값과 실제 HTTP 오류 증거를 반환합니다.
 Container/Order의 원문·nullable metadata 조회는 `service.Containers.Fetch(ctx, resource.ID(id))`와 `service.Orders.Fetch(ctx, resource.ID(id))`를 사용합니다. [Python/Go 조회 비교](keymanager/v1/metadata-fetch.md)에 결과와 실행 예제를 제공합니다.
+Container/Order/Secret의 `Remove(ctx, resource.ID(id))`는 기본으로 없는 객체를 무시하고 `resource.WithMissingError()`로 strict 삭제를 선택합니다. [Python/Go 삭제 비교](keymanager/v1/metadata-delete.md)에 공통 정책과 실행 예제를 제공합니다.
 `SecretConsumers.InSecret(ctx, resource.ID(secretID))`는 consumer association의 생성·삭제와
 offset 목록을 제공합니다. [SecretConsumer 비교](keymanager/v1/secretconsumers/README.md)에서
 association 입력과 실제 secret 응답을 구별합니다.
