@@ -156,6 +156,13 @@ func TestFloatingIPAttachAddressConsumesEveryPageBeforeSelection(t *testing.T) {
 					t.Fatal(err, proof)
 				}
 			}
+			if scenario == "late malformed" {
+				var syntax *json.SyntaxError
+				var proof *resource.ResponseError
+				if !errors.As(err, &syntax) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != `{"floatingips":` || reads.Load() != 2 {
+					t.Fatal(err, proof, reads.Load())
+				}
+			}
 		})
 	}
 }
@@ -346,7 +353,11 @@ func TestFloatingIPAttachWaitRequiresActualStatusAndPinnedAddress(t *testing.T) 
 				testcloud.JSON(w, 200, `{"floatingip":`+row+`}`)
 			})
 			attachUnexpected(t, cloud)
-			wait := []resource.WaitOption{resource.WithTimeout(10 * time.Millisecond), resource.WithPollInterval(time.Millisecond)}
+			timeout := time.Second
+			if scenario == "timeout" {
+				timeout = 20 * time.Millisecond
+			}
+			wait := []resource.WaitOption{resource.WithTimeout(timeout), resource.WithPollInterval(time.Millisecond)}
 			if scenario == "custom status" {
 				wait = append(wait, resource.WithStatusAttribute("description"))
 			}
@@ -356,6 +367,21 @@ func TestFloatingIPAttachWaitRequiresActualStatusAndPinnedAddress(t *testing.T) 
 			}
 			if scenario == "timeout" && !errors.Is(err, context.DeadlineExceeded) {
 				t.Fatal(err)
+			}
+			if scenario == "changed address" {
+				var proof *resource.ResponseError
+				if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || !strings.Contains(string(proof.Body), "198.51.100.99") || gets.Load() != 3 {
+					t.Fatal(err, proof, gets.Load())
+				}
+			}
+			if scenario == "ERROR" {
+				var failed *resource.FailedStateError
+				if !errors.As(err, &failed) || failed.Status != "ERROR" || gets.Load() != 3 {
+					t.Fatal(err, failed, gets.Load())
+				}
+			}
+			if scenario == "custom status" && (!errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), `status is "DOWN"`) || gets.Load() != 3) {
+				t.Fatal(err, gets.Load())
 			}
 		})
 	}
