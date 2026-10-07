@@ -14,6 +14,7 @@ import (
 	"gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
+	nativeports "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 
@@ -45,9 +46,12 @@ func newFloatingIPs(s *Service, dependencies Dependencies) *FloatingIPs {
 		NameQuery: func(name string) string { return name },
 		Iterate: func(ctx context.Context, values url.Values) iter.Seq2[*externalNetwork, error] {
 			values.Set("router:external", "true")
-			return resource.Stream(ctx, networks.List(s.client, query.Adapter(values)), func(page pagination.Page) ([]externalNetwork, error) {
+			pager := floatingIPSelectionPager(networks.List(s.client, query.Adapter(values)), func(r pagination.PageResult) pagination.Page {
+				return networks.NetworkPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: r}}
+			})
+			return resource.Stream(ctx, pager, func(page pagination.Page) ([]externalNetwork, error) {
 				var all []externalNetwork
-				if err := networks.ExtractNetworksInto(page, &all); err != nil {
+				if err := networks.ExtractNetworksInto(page.(floatingIPSelectionPage).Page, &all); err != nil {
 					return nil, err
 				}
 				filtered := make([]externalNetwork, 0, len(all))
@@ -207,7 +211,13 @@ func (f *FloatingIPs) selectDestination(ctx context.Context, serverID string, o 
 		}
 	} else {
 		filter := portapi.ListOpts{DeviceID: serverID, NetworkID: networkID}
-		for port, err := range f.ports.List(ctx, portapi.WithListOptions(filter)) {
+		pager := floatingIPSelectionPager(nativeports.List(f.ports.RawClient(), filter), func(r pagination.PageResult) pagination.Page {
+			return nativeports.PortPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: r}}
+		})
+		items := resource.Stream(ctx, pager, func(page pagination.Page) ([]Port, error) {
+			return nativeports.ExtractPorts(page.(floatingIPSelectionPage).Page)
+		})
+		for port, err := range items {
 			if err != nil {
 				return floatingIPDestination{}, err
 			}
