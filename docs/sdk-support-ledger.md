@@ -1413,3 +1413,28 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 진행표 `559709b`, 공유 대기 `b60264d`, Compute `4a305e6`, Connection `85a3063`, raw 경계 `61982b2`를 작은 커밋으로 나누어 직접 push했습니다. 사용법·검증 문서는 `05a2e60`으로 보존하고 판정·진행 단계도 별도 커밋으로 저장합니다. 마지막 existing Neutron remaining 표현을 보완한 뒤 코드 변경 없이 `make parity`를 다시 통과했습니다(`/private/tmp/gophercloudsdk-server-ready-final-parity.log`, `gophercloudsdk-server-ready-final-receipt.json`). 이번 진행표부터 작업 착수·구현·테스트·문서·검토·커밋/push 단계의 중간 안내를 계속 남깁니다.
 
 기존 get_active_server/wait_for_server 두 review에 실제 함수·assertion·문서를 추가하고 더 이상 맞지 않는 creation-only/독립 API 미제공 문구를 좁혔습니다. fingerprint·unresolved 상태·기존 계약과 다른493행은 보존하며 신규 review·지원 승격은 없습니다. review495=go_mapping161/unresolved333/unsupported1, 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200, native1126/resources235/generatedGo338입니다. pool>ips>auto 전체 dispatch·Nova mutation/fallback·dynamic Resource/location/interface/config/session·모든 fault/nullable/default/timeout/cleanup 계약은 remaining입니다. Neutron accepted201/202 body 처리 오류에서는 기존 lower layer가 Allocated=true를 보존하되 FloatingIP가 nil일 수 있는 경계도 별도 remaining이며 이번 Nova partial 모델 보존과 혼동하지 않습니다. 다음 핵심 user 단위는 순차 명시 IP와 pool 선택·연결 및 부분 성공 보존입니다.
+
+## Neutron 접수 응답의 IP 모델 보존
+
+2026-10-07 핵심 user의 명시 IP·pool 분기를 준비하면서 위 readiness 기록에 남긴 접수 모델 보존 경계를 보완했습니다. `FloatingIPs.EnsurePrepared`의 owned write는 실제 accepted POST201/202·PUT200 응답만 디코드하고, complete body가 있으면 read/Close·source·취소 오류와 함께 확인한 모델을 보존합니다. 원래 처리 오류와 추가 decode·검증 오류를 함께 반환하므로 모델이 있어도 성공이나 ACTIVE 완료로 취급하지 않습니다. 생성된 native API transport·기존 public signature·서버 상태 판정의 기본값은 바꾸지 않습니다.
+
+새 allocation은 accepted면 Allocated=true이고, 디코드 가능한 body의 모델은 소유자 검증 실패에도 실제 응답의 증거로 남습니다. malformed·truncated body로 모델을 만들 수 없을 때는 nil과 원래 status/header/body·read/Close·JSON 오류를 함께 보존합니다. 재사용 PUT은 ID·소유자·network·port·fixed IPv4 검증을 통과한 complete 모델만 기존 후보를 대체합니다. wrong ID·fixed 주소 응답은 이전 후보를 유지하고 validation 원인과 Close 원인을 함께 반환합니다. 명시 IP가 요구하는 원래 floating 주소의 정확한 동일성은 다음 Attach validator에서 별도로 고정할 계약입니다.
+
+신규 **4개 테스트 그룹**은 [Network 접수 모델](../network/floating_ip_accepted_model_test.go)3과 [서버 흐름 통합](../compute/server_accepted_assignment_test.go)1입니다. 기존 [plan accepted 실패 그룹](../network/floating_ip_plan_test.go)의 complete201 Close/source/cancel 기대도 알려진 IP 보존으로 강화했고 malformed의 nil 모델은 유지합니다. 새 Network fixture는201/202 × complete Close/read/source/custom-cancel 및 wrong-owner+Close,200 matching/wrong-ID/wrong-fixed association과 revision0 header,202 truncated read+Close+실제 json.SyntaxError를 검증합니다. 한 번의 mutation·실제 status/header/body·원래 원인·잘못된 후보 채택 금지·후속 retry/wait/관측/allocation/DELETE 생략을 확인합니다.
+
+서버 fixture는 GetActive/Wait/Create/Ensure 네 가지 공개 경로에서 accepted201 IP Close 오류를 확인합니다. 알려진 ACTIVE Server와 DOWN allocated IP, Observed=false·ResponseError·원래 오류가 남고 IP allocation은1번입니다. Get/Ensure는 raw 관측0, Wait/Create는 이미 수행한 readiness raw 조회1번을 유지하며 후속 관측을 하지 않습니다. 이 그룹은 pool·명시 주소 순서·Nova 전체 dispatch 검증을 대신하지 않습니다.
+
+```sh
+go test -race -timeout 60s ./network ./compute \
+  -run 'TestFloatingIP(Accepted|Plan)|TestServerIPWorkflows' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+집중2 package race가 최종 assertion에서 통과했습니다. production·기본 Network 검증 `6ffc6a3`, 서버 통합 `5c6941d`를 직접 push했고 추가 오류 원인 assertion은 `b3a7d56`으로 분리했습니다. 최종 code/tests `b3a7d56`과 이번 기존6행 판정에서 전체 make check의 vet·race·고정 parity·gofmt가 통과했으며 테스트 package는40개, Go 파일은1,854개입니다(`/private/tmp/gophercloudsdk-accepted-ip-check.log`, `gophercloudsdk-accepted-ip-check-receipt.json`). [Plan 사용법](../network/floating-ip-plan.md)과 [서버 readiness](../compute/server-ready.md)의 부분 결과 문구를 현재 정책으로 갱신했습니다. 호출 예제/API signature는 바꾸지 않아 새 독립 main을 추가하거나 기존 빌드 성공을 새 runtime 실행으로 기록하지 않습니다.
+
+변경한 네 문서의 상대 파일 링크798개에서 누락이 없음을 확인했습니다(문서 내 anchor 자동 검증 제외). readiness의 기존 Go main은 이전에 컴파일한 원문과 동일하며 새 Python/live cloud 실행은 하지 않았습니다(`/private/tmp/gophercloudsdk-accepted-ip-doc-receipt.json`).
+
+기존 native Create 및 cloud available/add_ips/create/get_active/wait6행에 실제 owned workflow의 모델·원인 보존 근거를 연결했습니다. 다른489행·fingerprint·status·source pin·선언/생성 inventory와 native Update의 별도 판정은 유지하며 신규 review·지원 승격은 없습니다. review495=go_mapping161/unresolved333/unsupported1, 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200입니다. 위 readiness의 decodable Neutron accepted 모델 소실 항목은 이 후속 검증으로 좁혔으며 malformed 모델 부재·전체 Resource/normalization/ownership/error·timeout·dispatch 계약은 별도로 남습니다.
+
+다음 구현은 기존 IP ID/주소·destination·revision을 고정하는 owner-free Attach plan입니다. 그 위에 pool > 순서 IP 목록 > automatic의 concrete 선택과 순서별 부분 결과, Get/Wait/Create의 공통 정책 소비, Nova backend와 전체 Python source 계약을 계속 연결합니다. 전체 SDK 목표와 서비스/user/admin 우선순위는 유지합니다.

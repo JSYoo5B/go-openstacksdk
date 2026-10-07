@@ -159,7 +159,7 @@ plan은 준비한 동일 `FloatingIPs` 객체에 속합니다. zero plan이나 �
 
 실행 시 floating IP 후보의 owner/external network 목록을 모든 페이지에서 확인하고, 같은 port/fixed IPv4에 이미 붙은 후보를 첫 free IP보다 우선합니다. 같은 대상에 붙어 있으면 association PUT을 생략합니다. free IP를 사용하면 관측한 `revision_number`가 있는 경우 0도 포함하여 `If-Match: revision_number=N`으로 PUT합니다. 뒤 페이지 오류나 revision 충돌이 있으면 대체 allocation을 하지 않습니다.
 
-후보가 없으면 선택한 network/port/fixed IPv4로 POST합니다. 새 allocation의 성공 코드는 native와 같이 201/202이며, 접수 이후 decode/read/Close·source·취소 오류가 생기면 `Allocated=true`인 assignment와 실제 response error를 함께 보존합니다. 모델을 디코드하지 못하면 `FloatingIP`는 nil일 수 있습니다. 재사용 association이나 wait 실패는 이미 확인한 candidate/assignment를 반환하며 검증하지 않은 응답으로 교체하지 않습니다.
+후보가 없으면 선택한 network/port/fixed IPv4로 POST합니다. 새 allocation의 성공 코드는 native와 같이 201/202이며, 접수 이후 decode/read/Close·source·취소 오류가 생기면 `Allocated=true`인 assignment와 실제 response error를 함께 보존합니다. 유효한 body를 디코드할 수 있으면 read/Close·source·취소 오류와 함께 알려진 IP 모델을 반환합니다. malformed·truncated body로 모델을 확인할 수 없을 때만 `FloatingIP`가 nil일 수 있습니다. 재사용 PUT은 ID·owner·network·port·fixed IPv4 검증을 통과한 응답만 기존 후보를 대체하며, 접수 후 처리 오류가 있어도 검증한 최신 모델을 보존합니다. 잘못된 응답은 원래 후보를 유지합니다. 원래 처리 오류와 추가 decode·검증 원인을 함께 반환하고, 오류 뒤 대기·관측·재할당·DELETE를 보내지 않습니다.
 
 `WithEnsureWait`가 없으면 실제 association 응답을 반환하며 `DOWN`일 수 있습니다. 옵션이 있으면 같은 IP의 실제 ACTIVE를 GET으로 관측하고 ID·owner·network·port·fixed IPv4를 검증합니다. 공통 waiter의 상태 attribute를 바꿔도 실제 IP Status가 ACTIVE여야 성공합니다. caller context는 전체 준비·실행을 제한하고, `resource.WithTimeout`은 waiter의 추가 제한입니다. 생성하거나 재사용한 IP를 오류 시 자동 DELETE하지 않습니다.
 
@@ -171,8 +171,10 @@ plan이 직접 실행하는 owned REST 목록·명시 Neutron lookup·port 재�
 
 공유 role cache의 성공값·Reset·동시 discovery는 기존 정책을 따릅니다. 이미 일반 role discovery가 진행 중인 경우 그 결과를 기다려 공유할 수 있으며, 모든 기존 public getter/native/raw 요청이 이 plan의 보호 정책으로 바뀌는 것은 아닙니다. 서버 이름 조회는 기존 Connection resolver를 사용합니다. 환경의 외부 변경을 자동 탐지하거나 cache를 매번 강제로 새로 읽는 정책은 아니므로 필요한 topology 변경에는 [Reset 규칙](network-roles.md)을 적용합니다.
 
-고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 별도 [Compute 자동 메서드](../compute/server-automatic-ip.md)는 기존 서버의 조건부 Neutron 실행과 raw Nova 관측을 제공합니다. 일반 Create/Get/Wait 통합, pool/명시 IP 우선순위, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup은 계속 남습니다. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
+고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 별도 [Compute 자동 메서드](../compute/server-automatic-ip.md)는 기존 서버의 조건부 Neutron 실행과 raw Nova 관측을 제공합니다. [자동 IP 서버 생성](../compute/create-with-automatic-floating-ip.md)과 [GetActive/Wait](../compute/server-ready.md)도 같은 Neutron 정책을 소비합니다. 일반 Create의 전체 source dispatch, pool/명시 IP 우선순위, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup은 계속 남습니다. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
 
 [plan HTTP 테스트](floating_ip_plan_test.go)와 [설정·응답 경계 테스트](floating_ip_plan_boundaries_test.go)는 owner 지연·owned 선택·typed absence·목적지 재GET·전체 후보·revision·실제 ACTIVE·접수 후 부분 결과·source guard를 확인하도록 작성되어 있습니다. 테스트 실행 결과와 최종 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md)에 실제 검증 revision과 함께 기록합니다. Python 비교는 고정 소스 정적 검토이며 Python 예제·실클라우드 실행 근거는 별도입니다.
 
 [Compute 자동 floating IPv4](../compute/server-automatic-ip.md)는 `FloatingIPs.NewPlanner`의 한 guarded 역할 snapshot을 주소 분류와 대상 선택에 공유하고, 필요할 때 같은 plan을 실행합니다. `NewPlanner` 자체는 조회·owner 확인을 하지 않으며 `NetworkRoles`는 호출자가 소유하는 복사본을 반환합니다. 한 planner가 확보한 snapshot은 Reset 이후에도 유지되고 다음 planner는 새 cache를 읽을 수 있습니다. `WithEnsureActive`는 기존 wait 옵션을 유지하며 actual ACTIVE를 필수로 만들지만 owner를 미리 바인딩하지 않습니다. 원래 직접 Plan API에는 자동 필요성이나 raw Nova 관측 책임이 없습니다.
+
+접수 후 IP 모델·오류 보존의 [후속 검증 기록](../docs/sdk-support-ledger.md#neutron-접수-응답의-ip-모델-보존)은 POST201/202·PUT200의 complete/invalid/truncated body와 서버 Get/Wait/Create/Ensure 부분 결과를 구분합니다.

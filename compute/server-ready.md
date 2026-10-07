@@ -161,7 +161,7 @@ GetActive의 known non-ACTIVE·ERROR·주소 오류·automatic skip에는 Comput
 
 Go는 상태를 대소문자 구분 없이 비교하며, pinned Python helper는 ERROR/ACTIVE literal을 비교합니다. ERROR는 user failure states를 비워도 반드시 실패입니다. Native Fault 모델은 source의 key 미제공/null/빈 message 구분과 mutable Resource/extra_data taxonomy 전부를 보존하지 않습니다. malformed addresses를 clean absence로 바꾸지 않습니다. 접수된 GET200/203 body에서 동일 ID의 유효한 Server를 확인한 뒤 Close/source/취소 오류가 나면 마지막 모델과 응답 증거를 함께 반환합니다. wrong-ID·malformed envelope는 대상 모델로 채택하지 않습니다.
 
-Neutron allocation의 accepted201/202 응답에서 read/Close/source 오류가 나면 기존 lower layer의 Assignment는 Allocated=true를 보존하되 FloatingIP가 nil일 수 있습니다. 실제 ResponseError의 status/header/body와 오류를 함께 확인합니다. 이 모델 보존 경계는 별도 remaining이며 이번 matching Nova GET의 모델 보존 검증과 구분합니다.
+Neutron allocation의 accepted201/202 응답에서 read/Close/source 오류가 나도 디코드 가능한 body의 IP 모델과 Allocated=true를 보존합니다. malformed·truncated body로 모델을 확인하지 못한 경우 FloatingIP가 nil일 수 있습니다. 실제 ResponseError의 status/header/body·처리 오류·decode/검증 원인을 함께 확인합니다. Get/Wait/Create/Ensure의 [후속 IP 부분 모델 검증](../docs/sdk-support-ledger.md#neutron-접수-응답의-ip-모델-보존)은 matching Nova GET의 모델 보존 검증과 구분합니다.
 
 raw 조회가 성공하기 전 반환 Server는 supplied 모델의 복사본일 수 있으며, 현재 Nova 상태를 확인한 증거가 아닙니다. 오류 여부·응답 증거·Observed를 함께 확인합니다. GetActive의 async 성공은 요청 접수/모델을 얻었다는 의미입니다. IP ACTIVE 또는 Nova가 목표 floating IPv4를 보았다는 뜻은 `Observed=true`의 sync 완료와 구분합니다. GetActive 기본 async에서 이미 할당한 자원을 자동 삭제하지 않고, association 실패를 새 allocation fallback으로 덮지 않습니다.
 
