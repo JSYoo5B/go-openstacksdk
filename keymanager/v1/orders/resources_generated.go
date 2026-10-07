@@ -50,7 +50,7 @@ func (a *API) newResources() *resource.Collection[Order] {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
-		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
+		Delete: func(ctx context.Context, id string) error { return a.deleteOwned(ctx, id) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Order, error] {
 			q = maps.Clone(q)
 			q.Del("status")
@@ -87,7 +87,7 @@ func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Order
 	return a.Resources.All(ctx, options...)
 }
 func (a *API) Remove(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) error {
-	return a.Resources.Delete(ctx, ref, options...)
+	return a.removeOwned(ctx, ref, options...)
 }
 func (a *API) WaitFor(ctx context.Context, ref resource.Ref, status string, options ...resource.WaitOption) (*Order, error) {
 	return a.Resources.Wait(ctx, ref, status, options...)

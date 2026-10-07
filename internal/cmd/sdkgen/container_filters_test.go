@@ -510,7 +510,9 @@ func(ListOpts)ToContainerListQuery()(string,error){return "",nil}
 type GetResult struct{}
 func(GetResult)Extract()(*Container,error){return nil,nil}
 func Get(context.Context,*gophercloud.ServiceClient,string)GetResult{return GetResult{}}
-func Delete(context.Context,*gophercloud.ServiceClient,string)error{return nil}
+type DeleteResult struct{}
+func(DeleteResult)ExtractErr()error{return nil}
+func Delete(ctx context.Context,client *gophercloud.ServiceClient,id string)DeleteResult{return DeleteResult{}}
 type ContainerPage struct{pagination.LinkedPageBase}
 func(ContainerPage)IsEmpty()(bool,error){return false,nil}
 func(ContainerPage)NextPageURL()(string,error){return "",nil}

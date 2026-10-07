@@ -49,7 +49,7 @@ func TestOrderCollectionIdentityUsesOrderRefWithoutChangingGenericPriority(t *te
 	if !strings.Contains(source, "url.Parse(v.OrderRef)") || strings.Contains(source, "v.SecretRef") || strings.Contains(source, "v.Meta") || strings.Contains(source, "Name:") || strings.Contains(source, "IdentityFind:") {
 		t.Fatalf("order identity or capabilities changed: %s", source)
 	}
-	for _, unchanged := range []string{"a.Get(ctx,string(id))", "a.Delete(ctx,string(id))", `q.Del("status")`, "a.listWithControl(ctx,control,options...)"} {
+	for _, unchanged := range []string{"a.Get(ctx,string(id))", "a.deleteOwned(ctx,id)", `q.Del("status")`, "a.listWithControl(ctx,control,options...)"} {
 		if !strings.Contains(source, unchanged) {
 			t.Errorf("missing existing native behavior %q in %s", unchanged, source)
 		}

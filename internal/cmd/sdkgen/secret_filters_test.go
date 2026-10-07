@@ -386,7 +386,9 @@ func(ListOpts)ToSecretListQuery()(string,error){return "",nil}
 type GetResult struct{}
 func(GetResult)Extract()(*Secret,error){return nil,nil}
 func Get(context.Context,*gophercloud.ServiceClient,string)GetResult{return GetResult{}}
-func Delete(context.Context,*gophercloud.ServiceClient,string)error{return nil}
+type DeleteResult struct{}
+func(DeleteResult)ExtractErr()error{return nil}
+func Delete(ctx context.Context,client *gophercloud.ServiceClient,id string)DeleteResult{return DeleteResult{}}
 type SecretPage struct{pagination.LinkedPageBase}
 func(SecretPage)IsEmpty()(bool,error){return false,nil}
 func(SecretPage)NextPageURL()(string,error){return "",nil}

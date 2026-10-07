@@ -415,6 +415,9 @@ func (g *generator) generate(path string) error {
 	if err := validateOrderBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}
+	if err := validateKeyManagerDeleteDeclarations(pkg, nativeDecls, plan); err != nil {
+		return err
+	}
 	if err := validateAddressGroupBodyNativeDeclarations(pkg, nativeDecls, plan); err != nil {
 		return err
 	}

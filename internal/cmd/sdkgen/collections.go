@@ -283,7 +283,11 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 		emitIdentityFind(&e, "a *API", "a.Resources", plan.modelName)
 	}
 	e.printf("func(a *API)All(ctx context.Context,options ...resource.ListOption)([]*%s,error){return a.Resources.All(ctx,options...)}\n", plan.modelName)
-	e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
+	if keyManagerOwnedDeleteCollection(pkg, plan, 0) {
+		e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.removeOwned(ctx,ref,options...)}\n")
+	} else {
+		e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
+	}
 	e.printf("func(a *API)WaitFor(ctx context.Context,ref resource.Ref,status string,options ...resource.WaitOption)(*%s,error){return a.Resources.Wait(ctx,ref,status,options...)}\n", plan.modelName)
 	e.printf("func(a *API)WaitForDeletion(ctx context.Context,ref resource.Ref,options ...resource.WaitOption)error{return a.Resources.WaitDeleted(ctx,ref,options...)}\n")
 	source, err := e.source()
@@ -367,7 +371,9 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 			e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return err};", e.typ(plan.deleteIDType))
 			idArg = "parsed"
 		}
-		if policy == "extract" {
+		if keyManagerOwnedDeleteCollection(e.pkg, plan, len(parents)) {
+			e.printf("return %s.deleteOwned(ctx,id)},\n", receiver)
+		} else if policy == "extract" {
 			e.printf("_,err:=%s.%s(%s);return err},\n", receiver, plan.deleter.Name(), arguments(idArg))
 		} else {
 			e.printf("return %s.%s(%s)},\n", receiver, plan.deleter.Name(), arguments(idArg))

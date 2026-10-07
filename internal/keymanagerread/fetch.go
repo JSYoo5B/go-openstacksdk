@@ -1,4 +1,4 @@
-// Package keymanagerread implements the SDK-owned metadata read for Barbican.
+// Package keymanagerread implements SDK-owned metadata operations for Barbican.
 // Service leaves retain their public concrete types and operation names.
 package keymanagerread
 
