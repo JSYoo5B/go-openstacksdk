@@ -896,13 +896,13 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	var streamType types.Type
 	streamValues := false
 	if policy == "stream" {
-		extractName, streamType = findExtractor(e.pkg, op, decl, extractors)
-		if streamType == nil {
-			if fn := importedExtractor(e.sourceImports, decl); fn != nil {
-				extractName = fn.Name()
-				extractPackage = e.use(fn.Pkg().Path())
-				streamType = fn.Type().(*types.Signature).Results().At(0).Type()
-			}
+		fn, declaredPage := declaredPageExtractor(e.pkg, e.sourceImports, decl, extractors)
+		if fn != nil {
+			extractName = fn.Name()
+			extractPackage = e.use(fn.Pkg().Path())
+			streamType = fn.Type().(*types.Signature).Results().At(0).Type()
+		} else if !declaredPage {
+			extractName, streamType = findExtractor(e.pkg, op, decl, extractors)
 		}
 		if streamType != nil {
 			if slice, ok := streamType.Underlying().(*types.Slice); ok {
@@ -1101,38 +1101,70 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	return nil
 }
 
-func importedExtractor(imports map[string]*types.Package, decl *ast.FuncDecl) *types.Func {
+// declaredPageExtractor follows the page returned by the pager callback before
+// trying operation names or a package's sole extractor. Nested page fields are
+// not the returned page: Identity v2 wraps a common ExtensionPage with its own
+// envelope and extractor. An unknown or ambiguous page stays a raw-page stream.
+func declaredPageExtractor(pkg *types.Package, imports map[string]*types.Package, decl *ast.FuncDecl, byPage map[string]string) (*types.Func, bool) {
 	if decl == nil {
-		return nil
+		return nil, false
 	}
 	var found *types.Func
+	declared, ambiguous := false, false
 	ast.Inspect(decl.Body, func(node ast.Node) bool {
-		lit, ok := node.(*ast.CompositeLit)
+		statement, ok := node.(*ast.ReturnStmt)
 		if !ok {
 			return true
 		}
-		selector, ok := lit.Type.(*ast.SelectorExpr)
-		if !ok {
-			return true
-		}
-		alias, ok := selector.X.(*ast.Ident)
-		if !ok {
-			return true
-		}
-		if imported := imports[alias.Name]; imported != nil {
-			name := "Extract" + strings.TrimSuffix(selector.Sel.Name, "Page") + "s"
-			fn, ok := imported.Scope().Lookup(name).(*types.Func)
+		for _, expression := range statement.Results {
+			if pointer, ok := expression.(*ast.UnaryExpr); ok && pointer.Op == token.AND {
+				expression = pointer.X
+			}
+			literal, ok := expression.(*ast.CompositeLit)
 			if !ok {
-				return true
+				continue
+			}
+			owner, page, extractor := pkg, "", ""
+			switch typ := literal.Type.(type) {
+			case *ast.Ident:
+				page, extractor = typ.Name, byPage[typ.Name]
+			case *ast.SelectorExpr:
+				alias, ok := typ.X.(*ast.Ident)
+				if !ok {
+					continue
+				}
+				owner = imports[alias.Name]
+				page = typ.Sel.Name
+				extractor = "Extract" + strings.TrimSuffix(page, "Page") + "s"
+			}
+			if !strings.HasSuffix(page, "Page") {
+				continue
+			}
+			declared = true
+			var fn *types.Func
+			if owner != nil {
+				fn, _ = owner.Scope().Lookup(extractor).(*types.Func)
+			}
+			if fn == nil {
+				ambiguous = true
+				continue
 			}
 			sig := fn.Type().(*types.Signature)
-			if sig.Params().Len() == 1 && sig.Results().Len() == 2 && isError(sig.Results().At(1).Type()) {
-				found = fn
+			if sig.Params().Len() != 1 || sig.Results().Len() != 2 || !isError(sig.Results().At(1).Type()) {
+				ambiguous = true
+				continue
 			}
+			if found != nil && found != fn {
+				ambiguous = true
+			}
+			found = fn
 		}
 		return true
 	})
-	return found
+	if ambiguous {
+		return nil, declared
+	}
+	return found, declared
 }
 
 func emitBuilder(e *emitter, b builder) {

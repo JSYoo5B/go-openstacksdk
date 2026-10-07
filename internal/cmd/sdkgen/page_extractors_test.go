@@ -1,0 +1,97 @@
+package main
+
+import (
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestDeclaredPageExtractorUsesReturnedPageInsteadOfNamesOrNestedFields(t *testing.T) {
+	local, _ := fixture(t, `package fixture
+type Page interface{}
+type User struct{}
+type UserPage struct{}
+type WrappedPage struct{}
+func ExtractUsers(Page)([]User,error){return nil,nil}
+func ExtractProjects(Page)([]User,error){return nil,nil}
+func ExtractWrapped(Page)([]User,error){return nil,nil}
+`)
+	foreign, _ := fixture(t, `package fixture
+type Page interface{}
+type Project struct{}
+func ExtractProjects(Page)([]Project,error){return nil,nil}
+`)
+	for _, tc := range []struct {
+		name, body, extractor string
+		owner                 *types.Package
+		declared              bool
+	}{
+		{"foreign beats sole user and operation-name extractors", "return other.ProjectPage{}", "ExtractProjects", foreign, true},
+		{"local wrapper owns nested foreign page", "return WrappedPage{other.ProjectPage{}}", "ExtractWrapped", local, true},
+		{"local user page stays local", "return UserPage{}", "ExtractUsers", local, true},
+		{"unknown foreign page stays raw", "return other.UnknownPage{}", "", nil, true},
+		{"conflicting return pages stay raw", "if true { return UserPage{} }; return other.ProjectPage{}", "", nil, true},
+		{"delegating declaration permits fallback", "return delegated()", "", nil, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			file, err := parser.ParseFile(token.NewFileSet(), "operation.go", "package fixture; func ListProjects() Page { "+tc.body+" }", 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			declaration := file.Decls[0].(*ast.FuncDecl)
+			fn, declared := declaredPageExtractor(local, map[string]*types.Package{"other": foreign}, declaration, map[string]string{"UserPage": "ExtractUsers", "WrappedPage": "ExtractWrapped"})
+			if declared != tc.declared {
+				t.Fatalf("declared=%v", declared)
+			}
+			if tc.extractor == "" {
+				if fn != nil {
+					t.Fatalf("unexpected extractor %s", fn)
+				}
+			} else if fn == nil || fn.Name() != tc.extractor || fn.Pkg() != tc.owner {
+				t.Fatalf("extractor=%v want %s from %v", fn, tc.extractor, tc.owner)
+			}
+		})
+	}
+}
+
+func TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators(t *testing.T) {
+	g, _ := snapshotMetadataActualNative(t)
+	g.root = t.TempDir()
+	for _, tc := range []struct {
+		path string
+		want []string
+	}{
+		{"identity/v3/users", []string{
+			"ListProjects(ctx context.Context, userID string) iter.Seq2[*projects.Project, error]",
+			"ListGroups(ctx context.Context, userID string) iter.Seq2[*groups.Group, error]",
+			"values, err := projects.ExtractProjects(page)", "values, err := groups.ExtractGroups(page)",
+			"ListInGroup(ctx context.Context, groupID string, options ...ListInGroupOption) iter.Seq2[*User, error]",
+			"values, err := upstream.ExtractUsers(page)",
+		}},
+		{"db/v1/configurations", []string{"iter.Seq2[*instances.Instance, error]", "values, err := instances.ExtractInstances(page)"}},
+		{"identity/v2/extensions", []string{"values, err := upstream.ExtractExtensions(page)"}},
+	} {
+		t.Run(tc.path, func(t *testing.T) {
+			if err := g.generate(upstreamModule + "/openstack/" + tc.path); err != nil {
+				t.Fatal(err)
+			}
+			body, err := os.ReadFile(filepath.Join(g.root, tc.path, "api_generated.go"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, want := range tc.want {
+				if !strings.Contains(string(body), want) {
+					t.Fatalf("missing %q in %s", want, tc.path)
+				}
+			}
+			if tc.path == "identity/v2/extensions" && strings.Contains(string(body), "values, err := extensions.ExtractExtensions(page)") {
+				t.Fatal("nested common page replaced the local extension wrapper")
+			}
+		})
+	}
+}

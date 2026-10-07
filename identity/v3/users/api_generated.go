@@ -4,6 +4,8 @@ package users
 import (
 	context "context"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
+	groups "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
+	projects "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
 	request "gophercloudsdk/request"
@@ -213,10 +215,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 }
 
 // ListGroups invokes the upstream API with library-owned builders and result handling.
-func (a *API) ListGroups(ctx context.Context, userID string) iter.Seq2[*User, error] {
-	return resource.Stream(ctx, upstream.ListGroups(a.client, userID), func(page pagination.Page) ([]User, error) {
-		values, err := upstream.ExtractUsers(page)
-		return []User(values), err
+func (a *API) ListGroups(ctx context.Context, userID string) iter.Seq2[*groups.Group, error] {
+	return resource.Stream(ctx, upstream.ListGroups(a.client, userID), func(page pagination.Page) ([]groups.Group, error) {
+		values, err := groups.ExtractGroups(page)
+		return []groups.Group(values), err
 	})
 }
 
@@ -266,10 +268,10 @@ func (a *API) ListInGroup(ctx context.Context, groupID string, options ...ListIn
 }
 
 // ListProjects invokes the upstream API with library-owned builders and result handling.
-func (a *API) ListProjects(ctx context.Context, userID string) iter.Seq2[*User, error] {
-	return resource.Stream(ctx, upstream.ListProjects(a.client, userID), func(page pagination.Page) ([]User, error) {
-		values, err := upstream.ExtractUsers(page)
-		return []User(values), err
+func (a *API) ListProjects(ctx context.Context, userID string) iter.Seq2[*projects.Project, error] {
+	return resource.Stream(ctx, upstream.ListProjects(a.client, userID), func(page pagination.Page) ([]projects.Project, error) {
+		values, err := projects.ExtractProjects(page)
+		return []projects.Project(values), err
 	})
 }
 
