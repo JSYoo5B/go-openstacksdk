@@ -160,6 +160,12 @@ func TestKeyManagerQuotasInvalidOptionsAndScopePreflight(t *testing.T) {
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
 	client := cloud.Client("key-manager", quotaPrefix)
 	scope := quotaScope(t, client, "project")
+	ctx, cancel := context.WithCancelCause(context.Background())
+	cause := errors.New("effective quota request canceled")
+	cancel(cause)
+	if value, err := quotas.New(client).Get(ctx); value != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+		t.Fatal("quota preflight lost cancellation cause", value, err)
+	}
 	for _, field := range []quotas.UpdateOpts{{Secrets: request.Null[int64]()}, {Orders: request.Null[int64]()}, {Containers: request.Null[int64]()}, {Consumers: request.Null[int64]()}, {CAs: request.Null[int64]()}} {
 		if _, err := scope.Update(context.Background(), field); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(field, err)

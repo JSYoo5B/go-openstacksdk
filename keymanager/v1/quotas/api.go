@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/internal/cloudread"
 	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
@@ -172,10 +173,7 @@ func get(ctx context.Context, client *gophercloud.ServiceClient, endpoint, envel
 }
 
 func validate(ctx context.Context, client *gophercloud.ServiceClient) error {
-	if ctx == nil {
-		return fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
-	}
-	if err := ctx.Err(); err != nil {
+	if err := cloudread.Context(ctx); err != nil {
 		return err
 	}
 	if client == nil || client.ProviderClient == nil {
