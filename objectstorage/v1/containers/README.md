@@ -7,7 +7,7 @@
 | 전체 목록 | `conn.object_store.containers()` | `service.Containers.Resources.List(ctx)` |
 | 읽을 행 수 제한 | `containers(max_items=20)` | 목록에 `resource.WithMaxItems(20)` |
 | 첫 페이지만 읽기 | pinned proxy는 `paginated=True`를 고정 | 목록에 `resource.WithPaginated(false)` |
-| metadata 조회 | `get_container_metadata(name)` | `service.Containers.Resources.Get(ctx, name)` |
+| metadata 조회 | `get_container_metadata(name)` | `service.Containers.GetMetadata(ctx, name)` |
 
 `WithMaxItems(0)`은 무제한이며 음수는 iterator 순회 시 HTTP 전에 오류를 반환합니다. 같은 옵션은 마지막 값이 적용됩니다. 제한은 서버 응답 행을 세므로 `WithName`의 정확한 로컬 비교보다 먼저 적용합니다. prefix query 결과 중 이름이 다른 항목도 cap을 소비합니다. native 경로는 cap에서 `limit`을 추정하지 않으며, 아래 `WithPageSize(100)`만 서버 페이지 크기를 요청합니다.
 
@@ -220,3 +220,5 @@ Delete의 IgnoreMissing nil은 true입니다. 실제로 받은 허용 404의 bod
 기존 generated/native `Create`의 201/202/204, `Delete`의 202/204 acceptance와 typed header/date 변환, `Resources` Name 조회, metadata API는 유지됩니다. Python은 [Resource create 반환](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1519)·descriptor/dirty alias·`str(any)`·service cache/session을 사용하고 generic `<400` 응답을 허용하므로 이 두 메서드는 bounded partial 비교입니다. 필요한 변경 후 metadata 조회는 별도로 `GetMetadata`를 호출합니다.
 
 검증 근거는 [core wire·응답 처리](lifecycle_core_test.go#L80), [option 소유권·재사용](lifecycle_options_test.go#L16), [외부 API 계약](lifecycle_contracts_test.go#L49), [Connection 공유 client](../../../connection_objectstorage_container_lifecycle_test.go#L18), [native·generator 보존](../../../internal/cmd/sdkgen/swift_container_lifecycle_test.go#L11)에 있습니다.
+
+Python `get_container_metadata(name)`의 HEAD는 Go `GetMetadata`의 typed metadata와 독립 raw `Header`로 매핑합니다. literal 이름을 사용하며 parent HEAD나 name lookup을 추가하지 않습니다. Python의 system header descriptor는 raw `Header`에서 확인하고, Go는 실제204와 atomic header validation을 적용합니다. mutable Resource/cache/session과 setter refresh는 별도 구현 범위입니다.

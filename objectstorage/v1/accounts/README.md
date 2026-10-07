@@ -83,3 +83,5 @@ source client/provider, Endpoint/Type/Microversion과 ordinary header는 callbac
 
 server가 metadata 크기·개수 제한, quota, ACL, account autocreate와 cluster 저장 정책을 결정합니다. SDK는 배포 제한을 추론하거나 metadata POST의 durable replication을 보장하지 않습니다. 기존 native/generated `Get`/`Update`와 Connection의 Account API는 보존됩니다. native `Update`의 201/202/204 acceptance, Python `str(any)`·Resource/cache/session·자동 setter refresh까지 완전한 parity는 아닙니다.
 HTTP 계약은 [route와 presence](metadata_contracts_test.go#L88), [preflight와 snapshot](metadata_contracts_test.go#L195), [header decode와 소유권](metadata_contracts_test.go#L352), [mutation 증거](metadata_contracts_test.go#L446), [source와 native 정책](metadata_contracts_test.go#L529) 테스트로 검증합니다.
+
+Python `get_account_metadata()`의 HEAD는 Go `GetMetadata`의 typed metadata와 독립 raw `Header`로 매핑합니다. Account 입력이나 query는 없으며, Python이 descriptor로 노출하는 system header도 raw `Header`에서 확인합니다. Python의 HTTP400 미만 status acceptance와 달리 Go는 실제204만 허용합니다. mutable Resource/cache/session과 관련 setter의 refresh는 별도 구현 범위입니다.

@@ -39,7 +39,7 @@ fmt.Println(value.ProjectID, value.Absolute.TotalCoresUsed)
 
 Nova의 `reserved`는 boolean 문자열이 아닌 integer입니다. 0은 예약된 자원을 제외하고, nonzero는 포함하며, non-integer는 서버가 0처럼 처리합니다. `WithGetReserved`는 false/true를 0/1로 직렬화합니다. Raw `WithGetQuery`는 값을 변경하지 않습니다. 이 helper는 `Fetch`, scope Get, 기존 native Get에서 모두 사용합니다.
 
-`Fetch`는 하나의 명시적인 `tenant_id`를 native opts 또는 query로 받지만 두 방식의 중복 설정과 여러 tenant 값을 거부합니다. Python의 `project_id` alias 대신 `InProject` 또는 native TenantID를 사용합니다. 그 밖의 query 확장은 서버가 검증하며 원래 값을 보존합니다. Header·body field·argument/custom builder 확장은 고수준 조회에서 받지 않습니다.
+`Fetch`는 하나의 명시적인 `tenant_id`를 native opts 또는 query로 받지만 두 방식의 중복 설정과 여러 tenant 값을 거부합니다. Go는 `project_id` query를 거부하며 `InProject` 또는 native TenantID로 프로젝트를 선택합니다. 그 밖의 query 확장은 서버가 검증하며 원래 값을 보존합니다. Header·body field·argument/custom builder 확장은 고수준 조회에서 받지 않습니다.
 
 공유 fixed-request helper는 요청의 method·origin·경로·query를 redirect·retry·reauth 동안 유지합니다. 같은 대상 redirect는 원래 HTTPClient의 policy를 거칩니다. 원래 transport·HTTPClient 설정과 provider의 token·reauth·backoff·retry 동작을 보존하고 source client나 token lock을 바꾸지 않습니다. 예약 query나 tenant query를 재시도 때 중복으로 추가하지 않습니다.
 
@@ -74,7 +74,7 @@ for _, group := range value.Rate {
 
 Pinned [Python limits resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/limits.py)는 absolute와 rate를 함께 모델링하지만 [Gophercloud v2.15.0](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/compute/v2/limits/results.go)의 `Limits`에는 absolute만 있습니다. SDK-owned Fetch/scope는 rate도 유지하며, generated Get의 반환 타입은 바꾸지 않습니다.
 
-Python [get_limits proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py)는 조회 singleton입니다. Go도 fetch/read 작업만 제공합니다. Python Resource의 변경 추적·session/cache·skip_cache 동작과 alias 변환은 구현한 것으로 보지 않으며 partial로 남습니다. Pinned AbsoluteLimits의 최대 microversion 2.57을 전체 limits API의 최소 요구로 해석하거나 client microversion을 변경하지 않습니다.
+Python [get_limits proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py)는 조회 singleton입니다. 고정 `get_limits` → `Limits.fetch` → [Resource.fetch](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py) 경로는 query kwargs를 HTTP params로 직접 전달하며, Limits에 선언된 `project_id` → `tenant_id` query mapping을 적용하지 않습니다. Go도 fetch/read 작업만 제공합니다. Python Resource의 변경 추적·session/cache·skip_cache 동작은 전체 SDK의 공통 Resource 목표로 남습니다. 이 고정 singleton 조회는 문서화한 typed/raw Go 매핑으로 제공합니다. Pinned AbsoluteLimits의 최대 microversion 2.57을 전체 limits API의 최소 요구로 해석하거나 client microversion을 변경하지 않습니다.
 
 Rate 값은 과거 Nova v2 응답을 읽기 위한 모델입니다. [Nova의 legacy v2 코드](https://docs.openstack.org/nova/15.0.4/stable_api.html#background)는 Newton(14.0.0)에서 제거되었으며, [현재 limits API](https://docs.openstack.org/api-ref/compute/#show-rate-and-absolute-limits)는 backward compatibility를 위한 빈 rate 배열을 반환합니다. SDK는 rate 정책을 강제로 적용하거나 legacy API를 복원하지 않습니다. 실제 서버가 legacy 데이터를 보낼 때만 그 값을 유지합니다.
 

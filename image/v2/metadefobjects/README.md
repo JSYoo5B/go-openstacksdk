@@ -155,3 +155,5 @@ configured native pre-body retry·reauth·backoff·동일한 target redirect 정
 비교 기준은 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, native Gophercloud `v2.15.0`입니다. native에는 object CRUD/list API가 없어 SDK가 이 leaf를 소유합니다. Python의 mutable Resource·dirty cache·descriptor/coercion·adapter/session·arbitrary attrs/version controls와 전체 parity를 주장하지 않습니다. 서버 JSON Schema·권한·보호·DB 기본값·CSV 저장과 실제 cloud side effect는 로컬 호출 계약과 별개입니다.
 
 실제 route·payload·canonical raw 모델·유한 목록·응답 소유권은 [외부 HTTP 테스트](contracts_test.go), [core 증거 테스트](core_test.go), [옵션 소유권 테스트](options_test.go)에서 확인합니다. [Connection 테스트](../../../connection_image_metadef_objects_test.go)는 shared client와 zero-HTTP scope를, [생성기 테스트](../../../internal/cmd/sdkgen/glance_metadef_objects_test.go)는 SDK 소유 scope·concrete 옵션과 기존 native API 유지를 검증합니다.
+
+Python `get_metadef_object`의 새 Resource는 request name과 namespace_name URI를 seed로 유지할 수 있습니다. Go 요청 부모는 `scope.NamespaceName()`으로 확인하며, `Object.Name`은 실제 응답만 반영합니다. Python의 untyped properties·required와 달리 Go는 object/string-array canonical 타입을 검증하고 원문은 `Metadata.Body`에 남깁니다.

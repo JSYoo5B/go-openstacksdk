@@ -146,3 +146,5 @@ Add/Get/Update/Find actual 200의 read·Close·context·UTF-8·JSON·schema 오�
 생성은 pending이며 accepted/rejected의 이미지 목록 노출 효과, shared visibility·소유권·RBAC·quota는 서버가 판단합니다. [공식 생성 문서](https://docs.openstack.org/api-ref/image/v2/index.html#create-image-member)와 실제 controller는 shared 이미지를 요구합니다. SDK는 상태 prefetch·권한 발견·자동 수락·cache 갱신·wait·cleanup을 수행하지 않습니다. local 계약 검증은 실제 cloud 권한이나 full Python Resource/cache/session parity를 증명하지 않습니다.
 
 실제 local 계약은 [외부 HTTP tests](members_contracts_test.go), [core tests](members_core_test.go), [option tests](members_options_test.go)에서 검증합니다. [Connection test](../connection_image_members_test.go)는 공유 client와 concrete 기본값을, [generator test](../internal/cmd/sdkgen/glance_members_test.go)는 기존 native member API·scope 보존과 전용 workflow 문서를 확인합니다.
+
+Python `get_member`는 image/member ID로 새 Resource를 만들어 응답에 빠진 identity를 seed에서 유지할 수 있습니다. Go `GetImageMember`의 nullable `ImageID`·`MemberID`는 실제 canonical 응답만 나타냅니다. Python의 `member` descriptor alias가 응답에 있으면 Go에서는 `Metadata.Body["member"]`로 확인하며, typed `MemberID`는 `member_id`를 읽습니다.
