@@ -38952,6 +38952,403 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/list_floating_ips",
+      "source_fingerprint": "9d86217cf4895e98e7a2eef6bea201e50e49f9a427ed53228796e6880e05bc62",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.ListFloatingIPs",
+        "gophercloudsdk/compute.Service.ListFloatingIPs",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryFilters",
+        "gophercloudsdk/compute.WithFloatingIPQueryLocation",
+        "gophercloudsdk/compute.WithFloatingIPQueryStrict",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "Configured Neutron List needs only Network and sends a GET to floatingips without role/server/mutation work. The tested Resource projection keeps exact numeric ID/extension JSON, derives name from floating_ip_address, falls back from tenant_id, converts revision string12, defaults absent port/if_match to null, converts the tested invalid port_details/tags values and strips self only from the logical view. Foreign project location is owned; editing Resource fields/header cannot alter Wire or page evidence.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNeutronProjectionAndWireOwnership"
+          ]
+        },
+        {
+          "behavior": "Neutron server parameters preserve tested project/tenant alias priority independent of input-key order, repeated fields/tags, tags-any wire spelling and Python False encoding; null/empty query values are omitted. Unknown filter keys are discarded, known nonquery descriptor filters run locally on the projected row and nested missing-null plus converted revision select the tested matching row.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNeutronParametersAndLocalDescriptors"
+          ]
+        },
+        {
+          "behavior": "Clean Neutron404 with truthy filters returns an explicit empty logical result plus SuppressedNotFound/Failure and no fallback request, even when an unknown filter is discarded. Omitted or tested falsey filters fall through to Nova, keep FallbackError/404 proof and return only fallback rows. Because Network exists, that Nova data is normalized with configured-Neutron port/status semantics. A missing Network catalog instead uses Nova normalization.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryListFilterSpecificNotFound",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPreflightAndMissingNetworkFallback"
+          ]
+        },
+        {
+          "behavior": "Direct Nova and None perform only Compute discovery, permit null/false IDs and non-IP read data, and expose synthetic normalized ACTIVE beside the actual raw ERROR field. Clean Nova404 returns [] with SuppressedNotFound/404 proof. Truthy server filters are rejected before direct Nova discovery; tested Neutron nondict filters fail before HTTP.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNovaAndNonePermissiveRowsAndNotFound",
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryListRejectsFiltersBeforeNovaDiscovery"
+          ]
+        },
+        {
+          "behavior": "The tested Neutron list consumes advertised continuation, supports paginated=false and max_items applied to physical rows before local selection, and uses exact large numeric marker text. An empty canonical page stops before its advertised link. Late403/malformed envelope/cycle leaves no logical prefix; a late clean404 discards the Neutron prefix and returns only Nova fallback data.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryNeutronPagesControlsAndRawLimit",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryLatePageFailureNoLogicalPrefix"
+          ]
+        },
+        {
+          "behavior": "A retry callback that expands OkCodes to accept404 runs once and the fixture admits exactly two physical requests, then retains original native404/Failure and the terminal SDK marker with neither fallback nor suppression. Cancelled context, unsafe member ID and nil option preflight need no locator; the list fallback/option fixture retains equal request deadlines and owned configuration.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryRetryCannotExpandAcceptedCodesOrFallback",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPreflightAndMissingNetworkFallback"
+          ]
+        },
+        {
+          "behavior": "The pure Nova read view preserves exact raw ID values without mutation candidate validation, lets canonical present-null address/fixed/network/project fields win legacy aliases, consumes instance_id for attached and leaves owner/status/vendor data in properties. Strict mode omits legacy aliases/unknown-field hoisting; nonstrict mode restores them without replacing canonical fields. Actual Backend remains Nova, while NormalizationSource distinguishes configured Neutron fallback with port-based attached and missing/null/value status from synthetic Nova ACTIVE. Resource, original Wire and their metadata remain independent; foreign normalized project clears current project names.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationCanonicalNullPropertiesAndStrictAliases",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationUsesConfiguredNeutronAfterNovaFallback",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationReadRowsAreNotMutationCandidates"
+          ]
+        },
+        {
+          "behavior": "Concrete query option factories own bulk Source/Filters/Location pointers and raw bytes across later caller or returned-policy mutation. Pure preparation rejects nil option/context, invalid source, nonpositive timeout or negative bulk timeout and preserves a custom cancelled-context cause; unlimited clears a prior timeout. The List HTTP fixture additionally applies originals once across Neutron-to-Nova fallback, retains owned source/location despite caller edits, uses equal request deadlines, adds no deadline by default, removes a configured SDK cap with unlimited and preserves an earlier parent deadline; replacing captured Servers in an option stops before HTTP. This shared-policy fixture is not an exhaustive per-entry option/timeout matrix.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryOptionsBudgetOwnershipAndSourceCapture"
+          ]
+        },
+        {
+          "behavior": "A retry callback changing the already-cached Network endpoint is rejected before a second physical request. The fixture retains both ErrInvalidOption and original native503/Failure with one retry callback and one GET; temporary source restoration is not asserted by this test.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryRetrySourceChangeStopsBeforeSecondRequest"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "Neutron dict filters are mapped server parameters plus supported local descriptor checks; direct Nova list rejects truthy filters. Source filtered404 suppression, unfiltered404 fallback and Nova404 empty are mapped separately from the availability getter and member lookup. Unknown-filter/query-control conversion and complete generic Resource paging are still bounded comparisons.",
+        "The SDK returns owned logical JSON, actual backend records and independent raw Wire/page/member/failed-response evidence alongside errors. It does not recreate Python mutable Resource/Munch identity, Adapter/session or runtime cache. Existing-object Get adoption is the intentional identity-preserving exception.",
+        "Cloud source/model selection follows concrete source options and existing lazy service discovery. Location uses the owned configured/recorded-provider scope without new authentication I/O; Python session current_project/location may refresh authentication. Source-synthetic normalized status is kept separate from actual backend/raw response and is not readiness evidence.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy."
+      ],
+      "remaining": [
+        "Finish all source filters/coercion, recognized and unknown query values, local descriptor and page/marker/HTTP-Link/limit/max_items/error ordering combinations beyond tested controls. In particular collection conversion timing relative to continuation and source mutable Resource behavior remain open.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Compare full inherited mutable FloatingIP Resource/Munch/descriptor/tag/query/session semantics, malformed and duplicate-wire alias conversion, dynamic inputs and every strict/nonstrict normalization case beyond the bounded owned read views. Direct Resource inventory and standalone Proxy/native declarations remain separate; no support promotion is inferred from private REST dependencies.",
+        "Expand per-entry option/default/unlimited/parent/deadline, accepted read/decode/Close/source/cancel/retry and pagination/filter combinations beyond the actual fixtures. Keep logical results separate from admitted response proof and preserve source-synthetic status versus actual readiness; CRUD/assignment/cleanup consumers are outside this read operation."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/search_floating_ips",
+      "source_fingerprint": "1e02d9d47956edd6bf120d30428d3416d77037e0933bbe55a1a68e7cd55426b5",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.SearchFloatingIPs",
+        "gophercloudsdk/compute.Service.SearchFloatingIPs",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryFilters",
+        "gophercloudsdk/compute.WithFloatingIPQueryExpression",
+        "gophercloudsdk/compute.WithFloatingIPQueryLocation",
+        "gophercloudsdk/compute.WithFloatingIPQueryStrict",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "Neutron dict search, including an empty dict, bypasses local ID selection and returns both tested rows despite ID=absent. Its dict404 remains a failed Neutron search without fallback, unlike cloud filtered List suppression; Get of those two rows is ambiguous.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNeutronDictionarySearchIgnoresID"
+          ]
+        },
+        {
+          "behavior": "Local Nova search supports the tested b* identifier plus dictionary vendor filter, returns the corresponding source record, and validates a nested missing-field filter only after identifier selection reaches rows. Empty identifier selection can return []; reached missing nested fields return ErrInvalidOption with no logical Value/rows. The tested JMESPath array/scalar/false/null/object expressions return the asserted exact JSON Value without invented FloatingIPs, while invalid syntax fails after the actual page.",
+          "tests": [
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryLocalSearchAndArbitraryExpressions"
+          ]
+        },
+        {
+          "behavior": "The pure Nova read view preserves exact raw ID values without mutation candidate validation, lets canonical present-null address/fixed/network/project fields win legacy aliases, consumes instance_id for attached and leaves owner/status/vendor data in properties. Strict mode omits legacy aliases/unknown-field hoisting; nonstrict mode restores them without replacing canonical fields. Actual Backend remains Nova, while NormalizationSource distinguishes configured Neutron fallback with port-based attached and missing/null/value status from synthetic Nova ACTIVE. Resource, original Wire and their metadata remain independent; foreign normalized project clears current project names.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationCanonicalNullPropertiesAndStrictAliases",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationUsesConfiguredNeutronAfterNovaFallback",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationReadRowsAreNotMutationCandidates"
+          ]
+        },
+        {
+          "behavior": "Concrete query option factories own bulk Source/Filters/Location pointers and raw bytes across later caller or returned-policy mutation. Pure preparation rejects nil option/context, invalid source, nonpositive timeout or negative bulk timeout and preserves a custom cancelled-context cause; unlimited clears a prior timeout. The List HTTP fixture additionally applies originals once across Neutron-to-Nova fallback, retains owned source/location despite caller edits, uses equal request deadlines, adds no deadline by default and preserves an earlier parent deadline; replacing captured Servers in an option stops before HTTP. This shared-policy fixture is not an exhaustive per-entry option/timeout matrix.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryOptionsBudgetOwnershipAndSourceCapture"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "Pinned Neutron+dict search ignores ID and pushes filters directly into network.ips; the Go branch retains that distinction from local exact/glob/dict/JMESPath search. Go arbitrary expression output is carried in Value and does not fabricate source row associations or require an array. Python deprecation warnings are not recreated.",
+        "The SDK returns owned logical JSON, actual backend records and independent raw Wire/page/member/failed-response evidence alongside errors. It does not recreate Python mutable Resource/Munch identity, Adapter/session or runtime cache. Existing-object Get adoption is the intentional identity-preserving exception.",
+        "Cloud source/model selection follows concrete source options and existing lazy service discovery. Location uses the owned configured/recorded-provider scope without new authentication I/O; Python session current_project/location may refresh authentication. Source-synthetic normalized status is kept separate from actual backend/raw response and is not readiness evidence.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy."
+      ],
+      "remaining": [
+        "Complete exact Python warning, dynamic ID/name/dictionary/JMESPath coercion, projected-result/filter truthiness/lazy-error ordering, source query mapping/descriptor and all backend/fallback/paging combinations beyond tested dict and Nova-local paths. No generator Proxy ips/find or direct Resource search completion is established.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Compare full inherited mutable FloatingIP Resource/Munch/descriptor/tag/query/session semantics, malformed and duplicate-wire alias conversion, dynamic inputs and every strict/nonstrict normalization case beyond the bounded owned read views. Direct Resource inventory and standalone Proxy/native declarations remain separate; no support promotion is inferred from private REST dependencies.",
+        "Expand per-entry option/default/unlimited/parent/deadline, accepted read/decode/Close/source/cancel/retry and pagination/filter combinations beyond the actual fixtures. Keep logical results separate from admitted response proof and preserve source-synthetic status versus actual readiness; CRUD/assignment/cleanup consumers are outside this read operation."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_floating_ip",
+      "source_fingerprint": "bfbf7f774f65779dc94b6fc07d57f890a5ffa79354783ac62841baf8b5752163",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.GetFloatingIP",
+        "gophercloudsdk/compute.Service.GetFloatingIP",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryFilters",
+        "gophercloudsdk/compute.WithFloatingIPQueryExpression",
+        "gophercloudsdk/compute.WithFloatingIPQueryLocation",
+        "gophercloudsdk/compute.WithFloatingIPQueryStrict",
+        "gophercloudsdk/compute.WithFloatingIPQueryDirectGet",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordinary Get returns no model/Value for completed absent lookup, one known model for one match, and ErrAmbiguous for multiple matches. Projected singleton arrays retain selected scalar false/0/empty-string as exact JSON with nil FloatingIP; a top-level null expression is an absent nil Value, while the projected two-ID array is ambiguous. Neutron empty-dict ID-ignore search reports a typed FloatingIPSelectionError with length2.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryGetZeroOneMultipleAndExpressionValues",
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNeutronDictionarySearchIgnoresID"
+          ]
+        },
+        {
+          "behavior": "Existing with a present nullable id returns the supplied record pointer before options, filters or discovery. Its failing callback and nil option are unused, with callback/locator/HTTP counts zero; a custom cancelled context still fails before adoption and preserves its cause.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryExistingBypassesOptionsAndDiscovery"
+          ]
+        },
+        {
+          "behavior": "DirectGet=true recognizes the tested canonical, compact, braced uppercase and URN UUID forms and sends one Neutron member request despite malformed unused filter JSON. Member If-Match is projected from the actual header; omitted response ID is seeded only in Resource from the requested UUID, never inserted into Wire. A present null or different response ID remains its actual value rather than being replaced.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryMemberProjectionAndUUIDDirectGet"
+          ]
+        },
+        {
+          "behavior": "Concrete query option factories own bulk Source/Filters/Location pointers and raw bytes across later caller or returned-policy mutation. Pure preparation rejects nil option/context, invalid source, nonpositive timeout or negative bulk timeout and preserves a custom cancelled-context cause; unlimited clears a prior timeout. The List HTTP fixture additionally applies originals once across Neutron-to-Nova fallback, retains owned source/location despite caller edits, uses equal request deadlines, adds no deadline by default and preserves an earlier parent deadline; replacing captured Servers in an option stops before HTTP. This shared-policy fixture is not an exhaustive per-entry option/timeout matrix.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryOptionsBudgetOwnershipAndSourceCapture"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "Go Existing accepts a concrete FloatingIPRecord and intentionally returns it by identity like cloud adopted-object lookup; it is not the Python arbitrary Any/dict/Resource adoption surface. Context validation precedes adoption in Go, while unused options are bypassed. Direct UUID lookup bypasses filters and the logical Neutron Resource may seed omitted ID while raw Wire remains exact.",
+        "The SDK returns owned logical JSON, actual backend records and independent raw Wire/page/member/failed-response evidence alongside errors. It does not recreate Python mutable Resource/Munch identity, Adapter/session or runtime cache. Existing-object Get adoption is the intentional identity-preserving exception.",
+        "Cloud source/model selection follows concrete source options and existing lazy service discovery. Location uses the owned configured/recorded-provider scope without new authentication I/O; Python session current_project/location may refresh authentication. Source-synthetic normalized status is kept separate from actual backend/raw response and is not readiness evidence.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy."
+      ],
+      "remaining": [
+        "Complete dynamic adopted objects, exact Python uuid parsing and direct_get/default configuration, all projected entity truthiness/length/index and ambiguity combinations, missing-resource/exception/query/normalization/cache ordering beyond the tested typed Get branches. New underlying read methods do not complete ordinary server/create/assignment lifecycle or Proxy find_ip.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Compare full inherited mutable FloatingIP Resource/Munch/descriptor/tag/query/session semantics, malformed and duplicate-wire alias conversion, dynamic inputs and every strict/nonstrict normalization case beyond the bounded owned read views. Direct Resource inventory and standalone Proxy/native declarations remain separate; no support promotion is inferred from private REST dependencies.",
+        "Expand per-entry option/default/unlimited/parent/deadline, accepted read/decode/Close/source/cancel/retry and pagination/filter combinations beyond the actual fixtures. Keep logical results separate from admitted response proof and preserve source-synthetic status versus actual readiness; CRUD/assignment/cleanup consumers are outside this read operation."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_floating_ip_by_id",
+      "source_fingerprint": "99f42df086b8632a856000a23e450bf411f69d1b2075fb133b722d8f09cb9c23",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.GetFloatingIPByID",
+        "gophercloudsdk/compute.Service.GetFloatingIPByID",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryLocation",
+        "gophercloudsdk/compute.WithFloatingIPQueryStrict",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "Member Neutron projection retains observed HTTP200 and actual If-Match list header, seeds omitted ID only in logical Resource and preserves present null/different IDs. The request does not manufacture a Wire ID. Typed safe member ID validation precedes service discovery.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryMemberProjectionAndUUIDDirectGet",
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPreflightAndMissingNetworkFallback"
+          ]
+        },
+        {
+          "behavior": "Both Neutron and Nova member404/403/204 retain their actual status failure after one request and never use list suppression, fallback or fabricated missing result. Accepted Nova200 missing required id retains Observed and decoded Wire/ip but no Resource/Value, with accepted ResponseError proof.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryMemberFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Accepted Nova member200 followed by Close/custom cancellation/API-source change retains the decoded Wire/id, actual Observed and ResponseError200 after one request. Close/cancellation causes remain accessible; cancellation/source change leaves Resource/Value unset and does not retry, allocate, associate or observe a server.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryAcceptedCloseAndCancellationRetainWire"
+          ]
+        },
+        {
+          "behavior": "The pure Nova read view preserves exact raw ID values without mutation candidate validation, lets canonical present-null address/fixed/network/project fields win legacy aliases, consumes instance_id for attached and leaves owner/status/vendor data in properties. Strict mode omits legacy aliases/unknown-field hoisting; nonstrict mode restores them without replacing canonical fields. Actual Backend remains Nova, while NormalizationSource distinguishes configured Neutron fallback with port-based attached and missing/null/value status from synthetic Nova ACTIVE. Resource, original Wire and their metadata remain independent; foreign normalized project clears current project names.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationCanonicalNullPropertiesAndStrictAliases",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationUsesConfiguredNeutronAfterNovaFallback",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationReadRowsAreNotMutationCandidates"
+          ]
+        },
+        {
+          "behavior": "Shared concrete options own raw JSON/source/location across caller and returned-policy mutation and reject invalid preparation/context/timeout input. These pure assertions support option ownership rather than every member HTTP timeout/override combination.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults"
+          ]
+        },
+        {
+          "behavior": "Nova and None member success under strict/nonstrict options keeps exact integer ID 9007199254740993, actual HTTP 200 Observed with no Failure and one request. Logical status is synthetic ACTIVE beside raw Wire ERROR; strict mode omits floating_network_id/vendor aliases, while nonstrict restores them. The actual backend remains Nova rather than treating logical status as readiness.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryNovaMemberStrictAndActualResponse"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "GetByID is a typed safe string member request, separate from ordinary entity search and its absent result. It exposes richer actual Observed/Failure/Wire proof beside errors and does not fall back or suppress member404. Nova logical status can be synthetic; member evidence and raw response are the actual backend observation.",
+        "The SDK returns owned logical JSON, actual backend records and independent raw Wire/page/member/failed-response evidence alongside errors. It does not recreate Python mutable Resource/Munch identity, Adapter/session or runtime cache. Existing-object Get adoption is the intentional identity-preserving exception.",
+        "Cloud source/model selection follows concrete source options and existing lazy service discovery. Location uses the owned configured/recorded-provider scope without new authentication I/O; Python session current_project/location may refresh authentication. Source-synthetic normalized status is kept separate from actual backend/raw response and is not readiness evidence.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy."
+      ],
+      "remaining": [
+        "Complete every member descriptor/normalization/location/strict mode and backend/version/input combination, accepted read/decode/Close/source/retry proof and exact Python error/default/cache semantics beyond tested members. Typed safety and canonical200 decoder are deliberate differences, not full dynamic Resource fetch/get_ip/fields/session parity.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Compare full inherited mutable FloatingIP Resource/Munch/descriptor/tag/query/session semantics, malformed and duplicate-wire alias conversion, dynamic inputs and every strict/nonstrict normalization case beyond the bounded owned read views. Direct Resource inventory and standalone Proxy/native declarations remain separate; no support promotion is inferred from private REST dependencies.",
+        "Expand per-entry option/default/unlimited/parent/deadline, accepted read/decode/Close/source/cancel/retry and pagination/filter combinations beyond the actual fixtures. Keep logical results separate from admitted response proof and preserve source-synthetic status versus actual readiness; CRUD/assignment/cleanup consumers are outside this read operation."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/list_floating_ip_pools",
+      "source_fingerprint": "6da6a2acfbe9d63bc6e590170373b6cbd4fc82170c435dc32e194462104ede0b",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.ListFloatingIPPools",
+        "gophercloudsdk/compute.Service.ListFloatingIPPools",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryFilters",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "For configured Neutron/Nova/None, pool List discovers only Compute and returns each pool as name-only logical data, including the tested null name. Unknown vendor data stays in Pages envelope, not pool Body. Even an empty explicit filter object is invalid because this list has no filter argument.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors"
+          ]
+        },
+        {
+          "behavior": "Pool404 remains an actual failure rather than IP-list empty suppression. An accepted200 row missing name leaves Value/Pools unset but retains page proof and a200 ResponseError.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors"
+          ]
+        },
+        {
+          "behavior": "Shared query option preparation owns bulk pointers/bytes and rejects invalid source/context/timeout/nil options; unlimited clears a prior cap. These pure option tests do not establish every pool timeout/source/cancel HTTP branch.",
+          "tests": [
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "Pool List always uses the legacy Compute endpoint independently of floating IP source and returns a source-style name-only projection plus independent actual page evidence. IP filter/location/strict options do not become pool semantics; Go rejects explicit List filters and exposes errors beside richer proof.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy.",
+        "Pool results own name-only RawResource values and full page/failure response evidence. IP location, strict normalization and Wire records are not pool semantics; inherited Resource/Adapter/session support remains separate."
+      ],
+      "remaining": [
+        "Complete pool page/link/marker/envelope/value-shape/version/capability and accepted read/Close/source/cancel/retry/default/timeout combinations beyond the three-source projection and missing-name/404 fixtures. Actual legacy Nova pool REST dependencies do not create native Gophercloud pool operation IDs or complete full Resource/session/cache behavior.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Complete pool name-only dictionary projection and exact/glob/local dictionary/JMESPath selection, duplicate/type/lazy-error ordering and Adapter/session/cache/response policies beyond the tested pool cases. FloatingIP normalization and mutable FloatingIP Resource are separate SDK surfaces, not this pool helper contract.",
+        "Expand pool-specific default/unlimited/parent/deadline and accepted read/decode/Close/source/cancel/retry evidence beyond the actual fixtures; retain physical page proof separately from complete name-only results."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/search_floating_ip_pools",
+      "source_fingerprint": "288d1e9f4b418a97e6e59c0c0699670057b0c0370fbeaa771415d7eaef424e18",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.SearchFloatingIPPools",
+        "gophercloudsdk/compute.Service.SearchFloatingIPPools",
+        "gophercloudsdk/compute.PrepareFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQueryOptions",
+        "gophercloudsdk/compute.WithFloatingIPQuerySource",
+        "gophercloudsdk/compute.WithFloatingIPQueryFilters",
+        "gophercloudsdk/compute.WithFloatingIPQueryExpression",
+        "gophercloudsdk/compute.WithFloatingIPQueryTimeout",
+        "gophercloudsdk/compute.WithUnlimitedFloatingIPQueryTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pool search uses the Compute-only name projection for Neutron/Nova/None source settings, selects one pool with pub* plus the tested name dictionary filter, and supports the tested [].name JMESPath expression as exact [public,private] Value with no invented Pools association.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors"
+          ]
+        },
+        {
+          "behavior": "The underlying pool list keeps vendor data only in page proof, permits tested null name and fails on missing name/404 with logical outputs uncommitted. Shared concrete option pure tests demonstrate independent owned JSON/source/location and unlimited/context/timeout validation rather than exhaustive search HTTP policy.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/floating-ip-queries.md",
+        "README.md"
+      ],
+      "differences": [
+        "Search pool Value can be arbitrary expression output while ordinary selected Pools retain source rows. The current typed Name and owned JSON filters map a bounded subset of Python dynamic exact/glob/dict/JMESPath behavior; the test expression omits null projected names according to the expression engine.",
+        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy.",
+        "Pool results own name-only RawResource values and full page/failure response evidence. IP location, strict normalization and Wire records are not pool semantics; inherited Resource/Adapter/session support remains separate."
+      ],
+      "remaining": [
+        "Complete exact/name/glob/dictionary/JMESPath truthiness/coercion/duplicate/lazy-error/arbitrary output cases and all pool projection/paging/backend/version/error/cache/timeout policies beyond tested pub* and name/array-expression branches. No independent pool CRUD or source mutable Resource/Adapter/session support is implied.",
+        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
+        "Complete pool name-only dictionary projection and exact/glob/local dictionary/JMESPath selection, duplicate/type/lazy-error ordering and Adapter/session/cache/response policies beyond the tested pool cases. FloatingIP normalization and mutable FloatingIP Resource are separate SDK surfaces, not this pool helper contract.",
+        "Expand pool-specific default/unlimited/parent/deadline and accepted read/decode/Close/source/cancel/retry evidence beyond the actual fixtures; retain physical page proof separately from complete name-only results."
+      ]
     }
   ]
 }
