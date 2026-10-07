@@ -230,7 +230,7 @@ func TestIdentityUserProjectRecordsLocalBodiesNormalizedViewAndIndependentWire(t
 }
 
 func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *testing.T) {
-	for _, mode := range []string{"dictionary", "links", "projects_links", "next", "HTTP Link", "short limit", "single page", "empty stops"} {
+	for _, mode := range []string{"dictionary", "links", "projects_links", "next", "HTTP Link", "server limit", "short limit", "single page", "empty stops"} {
 		t.Run(mode, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
@@ -243,6 +243,9 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 				}
 				if call > 1 {
 					want.Set("marker", "wire-last")
+					if mode == "server limit" {
+						want.Set("limit", "25")
+					}
 					if call == 3 {
 						want.Set("marker", "second")
 					}
@@ -266,11 +269,14 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 				}
 				cloud.Provider.SetToken("next-token")
 				next := cloud.Server.URL + userProjectRecordsPath + "?marker=wire-last"
+				if mode == "server limit" {
+					next += "&limit=25"
+				}
 				continuation := ""
 				switch mode {
 				case "dictionary", "single page":
 					continuation = `,"links":{"next":"` + next + `"}`
-				case "links", "empty stops":
+				case "links", "server limit", "empty stops":
 					continuation = `,"links":[{"rel":"next","href":"` + next + `"}]`
 				case "projects_links":
 					continuation = `,"projects_links":[{"rel":"next","href":"` + next + `"}]`
