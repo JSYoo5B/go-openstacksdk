@@ -23,17 +23,29 @@ import (
 // Only passive reply rows are replaced; these cases install no Close hook.
 func availableViewReply(t *testing.T, cloud *testcloud.Cloud, reply func(*http.Request) (string, bool)) {
 	t.Helper()
+	availableReply(t, cloud, func(r *http.Request) (int, string, bool) {
+		body, replace := reply(r)
+		return 0, body, replace
+	})
+}
+
+// Reuse request/deadline/source assertions while varying body and actual code.
+func availableReply(t *testing.T, cloud *testcloud.Cloud, reply func(*http.Request) (int, string, bool)) {
+	t.Helper()
 	next := cloud.Provider.HTTPClient.Transport
 	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
 		response, err := next.RoundTrip(r)
 		if err != nil || response == nil {
 			return response, err
 		}
-		if body, replace := reply(r); replace {
+		if code, body, replace := reply(r); replace {
 			if err := response.Body.Close(); err != nil {
 				return response, err
 			}
 			response.Body = io.NopCloser(strings.NewReader(body))
+			if code != 0 {
+				response.StatusCode = code
+			}
 		}
 		return response, nil
 	})
