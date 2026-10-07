@@ -40,6 +40,10 @@ type Dependencies struct {
 	Network func(context.Context, resource.Ref) (string, error)
 	Port    func(context.Context, resource.Ref) (string, error)
 	Volume  func(context.Context, resource.Ref) (string, error)
+	// DefaultNetwork is called only when neither NICs nor a mode were supplied.
+	// A zero Ref means no default; a nonzero Ref is validated and resolved like
+	// an explicit network. Connection supplies its configured policy lazily.
+	DefaultNetwork func(context.Context) (resource.Ref, error)
 }
 
 type Servers struct {

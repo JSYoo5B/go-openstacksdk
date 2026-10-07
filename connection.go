@@ -104,7 +104,7 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 		return nil, err
 	}
 	if o.auth != nil || o.cloud != "" || len(o.cloudFiles) != 0 || o.httpConfigured {
-		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion and location options")
+		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion, location and default network options")
 	}
 	return newConnection(provider, o, gophercloud.EndpointOpts{})
 }
@@ -150,6 +150,7 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 			return nil, err
 		}
 		c.compute = compute.New(client, compute.Dependencies{
+			DefaultNetwork: c.defaultServerNetwork,
 			Image: func(ctx context.Context, ref resource.Ref) (string, error) {
 				service, err := c.Image(ctx)
 				if err != nil {

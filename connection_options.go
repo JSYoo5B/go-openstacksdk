@@ -37,9 +37,34 @@ type connectionOptions struct {
 	messagingClientID      string
 	locationFacts          resource.CloudLocation
 	cloudLocation          *resource.CloudLocation
+	defaultNetwork         resource.Ref
+	defaultNetworkSet      bool
 }
 
 type ConnectionOption func(*connectionOptions) error
+
+// WithDefaultNetwork selects a network for server creation when no NIC or
+// network mode is supplied. IDs bypass Neutron; names use exact-name lookup.
+// It overrides clouds.yaml. The last default-network option wins.
+func WithDefaultNetwork(ref resource.Ref) ConnectionOption {
+	return func(o *connectionOptions) error {
+		if err := ref.Validate(); err != nil {
+			return err
+		}
+		o.defaultNetwork, o.defaultNetworkSet = ref, true
+		return nil
+	}
+}
+
+// WithoutDefaultNetwork disables the configured default network. Nova uses
+// auto at selected microversion 2.37 or later; older requests omit networks.
+// Explicit NICs and modes still take precedence.
+func WithoutDefaultNetwork() ConnectionOption {
+	return func(o *connectionOptions) error {
+		o.defaultNetwork, o.defaultNetworkSet = resource.Ref{}, true
+		return nil
+	}
+}
 
 // WithAuth uses explicit credentials instead of environment or clouds.yaml.
 func WithAuth(auth gophercloud.AuthOptions) ConnectionOption {

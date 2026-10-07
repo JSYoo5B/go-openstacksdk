@@ -98,6 +98,24 @@ func (o *createServerOptions) validateNetworkVersion(version string) error {
 }
 
 func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOptions) error {
+	if len(o.networkInterfaces) == 0 && o.networkMode == "" && s.dependencies.DefaultNetwork != nil {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		ref, err := s.dependencies.DefaultNetwork(ctx)
+		if err != nil {
+			return s.wrap("select default network", err)
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if ref != (resource.Ref{}) {
+			if err := ref.Validate(); err != nil {
+				return s.wrap("select default network", err)
+			}
+			o.networkInterfaces = []ServerNetworkInterface{{Network: ref}}
+		}
+	}
 	if len(o.networkInterfaces) == 0 {
 		if o.networkMode != "" {
 			o.base.Networks = o.networkMode
