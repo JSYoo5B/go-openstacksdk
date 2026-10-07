@@ -14,6 +14,7 @@ import (
 	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
+	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestServerPasswordDefaultAndOptionalDecryption(t *testing.T) {
@@ -30,13 +31,15 @@ func TestServerPasswordDefaultAndOptionalDecryption(t *testing.T) {
 	calls := 0
 	cloud.Mux.HandleFunc("/compute/servers/server/os-server-password", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		if r.Method != http.MethodGet {
-			t.Error(r.Method)
-		}
+		th.TestMethod(t, r, http.MethodGet)
+		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.87")
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"password": encrypted})
 	})
-	api := servers.New(cloud.Client("compute", "/compute"))
+	client := cloud.Client("compute", "/compute")
+	client.Microversion = "2.87"
+	api := servers.New(client)
 	ctx := context.Background()
 	value, err := api.GetPassword(ctx, "server")
 	if err != nil || value != encrypted {
@@ -64,17 +67,18 @@ func TestServerPasswordHandlesEmptyResponsesAndErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct {
-		name, body     string
-		status         int
-		decrypt, fails bool
+		name, body, want string
+		status           int
+		decrypt, fails   bool
 	}{
-		{"empty", `{"password":""}`, 200, true, false},
-		{"missing", `{}`, 200, true, false},
-		{"null", `{"password":null}`, 200, true, false},
-		{"opaque-default", `{"password":"not-base64"}`, 200, false, false},
-		{"invalid-ciphertext", `{"password":"not-base64"}`, 200, true, true},
-		{"invalid-type", `{"password":false}`, 200, false, true},
-		{"forbidden", `{"error":"forbidden"}`, 403, false, true},
+		{"empty", `{"password":""}`, "", 200, true, false},
+		{"missing", `{}`, "", 200, true, false},
+		{"null", `{"password":null}`, "", 200, true, false},
+		{"opaque-default", `{"password":"not-base64"}`, "not-base64", 200, false, false},
+		{"invalid-ciphertext", `{"password":"not-base64"}`, "", 200, true, true},
+		{"invalid-type", `{"password":false}`, "", 200, false, true},
+		{"forbidden", `{"error":"forbidden"}`, "", 403, false, true},
+		{"unexpected-status", `{"password":"opaque"}`, "", 203, false, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -84,7 +88,7 @@ func TestServerPasswordHandlesEmptyResponsesAndErrors(t *testing.T) {
 				opts = append(opts, servers.WithGetPasswordPrivateKey(key))
 			}
 			value, err := servers.New(cloud.Client("compute", "/compute")).GetPassword(context.Background(), "server", opts...)
-			if (err != nil) != tc.fails {
+			if value != tc.want || (err != nil) != tc.fails {
 				t.Fatalf("value=%q err=%v", value, err)
 			}
 			if tc.fails {
@@ -93,9 +97,9 @@ func TestServerPasswordHandlesEmptyResponsesAndErrors(t *testing.T) {
 					t.Fatalf("value=%q err=%v", value, err)
 				}
 			}
-			if tc.status == 403 {
+			if tc.status == 403 || tc.status == 203 {
 				var response gophercloud.ErrUnexpectedResponseCode
-				if !errors.As(err, &response) || response.Actual != 403 {
+				if !errors.As(err, &response) || response.Actual != tc.status {
 					t.Fatal(err)
 				}
 			}
