@@ -15,11 +15,12 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
+| `conn.create_server(..., ip_pool="public", wait=True)` | [CreateWithFloatingIP](create-with-floating-ip.md): 서버·IP ACTIVE와 공통 timeout·부분 결과 |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=True)` | 위 호출에 `compute.WithDeleteBootVolumeOnTermination(true)` 추가 |
 | `conn.create_server(..., image=image, boot_from_volume=True, volume_size=50)` | 이미지가 있는 요청에 `compute.WithBootVolumeSize(50)` 추가 |
 
-마지막 행은 의존 리소스를 해석하는 상위 작업의 대응입니다. Python의 `conn.compute.create_server(**attrs)`는 이미 준비한 API 속성을 전달하는 Proxy 작업이므로 상위 `conn.create_server(...)`와 구분해야 합니다. [공식 Compute API](https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html)
+생성 행들은 의존 리소스를 해석하는 상위 작업의 대응입니다. Python의 `conn.compute.create_server(**attrs)`는 이미 준비한 API 속성을 전달하는 Proxy 작업이므로 상위 `conn.create_server(...)`와 구분해야 합니다. [공식 Compute API](https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html)
 
 ## 서버 조회와 목록
 
@@ -178,8 +179,10 @@ if err := service.Servers.Delete(ctx, resource.ID(server.ID)); err != nil {
 
 `compute.WithField("vendor_hint", value)`로 기본 생성 필드와 충돌하지 않는 확장 JSON을 전달할 수 있습니다. 예시 필드는 표준 Nova API가 아닙니다. builder는 SDK 내부에서 구현합니다. 필드 스키마·지원 여부·microversion은 실제 API가 검증합니다.
 
-flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/resize 등의 action, keypair 관리에는 `service.API`의 [전체 Compute API](v2/README.md)를 사용할 수 있습니다. floating IP 연결은 아직 상위 계층에 없습니다. `service.RawClient()`를 이용한 Gophercloud 호출도 가능합니다.
+flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/resize 등의 action, keypair 관리에는 `service.API`의 [전체 Compute API](v2/README.md)를 사용할 수 있습니다. floating IP 생성·재사용·연결은 Network의 `FloatingIPs`와 아래 `CreateWithFloatingIP`으로 제공합니다. `service.RawClient()`를 이용한 Gophercloud 호출도 가능합니다.
 
 테스트는 [compute_test.go](compute_test.go), 기존 볼륨 부팅의 요청·검증·실패 정책은 [boot_volume_test.go](boot_volume_test.go), 새 부팅 볼륨과 microversion 정책은 [new_boot_volume_test.go](new_boot_volume_test.go), 연결을 통한 전체 생성 흐름은 [server_create_test.go](../server_create_test.go), 페이지·이름·대기 정책은 [collections_test.go](../collections_test.go)에 있습니다.
 
 Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사용합니다. `WaitForServerState`는 다른 대상을 120초 기본으로, `WaitForState`는 대상을 명시하고 SDK timeout 없이 기다립니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 패키지 함수 `compute.WaitForState/WaitForDelete`는 기존 typed collection을 받습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
+
+서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.

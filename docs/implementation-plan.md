@@ -57,7 +57,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-07, 코드 기준 `51223e7`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
+아래는 2026-10-07, 코드 기준 `50b155d`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
@@ -66,8 +66,9 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | Identity 사용자별 프로젝트·그룹 목록 | native page와 Python 모델·상속 비교 완료 | 반환 모델·추출기 교정 완료 | 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | native 2개 `go_mapping`, Python 2개 부분 판정·정합성 검증 완료 | 코드·테스트 `ff685e9` push 완료. 문서·판정 `4ba94ab` push 완료. [검증 기록](sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록), [사용법](../identity/v3/users/memberships.md). NIC 선택으로 연결 완료 |
 | Nova 서버 NIC 선택 | cloud·Proxy·native와 capability 정책 비교 완료 | concrete NIC·mode·port 이름 해석·default auto 완료 | 11개 신규 HTTP 그룹·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 관련 3개 부분 판정, 전체 연산 unresolved | 코드·테스트 `55927d3` push 완료. [사용법](../compute/server-network-interfaces.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-nic-선택). 문서·판정 `16d51cc` push 완료 |
 | Nova 서버 생성의 기본 네트워크 | config/cloud/native의 선택·상속·오류·cache 비교 완료 | Connection concrete 옵션·파일 snapshot·YAML 전체 페이지 name/ID 선택 완료 | 신규 12그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 3개 부분 판정 갱신·default getter 1개 부분 판정, 전체 연산 unresolved | 코드·테스트 `0355600`·`afb3023` push 완료. [사용법](../compute/server-default-network.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-기본-네트워크). 문서·판정 `a61135f` push 완료 |
-| Neutron floating IP 재사용·서버 연결 | 고정 available/create/attach·NAT·cache·cleanup 비교 완료 | Ensure·recorded owner·revision·자동 external/router·빈 페이지 선택 완료 | 신규 9그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | 부분 계약 검토 완료, 전체 cloud 연산 unresolved | 코드·테스트 `51223e7` push 완료. [사용법](../network/floating-ip-ensure.md), [검증 기록](sdk-support-ledger.md#neutron-floating-ip-재사용과-서버-연결). 문서·판정은 이번 갱신에 포함 |
-| 서버 생성의 자동 IP·공유 네트워크 정책 | 고정 create wait/auto IP·공유 role/NAT·cache 차이 조사 완료 | 서버 생성과 Ensure 연계 대기 | 연계·전체 budget·부분 실패 테스트 대기 | Ensure 가이드에 remaining 기록 | 미완료, 지원 승격 없음 | 다음 1단계 후보. 서버 ACTIVE → IP 선택·연결·대기를 SDK workflow로 연결하고, 네트워크 역할·service/flags·capability 정책과 필요 여부 판단을 이어서 닫음 |
+| Neutron floating IP 재사용·서버 연결 | 고정 available/create/attach·NAT·cache·cleanup 비교 완료 | Ensure·recorded owner·revision·자동 external/router·빈 페이지 선택 완료 | 신규 9그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | 부분 계약 검토 완료, 전체 cloud 연산 unresolved | 코드·테스트 `51223e7`·문서·판정 `15bb5cc` push 완료. [사용법](../network/floating-ip-ensure.md), [검증 기록](sdk-support-ledger.md#neutron-floating-ip-재사용과-서버-연결) |
+| 서버 생성과 floating IPv4 연결 | 고정 create/wait/available·remaining timeout·주소 수렴 차이 비교 완료 | CreateWithFloatingIP·생성 전 서비스/owner 준비·필수 서버/IP ACTIVE·단일 deadline·부분 결과 완료 | 신규 8그룹 집중 race·전체 check 완료 | Python 비교·정확한 독립 Go 예제 컴파일 완료 | cloud create/available 갱신·cloud wait 부분 판정 추가, 전체 연산 unresolved | 준비 공통화 `bc36b0a`·구현 `14e6d88`·경계 테스트 `50b155d` push 완료. [사용법](../compute/create-with-floating-ip.md), [검증 기록](sdk-support-ledger.md#서버-생성과-floating-ip-연결). 문서·판정은 이번 갱신에 포함 |
+| 서버 생성의 자동 IP 필요성·공유 네트워크 정책 | 고정 auto IP·공유 role/NAT·cache 차이 조사 완료 | 명시 연계 완료; 자동 필요성·생략·공유 정책 대기 | 자동 조건·공유 정책 테스트 대기 | 새 workflow 가이드에 remaining 기록 | 미완료, 지원 승격 없음 | 다음 1단계 후보. 기존 public/floating/fixed 주소와 private cloud·service/flags·NAT에 따른 필요성 판단, 공유 역할·cache/reset·Nova 주소 수렴을 남은 계약별로 닫음 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |

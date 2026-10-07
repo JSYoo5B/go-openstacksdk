@@ -1199,3 +1199,21 @@ PUT 오류의 nonnil zero native model로 원래 선택 IP를 덮지 않습니�
 Python shared external/internal·IPv4/IPv6·YAML role/NAT/subnet/service flags·cache/reset·Resource/session 정책, requested network list, Nova-network fallback, IP-list 입력과 server 주소 convergence는 남습니다. 서버 생성의 `_needs_floating_ip` 조건, 공통 시간 제한·ACTIVE → IP 연계, auto/reuse/cleanup 및 생성 전체의 다른 입력/결과 계약도 남습니다. 이 기반 작업을 available/create_server 전체 지원으로 올리지 않았습니다. source/native/resource inventory와 generated API는 변경하지 않았으며 Go 파일은 1,788개입니다.
 
 현재 review는 476개(go_mapping 161·부분 판정 314·unsupported 1)이며 판정 없는 선언은 2,886개입니다. 전체 3,362개 선언의 supported=0·go_mapping=161·unsupported=1·unresolved=3,200은 유지됩니다. 새로운 부분 계약 2개를 전체 연산 완료로 세지 않았습니다.
+
+## 서버 생성과 Floating IP 연결
+
+2026-10-07 핵심 user 흐름의 `compute.Servers.CreateWithFloatingIP`을 추가했습니다. 서버 생성 → 원래 ID의 실제 Nova ACTIVE → floating IPv4 재사용/할당·연결 → 실제 Neutron ACTIVE를 하나의 SDK 작업으로 수행합니다. 기존 이미지·기존 볼륨·새 이미지 볼륨 부팅과 NIC/default-network 정책을 재사용합니다. 일반 `Servers.Create`의 기본 비동기 동작은 유지합니다. [Python/Go 비교와 독립 예제](../compute/create-with-floating-ip.md)에 요청·옵션·기본값·부분 결과를 설명합니다.
+
+server/Ensure 옵션·external Ref를 먼저 검증하고, Connection의 lazy Network getter와 reuse owner 준비를 Nova POST 전에 실행합니다. `PrepareEnsureActive`는 일반 prepared policy를 복사해 owner를 바인딩하고 기존 wait 옵션을 보존합니다. reuse=false·owner 생략은 recorded scope 확인 없이 Neutron scope를 사용합니다. 애플리케이션에서 builder/resolver를 구현할 필요가 없고, 외부 network/새 서버 port/IP 후보의 실제 조회는 서버 ACTIVE 이후에 수행합니다.
+
+기본 5분의 단일 context deadline이 서비스 준비·create 의존 조회·POST와 두 대기·IP 작업을 함께 제한합니다. 전체 제한 해제 뒤에도 부모 context와 개별 waiter 제한은 유지됩니다. 서버와 IP waiter의 사용자 status attribute가 먼저 완료되더라도 실제 ACTIVE와 identity를 별도로 검사합니다. 서버 대기 실패에는 원래 생성 서버, IP 단계 실패에는 확인된 ACTIVE 서버와 알려진 assignment를 보존합니다. 자동 DELETE·실패 후 새 allocation 우회·Nova 주소 합성은 추가하지 않았습니다.
+
+준비 공통화를 `bc36b0a`, 구현·주요 테스트를 `14e6d88`, deadline/endpoint 경계 테스트를 `50b155d`로 각각 commit/push했습니다. 신규 8개 테스트 그룹은 [Compute preflight](../compute/server_floating_ip_test.go) 1개, [Network policy 복사·owner 바인딩·wait 유지](../network/floating_ip_prepare_test.go) 1개, [Connection](../connection_server_floating_ip_test.go) 6개입니다. Connection 검증은 실제 endpoint 누락의 POST 차단, 생성·재사용/할당 호출 순서, BUILD→ACTIVE polling/callback, 실제 ID/status 검사, 공통 deadline·부모 제한·무제한/복원, 부팅/default NIC 보존, 동시 옵션 재사용과 부분 실패를 포함합니다. 기존 Compute/Network 생성 회귀와 신규 집중 race 검사도 통과했습니다.
+
+코드 `50b155d`에서 고정 Python source와 native metadata를 지정한 전체 `make check`의 vet·race·parity·gofmt가 PASS이며 테스트 패키지는 40개입니다(cache 재사용 포함). 문서·판정 변경 후 같은 pin의 parity CLI도 다시 PASS했습니다. 가이드의 정확한 Go main fence 1을 별도 모듈에서 `go build -mod=mod -o server-floating-ip-example .`로 컴파일했습니다(source SHA-256 `f68e5f2e615e3d076536ea973b17b439fb4da3565d01e0ac46dc7cb1edd17e27`). HTTP 검증은 로컬 fixture이고 인증된 OpenStack/Python 예제 실행은 하지 않았습니다. 최종 정적 검토에서 오래된 Compute README의 floating IP 미지원 설명을 교정했습니다.
+
+고정 cloud `create_server`·`wait_for_server`·`available_floating_ip`의 입력·기본값·remaining 시간·주소 갱신·오류/cleanup 소스와 구현·실제 assertion·문서를 함께 검토했습니다. 기존 create/available 부분 판정을 갱신하고 실제 catalog의 cloud wait 선언을 unresolved로 추가했습니다. Proxy wait의 cloud 미검토 설명도 갱신했으며 native floatingips.Update의 기존 go_mapping과 나머지 판정·source pins는 보존했습니다. Go API 참조는 검사기가 지원하는 공개 함수·method 선언만 연결하고 Request/Result 타입은 사용 문서에서 설명합니다.
+
+Python의 자동 IP 필요성/생략, public/floating/fixed 주소·private cloud·service/flags·NAT 판단, 공유 network 역할·IPv4/IPv6·subnet·cache/reset, IP-list/pool/auto 조합·Nova fallback, 주소 수렴·반환 객체 확장·fault/cleanup, create의 추가 필드·volume/server-group 및 Resource/session 계약은 남습니다. 새 explicit workflow를 cloud 전체 연산 지원으로 승격하지 않았습니다. source/native/resource inventory와 generated API는 변경하지 않았고 Go 파일은 1,793개입니다.
+
+현재 review는 477개(go_mapping 161·부분 판정 315·unsupported 1), 판정 없는 선언은 2,885개입니다. 전체 3,362개 선언의 supported=0·go_mapping=161·unsupported=1·unresolved=3,200은 유지됩니다. 다음은 같은 핵심 user 단계의 자동 floating IP 필요성·공유 네트워크 정책이며 전체 목표와 구현 순서는 그대로입니다.
