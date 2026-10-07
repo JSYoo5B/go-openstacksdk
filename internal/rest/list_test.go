@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"strings"
 	"sync/atomic"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 type listItem struct {
@@ -37,8 +37,10 @@ func (v *listItem) UnmarshalJSON(data []byte) error {
 
 func listSpec(t *testing.T, handler http.HandlerFunc) CollectionSpec[listItem] {
 	t.Helper()
-	server := httptest.NewServer(handler)
-	t.Cleanup(server.Close)
+	fake := testhelper.SetupHTTP()
+	t.Cleanup(fake.Teardown)
+	fake.Mux.Handle("/", handler)
+	server := fake.Server
 	provider := &gophercloud.ProviderClient{HTTPClient: *server.Client()}
 	provider.UseTokenLock()
 	provider.SetToken("shared-token")
@@ -125,6 +127,46 @@ func TestListBreakDoesNotValidateOrFetchAnotherPage(t *testing.T) {
 	}
 	if calls.Load() != 1 {
 		t.Fatal("break fetched another page")
+	}
+}
+
+func TestListDictionaryLinksAreExplicitAndGuarded(t *testing.T) {
+	for _, tc := range []struct {
+		name, continuation  string
+		enabled, wantError  bool
+		wantCalls, wantRows int
+	}{
+		{"opt-in", `"links":{"next":"?marker=next","self":{"ignored":true}}`, true, false, 2, 2},
+		{"disabled", `"links":{"next":"?marker=next"}`, false, true, 1, 1},
+		{"array-compatible", `"links":[{"rel":"next","href":"?marker=next"}]`, true, false, 2, 2},
+		{"null-next", `"links":{"next":null}`, true, false, 1, 1},
+		{"empty-next", `"links":{"next":""}`, true, false, 1, 1},
+		{"malformed-next", `"links":{"next":[]}`, true, true, 1, 1},
+		{"conflicting-next", `"links":{"next":"?marker=next"},"next":"?marker=other"`, true, true, 1, 1},
+		{"foreign-path", `"links":{"next":"/v1/other?marker=next"}`, true, true, 1, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls atomic.Int32
+			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
+				if r.URL.Query().Get("marker") == "" {
+					writeList(w, `{"items":[{"id":"first"}],`+tc.continuation+`}`)
+				} else {
+					writeList(w, `{"items":[{"id":"second"}]}`)
+				}
+			})
+			spec.Paging.DictionaryLinks = tc.enabled
+			rows, err := collectList(context.Background(), spec, nil)
+			if (err != nil) != tc.wantError || int(calls.Load()) != tc.wantCalls || len(rows) != tc.wantRows {
+				t.Fatalf("rows=%d calls=%d err=%v", len(rows), calls.Load(), err)
+			}
+			if tc.wantError {
+				var response *resource.ResponseError
+				if !errors.As(err, &response) || response.StatusCode != http.StatusOK || response.Header.Get("X-Page") != "kept" {
+					t.Fatalf("continuation error lost HTTP evidence: %v", err)
+				}
+			}
+		})
 	}
 }
 

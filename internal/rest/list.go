@@ -27,6 +27,9 @@ type PagePolicy[T any] struct {
 	HTTPLink       bool
 	MarkerFallback bool
 	Marker         func(*T) (string, error)
+	// DictionaryLinks also accepts Keystone's links:{next:...} shape. This is
+	// an explicit service compatibility option; other link formats stay strict.
+	DictionaryLinks bool
 	// MarkerOnShortPage follows every nonempty page when an explicit limit is
 	// present. Python Resource uses this rule; other APIs may stop when their
 	// returned page is shorter than the limit. An empty page always stops.
@@ -350,6 +353,22 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 	var links []string
 	for _, key := range keys {
 		if raw, exists := fields[key]; exists {
+			if policy.DictionaryLinks && len(bytes.TrimSpace(raw)) > 0 && bytes.TrimSpace(raw)[0] == '{' {
+				var values map[string]json.RawMessage
+				if err := json.Unmarshal(raw, &values); err != nil {
+					return nil, err
+				}
+				if value, exists := values["next"]; exists {
+					var next string
+					if err := json.Unmarshal(value, &next); err != nil {
+						return nil, err
+					}
+					if next != "" {
+						links = append(links, next)
+					}
+				}
+				continue
+			}
 			var values []resource.Link
 			if err := json.Unmarshal(raw, &values); err != nil {
 				return nil, err

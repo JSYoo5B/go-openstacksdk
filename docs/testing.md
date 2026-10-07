@@ -22,7 +22,7 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 
 ## 공개 테스트 도구 재사용
 
-공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다.
+공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다. 공통 REST 목록 테스트의 기존 `listSpec`도 같은 공개 `SetupHTTP`를 사용합니다. 서비스별로 서버 구성 코드를 복제하지 않습니다.
 
 새 테스트는 공개 `testhelper.TestMethod`, `TestHeader`, `TestHeaderUnset`, `TestBody`, `TestJSONRequest`와 `testhelper/fixture.SetupHandler`를 먼저 검토합니다. 단순 요청 검증과 고정 응답에 맞으면 재사용하고, SDK의 단계 순서·부분 결과·정확한 raw JSON·응답 소유권 검증만 추가합니다. Cinder 생성 계약의 공통 wire 검증은 method·source·token에 공개 helper를 사용합니다. `SetupHandler`는 upstream 고정 token을 검사하므로 SDK의 token 교체·공유 검증에는 별도 handler가 필요합니다.
 
