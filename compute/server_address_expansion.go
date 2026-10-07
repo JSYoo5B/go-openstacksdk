@@ -121,6 +121,12 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 	var computeProvider *gophercloud.ProviderClient
 	var computeEndpoint, computeBase string
 	if state.options.source == FloatingIPNova {
+		if computeClient == nil && s.dependencies.AddressCompute != nil {
+			computeClient, err = s.dependencies.AddressCompute(ctx)
+			if err != nil {
+				return state.supplementFailure(ctx, err)
+			}
+		}
 		if computeClient == nil || computeClient.ProviderClient == nil {
 			return invalid("authenticated compute client is required for Nova address supplementation")
 		}
@@ -136,7 +142,7 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 		}
 		if sourceError == nil && (service.RawClient() != client || client.ProviderClient != provider || client.Endpoint != endpoint || client.ResourceBase != base ||
 			service.API != api || service.Ports != ports || service.FloatingIPs != ips || service.Roles != roles ||
-			(state.options.source == FloatingIPNova && (s.client != computeClient || computeClient.ProviderClient != computeProvider || computeClient.Endpoint != computeEndpoint || computeClient.ResourceBase != computeBase))) {
+			(state.options.source == FloatingIPNova && ((s.client != nil && s.client != computeClient) || computeClient.ProviderClient != computeProvider || computeClient.Endpoint != computeEndpoint || computeClient.ResourceBase != computeBase))) {
 			sourceError = invalid("address network service source changed during supplementation")
 		}
 		return sourceError
@@ -168,7 +174,7 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 		}
 		rows := rest.List(ctx, ipSpec, url.Values{"port_id": {port.ID}})
 		if state.options.source == FloatingIPNova {
-			rows = s.supplementalNovaIPs(ctx, port.ID, guard)
+			rows = s.supplementalNovaIPs(ctx, computeClient, port.ID, guard)
 		}
 		for ip, err := range rows {
 			if err != nil {

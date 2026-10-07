@@ -63,10 +63,19 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 		if !o.networkRolesSet {
 			o.networkRoles = configuration.networkRoles
 		}
+		if !o.serverAddressesSet {
+			o.serverAddresses = configuration.serverAddresses
+		}
 	} else {
 		auth, err = openstack.AuthOptionsFromEnv()
 		if err != nil {
 			return nil, fmt.Errorf("load environment authentication: %w", err)
+		}
+	}
+	if cloudName == "" && !o.serverAddressesSet {
+		o.serverAddresses, err = configuredServerAddresses(nil, nil)
+		if err != nil {
+			return nil, err
 		}
 	}
 	client := o.httpClient
@@ -109,6 +118,12 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 	}
 	if o.auth != nil || o.cloud != "" || len(o.cloudFiles) != 0 || o.httpConfigured {
 		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion, location, default network and network role options")
+	}
+	if !o.serverAddressesSet {
+		o.serverAddresses, err = compute.PrepareServerAddressPolicy()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return newConnection(provider, o, gophercloud.EndpointOpts{})
 }
@@ -157,6 +172,8 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 			return nil, err
 		}
 		c.compute = compute.New(client, compute.Dependencies{
+			NetworkRoles: c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,
+			AddressCompute: c.addressComputeClient, NetworkPolicy: c.options.networkRoles, ServerAddresses: c.options.serverAddresses,
 			DefaultNetwork: c.defaultServerNetwork,
 			FloatingIPs: func(ctx context.Context) (*network.FloatingIPs, error) {
 				service, err := c.Network(ctx)

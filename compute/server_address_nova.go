@@ -41,9 +41,9 @@ func (ip *novaAddressIP) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Servers) supplementalNovaIPs(ctx context.Context, portID string, guard func(context.Context) error) iter.Seq2[*network.FloatingIP, error] {
+func (s *Servers) supplementalNovaIPs(ctx context.Context, client *gophercloud.ServiceClient, portID string, guard func(context.Context) error) iter.Seq2[*network.FloatingIP, error] {
 	return func(yield func(*network.FloatingIP, error) bool) {
-		spec := rest.CollectionSpec[novaAddressIP]{Client: s.client, Path: "os-floating-ips", Kind: "Nova floating IP",
+		spec := rest.CollectionSpec[novaAddressIP]{Client: client, Path: "os-floating-ips", Kind: "Nova floating IP",
 			SingleKey: "floating_ip", PluralKey: "floating_ips", Validate: guard, SourceGuard: guard,
 			ListCodes: []int{http.StatusOK, http.StatusNoContent},
 			Metadata:  func(*novaAddressIP) *resource.Metadata { return &resource.Metadata{} }}

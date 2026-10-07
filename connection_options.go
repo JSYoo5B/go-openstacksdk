@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/compute"
 	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
 )
@@ -43,9 +44,25 @@ type connectionOptions struct {
 	configuredDefaultNetwork string
 	networkRoles             network.NetworkRolePolicy
 	networkRolesSet          bool
+	serverAddresses          compute.ServerAddressPolicy
+	serverAddressesSet       bool
 }
 
 type ConnectionOption func(*connectionOptions) error
+
+// WithServerAddressPolicy replaces file/environment address configuration with
+// concrete SDK options. Per-call address options can override this policy.
+func WithServerAddressPolicy(options ...compute.ServerAddressOption) ConnectionOption {
+	options = append([]compute.ServerAddressOption(nil), options...)
+	return func(o *connectionOptions) error {
+		policy, err := compute.PrepareServerAddressPolicy(options...)
+		if err != nil {
+			return err
+		}
+		o.serverAddresses, o.serverAddressesSet = policy, true
+		return nil
+	}
+}
 
 // WithNetworkRoles replaces clouds.yaml routing-role configuration with owned
 // concrete options. It also supplies a configured default interface for Create;

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gophercloudsdk/compute"
 	"gophercloudsdk/network"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
@@ -18,14 +19,16 @@ import (
 // Freeze the selected files once. Native authentication/TLS parsing and SDK
 // network policy then consume the same bytes, even if files change meanwhile.
 type cloudConfiguration struct {
-	parseOptions   []clouds.ParseOption
-	defaultNetwork string
-	networkRoles   network.NetworkRolePolicy
+	parseOptions    []clouds.ParseOption
+	defaultNetwork  string
+	networkRoles    network.NetworkRolePolicy
+	serverAddresses compute.ServerAddressPolicy
 }
 
 type cloudNetworkDocument struct {
 	Clouds       map[string]map[string]any `yaml:"clouds"`
 	PublicClouds map[string]map[string]any `yaml:"public-clouds"`
+	Client       map[string]any            `yaml:"client"`
 }
 
 func loadCloudConfiguration(name string, locations []string) (cloudConfiguration, error) {
@@ -59,11 +62,24 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 	}
 	result.parseOptions = []clouds.ParseOption{clouds.WithCloudName(name), clouds.WithCloudsYAML(bytes.NewReader(base))}
 	settings := maps.Clone(baseSettings)
+	var baseDocument cloudNetworkDocument
+	if err := yaml.Unmarshal(base, &baseDocument); err != nil {
+		return result, err
+	}
+	clientSettings := maps.Clone(baseDocument.Client)
 	secure, present, err := readOptionalCloudFile(filepath.Join(filepath.Dir(path), "secure.yaml"))
 	if err != nil {
 		return result, fmt.Errorf("read secure.yaml: %w", err)
 	}
 	if present {
+		var secureDocument cloudNetworkDocument
+		if err := yaml.Unmarshal(secure, &secureDocument); err != nil {
+			return result, err
+		}
+		if clientSettings == nil {
+			clientSettings = make(map[string]any)
+		}
+		maps.Copy(clientSettings, secureDocument.Client)
 		var secureHeaders clouds.Clouds
 		if err := yaml.NewDecoder(bytes.NewReader(secure)).Decode(&secureHeaders); err != nil {
 			return result, fmt.Errorf("parse secure.yaml: %w", err)
@@ -131,6 +147,10 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		return result, err
 	}
 	result.networkRoles, err = configuredNetworkRoles(settings)
+	if err != nil {
+		return result, err
+	}
+	result.serverAddresses, err = configuredServerAddresses(settings, clientSettings)
 	return result, err
 }
 

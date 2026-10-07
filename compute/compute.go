@@ -51,6 +51,7 @@ type Dependencies struct {
 	// Address helpers share Connection's routing configuration and lazy cache.
 	NetworkRoles    func(context.Context) (*network.NetworkRoleSnapshot, error)
 	AddressNetworks func(context.Context) (*network.Service, error)
+	AddressCompute  func(context.Context) (*gophercloud.ServiceClient, error)
 	NetworkPolicy   network.NetworkRolePolicy
 	ServerAddresses ServerAddressPolicy
 }
