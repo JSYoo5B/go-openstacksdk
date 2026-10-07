@@ -20,6 +20,44 @@ type supplementalAddressPort struct {
 	MACPresent bool
 }
 
+type supplementalAddressIP struct {
+	PortID, FixedIP, FloatingIP   string
+	FixedPresent, FloatingPresent bool
+}
+
+func (ip *supplementalAddressIP) UnmarshalJSON(data []byte) error {
+	return ip.decode(data, false)
+}
+
+func (ip *supplementalAddressIP) decode(data []byte, legacy bool) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	*ip = supplementalAddressIP{}
+	for _, field := range []struct {
+		name, alias string
+		target      *string
+		present     *bool
+	}{
+		{"port_id", "", &ip.PortID, nil}, {"fixed_ip_address", "fixed_ip", &ip.FixedIP, &ip.FixedPresent}, {"floating_ip_address", "ip", &ip.FloatingIP, &ip.FloatingPresent},
+	} {
+		value, present := fields[field.name]
+		if !present && legacy && field.alias != "" {
+			value, present = fields[field.alias]
+		}
+		if present && string(value) != "null" {
+			if err := json.Unmarshal(value, field.target); err != nil {
+				return err
+			}
+			if field.present != nil {
+				*field.present = true
+			}
+		}
+	}
+	return nil
+}
+
 func (p *supplementalAddressPort) UnmarshalJSON(data []byte) error {
 	var base network.Port
 	if err := json.Unmarshal(data, &base); err != nil {
@@ -93,13 +131,13 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 				continue
 			}
 			if row.Type == "floating" {
-				return ctx.Err()
+				return state.sourceGuard(ctx)
 			}
 			fixedNetworks[row.Address] = key
 		}
 	}
 	if state.options.source == FloatingIPNone || status != "ACTIVE" || s.dependencies.AddressNetworks == nil {
-		return ctx.Err()
+		return state.sourceGuard(ctx)
 	}
 	if err := resource.ID(state.view.ServerID).Validate(); err != nil {
 		return err
@@ -109,7 +147,7 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 		return state.supplementFailure(ctx, err)
 	}
 	if service == nil {
-		return ctx.Err()
+		return state.sourceGuard(ctx)
 	}
 	client := service.RawClient()
 	if client == nil || client.ProviderClient == nil {
@@ -166,21 +204,28 @@ func (s *Servers) supplementServerAddresses(ctx context.Context, status string, 
 		if port.DeviceID != state.view.ServerID {
 			continue
 		}
-		ipSpec := rest.CollectionSpec[network.FloatingIP]{
+		validateIP := func(ip *supplementalAddressIP) error {
+			_, matches := fixedNetworks[ip.FixedIP]
+			if ip.PortID == port.ID && ip.FixedPresent && matches && !ip.FloatingPresent {
+				return invalid("supplemental floating address requires a string value")
+			}
+			return nil
+		}
+		ipSpec := rest.CollectionSpec[supplementalAddressIP]{
 			Client: client, Path: "floatingips", Kind: "floating IP", PluralKey: "floatingips", SingleKey: "floatingip", Validate: guard, SourceGuard: guard,
 			ListCodes: []int{http.StatusOK, http.StatusNoContent},
-			ID:        func(ip *network.FloatingIP) string { return ip.ID }, Metadata: func(*network.FloatingIP) *resource.Metadata { return &resource.Metadata{} },
-			Paging: rest.PagePolicy[network.FloatingIP]{HTTPLink: true},
+			Metadata:  func(*supplementalAddressIP) *resource.Metadata { return &resource.Metadata{} },
+			Paging:    rest.PagePolicy[supplementalAddressIP]{HTTPLink: true}, ValidateItem: validateIP,
 		}
 		rows := rest.List(ctx, ipSpec, url.Values{"port_id": {port.ID}})
 		if state.options.source == FloatingIPNova {
-			rows = s.supplementalNovaIPs(ctx, computeClient, port.ID, guard)
+			rows = s.supplementalNovaIPs(ctx, computeClient, port.ID, guard, validateIP)
 		}
 		for ip, err := range rows {
 			if err != nil {
 				return state.supplementFailure(ctx, err)
 			}
-			if ip.PortID != port.ID {
+			if ip.PortID != port.ID || !ip.FixedPresent {
 				continue
 			}
 			key, present := fixedNetworks[ip.FixedIP]

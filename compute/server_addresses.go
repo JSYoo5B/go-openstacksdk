@@ -93,7 +93,7 @@ func (s *Servers) prepareServerAddresses(ctx context.Context, server *Server, op
 		}
 	}
 	return &serverAddressState{view: view, accessIPv4: server.AccessIPv4, accessIPv6: server.AccessIPv6,
-		options: policy.options, loadRoles: s.dependencies.NetworkRoles}, ctx.Err()
+		options: policy.options, loadRoles: s.dependencies.NetworkRoles}, errors.Join(ctx.Err(), context.Cause(ctx))
 }
 
 func parseServerAddresses(server *Server, order []string) (*ServerAddressView, error) {
@@ -214,7 +214,7 @@ func (state *serverAddressState) best(ctx context.Context, addresses []string, p
 			}
 		}
 	}
-	return addresses[0], ctx.Err()
+	return addresses[0], state.sourceGuard(ctx)
 }
 
 func probeAddress(ctx context.Context, address string, port int) bool {
@@ -238,7 +238,7 @@ func probeAddress(ctx context.Context, address string, port int) bool {
 
 func (state *serverAddressState) privateIPv4(ctx context.Context, enabled bool) (string, error) {
 	if !enabled {
-		return "", ctx.Err()
+		return "", state.sourceGuard(ctx)
 	}
 	var mac *string
 	for _, key := range state.view.NetworkOrder {
@@ -279,10 +279,10 @@ selectedMAC:
 
 func (state *serverAddressState) publicIPv4(ctx context.Context, enabled bool) (string, error) {
 	if !enabled {
-		return "", ctx.Err()
+		return "", state.sourceGuard(ctx)
 	}
 	if state.accessIPv4 != "" {
-		return state.accessIPv4, ctx.Err()
+		return state.accessIPv4, state.sourceGuard(ctx)
 	}
 	roles, err := state.networkRoles(ctx)
 	if err != nil {
@@ -313,16 +313,16 @@ func (state *serverAddressState) publicIPv4(ctx context.Context, enabled bool) (
 		for _, row := range state.view.Addresses[key] {
 			ip, err := netip.ParseAddr(row.Address)
 			if err == nil && ip.Is4() && !python313PrivateIPv4(ip) {
-				return ip.String(), ctx.Err()
+				return ip.String(), state.sourceGuard(ctx)
 			}
 		}
 	}
-	return "", ctx.Err()
+	return "", state.sourceGuard(ctx)
 }
 
 func (state *serverAddressState) publicIPv6(ctx context.Context) (string, error) {
 	if state.accessIPv6 != "" {
-		return state.accessIPv6, ctx.Err()
+		return state.accessIPv6, state.sourceGuard(ctx)
 	}
 	return state.best(ctx, state.candidates(6, "", nil, nil), true, true)
 }
@@ -343,7 +343,7 @@ func (state *serverAddressState) defaultIP(ctx context.Context) (string, bool, e
 			return address, len(candidates) != 0, err
 		}
 	}
-	return "", false, ctx.Err()
+	return "", false, state.sourceGuard(ctx)
 }
 
 // Match the stable CPython 3.13 IPv4 is_private table, rather than RFC1918-only

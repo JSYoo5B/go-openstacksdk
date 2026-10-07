@@ -328,3 +328,86 @@ func TestServerAddressSupplementPortMACMissingNullAndEmptyAreDistinct(t *testing
 		})
 	}
 }
+
+type addressCancelJSON struct{ cancel func() }
+
+func (value addressCancelJSON) MarshalJSON() ([]byte, error) {
+	value.cancel()
+	return []byte(`{"extension":true}`), nil
+}
+
+func TestServerAddressCalculationPreservesCancellationCauseAtEachDependencyBoundary(t *testing.T) {
+	for _, scenario := range []string{"marshal", "role getter", "network getter"} {
+		t.Run(scenario, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(context.Background())
+			defer cancel(nil)
+			cause, dependencyError := errors.New("address calculation canceled"), errors.New("dependency stopped")
+			row := addressRow(4, "10.0.0.1", "fixed")
+			deps := compute.Dependencies{}
+			if scenario == "marshal" {
+				row["vendor:field"] = addressCancelJSON{cancel: func() { cancel(cause) }}
+			}
+			if scenario == "role getter" {
+				deps.NetworkRoles = func(context.Context) (*network.NetworkRoleSnapshot, error) {
+					cancel(cause)
+					return nil, dependencyError
+				}
+			}
+			if scenario == "network getter" {
+				deps.AddressNetworks = func(context.Context) (*network.Service, error) { cancel(cause); return nil, dependencyError }
+			}
+			service := compute.New(nil, deps)
+			server := &compute.Server{ID: "server", Status: "ACTIVE", Addresses: map[string]any{"private": []any{row}}}
+			_, err := service.ExpandServerInterfaces(ctx, server, compute.WithAddressReachability(false))
+			if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || (scenario != "marshal" && !errors.Is(err, dependencyError)) {
+				t.Fatalf("boundary=%s err=%v", scenario, err)
+			}
+		})
+	}
+}
+
+func TestServerAddressSupplementNullableFixedAndFloatingFieldsDoNotBecomeEmptyAddresses(t *testing.T) {
+	for _, backend := range []compute.FloatingIPSource{compute.FloatingIPNeutron, compute.FloatingIPNova} {
+		for _, scenario := range []struct {
+			name, fields string
+			added, fails bool
+		}{
+			{"missing fixed", `"fixed_ip":"","floating_ip_address":"8.8.8.8"`, false, false},
+			{"null fixed overrides legacy", `"fixed_ip_address":null,"fixed_ip":"","floating_ip_address":"8.8.8.8"`, false, false},
+			{"literal empty fixed", `"fixed_ip_address":"","floating_ip_address":"8.8.8.8"`, true, false},
+			{"null floating", `"fixed_ip_address":"","floating_ip_address":null,"ip":"8.8.8.8"`, false, true},
+		} {
+			t.Run(string(backend)+"/"+scenario.name, func(t *testing.T) {
+				cloud := testcloud.New(t)
+				cloud.Mux.HandleFunc("GET /network/ports", func(w http.ResponseWriter, r *http.Request) {
+					testcloud.JSON(w, 200, `{"ports":[{"id":"port","device_id":"server"}]}`)
+				})
+				path, key := "/network/floatingips", "floatingips"
+				if backend == compute.FloatingIPNova {
+					path, key = "/compute/os-floating-ips", "floating_ips"
+				}
+				cloud.Mux.HandleFunc("GET "+path, func(w http.ResponseWriter, r *http.Request) {
+					testcloud.JSON(w, 200, `{"`+key+`":[{"port_id":"port",`+scenario.fields+`}]}`)
+				})
+				service, _ := addressSupplementService(cloud)
+				server := &compute.Server{ID: "server", Status: "ACTIVE", Addresses: map[string]any{"private": []any{addressRow(4, "", "fixed")}}}
+				view, err := service.ExpandServerInterfaces(context.Background(), server, compute.WithFloatingIPSource(backend), compute.WithAddressReachability(false))
+				wantRows := 1
+				// The missing canonical fixed field uses the legacy alias only in Nova.
+				added := scenario.added || (backend == compute.FloatingIPNova && scenario.name == "missing fixed")
+				if added {
+					wantRows++
+				}
+				if view == nil || len(view.Addresses["private"]) != wantRows || (err != nil) != scenario.fails || view.SupplementalError != nil {
+					t.Fatalf("view=%+v err=%v wantRows=%d", view, err, wantRows)
+				}
+				if scenario.fails {
+					var responseError *resource.ResponseError
+					if !errors.As(err, &responseError) || !errors.Is(err, resource.ErrInvalidOption) {
+						t.Fatal(err)
+					}
+				}
+			})
+		}
+	}
+}
