@@ -10,14 +10,18 @@
 
 | 순서 | API 범위 | 먼저 완성할 동작 |
 |---|---|---|
-| 1 | **핵심 서비스 user API** | 인증·프로젝트 선택, 이름/ID 조회, 사용자가 소유하거나 사용할 수 있는 리소스의 기본 CRUD·목록·페이지네이션·대기, 서버 부팅·네트워크·볼륨·이미지·객체 저장 흐름 |
+| 1 | **핵심 서비스 user API** | 인증·프로젝트 선택, 이름/ID 조회, 사용자가 소유하거나 사용할 수 있는 리소스의 기본 CRUD·목록·페이지네이션·대기, 서버 부팅·네트워크·볼륨·이미지·키 관리·객체 저장 흐름 |
 | 2 | **핵심 서비스 admin API** | 운영자 권한을 요구하는 전역 조회·관리, quota·서비스/host·Placement 관리, Cinder `ManageVolume` 등 관리자 action과 관련 기본값·확장·오류 계약 |
 | 3 | **매니지드 서비스 user API** | LBaaS·DBaaS·컨테이너·클러스터 등에서 사용자가 요청·조회·수정·삭제하는 리소스와 상위 작업, 부모 범위·비동기 완료·부분 실패 |
 | 4 | **매니지드 서비스 admin API** | 해당 서비스의 운영자용 전역 관리·quota·서비스/host·관리자 action과 관련 계약 |
 
-핵심 서비스 묶음은 **Identity(Keystone), Compute(Nova), Placement, Network(Neutron), Image(Glance), Block Storage(Cinder), Object Storage(Swift)**입니다.
+핵심 서비스 묶음은 **Identity(Keystone), Compute(Nova), Placement, Network(Neutron), Image(Glance), Block Storage(Cinder), Key Manager(Barbican), Object Storage(Swift)**입니다.
 
-후속 서비스 묶음은 **Load Balancer(Octavia), Database(Trove), Container Infra(Magnum), Container(Zun), Clustering(Senlin), Orchestration(Heat), Messaging(Zaqar), Workflow(Mistral), Bare Metal(Ironic), Bare Metal Introspection, Shared File System(Manila), DNS(Designate), Key Manager(Barbican), Instance HA(Masakari), Metric, Reservation(Blazar), Accelerator(Cyborg)**입니다. 이 중 인프라 확장·특화 서비스도 핵심 서비스 뒤에서 같은 user → admin 순서로 진행합니다. 모든 후속 서비스를 배포 형태까지 관리형이라고 분류하는 것은 아닙니다.
+후속 서비스 묶음은 **Load Balancer(Octavia), DNS(Designate), Bare Metal(Ironic), Bare Metal Introspection, Database(Trove), Container Infra(Magnum), Container(Zun), Clustering(Senlin), Orchestration(Heat), Messaging(Zaqar), Workflow(Mistral), Shared File System(Manila), Instance HA(Masakari), Metric, Reservation(Blazar), Accelerator(Cyborg)** 순서입니다. 이 중 인프라 확장·특화 서비스도 핵심 서비스 뒤에서 같은 user → admin 순서로 진행합니다. 모든 후속 서비스를 배포 형태까지 관리형이라고 분류하는 것은 아닙니다.
+
+**후속 user API 단계와 후속 admin API 단계 각각에서 네트워크 관련 서비스(Octavia·Designate) → 베어메탈(Ironic·Introspection) → 나머지 후속 서비스 순으로 진행합니다.** 따라서 후속 서비스의 user API를 처리한 뒤 같은 내부 순서로 admin API를 처리합니다. Neutron은 핵심 서비스 묶음에서 먼저 진행합니다. Barbican을 핵심으로 올리고 Swift도 핵심에 유지합니다.
+
+Swift는 일반 Glance 업로드/import의 필수 의존은 아니지만, 고정 openstacksdk의 [Swift 경유 이미지 Task 업로드](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L835-L913)에 필요합니다. `image_api_use_tasks` 분기는 Swift container/object 생성 → Glance import Task → 선택적 대기·이미지 갱신·객체 정리를 연결하며, 이 흐름은 [남은 구현 범위](../image/README.md#전체-api와-남은-작업)에 포함됩니다. 해당 Task 경로의 권한 분류는 고정 소스의 admin-only 설명과 서버 정책을 검토해 핵심 admin 단계에 배치합니다.
 
 현재 Connection의 24개 서비스를 모두 배치했으며, 고정 소스에만 있는 추가 버전·상속·descriptor·Resource 표면도 각 서비스와 권한 범위에 따라 조사합니다.
 
@@ -28,8 +32,9 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 1. **인증과 기본 조회:** Identity의 인증·접근 가능한 프로젝트 선택, 공유 토큰과 endpoint 선택, Nova·Neutron·Glance의 이름/ID·목록·기본값 계약을 확인합니다.
 2. **이미지 기반 서버와 네트워크:** 이미지·flavor·network·port 해석, 서버 생성·대기·삭제, floating IP 선택·재사용·자동 연결과 각 단계의 부분 실패를 닫습니다.
 3. **볼륨과 부팅:** Cinder의 기본 생명주기, 서버 연결·분리, 볼륨·snapshot 기반 부팅과 이미지 연계에서 남은 계약을 닫습니다.
-4. **객체 저장:** Swift의 container/object 생성·목록·업로드·다운로드·삭제, metadata·스트림 소유권·무결성 계약을 닫습니다.
-5. **핵심 user API의 나머지 범위:** 사용자가 조회 가능한 quota·limits, 확장 API·이전 버전과 공통 Resource 동작을 끝까지 추적합니다. 프로젝트/사용자/role의 관리자 작업, quota 변경·Placement 관리·관리자 action은 2단계에서 처리합니다.
+4. **키 관리:** Barbican의 secret/container 생성·조회·목록·수정·삭제, payload와 접근 권한·옵션의 계약을 닫습니다. 각 리소스가 실제로 제공하는 연산을 소스와 권한 정책으로 확인합니다.
+5. **객체 저장:** Swift의 container/object 생성·목록·업로드·다운로드·삭제, metadata·스트림 소유권·무결성 계약을 닫고 Glance 연계의 공통 기반을 준비합니다. Glance Task 연계는 권한 범위에 맞춰 핵심 admin 단계에서 처리합니다.
+6. **핵심 user API의 나머지 범위:** 사용자가 조회 가능한 quota·limits, 확장 API·이전 버전과 공통 Resource 동작을 끝까지 추적합니다. 프로젝트/사용자/role의 관리자 작업, quota 변경·Placement 관리·관리자 action은 2단계에서 처리합니다.
 
 각 흐름은 작은 API/계약 단위로 구현·검증·커밋하고 다음 핵심 흐름으로 이어갑니다. 앞선 작업을 막는 의존 기능이나 기존 공개 API의 회귀가 있으면 필요한 부분을 먼저 처리하고 그 이유와 범위를 이 문서에 기록합니다. 의존 기능 처리는 후속 단계 전체를 앞당기는 것으로 해석하지 않습니다.
 
@@ -58,10 +63,11 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 |---|---|---|---|---|---|---|
 | Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
 | Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |
-| 핵심 user API의 미해결 계약 선별 | 예정 | 대기 | 대기 | 대기 | 대기 | 1단계. Identity·Nova·Neutron·Glance와 관련 cloud/Resource 계약 및 권한을 조사해 다음 작은 구현 단위를 확정 |
+| 핵심 user API의 미해결 계약 선별 | 예정 | 대기 | 대기 | 대기 | 대기 | 1단계. Identity·Nova·Neutron·Glance·Cinder·Barbican·Swift와 관련 cloud/Resource 계약 및 권한을 조사해 다음 작은 구현 단위를 확정 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
-| 매니지드·확장 서비스의 user 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 3단계. 기존 완료 기능을 그대로 유지 |
-| 매니지드·확장 서비스의 admin 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 4단계. 기존 완료 기능을 그대로 유지 |
+| Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
+| 매니지드·확장 서비스의 user 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 3단계. 네트워크 → 베어메탈 → 나머지. 기존 완료 기능을 그대로 유지 |
+| 매니지드·확장 서비스의 admin 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 4단계. 네트워크 → 베어메탈 → 나머지. 기존 완료 기능을 그대로 유지 |
 
 ## 지원 여부와 검증 근거의 관리
 
