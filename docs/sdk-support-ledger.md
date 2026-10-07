@@ -1438,3 +1438,26 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 기존 native Create 및 cloud available/add_ips/create/get_active/wait6행에 실제 owned workflow의 모델·원인 보존 근거를 연결했습니다. 다른489행·fingerprint·status·source pin·선언/생성 inventory와 native Update의 별도 판정은 유지하며 신규 review·지원 승격은 없습니다. review495=go_mapping161/unresolved333/unsupported1, 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200입니다. 위 readiness의 decodable Neutron accepted 모델 소실 항목은 이 후속 검증으로 좁혔으며 malformed 모델 부재·전체 Resource/normalization/ownership/error·timeout·dispatch 계약은 별도로 남습니다.
 
 다음 구현은 기존 IP ID/주소·destination·revision을 고정하는 owner-free Attach plan입니다. 그 위에 pool > 순서 IP 목록 > automatic의 concrete 선택과 순서별 부분 결과, Get/Wait/Create의 공통 정책 소비, Nova backend와 전체 Python source 계약을 계속 연결합니다. 전체 SDK 목표와 서비스/user/admin 우선순위는 유지합니다.
+
+## 기존 Floating IP의 고정 연결
+
+2026-10-07 핵심 user 단계에서 `FloatingIPs.Attach`·`PrepareAttach`·`AttachPrepared`와 `FloatingIPPlanner.PrepareAttach`를 추가했습니다. 고정 Python의 `add_ip_list`와 Neutron attach helper에 필요한 **기존 IP 한 개의 연결 기반**이며, 공개 순차 Server-returning consumer는 아직 구현하지 않았습니다. [Python/Go 사용법](../network/floating-ip-attach.md)에 request·concrete 옵션·두 단계 선택/실행과 남은 범위를 기록했습니다.
+
+ID는 정확한 GET, Name(floating IPv4)은 주소 query와 전체 페이지의 local exact 검색을 사용합니다. 현재 token project·free 여부·allocation network 필터를 붙이지 않고, foreign recorded owner와 안정적인 다른-port 연결도 Neutron 권한 범위에서 이동할 수 있습니다. 준비에는 mutation이 없고 기존 IP ID/주소·외부 network·destination·원래 revision을 service-bound opaque plan에 고정합니다. 실행은 port/IP를 재검증하며 unrelated association drift를 거절하고, 원래 revision0은 재조회7 이후에도 header0을 유지합니다. 이미 요청 tuple이면 PUT 없이 필요한 ACTIVE를 기다립니다.
+
+반환 Assignment는 Reused=true·Allocated=false이며 caller가 이전 결과 ID/주소/Tags를 바꿔도 계획의 후보를 수정하지 않습니다. Tags의 null/빈 배열도 보존합니다. accepted PUT200의 complete model은 정확한 ID/주소/owner/network/destination을 통과한 경우만 read/Close/source/cancel 오류 옆에 남고, 잘못된 body는 이전 후보와 joined validation/decode/process·HTTP 증거를 유지합니다. source 변경은 복원 후에도 sticky이며 revision/outer guard를 변경하는 retry는 다음 physical PUT 전에 차단됩니다. 412나 그 밖의 실패는 allocation·fallback·cleanup으로 이어지지 않습니다.
+
+새 **10개 그룹**은 [기본 HTTP6](../network/floating_ip_attach_test.go)과 [준비·source·소유권4](../network/floating_ip_attach_boundaries_test.go)입니다. 주소의 empty JSON/HTTP continuation·후속403/malformed·중복·missing/204·query drift, GET와 LIST의 invalid identity/owner aliases/negative revision accepted200 proof, 고정 port/IP drift·412, matching/nonmatching accepted PUT partial, 실제 ACTIVE·custom status·wait address 변경·ERROR·timeout을 검증합니다. 같은 executable plan을 반복 실행해 초기 실패 후보의 ID/주소/Tags 격리를 확인합니다. accepted GET fixture는 **Close 중 source 변경** 증거이고, PUT fixture는 실제 read/Close 오류와 source/custom cancellation을 검증합니다.
+
+```sh
+go test -race -timeout 60s ./network ./compute \
+  -run 'TestFloatingIPAttach|TestFloatingIPPlan|TestServerIPWorkflows' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+집중2 package race가 최종 오류 assertion에서 통과했습니다. 구현 `413e83b`·기본 테스트 `2e59e28`는 중간에 직접 push했고 추가 경계 `e68f037`을 별도 커밋으로 보존했습니다. 최종 code/tests `e68f037`에서 전체 check의 vet·race·고정 parity·gofmt를 통과했으며 테스트 package40개, Go 파일1,860개입니다(`/private/tmp/gophercloudsdk-attach-check.log`, `gophercloudsdk-attach-check-receipt.json`). 기본 Attach는 비동기이고, Active/Wait를 선택한 기본 resource waiter는5분·2초입니다. 예제는 부모2분/Neutron1분을 명시합니다.
+
+새 가이드의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-attach-example-8s8h7cnt/main.go`, SHA256 `0b2e07a04bf3c002c13d0bac0ef097fac55351336b1e1855825f46472b335ff0`). 변경한 다섯 문서의 상대 파일 링크989개에 누락이 없고 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-attach-doc-receipt.json`). Python/runtime와 인증된 cloud 실행은 하지 않았습니다. 코드 변경 없이 review의 waiter 설명을5분으로 교정한 뒤 최종 parity도 통과했습니다(`/private/tmp/gophercloudsdk-attach-final-parity.log`).
+
+`add_ip_list`의 새 부분 판정은 unresolved이며 단일 Neutron foundation만 기록합니다. 기존495개 review·핀·fingerprint·status와 생성/선언 inventory는 유지하고 새1행만 추가합니다. review496=go_mapping161/unresolved334/unsupported1이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200으로 지원 승격은 없습니다. 순서와 중복을 유지하는 목록 consumer·pool > ips > auto·Get/Wait/Create 통합·Nova-network mutation·raw Nova 수렴·전체 Server/Resource/session/normalization은 남습니다. 전체 SDK 목표와 서비스/user/admin 순서를 유지합니다.
