@@ -39255,7 +39255,7 @@
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/list_floating_ip_pools",
       "source_fingerprint": "6da6a2acfbe9d63bc6e590170373b6cbd4fc82170c435dc32e194462104ede0b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk.Connection.ListFloatingIPPools",
         "gophercloudsdk/compute.Service.ListFloatingIPPools",
@@ -39292,21 +39292,17 @@
         "README.md"
       ],
       "differences": [
-        "Pool List always uses the legacy Compute endpoint independently of floating IP source and returns a source-style name-only projection plus independent actual page evidence. IP filter/location/strict options do not become pool semantics; Go rejects explicit List filters and exposes errors beside richer proof.",
-        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy.",
-        "Pool results own name-only RawResource values and full page/failure response evidence. IP location, strict normalization and Wire records are not pool semantics; inherited Resource/Adapter/session support remains separate."
+        "Only this named Cloud helper is mapped. Pool List always reads legacy Compute independently of floating IP source, and its logical result is a name-only dictionary sequence plus owned page/failure proof. It does not invoke FloatingIP Resource or normalization, has_service, owner/location selection or other pool/IP CRUD; those SDK surfaces retain their own tracking.",
+        "Go intentionally accepts canonical UTF-8 object/list envelopes and HTTP200 only, preserves terminal source/retry/processing failures and checks the selected legacy Compute microversion below2.36 without hidden downgrade. Python raw adapter JSON translation is more permissive. These are deliberate Go mapping boundaries rather than missing normal declared-function behavior.",
+        "Pinned pool List reads one raw Compute response rather than a Resource pager. Go guarded advertised JSON/HTTP continuations and page/error evidence are an extension, with owned name-only results and atomic logical output on failure. No mutable Python Resource/Munch/session/cache or unrelated native/Proxy operation is promoted.",
+        "Shared concrete options are Go extensions: optional whole-query timeout defaults to no SDK cap, source/location/strict controls do not become pool lookup semantics, and explicit List filters are rejected because the source List declares no filters. Typed policy/error ownership and context guards replace Python dynamic object/session details without requiring application builders."
       ],
-      "remaining": [
-        "Complete pool page/link/marker/envelope/value-shape/version/capability and accepted read/Close/source/cancel/retry/default/timeout combinations beyond the three-source projection and missing-name/404 fixtures. Actual legacy Nova pool REST dependencies do not create native Gophercloud pool operation IDs or complete full Resource/session/cache behavior.",
-        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
-        "Complete pool name-only dictionary projection and exact/glob/local dictionary/JMESPath selection, duplicate/type/lazy-error ordering and Adapter/session/cache/response policies beyond the tested pool cases. FloatingIP normalization and mutable FloatingIP Resource are separate SDK surfaces, not this pool helper contract.",
-        "Expand pool-specific default/unlimited/parent/deadline and accepted read/decode/Close/source/cancel/retry evidence beyond the actual fixtures; retain physical page proof separately from complete name-only results."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/search_floating_ip_pools",
       "source_fingerprint": "288d1e9f4b418a97e6e59c0c0699670057b0c0370fbeaa771415d7eaef424e18",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk.Connection.SearchFloatingIPPools",
         "gophercloudsdk/compute.Service.SearchFloatingIPPools",
@@ -39332,28 +39328,54 @@
             "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation",
             "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults"
           ]
+        },
+        {
+          "behavior": "Pool Search directly composes its tested name-only List projection with the audited cloudfilter.Select helper. Shared identifier tests cover empty/default selection, per-row exact/glob matches, duplicate/source-order retention, Unicode patterns and Python ordinary JSON stringification of missing/null identifiers. This is helper-composition evidence together with the pub* pool HTTP integration, not an invented separate default/duplicate pool HTTP fixture.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterIdentifierPreservesPerRowExactGlobMatchesDuplicatesAndSourceOrder",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterGlobUsesCPythonRuneDotAllClassesAndLiteralBackslashes",
+            "internal/cloudfilter/identifier_test.go:TestCloudFilterMissingAndNullIdentifiersDifferFromEmptyStringsAndRemainCaseSensitive"
+          ]
+        },
+        {
+          "behavior": "The shared filter used by this Search applies identifier selection before ordered/lazy dictionary filters and distinguishes absent keys, nested empty-object truthiness and exact Python bool/number equality in ordinary JSON. Its checked reference snapshots use the current pinned _utils.py source hash. The pool wrapper supplies only projected name dictionaries, so removed vendor fields are not synthesized as searchable fields.",
+          "tests": [
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterOrderedMappingConsumesOnlyReachedKeysAndKeepsDuplicateFirstPosition",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNestedEmptyObjectsUseActualTruthinessBeforeShapeOrMissingKeys",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterLeafEqualityKeepsExactArrayShapeAndPythonBooleanNumberPrecision",
+            "internal/cloudfilter/mapping_test.go:TestCloudFilterNonmappingFilterShapeIsLazyAfterIdentifierAndActualTruthiness",
+            "internal/cloudfilter/reference_test.go:TestCloudFilterRepairedPinnedReferenceSnapshotsRetainValuesAndErrorPhases"
+          ]
+        },
+        {
+          "behavior": "Search routes string filters through the audited expression bridge, preserving arbitrary owned JSON output and no invented source-row indices. The pool [].name integration and shared scalar/list/object/null/parser/runtime/empty-selection tests establish this composition under the documented Go/JMESPath representation boundaries.",
+          "tests": [
+            "connection_floating_ip_queries_boundaries_test.go:TestFloatingIPQueryPoolsProjectionSearchAndErrors",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionBridgeReturnsArbitraryOwnedJSONWithoutInventedRowIndices",
+            "internal/cloudfilter/results_test.go:TestCloudFilterExpressionsStillParseEmptySelectionAndKeepRuntimeFailuresAtomic",
+            "internal/cloudfilter/results_test.go:TestCloudFilterSelectOwnsViewsFiltersIndicesAndResultsBeforeGuardCallbacks"
+          ]
         }
       ],
       "documentation": [
         "compute/floating-ip-queries.md",
-        "README.md"
+        "README.md",
+        "internal/jmespath/README.md"
       ],
       "differences": [
-        "Search pool Value can be arbitrary expression output while ordinary selected Pools retain source rows. The current typed Name and owned JSON filters map a bounded subset of Python dynamic exact/glob/dict/JMESPath behavior; the test expression omits null projected names according to the expression engine.",
-        "The owned query transport deliberately accepts canonical UTF-8 object/list envelopes and HTTP200 only, with terminal source/retry/processing failures preserved. Python generic Resource/JSON translation can accept other successful codes or unwrap/default shapes more permissively. Native legacy version/capability checks and typed safe member IDs are Go mapping boundaries, not every deployment or Python dynamic-input policy.",
-        "Pool results own name-only RawResource values and full page/failure response evidence. IP location, strict normalization and Wire records are not pool semantics; inherited Resource/Adapter/session support remains separate."
+        "Only this named Cloud helper is mapped. Pool List always reads legacy Compute independently of floating IP source, and its logical result is a name-only dictionary sequence plus owned page/failure proof. It does not invoke FloatingIP Resource or normalization, has_service, owner/location selection or other pool/IP CRUD; those SDK surfaces retain their own tracking.",
+        "Go maps optional name None/empty to the zero-valued Name string and ordinary JSON dictionary/string/null filters to owned bytes. It uses the same audited cloudfilter/JMESPath engine as existing mapped Cinder searches; warning delivery and arbitrary custom Python object coercions are omitted. Exact-number/finite arithmetic, deterministic unordered-object traversal and stricter malformed-expression boundaries are documented in the engine guide rather than claimed as literal Python runtime equality.",
+        "Go intentionally accepts canonical UTF-8 object/list envelopes and HTTP200 only, preserves terminal source/retry/processing failures and checks the selected legacy Compute microversion below2.36 without hidden downgrade. Python raw adapter JSON translation is more permissive. These are deliberate Go mapping boundaries rather than missing normal declared-function behavior.",
+        "Pinned pool List reads one raw Compute response rather than a Resource pager. Go guarded advertised JSON/HTTP continuations and page/error evidence are an extension, with owned name-only results and atomic logical output on failure. No mutable Python Resource/Munch/session/cache or unrelated native/Proxy operation is promoted.",
+        "Shared concrete options are Go extensions: optional whole-query timeout defaults to no SDK cap, source/location/strict controls do not become pool lookup semantics, and explicit List filters are rejected because the source List declares no filters. Typed policy/error ownership and context guards replace Python dynamic object/session details without requiring application builders."
       ],
-      "remaining": [
-        "Complete exact/name/glob/dictionary/JMESPath truthiness/coercion/duplicate/lazy-error/arbitrary output cases and all pool projection/paging/backend/version/error/cache/timeout policies beyond tested pub* and name/array-expression branches. No independent pool CRUD or source mutable Resource/Adapter/session support is implied.",
-        "Complete source cloud has_service/config/profile/API-version/token refresh, exact cache/session/Adapter and warning/exception/error ordering beyond the tested lazy backend and recorded-scope policies; no authenticated Python/OpenStack runtime parity is established.",
-        "Complete pool name-only dictionary projection and exact/glob/local dictionary/JMESPath selection, duplicate/type/lazy-error ordering and Adapter/session/cache/response policies beyond the tested pool cases. FloatingIP normalization and mutable FloatingIP Resource are separate SDK surfaces, not this pool helper contract.",
-        "Expand pool-specific default/unlimited/parent/deadline and accepted read/decode/Close/source/cancel/retry evidence beyond the actual fixtures; retain physical page proof separately from complete name-only results."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/delete_floating_ip",
       "source_fingerprint": "7f7c7ea7f8c31cabbe45f1904ab495d37fe48b30c27bd376241912f9505d7f62",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk.Connection.DeleteFloatingIP",
         "gophercloudsdk/compute.Service.DeleteFloatingIP",
@@ -39513,14 +39535,11 @@
         "Typed safe UTF-8/path IDs, explicit source/location/strict/direct-get policy and optional one shared operation timeout are Go API choices. Defaults add no SDK deadline; a bulk zero-valued options replacement sets retry0, while dedicated default preparation retains retry1. The mapping does not establish every Python dynamic retry argument, configuration or has_service/session policy.",
         "Owned mutation transport follows the cloud-style passive HTTP200–399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
         "Direct UUID verification intentionally preserves source getter trust: a different response ID with DOWN can satisfy the source boolean, with the actual row retained and Absent=false. The result is a source success policy rather than identity-checked requested-resource disappearance. Dedicated deletion options do not add filters or expression parameters that are absent from the source deletion signature.",
-        "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade."
+        "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade.",
+        "The declared ID/retry deletion contract is mapped. Connection/profile use_direct_get configuration is expressed as an explicit Go option with default false; typed safe IDs and int retries, exact missing-catalog fallback, guarded context/accepted-error behavior, and the local legacy version preflight are documented Go choices. Inherited mutable Resource/session/cache APIs remain separately tracked in the SDK scope rather than missing arguments of this declaration.",
+        "The fixed success policy accepts final HTTP200 through399. Unlike the source's literal status<400 comparison, final informational1xx responses are rejected; normal net/http informational handling and source session redirects are not exact Python transport parity."
       ],
-      "remaining": [
-        "Complete exact source use_direct_get default/config resolution and Python UUID/dynamic ID handling, member omitted/null/different identity, status/value-shape/alias/normalization/error ordering and public-Get paging/selection combinations beyond the tested list/member/duplicate/late-page branches. Preserve source trust versus requested-resource identity proof and logical Nova status versus actual Wire; arbitrary query filters/expressions are separate read API surfaces, not required deletion arguments.",
-        "Expand actual per-backend accepted DELETE/read/decode/Close/cancel/source/retry evidence, including Nova/None and missing/mixed Network catalog failures, physical callback retries versus logical retries, response redirect/Location/session behavior and all status/value/default/timeout combinations beyond the finite local fixtures. The real timeout and common-deadline fixtures do not prove every parent/option/callback cancellation ordering.",
-        "Complete source deletion has_service/config/profile/API-version/token refresh, exact delete/public-Get cache/session/Adapter/warning/exception/error ordering and dynamic Python retry/type behavior beyond the local fixtures. No authenticated Python/OpenStack deletion runtime parity is established; unrelated inherited Resource operations are not completed or required by this row.",
-        "Expand direct Service/Connection deletion source/dependency/cache ownership combinations beyond the successful cached retry0 path and captured-Service preflight failure. Existing mutation history, public-Get verification and typed options must remain consistent under further backend/configuration combinations. Independent cleanup and other CRUD/Proxy/Resource operations are outside this deletion row rather than prerequisites to mark its own contract complete."
-      ]
+      "remaining": []
     }
   ]
 }

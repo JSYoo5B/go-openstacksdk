@@ -54,7 +54,7 @@ retry는 초기 요청에 더하는 추가 횟수입니다. 음수는 DELETE를1
 
 `LastVerification`은 가장 최근에 수행한 조회이며, 이후 DELETE가 실패해도 앞선 조회가 남습니다. DELETE의 backend와 검증 조회의 backend가 다를 수 있으므로 `Verification.Backend`도 확인합니다. native transport retry는 새 논리적 attempt로 세지 않습니다.
 
-DELETE 응답은 리소스 JSON으로 해석하지 않습니다. 최초 성공 정책인 HTTP200–399를 고정하고 실제 body/header/status를 보존합니다. `Envelope`는 `json.RawMessage`이지만 passive body가 유효한 JSON이라는 보장은 없으므로, 전체 result를 `json.Marshal`하면 body 때문에 실패할 수 있습니다. 아래 예제는 scalar 결과와 counts만 출력합니다.
+DELETE 응답은 리소스 JSON으로 해석하지 않습니다. 최초 성공 정책인 HTTP200–399를 고정하고 실제 body/header/status를 보존합니다. Python의 `<400` 비교와 달리 final informational1xx는 허용하지 않습니다. 이는 Go transport의 명시적인 성공 정책 차이입니다. `Envelope`는 `json.RawMessage`이지만 passive body가 유효한 JSON이라는 보장은 없으므로, 전체 result를 `json.Marshal`하면 body 때문에 실패할 수 있습니다. 아래 예제는 scalar 결과와 counts만 출력합니다.
 
 ## 검증 조회와 legacy Nova
 
@@ -155,3 +155,5 @@ accepted = conn.delete_floating_ip("IP_ID", retry=0)  # 확인 Get 없음
 SDK의 추가 timeout은 Python Delete에는 없는 옵션입니다. 옵션 준비 후 하나의 budget을 backend 연결·전체 retry·검증에 적용하며 caller context의 취소 원인을 보존합니다. 예제는 Connect를 포함한 부모2분 예산과 Delete의1분 예산을 사용합니다. mutable Resource/Munch와 전체 inherited session/cache/discovery/context 동작이 같은 것은 아닙니다. 여기서는 owned 조회 모델과 source 선택·retry·검증 흐름을 다룹니다.
 
 기존 generic `Network.FloatingIPs.Delete`의 ignoreMissing/error-only 정책, [Available](floating-ip-available.md)의 free IP 조회·할당, [IP helper](server-ip-helpers.md)의 서버 연결과 이 standalone 삭제를 구분합니다. 이 API는 서버·port detach, `delete_unattached_floating_ips`, Create의 timeout cleanup, 직접 Network Proxy의 revision-aware Delete 전체를 수행하지 않습니다. 전체 Floating IP CRUD와 Python Resource parity는 해당 후속 범위를 함께 검토해야 합니다.
+
+새 IP 할당·선택적 대기·timeout 정리는 [CreateFloatingIP](floating-ip-create.md)에서 제공합니다.

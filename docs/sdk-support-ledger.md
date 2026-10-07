@@ -1631,3 +1631,11 @@ PATH=/opt/homebrew/bin:$PATH make check
 새 cloud `delete_floating_ip`1행에 실제23개 테스트·부분 계약22개·공개 함수/메서드11개를 연결하고 `unresolved`로 유지했습니다. 기존502행의 내용·순서·status/fingerprint/source pins는 그대로입니다. review503=go_mapping161/unresolved341/unsupported1이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200으로 지원 승격은 없습니다. 최종 `paritycheck`도 통과했습니다(`/private/tmp/gophercloudsdk-floating-ip-delete-final-parity.log`). source `use_direct_get`/profile/config·동적 ID/retry 값, 후속 Get의 나머지 descriptor/정규화/선택 오류 조합, Nova/None·catalog·redirect/session·transport retry/cancel/timeout 조합은 남습니다. 별도 Create·DeleteUnattached나 Proxy/Resource 선언의 완료를 이 삭제의 근거로 대신하지 않습니다.
 
 다음은 독립 Floating IP Create의 새 allocation·선택적 대기·timeout 정리, 이후 unattached cleanup과 남은 핵심 user 계약입니다. Swift를 포함한 핵심 user→핵심 admin→후속 user→후속 admin 순서와 전체 목표는 유지합니다.
+
+## Floating IP named 계약 재검토와 현재 집계
+
+2026-10-08 01:54 KST. 앞선 단위 기록은 당시 판정의 이력입니다. 이번 검토는 기존 Cinder cloud 조회와 같은 `go_mapping` 기준으로 완료된 named 선언의 입력·기본값·결과·오류·실제 테스트·사용 문서를 다시 확인했습니다. 삭제1개와 pool 조회2개는 필수 기능 누락이 없으며 owned typed 결과, 엄격한 응답 정책, 기록된 location 및 전체 mutable Resource/session과의 경계를 `differences`로 명시했습니다. 해당3개만 `go_mapping`으로 바꿨고 source pins/fingerprint/기존503행 순서를 보존했습니다. 다른 Floating IP CRUD·Proxy/native/Resource의 지원 판정을 대신하지 않습니다.
+
+리뷰503개=go_mapping164/unresolved338/unsupported1, 전체 선언3,362개=supported0/go_mapping164/unsupported1/unresolved3,197입니다. 계약 항목은 3,126개이며 테스트 함수나 완료 API 수와 다릅니다. 근거는 기존 삭제23그룹과22계약, pool HTTP/공통 cloudfilter 계약 및 `/private/tmp/gophercloudsdk-floating-ip-delete-closure-audit.md`, `gophercloudsdk-floating-ip-pools-completion-audit.md`입니다. 세 선언의 `remaining`을 닫아도 상속·descriptor·전체 Resource/session 목표는 계속 진행합니다.
+
+일반 List/Search/Get 재검토에서는 다음 페이지 전에 Neutron descriptor/local Body 필터를 소비하지 않아 앞 페이지 오류를 뒤404로 숨길 수 있는 실제 순서 오류와, 빈 nested dictionary 필터가 truthy scalar에 잘못 오류를 내는 실제 버그를 발견했습니다. 이를 코드·HTTP 회귀로 수정 중입니다. GetByID와 Create는 독립 최종 판정 단계입니다. Create의 신규24그룹을 포함한 집중 race와 `bf3024a` 전체 check(vet·race·고정 parity·gofmt,40개 테스트 package)가 통과했습니다. Go 파일1,910개 source SHA256은 검증 전후 `cb29f882d0d5938e551108457ee27397164d7d6b7205b352cb412a26a1b74afd`로 동일합니다. 실행 근거는 `/private/tmp/gophercloudsdk-floating-ip-create-focused.log`, `gophercloudsdk-floating-ip-create-check.log`, `gophercloudsdk-floating-ip-create-gate-receipt.json`입니다. 작성한 Create 가이드의 독립 main 컴파일·연산별 최종 판정은 다음 단계입니다.
