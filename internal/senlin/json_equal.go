@@ -3,7 +3,7 @@ package senlin
 import (
 	"encoding/json"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 // EqualJSON compares complete valid JSON values without losing number precision.

@@ -10,9 +10,9 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/image"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionImageLocationsShareNativeClientAndPreservePassiveData(t *testing.T) {

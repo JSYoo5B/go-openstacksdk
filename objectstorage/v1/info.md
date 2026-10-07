@@ -14,8 +14,8 @@ import (
     "errors"
     "fmt"
 
-    objectstorage "gophercloudsdk/objectstorage/v1"
-    "gophercloudsdk/resource"
+    objectstorage "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func reportResponseError(err error) {

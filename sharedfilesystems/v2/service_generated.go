@@ -2,21 +2,21 @@
 package v2
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/availabilityzones"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/messages"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/replicas"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/schedulerstats"
+	resource6 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/securityservices"
+	resource7 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/services"
+	resource8 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+	resource9 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+	resource10 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
+	resource11 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetransfers"
+	resource12 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
+	resource13 "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/snapshots"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/sharedfilesystems/v2/availabilityzones"
-	resource1 "gophercloudsdk/sharedfilesystems/v2/messages"
-	resource2 "gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
-	resource3 "gophercloudsdk/sharedfilesystems/v2/quotasets"
-	resource4 "gophercloudsdk/sharedfilesystems/v2/replicas"
-	resource5 "gophercloudsdk/sharedfilesystems/v2/schedulerstats"
-	resource6 "gophercloudsdk/sharedfilesystems/v2/securityservices"
-	resource7 "gophercloudsdk/sharedfilesystems/v2/services"
-	resource8 "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
-	resource9 "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
-	resource10 "gophercloudsdk/sharedfilesystems/v2/shares"
-	resource11 "gophercloudsdk/sharedfilesystems/v2/sharetransfers"
-	resource12 "gophercloudsdk/sharedfilesystems/v2/sharetypes"
-	resource13 "gophercloudsdk/sharedfilesystems/v2/snapshots"
 )
 
 // Service shares one authenticated client across its resource APIs.

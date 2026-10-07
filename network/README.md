@@ -196,7 +196,7 @@ floating_ip = conn.create_floating_ip(
     network="public", server=server, nat_destination="private", wait=True)
 ```
 
-Go (`gophercloudsdk/network`를 import):
+Go (`github.com/JSYoo5B/gophercloudsdk/network`를 import):
 
 ```go
 service, err := conn.Network(ctx)
@@ -237,7 +237,7 @@ created, err := service.FloatingIPs.Create(ctx,
 
 ## 전체 API와 남은 복합 작업
 
-네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `gophercloudsdk/network/v2/networks`, `gophercloudsdk/network/v2/extensions/layer3/floatingips`를 import합니다.
+네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `github.com/JSYoo5B/gophercloudsdk/network/v2/networks`, `github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips`를 import합니다.
 
 위 `Create` 작업은 Neutron에서 새 IPv4 floating IP를 생성합니다. [FloatingIPs.Ensure](floating-ip-ensure.md)는 현재 프로젝트의 이미 연결된 IP·가용 IP·새 allocation을 순서대로 선택하고 서버의 fixed IPv4에 연결합니다. 명시 network 또는 공유 floating 역할·router gateway에서 외부 network를 선택하며, 조건에 따라 공유 NAT 역할로 destination을 좁힙니다. 알려진 revision으로 PUT을 보호하고 실패 시 선택/할당 결과를 보존합니다. 자동 필요성 판단·pool·순차 IPv4와 raw Nova 관측은 [Compute IP dispatch](../compute/server-ip-dispatch.md)에서 제공합니다. direct proxy add/remove·함수별 fallback과 전체 cloud 서비스·Resource/session/lifecycle은 남은 범위입니다. Neutron의 404·403·409는 원래 HTTP 오류를 보존하며 다른 API로 전환하지 않습니다. 지정한 기존 IP의 고정 연결은 [FloatingIPs.Attach](floating-ip-attach.md)로 제공하며 해제·일반 수정은 `service.API.FloatingIPs.Update`에서 개별 호출할 수 있습니다. 이 범위를 Python cloud 계층 전체와 동일하게 구현했다고 간주하지 않습니다.
 

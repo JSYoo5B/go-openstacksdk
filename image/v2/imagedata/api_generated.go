@@ -3,9 +3,9 @@ package imagedata
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/image/v2/imagedata"
-	request "gophercloudsdk/request"
 	io "io"
 )
 

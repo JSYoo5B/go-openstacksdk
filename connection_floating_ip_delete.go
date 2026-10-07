@@ -2,7 +2,7 @@ package gophercloudsdk
 
 import (
 	"context"
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func (c *Connection) DeleteFloatingIP(ctx context.Context, input compute.DeleteFloatingIPRequest, options ...compute.FloatingIPDeleteOption) (*compute.DeleteFloatingIPResult, error) {

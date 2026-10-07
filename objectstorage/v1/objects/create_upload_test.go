@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func createUploadPrepared(t *testing.T, c *gophercloud.ServiceClient) *preparedCreateObject {

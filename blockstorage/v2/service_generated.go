@@ -2,16 +2,16 @@
 package v2
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/availabilityzones"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/backups"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/limits"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/quotasets"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/schedulerstats"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/services"
+	resource6 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
+	resource7 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/transfers"
+	resource8 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/volumes"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/blockstorage/v2/availabilityzones"
-	resource1 "gophercloudsdk/blockstorage/v2/backups"
-	resource2 "gophercloudsdk/blockstorage/v2/limits"
-	resource3 "gophercloudsdk/blockstorage/v2/quotasets"
-	resource4 "gophercloudsdk/blockstorage/v2/schedulerstats"
-	resource5 "gophercloudsdk/blockstorage/v2/services"
-	resource6 "gophercloudsdk/blockstorage/v2/snapshots"
-	resource7 "gophercloudsdk/blockstorage/v2/transfers"
-	resource8 "gophercloudsdk/blockstorage/v2/volumes"
 )
 
 // Service shares one authenticated client across its resource APIs.

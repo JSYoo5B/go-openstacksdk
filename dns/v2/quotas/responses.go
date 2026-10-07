@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // QuotaResource preserves native values and all response fields. Native ints

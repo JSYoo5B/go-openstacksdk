@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func snapshotLocalContractMembers(t *testing.T, raw string) []cloudfilter.JSONMember {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/network"
 )
 
 // Allocation and AllocationResponse remain the initial mutation evidence.

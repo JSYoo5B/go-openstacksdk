@@ -13,9 +13,9 @@ func TestGlanceMetadefTagsRegistryAndConcreteScope(t *testing.T) {
 	g.root = t.TempDir()
 	var tags int
 	for _, record := range sdkOwnedCollections {
-		if record.Package == "gophercloudsdk/image/v2/metadeftags" {
+		if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags" {
 			tags++
-			if record.Source != "sdk_owned" || record.Model != "Tag" || record.Kind != "scoped_tag_resource" || !record.Delete || record.Find || record.Wait || record.Scope != "InNamespace" || record.Parent != "gophercloudsdk/image/v2/metadefnamespaces" {
+			if record.Source != "sdk_owned" || record.Model != "Tag" || record.Kind != "scoped_tag_resource" || !record.Delete || record.Find || record.Wait || record.Scope != "InNamespace" || record.Parent != "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces" {
 				t.Fatalf("invented tag capability: %+v", record)
 			}
 			g.collections = append(g.collections, record)
@@ -45,7 +45,7 @@ func TestGlanceMetadefTagsRegistryAndConcreteScope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"gophercloudsdk/image/v2/metadeftags"`, "MetadefTags ", "MetadefTags:"} {
+	for _, want := range []string{`"github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"`, "MetadefTags ", "MetadefTags:"} {
 		if strings.Count(string(registry), want) != 1 {
 			t.Fatalf("missing or duplicate tag aggregate: %s", want)
 		}

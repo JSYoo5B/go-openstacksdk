@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func validate[T any](ctx context.Context, collection *resource.Collection[T]) error {

@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 )

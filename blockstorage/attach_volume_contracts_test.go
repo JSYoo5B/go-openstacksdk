@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const attachVolumeContractNovaBase = "/reverse/nova/v2.1/project/"

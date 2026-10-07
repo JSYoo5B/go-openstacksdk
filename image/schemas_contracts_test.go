@@ -14,13 +14,13 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	sdkimages "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	sdkmembers "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+	sdktasks "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	sdkimages "gophercloudsdk/image/v2/images"
-	sdkmembers "gophercloudsdk/image/v2/members"
-	sdktasks "gophercloudsdk/image/v2/tasks"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const schemasPrefix = "/reverse/schema-discovery/glance/v2/"

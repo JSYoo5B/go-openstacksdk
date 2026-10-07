@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/hosts"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/instanceha/v1/hosts"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const hostUUID = "33333333-3333-4333-8333-333333333333"

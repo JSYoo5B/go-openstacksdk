@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionNetworkMutationRefreshesGetterDefaultNICAndFloatingRoles(t *testing.T) {

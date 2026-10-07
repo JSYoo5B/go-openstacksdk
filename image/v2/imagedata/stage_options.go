@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // StageOpts owns staging headers. Size is the expected byte count sent as

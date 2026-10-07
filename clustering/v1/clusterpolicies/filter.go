@@ -1,6 +1,6 @@
 package clusterpolicies
 
-import "gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
 
 // Body filters use the pinned response fields. cluster_id is a URI attribute
 // fixed by Scope, and URIClusterID is a Go-only value rather than a Body field.

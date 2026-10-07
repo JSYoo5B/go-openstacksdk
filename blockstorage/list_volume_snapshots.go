@@ -2,8 +2,8 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudsnapshot"
 )
 
 // ListVolumeSnapshots returns the complete owned cloud view. Detailed and

@@ -3,7 +3,7 @@ package metadefresourcetypes
 import (
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // Acknowledgement records only an actual DELETE 204 independently of response

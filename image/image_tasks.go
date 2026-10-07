@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ImageTasks lazily fetches the finite task list for one image. MaxItems limits

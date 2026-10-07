@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // Create forwards a literal volume ID and owns defaults, name aliases,

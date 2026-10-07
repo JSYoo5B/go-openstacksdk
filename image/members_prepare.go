@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func (s *Service) prepareImageMember(ctx context.Context, parent resource.Ref, memberID, status *string, apply func() (map[string]string, error)) (*preparedImageMutation, error) {

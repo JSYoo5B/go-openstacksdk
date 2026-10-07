@@ -3,10 +3,10 @@ package v1
 import (
 	"context"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GetTempURLKey reads fresh metadata, preferring the container's secondary then

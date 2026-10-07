@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/dns/v2/quotas"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type designateQuotaTransport func(*http.Request) (*http.Response, error)

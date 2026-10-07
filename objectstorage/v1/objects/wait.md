@@ -23,9 +23,9 @@ import (
     "fmt"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/objectstorage/v1/objects"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func showWait(result *objects.ObjectWaitResult, err error) {

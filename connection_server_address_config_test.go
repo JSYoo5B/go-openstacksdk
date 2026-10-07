@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func checkAddressConfiguration(t *testing.T, policy compute.ServerAddressPolicy, wantPrivate, wantForce bool) {

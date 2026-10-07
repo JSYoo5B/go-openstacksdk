@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
 )
 
 // MemberGet owns the negotiated version and bodyless physical member request.

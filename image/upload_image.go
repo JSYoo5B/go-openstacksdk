@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
 )
 
 // UploadImage creates metadata and streams borrowed data through one file PUT.

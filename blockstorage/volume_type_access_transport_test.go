@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllCauses(t *testing.T) {

@@ -28,8 +28,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/network/v2/extensions/subnetpools"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listPools(ctx context.Context, client *gophercloud.ServiceClient) ([]*subnetpools.SubnetPool, error) {
@@ -75,8 +75,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/network/v2/extensions/subnetpools"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listTenantPools(ctx context.Context, client *gophercloud.ServiceClient) ([]*subnetpools.SubnetPool, error) {

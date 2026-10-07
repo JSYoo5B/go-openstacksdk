@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // TrackedState owns a cached body and a sticky dirty set. Equality is checked

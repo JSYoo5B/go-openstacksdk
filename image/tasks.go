@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // CreateTask sends one asynchronous task request. Nil input becomes an owned

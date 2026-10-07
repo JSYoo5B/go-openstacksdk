@@ -10,8 +10,8 @@ import (
     "io"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image/v2/imagedata"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func stageExistingImage(ctx context.Context, client *gophercloud.ServiceClient, id string, data io.Reader) (*imagedata.StageImageResult, error) {
@@ -38,8 +38,8 @@ import (
     "io"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image/v2/imagedata"
-    "gophercloudsdk/image/v2/images"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
 )
 
 func stageKnownImage(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, data io.Reader, remainingBytes int64) (*imagedata.StageImageResult, error) {

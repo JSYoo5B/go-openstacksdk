@@ -8,8 +8,8 @@ package example
 import (
     "context"
 
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func addDefaultLocation(ctx context.Context, service *image.Service, ref resource.Ref, locationURL string) (*image.AddImageLocationResult, error) {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"slices"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // SetVolumeBootableOpts owns the flag and complete location. Nil Bootable

@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestResolveIDUsesExactNamesAndNeverFetchesExplicitIDs(t *testing.T) {

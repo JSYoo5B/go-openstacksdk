@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 )
 
 func TestVolumeBackupReadConcurrentSnapshotAndBackupCallsKeepSchemaPolicyIsolated(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestCinderFailurePrefixAndMicroversion(t *testing.T) {

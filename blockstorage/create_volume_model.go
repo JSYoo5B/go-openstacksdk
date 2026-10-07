@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // VolumeInfo preserves an SDK-owned Cinder volume representation. Nullable

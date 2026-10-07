@@ -8,7 +8,7 @@ import (
 	"iter"
 	"net/url"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (p *preparedVolumeTypes) find(ctx context.Context, nameOrID string) (*GetVolumeTypeResult, error) {

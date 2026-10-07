@@ -284,7 +284,7 @@
   ],
   "resource": "openstack.key_manager.v1.order.Order",
   "schema_version": 1,
-  "sdk_package": "gophercloudsdk/keymanager/v1/orders",
+  "sdk_package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders",
   "source_controls": {
     "proxy_list": [
       "resource_type",

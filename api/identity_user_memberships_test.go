@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/identity/v2/extensions"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/identity/v2/extensions"
-	"gophercloudsdk/identity/v3/groups"
-	"gophercloudsdk/identity/v3/projects"
-	"gophercloudsdk/identity/v3/users"
-	"gophercloudsdk/internal/testcloud"
 )
 
 func checkMembershipRows[T any](t *testing.T, sequence iter.Seq2[*T, error], wantType reflect.Type, envelope string) {

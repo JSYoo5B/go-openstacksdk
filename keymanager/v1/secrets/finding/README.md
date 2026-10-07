@@ -11,7 +11,7 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
 )
 
 func findSecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
@@ -69,8 +69,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secrets"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func findSecretStrict(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {

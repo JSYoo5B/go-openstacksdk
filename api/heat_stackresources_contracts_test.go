@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackresources"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/orchestration/v1/stackresources"
-	"gophercloudsdk/orchestration/v1/stacks"
-	"gophercloudsdk/resource"
 )
 
 func heatResourceScope(t *testing.T, api *stackresources.API) *stackresources.StackScope {

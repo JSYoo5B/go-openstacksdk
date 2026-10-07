@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	rt "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	rt "gophercloudsdk/image/v2/metadefresourcetypes"
 )
 
 func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {

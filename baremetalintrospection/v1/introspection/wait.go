@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // IntrospectionFailureError retains the service's failure message and the last

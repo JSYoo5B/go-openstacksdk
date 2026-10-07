@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // CreateBackup forwards the fixed cloud body and preserves request-seeded

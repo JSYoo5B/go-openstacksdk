@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/baremetalintrospection/v1/introspection"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/baremetalintrospection/v1/introspection"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestIntrospectionFinishedWaitRejectsAttributeReplacementBeforeHTTP(t *testing.T) {

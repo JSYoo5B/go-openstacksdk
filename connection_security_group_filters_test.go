@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/rules"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/security/groups"
-	"gophercloudsdk/network/v2/extensions/security/rules"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionSecurityGroupFiltersSharedClientAndOriginalRules(t *testing.T) {

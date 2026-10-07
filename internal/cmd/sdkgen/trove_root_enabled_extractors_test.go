@@ -263,7 +263,7 @@ func TestTroveRootEnabledActualEmissionStoredFacadeAndBoundedInventory(t *testin
 						t.Fatal("safe bool extraction missing", wanted, out)
 					}
 				}
-				if strings.Contains(out, "result.Extract()") || e.imports["gophercloudsdk/internal/troveroot"] != "troveroot" || operationReturnPolicy(fn) != "extract" {
+				if strings.Contains(out, "result.Extract()") || e.imports["github.com/JSYoo5B/gophercloudsdk/internal/troveroot"] != "troveroot" || operationReturnPolicy(fn) != "extract" {
 					t.Fatal("unsafe native assertion emitted", out)
 				}
 			} else if troveRootEnabledExtractor(fn) || strings.Contains(out, "troveroot") || !strings.Contains(out, "result.Extract()") {
@@ -285,7 +285,7 @@ func TestTroveRootEnabledActualEmissionStoredFacadeAndBoundedInventory(t *testin
 			continue
 		}
 		count++
-		if op.Source != upstreamModule+"/openstack/db/v1/instances" || op.Package != "db/v1/instances" || op.Name != "IsRootEnabled" || op.SDKPackage != "gophercloudsdk/db/v1/instances" || !op.BuilderFree || op.ReturnPolicy != "extract" || op.Issue != "" {
+		if op.Source != upstreamModule+"/openstack/db/v1/instances" || op.Package != "db/v1/instances" || op.Name != "IsRootEnabled" || op.SDKPackage != "github.com/JSYoo5B/gophercloudsdk/db/v1/instances" || !op.BuilderFree || op.ReturnPolicy != "extract" || op.Issue != "" {
 			t.Fatal("unreviewed inventory operation opted in", op)
 		}
 	}

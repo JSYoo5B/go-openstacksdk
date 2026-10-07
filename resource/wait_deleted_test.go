@@ -3,8 +3,8 @@ package resource_test
 import (
 	"context"
 	"errors"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 	"iter"
 	"net/url"
 	"testing"

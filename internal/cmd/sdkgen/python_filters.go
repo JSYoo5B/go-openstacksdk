@@ -127,7 +127,7 @@ func verifyPythonFilterManifest(source string, manifest *pythonFilterManifest) e
 	if strings.TrimSpace(source) == "" {
 		return fmt.Errorf("-openstacksdk-source is required for audited Subnet semantic filters")
 	}
-	if manifest == nil || manifest.SchemaVersion != 1 || manifest.SourcePin != pythonFilterPin || manifest.Resource != "openstack.network.v2.subnet.Subnet" || manifest.SDKPackage != "gophercloudsdk/network/v2/subnets" || manifest.BasePath != "/subnets" || manifest.Envelope != "subnets" {
+	if manifest == nil || manifest.SchemaVersion != 1 || manifest.SourcePin != pythonFilterPin || manifest.Resource != "openstack.network.v2.subnet.Subnet" || manifest.SDKPackage != "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets" || manifest.BasePath != "/subnets" || manifest.Envelope != "subnets" {
 		return fmt.Errorf("audited Subnet Python filter identity changed")
 	}
 	if !reflect.DeepEqual(manifest.Proof.Files, subnetFilterSourceHashes) {
@@ -418,7 +418,7 @@ func pythonFilterReserved(manifest *pythonFilterManifest) []string {
 
 func emitPythonFilterDescriptor(e *emitter, plan *collectionPlan, parents int) {
 	manifest := e.pythonFilters
-	if manifest == nil || parents != 0 || manifest.SDKPackage != "gophercloudsdk/"+sdkPath(e.pkg.Path()) {
+	if manifest == nil || parents != 0 || manifest.SDKPackage != "github.com/JSYoo5B/gophercloudsdk/"+sdkPath(e.pkg.Path()) {
 		return
 	}
 	if _, ok := bodyFilterCollectionContract(e.pkg, plan, parents); !ok {

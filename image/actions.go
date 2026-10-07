@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // DeactivateImage requests Glance's deactivate action without fetching current

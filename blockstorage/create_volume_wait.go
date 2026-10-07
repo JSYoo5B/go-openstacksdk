@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (p *preparedCreateVolume) wait(ctx context.Context, result *CreateVolumeResult) error {

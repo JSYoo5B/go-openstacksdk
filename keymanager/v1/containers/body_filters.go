@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // containerBodyFilterValue projects a pinned Python attribute from the original

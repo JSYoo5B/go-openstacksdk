@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestSwiftMarkerCycleCannotLoopForever(t *testing.T) {

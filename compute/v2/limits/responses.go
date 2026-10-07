@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // RateLimit retains a legacy v2 rule. NextAvailable is exact JSON because the

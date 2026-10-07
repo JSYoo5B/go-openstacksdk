@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/orchestration/v1/stacks"

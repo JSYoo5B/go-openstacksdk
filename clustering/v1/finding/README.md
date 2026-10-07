@@ -28,7 +28,7 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
 )
 
 func FindSenlinResources(ctx context.Context, conn *sdk.Connection) error {
@@ -82,9 +82,9 @@ import (
     "errors"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/clusters"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func FindClusterStrict(ctx context.Context, conn *sdk.Connection) error {

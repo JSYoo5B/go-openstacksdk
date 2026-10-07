@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Invoked during Create, after the Compute constructor releases c.mu.

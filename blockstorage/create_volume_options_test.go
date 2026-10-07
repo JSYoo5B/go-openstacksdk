@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplacement(t *testing.T) {

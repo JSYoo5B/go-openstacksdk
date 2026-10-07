@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type filters struct {

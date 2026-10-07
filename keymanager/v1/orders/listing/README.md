@@ -13,8 +13,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/orders"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listAESOrders(ctx context.Context, client *gophercloud.ServiceClient) ([]*orders.Order, error) {
@@ -131,8 +131,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/orders"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listNamedOrderRows(ctx context.Context, client *gophercloud.ServiceClient) ([]*orders.Order, error) {

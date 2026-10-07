@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // ValidateSnapshotID validates body text, without imposing route-ID rules.

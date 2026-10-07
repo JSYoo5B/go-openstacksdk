@@ -2,14 +2,14 @@ package gophercloudsdk
 
 import (
 	"context"
-	blockquotas "gophercloudsdk/blockstorage/v3/quotasets"
-	"gophercloudsdk/compute/v2/quotasets"
-	infraquotas "gophercloudsdk/containerinfra/v1/quotas"
-	dnsquotas "gophercloudsdk/dns/v2/quotas"
-	loadbalancerquotas "gophercloudsdk/loadbalancer/v2/quotas"
-	networkquotas "gophercloudsdk/network/v2/extensions/quotas"
-	"gophercloudsdk/resource"
-	filequotas "gophercloudsdk/sharedfilesystems/v2/quotasets"
+	blockquotas "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/quotasets"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/quotasets"
+	infraquotas "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
+	dnsquotas "github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas"
+	loadbalancerquotas "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/quotas"
+	networkquotas "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	filequotas "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 // ProjectQuotas binds Nova quotas to an explicit project ID or exact Keystone

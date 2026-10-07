@@ -58,10 +58,10 @@ import (
 	"fmt"
 	"log"
 
-	"gophercloudsdk"
-	"gophercloudsdk/keymanager/v1/containers"
-	"gophercloudsdk/keymanager/v1/orders"
-	"gophercloudsdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
 )
 
 func main() {

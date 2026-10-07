@@ -3,8 +3,8 @@ package blockstorage
 import (
 	"context"
 	"encoding/json"
-	"gophercloudsdk/internal/cloudsnapshot"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // VolumeBackupListOpts owns backup list policy; omission retains source defaults.

@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 // GetActiveServer checks supplied metadata and keeps known branches free of

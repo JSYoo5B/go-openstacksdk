@@ -10,11 +10,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 func mutationService(t *testing.T, cloud *testcloud.Cloud) *network.Service {

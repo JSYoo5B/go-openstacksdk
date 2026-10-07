@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // WithQuotaOptions snapshots typed limit pointers at option construction. The

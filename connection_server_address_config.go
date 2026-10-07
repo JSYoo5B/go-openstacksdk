@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func configuredServerAddresses(settings, client map[string]any) (compute.ServerAddressPolicy, error) {

@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
 )
 
 // Delete resolves exactly one snapshot through the same captured source as

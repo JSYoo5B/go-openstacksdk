@@ -16,11 +16,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/networks"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // Independent pinned Network query declarations, including inherited tag aliases.

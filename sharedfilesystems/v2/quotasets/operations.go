@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // UpdateOpts is a concrete partial update: nil omits, zero sends zero, and -1

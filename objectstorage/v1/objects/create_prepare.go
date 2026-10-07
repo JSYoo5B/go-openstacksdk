@@ -9,7 +9,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 type preparedCreateObject struct {

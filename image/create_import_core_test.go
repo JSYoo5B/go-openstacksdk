@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/image/v2/imageimport"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type createImportReader struct {

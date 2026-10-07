@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const imageTaskContractObject = `{"id":"response-task","image_id":"response-parent","type":"future","status":"future-state","owner":"owner","request_id":"canonical-request","user_id":"canonical-user","message":"","self":"https://passive.invalid/self","schema":"https://passive.invalid/schema","created_at":"literal-created","updated_at":"literal-updated","expires_at":"literal-expiry","deleted_at":"literal-deleted","deleted":false,"input":{"number":9007199254740993,"huge":1e1000},"result":{},"request-id":17,"user":false,"links":42,"x-number":9007199254740995}`

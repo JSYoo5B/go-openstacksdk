@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	swift "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	swift "gophercloudsdk/objectstorage/v1"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 func TestSwiftCollectionsOwnMetadataOpaqueKeysAndDeletionPolicies(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 )
 
 func TestManilaAccessIdentityCanonicalFieldsAndRawAliases(t *testing.T) {

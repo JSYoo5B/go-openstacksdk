@@ -7,9 +7,9 @@ import (
 	"sort"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cinderrequest"
-	"gophercloudsdk/internal/rest"
 )
 
 // ImageMetadataDeletion records one key and its actual accepted response.

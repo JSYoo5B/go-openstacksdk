@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/metadata"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage/metadata"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type roundTripFunc func(*http.Request) (*http.Response, error)

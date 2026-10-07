@@ -15,11 +15,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/security/addressgroups"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // Independent tables from pinned AddressGroup._query_mapping and inherited

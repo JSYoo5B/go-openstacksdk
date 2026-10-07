@@ -4,7 +4,7 @@ package subscriptions
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Subscription retains exact raw numeric/metadata values and HTTP evidence.

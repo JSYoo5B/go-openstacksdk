@@ -11,10 +11,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/common"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/accelerator/v2/common"
-	"gophercloudsdk/resource"
 )
 
 func Collection[T any](client *gophercloud.ServiceClient, path, single, plural string,

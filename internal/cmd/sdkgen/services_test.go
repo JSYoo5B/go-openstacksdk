@@ -13,11 +13,11 @@ import (
 func TestServiceRegistriesSeparateVersionsAndBindReadableResources(t *testing.T) {
 	root := t.TempDir()
 	g := generator{root: root, inventory: inventory{Operations: []operation{
-		{SDKPackage: "gophercloudsdk/network/v2/extensions/security/groups"},
-		{SDKPackage: "gophercloudsdk/network/v2/extensions/layer3/routers"},
-		{SDKPackage: "gophercloudsdk/identity/v2/users"},
-		{SDKPackage: "gophercloudsdk/identity/v3/users"},
-		{SDKPackage: "gophercloudsdk/utils"},
+		{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"},
+		{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"},
+		{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"},
+		{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"},
+		{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/utils"},
 	}}}
 	if err := g.generateServices(); err != nil {
 		t.Fatal(err)
@@ -47,11 +47,11 @@ func TestServiceRegistriesSeparateVersionsAndBindReadableResources(t *testing.T)
 
 func TestSDKOwnedAPIsExtendRegisteredServiceWithoutNativeDeclarations(t *testing.T) {
 	root := t.TempDir()
-	native := inventory{Version: "test-pin", Operations: []operation{{SDKPackage: "gophercloudsdk/sharedfilesystems/v2/shares", Name: "List"}}}
+	native := inventory{Version: "test-pin", Operations: []operation{{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares", Name: "List"}}}
 	g := generator{root: root, inventory: native, collections: []collectionRecord{
-		{Package: "gophercloudsdk/sharedfilesystems/v2/quotasets", Source: "sdk_owned", Model: "QuotaResource", Kind: "singleton", Scope: "InProject"},
-		{Package: "gophercloudsdk/sharedfilesystems/v2/shares", Source: "sdk_owned", Model: "Share"},
-		{Package: "gophercloudsdk/accelerator/v2/devices", Source: "sdk_owned", Model: "Device"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets", Source: "sdk_owned", Model: "QuotaResource", Kind: "singleton", Scope: "InProject"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares", Source: "sdk_owned", Model: "Share"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices", Source: "sdk_owned", Model: "Device"},
 	}}
 	if err := g.generateServices(); err != nil {
 		t.Fatal(err)

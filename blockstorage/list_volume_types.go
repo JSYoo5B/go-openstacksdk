@@ -3,9 +3,9 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/resource"
 )
 
 // ListVolumeTypes materializes the complete type list with no visibility query

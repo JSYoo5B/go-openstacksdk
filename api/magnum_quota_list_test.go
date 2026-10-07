@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/containerinfra/v1/quotas"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const magnumQuotaListRow = `{"id":9007199254740993,"project_id":"row-project","resource":"Cluster","hard_limit":0,"vendor":{"big":9007199254740993},"optional":null}`

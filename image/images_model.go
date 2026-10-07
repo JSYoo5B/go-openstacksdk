@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ImageInfo preserves nullable canonical image fields and exact raw properties.

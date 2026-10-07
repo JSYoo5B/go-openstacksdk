@@ -12,14 +12,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/swauth"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeobjects "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
-	"gophercloudsdk/objectstorage/v1"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/objectstorage/v1/swauth"
-	"gophercloudsdk/resource"
 )
 
 var signingInstant = time.Unix(1700000000, 0).UTC()

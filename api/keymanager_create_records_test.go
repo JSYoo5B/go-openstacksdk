@@ -14,17 +14,17 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upcontainers "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 	uporders "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
 	upsecrets "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
 	th "github.com/gophercloud/gophercloud/v2/testhelper"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/containers"
-	"gophercloudsdk/keymanager/v1/orders"
-	"gophercloudsdk/keymanager/v1/secrets"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // Existing leaf/cached-Connection fixtures and body wrappers are reused.

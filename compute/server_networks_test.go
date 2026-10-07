@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func nicCreateRequest() compute.CreateServerRequest {

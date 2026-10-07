@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestStageOptionsOwnedSnapshotsReplacementAndConcurrentReuse(t *testing.T) {

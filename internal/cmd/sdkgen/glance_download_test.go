@@ -19,7 +19,7 @@ func TestGlanceDownloadKeepsNativeStreamAndDocumentsWriterWorkflow(t *testing.T)
 		t.Fatalf("invented writer download inventory rows: %+v", g.collections)
 	}
 	r := g.collections[0]
-	if r.Package != "gophercloudsdk/image/v2/imagedata" || r.Model != "" || r.Find || r.Delete || r.Wait || r.Scope != "" || r.Kind != "" || r.Issue != "requires a scoped or specialized resource binding" {
+	if r.Package != "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata" || r.Model != "" || r.Find || r.Delete || r.Wait || r.Scope != "" || r.Kind != "" || r.Issue != "requires a scoped or specialized resource binding" {
 		t.Fatalf("writer download workflow became a collection: %+v", r)
 	}
 	actual, err := os.ReadFile(filepath.Join(g.root, "image/v2/imagedata/api_generated.go"))

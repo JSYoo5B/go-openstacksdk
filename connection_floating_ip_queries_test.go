@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type floatingQueryState struct {

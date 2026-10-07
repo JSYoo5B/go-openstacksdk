@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
 )
 
 func roleFloatingIPCall(ctx context.Context, s *network.Service, kind string, external resource.Ref, create []network.CreateFloatingIPOption, ensure []network.EnsureFloatingIPOption) (*network.FloatingIP, error) {

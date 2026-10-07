@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Consumer has no synthesized resource ID. Its three association fields are

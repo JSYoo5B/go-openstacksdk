@@ -3,8 +3,8 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cinderaction"
 )
 
 // RevertVolumeToSnapshot sends a literal snapshot ID after checking support for

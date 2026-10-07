@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type UpdateVolumeRequest struct{ NameOrID string }

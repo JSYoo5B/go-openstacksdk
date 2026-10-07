@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 )
 
 func TestManilaAccessListControlsSnapshotAndSingleCollection(t *testing.T) {

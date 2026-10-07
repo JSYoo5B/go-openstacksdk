@@ -2,7 +2,7 @@ package blockstorage
 
 import (
 	"fmt"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"strings"
 	"time"
 	"unicode"

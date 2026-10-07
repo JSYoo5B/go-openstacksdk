@@ -16,8 +16,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
-	"gophercloudsdk/resource"
 )
 
 func cloneSigningKey(value []byte) []byte {

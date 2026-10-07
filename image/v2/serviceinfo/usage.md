@@ -8,8 +8,8 @@ package example
 import (
     "context"
 
-    "gophercloudsdk"
-    "gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
 )
 
 func discoverUsage(ctx context.Context, conn *gophercloudsdk.Connection) (*serviceinfo.UsageInfo, error) {

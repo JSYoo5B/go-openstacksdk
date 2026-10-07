@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 // CreateWithAutomaticFloatingIP discovers Compute lazily, then delegates all

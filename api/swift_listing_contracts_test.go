@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
 )
 
 func TestSwiftContainerListRetainsCountsAndPagesLazily(t *testing.T) {

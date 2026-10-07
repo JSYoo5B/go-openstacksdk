@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // QuotaCreateOpts contains mutable quota attributes; the scope owns identity.

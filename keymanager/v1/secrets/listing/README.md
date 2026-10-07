@@ -13,8 +13,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secrets"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listPlainSecrets(ctx context.Context, client *gophercloud.ServiceClient) ([]*secrets.Secret, error) {
@@ -124,8 +124,8 @@ import (
     "encoding/json"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secrets"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listExactSecretRows(ctx context.Context, client *gophercloud.ServiceClient) ([]*secrets.Secret, error) {

@@ -1,8 +1,8 @@
 package quotasets
 
 import (
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // User quota requests retain their complete target across redirects and retries.

@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"gophercloudsdk/internal/masakari"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/masakari"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type CreateOpts struct {

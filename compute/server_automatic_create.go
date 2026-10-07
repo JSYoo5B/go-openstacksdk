@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AutomaticServerCreateOptions reuses existing server and automatic-IP options.

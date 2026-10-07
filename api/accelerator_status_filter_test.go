@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/accelerator/v2/acceleratorrequests"
-	"gophercloudsdk/accelerator/v2/devices"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestAcceleratorStatusFilterStaysLocal(t *testing.T) {

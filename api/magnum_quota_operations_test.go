@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/containerinfra/v1/quotas"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 func TestMagnumQuotaScopedOperationsKeepProjectResourceBodyAndMetadata(t *testing.T) {

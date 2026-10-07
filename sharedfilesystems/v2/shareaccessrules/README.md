@@ -10,9 +10,9 @@ import (
     "fmt"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/resource"
-    "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 )
 
 func main() {
@@ -82,9 +82,9 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/resource"
-    "gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 )
 
 func FirstAccessRules(ctx context.Context, conn *sdk.Connection,

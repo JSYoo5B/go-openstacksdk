@@ -12,14 +12,14 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/network/v2/extensions/subnetpools"
-	"gophercloudsdk/network/v2/extensions/trunks"
-	"gophercloudsdk/network/v2/networks"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Python Network.subnet_ids is a Body alias for subnets; SubnetPool

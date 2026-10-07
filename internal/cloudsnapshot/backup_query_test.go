@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func backupQueryContractRaw(text string) *json.RawMessage {

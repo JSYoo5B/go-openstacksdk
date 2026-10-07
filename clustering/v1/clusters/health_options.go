@@ -3,8 +3,8 @@ package clusters
 import (
 	"encoding/json"
 
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 type CheckOpts struct{}

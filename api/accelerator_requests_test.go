@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/accelerator/v2/acceleratorrequests"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 func TestAcceleratorRequestCreateRetainsBatch(t *testing.T) {

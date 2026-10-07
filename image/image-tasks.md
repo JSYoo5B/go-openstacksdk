@@ -19,8 +19,8 @@ package examples
 import (
     "context"
 
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func imageTaskExamples(ctx context.Context, svc *image.Service, imageID string) ([]*image.ImageTaskInfo, error) {

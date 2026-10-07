@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func vsopLocation() resource.CloudLocation {

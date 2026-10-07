@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 const limitsGuardedTarget = "https://guarded.test/reverse/v3/limits?project_id=actual"

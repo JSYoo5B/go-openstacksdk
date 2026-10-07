@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/resource"
 )
 
 // UpdateVolume resolves one volume through cached Cinder v3 and applies only

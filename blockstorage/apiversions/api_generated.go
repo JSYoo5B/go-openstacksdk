@@ -3,10 +3,10 @@ package apiversions
 
 import (
 	context "context"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/apiversions"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 func TestEqualPythonJSONSupportsRecursiveBooleanNumberEqualityAndCompleteShape(t *testing.T) {

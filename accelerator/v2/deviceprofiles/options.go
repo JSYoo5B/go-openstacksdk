@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateOpts creates one device profile. Nil optional pointers are omitted;

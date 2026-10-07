@@ -3,13 +3,13 @@ package instances
 
 import (
 	context "context"
+	troveroot "github.com/JSYoo5B/gophercloudsdk/internal/troveroot"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	users "github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	troveroot "gophercloudsdk/internal/troveroot"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

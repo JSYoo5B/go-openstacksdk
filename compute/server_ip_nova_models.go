@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // NovaFloatingIP retains the legacy Nova allocation fields and actual HTTP

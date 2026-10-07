@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
 )
 
 // GetVolumeTypeAccess resolves an exact Type through cached Cinder v3, then

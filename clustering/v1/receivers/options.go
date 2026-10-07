@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type CreateOpts struct {

@@ -23,9 +23,9 @@ import (
     "context"
     "fmt"
 
-    objectstorage "gophercloudsdk/objectstorage/v1"
-    "gophercloudsdk/objectstorage/v1/accounts"
-    "gophercloudsdk/objectstorage/v1/containers"
+    objectstorage "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
 )
 
 func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, accountSecret, containerSecret string) error {

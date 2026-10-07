@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	prop "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	prop "gophercloudsdk/image/v2/metadefproperties"
 )
 
 func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // IsObjectStale compares only the SDK checksum metadata. Filename is explicit

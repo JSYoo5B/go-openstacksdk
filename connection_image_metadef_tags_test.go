@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	tag "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	tag "gophercloudsdk/image/v2/metadeftags"
 )
 
 func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {

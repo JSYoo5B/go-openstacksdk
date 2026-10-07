@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions(t *testing.T) {

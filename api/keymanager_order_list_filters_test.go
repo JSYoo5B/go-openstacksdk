@@ -14,11 +14,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/orders"
-	"gophercloudsdk/resource"
 )
 
 func orderListRow(t *testing.T, tag string, fields map[string]any) string {

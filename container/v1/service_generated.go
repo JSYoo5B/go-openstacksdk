@@ -2,8 +2,8 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/container/v1/capsules"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/container/v1/capsules"
 )
 
 // Service shares one authenticated client across its resource APIs.

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 var backupDescriptors = [...]descriptor{

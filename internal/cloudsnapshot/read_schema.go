@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // These schemas are library-owned. Callers select concrete resource APIs;

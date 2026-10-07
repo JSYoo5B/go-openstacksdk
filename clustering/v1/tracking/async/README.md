@@ -34,9 +34,9 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/clusters"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func UpdateTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {
@@ -67,9 +67,9 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/nodes"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func UpdateTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, error) {

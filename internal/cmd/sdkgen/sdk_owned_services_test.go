@@ -12,17 +12,17 @@ import (
 func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 	root := t.TempDir()
 	g := generator{root: root, collections: []collectionRecord{
-		{Package: "gophercloudsdk/clustering/v1/buildinfo", Source: "sdk_owned", Model: "BuildInfo", Kind: "service_info"},
-		{Package: "gophercloudsdk/clustering/v1/profiletypes", Source: "sdk_owned", Model: "ProfileType", Find: true},
-		{Package: "gophercloudsdk/clustering/v1/profiles", Source: "sdk_owned", Model: "Profile", Find: true, Delete: true},
-		{Package: "gophercloudsdk/clustering/v1/policies", Source: "sdk_owned", Model: "Policy", Find: true, Delete: true},
-		{Package: "gophercloudsdk/clustering/v1/clusters", Source: "sdk_owned", Model: "Cluster", Kind: "async_resource", Find: true, Wait: true},
-		{Package: "gophercloudsdk/clustering/v1/nodes", Source: "sdk_owned", Model: "Node", Kind: "async_resource", Find: true, Wait: true},
-		{Package: "gophercloudsdk/clustering/v1/receivers", Source: "sdk_owned", Model: "Receiver", Find: true, Delete: true},
-		{Package: "gophercloudsdk/clustering/v1/services", Source: "sdk_owned", Model: "Service", Kind: "list_only"},
-		{Package: "gophercloudsdk/clustering/v1/clusterpolicies", Source: "sdk_owned", Model: "ClusterPolicy", Kind: "policy_binding", Find: true, Scope: "InCluster", Parent: "gophercloudsdk/clustering/v1/clusters"},
-		{Package: "gophercloudsdk/clustering/v1/clusterattributes", Source: "sdk_owned", Model: "ClusterAttribute", Kind: "scoped_list_only", Scope: "InCluster", Parent: "gophercloudsdk/clustering/v1/clusters"},
-		{Package: "gophercloudsdk/instanceha/v1/segments", Source: "sdk_owned", Model: "Segment", Find: true, Delete: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/buildinfo", Source: "sdk_owned", Model: "BuildInfo", Kind: "service_info"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes", Source: "sdk_owned", Model: "ProfileType", Find: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles", Source: "sdk_owned", Model: "Profile", Find: true, Delete: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies", Source: "sdk_owned", Model: "Policy", Find: true, Delete: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters", Source: "sdk_owned", Model: "Cluster", Kind: "async_resource", Find: true, Wait: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes", Source: "sdk_owned", Model: "Node", Kind: "async_resource", Find: true, Wait: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers", Source: "sdk_owned", Model: "Receiver", Find: true, Delete: true},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/services", Source: "sdk_owned", Model: "Service", Kind: "list_only"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies", Source: "sdk_owned", Model: "ClusterPolicy", Kind: "policy_binding", Find: true, Scope: "InCluster", Parent: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterattributes", Source: "sdk_owned", Model: "ClusterAttribute", Kind: "scoped_list_only", Scope: "InCluster", Parent: "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments", Source: "sdk_owned", Model: "Segment", Find: true, Delete: true},
 	}}
 	if err := g.generateServices(); err != nil {
 		t.Fatal(err)

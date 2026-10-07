@@ -10,10 +10,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 func TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget(t *testing.T) {

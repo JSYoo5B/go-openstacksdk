@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestDirectoryMarkerOptionsFactoryAndCallbackSnapshots(t *testing.T) {

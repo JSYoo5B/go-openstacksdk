@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"gophercloudsdk/identity/v3/users"
-	"gophercloudsdk/internal/project"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // UserQuotaScope fixes both the project and user. It has no Defaults method

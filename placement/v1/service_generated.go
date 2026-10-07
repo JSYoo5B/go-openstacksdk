@@ -2,13 +2,13 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocationcandidates"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocations"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/placement/v1/traits"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/placement/v1/usages"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/placement/v1/allocationcandidates"
-	resource1 "gophercloudsdk/placement/v1/allocations"
-	resource2 "gophercloudsdk/placement/v1/resourceclasses"
-	resource3 "gophercloudsdk/placement/v1/resourceproviders"
-	resource4 "gophercloudsdk/placement/v1/traits"
-	resource5 "gophercloudsdk/placement/v1/usages"
 )
 
 // Service shares one authenticated client across its resource APIs.

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // StageAcknowledgement records an actual accepted PUT204 response. It does not

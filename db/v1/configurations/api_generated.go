@@ -3,12 +3,12 @@ package configurations
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/db/v1/configurations"
 	instances "github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

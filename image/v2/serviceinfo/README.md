@@ -12,8 +12,8 @@ package example
 import (
     "context"
 
-    "gophercloudsdk"
-    "gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
 )
 
 func discoverStores(ctx context.Context, conn *gophercloudsdk.Connection) ([]*serviceinfo.Store, error) {
@@ -54,8 +54,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
 )
 
 func discoverImportMethods(ctx context.Context, client *gophercloud.ServiceClient) (*serviceinfo.ImportInfo, error) {

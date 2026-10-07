@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
 )
 
 func captureAction(ctx context.Context, client *gophercloud.ServiceClient, id string) (*cloudread.Source, error) {

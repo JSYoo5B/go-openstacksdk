@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // PagePolicy selects continuation representations supported by a service.

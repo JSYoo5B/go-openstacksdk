@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // quotaBinding is private composition, never an embedded project scope. There

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestImageMutationOptionsSnapshotReplacementAndLastWins(t *testing.T) {

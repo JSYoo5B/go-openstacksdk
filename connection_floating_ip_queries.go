@@ -2,7 +2,7 @@ package gophercloudsdk
 
 import (
 	"context"
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func (c *Connection) ListFloatingIPs(ctx context.Context, options ...compute.FloatingIPQueryOption) (*compute.FloatingIPQueryResult, error) {

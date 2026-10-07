@@ -7,8 +7,8 @@ import (
 	"iter"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AddImageMember adds a literal member ID to an image. The server owns sharing

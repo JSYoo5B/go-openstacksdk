@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FetchedSecret separates the actual metadata response from the payload.

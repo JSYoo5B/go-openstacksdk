@@ -1,8 +1,8 @@
 package clusters
 
 import (
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // PolicyID can be a controller name, UUID or short ID. Enabled distinguishes

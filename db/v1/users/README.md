@@ -91,9 +91,9 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/db/v1/users"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/db/v1/users"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func ListUsers(ctx context.Context, conn *sdk.Connection, instanceID, host string) error {

@@ -4,10 +4,10 @@ package groups
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
-	nativefind "gophercloudsdk/internal/nativefind"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

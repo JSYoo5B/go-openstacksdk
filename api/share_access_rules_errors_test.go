@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/shareaccessrules"
 )
 
 func TestShareAccessScopeParentMismatchIsNeverIgnored(t *testing.T) {

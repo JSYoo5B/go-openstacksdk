@@ -7,14 +7,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/cloudlocation"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
 )
 
 type floatingIPQueryState struct {

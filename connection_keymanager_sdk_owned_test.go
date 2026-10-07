@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/quotas"
-	"gophercloudsdk/keymanager/v1/secretstores"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject(t *testing.T) {

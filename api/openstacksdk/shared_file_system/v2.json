@@ -23,7 +23,7 @@
       "id": "shared_file_system/v2/access_rules",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -69,7 +69,7 @@
       "id": "shared_file_system/v2/create_access_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -107,7 +107,7 @@
       "id": "shared_file_system/v2/delete_access_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -144,7 +144,7 @@
       "id": "shared_file_system/v2/export_locations",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -171,7 +171,7 @@
       "id": "shared_file_system/v2/get_export_location",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -426,7 +426,7 @@
       "id": "shared_file_system/v2/shares",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -456,7 +456,7 @@
       "id": "shared_file_system/v2/find_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -477,7 +477,7 @@
       "id": "shared_file_system/v2/get_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -509,7 +509,7 @@
       "id": "shared_file_system/v2/delete_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -534,7 +534,7 @@
       "id": "shared_file_system/v2/update_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -555,7 +555,7 @@
       "id": "shared_file_system/v2/create_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -582,7 +582,7 @@
       "id": "shared_file_system/v2/revert_share_to_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -615,7 +615,7 @@
       "id": "shared_file_system/v2/manage_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -636,7 +636,7 @@
       "id": "shared_file_system/v2/unmanage_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -676,7 +676,7 @@
       "id": "shared_file_system/v2/resize_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -697,7 +697,7 @@
       "id": "shared_file_system/v2/soft_delete_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -718,7 +718,7 @@
       "id": "shared_file_system/v2/restore_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -743,7 +743,7 @@
       "id": "shared_file_system/v2/reset_share_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -764,7 +764,7 @@
       "id": "shared_file_system/v2/fetch_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -786,7 +786,7 @@
       "id": "shared_file_system/v2/get_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -811,7 +811,7 @@
       "id": "shared_file_system/v2/fetch_share_metadata_item",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -837,7 +837,7 @@
       "id": "shared_file_system/v2/get_share_metadata_item",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -867,7 +867,7 @@
       "id": "shared_file_system/v2/set_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -893,7 +893,7 @@
       "id": "shared_file_system/v2/create_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -924,7 +924,7 @@
       "id": "shared_file_system/v2/update_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -957,7 +957,7 @@
       "id": "shared_file_system/v2/delete_share_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -1354,7 +1354,7 @@
       "id": "shared_file_system/v2/share_networks",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1375,7 +1375,7 @@
       "id": "shared_file_system/v2/get_share_network",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1401,7 +1401,7 @@
       "id": "shared_file_system/v2/delete_share_network",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1426,7 +1426,7 @@
       "id": "shared_file_system/v2/update_share_network",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1447,7 +1447,7 @@
       "id": "shared_file_system/v2/create_share_network",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1470,7 +1470,7 @@
       "id": "shared_file_system/v2/share_network_subnets",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1497,7 +1497,7 @@
       "id": "shared_file_system/v2/get_share_network_subnet",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1524,7 +1524,7 @@
       "id": "shared_file_system/v2/create_share_network_subnet",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1556,7 +1556,7 @@
       "id": "shared_file_system/v2/delete_share_network_subnet",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1583,7 +1583,7 @@
       "id": "shared_file_system/v2/fetch_share_network_subnet_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1614,7 +1614,7 @@
       "id": "shared_file_system/v2/fetch_share_network_subnet_metadata_item",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1650,7 +1650,7 @@
       "id": "shared_file_system/v2/set_share_network_subnet_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1686,7 +1686,7 @@
       "id": "shared_file_system/v2/delete_share_network_subnet_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharenetworks"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks"
       ],
       "review": "pending"
     },
@@ -1713,7 +1713,7 @@
       "id": "shared_file_system/v2/create_share_replica",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -2033,7 +2033,7 @@
       "id": "shared_file_system/v2/manage_share_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/shares"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
       ],
       "review": "pending"
     },
@@ -2451,7 +2451,7 @@
       "id": "shared_file_system/v2/share_types",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2472,7 +2472,7 @@
       "id": "shared_file_system/v2/get_share_type",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2497,7 +2497,7 @@
       "id": "shared_file_system/v2/create_share_type",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2523,7 +2523,7 @@
       "id": "shared_file_system/v2/delete_share_type",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2548,7 +2548,7 @@
       "id": "shared_file_system/v2/update_share_type",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2573,7 +2573,7 @@
       "id": "shared_file_system/v2/update_share_type_extra_specs",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },
@@ -2604,7 +2604,7 @@
       "id": "shared_file_system/v2/delete_share_type_extra_spec_property",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/sharedfilesystems/v2/sharetypes"
+        "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
       ],
       "review": "pending"
     },

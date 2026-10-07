@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError(t *testing.T) {

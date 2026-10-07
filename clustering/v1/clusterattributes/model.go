@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ClusterAttribute retains a value of any JSON type. A nil Value means omitted;

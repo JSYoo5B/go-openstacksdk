@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func TestPrepareImportOptionsFreezesJSONAndSourceConflictsWithoutRequests(t *testing.T) {

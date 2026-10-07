@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForStatus applies the instance-ha proxy defaults. Explicit caller

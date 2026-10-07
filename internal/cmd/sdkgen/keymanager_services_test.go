@@ -12,13 +12,13 @@ import (
 
 func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 	want := []collectionRecord{
-		{Package: "gophercloudsdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
-		{Package: "gophercloudsdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "gophercloudsdk/identity/v3/projects"},
-		{Package: "gophercloudsdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "gophercloudsdk/keymanager/v1/secrets"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"},
+		{Package: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"},
 	}
 	var actual []collectionRecord
 	for _, record := range sdkOwnedCollections {
-		if strings.HasPrefix(record.Package, "gophercloudsdk/keymanager/") {
+		if strings.HasPrefix(record.Package, "github.com/JSYoo5B/gophercloudsdk/keymanager/") {
 			actual = append(actual, record)
 		}
 	}
@@ -26,8 +26,8 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		t.Fatalf("manual registry invented a native or common capability: %#v", actual)
 	}
 	root := t.TempDir()
-	g := generator{root: root, inventory: inventory{Operations: []operation{{SDKPackage: "gophercloudsdk/keymanager/v1/secrets", Name: "List"}}}, collections: append([]collectionRecord{
-		{Package: "gophercloudsdk/keymanager/v1/secrets", Model: "Secret", Find: true, Delete: true, Wait: true},
+	g := generator{root: root, inventory: inventory{Operations: []operation{{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets", Name: "List"}}}, collections: append([]collectionRecord{
+		{Package: "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets", Model: "Secret", Find: true, Delete: true, Wait: true},
 	}, actual...)}
 	if err := g.generateServices(); err != nil {
 		t.Fatal(err)
@@ -45,7 +45,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	registry := read("keymanager/v1/service_generated.go")
-	for _, part := range []string{"SecretStores", "Quotas", "SecretConsumers", "Secrets", "gophercloudsdk/keymanager/v1/secretstores", "gophercloudsdk/keymanager/v1/quotas", "gophercloudsdk/keymanager/v1/secretconsumers", "New(client)"} {
+	for _, part := range []string{"SecretStores", "Quotas", "SecretConsumers", "Secrets", "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores", "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas", "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers", "New(client)"} {
 		if !strings.Contains(registry, part) {
 			t.Fatalf("missing shared-client registry %q: %s", part, registry)
 		}

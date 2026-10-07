@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type mutationOpts struct {

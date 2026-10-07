@@ -3,7 +3,7 @@ package cinderaction
 import (
 	"context"
 
-	"gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
 )
 
 // ReadonlyOptions owns the optional flag. Nil selects the Proxy default true.

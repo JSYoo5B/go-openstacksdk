@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ConsumerOpts identifies an association, not a URL or a Consumer resource ID.

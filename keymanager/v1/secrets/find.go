@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FindIdentity uses a strict metadata/payload Fetch for a safe direct identity.

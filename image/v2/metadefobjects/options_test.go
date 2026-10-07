@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func objectOptionPointer[T any](value T) *T { return &value }

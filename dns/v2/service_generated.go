@@ -2,13 +2,13 @@
 package v2
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/accept"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/request"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/dns/v2/quotas"
-	resource1 "gophercloudsdk/dns/v2/recordsets"
-	resource2 "gophercloudsdk/dns/v2/transfer/accept"
-	resource3 "gophercloudsdk/dns/v2/transfer/request"
-	resource4 "gophercloudsdk/dns/v2/tsigkeys"
-	resource5 "gophercloudsdk/dns/v2/zones"
 )
 
 // Service shares one authenticated client across its resource APIs.

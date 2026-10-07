@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Tasks lazily follows guarded canonical next links. Each iteration owns its

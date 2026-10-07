@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 type bodyFilterUpdate struct {

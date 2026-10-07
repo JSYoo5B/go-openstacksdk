@@ -3,7 +3,7 @@ package blockstorage
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListVolumesResult commits a full owned normalized array and original wire

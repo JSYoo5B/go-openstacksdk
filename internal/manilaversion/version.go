@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // Minor returns the configured 2.N minor version. Empty selection means 2.0;

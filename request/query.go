@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // QueryOptions is used by SDK-owned collection bindings when an upstream API

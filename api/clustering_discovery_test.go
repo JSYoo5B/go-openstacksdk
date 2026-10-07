@@ -9,12 +9,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/buildinfo"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/buildinfo"
-	"gophercloudsdk/clustering/v1/policytypes"
-	"gophercloudsdk/clustering/v1/profiletypes"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestClusteringDiscoveryBuildInfoSingletonAndRawEvidence(t *testing.T) {

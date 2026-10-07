@@ -12,11 +12,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/internal/troveroot"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/db/v1/instances"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/internal/troveroot"
-	"gophercloudsdk/resource"
 )
 
 const troveRootContractBase = "/reverse/trove/project/"

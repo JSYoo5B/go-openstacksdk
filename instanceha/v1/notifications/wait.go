@@ -3,9 +3,9 @@ package notifications
 import (
 	"context"
 
-	"gophercloudsdk/internal/masakari"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/masakari"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForStatus polls the notification UUID with the instance-ha defaults.

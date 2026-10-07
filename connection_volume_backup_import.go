@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/cloudsnapshot"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ImportVolumeBackup uses cached Cinder without consuming CurrentLocation.

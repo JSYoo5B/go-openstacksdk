@@ -11,13 +11,13 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/network/v2/extensions/layer3/routers"
-	"gophercloudsdk/network/v2/extensions/security/groups"
-	"gophercloudsdk/resource"
 )
 
 // Python find_router/find_security_group accept query and ignore logical

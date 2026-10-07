@@ -4,7 +4,7 @@ import (
 	"context"
 	"unicode/utf8"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (s *Service) prepareGetImage(ctx context.Context, ref resource.Ref, options []GetImageOption) (*preparedTaskSource, string, error) {

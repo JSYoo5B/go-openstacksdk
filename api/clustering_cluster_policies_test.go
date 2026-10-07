@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/clusterpolicies"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const clusterPolicyRow = `{"id":"binding-id","policy_id":"policy-id","cluster_id":"canonical-cluster","cluster_name":"selected","policy_name":"named-policy","policy_type":"senlin.policy.scaling-1.0","enabled":false,"data":{"big":9007199254740993,"nested":{"fraction":1.234567890123456789}},"future":null}`

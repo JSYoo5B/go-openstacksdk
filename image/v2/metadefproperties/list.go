@@ -8,7 +8,7 @@ import (
 	"iter"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 type propertyEntry struct {

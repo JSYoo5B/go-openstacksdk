@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/swiftinfo"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/internal/swiftinfo"
 )
 
 type preparedInfo struct {

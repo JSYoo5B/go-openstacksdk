@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GenerateFormSignature signs literal FormPost fields. Automatic discovery reads

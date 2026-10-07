@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/blockstorage/v3/volumes"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 )

@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 // matchLocal follows Resource.list's ordered Body predicates, not cloud search

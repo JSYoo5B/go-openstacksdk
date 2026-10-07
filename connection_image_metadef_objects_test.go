@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	obj "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	obj "gophercloudsdk/image/v2/metadefobjects"
 )
 
 func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {

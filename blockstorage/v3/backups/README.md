@@ -34,8 +34,8 @@ package example
 import (
     "context"
 
-    v3 "gophercloudsdk/blockstorage/v3"
-    "gophercloudsdk/blockstorage/v3/backups"
+    v3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
 )
 
 func clearBackupMetadata(ctx context.Context, cinder *v3.Service, backupID string) (*backups.Backup, error) {

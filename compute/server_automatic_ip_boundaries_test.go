@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
 )
 
 func TestAutomaticIPObservationCapabilityAndReuseOwnerPreflight(t *testing.T) {

@@ -3,13 +3,13 @@ package users
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	groups "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 	projects "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

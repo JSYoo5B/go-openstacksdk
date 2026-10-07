@@ -2,10 +2,10 @@
 package deployables
 
 import (
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/common"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cyborg"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/accelerator/v2/common"
-	"gophercloudsdk/internal/cyborg"
-	"gophercloudsdk/resource"
 )
 
 type Deployable struct {

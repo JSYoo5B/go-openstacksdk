@@ -3,9 +3,9 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // CreateVolumeRequest supplies the required size and an optional explicit image

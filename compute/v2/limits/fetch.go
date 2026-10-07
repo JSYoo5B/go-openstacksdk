@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WithGetReserved uses Nova's integer reserved query: 0 excludes reservations,

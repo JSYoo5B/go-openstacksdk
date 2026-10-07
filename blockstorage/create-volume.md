@@ -15,9 +15,9 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    sdk "gophercloudsdk"
-    "gophercloudsdk/blockstorage"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func createDefault(ctx context.Context, conn *sdk.Connection) (*blockstorage.CreateVolumeResult, error) {

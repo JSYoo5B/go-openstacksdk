@@ -200,8 +200,8 @@ func emitSecurityGroupBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 	emitNeutronBodyRecordAdapter(e, plan, "securityGroupBodyFilterValue")
 }
 func emitSecurityGroupBodyFilterList(e *emitter, plan *collectionPlan) {
-	e.use("gophercloudsdk/request")
-	e.use("gophercloudsdk/internal/nativefind")
+	e.use("github.com/JSYoo5B/gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/gophercloudsdk/internal/nativefind")
 	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)
 	e.printf("if err==nil{err=request.ValidateCapabilities(cfg,false,true,false)}\nif err!=nil{err=request.Wrap(\"List\",\"groups\",err);return func(yield func(*resource.BodyRecord[%s],error)bool){yield(nil,err)}}\n", plan.modelName)
 	e.printf("return nativefind.IterateSecurityGroupBodies(ctx,a.RawClient(),cfg.Query,control)\n}\n")

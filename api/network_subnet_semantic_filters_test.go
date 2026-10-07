@@ -12,10 +12,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/subnets"
-	"gophercloudsdk/resource"
 )
 
 // Independent expected table from openstacksdk ef55d7d Subnet._query_mapping,

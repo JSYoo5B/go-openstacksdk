@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"gophercloudsdk/internal/swiftinfo"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/swiftinfo"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Info retains Swift's complete capability object and five common sections.

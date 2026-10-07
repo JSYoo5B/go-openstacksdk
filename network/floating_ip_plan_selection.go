@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"sort"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 func planMetadata[T any](*T) *resource.Metadata { return &resource.Metadata{} }

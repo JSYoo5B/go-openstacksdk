@@ -9,8 +9,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/image/v2/serviceinfo"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
 )
 
 func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {

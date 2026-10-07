@@ -5,7 +5,7 @@ import (
 	"errors"
 	"slices"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // VolumeTypeReadOpts supplies an owned complete location override to ordinary

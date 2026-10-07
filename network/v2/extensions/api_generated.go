@@ -3,12 +3,12 @@ package extensions
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	extensions "github.com/gophercloud/gophercloud/v2/openstack/common/extensions"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 // AddIPsToServer provides standalone pool/list/automatic assignment with lazy

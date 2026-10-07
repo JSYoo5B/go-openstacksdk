@@ -3,9 +3,9 @@ package gophercloudsdk
 import (
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudlocation"
-	"gophercloudsdk/resource"
 )
 
 // WithCloudLocation supplies owned configured facts when an adopted provider

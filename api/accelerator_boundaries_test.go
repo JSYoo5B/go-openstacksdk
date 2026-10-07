@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deployables"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/accelerator/v2/deployables"
-	"gophercloudsdk/accelerator/v2/devices"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestAcceleratorEmptyPageContinuesAndCycles(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/objectstorage/v1/objects"
 )
 
 type connectionCreateReader struct {

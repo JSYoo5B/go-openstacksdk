@@ -2,11 +2,11 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/hosts"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/notifications"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/vmoves"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/instanceha/v1/hosts"
-	resource1 "gophercloudsdk/instanceha/v1/notifications"
-	resource2 "gophercloudsdk/instanceha/v1/segments"
-	resource3 "gophercloudsdk/instanceha/v1/vmoves"
 )
 
 // Service shares one authenticated client across its resource APIs.

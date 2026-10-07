@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/clustering/v1/nodes"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestClusteringScalarOptionsPreserveExplicitValuesAndReuse(t *testing.T) {

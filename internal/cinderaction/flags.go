@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
 )
 
 // Bootable retains the required Proxy bool, including an explicit false.

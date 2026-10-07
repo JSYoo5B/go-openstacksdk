@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func snapshotMutationModelObject(t *testing.T, raw json.RawMessage) map[string]json.RawMessage {

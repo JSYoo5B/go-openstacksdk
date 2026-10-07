@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FloatingIPRecord separates the returned cloud resource from the original

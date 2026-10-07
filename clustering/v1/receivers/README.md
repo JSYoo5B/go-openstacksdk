@@ -201,8 +201,8 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/receivers"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
 )
 
 func FindReceiverStrict(ctx context.Context, conn *sdk.Connection) (*receivers.Receiver, error) {

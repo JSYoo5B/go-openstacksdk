@@ -20,7 +20,7 @@ if err != nil { return err }
 fmt.Println(value.UUID, value.Finished, value.State)
 ```
 
-`resource`는 `gophercloudsdk/resource`, `time`과 `fmt`는 표준 라이브러리입니다. 실제 node UUID를 입력해야 합니다. UUID처럼 보이는 문자열로 이름 조회를 추측하지 않습니다. Node 이름을 사용하려면 먼저 Bare Metal 서비스의 `Nodes.Resources.ResolveID(ctx, resource.Name(name))`로 UUID를 구한 뒤 Introspection 서비스에 전달합니다. `resource.Name`을 Introspection Collection과 waiter에 직접 전달하면 요청 전에 `resource.ErrUnsupported`를 반환합니다.
+`resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `time`과 `fmt`는 표준 라이브러리입니다. 실제 node UUID를 입력해야 합니다. UUID처럼 보이는 문자열로 이름 조회를 추측하지 않습니다. Node 이름을 사용하려면 먼저 Bare Metal 서비스의 `Nodes.Resources.ResolveID(ctx, resource.Name(name))`로 UUID를 구한 뒤 Introspection 서비스에 전달합니다. `resource.Name`을 Introspection Collection과 waiter에 직접 전달하면 요청 전에 `resource.ErrUnsupported`를 반환합니다.
 
 공통 `Get/Find/ResolveID/List/All`을 사용할 수 있습니다. Find는 ID 미존재를 `resource.ErrNotFound`로 반환하며 `resource.WithIgnoreMissing()`으로 `nil, nil`을 선택합니다. 목록은 UUID와 `Finished`, `State`, `Error`, 시간을 보존하고 lazy page 순회와 `break`, context 취소를 적용합니다. 생성기에서 조회/목록 모델, UUID 타입, Finished bool과 Error string의 일치를 검사합니다.
 

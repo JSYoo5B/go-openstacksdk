@@ -12,8 +12,8 @@ import (
     "io"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/image/v2/imagedata"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
 )
 
 func createAndWait(ctx context.Context, client *gophercloud.ServiceClient, data io.Reader, size int64) (*image.CreateImportResult, error) {
@@ -49,8 +49,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/image/v2/imageimport"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
 )
 
 func createFromWeb(ctx context.Context, client *gophercloud.ServiceClient, uri string) (*image.CreateImportResult, error) {

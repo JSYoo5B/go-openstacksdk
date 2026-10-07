@@ -16,11 +16,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // The expected map is independent of the emitted runtime descriptor: pinned

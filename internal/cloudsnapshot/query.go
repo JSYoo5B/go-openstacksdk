@@ -11,8 +11,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type listPolicy struct {

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/identity/v3/users"
-	"gophercloudsdk/internal/project"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // UserQuotaScope fixes both the project and user. It intentionally does not

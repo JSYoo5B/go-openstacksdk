@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FetchOpts controls composition. Nil Payload selects the automatic payload

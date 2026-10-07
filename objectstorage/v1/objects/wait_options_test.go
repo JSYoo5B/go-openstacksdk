@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestObjectWaitOptionsSnapshots(t *testing.T) {

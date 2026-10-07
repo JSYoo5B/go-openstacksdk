@@ -10,16 +10,16 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
+	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/identity/v3/domains"
-	"gophercloudsdk/identity/v3/groups"
-	"gophercloudsdk/identity/v3/projects"
-	"gophercloudsdk/identity/v3/roles"
-	"gophercloudsdk/identity/v3/users"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/networks"
-	"gophercloudsdk/network/v2/subnets"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Python find_network/find_subnet and four Keystone find methods accept

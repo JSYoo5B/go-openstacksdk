@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gophercloudsdk/internal/nativefind"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"maps"
 	"reflect"
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 )

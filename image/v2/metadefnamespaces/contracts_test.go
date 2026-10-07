@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	namespaces "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	namespaces "gophercloudsdk/image/v2/metadefnamespaces"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const namespacePrefix = "/reverse/namespace/glance/v2/"

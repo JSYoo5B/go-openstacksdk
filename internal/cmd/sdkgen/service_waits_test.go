@@ -54,7 +54,7 @@ func TestServiceWaitPoliciesBindOnlyActualStatusCollections(t *testing.T) {
 		t.Fatalf("service wait inventory: %v", err)
 	}
 	for _, record := range records {
-		path := strings.TrimPrefix(record["package"].(string), "gophercloudsdk/")
+		path := strings.TrimPrefix(record["package"].(string), "github.com/JSYoo5B/gophercloudsdk/")
 		if record["service_wait"] != policies[path] {
 			t.Fatalf("missing exact owned policy: %v", record)
 		}

@@ -3,8 +3,8 @@ package clusters
 import (
 	"context"
 
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FindOpts controls automatic name/ID lookup. Nil IgnoreMissing keeps the

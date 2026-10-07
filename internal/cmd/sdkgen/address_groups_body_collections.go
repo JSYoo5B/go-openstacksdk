@@ -190,7 +190,7 @@ func emitAddressGroupBodyRecordAdapter(e *emitter, plan *collectionPlan) {
 }
 
 func emitNeutronBodyRecordAdapter(e *emitter, plan *collectionPlan, selector string) {
-	e.use("gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/gophercloudsdk/request")
 	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return %s(record,key)},\n", plan.modelName, selector)
 	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
 	e.printf("options:=[]ListOption{func(config *request.Config[ListOpts])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn a.listBodyWithControl(ctx,control,options...)\n},\n")
@@ -201,7 +201,7 @@ func emitAddressGroupBodyFilterList(e *emitter, plan *collectionPlan) {
 }
 
 func emitNeutronBodyFilterList(e *emitter, plan *collectionPlan, kind, envelope, extractor string) {
-	e.use("gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/gophercloudsdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
 	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)

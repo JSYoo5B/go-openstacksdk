@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 type Conversion uint8

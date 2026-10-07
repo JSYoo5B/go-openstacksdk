@@ -3,8 +3,8 @@ package blockstorage
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudsnapshot"
 )
 
 // CreateVolumeSnapshot owns cloud-helper defaults and response merging. It

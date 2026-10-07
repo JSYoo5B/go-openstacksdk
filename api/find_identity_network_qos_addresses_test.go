@@ -13,11 +13,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
-	"gophercloudsdk/network/v2/extensions/security/addressgroups"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Python find_qos_policy/find_address_group are string-identity finds

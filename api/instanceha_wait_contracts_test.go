@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/hosts"
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/notifications"
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/vmoves"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/instanceha/v1/hosts"
-	"gophercloudsdk/instanceha/v1/notifications"
-	"gophercloudsdk/instanceha/v1/segments"
-	"gophercloudsdk/instanceha/v1/vmoves"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type instanceHAWaitAPI struct {

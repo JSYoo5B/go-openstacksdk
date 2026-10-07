@@ -4,8 +4,8 @@ package rules
 import (
 	context "context"
 	fmt "fmt"
-	policies "gophercloudsdk/network/v2/extensions/qos/policies"
-	resource "gophercloudsdk/resource"
+	policies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

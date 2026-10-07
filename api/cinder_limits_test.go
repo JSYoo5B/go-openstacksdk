@@ -13,13 +13,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/blockstorage/v3/limits"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const cinderLimitsBody = `{"limits":{"absolute":{"maxTotalVolumes":10,"totalVolumesUsed":1},"rate":[]}}`

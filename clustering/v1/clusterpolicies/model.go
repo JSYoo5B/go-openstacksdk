@@ -3,7 +3,7 @@ package clusterpolicies
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ClusterPolicy distinguishes the binding UUID from its policy UUID and the

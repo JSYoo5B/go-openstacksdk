@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
 )
 
 type preparedDeleteObject struct {

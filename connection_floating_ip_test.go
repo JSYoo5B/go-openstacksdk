@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionFloatingIPResolvesComputeAndNeutronReferences(t *testing.T) {

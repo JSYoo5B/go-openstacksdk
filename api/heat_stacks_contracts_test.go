@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/orchestration/v1/stacks"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 )

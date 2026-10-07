@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/trunks"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionTrunkFiltersSharedClientAndDistinctQueryBodyNamespaces(t *testing.T) {

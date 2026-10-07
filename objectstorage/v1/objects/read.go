@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GetObject reads opaque binary bytes. Partial bytes and the initial metadata

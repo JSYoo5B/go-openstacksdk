@@ -3,10 +3,10 @@ package clusters
 import (
 	"context"
 
-	"gophercloudsdk/clustering/v1/actions"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Check submits a health check with an empty parameter object by default.

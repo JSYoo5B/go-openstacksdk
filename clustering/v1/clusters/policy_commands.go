@@ -3,9 +3,9 @@ package clusters
 import (
 	"context"
 
-	"gophercloudsdk/clustering/v1/actions"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AttachPolicy submits a binding change. PolicyID is a controller identity in

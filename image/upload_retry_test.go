@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/image"
-	"gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 
 	"github.com/gophercloud/gophercloud/v2"
 )

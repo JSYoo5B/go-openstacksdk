@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/quotasets"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // QuotaResource preserves native limits and every quota_set response field.

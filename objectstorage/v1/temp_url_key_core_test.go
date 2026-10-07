@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeobjects "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 type tempURLKeyTestTransport func(*http.Request) (*http.Response, error)

@@ -3,8 +3,8 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
 )
 
 func (c *Connection) ExtendVolume(ctx context.Context, input blockstorage.VolumeActionRequest, newSize int) (*blockstorage.VolumeActionResult, error) {

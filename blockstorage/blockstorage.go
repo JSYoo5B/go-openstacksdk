@@ -2,14 +2,14 @@ package blockstorage
 
 import (
 	"context"
-	blockstorageapi "gophercloudsdk/blockstorage/v3"
+	blockstorageapi "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
 	"iter"
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/internal/nativefind"
-	"gophercloudsdk/internal/query"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
+	"github.com/JSYoo5B/gophercloudsdk/internal/query"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"

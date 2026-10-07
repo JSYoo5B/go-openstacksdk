@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	"gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 // The pinned DownloadMixin always fetches metadata first. DownloadTo covers

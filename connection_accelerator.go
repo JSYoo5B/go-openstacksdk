@@ -2,8 +2,8 @@ package gophercloudsdk
 
 import (
 	"context"
+	accelerator "github.com/JSYoo5B/gophercloudsdk/accelerator/v2"
 	"github.com/gophercloud/gophercloud/v2"
-	accelerator "gophercloudsdk/accelerator/v2"
 	"strings"
 )
 

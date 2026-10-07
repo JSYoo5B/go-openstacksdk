@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // qosPolicyBodyFilterValue compares original fields only after native

@@ -1,6 +1,6 @@
 package blockstorage
 
-import "gophercloudsdk/internal/cloudbackup"
+import "github.com/JSYoo5B/gophercloudsdk/internal/cloudbackup"
 
 // VolumeBackupMutationPage owns actual mutation or polling body/header/status.
 type VolumeBackupMutationPage = cloudbackup.MutationPage

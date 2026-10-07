@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // TaskWaitOpts controls the SDK-owned task workflow. Nil Timeout selects 120

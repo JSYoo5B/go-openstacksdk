@@ -9,8 +9,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 type limitsModelConversion uint8

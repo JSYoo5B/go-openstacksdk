@@ -7,7 +7,7 @@ import (
 	"net/netip"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AvailableFloatingIPRequest selects the first matching external network in

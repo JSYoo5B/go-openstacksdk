@@ -18,7 +18,7 @@
       "id": "load_balancer/v2/create_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -39,7 +39,7 @@
       "id": "load_balancer/v2/get_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -61,7 +61,7 @@
       "id": "load_balancer/v2/get_load_balancer_statistics",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -82,7 +82,7 @@
       "id": "load_balancer/v2/load_balancers",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -113,7 +113,7 @@
       "id": "load_balancer/v2/delete_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -139,7 +139,7 @@
       "id": "load_balancer/v2/find_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -164,7 +164,7 @@
       "id": "load_balancer/v2/update_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -205,7 +205,7 @@
       "id": "load_balancer/v2/wait_for_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -226,7 +226,7 @@
       "id": "load_balancer/v2/failover_load_balancer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/loadbalancers"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
       ],
       "review": "pending"
     },
@@ -247,7 +247,7 @@
       "id": "load_balancer/v2/create_listener",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -273,7 +273,7 @@
       "id": "load_balancer/v2/delete_listener",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -299,7 +299,7 @@
       "id": "load_balancer/v2/find_listener",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -320,7 +320,7 @@
       "id": "load_balancer/v2/get_listener",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -342,7 +342,7 @@
       "id": "load_balancer/v2/get_listener_statistics",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -363,7 +363,7 @@
       "id": "load_balancer/v2/listeners",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -388,7 +388,7 @@
       "id": "load_balancer/v2/update_listener",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/listeners"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
       ],
       "review": "pending"
     },
@@ -409,7 +409,7 @@
       "id": "load_balancer/v2/create_pool",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -430,7 +430,7 @@
       "id": "load_balancer/v2/get_pool",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -451,7 +451,7 @@
       "id": "load_balancer/v2/pools",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -477,7 +477,7 @@
       "id": "load_balancer/v2/delete_pool",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -503,7 +503,7 @@
       "id": "load_balancer/v2/find_pool",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -528,7 +528,7 @@
       "id": "load_balancer/v2/update_pool",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -554,8 +554,8 @@
       "id": "load_balancer/v2/create_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -586,8 +586,8 @@
       "id": "load_balancer/v2/delete_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -618,8 +618,8 @@
       "id": "load_balancer/v2/find_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -645,8 +645,8 @@
       "id": "load_balancer/v2/get_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -672,8 +672,8 @@
       "id": "load_balancer/v2/members",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -703,8 +703,8 @@
       "id": "load_balancer/v2/update_member",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/pools",
-        "gophercloudsdk/loadbalancer/v2/pools"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
       ],
       "review": "pending"
     },
@@ -853,7 +853,7 @@
       "id": "load_balancer/v2/create_l7_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -879,7 +879,7 @@
       "id": "load_balancer/v2/delete_l7_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -905,7 +905,7 @@
       "id": "load_balancer/v2/find_l7_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -926,7 +926,7 @@
       "id": "load_balancer/v2/get_l7_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -947,7 +947,7 @@
       "id": "load_balancer/v2/l7_policies",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -972,7 +972,7 @@
       "id": "load_balancer/v2/update_l7_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -998,7 +998,7 @@
       "id": "load_balancer/v2/create_l7_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1029,7 +1029,7 @@
       "id": "load_balancer/v2/delete_l7_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1060,7 +1060,7 @@
       "id": "load_balancer/v2/find_l7_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1086,7 +1086,7 @@
       "id": "load_balancer/v2/get_l7_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1112,7 +1112,7 @@
       "id": "load_balancer/v2/l7_rules",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1142,7 +1142,7 @@
       "id": "load_balancer/v2/update_l7_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/l7policies"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
       ],
       "review": "pending"
     },
@@ -1304,7 +1304,7 @@
       "id": "load_balancer/v2/create_flavor_profile",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1325,7 +1325,7 @@
       "id": "load_balancer/v2/get_flavor_profile",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1346,7 +1346,7 @@
       "id": "load_balancer/v2/flavor_profiles",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1372,7 +1372,7 @@
       "id": "load_balancer/v2/delete_flavor_profile",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1398,7 +1398,7 @@
       "id": "load_balancer/v2/find_flavor_profile",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1423,7 +1423,7 @@
       "id": "load_balancer/v2/update_flavor_profile",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavorprofiles"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
       ],
       "review": "pending"
     },
@@ -1444,7 +1444,7 @@
       "id": "load_balancer/v2/create_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1465,7 +1465,7 @@
       "id": "load_balancer/v2/get_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1486,7 +1486,7 @@
       "id": "load_balancer/v2/flavors",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1512,7 +1512,7 @@
       "id": "load_balancer/v2/delete_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1538,7 +1538,7 @@
       "id": "load_balancer/v2/find_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1563,7 +1563,7 @@
       "id": "load_balancer/v2/update_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
       ],
       "review": "pending"
     },
@@ -1584,7 +1584,7 @@
       "id": "load_balancer/v2/amphorae",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/amphorae"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
       ],
       "review": "pending"
     },
@@ -1605,7 +1605,7 @@
       "id": "load_balancer/v2/get_amphora",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/amphorae"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
       ],
       "review": "pending"
     },
@@ -1631,7 +1631,7 @@
       "id": "load_balancer/v2/find_amphora",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/amphorae"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
       ],
       "review": "pending"
     },
@@ -1652,7 +1652,7 @@
       "id": "load_balancer/v2/configure_amphora",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/amphorae"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
       ],
       "review": "pending"
     },
@@ -1673,7 +1673,7 @@
       "id": "load_balancer/v2/failover_amphora",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/loadbalancer/v2/amphorae"
+        "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
       ],
       "review": "pending"
     },

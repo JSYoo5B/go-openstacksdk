@@ -23,8 +23,8 @@ import (
     "context"
     "encoding/json"
 
-    "gophercloudsdk/image"
-    "gophercloudsdk/image/v2/metadefproperties"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"
 )
 
 type PropertyEvidence struct {

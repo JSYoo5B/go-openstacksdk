@@ -3,7 +3,7 @@ package cinderrequest
 import (
 	"errors"
 	"fmt"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"io"
 	"net/http"
 	"strings"

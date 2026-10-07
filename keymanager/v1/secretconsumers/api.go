@@ -12,11 +12,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/keymanager/v1/secrets"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const kind = "keymanager.secret_consumers"

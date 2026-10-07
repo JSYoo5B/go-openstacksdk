@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestAvailableIPNovaRawFilterBeforeNormalization(t *testing.T) {

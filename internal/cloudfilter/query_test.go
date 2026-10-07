@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
 )
 
 // The 16 expected wire queries come from the separate, explicitly unpinned

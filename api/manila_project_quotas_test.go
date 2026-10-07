@@ -11,13 +11,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 func newManilaQuotaScope(t *testing.T, cloud *testcloud.Cloud, version string) *quotasets.ProjectQuotaScope {

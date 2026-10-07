@@ -272,7 +272,7 @@ func TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPo
 				t.Fatalf("unsafe/misleading %q: %s", forbidden, out)
 			}
 		}
-		if e.imports["gophercloudsdk/internal/snapshotmetadata"] != "snapshotmetadata" || operationReturnPolicy(fn) != "extract" {
+		if e.imports["github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata"] != "snapshotmetadata" || operationReturnPolicy(fn) != "extract" {
 			t.Fatal("safe helper import/return policy missing")
 		}
 		// The optional inventory marker describes this correction without changing

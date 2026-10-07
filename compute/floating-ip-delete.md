@@ -80,8 +80,8 @@ import (
 	"os"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func main() {

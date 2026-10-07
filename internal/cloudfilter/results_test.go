@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
 )
 
 func TestCloudFilterExpressionBridgeReturnsArbitraryOwnedJSONWithoutInventedRowIndices(t *testing.T) {

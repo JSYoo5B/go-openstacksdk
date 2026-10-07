@@ -1,7 +1,7 @@
 package cloudsnapshot
 
 import (
-	"gophercloudsdk/internal/cinderrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderrequest"
 	"math/big"
 )
 

@@ -6,8 +6,8 @@ import (
 	"iter"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // List is lazy and reusable. A positive wire limit follows full pages using

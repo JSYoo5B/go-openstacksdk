@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/orders"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 const orderListPath = "/reverse/barbican/v1/orders"

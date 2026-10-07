@@ -2,11 +2,11 @@
 package v2
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/claims"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/messages"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/messaging/v2/claims"
-	resource1 "gophercloudsdk/messaging/v2/messages"
-	resource2 "gophercloudsdk/messaging/v2/queues"
-	resource3 "gophercloudsdk/messaging/v2/subscriptions"
 )
 
 // Service shares one authenticated client across its resource APIs.

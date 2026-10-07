@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // DeleteUnattachedFloatingIPs lists the complete public inventory before

@@ -3,7 +3,7 @@ package image
 import (
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // ImageTagResult retains an actual 204 acknowledgement for one fixed image and

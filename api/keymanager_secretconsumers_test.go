@@ -14,11 +14,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/secretconsumers"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // openstacksdk ef55d7d _proxy.py:544–610 and secret_consumer.py:22–67;

@@ -2,8 +2,8 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudsnapshot"
 )
 
 // SearchVolumeSnapshots completes a queryless detailed list before applying

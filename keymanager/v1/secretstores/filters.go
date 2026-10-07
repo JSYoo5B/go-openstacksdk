@@ -8,10 +8,10 @@ import (
 	"maps"
 	"net/url"
 
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // The request argument is SDK-private: no additional public ListOpts field,

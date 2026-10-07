@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"sort"
 
-	"gophercloudsdk/internal/query"
-	floatingipapi "gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	portapi "gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/query"
+	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+	portapi "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	nativeports "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/ports"

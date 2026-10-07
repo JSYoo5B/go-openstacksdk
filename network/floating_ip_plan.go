@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sync"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FloatingIPSelection is an owned copy of a plan's concrete Neutron targets.

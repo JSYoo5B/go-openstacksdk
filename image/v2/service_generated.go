@@ -2,18 +2,18 @@
 package v2
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects"
+	resource6 "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"
+	resource7 "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes"
+	resource8 "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"
+	resource9 "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+	resource10 "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/image/v2/imagedata"
-	resource1 "gophercloudsdk/image/v2/imageimport"
-	resource2 "gophercloudsdk/image/v2/images"
-	resource3 "gophercloudsdk/image/v2/members"
-	resource4 "gophercloudsdk/image/v2/metadefnamespaces"
-	resource5 "gophercloudsdk/image/v2/metadefobjects"
-	resource6 "gophercloudsdk/image/v2/metadefproperties"
-	resource7 "gophercloudsdk/image/v2/metadefresourcetypes"
-	resource8 "gophercloudsdk/image/v2/metadeftags"
-	resource9 "gophercloudsdk/image/v2/serviceinfo"
-	resource10 "gophercloudsdk/image/v2/tasks"
 )
 
 // Service shares one authenticated client across its resource APIs.

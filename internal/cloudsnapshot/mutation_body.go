@@ -6,7 +6,7 @@ import (
 	"sort"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
 )
 
 // ValidateCreateInput checks the literal body without selecting a service.

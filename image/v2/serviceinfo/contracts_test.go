@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	nativeimport "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	nativeimport "gophercloudsdk/image/v2/imageimport"
-	"gophercloudsdk/image/v2/serviceinfo"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const infoPrefix = "/reverse/glance/v2/"

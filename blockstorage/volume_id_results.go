@@ -3,7 +3,7 @@ package blockstorage
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // GetVolumeIDResult owns the response ID independently of the normalized Value,

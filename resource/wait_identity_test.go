@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestWaitKeepsExplicitIDWhenResponseIdentityChanges(t *testing.T) {

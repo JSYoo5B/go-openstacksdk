@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func infoCoreProof(t *testing.T, err error, code int, body string) *resource.ResponseError {

@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // BodyFilterSpec owns one operation's local response-field namespace. Fields

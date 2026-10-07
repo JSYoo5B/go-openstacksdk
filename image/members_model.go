@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ImageMember preserves nullable canonical fields and exact response metadata.

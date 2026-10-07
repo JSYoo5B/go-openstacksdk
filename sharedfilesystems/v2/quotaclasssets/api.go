@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/manilaversion"
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/manilaversion"
-	"gophercloudsdk/internal/project"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 type API struct{ client *gophercloud.ServiceClient }

@@ -122,8 +122,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/profiletypes"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes"
 )
 
 func FilterProfileTypes(ctx context.Context, conn *sdk.Connection, typeName string) error {

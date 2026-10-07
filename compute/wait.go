@@ -3,8 +3,8 @@ package compute
 import (
 	"context"
 
-	"gophercloudsdk/internal/servicewait"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/servicewait"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForState polls an SDK collection with Compute's ERROR failure default,

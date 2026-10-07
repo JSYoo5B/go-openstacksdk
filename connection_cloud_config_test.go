@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
-	"gophercloudsdk/resource"
 )
 
 func writeCloudConfigFile(t *testing.T, path, body string) {

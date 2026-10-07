@@ -8,8 +8,8 @@ import (
 	"slices"
 	"time"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type SearchFloatingIPsRequest struct{ ID string }

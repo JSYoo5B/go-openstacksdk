@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
+	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/policies"
-	"gophercloudsdk/clustering/v1/profiles"
-	"gophercloudsdk/instanceha/v1/segments"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionSDKOwnedResourcesUseCachedProviderAndExactServiceRoots(t *testing.T) {

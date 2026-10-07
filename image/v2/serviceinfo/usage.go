@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // GetUsageInfo reads the authenticated project's quota usage once. The server

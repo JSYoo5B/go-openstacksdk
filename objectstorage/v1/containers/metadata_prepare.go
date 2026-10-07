@@ -9,10 +9,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 type preparedMetadata struct {

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (p *reader) mutationExchange(ctx context.Context, method, target string, body json.RawMessage) (*rest.Response, error) {

@@ -22,7 +22,7 @@ import (
     "context"
     "fmt"
 
-    "gophercloudsdk/objectstorage/v1/accounts"
+    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
 )
 
 func changeAccountMetadata(ctx context.Context, api *accounts.API) error {

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AllocateFloatingIPRequest always creates a fresh Neutron allocation. Network

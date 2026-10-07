@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // DirectAttachOptions preserves selector presence. Instance wins over HostName,

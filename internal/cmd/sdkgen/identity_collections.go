@@ -648,7 +648,7 @@ func identityGetResult(pkg *types.Package, plan *collectionPlan, parents int) *t
 }
 
 func emitIdentityGetQuery(e *emitter, plan *collectionPlan, receiver string, parents []string, spec identityCollectionSpec) {
-	e.use("gophercloudsdk/internal/nativefind")
+	e.use("github.com/JSYoo5B/gophercloudsdk/internal/nativefind")
 	result := identityGetResult(e.pkg, plan, len(parents))
 	segments := make([]string, len(spec.getSegments))
 	for i, segment := range spec.getSegments {

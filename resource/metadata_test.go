@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type metadataModel struct {

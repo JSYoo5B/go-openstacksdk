@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func snapshotQueryContractRaw(text string) *json.RawMessage {

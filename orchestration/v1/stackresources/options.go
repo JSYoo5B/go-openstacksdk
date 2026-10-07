@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WithNestedDepth includes nested resources in the read-only list. Each result

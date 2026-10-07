@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 )

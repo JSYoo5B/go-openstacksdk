@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const scopeCheckLimitArgument = "project_quota_check_limit"

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // secretBodyFilterValue projects the pinned Python attribute from an original

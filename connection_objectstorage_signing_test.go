@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	swift "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	swift "gophercloudsdk/objectstorage/v1"
 )
 
 func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T) {

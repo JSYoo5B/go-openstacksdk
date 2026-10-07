@@ -1,6 +1,6 @@
 package blockstorage
 
-import "gophercloudsdk/internal/cloudsnapshot"
+import "github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
 
 // VolumeSnapshotsPage keeps the actual admitted HTTP response independently.
 type VolumeSnapshotsPage = cloudsnapshot.Page

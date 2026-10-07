@@ -3,12 +3,12 @@ package gophercloudsdk
 import (
 	"context"
 	"fmt"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlimits"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/cloudlimits"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // GetVolumeLimits owns defaults and cached service selection. Original options

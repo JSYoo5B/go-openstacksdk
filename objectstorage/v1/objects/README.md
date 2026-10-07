@@ -37,7 +37,7 @@ _, err = io.Copy(destination, download)
 if err != nil { return err }
 ```
 
-`swiftv1`은 `gophercloudsdk/objectstorage/v1`, `objects`는 `gophercloudsdk/objectstorage/v1/objects`, `resource`는 `gophercloudsdk/resource`입니다. `fmt`, `strings`, `io`는 표준 라이브러리이며 `destination`은 `io.Writer`입니다. Connection의 `ObjectStorage(ctx)`가 서비스 객체를 제공합니다.
+`swiftv1`은 `github.com/JSYoo5B/gophercloudsdk/objectstorage/v1`, `objects`는 `github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects`, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다. `fmt`, `strings`, `io`는 표준 라이브러리이며 `destination`은 `io.Writer`입니다. Connection의 `ObjectStorage(ctx)`가 서비스 객체를 제공합니다.
 
 ID로 parent를 지정하면 사전 조회를 하지 않습니다. `resource.Name(...)`은 container를 한 번 조회해 범위를 고정합니다. 목록의 `ContainerResource/ObjectResource`에는 Swift가 목록에 제공한 필드가 들어 있습니다. `Get`은 HEAD 요청으로 `Details`, 사용자 `Metadata`, 전체 `Header`까지 채웁니다. 목록에서 얻은 모델의 `Details/Metadata/Header`는 nil입니다. metadata key의 대소문자는 HTTP 헤더의 canonical 형태를 따릅니다.
 
@@ -58,8 +58,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func ListObjects(ctx context.Context, conn *sdk.Connection, containerName string) error {
@@ -106,8 +106,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/objectstorage/v1/objects"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
 )
 
 func ChangeObjectMetadata(ctx context.Context, conn *sdk.Connection, newest bool) error {

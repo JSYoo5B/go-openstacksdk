@@ -6,12 +6,12 @@ import (
 	"iter"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/query"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	volumes "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	servers "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/internal/query"
-	"gophercloudsdk/resource"
 )
 
 // IterateServers selects Nova's native detailed or summary pager for identity

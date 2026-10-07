@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"strings"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 // A nil component denotes the positive-infinity 'latest' token. Tuples keep

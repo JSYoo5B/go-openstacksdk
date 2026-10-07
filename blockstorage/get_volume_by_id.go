@@ -5,8 +5,8 @@ import (
 	"context"
 	"unicode"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // GetVolumeByID performs one logical member GET, without name search or list

@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	objects "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	objects "gophercloudsdk/image/v2/metadefobjects"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const objectPrefix = "/reverse/object/glance/v2/"

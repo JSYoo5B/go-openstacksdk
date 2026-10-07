@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 type deleteCoreTransport func(*http.Request) (*http.Response, error)

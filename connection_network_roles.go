@@ -2,7 +2,7 @@ package gophercloudsdk
 
 import (
 	"context"
-	"gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/network"
 )
 
 // GetNetworkRoles shares one successful network/subnet discovery among all role

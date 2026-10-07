@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 func (c *Connection) DeleteUnattachedFloatingIPs(ctx context.Context, options ...compute.FloatingIPDeleteOption) (*compute.DeleteUnattachedFloatingIPsResult, error) {

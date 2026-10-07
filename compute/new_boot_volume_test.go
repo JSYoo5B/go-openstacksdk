@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/image"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func newVolumeBootRequest() compute.CreateServerRequest {

@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type volumeTypeEntry struct {

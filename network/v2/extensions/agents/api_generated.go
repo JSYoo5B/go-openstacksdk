@@ -3,14 +3,14 @@ package agents
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/agents"
 	speakers "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgp/speakers"
 	routers "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	networks "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

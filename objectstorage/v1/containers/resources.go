@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/containers"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // ContainerResource joins a Swift list record with metadata from HEAD. Details,

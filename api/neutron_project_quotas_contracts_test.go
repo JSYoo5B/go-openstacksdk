@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/quotas"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const neutronQuotaLimits = `{"quota":{"project_id":"wire-project","network":-1,"port":0,"vendor":{"big":9007199254740993},"optional":null}}`

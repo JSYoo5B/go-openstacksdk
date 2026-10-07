@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 func TestBodyRecordPairingPreservesOriginalRowsAndOwnsFields(t *testing.T) {

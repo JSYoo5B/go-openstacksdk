@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/clustering/v1/policies"
-	"gophercloudsdk/clustering/v1/profiles"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestClusteringMutationsRecheckConfiguredSourceAfterOptions(t *testing.T) {

@@ -2,8 +2,8 @@ package gophercloudsdk
 
 import (
 	"context"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
 )
 
 func (c *Connection) ResetVolumeStatus(ctx context.Context, input blockstorage.VolumeActionRequest, options ...blockstorage.VolumeStatusResetOption) (*blockstorage.VolumeActionResult, error) {

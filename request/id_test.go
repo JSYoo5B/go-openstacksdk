@@ -2,8 +2,8 @@ package request_test
 
 import (
 	"errors"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"testing"
 )
 

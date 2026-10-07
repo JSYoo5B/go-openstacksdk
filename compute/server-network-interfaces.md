@@ -52,10 +52,10 @@ import (
 	"log"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

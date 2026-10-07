@@ -2,14 +2,14 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/apiversions"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/buildinfo"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/resourcetypes"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackevents"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackresources"
+	resource5 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	resource6 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacktemplates"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/orchestration/v1/apiversions"
-	resource1 "gophercloudsdk/orchestration/v1/buildinfo"
-	resource2 "gophercloudsdk/orchestration/v1/resourcetypes"
-	resource3 "gophercloudsdk/orchestration/v1/stackevents"
-	resource4 "gophercloudsdk/orchestration/v1/stackresources"
-	resource5 "gophercloudsdk/orchestration/v1/stacks"
-	resource6 "gophercloudsdk/orchestration/v1/stacktemplates"
 )
 
 // Service shares one authenticated client across its resource APIs.

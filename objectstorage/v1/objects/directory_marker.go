@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // CreateDirectoryMarkerObject writes an empty object with the owned

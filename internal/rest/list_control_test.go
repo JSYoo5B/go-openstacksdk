@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func collectControlledList(ctx context.Context, spec CollectionSpec[listItem], query url.Values, control ListControl) ([]*listItem, error) {

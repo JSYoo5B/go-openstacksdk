@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionSenlinWaitersShareLiveTokenVersionAndFixedRoutes(t *testing.T) {

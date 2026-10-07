@@ -17,8 +17,8 @@ import (
     "context"
     "fmt"
 
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func shareAndReadMembers(ctx context.Context, owner, member *image.Service, parent resource.Ref, memberID string) (*image.ImageMemberAcknowledgement, error) {

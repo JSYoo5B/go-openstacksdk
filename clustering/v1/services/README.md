@@ -101,8 +101,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/services"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/services"
 )
 
 func FilterServices(ctx context.Context, conn *sdk.Connection) error {

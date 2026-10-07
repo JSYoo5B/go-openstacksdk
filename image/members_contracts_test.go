@@ -15,11 +15,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	nativeMembers "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	nativeMembers "gophercloudsdk/image/v2/members"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const memberContractPrefix = "/reverse/members/glance/v2/"

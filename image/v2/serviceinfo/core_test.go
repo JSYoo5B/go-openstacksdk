@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type infoTransport func(*http.Request) (*http.Response, error)

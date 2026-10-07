@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Quota preserves exact response values, including omitted fields, JSON null,

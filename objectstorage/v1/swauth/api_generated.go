@@ -3,9 +3,9 @@ package swauth
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/swauth"
-	request "gophercloudsdk/request"
 )
 
 // API owns the client and provides concrete inputs, optional extensions and normalized results.

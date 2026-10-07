@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Explicit requests bypass automatic needs/skip classification. Backend

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"slices"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type SearchVolumesRequest struct{ NameOrID string }

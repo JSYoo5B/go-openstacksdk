@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/instanceactions"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute/v2/instanceactions"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const actionSummary = `{"action":"reboot","instance_uuid":"wire-server","message":null,"project_id":"project","request_id":"req-one","start_time":"2026-10-01T00:00:00.123456","updated_at":"2026-10-01T00:01:00.000000","user_id":"user","status":"extension-list","vendor":{"attempt":1}}`

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"gophercloudsdk/blockstorage/v3/snapshots"
-	"gophercloudsdk/blockstorage/v3/volumes"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // VolumeMetadata fixes Cinder v3 metadata to one volume ID or exact name.

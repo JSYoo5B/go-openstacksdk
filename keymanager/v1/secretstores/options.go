@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListOpts exposes the pinned SecretStore query names. Empty string fields are

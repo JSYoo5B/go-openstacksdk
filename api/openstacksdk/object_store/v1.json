@@ -70,7 +70,7 @@
       "id": "object_store/v1/containers",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -95,7 +95,7 @@
       "id": "object_store/v1/create_container",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -121,7 +121,7 @@
       "id": "object_store/v1/delete_container",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -142,7 +142,7 @@
       "id": "object_store/v1/get_container_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -172,7 +172,7 @@
       "id": "object_store/v1/set_container_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -197,7 +197,7 @@
       "id": "object_store/v1/delete_container_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -223,8 +223,8 @@
       "id": "object_store/v1/objects",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -266,8 +266,8 @@
       "id": "object_store/v1/get_object",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -298,8 +298,8 @@
       "id": "object_store/v1/download_object",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -335,8 +335,8 @@
       "id": "object_store/v1/stream_object",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -406,8 +406,8 @@
       "id": "object_store/v1/create_object",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -451,8 +451,8 @@
       "id": "object_store/v1/delete_object",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -479,8 +479,8 @@
       "id": "object_store/v1/get_object_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -511,8 +511,8 @@
       "id": "object_store/v1/set_object_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -544,8 +544,8 @@
       "id": "object_store/v1/delete_object_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers",
-        "gophercloudsdk/objectstorage/v1/objects"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
       ],
       "review": "pending"
     },
@@ -671,7 +671,7 @@
       "id": "object_store/v1/set_container_temp_url_key",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -693,7 +693,7 @@
       "id": "object_store/v1/get_temp_url_key",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },
@@ -740,7 +740,7 @@
       "id": "object_store/v1/generate_form_signature",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/objectstorage/v1/containers"
+        "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
       ],
       "review": "pending"
     },

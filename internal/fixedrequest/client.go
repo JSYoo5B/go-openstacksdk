@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"sync/atomic"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // New preserves the exact method and URL of a scoped request through redirects,

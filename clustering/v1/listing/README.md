@@ -42,10 +42,10 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/clusterpolicies"
-    "gophercloudsdk/clustering/v1/profiles"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func ListProfiles(ctx context.Context, conn *sdk.Connection) error {
@@ -205,8 +205,8 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/services"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/services"
 )
 
 func ListServicesWithCallOptions(ctx context.Context, conn *sdk.Connection) error {

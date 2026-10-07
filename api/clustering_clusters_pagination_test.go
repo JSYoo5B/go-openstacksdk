@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestClusteringClustersContinuationGuardsBreakAndCancellation(t *testing.T) {

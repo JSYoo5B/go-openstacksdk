@@ -14,12 +14,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/secrets"
-	"gophercloudsdk/resource"
 )
 
 // Independent source tables: openstacksdk ef55d7d Secret query/Body declarations

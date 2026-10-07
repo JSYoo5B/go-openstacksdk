@@ -301,8 +301,8 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/nodes"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
 )
 
 func FindNodeStrict(ctx context.Context, conn *sdk.Connection) (*nodes.Node, error) {
@@ -325,9 +325,9 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/nodes"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func RenameTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, error) {

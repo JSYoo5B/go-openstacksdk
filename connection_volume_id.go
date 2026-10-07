@@ -3,7 +3,7 @@ package gophercloudsdk
 import (
 	"context"
 
-	"gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
 )
 
 // GetVolumeID uses cached Cinder v3 to resolve an exact name or ID and preserves

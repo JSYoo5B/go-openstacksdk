@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type deleteIdentityItem struct {

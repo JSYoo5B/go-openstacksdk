@@ -1,6 +1,6 @@
 package policytypes
 
-import "gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
 
 func bodyFilterSpec() senlin.BodyFilterSpec {
 	return senlin.BodyFilterSpec{Namespace: "policytypes.local_filters", Fields: map[string]string{

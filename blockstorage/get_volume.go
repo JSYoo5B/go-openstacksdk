@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/resource"
 )
 
 // GetVolume uses shared GET-first exact identity lookup when filters are

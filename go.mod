@@ -1,4 +1,4 @@
-module gophercloudsdk
+module github.com/JSYoo5B/gophercloudsdk
 
 go 1.25.0
 

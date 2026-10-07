@@ -2,8 +2,8 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/metric/v1/metrics"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/metric/v1/metrics"
 )
 
 // Service shares one authenticated client across its resource APIs.

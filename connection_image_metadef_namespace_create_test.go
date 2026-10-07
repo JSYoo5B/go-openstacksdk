@@ -12,10 +12,10 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	ns "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	ns "gophercloudsdk/image/v2/metadefnamespaces"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput(t *testing.T) {

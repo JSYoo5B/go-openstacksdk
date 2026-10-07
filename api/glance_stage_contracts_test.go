@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Proxy.stage_image/Image.stage require exact queued status, stage binary

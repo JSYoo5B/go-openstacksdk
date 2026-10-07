@@ -84,7 +84,7 @@ func (g *generator) emitScopes(pkg *types.Package, plans []scopePlan, apiSource 
 	}
 	e := emitter{pkg: pkg, imports: map[string]string{}}
 	e.use("context")
-	e.use("gophercloudsdk/resource")
+	e.use("github.com/JSYoo5B/gophercloudsdk/resource")
 	for _, scope := range plans {
 		plan, spec := scope.collection, scope.spec
 		typeName := plan.modelName + "Scope"
@@ -92,7 +92,7 @@ func (g *generator) emitScopes(pkg *types.Package, plans []scopePlan, apiSource 
 		e.printf("// %s resolves the parent once; explicit IDs require no lookup request.\nfunc(a *API)%s(ctx context.Context,parent resource.Ref)(*%s,error){\n", spec.method, spec.method, typeName)
 		resolver := "a.Resources"
 		if spec.parent != spec.path {
-			resolver = e.use("gophercloudsdk/"+spec.parent) + ".New(a.client).Resources"
+			resolver = e.use("github.com/JSYoo5B/gophercloudsdk/"+spec.parent) + ".New(a.client).Resources"
 		}
 		e.printf("id,err:=%s.ResolveID(ctx,parent);if err!=nil{return nil,err}\nscope:=&%s{api:a,parentID:id};scope.Collection=scope.newResources();return scope,nil}\n", resolver, typeName)
 		e.printf("func(s *%s)newResources()*resource.Collection[%s]{return ", typeName, plan.modelName)

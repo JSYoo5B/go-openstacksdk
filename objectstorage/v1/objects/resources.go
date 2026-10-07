@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // ObjectResource joins a Swift object listing with metadata from HEAD. Container

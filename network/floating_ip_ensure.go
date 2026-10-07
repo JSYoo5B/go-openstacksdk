@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/netip"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/internal/project"
-	floatingipapi "gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"gophercloudsdk/resource"
 )
 
 // Ensure associates a current-project floating IPv4 address with a server.

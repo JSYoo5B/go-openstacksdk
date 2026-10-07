@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // guardedClient owns the HTTP redirect boundary without changing the shared

@@ -12,9 +12,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 func directoryMarkerExternalPayload(t *testing.T, r *http.Request) {

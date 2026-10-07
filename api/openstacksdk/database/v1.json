@@ -23,8 +23,8 @@
       "id": "database/v1/create_database",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/databases",
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -56,8 +56,8 @@
       "id": "database/v1/delete_database",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/databases",
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -88,8 +88,8 @@
       "id": "database/v1/find_database",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/databases",
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -115,8 +115,8 @@
       "id": "database/v1/databases",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/databases",
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -143,8 +143,8 @@
       "id": "database/v1/get_database",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/databases",
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -170,7 +170,7 @@
       "id": "database/v1/find_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/flavors"
       ],
       "review": "pending"
     },
@@ -191,7 +191,7 @@
       "id": "database/v1/get_flavor",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/flavors"
       ],
       "review": "pending"
     },
@@ -212,7 +212,7 @@
       "id": "database/v1/flavors",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/flavors"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/flavors"
       ],
       "review": "pending"
     },
@@ -233,7 +233,7 @@
       "id": "database/v1/create_instance",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -259,7 +259,7 @@
       "id": "database/v1/delete_instance",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -285,7 +285,7 @@
       "id": "database/v1/find_instance",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -306,7 +306,7 @@
       "id": "database/v1/get_instance",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -327,7 +327,7 @@
       "id": "database/v1/instances",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -352,7 +352,7 @@
       "id": "database/v1/update_instance",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
       ],
       "review": "pending"
     },
@@ -378,8 +378,8 @@
       "id": "database/v1/create_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances",
-        "gophercloudsdk/db/v1/users"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
       ],
       "review": "pending"
     },
@@ -411,8 +411,8 @@
       "id": "database/v1/delete_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances",
-        "gophercloudsdk/db/v1/users"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
       ],
       "review": "pending"
     },
@@ -443,8 +443,8 @@
       "id": "database/v1/find_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances",
-        "gophercloudsdk/db/v1/users"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
       ],
       "review": "pending"
     },
@@ -470,8 +470,8 @@
       "id": "database/v1/users",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances",
-        "gophercloudsdk/db/v1/users"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
       ],
       "review": "pending"
     },
@@ -498,8 +498,8 @@
       "id": "database/v1/get_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/db/v1/instances",
-        "gophercloudsdk/db/v1/users"
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+        "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
       ],
       "review": "pending"
     },

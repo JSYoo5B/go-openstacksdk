@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
 )
 
 func newManilaQuotaClassScope(t *testing.T, cloud *testcloud.Cloud, version string) *quotaclasssets.QuotaClassScope {

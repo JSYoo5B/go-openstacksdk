@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/orchestration/v1/stackresources"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackresources"
 )
 
 func TestHeatStackResourcesRetainRawFieldsAndIndependentHeaders(t *testing.T) {

@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/quotasets"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/compute/v2/quotasets"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const projectQuotaLimits = `{"quota_set":{"id":"wire-project","cores":-1,"instances":0,"networks":8,"vendor":{"tier":"custom"},"optional":null}}`

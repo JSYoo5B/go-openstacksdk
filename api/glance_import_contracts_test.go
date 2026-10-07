@@ -13,11 +13,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image/v2/imageimport"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Proxy.import_image/Image.import_image use a supplied image's formats

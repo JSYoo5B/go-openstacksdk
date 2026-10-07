@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/orchestration/v1/stacks"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ResourceIdentity retains the actual owning stack and the resource_name used

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (p *preparedGetVolumes) selectVolumes(ctx context.Context, entries []getVolumesEntry) ([]*resource.RawResource, error) {

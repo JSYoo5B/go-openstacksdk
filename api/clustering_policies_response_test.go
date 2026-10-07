@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/policies"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestClusteringPolicyGetAndValidateRetainMalformedAcceptedResponseEvidence(t *testing.T) {

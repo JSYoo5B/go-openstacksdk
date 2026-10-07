@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/rest"
 )
 
 // DeleteBackup resolves one exact Backup through one captured Cinder source.

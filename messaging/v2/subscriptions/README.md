@@ -17,7 +17,7 @@ import (
     "fmt"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/messaging/v2/subscriptions"
+    "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions"
 )
 
 func Subscribe(ctx context.Context, client *gophercloud.ServiceClient) error {

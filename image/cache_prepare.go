@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 const cacheTargetHeader = "X-Image-Cache-Clear-Target"

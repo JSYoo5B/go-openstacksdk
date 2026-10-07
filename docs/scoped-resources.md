@@ -20,7 +20,7 @@ record, err = records.Update(ctx, resource.ID(record.ID),
 if err != nil { return err }
 ```
 
-이 코드는 context와 연결 객체 `conn`, `gophercloudsdk/resource`와 `gophercloudsdk/dns/v2/recordsets`를 사용하는 함수 안에서 작성합니다. 범위 객체의 Create/Update는 기존 API의 concrete options와 `With...` 함수를 그대로 사용하며 요청 builder 구현은 필요하지 않습니다.
+이 코드는 context와 연결 객체 `conn`, `github.com/JSYoo5B/gophercloudsdk/resource`와 `github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets`를 사용하는 함수 안에서 작성합니다. 범위 객체의 Create/Update는 기존 API의 concrete options와 `With...` 함수를 그대로 사용하며 요청 builder 구현은 필요하지 않습니다.
 
 openstacksdk의 `conn.dns.get_recordset(record_id, zone=zone)`, `conn.load_balancer.members(pool=pool)`처럼 부모를 전달하는 동작에 대응합니다. Go에서는 아래처럼 부모 범위를 객체에 고정합니다.
 

@@ -13,9 +13,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 const deleteContractBulkOK = `{"Response Status":"200 OK","Response Body":"","Number Deleted":2,"Number Not Found":1,"Errors":[],"plugin":{"precise":9007199254740993},"links":42,"created_at":false}`

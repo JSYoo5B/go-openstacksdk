@@ -4,8 +4,8 @@ package aggregates
 import (
 	context "context"
 	fmt "fmt"
-	request "gophercloudsdk/request"
-	resource "gophercloudsdk/resource"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

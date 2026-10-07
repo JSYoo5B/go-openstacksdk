@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Only the owning attach/detach workflows construct this fixed-ID loop. The

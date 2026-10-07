@@ -32,7 +32,7 @@ import (
     "os"
     "time"
 
-    sdk "gophercloudsdk"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
 )
 
 func main() {
@@ -98,9 +98,9 @@ import (
     "fmt"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/quotas"
-    "gophercloudsdk/request"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas"
+    "github.com/JSYoo5B/gophercloudsdk/request"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func Configure(ctx context.Context, client *gophercloud.ServiceClient, projectID string) error {

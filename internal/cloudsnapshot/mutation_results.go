@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // MutationPage owns actual physical bytes, including opaque acknowledgements

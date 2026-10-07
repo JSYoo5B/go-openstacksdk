@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 type passiveIdentityValue struct{ id, name string }

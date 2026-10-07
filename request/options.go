@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Download retains a streaming response body and its parsed metadata. The caller

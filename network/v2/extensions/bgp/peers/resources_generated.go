@@ -4,7 +4,7 @@ package peers
 import (
 	context "context"
 	fmt "fmt"
-	resource "gophercloudsdk/resource"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

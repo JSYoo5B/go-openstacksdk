@@ -16,8 +16,8 @@ import (
     "errors"
     "fmt"
 
-    "gophercloudsdk/objectstorage/v1/objects"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func showDelete(result *objects.DeleteObjectResult) {

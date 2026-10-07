@@ -9,13 +9,13 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	clustering "github.com/JSYoo5B/gophercloudsdk/clustering/v1"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	clustering "gophercloudsdk/clustering/v1"
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 func connectionMetadataService(t *testing.T, cloud *testcloud.Cloud) (*sdk.Connection, *clustering.Service) {

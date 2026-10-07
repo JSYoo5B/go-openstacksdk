@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // StackIdentity keeps both canonical components required by Heat endpoints.

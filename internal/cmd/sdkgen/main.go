@@ -501,7 +501,7 @@ func (g *generator) generate(path string) error {
 	}
 	if plan == nil {
 		if hasSpecialized && specialized.Scope == "" && specialized.Kind == "" {
-			e.use("gophercloudsdk/resource")
+			e.use("github.com/JSYoo5B/gophercloudsdk/resource")
 			e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", specialized.Model)
 		} else {
 			e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
@@ -509,13 +509,13 @@ func (g *generator) generate(path string) error {
 		if hasSpecialized {
 			g.collections = append(g.collections, specialized)
 		} else if len(scopes) == 0 {
-			g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
+			g.collections = append(g.collections, collectionRecord{Package: "github.com/JSYoo5B/gophercloudsdk/" + sdkPath(path), Issue: "requires a scoped or specialized resource binding"})
 		}
 	} else {
-		e.use("gophercloudsdk/resource")
+		e.use("github.com/JSYoo5B/gophercloudsdk/resource")
 		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
 		filter := g.pythonFilterFor(pkg, plan)
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != "", MetadataScope: metadataScope, ServiceWait: serviceWait, TaskWait: taskWait})
+		g.collections = append(g.collections, collectionRecord{Package: "github.com/JSYoo5B/gophercloudsdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != "", MetadataScope: metadataScope, ServiceWait: serviceWait, TaskWait: taskWait})
 	}
 	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {
@@ -536,7 +536,7 @@ func (g *generator) generate(path string) error {
 	sort.Strings(names)
 	for _, name := range names {
 		fn := pkg.Scope().Lookup(name).(*types.Func)
-		op := operation{Source: path, Package: strings.TrimPrefix(path, upstreamModule+"/openstack/"), Name: name, SDKPackage: "gophercloudsdk/" + sdkPath(path)}
+		op := operation{Source: path, Package: strings.TrimPrefix(path, upstreamModule+"/openstack/"), Name: name, SDKPackage: "github.com/JSYoo5B/gophercloudsdk/" + sdkPath(path)}
 		if err := emitOperation(&e, fn, decls[name], extractors); err != nil {
 			op.Issue = err.Error()
 		} else {
@@ -572,7 +572,7 @@ func (g *generator) generate(path string) error {
 	}
 	for _, scope := range scopes {
 		p := scope.collection
-		g.collections = append(g.collections, collectionRecord{Package: "gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", IdentityFind: identityCollectionEnabled(pkg, p, 1), IdentityGetQuery: identityCollectionEnabled(pkg, p, 1), BodyFilterFields: bodyFilterCollectionFields(pkg, p, 1), Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "gophercloudsdk/" + scope.spec.parent})
+		g.collections = append(g.collections, collectionRecord{Package: "github.com/JSYoo5B/gophercloudsdk/" + sdkPath(path), Model: p.modelName, Find: p.name != "", IdentityFind: identityCollectionEnabled(pkg, p, 1), IdentityGetQuery: identityCollectionEnabled(pkg, p, 1), BodyFilterFields: bodyFilterCollectionFields(pkg, p, 1), Delete: p.deleter != nil, Wait: p.status != "", Scope: scope.spec.method, Parent: "github.com/JSYoo5B/gophercloudsdk/" + scope.spec.parent})
 	}
 	return g.emitScopes(pkg, scopes, source)
 }
@@ -798,7 +798,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		}
 	}
 	contextAlias := e.use("context")
-	requestAlias := e.use("gophercloudsdk/request")
+	requestAlias := e.use("github.com/JSYoo5B/gophercloudsdk/request")
 	params := []string{"ctx " + contextAlias + ".Context"}
 	forwardArgs := []string{"ctx"}
 	args := []string{}
@@ -965,7 +965,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	}
 	e.printf("\n// %s invokes the upstream API with library-owned builders and result handling.\nfunc (a *API) %s(%s) %s {\n", op, op, strings.Join(params, ","), returns)
 	if controlled {
-		resourceAlias := e.use("gophercloudsdk/resource")
+		resourceAlias := e.use("github.com/JSYoo5B/gophercloudsdk/resource")
 		// A control parameter precedes variadic options, keeping the public
 		// signature and its native option preparation unchanged.
 		position := len(params)
@@ -1053,7 +1053,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 	case "normalize":
 		e.printf("result:=%s\nvalue,err:=%s\nreturn value,%s.Wrap(%q,%q,err)\n", call, normalizer.call, requestAlias, op, e.pkg.Name())
 	case "stream":
-		resourceAlias := e.use("gophercloudsdk/resource")
+		resourceAlias := e.use("github.com/JSYoo5B/gophercloudsdk/resource")
 		if streamType != nil {
 			if streamValues {
 				e.printf("return %s.StreamValues(ctx,%s,%s.%s)\n", resourceAlias, call, extractPackage, extractName)
@@ -1080,10 +1080,10 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 			}
 		}
 		if snapshotMetadataExtractor(fn) {
-			helper := e.use("gophercloudsdk/internal/snapshotmetadata")
+			helper := e.use("github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata")
 			e.printf("%s:=%s.Extract(result.Result)\n", strings.Join(vals, ","), helper)
 		} else if troveRootEnabledExtractor(fn) {
-			helper := e.use("gophercloudsdk/internal/troveroot")
+			helper := e.use("github.com/JSYoo5B/gophercloudsdk/internal/troveroot")
 			e.printf("%s:=%s.Extract(result.Result)\n", strings.Join(vals, ","), helper)
 		} else {
 			e.printf("%s:=result.%s()\n", strings.Join(vals, ","), resultExtractor)
@@ -1171,7 +1171,7 @@ func declaredPageExtractor(pkg *types.Package, imports map[string]*types.Package
 }
 
 func emitBuilder(e *emitter, b builder) {
-	req := e.use("gophercloudsdk/request")
+	req := e.use("github.com/JSYoo5B/gophercloudsdk/request")
 	e.printf("type %s struct{base %s;config %s.Config[%s]", b.adapter, e.typ(b.base), req, e.typ(b.base))
 	for _, header := range b.headers {
 		e.printf(";%s %s %q", header.field.Name(), e.typ(header.field.Type()), header.tag)

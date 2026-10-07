@@ -3,9 +3,9 @@ package acls
 
 import (
 	context "context"
+	request "github.com/JSYoo5B/gophercloudsdk/request"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/acls"
-	request "gophercloudsdk/request"
 )
 
 // API owns the client and provides concrete inputs, optional extensions and normalized results.

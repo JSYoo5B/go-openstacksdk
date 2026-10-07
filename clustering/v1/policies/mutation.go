@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"regexp"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Spec is a required JSON object. RawMessage preserves exact numbers and

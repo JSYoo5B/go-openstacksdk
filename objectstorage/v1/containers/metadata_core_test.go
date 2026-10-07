@@ -12,9 +12,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
-	"gophercloudsdk/resource"
 )
 
 const containerMetadataName = "한 %?#: 컨테이너"

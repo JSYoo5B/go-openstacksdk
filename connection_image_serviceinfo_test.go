@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/image/v2/imageimport"
-	"gophercloudsdk/image/v2/serviceinfo"
 )
 
 type serviceInfoTransport func(*http.Request) (*http.Response, error)

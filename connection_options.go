@@ -7,10 +7,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
 )
 
 type Service string

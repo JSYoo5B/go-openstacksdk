@@ -14,13 +14,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	sdkimages "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	"gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/image/v2/imageimport"
-	sdkimages "gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 // Pinned create_image's non-task upload/import branch does not wait for active.

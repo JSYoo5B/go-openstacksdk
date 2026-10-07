@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestTaskWaitOptionsSnapshotCustomRetentionAndConcurrentReuse(t *testing.T) {

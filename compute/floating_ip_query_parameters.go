@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"net/url"
 	"strconv"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 type floatingIPQueryParameters struct {

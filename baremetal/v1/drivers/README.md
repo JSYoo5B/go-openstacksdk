@@ -17,7 +17,7 @@ if err != nil { return err }
 fmt.Println(driver.Name, driver.Hosts)
 ```
 
-`resource`는 `gophercloudsdk/resource`, `fmt`는 표준 라이브러리입니다. ID는 목록 조회를 생략하며 Name은 전체 목록에서 정확히 비교합니다. 이름 중복은 `resource.ErrAmbiguous`, 미존재는 `resource.ErrNotFound`입니다. `resource.WithIgnoreMissing()`을 추가한 Find는 미존재에 `nil, nil`을 반환합니다. HTTP 403과 통신 오류는 미존재로 바꾸지 않습니다.
+`resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `fmt`는 표준 라이브러리입니다. ID는 목록 조회를 생략하며 Name은 전체 목록에서 정확히 비교합니다. 이름 중복은 `resource.ErrAmbiguous`, 미존재는 `resource.ErrNotFound`입니다. `resource.WithIgnoreMissing()`을 추가한 Find는 미존재에 `nil, nil`을 반환합니다. HTTP 403과 통신 오류는 미존재로 바꾸지 않습니다.
 
 `Resources.List`는 페이지를 순회하고 `break`와 context 취소를 적용합니다. `Resources.All`은 결과를 수집합니다. Driver에는 삭제와 문자열 상태가 없으므로 `Resources.Delete`, `Resources.Wait`, 상태 필터는 `resource.ErrUnsupported`입니다. 상세 목록과 driver type은 `service.Drivers.ListDrivers(ctx, drivers.WithListDriversOptions(drivers.ListDriversOpts{Detail: true, Type: "dynamic"}))`로 지정합니다. `drivers`는 이 패키지입니다.
 

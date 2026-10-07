@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GenerateTempURL signs a decoded literal Swift path. Automatic key discovery is

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 )
 
 func cloudFilterContractRows(t *testing.T, raw string) []json.RawMessage {

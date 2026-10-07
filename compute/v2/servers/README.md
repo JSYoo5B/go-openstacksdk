@@ -23,7 +23,7 @@ if err != nil { return err }
 _ = password
 ```
 
-`computev2`는 `gophercloudsdk/compute/v2`, `servers`는 `gophercloudsdk/compute/v2/servers`입니다. Connection의 `ComputeV2(ctx)`가 서비스 객체를 제공합니다.
+`computev2`는 `github.com/JSYoo5B/gophercloudsdk/compute/v2`, `servers`는 `github.com/JSYoo5B/gophercloudsdk/compute/v2/servers`입니다. Connection의 `ComputeV2(ctx)`가 서비스 객체를 제공합니다.
 
 빈 암호 응답은 빈 문자열을 반환합니다. 잘못된 개인 키나 nil 옵션은 요청 전에 거부합니다. 복호화 오류와 HTTP 오류는 반환한 error로 확인합니다. 옵션을 여러 개 지정하면 마지막 키를 사용하며 `WithGetPasswordPrivateKey(nil)`은 기본 동작으로 돌아갑니다. 개인 키는 호출 동안 변경하지 않습니다.
 

@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	swift "gophercloudsdk/objectstorage/v1"
+	swift "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
 )
 
 func signRequests(ctx context.Context, service *swift.Service, key []byte, now time.Time) error {

@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestNegotiatedMicroversionControlsBootVolumeType(t *testing.T) {

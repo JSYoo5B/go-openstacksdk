@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"regexp"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListFloatingIPs follows cloud's filter-specific 404 policy. Dictionary

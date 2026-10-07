@@ -4,8 +4,8 @@ package attachinterfaces
 import (
 	context "context"
 	fmt "fmt"
-	servers "gophercloudsdk/compute/v2/servers"
-	resource "gophercloudsdk/resource"
+	servers "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

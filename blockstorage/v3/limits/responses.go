@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // AbsoluteLimit keeps exact int64 values and optional/null fields without

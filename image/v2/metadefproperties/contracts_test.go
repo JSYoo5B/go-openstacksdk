@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	properties "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	properties "gophercloudsdk/image/v2/metadefproperties"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const propertyPrefix = "/reverse/property/glance/v2/"

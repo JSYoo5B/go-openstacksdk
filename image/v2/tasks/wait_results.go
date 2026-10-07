@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // TaskWaitResponse retains an actual task HTTP response. Task is nil when an

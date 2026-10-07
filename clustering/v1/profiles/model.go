@@ -4,7 +4,7 @@ package profiles
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Profile retains both typed fields and their original JSON representation.

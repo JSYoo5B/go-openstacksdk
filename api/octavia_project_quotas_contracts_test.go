@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/loadbalancer/v2/quotas"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const octaviaQuotaBody = `{"quota":{"project_id":"wire-project","load_balancer":7,"loadbalancer":-1,"health_monitor":8,"healthmonitor":0,"listener":null,"member":0,"pool":2,"l7policy":3,"l7rule":4,"vendor":{"counter":9007199254740993},"optional":null}}`

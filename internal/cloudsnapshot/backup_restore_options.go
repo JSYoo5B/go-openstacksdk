@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"unicode/utf8"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Seed supplies cached Backup fields; its ID must match the fixed target.

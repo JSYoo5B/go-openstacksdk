@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Only phase orchestration is new: leaf APIs retain their strict response policy.

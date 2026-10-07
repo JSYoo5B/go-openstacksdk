@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const imageContractObject = `{"id":"response-id","name":"literal\nname","status":"future/status","visibility":"future/visibility","owner":"owner","container_format":"future/container","disk_format":"future/disk","checksum":"literal-checksum","os_hash_algo":"future/hash","os_hash_value":"literal-value","self":"https://passive.invalid/self","file":"https://passive.invalid/file","schema":"https://passive.invalid/schema","direct_url":"https://passive.invalid/data","stores":"one,one, two","created_at":"literal-created","updated_at":"literal-updated","protected":false,"os_hidden":true,"size":9007199254740993,"virtual_size":9223372036854775807,"min_disk":-1,"min_ram":0,"tags":["","repeat","repeat","line\n"],"locations":[{"url":"literal:%2F ?#","metadata":{"huge":1e1000,"integer":9007199254740995},"x-row":true}],"properties":[1e1000],"metadata":17,"owner_id":false,"ID":42,"links":17,"hw_vif_multiqueue_enabled":"false","x-number":9007199254740995}`

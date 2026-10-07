@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"gophercloudsdk/internal/swiftinfo"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/swiftinfo"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // CreateObject uploads explicit bytes directly, or prepares immutable file or

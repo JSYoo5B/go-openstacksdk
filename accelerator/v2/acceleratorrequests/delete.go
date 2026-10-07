@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/accelerator/v2/common"
-	"gophercloudsdk/internal/cyborg"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/common"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cyborg"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type DeleteOption = request.Option[struct{}]

@@ -169,9 +169,9 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/clusterpolicies"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func FilterClusterPolicies(ctx context.Context, conn *sdk.Connection, cluster resource.Ref) error {

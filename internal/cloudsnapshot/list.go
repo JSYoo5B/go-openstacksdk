@@ -8,8 +8,8 @@ import (
 	"maps"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 // List owns source/query policy before making the first request. Logical rows

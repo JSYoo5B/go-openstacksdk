@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type integer interface {

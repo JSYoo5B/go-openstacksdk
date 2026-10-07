@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 func objectWaitExternalLast(t *testing.T, result *objects.ObjectWaitResult, polls, status int, body string) *objects.ObjectCreateResponse {

@@ -9,12 +9,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/limits"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/compute/v2/limits"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestNovaLimitsProjectIDsAreLazyAndExactNamesUseSeparateKeystoneOnce(t *testing.T) {

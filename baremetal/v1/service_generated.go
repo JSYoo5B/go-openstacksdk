@@ -2,12 +2,12 @@
 package v1
 
 import (
+	resource0 "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/allocations"
+	resource1 "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/conductors"
+	resource2 "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/drivers"
+	resource3 "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/nodes"
+	resource4 "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/ports"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
-	resource0 "gophercloudsdk/baremetal/v1/allocations"
-	resource1 "gophercloudsdk/baremetal/v1/conductors"
-	resource2 "gophercloudsdk/baremetal/v1/drivers"
-	resource3 "gophercloudsdk/baremetal/v1/nodes"
-	resource4 "gophercloudsdk/baremetal/v1/ports"
 )
 
 // Service shares one authenticated client across its resource APIs.

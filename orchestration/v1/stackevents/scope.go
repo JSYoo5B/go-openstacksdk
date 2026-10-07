@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/orchestration/v1/stacks"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // StackEventScope reads events for one complete Heat stack identity.

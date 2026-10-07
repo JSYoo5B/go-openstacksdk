@@ -11,11 +11,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/orchestration/v1/stackevents"
-	"gophercloudsdk/orchestration/v1/stacks"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackevents"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 const heatEventBase = "/heat/v1/project/stacks/app/fixed"

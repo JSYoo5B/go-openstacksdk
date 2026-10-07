@@ -14,12 +14,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/objectstorage/v1"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/objectstorage/v1/containers"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 const tempKeyAccount = "https://swift.invalid/reverse/v1/AUTH_account/"

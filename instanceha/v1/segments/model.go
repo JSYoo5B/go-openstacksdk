@@ -4,7 +4,7 @@ package segments
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Segment.UUID is the endpoint identity. ID retains the distinct database ID,

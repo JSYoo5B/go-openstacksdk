@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/project"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type projectOptions struct{ identity *gophercloud.ServiceClient }

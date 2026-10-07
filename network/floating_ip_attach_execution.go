@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	floatingipapi "gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // AttachPrepared rechecks the selected port and existing IP, and preserves the

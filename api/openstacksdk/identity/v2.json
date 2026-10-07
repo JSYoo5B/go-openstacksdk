@@ -179,7 +179,7 @@
       "id": "identity/v2/create_tenant",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -205,7 +205,7 @@
       "id": "identity/v2/delete_tenant",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -231,7 +231,7 @@
       "id": "identity/v2/find_tenant",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -252,7 +252,7 @@
       "id": "identity/v2/get_tenant",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -273,7 +273,7 @@
       "id": "identity/v2/tenants",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -298,7 +298,7 @@
       "id": "identity/v2/update_tenant",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/tenants"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
       ],
       "review": "pending"
     },
@@ -319,7 +319,7 @@
       "id": "identity/v2/create_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },
@@ -345,7 +345,7 @@
       "id": "identity/v2/delete_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },
@@ -371,7 +371,7 @@
       "id": "identity/v2/find_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },
@@ -392,7 +392,7 @@
       "id": "identity/v2/get_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },
@@ -413,7 +413,7 @@
       "id": "identity/v2/users",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },
@@ -438,7 +438,7 @@
       "id": "identity/v2/update_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v2/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
       ],
       "review": "pending"
     },

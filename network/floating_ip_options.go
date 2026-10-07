@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/netip"
 
-	floatingipapi "gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateFloatingIPRequest selects the external allocation network. A name is

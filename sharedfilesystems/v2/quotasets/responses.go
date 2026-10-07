@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // QuotaSet uses exact int64 limits. Nil means omitted or JSON null; Body on the

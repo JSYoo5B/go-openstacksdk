@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type GetOpts struct {

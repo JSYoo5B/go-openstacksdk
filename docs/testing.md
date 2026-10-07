@@ -18,6 +18,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 
 `make smoke`는 [개발 preview의 5개 핵심 흐름](release-milestones.md)을 기존 테스트에서 선택해 실행하고 `.reports/core-smoke.json`에 실제 결과를 저장합니다. 새로운 mock이나 같은 계약의 테스트를 따로 복제하지 않습니다.
 
+공개 module namespace 변경은 기존 전체 계약 테스트·smoke·생성기 검증을 재사용합니다. [외부 소비자 예제](install.md)의 정확한 main은 checkout 밖의 별도 module에서 빌드하며, consumer-only local replace와 push된 정확한 커밋의 원격 설치를 구분합니다. HTTP harness를 추가하지 않습니다.
+
 ## 공개 테스트 도구 재사용
 
 공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다.

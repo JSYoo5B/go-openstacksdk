@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
-	"gophercloudsdk/network/v2/subnets"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Subnet Body fields are independent of its query mapping. The raw

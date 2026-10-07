@@ -14,15 +14,15 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/metadata"
+	snapshots2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
+	volumes2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/volumes"
+	snapshots3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
+	volumes3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage/metadata"
-	snapshots2 "gophercloudsdk/blockstorage/v2/snapshots"
-	volumes2 "gophercloudsdk/blockstorage/v2/volumes"
-	snapshots3 "gophercloudsdk/blockstorage/v3/snapshots"
-	volumes3 "gophercloudsdk/blockstorage/v3/volumes"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // Source: pinned MetadataMixin and the Cinder stock-server metadata controllers.

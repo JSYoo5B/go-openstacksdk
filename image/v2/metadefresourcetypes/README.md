@@ -21,8 +21,8 @@ package example
 import (
     "context"
 
-    "gophercloudsdk/image"
-    types "gophercloudsdk/image/v2/metadefresourcetypes"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    types "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes"
 )
 
 type AssociationEvidence struct {

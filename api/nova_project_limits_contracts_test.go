@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/limits"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute/v2/limits"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const novaLimitsBody = `{"limits":{"absolute":{"maxTotalCores":-1,"maxTotalInstances":0,"totalCoresUsed":null,"vendor":9007199254740993},"rate":[{"uri":"*","regex":".*","limit":[{"next-available":9007199254740993,"remaining":0,"unit":"MINUTE","value":120,"verb":"POST","vendor":{"tier":"legacy"}}],"vendor":null}],"id":"wire-project","optional":null}}`

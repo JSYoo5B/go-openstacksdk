@@ -12,12 +12,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	snapshots2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
+	snapshots3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	snapshots2 "gophercloudsdk/blockstorage/v2/snapshots"
-	snapshots3 "gophercloudsdk/blockstorage/v3/snapshots"
-	"gophercloudsdk/internal/snapshotmetadata"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type snapshotMetadataCall func(context.Context, *gophercloud.ServiceClient, string) (map[string]any, error)

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateObjectInput selects exactly one explicit input. Nonnil empty Data

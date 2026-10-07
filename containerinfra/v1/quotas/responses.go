@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
 )
 
 // QuotaResource preserves response fields separately from the request identity.

@@ -3,11 +3,11 @@ package catalog
 
 import (
 	context "context"
+	resource "github.com/JSYoo5B/gophercloudsdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/catalog"
 	tokens "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"
-	resource "gophercloudsdk/resource"
 	iter "iter"
 )
 

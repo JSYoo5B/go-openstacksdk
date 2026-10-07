@@ -4,7 +4,7 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type Link = resource.Link

@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	v3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	v3 "gophercloudsdk/blockstorage/v3"
-	"gophercloudsdk/blockstorage/v3/backups"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestBackupProxyImportUsesFullDisconnectedModelWhileNativeImportRetainsBase64AndTypedResult(t *testing.T) {

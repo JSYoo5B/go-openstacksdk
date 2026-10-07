@@ -3,7 +3,7 @@ package image
 import (
 	"encoding/json"
 	"fmt"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // TaskInfo owns canonical nullable task fields and actual HTTP metadata.

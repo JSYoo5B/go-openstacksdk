@@ -47,7 +47,7 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
 }
 ```
 
-예제 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `gophercloudsdk/containerinfra/v1/quotas`, `gophercloudsdk/resource`입니다. 인증과 endpoint가 설정된 Magnum ServiceClient를 전달합니다. 서버가 해당 확장을 제공할 때만 `vendor` 필드를 보낼 수 있습니다.
+예제 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas`, `github.com/JSYoo5B/gophercloudsdk/resource`입니다. 인증과 endpoint가 설정된 Magnum ServiceClient를 전달합니다. 서버가 해당 확장을 제공할 때만 `vendor` 필드를 보낼 수 있습니다.
 
 ## 프로젝트와 resource
 
@@ -85,7 +85,7 @@ Delete의 기본 404 정책은 엄격합니다. `WithDeleteIgnoreMissing(true)`�
 import (
     "context"
     "fmt"
-    "gophercloudsdk/containerinfra/v1/quotas"
+    "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
 )
 
 func listQuotas(ctx context.Context, api *quotas.API) error {

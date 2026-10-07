@@ -2,7 +2,7 @@ package gophercloudsdk
 
 import (
 	"context"
-	"gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
 )
 
 // AvailableFloatingIP supplies lazy service discovery and configured source

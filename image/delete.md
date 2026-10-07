@@ -9,8 +9,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func deleteWholeImage(ctx context.Context, client *gophercloud.ServiceClient, id string) (*image.DeleteImageResult, error) {
@@ -39,8 +39,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func deleteStoreCopy(ctx context.Context, client *gophercloud.ServiceClient, id, storeID string) (*image.DeleteImageResult, error) {

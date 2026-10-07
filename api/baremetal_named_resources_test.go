@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/baremetal/v1/conductors"
+	"github.com/JSYoo5B/gophercloudsdk/baremetal/v1/drivers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/baremetal/v1/conductors"
-	"gophercloudsdk/baremetal/v1/drivers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func checkBareMetalReadOnlyIdentity[T any](t *testing.T, cloud *testcloud.Cloud, collection *resource.Collection[T], base, envelope, linksKey, identityKey string, model map[string]any, identity func(*T) string, checkDetails func(*T)) {

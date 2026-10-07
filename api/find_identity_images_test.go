@@ -11,11 +11,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	image "github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	image "gophercloudsdk/image"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 // Pinned image.find adds one hidden-image list only after Resource.find reports

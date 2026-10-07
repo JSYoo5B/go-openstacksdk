@@ -11,11 +11,11 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const kind = "keymanager.secret_stores"

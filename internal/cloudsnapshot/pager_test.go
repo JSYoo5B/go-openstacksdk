@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 const snapshotPagerContractCollection = "https://cinder.example/v3/project/snapshots/detail"

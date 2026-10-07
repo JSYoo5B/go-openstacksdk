@@ -122,7 +122,7 @@
       "id": "placement/v1/create_resource_class",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
       ],
       "review": "pending"
     },
@@ -148,7 +148,7 @@
       "id": "placement/v1/delete_resource_class",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
       ],
       "review": "pending"
     },
@@ -173,7 +173,7 @@
       "id": "placement/v1/update_resource_class",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
       ],
       "review": "pending"
     },
@@ -194,7 +194,7 @@
       "id": "placement/v1/get_resource_class",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
       ],
       "review": "pending"
     },
@@ -215,7 +215,7 @@
       "id": "placement/v1/resource_classes",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
       ],
       "review": "pending"
     },
@@ -236,7 +236,7 @@
       "id": "placement/v1/create_resource_provider",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -262,7 +262,7 @@
       "id": "placement/v1/delete_resource_provider",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -287,7 +287,7 @@
       "id": "placement/v1/update_resource_provider",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -308,7 +308,7 @@
       "id": "placement/v1/get_resource_provider",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -334,7 +334,7 @@
       "id": "placement/v1/find_resource_provider",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -355,7 +355,7 @@
       "id": "placement/v1/resource_providers",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -376,7 +376,7 @@
       "id": "placement/v1/fetch_resource_provider_aggregates",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -398,7 +398,7 @@
       "id": "placement/v1/get_resource_provider_aggregates",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -423,7 +423,7 @@
       "id": "placement/v1/set_resource_provider_aggregates",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -459,8 +459,8 @@
       "id": "placement/v1/create_resource_provider_inventory",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceclasses",
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses",
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -492,7 +492,7 @@
       "id": "placement/v1/delete_resource_provider_inventory",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -528,7 +528,7 @@
       "id": "placement/v1/update_resource_provider_inventory",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -555,7 +555,7 @@
       "id": "placement/v1/get_resource_provider_inventory",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -582,7 +582,7 @@
       "id": "placement/v1/resource_provider_inventories",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -611,7 +611,7 @@
       "id": "placement/v1/set_resource_provider_inventories",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -632,7 +632,7 @@
       "id": "placement/v1/delete_resource_provider_inventories",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -653,7 +653,7 @@
       "id": "placement/v1/fetch_resource_provider_usages",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -680,7 +680,7 @@
       "id": "placement/v1/resource_provider_allocations",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -784,7 +784,7 @@
       "id": "placement/v1/get_resource_provider_trait",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },
@@ -835,7 +835,7 @@
       "id": "placement/v1/delete_resource_provider_trait",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/placement/v1/resourceproviders"
+        "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
       ],
       "review": "pending"
     },

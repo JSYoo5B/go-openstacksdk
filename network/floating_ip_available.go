@@ -10,11 +10,11 @@ import (
 	"net/url"
 	"sort"
 
-	"gophercloudsdk/internal/cloudlocation"
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/internal/rest"
-	floatingipapi "gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type availabilityIP struct {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 func TestOptionalWirePresenceAndTypedRoundTrip(t *testing.T) {

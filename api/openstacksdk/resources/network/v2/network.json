@@ -434,7 +434,7 @@
   ],
   "resource": "openstack.network.v2.network.Network",
   "schema_version": 1,
-  "sdk_package": "gophercloudsdk/network/v2/networks",
+  "sdk_package": "github.com/JSYoo5B/gophercloudsdk/network/v2/networks",
   "source_controls": {
     "proxy_list": [
       "resource_type",

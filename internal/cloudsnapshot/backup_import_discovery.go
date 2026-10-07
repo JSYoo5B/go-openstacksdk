@@ -2,7 +2,7 @@ package cloudsnapshot
 
 import (
 	"context"
-	"gophercloudsdk/internal/cinderrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderrequest"
 )
 
 func (p *reader) backupImportMicroversion(ctx context.Context) (string, []*MutationPage, error) {

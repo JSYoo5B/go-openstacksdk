@@ -3,8 +3,8 @@ package clusterpolicies
 import (
 	"context"
 
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForStatus has no default status field and fails before HTTP. Callers may

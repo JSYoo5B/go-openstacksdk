@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/keymanagerread"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/keymanagerread"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // FetchOpts has no default query/name/wait policy. Headers are concrete options.

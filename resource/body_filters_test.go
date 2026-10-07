@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/internal/testcloud"
 )
 
 type bodyFilterEntry struct {

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // GetVolumes materializes Cinder's detail list before local server association

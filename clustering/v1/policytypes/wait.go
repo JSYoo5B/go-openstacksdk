@@ -3,9 +3,9 @@ package policytypes
 import (
 	"context"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForStatus polls with the shared Senlin defaults: no deadline and ERROR

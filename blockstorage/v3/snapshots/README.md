@@ -12,7 +12,7 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/blockstorage/v3/snapshots"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
 )
 
 func replaceSnapshotMetadata(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {

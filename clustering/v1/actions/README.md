@@ -164,8 +164,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/actions"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
 )
 
 func FilterActions(ctx context.Context, conn *sdk.Connection, ownerID string) error {

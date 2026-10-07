@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	tags "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	tags "gophercloudsdk/image/v2/metadeftags"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const tagPrefix = "/reverse/tag/glance/v2/"

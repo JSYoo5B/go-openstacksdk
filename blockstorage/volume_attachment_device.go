@@ -9,7 +9,7 @@ import (
 	volumesv2 "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v2/volumes"
 	volumesv3 "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // VolumeAttachDeviceInput accepts existing Cinder representations without a

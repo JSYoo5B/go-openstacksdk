@@ -9,9 +9,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 func (p *workflow) resolveProject(ctx context.Context, identity string, result *ProjectResult) error {

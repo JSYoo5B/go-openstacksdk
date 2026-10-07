@@ -19,7 +19,7 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
+    "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
 )
 
 func updateQuotaClass(ctx context.Context, client *gophercloud.ServiceClient) error {

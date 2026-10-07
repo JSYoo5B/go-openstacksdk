@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func snapshotModelContractFields(t *testing.T, raw json.RawMessage) map[string]json.RawMessage {

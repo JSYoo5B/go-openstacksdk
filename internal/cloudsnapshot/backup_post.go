@@ -3,8 +3,8 @@ package cloudsnapshot
 import (
 	"context"
 	"encoding/json"
-	"gophercloudsdk/internal/cinderrequest"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // Forced backup actions own3.64; ordinary restore keeps the selected policy.

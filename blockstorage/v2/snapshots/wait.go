@@ -3,8 +3,8 @@ package snapshots
 import (
 	"context"
 
-	"gophercloudsdk/internal/servicewait"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/servicewait"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (a *API) waitResources() *resource.Collection[Snapshot] {

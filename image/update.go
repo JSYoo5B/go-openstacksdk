@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // UpdateImage applies the owned ordered changes and returns fresh image JSON.

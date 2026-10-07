@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 func nestedCoreObject(t *testing.T, raw json.RawMessage) map[string]json.RawMessage {

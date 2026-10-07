@@ -9,9 +9,9 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/orchestration/v1/stackevents"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackevents"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

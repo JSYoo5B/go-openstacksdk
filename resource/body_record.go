@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"iter"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/internal/jsonfilter"
 )
 
 // BodyRecord pairs a native typed value with the original JSON fields of the

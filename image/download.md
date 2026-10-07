@@ -10,8 +10,8 @@ import (
     "io"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func downloadTo(ctx context.Context, client *gophercloud.ServiceClient, id string, output io.Writer) (*image.DownloadImageResult, error) {
@@ -45,8 +45,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func downloadByName(ctx context.Context, client *gophercloud.ServiceClient, name string) ([]byte, *image.DownloadImageResult, error) {

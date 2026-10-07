@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/manilaversion"
+	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/manilaversion"
-	"gophercloudsdk/internal/project"
-	"gophercloudsdk/resource"
 )
 
 type API struct{ client *gophercloud.ServiceClient }

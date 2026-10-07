@@ -193,9 +193,9 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	var example *collectionRecord
 	for i := range g.collections {
 		record := &g.collections[i]
-		if record.Model != "" && record.Kind != "service_info" && record.Kind != "named_resource" && record.Scope == "" && record.Package != "gophercloudsdk/image/v2/serviceinfo" && strings.HasPrefix(record.Package, "gophercloudsdk/"+key+"/") {
+		if record.Model != "" && record.Kind != "service_info" && record.Kind != "named_resource" && record.Scope == "" && record.Package != "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo" && strings.HasPrefix(record.Package, "github.com/JSYoo5B/gophercloudsdk/"+key+"/") {
 			example = record
-			if strings.TrimPrefix(record.Package, "gophercloudsdk/"+key+"/") == exampleResources[parts[0]] {
+			if strings.TrimPrefix(record.Package, "github.com/JSYoo5B/gophercloudsdk/"+key+"/") == exampleResources[parts[0]] {
 				break
 			}
 		}
@@ -203,7 +203,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	out.WriteString("## Go 사용\n\n```go\n")
 	fmt.Fprintf(&out, "// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서\nservice, err := conn.%s(ctx)\nif err != nil { return err }\n", method)
 	if example != nil {
-		field := registryField(strings.TrimPrefix(example.Package, "gophercloudsdk/"+key+"/"))
+		field := registryField(strings.TrimPrefix(example.Package, "github.com/JSYoo5B/gophercloudsdk/"+key+"/"))
 		accessor := "service." + field + ".Resources"
 		finder := "service." + field
 		if example.Source == "sdk_owned" {
@@ -224,22 +224,22 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			return err
 		}
 	}
-	out.WriteString("```\n\n예제의 `fmt`는 표준 라이브러리, `resource`는 `gophercloudsdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.\n\n")
+	out.WriteString("```\n\n예제의 `fmt`는 표준 라이브러리, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.\n\n")
 	if parts[0] == "metric" {
-		out.WriteString("`metrics`는 `gophercloudsdk/metric/v1/metrics`입니다.\n\n")
+		out.WriteString("`metrics`는 `github.com/JSYoo5B/gophercloudsdk/metric/v1/metrics`입니다.\n\n")
 	}
 	out.WriteString("## 리소스와 공통 정책\n\n| 서비스 필드 | API 패키지 | 공통 정책·범위 |\n|---|---|---|\n")
 	for _, path := range paths {
 		var policies []string
 		apiFile := "api_generated.go"
 		for _, record := range g.collections {
-			if record.Package != "gophercloudsdk/"+key+"/"+path || record.Model == "" {
+			if record.Package != "github.com/JSYoo5B/gophercloudsdk/"+key+"/"+path || record.Model == "" {
 				continue
 			}
 			if record.Source == "sdk_owned" {
 				apiFile = "api.go"
 			}
-			if record.Package == "gophercloudsdk/image/v2/serviceinfo" {
+			if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo" {
 				switch record.Model {
 				case "Store":
 					policies = append(policies, "`ListStores/AllStores(ctx)`: 저장소 목록·선택 상세 목록; Resources·CRUD·Find·Wait 없음")
@@ -380,7 +380,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	out.WriteString("\n공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.\n\n")
 	for _, record := range g.collections {
-		if record.Source != "" || record.Model == "" || record.Kind != "" || !strings.HasPrefix(record.Package, "gophercloudsdk/"+key+"/") {
+		if record.Source != "" || record.Model == "" || record.Kind != "" || !strings.HasPrefix(record.Package, "github.com/JSYoo5B/gophercloudsdk/"+key+"/") {
 			continue
 		}
 		out.WriteString("native pager에 연결된 `Resources.List/All`과 부모 scope의 `List/All`은 `resource.WithMaxItems(n)`과 `resource.WithPaginated(false)`로 raw 행 소비량과 첫 페이지를 제어합니다. cap은 로컬 name/status 및 Trove 사용자 host 필터 전에 적용합니다. 0은 무제한이며 음수는 lazy 순회 시 HTTP 전에 오류입니다. native 경로는 cap을 wire limit hint로 보내지 않고 명시 페이지 크기·query·header를 보존합니다. 페이지 전체 extraction 때문에 cap 뒤 malformed 행도 오류를 낼 수 있습니다. 기존 native typed `List`의 작업별 옵션은 유지하며, 공통 소비 옵션은 Collection/scope에 전달합니다. [서비스별 Python/Go 목록 비교](../../docs/listing.md)에서 실제 binding과 continuation 정책을 확인합니다.\n\n")

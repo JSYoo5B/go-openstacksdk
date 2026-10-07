@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"sort"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (f *FloatingIPs) allocateDestination(ctx context.Context, serverID string, input AllocateFloatingIPRequest, p *FloatingIPPlanner) (FloatingIPSelection, error) {

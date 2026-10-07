@@ -9,11 +9,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	volumes "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/v2/pagination"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 type getVolumesEntry struct {

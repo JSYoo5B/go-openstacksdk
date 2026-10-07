@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 )
 
 func TestCachedManualServicesRespectCanceledContext(t *testing.T) {

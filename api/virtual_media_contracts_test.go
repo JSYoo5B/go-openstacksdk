@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/baremetal/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/baremetal/v1/nodes"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 func TestVirtualMediaHasTypedFieldsAndPreservesResponseMetadata(t *testing.T) {

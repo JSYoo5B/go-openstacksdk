@@ -3,10 +3,10 @@ package containers
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/keymanagerread"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/keymanagerread"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // deleteOwned is only the collection binding. Native Delete keeps its public

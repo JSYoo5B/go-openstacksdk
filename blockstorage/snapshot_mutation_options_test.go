@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func snapshotMutationOptionsLocation() resource.CloudLocation {

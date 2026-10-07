@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/dns/v2/quotas"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const designateQuotaBody = `{"id":"wire-other","project_id":"wire-project","api_export_size":1000,"recordset_records":20,"zone_records":null,"zone_recordsets":0,"zones":-1,"vendor":{"counter":9007199254740993},"optional":null}`

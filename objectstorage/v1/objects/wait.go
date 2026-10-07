@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForDelete polls fresh HEAD until a clean physical 404. It never issues

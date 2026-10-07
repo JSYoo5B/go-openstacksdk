@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func addressRow(version int, ip, tag string, mac ...string) map[string]any {

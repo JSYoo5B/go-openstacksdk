@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GetMetadata reads this account's metadata and preserves the actual response.

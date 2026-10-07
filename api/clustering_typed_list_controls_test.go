@@ -10,16 +10,16 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/events"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/actions"
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/clustering/v1/events"
-	"gophercloudsdk/clustering/v1/nodes"
-	"gophercloudsdk/clustering/v1/policies"
-	"gophercloudsdk/clustering/v1/profiles"
-	"gophercloudsdk/clustering/v1/receivers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type typedListControlInput struct {

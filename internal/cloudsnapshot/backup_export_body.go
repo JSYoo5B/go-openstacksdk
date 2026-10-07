@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // Redirect hooks can change the physical request after native options checks.

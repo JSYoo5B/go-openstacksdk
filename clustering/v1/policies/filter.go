@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 const localFiltersKey = "policies.local_filters"

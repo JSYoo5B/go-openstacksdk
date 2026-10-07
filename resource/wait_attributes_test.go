@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/baremetal/v1/nodes"
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/baremetal/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestWaitStatusAttributeSelectsNativeNodeFields(t *testing.T) {

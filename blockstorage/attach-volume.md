@@ -14,9 +14,9 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    sdk "gophercloudsdk"
-    "gophercloudsdk/blockstorage"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func attachDefault(ctx context.Context, conn *sdk.Connection, serverID, volumeID string) (*blockstorage.AttachVolumeResult, error) {

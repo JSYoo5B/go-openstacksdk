@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/image"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {

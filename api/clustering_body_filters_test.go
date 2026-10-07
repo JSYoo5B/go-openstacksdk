@@ -10,16 +10,16 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/events"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/services"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/actions"
-	"gophercloudsdk/clustering/v1/clusterpolicies"
-	"gophercloudsdk/clustering/v1/events"
-	"gophercloudsdk/clustering/v1/policytypes"
-	"gophercloudsdk/clustering/v1/profiletypes"
-	"gophercloudsdk/clustering/v1/services"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type clusteringBodyValue struct {

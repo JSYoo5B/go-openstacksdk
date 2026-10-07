@@ -28,9 +28,9 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/receivers"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func RenameTrackedReceiver(ctx context.Context, conn *sdk.Connection) (*receivers.Receiver, error) {
@@ -54,9 +54,9 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/receivers"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func UpdateReceiverAt(ctx context.Context, conn *sdk.Connection, collectionPath, receiverID string) (*receivers.Receiver, error) {

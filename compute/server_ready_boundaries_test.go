@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 func TestWaitForServerRawFailuresKeepLastMatchingModelAndCauses(t *testing.T) {

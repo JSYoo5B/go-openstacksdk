@@ -28,8 +28,8 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/compute/v2/servers"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func waitForServer(ctx context.Context, client *gophercloud.ServiceClient, id string) (*servers.Server, error) {
@@ -57,8 +57,8 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/blockstorage/v3/volumes"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func waitForVolume(ctx context.Context, client *gophercloud.ServiceClient, id string) (*volumes.Volume, error) {

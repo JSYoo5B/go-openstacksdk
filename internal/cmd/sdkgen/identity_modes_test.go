@@ -119,7 +119,7 @@ func TestIdentityListModesEmitFallbackOnlyAndExplicitInventory(t *testing.T) {
 			if strings.Contains(body, "WithListDetails") || strings.Contains(body, "WithListAllProjects") {
 				t.Fatal("changed public native List options", body)
 			}
-			record := collectionRecord{Package: "gophercloudsdk/" + spec.path, IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan)}
+			record := collectionRecord{Package: "github.com/JSYoo5B/gophercloudsdk/" + spec.path, IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan)}
 			data, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)

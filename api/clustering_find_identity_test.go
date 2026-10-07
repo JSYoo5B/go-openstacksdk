@@ -15,15 +15,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/clustering/v1/nodes"
-	"gophercloudsdk/clustering/v1/policies"
-	"gophercloudsdk/clustering/v1/profiles"
-	"gophercloudsdk/clustering/v1/receivers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // Source: pinned ef55d7d Resource.find resource.py:2536-2554 tries GET before

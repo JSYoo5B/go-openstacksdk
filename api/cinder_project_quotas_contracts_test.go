@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/quotasets"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/blockstorage/v3/quotasets"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const cinderProjectQuotaLimits = `{"quota_set":{"id":"wire-project","volumes":-1,"snapshots":0,"volumes_SSD":8,"counter":9007199254740993,"vendor":{"tier":"custom"},"optional":null}}`

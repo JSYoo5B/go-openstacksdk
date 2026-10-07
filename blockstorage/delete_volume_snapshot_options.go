@@ -3,8 +3,8 @@ package blockstorage
 import (
 	"context"
 
-	"gophercloudsdk/internal/cloudsnapshot"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type DeleteVolumeSnapshotRequest struct{ NameOrID string }

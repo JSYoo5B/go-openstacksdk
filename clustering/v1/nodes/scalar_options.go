@@ -1,6 +1,6 @@
 package nodes
 
-import "gophercloudsdk/request"
+import "github.com/JSYoo5B/gophercloudsdk/request"
 
 func WithCreateClusterID(value string) CreateOption {
 	return func(config *request.Config[CreateOpts]) error {

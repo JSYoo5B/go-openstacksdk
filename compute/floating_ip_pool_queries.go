@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListFloatingIPPools always reads legacy Nova, independently of IP source.

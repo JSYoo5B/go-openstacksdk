@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // GetImage resolves an optional exact Name and then fetches fresh image JSON.

@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // ListVolumeTypes applies originals once before selecting cached Cinder v3 and

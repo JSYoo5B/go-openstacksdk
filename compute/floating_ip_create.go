@@ -10,11 +10,11 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateFloatingIP always allocates fresh. Only Neutron's selected port can

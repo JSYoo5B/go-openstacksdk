@@ -38,9 +38,9 @@ import (
     "strings"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/network"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/network"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

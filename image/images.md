@@ -20,8 +20,8 @@ import (
     "context"
     "net/url"
 
-    "gophercloudsdk/image"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func getImageExample(ctx context.Context, svc *image.Service, imageID string) (*image.ImageInfo, error) {

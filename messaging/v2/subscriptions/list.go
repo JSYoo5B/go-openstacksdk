@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func (s *QueueScope) List(ctx context.Context, options ...ListOption) iter.Seq2[*Subscription, error] {

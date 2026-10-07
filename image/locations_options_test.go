@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestImageLocationsOptionsSnapshotsAndReplacement(t *testing.T) {

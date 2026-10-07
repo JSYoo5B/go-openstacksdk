@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/dns/v2/recordsets"
-	"gophercloudsdk/dns/v2/zones"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
 )
 
 func TestOptionalDNSHeadersSurviveLibraryOwnedBuilders(t *testing.T) {

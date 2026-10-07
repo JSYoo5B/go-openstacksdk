@@ -15,11 +15,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	securitygroups "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	securitygroups "gophercloudsdk/network/v2/extensions/security/groups"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // Independent pinned SecurityGroup query table. Inherited revision_number and

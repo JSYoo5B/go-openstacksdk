@@ -11,7 +11,7 @@ package example
 import (
 	"context"
 
-	"gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk"
 )
 
 func rootEnabled(ctx context.Context, conn *gophercloudsdk.Connection, instanceID string) (bool, error) {

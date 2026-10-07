@@ -3,7 +3,7 @@ package resource_test
 import (
 	"encoding/json"
 	"errors"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"testing"
 )
 

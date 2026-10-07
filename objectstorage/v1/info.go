@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/internal/swiftinfo"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/swiftinfo"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // GetInfo reads fresh capabilities from the catalog-derived /info endpoint.

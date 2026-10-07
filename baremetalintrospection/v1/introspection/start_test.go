@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 )
 
 type failedStartQuery struct{ err error }

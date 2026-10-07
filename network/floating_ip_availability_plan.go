@@ -7,8 +7,8 @@ import (
 	"errors"
 	"slices"
 
-	"gophercloudsdk/internal/cloudlocation"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // FloatingIPAvailabilityPlan captures the chosen external network and nullable

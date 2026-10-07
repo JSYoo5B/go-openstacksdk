@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 var (

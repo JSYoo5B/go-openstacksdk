@@ -25,7 +25,7 @@ ID는 `gophercloud:compute/v2/servers.GetPassword` 또는 `python:compute/v2/get
   "operation": "python:service/v1/get_resource",
   "source_fingerprint": "catalog에 기록된 SHA-256",
   "status": "go_mapping",
-  "go_api": ["gophercloudsdk/service/v1/resources.API.Get"],
+  "go_api": ["github.com/JSYoo5B/gophercloudsdk/service/v1/resources.API.Get"],
   "contracts": [{
     "behavior": "ID 조회, 응답 값과 HTTP 오류 보존",
     "tests": ["api/resource_contracts_test.go:TestResourceGet"]

@@ -7,8 +7,8 @@ import (
 	"slices"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ImageMetadataOptions owns JSON values. Nil Metadata becomes an empty object.

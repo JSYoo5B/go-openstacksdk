@@ -12,9 +12,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/resource"
 )
 
 func importCoreClient(server *httptest.Server) *gophercloud.ServiceClient {

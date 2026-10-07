@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/resource"
 )
 
 const deleteCoreBulkOK = `{"Response Status":"200 OK","Response Body":"","Number Deleted":1,"Number Not Found":0,"Errors":[]}`

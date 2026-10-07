@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestCollectionValidateItemPreservesSingularHTTPResponse(t *testing.T) {

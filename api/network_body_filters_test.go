@@ -13,14 +13,14 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	qospolicies "gophercloudsdk/network/v2/extensions/qos/policies"
-	"gophercloudsdk/network/v2/extensions/security/addressgroups"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Resource.list separates QoSPolicy.rules and AddressGroup.addresses

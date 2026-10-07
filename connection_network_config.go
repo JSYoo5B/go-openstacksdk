@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/network"
 )
 
 // Called after the existing default-network parser validates list/row/flag

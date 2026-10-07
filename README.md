@@ -2,11 +2,13 @@
 
 Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사용 방식을 제공하는 Go SDK 프로젝트입니다. 애플리케이션이 기본값, 이름 조회, 페이지네이션, 상태 대기, 요청 builder를 반복해서 구현하지 않도록 하는 것이 목적입니다.
 
-현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 이름 `gophercloudsdk`는 로컬 개발용이며, 저장소 공개 시 실제 모듈 경로로 변경해야 합니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
+현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 경로는 `github.com/JSYoo5B/gophercloudsdk`입니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
 
 [구현 순서와 단계별 현황](docs/implementation-plan.md)은 **핵심 user API → 핵심 admin API → 매니지드 user API → 매니지드 admin API** 순으로 작업을 배치하고 소스 검토·구현·테스트·문서·최종 판정·커밋과 push를 구분합니다. 전체 API의 지원 범위와 완료 기준은 [지원 판정대장](docs/sdk-support-ledger.md)에서 확인합니다.
 
 **현재 SDK 완료 수와 진행 중인 작업:** [자동 집계·현재 단계](docs/implementation-plan.md#현재-집계와-진행-중인-작업). 아래의 Gophercloud 공개 연산 수는 고정 transport 목록이며, SDK 완료 수는 위 링크의 연산별 판정으로 확인합니다.
+
+[외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 **사용 가능한 개발 preview:** `make smoke`로 핵심 user 5개 흐름을 실행하고 실제 결과를 확인합니다. [단계별 사용·릴리즈 기준](docs/release-milestones.md)에 현재 검증 범위와 첫 외부 설치용 alpha의 남은 조건을 기록합니다.
 
@@ -265,9 +267,9 @@ import (
     "log"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/compute"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/compute"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

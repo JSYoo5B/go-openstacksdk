@@ -29,7 +29,7 @@ import (
     "encoding/json"
     "os"
 
-    "gophercloudsdk/image"
+    "github.com/JSYoo5B/gophercloudsdk/image"
 )
 
 func uploadFile(ctx context.Context, service *image.Service, filename string,

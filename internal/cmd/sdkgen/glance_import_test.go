@@ -22,7 +22,7 @@ func TestGlanceImportKeepsActualNativeCallsAndNoInventedCollection(t *testing.T)
 		t.Fatalf("invented import inventory rows: %+v", g.collections)
 	}
 	r := g.collections[0]
-	if r.Package != "gophercloudsdk/image/v2/imageimport" || r.Model != "" || r.Find || r.Delete || r.Wait || r.Scope != "" || r.Kind != "" || r.Issue != "requires a scoped or specialized resource binding" {
+	if r.Package != "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport" || r.Model != "" || r.Find || r.Delete || r.Wait || r.Scope != "" || r.Kind != "" || r.Issue != "requires a scoped or specialized resource binding" {
 		t.Fatalf("import submission became a collection: %+v", r)
 	}
 	actual, err := os.ReadFile(filepath.Join(g.root, "image/v2/imageimport/api_generated.go"))

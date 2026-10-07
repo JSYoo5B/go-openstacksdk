@@ -18,7 +18,7 @@
       "id": "dns/v2/zones",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -39,7 +39,7 @@
       "id": "dns/v2/create_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -60,7 +60,7 @@
       "id": "dns/v2/get_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -91,7 +91,7 @@
       "id": "dns/v2/delete_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -116,7 +116,7 @@
       "id": "dns/v2/update_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -142,7 +142,7 @@
       "id": "dns/v2/find_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -167,7 +167,7 @@
       "id": "dns/v2/abandon_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -192,7 +192,7 @@
       "id": "dns/v2/xfr_zone",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -215,7 +215,7 @@
       "id": "dns/v2/zone_nameservers",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -242,7 +242,7 @@
       "id": "dns/v2/recordsets",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -268,7 +268,7 @@
       "id": "dns/v2/create_recordset",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -317,7 +317,7 @@
       "id": "dns/v2/get_recordset",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -349,7 +349,7 @@
       "id": "dns/v2/delete_recordset",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -384,7 +384,7 @@
       "id": "dns/v2/find_recordset",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -510,7 +510,7 @@
       "id": "dns/v2/create_zone_export",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -716,7 +716,7 @@
       "id": "dns/v2/create_zone_transfer_request",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -846,7 +846,7 @@
       "id": "dns/v2/zone_shares",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -872,7 +872,7 @@
       "id": "dns/v2/get_zone_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -903,7 +903,7 @@
       "id": "dns/v2/find_zone_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -929,7 +929,7 @@
       "id": "dns/v2/create_zone_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -960,7 +960,7 @@
       "id": "dns/v2/delete_zone_share",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/zones"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
       ],
       "review": "pending"
     },
@@ -1246,7 +1246,7 @@
       "id": "dns/v2/tsigkeys",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/tsigkeys"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
       ],
       "review": "pending"
     },
@@ -1267,7 +1267,7 @@
       "id": "dns/v2/create_tsigkey",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/tsigkeys"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
       ],
       "review": "pending"
     },
@@ -1288,7 +1288,7 @@
       "id": "dns/v2/get_tsigkey",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/tsigkeys"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
       ],
       "review": "pending"
     },
@@ -1319,7 +1319,7 @@
       "id": "dns/v2/delete_tsigkey",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/tsigkeys"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
       ],
       "review": "pending"
     },
@@ -1345,7 +1345,7 @@
       "id": "dns/v2/find_tsigkey",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/dns/v2/tsigkeys"
+        "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
       ],
       "review": "pending"
     },

@@ -12,9 +12,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/resource"
 )
 
 const accountMetadataEndpoint = "https://swift.invalid/reverse/a%20b/v1/AUTH_account"

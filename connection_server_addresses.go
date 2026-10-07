@@ -3,10 +3,10 @@ package gophercloudsdk
 import (
 	"context"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/network"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/network"
 )
 
 func (c *Connection) addressNetworkService(ctx context.Context) (*network.Service, error) {

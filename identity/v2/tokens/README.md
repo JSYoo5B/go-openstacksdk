@@ -14,7 +14,7 @@ requestID := auth.Header.Get("X-Openstack-Request-Id")
 _ = requestID
 ```
 
-`identityv2`는 `gophercloudsdk/identity/v2`, `fmt`는 표준 라이브러리입니다. Connection의 `IdentityV2(ctx)`가 이 서비스 객체를 제공합니다. 일반적인 최초 인증은 프로젝트의 `Connect(ctx, ...)`를 사용합니다.
+`identityv2`는 `github.com/JSYoo5B/gophercloudsdk/identity/v2`, `fmt`는 표준 라이브러리입니다. Connection의 `IdentityV2(ctx)`가 이 서비스 객체를 제공합니다. 일반적인 최초 인증은 프로젝트의 `Connect(ctx, ...)`를 사용합니다.
 
 `Authentication.Body`는 추가 응답 필드도 포함하는 JSON snapshot입니다. 원래 HTTP 본문의 공백이나 필드 순서를 보존하지 않습니다. `Header`는 복사된 HTTP 응답 헤더입니다. 사용자나 catalog가 없는 unscoped 응답은 해당 필드가 비어 있습니다. 날짜나 모델 필드가 잘못되면 결과 대신 오류를 반환하고, HTTP 오류는 `errors.As`로 원래 Gophercloud 오류를 확인할 수 있습니다.
 

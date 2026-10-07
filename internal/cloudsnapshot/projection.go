@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/jmespath"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jmespath"
 )
 
 // An explicit list expression always evaluates the owned complete JSON value,

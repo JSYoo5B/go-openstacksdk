@@ -39,8 +39,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/resource"
-    "gophercloudsdk/sharedfilesystems/v2/quotasets"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 func manageQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
@@ -78,8 +78,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/resource"
-    "gophercloudsdk/sharedfilesystems/v2/quotasets"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
 )
 
 func manageScopedQuota(ctx context.Context, client *gophercloud.ServiceClient) error {

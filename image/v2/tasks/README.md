@@ -9,8 +9,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image/v2/tasks"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func waitForTask(ctx context.Context, client *gophercloud.ServiceClient, id string) (*tasks.TaskWaitResult, error) {
@@ -42,8 +42,8 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/image/v2/tasks"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func waitForProcessing(ctx context.Context, client *gophercloud.ServiceClient, id string) (*tasks.TaskWaitResult, error) {

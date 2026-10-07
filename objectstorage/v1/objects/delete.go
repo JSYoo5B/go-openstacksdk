@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // DeleteObject discovers unknown SLO state with fresh HEAD, then deletes the

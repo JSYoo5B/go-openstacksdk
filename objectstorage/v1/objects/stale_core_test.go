@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func staleCoreValue(value *string) string {

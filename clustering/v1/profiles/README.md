@@ -14,7 +14,7 @@
 
 ## 생성과 검증
 
-다음 Go 예제는 `ctx context.Context`, `conn *gophercloudsdk.Connection`을 사용하는 함수 안에서 실행합니다. `profiles`는 `gophercloudsdk/clustering/v1/profiles`, `resource`는 `gophercloudsdk/resource`입니다.
+다음 Go 예제는 `ctx context.Context`, `conn *gophercloudsdk.Connection`을 사용하는 함수 안에서 실행합니다. `profiles`는 `github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles`, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다.
 
 ```go
 service, err := conn.Clustering(ctx)
@@ -190,8 +190,8 @@ package example
 import (
     "context"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/clustering/v1/profiles"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
 )
 
 func FindProfileStrict(ctx context.Context, conn *sdk.Connection) (*profiles.Profile, error) {

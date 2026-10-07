@@ -76,7 +76,7 @@ func emitConfiguredBuilderMethod(e *emitter, b builder, method *types.Func, call
 		e.printf("if b.base.Metadata!=nil{value0[\"metadata\"]=%s.Clone(b.base.Metadata)}\n", maps)
 		e.printf("value0=map[string]any{\"backup\":value0}\n")
 	}
-	req := e.use("gophercloudsdk/request")
+	req := e.use("github.com/JSYoo5B/gophercloudsdk/request")
 	for i := 0; i < sig.Results().Len()-1; i++ {
 		t := sig.Results().At(i).Type()
 		if caps.body && isAnyMap(t) {

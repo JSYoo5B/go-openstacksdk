@@ -9,7 +9,7 @@ Keystone v3에서 사용자가 접근할 수 있는 프로젝트와 속한 그�
 | `conn.identity.user_projects(user)` | `identity.Users.ListProjects(ctx, userID)` | `iter.Seq2[*projects.Project, error]` |
 | `conn.identity.user_groups(user)` | `identity.Users.ListGroups(ctx, userID)` | `iter.Seq2[*groups.Group, error]` |
 
-`projects`와 `groups`는 각각 `gophercloudsdk/identity/v3/projects`, `gophercloudsdk/identity/v3/groups` 패키지입니다. `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. Python의 결과는 사용자 URI 범위를 가진 `UserProject`·`UserGroup` Resource이며, Go의 결과 모델에 해당 부모 범위나 Python Resource의 상태를 추가하지는 않습니다.
+`projects`와 `groups`는 각각 `github.com/JSYoo5B/gophercloudsdk/identity/v3/projects`, `github.com/JSYoo5B/gophercloudsdk/identity/v3/groups` 패키지입니다. `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. Python의 결과는 사용자 URI 범위를 가진 `UserProject`·`UserGroup` Resource이며, Go의 결과 모델에 해당 부모 범위나 Python Resource의 상태를 추가하지는 않습니다.
 
 Python:
 
@@ -38,7 +38,7 @@ import (
 	"os"
 	"time"
 
-	sdk "gophercloudsdk"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
 )
 
 func main() {

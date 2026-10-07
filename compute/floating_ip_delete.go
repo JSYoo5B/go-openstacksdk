@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Cloud raises on HTTP>=400; successful deletion responses are passive proof,

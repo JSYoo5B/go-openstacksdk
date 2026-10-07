@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
-	"gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/image/v2/imageimport"
-	"gophercloudsdk/resource"
 )
 
 func TestCreateImportOptionsOwnReplacementAndReusableSnapshots(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"slices"
 
-	"gophercloudsdk/internal/cloudread"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type Input struct{ NameOrID string }

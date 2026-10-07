@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestEnsureNoWaitPreservesPreparedPolicyForLaterActiveOverride(t *testing.T) {

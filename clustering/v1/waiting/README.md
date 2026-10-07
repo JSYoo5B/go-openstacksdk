@@ -76,7 +76,7 @@ if err != nil { return err }
 fmt.Println(cluster.ID, cluster.Status, cluster.Header, cluster.Body)
 ```
 
-예제의 `resource`는 `gophercloudsdk/resource`, `time`과 `fmt`는 표준 라이브러리입니다.
+예제의 `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `time`과 `fmt`는 표준 라이브러리입니다.
 Go는 `resource.ID`와 `resource.Name`을 명시하므로 UUID 모양 이름도 이름 그대로 검색할 수
 있습니다. ID는 fresh GET으로 시작합니다. Name은 정확한 서버 목록 lookup의 결과로 시작하며
 그 결과가 이미 목표 상태이면 단건 GET을 추가하지 않습니다. lookup 이후의 polling은 같은

@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	rt "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	rt "gophercloudsdk/image/v2/metadefresourcetypes"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 const rtPrefix = "/reverse/resource-type/glance/v2/"

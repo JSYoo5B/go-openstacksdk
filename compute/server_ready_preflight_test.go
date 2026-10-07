@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestServerReadyPreparesOptionsOnceAndCapturesIdentityAndSource(t *testing.T) {

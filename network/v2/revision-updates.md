@@ -19,8 +19,8 @@ import (
     "fmt"
 
     "github.com/gophercloud/gophercloud/v2"
-    networkv2 "gophercloudsdk/network/v2"
-    "gophercloudsdk/network/v2/networks"
+    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
+    "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
 )
 
 func renameNetwork(ctx context.Context, service *networkv2.Service, id, name string, revision int) (*networks.Network, error) {

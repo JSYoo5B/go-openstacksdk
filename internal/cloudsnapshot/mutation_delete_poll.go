@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"sync"
 
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // Native Gophercloud discards read/Close errors on rejected responses. A404

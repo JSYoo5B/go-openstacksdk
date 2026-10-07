@@ -71,8 +71,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func ListDatabases(ctx context.Context, conn *sdk.Connection, instanceID string) error {

@@ -3,7 +3,7 @@ package image
 import (
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 // ImageMemberAcknowledgement retains an actual 204 member-deletion response.

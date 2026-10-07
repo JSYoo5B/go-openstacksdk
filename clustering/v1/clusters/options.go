@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateOpts leaves omitted sizes to Senlin's defaults. A present zero size or

@@ -2,13 +2,13 @@ package image
 
 import (
 	"context"
-	imageapi "gophercloudsdk/image/v2"
+	imageapi "github.com/JSYoo5B/gophercloudsdk/image/v2"
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/internal/nativefind"
-	"gophercloudsdk/internal/query"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
+	"github.com/JSYoo5B/gophercloudsdk/internal/query"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"

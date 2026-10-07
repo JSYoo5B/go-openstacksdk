@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeNetworks "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 func mutationCall(ctx context.Context, s *network.Service, operation string) (*network.Network, bool, error) {

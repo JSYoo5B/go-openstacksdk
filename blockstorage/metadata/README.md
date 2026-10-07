@@ -32,8 +32,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/blockstorage/v3/volumes"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func replaceVolumeMetadata(ctx context.Context, client *gophercloud.ServiceClient, id string) error {
@@ -71,8 +71,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/blockstorage/v2/snapshots"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func deleteSnapshotMetadataKeys(ctx context.Context, client *gophercloud.ServiceClient, id string) error {

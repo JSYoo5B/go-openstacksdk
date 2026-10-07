@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // prepareOptions owns callback order, intermediate values and final defaults.

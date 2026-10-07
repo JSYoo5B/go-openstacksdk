@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/rest"
 )
 
 func volumeTypesPaginationFixture(t *testing.T, body, current string, header http.Header) (*rest.Response, *url.URL, map[string]json.RawMessage) {

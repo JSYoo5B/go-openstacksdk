@@ -15,12 +15,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/testhelper"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/quotas"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const quotaPrefix = "/reverse/barbican/v1"

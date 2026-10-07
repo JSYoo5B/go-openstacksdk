@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/rest"
 )
 
 // volumeTypesNext consumes the source body's link policy, a usable HTTP Link

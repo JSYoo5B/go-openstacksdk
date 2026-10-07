@@ -13,11 +13,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/metadata"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage/metadata"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 type Scope struct {

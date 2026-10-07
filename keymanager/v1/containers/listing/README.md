@@ -12,8 +12,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/containers"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listCertificateContainers(ctx context.Context, client *gophercloud.ServiceClient) ([]*containers.Container, error) {
@@ -122,8 +122,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/containers"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func listExactContainerReferences(ctx context.Context, client *gophercloud.ServiceClient) ([]*containers.Container, error) {

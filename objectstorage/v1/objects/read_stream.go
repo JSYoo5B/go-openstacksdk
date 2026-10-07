@@ -5,9 +5,9 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/fixedrequest"
-	"gophercloudsdk/resource"
 )
 
 // objectReadBody retains immutable wire evidence and serial body state. Public

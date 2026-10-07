@@ -3,8 +3,8 @@ package nodes
 import (
 	"encoding/json"
 
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // AdoptOpts identifies a physical resource in the body rather than the URL.

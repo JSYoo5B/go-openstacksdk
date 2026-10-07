@@ -3,9 +3,9 @@ package segments
 import (
 	"context"
 
-	"gophercloudsdk/internal/masakari"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/masakari"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // WaitForStatus requires an explicit typed string attribute because segments

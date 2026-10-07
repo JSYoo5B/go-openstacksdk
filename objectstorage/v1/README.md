@@ -56,7 +56,7 @@ if err != nil { return err }
 _ = value
 ```
 
-예제의 `fmt`는 표준 라이브러리, `resource`는 `gophercloudsdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.
+예제의 `fmt`는 표준 라이브러리, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.
 
 ## 리소스와 공통 정책
 

@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/containerinfra/v1/quotas"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 const magnumQuotaBody = `{"id":9007199254740993,"project_id":"wire-project","resource":"Cluster","hard_limit":0,"created_at":"2017-01-17T17:35:48+00:00","updated_at":null,"vendor":{"big":9007199254740993},"optional":null}`

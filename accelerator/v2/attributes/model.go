@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"gophercloudsdk/accelerator/v2/common"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/common"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 var uuidPattern = regexp.MustCompile(`^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$`)

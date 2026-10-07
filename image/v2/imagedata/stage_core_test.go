@@ -14,10 +14,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeimages "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/resource"
 )
 
 type stageCoreTransport func(*http.Request) (*http.Response, error)

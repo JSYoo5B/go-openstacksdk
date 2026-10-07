@@ -9,12 +9,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/quotas"
-	"gophercloudsdk/resource"
 )
 
 func TestNeutronProjectQuotaResolvesNameOnceUsingSeparateIdentityClient(t *testing.T) {

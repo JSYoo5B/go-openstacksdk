@@ -10,12 +10,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/manilaversion"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/manilaversion"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
-	"gophercloudsdk/sharedfilesystems/v2/shares"
 )
 
 // AccessRuleScope owns access IDs within a share. It uses the modern 2.45+

@@ -14,11 +14,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network/v2/extensions/subnetpools"
-	"gophercloudsdk/network/v2/extensions/trunks"
-	"gophercloudsdk/resource"
 )
 
 // Python find_subnet_pool/find_trunk accept string identity, ignore_missing,

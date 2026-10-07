@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gophercloudsdk/orchestration/v1/stacks"
+	"github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
 )
 
 // EventResource retains native event fields and server extensions. Request

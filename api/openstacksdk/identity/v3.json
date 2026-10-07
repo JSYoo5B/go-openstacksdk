@@ -18,8 +18,8 @@
       "id": "identity/v3/create_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -45,8 +45,8 @@
       "id": "identity/v3/delete_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -72,8 +72,8 @@
       "id": "identity/v3/find_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -94,8 +94,8 @@
       "id": "identity/v3/get_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -116,8 +116,8 @@
       "id": "identity/v3/credentials",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -142,8 +142,8 @@
       "id": "identity/v3/update_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/credentials",
-        "gophercloudsdk/identity/v3/ec2credentials"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials"
       ],
       "review": "pending"
     },
@@ -164,7 +164,7 @@
       "id": "identity/v3/create_domain",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -190,7 +190,7 @@
       "id": "identity/v3/delete_domain",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -216,7 +216,7 @@
       "id": "identity/v3/find_domain",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -237,7 +237,7 @@
       "id": "identity/v3/get_domain",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -258,7 +258,7 @@
       "id": "identity/v3/domains",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -283,7 +283,7 @@
       "id": "identity/v3/update_domain",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -310,7 +310,7 @@
       "id": "identity/v3/create_domain_config",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -338,7 +338,7 @@
       "id": "identity/v3/delete_domain_config",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -361,7 +361,7 @@
       "id": "identity/v3/get_domain_config",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -388,7 +388,7 @@
       "id": "identity/v3/update_domain_config",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains"
       ],
       "review": "pending"
     },
@@ -409,7 +409,7 @@
       "id": "identity/v3/create_endpoint",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -435,7 +435,7 @@
       "id": "identity/v3/delete_endpoint",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -461,7 +461,7 @@
       "id": "identity/v3/find_endpoint",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -482,7 +482,7 @@
       "id": "identity/v3/get_endpoint",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -503,7 +503,7 @@
       "id": "identity/v3/endpoints",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -528,7 +528,7 @@
       "id": "identity/v3/update_endpoint",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -578,7 +578,7 @@
       "id": "identity/v3/project_endpoints",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -604,8 +604,8 @@
       "id": "identity/v3/associate_endpoint_with_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints",
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -631,8 +631,8 @@
       "id": "identity/v3/disassociate_endpoint_from_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints",
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -786,7 +786,7 @@
       "id": "identity/v3/project_endpoint_groups",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -807,7 +807,7 @@
       "id": "identity/v3/create_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -833,7 +833,7 @@
       "id": "identity/v3/delete_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -863,7 +863,7 @@
       "id": "identity/v3/find_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -884,7 +884,7 @@
       "id": "identity/v3/get_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -905,7 +905,7 @@
       "id": "identity/v3/groups",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -930,7 +930,7 @@
       "id": "identity/v3/update_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
       ],
       "review": "pending"
     },
@@ -956,8 +956,8 @@
       "id": "identity/v3/add_user_to_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -983,8 +983,8 @@
       "id": "identity/v3/remove_user_from_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1010,8 +1010,8 @@
       "id": "identity/v3/check_user_in_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1037,8 +1037,8 @@
       "id": "identity/v3/group_users",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1059,7 +1059,7 @@
       "id": "identity/v3/create_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1085,7 +1085,7 @@
       "id": "identity/v3/delete_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1112,7 +1112,7 @@
       "id": "identity/v3/find_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1133,7 +1133,7 @@
       "id": "identity/v3/get_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1154,7 +1154,7 @@
       "id": "identity/v3/policies",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1179,7 +1179,7 @@
       "id": "identity/v3/update_policy",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/policies"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies"
       ],
       "review": "pending"
     },
@@ -1200,7 +1200,7 @@
       "id": "identity/v3/create_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1226,7 +1226,7 @@
       "id": "identity/v3/delete_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1256,7 +1256,7 @@
       "id": "identity/v3/find_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1277,7 +1277,7 @@
       "id": "identity/v3/get_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1298,7 +1298,7 @@
       "id": "identity/v3/projects",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1324,7 +1324,7 @@
       "id": "identity/v3/user_projects",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1350,7 +1350,7 @@
       "id": "identity/v3/endpoint_projects",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/endpoints"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints"
       ],
       "review": "pending"
     },
@@ -1375,7 +1375,7 @@
       "id": "identity/v3/update_project",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1425,7 +1425,7 @@
       "id": "identity/v3/associate_project_with_endpoint_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1451,7 +1451,7 @@
       "id": "identity/v3/disassociate_project_from_endpoint_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
       ],
       "review": "pending"
     },
@@ -1472,7 +1472,7 @@
       "id": "identity/v3/create_service",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1498,7 +1498,7 @@
       "id": "identity/v3/delete_service",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1524,7 +1524,7 @@
       "id": "identity/v3/find_service",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1545,7 +1545,7 @@
       "id": "identity/v3/get_service",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1566,7 +1566,7 @@
       "id": "identity/v3/services",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1591,7 +1591,7 @@
       "id": "identity/v3/update_service",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/services"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/services"
       ],
       "review": "pending"
     },
@@ -1612,7 +1612,7 @@
       "id": "identity/v3/create_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1638,7 +1638,7 @@
       "id": "identity/v3/delete_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1668,7 +1668,7 @@
       "id": "identity/v3/find_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1689,7 +1689,7 @@
       "id": "identity/v3/get_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1711,7 +1711,7 @@
       "id": "identity/v3/user_groups",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1732,7 +1732,7 @@
       "id": "identity/v3/users",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1757,7 +1757,7 @@
       "id": "identity/v3/update_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1786,7 +1786,7 @@
       "id": "identity/v3/update_password",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -1879,7 +1879,7 @@
       "id": "identity/v3/create_trust",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/trusts"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts"
       ],
       "review": "pending"
     },
@@ -1905,7 +1905,7 @@
       "id": "identity/v3/delete_trust",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/trusts"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts"
       ],
       "review": "pending"
     },
@@ -1931,7 +1931,7 @@
       "id": "identity/v3/find_trust",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/trusts"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts"
       ],
       "review": "pending"
     },
@@ -1952,7 +1952,7 @@
       "id": "identity/v3/get_trust",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/trusts"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts"
       ],
       "review": "pending"
     },
@@ -1973,7 +1973,7 @@
       "id": "identity/v3/trusts",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/trusts"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts"
       ],
       "review": "pending"
     },
@@ -1994,7 +1994,7 @@
       "id": "identity/v3/create_region",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2020,7 +2020,7 @@
       "id": "identity/v3/delete_region",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2047,7 +2047,7 @@
       "id": "identity/v3/find_region",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2068,7 +2068,7 @@
       "id": "identity/v3/get_region",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2089,7 +2089,7 @@
       "id": "identity/v3/regions",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2114,7 +2114,7 @@
       "id": "identity/v3/update_region",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/regions"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions"
       ],
       "review": "pending"
     },
@@ -2135,7 +2135,7 @@
       "id": "identity/v3/create_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2161,7 +2161,7 @@
       "id": "identity/v3/delete_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2191,7 +2191,7 @@
       "id": "identity/v3/find_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2212,7 +2212,7 @@
       "id": "identity/v3/get_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2233,7 +2233,7 @@
       "id": "identity/v3/roles",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2258,7 +2258,7 @@
       "id": "identity/v3/update_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2312,10 +2312,10 @@
       "id": "identity/v3/role_assignments_filter",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2370,9 +2370,9 @@
       "id": "identity/v3/assign_domain_role_to_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2408,9 +2408,9 @@
       "id": "identity/v3/unassign_domain_role_from_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2446,9 +2446,9 @@
       "id": "identity/v3/validate_user_has_domain_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2484,9 +2484,9 @@
       "id": "identity/v3/assign_domain_role_to_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2522,9 +2522,9 @@
       "id": "identity/v3/unassign_domain_role_from_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2560,9 +2560,9 @@
       "id": "identity/v3/validate_group_has_domain_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/domains",
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2598,9 +2598,9 @@
       "id": "identity/v3/assign_project_role_to_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2636,9 +2636,9 @@
       "id": "identity/v3/unassign_project_role_from_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2674,9 +2674,9 @@
       "id": "identity/v3/validate_user_has_project_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2712,9 +2712,9 @@
       "id": "identity/v3/assign_project_role_to_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2750,9 +2750,9 @@
       "id": "identity/v3/unassign_project_role_from_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2788,9 +2788,9 @@
       "id": "identity/v3/validate_group_has_project_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/projects",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2821,8 +2821,8 @@
       "id": "identity/v3/assign_system_role_to_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2853,8 +2853,8 @@
       "id": "identity/v3/unassign_system_role_from_user",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2885,8 +2885,8 @@
       "id": "identity/v3/validate_user_has_system_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/roles",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -2917,8 +2917,8 @@
       "id": "identity/v3/assign_system_role_to_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2949,8 +2949,8 @@
       "id": "identity/v3/unassign_system_role_from_group",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -2981,8 +2981,8 @@
       "id": "identity/v3/validate_group_has_system_role",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/groups",
-        "gophercloudsdk/identity/v3/roles"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles"
       ],
       "review": "pending"
     },
@@ -3003,7 +3003,7 @@
       "id": "identity/v3/registered_limits",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/registeredlimits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits"
       ],
       "review": "pending"
     },
@@ -3024,7 +3024,7 @@
       "id": "identity/v3/get_registered_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/registeredlimits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits"
       ],
       "review": "pending"
     },
@@ -3045,7 +3045,7 @@
       "id": "identity/v3/create_registered_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/registeredlimits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits"
       ],
       "review": "pending"
     },
@@ -3070,7 +3070,7 @@
       "id": "identity/v3/update_registered_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/registeredlimits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits"
       ],
       "review": "pending"
     },
@@ -3096,7 +3096,7 @@
       "id": "identity/v3/delete_registered_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/registeredlimits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits"
       ],
       "review": "pending"
     },
@@ -3117,7 +3117,7 @@
       "id": "identity/v3/limits",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/limits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits"
       ],
       "review": "pending"
     },
@@ -3138,7 +3138,7 @@
       "id": "identity/v3/get_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/limits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits"
       ],
       "review": "pending"
     },
@@ -3159,7 +3159,7 @@
       "id": "identity/v3/create_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/limits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits"
       ],
       "review": "pending"
     },
@@ -3184,7 +3184,7 @@
       "id": "identity/v3/update_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/limits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits"
       ],
       "review": "pending"
     },
@@ -3210,7 +3210,7 @@
       "id": "identity/v3/delete_limit",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/limits"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits"
       ],
       "review": "pending"
     },
@@ -3236,8 +3236,8 @@
       "id": "identity/v3/application_credentials",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3263,8 +3263,8 @@
       "id": "identity/v3/get_application_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3294,8 +3294,8 @@
       "id": "identity/v3/create_application_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3330,8 +3330,8 @@
       "id": "identity/v3/find_application_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3362,8 +3362,8 @@
       "id": "identity/v3/delete_application_credential",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3810,8 +3810,8 @@
       "id": "identity/v3/access_rules",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3837,8 +3837,8 @@
       "id": "identity/v3/get_access_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },
@@ -3869,8 +3869,8 @@
       "id": "identity/v3/delete_access_rule",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/identity/v3/applicationcredentials",
-        "gophercloudsdk/identity/v3/users"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
       ],
       "review": "pending"
     },

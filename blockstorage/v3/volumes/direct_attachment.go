@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
 )
 
 type CinderVolumeAttachOpts = cinderaction.DirectAttachOptions

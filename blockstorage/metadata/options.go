@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // Opts has no body, query, routing or microversion controls.

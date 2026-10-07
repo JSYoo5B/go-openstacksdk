@@ -11,8 +11,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListImages lazily follows guarded canonical next links, preserving the full

@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/rest"
 )
 
 const kind = "image.metadef_resource_type"

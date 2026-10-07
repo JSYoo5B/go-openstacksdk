@@ -11,8 +11,8 @@ package example
 import (
     "context"
 
-    "gophercloudsdk"
-    "gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
 )
 
 func secretPayload(ctx context.Context, conn *gophercloudsdk.Connection, secretID string) ([]byte, error) {

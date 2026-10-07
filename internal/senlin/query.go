@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // SortGrammar validates key[:asc|desc] comma-separated expressions without

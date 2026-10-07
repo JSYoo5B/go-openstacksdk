@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/clustering/v1/clusters"
-	"gophercloudsdk/clustering/v1/receivers"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource(t *testing.T) {

@@ -2,12 +2,12 @@
 package accelerator
 
 import (
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/attributes"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deployables"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deviceprofiles"
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/accelerator/v2/acceleratorrequests"
-	"gophercloudsdk/accelerator/v2/attributes"
-	"gophercloudsdk/accelerator/v2/deployables"
-	"gophercloudsdk/accelerator/v2/deviceprofiles"
-	"gophercloudsdk/accelerator/v2/devices"
 )
 
 type Service struct {

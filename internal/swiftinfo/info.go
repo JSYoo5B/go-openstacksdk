@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 const DefaultSegmentSize int64 = 1073741824

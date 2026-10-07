@@ -10,13 +10,13 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute/v2/aggregates"
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/dns/v2/recordsets"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/loadbalancer/v2/pools"
-	"gophercloudsdk/resource"
 )
 
 type generatedListAccess struct {

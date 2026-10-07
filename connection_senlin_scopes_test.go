@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestConnectionSenlinParentScopesShareLiveAuthVersionAndFixedRoutes(t *testing.T) {

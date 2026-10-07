@@ -4,7 +4,7 @@ package notifications
 import (
 	"encoding/json"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type ProgressDetail struct {

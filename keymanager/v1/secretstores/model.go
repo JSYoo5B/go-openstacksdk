@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // SecretStore retains root-object HTTP fields and exact extension JSON. A

@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/clustering/v1/actions"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/internal/senlin"
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
 )
 
 // Check submits a health check. Parameters remain inside the check object;

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestServiceInfoOptionsSnapshotReplacementAndRetainedHandles(t *testing.T) {

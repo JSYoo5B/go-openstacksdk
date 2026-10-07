@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/compute"
-	"gophercloudsdk/image"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestWaitWorkflowAttributesAreValidatedBeforeLookupOrMutation(t *testing.T) {

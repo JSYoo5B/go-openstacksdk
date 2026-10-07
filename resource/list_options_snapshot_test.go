@@ -7,10 +7,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"gophercloudsdk/clustering/v1/nodes"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestCollectionListRetainsCallerOptionsAcrossIteration(t *testing.T) {

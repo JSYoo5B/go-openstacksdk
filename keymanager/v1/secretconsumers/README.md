@@ -17,8 +17,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secretconsumers"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func Associate(ctx context.Context, client *gophercloud.ServiceClient, secretID string) error {
@@ -56,8 +56,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "gophercloudsdk/keymanager/v1/secretconsumers"
-    "gophercloudsdk/resource"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func Associations(ctx context.Context, client *gophercloud.ServiceClient, secretID string) ([]*secretconsumers.Consumer, error) {

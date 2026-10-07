@@ -2,8 +2,8 @@ package volumes
 
 import (
 	"context"
-	"gophercloudsdk/internal/cinderaction"
-	"gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 )
 
 type VolumeImageUploadOpts = cinderaction.ImageUploadOptions

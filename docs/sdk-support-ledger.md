@@ -1853,3 +1853,13 @@ Focused3 package race가 PASS했고 shared package는 compile-only/no test files
 Owned final200..399·strict non-null UTF-8 JSON·accepted 실패 record/ResponseError·callback/source/context guard는 문서에 명시한 Go 정책입니다. 입력 map의 canonical-wire 우선과 Python insertion order·malformed JSON ValueError 무시·computed location·untyped 객체/Resource lifecycle/cache/session 차이를 구분합니다. 응답 실패에서는 Resource=nil이지만 실제 receipt와 유효한 Wire가 있으면 유지합니다. SDK 조합 단계의 재전송과 configured Provider native retry/reauthentication을 혼동하지 않습니다.
 
 기존510 reviews·source pins·catalog IDs/fp를 보존하고 exact public3행만5계약씩 추가했습니다. 전체188/3362·핵심114/2292·Barbican14/67, reviews513=go_mapping188/unresolved324/unsupported1, contracts3236이며 catalog unresolved3173은 미검토 선언을 포함합니다. 선언별 매핑 완료가 전체 inherited Resource/SDK 완료는 아니며 원래 목표는 active입니다. 다음은 canonical module과 외부 consumer의 local/remote compile proof를 준비해 검증한 핵심 흐름을 설치할 수 있게 합니다.
+
+## 공개 모듈 경로와 외부 소비자 빌드
+
+2026-10-08에 `github.com/JSYoo5B/gophercloudsdk`로 module·Go imports·generator identity·Python filter/candidates·문서 import·review API anchors를 함께 옮겼습니다. namespace 외 JSON 의미 변화0, catalog bytes 보존, source ID/fingerprint3,362개 불일치0, 기존513개 판정과 완료188개를 유지했습니다. API 기본값·HTTP 계약·Go package 이름·고정 의존성은 그대로입니다.
+
+고정 Python/Gophercloud 소스로 generator 집중 race PASS, SDK 재생성 tracked drift0, Python inventory extractor의 namespace 치환 전후 결과 일치를 확인했습니다. 기존40개 test package를 실행한 `make check`와 핵심 preview5흐름/9그룹 `make smoke`가 PASS했습니다. Go source1,939개 SHA256 `49b6f49124fa367735a5e869ba664ff656ad83267282f0a6a43b208ff4b3f275`이 full gate 전후 같습니다.
+
+[외부 소비자 main](install.md)을 checkout 밖에서 컴파일했습니다. consumer의 `go.mod`에만 local replace가 있으며 SDK 의존성에는 replace가 없습니다. 정확한 main SHA256 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`로 공개 root·Compute/Network·Barbican3종·public `request.Config` alias가 빌드됩니다. canonical imports로 갱신한 Barbican 생성 가이드의 정확한 main도 SHA256 `015754160c4352f6bea65f41262e7cb0f49f5a7ddb97e3f5fa83fce018701c91`에서 빌드 PASS했습니다. 인증·OpenStack 호출은 실행하지 않았습니다.
+
+namespace 단위를 push한 후 같은 외부 main으로 정확한 커밋의 replace 없는 원격 설치를 별도 확인합니다. 이 기반 작업은 완료 API 수를 늘리지 않습니다.

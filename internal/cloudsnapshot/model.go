@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"gophercloudsdk/internal/cloudfilter"
-	"gophercloudsdk/internal/jsonfilter"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type descriptor struct {

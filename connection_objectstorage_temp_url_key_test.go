@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	swift "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	swift "gophercloudsdk/objectstorage/v1"
-	"gophercloudsdk/objectstorage/v1/accounts"
-	"gophercloudsdk/objectstorage/v1/containers"
 )
 
 func TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow(t *testing.T) {

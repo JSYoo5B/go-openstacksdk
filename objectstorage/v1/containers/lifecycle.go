@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/request"
 )
 
 // CreateContainer creates or updates a literal container with one bodyless PUT.

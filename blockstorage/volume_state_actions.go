@@ -2,9 +2,9 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cinderaction"
-	"gophercloudsdk/internal/rest"
 )
 
 // VolumeActionRequest uses one explicit ID; it never performs name lookup.

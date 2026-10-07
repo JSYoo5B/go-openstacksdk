@@ -8,9 +8,9 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type AvailableFloatingIPRequest = network.AvailableFloatingIPRequest

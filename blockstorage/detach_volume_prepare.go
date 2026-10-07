@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"net/url"
 
+	volumes "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+	servers "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	volumes "gophercloudsdk/blockstorage/v3/volumes"
-	servers "gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
 )
 
 type preparedDetach struct {

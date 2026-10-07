@@ -14,10 +14,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
-	"gophercloudsdk/objectstorage/v1/objects"
-	"gophercloudsdk/resource"
 )
 
 const objectMetadataBase = "https://swift.invalid/reverse/a%20b/v1/AUTH_account/"

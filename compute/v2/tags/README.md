@@ -9,9 +9,9 @@ import (
     "context"
     "fmt"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/compute/v2/tags"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/compute/v2/tags"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

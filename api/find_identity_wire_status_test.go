@@ -9,14 +9,14 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+	"github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+	securitygroups "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/compute/v2/flavors"
-	"gophercloudsdk/image/v2/images"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/loadbalancer/v2/pools"
-	"gophercloudsdk/network/v2/extensions/layer3/routers"
-	securitygroups "gophercloudsdk/network/v2/extensions/security/groups"
-	"gophercloudsdk/resource"
 )
 
 // Wire status is an explicit service query. It must not be dropped merely

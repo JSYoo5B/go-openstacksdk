@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"gophercloudsdk/internal/cloudsnapshot"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 type RestoreVolumeBackupRequest struct{ BackupID string }

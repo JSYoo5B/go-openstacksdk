@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/image"
+	nativeData "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/image"
-	nativeData "gophercloudsdk/image/v2/imagedata"
-	"gophercloudsdk/resource"
 )
 
 type uploadImageContractReader struct {

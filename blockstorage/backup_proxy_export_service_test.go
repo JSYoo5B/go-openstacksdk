@@ -10,11 +10,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	blockstoragev3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
+	backupsv3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	blockstoragev3 "gophercloudsdk/blockstorage/v3"
-	backupsv3 "gophercloudsdk/blockstorage/v3/backups"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/resource"
 )
 
 type backupProxyExportServiceOutcome struct {

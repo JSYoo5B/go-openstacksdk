@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers"
+	"github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	sdk "gophercloudsdk"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/keymanager/v1/secretconsumers"
-	"gophercloudsdk/messaging/v2/subscriptions"
-	"gophercloudsdk/resource"
 )
 
 func TestConnectionSDKOwnedSubscriptionAndConsumerScopes(t *testing.T) {

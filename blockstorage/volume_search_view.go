@@ -2,7 +2,7 @@ package blockstorage
 
 import (
 	"encoding/json"
-	"gophercloudsdk/internal/cindervolume"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cindervolume"
 )
 
 type volumeSearchConversion = cindervolume.Conversion

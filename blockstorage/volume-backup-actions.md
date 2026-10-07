@@ -27,9 +27,9 @@ import (
 	"os"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/blockstorage"
-	"gophercloudsdk/blockstorage/v3/backups"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
 )
 
 func main() {

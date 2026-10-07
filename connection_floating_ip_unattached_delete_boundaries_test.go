@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	sdk "gophercloudsdk"
-	"gophercloudsdk/compute"
-	"gophercloudsdk/internal/rest"
-	"gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func TestFloatingIPUnattachedPreflightAndCapturedSource(t *testing.T) {

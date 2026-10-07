@@ -1,6 +1,6 @@
 package network
 
-import "gophercloudsdk/resource"
+import "github.com/JSYoo5B/gophercloudsdk/resource"
 
 func classifyNetworkRoles(all []*RoleNetwork, gateways map[string]bool, policy NetworkRolePolicy) (*NetworkRoleSnapshot, error) {
 	result := &NetworkRoleSnapshot{}

@@ -3,8 +3,8 @@ package compute
 import (
 	"time"
 
-	"gophercloudsdk/network"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // CreateServerWithFloatingIPRequest keeps the server NIC selection separate

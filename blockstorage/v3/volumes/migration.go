@@ -2,7 +2,7 @@ package volumes
 
 import (
 	"context"
-	"gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
 )
 
 type VolumeStatusResetOpts = cinderaction.StatusResetOptions

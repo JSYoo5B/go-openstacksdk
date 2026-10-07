@@ -13,15 +13,15 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+	"github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/blockstorage/v3/volumes"
-	"gophercloudsdk/compute/v2/aggregates"
-	"gophercloudsdk/compute/v2/servers"
-	"gophercloudsdk/dns/v2/recordsets"
-	"gophercloudsdk/internal/testcloud"
-	"gophercloudsdk/loadbalancer/v2/pools"
-	"gophercloudsdk/network/v2/ports"
-	"gophercloudsdk/resource"
 )
 
 // Pinned Resource.find tries GET, falls back only for 400/403/404, and scans

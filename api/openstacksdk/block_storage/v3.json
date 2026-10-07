@@ -43,7 +43,7 @@
       "id": "block_storage/v3/create_image",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -64,7 +64,7 @@
       "id": "block_storage/v3/get_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -100,7 +100,7 @@
       "id": "block_storage/v3/find_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -131,7 +131,7 @@
       "id": "block_storage/v3/snapshots",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -152,7 +152,7 @@
       "id": "block_storage/v3/create_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -177,7 +177,7 @@
       "id": "block_storage/v3/update_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -208,7 +208,7 @@
       "id": "block_storage/v3/delete_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -229,7 +229,7 @@
       "id": "block_storage/v3/fetch_snapshot_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -251,7 +251,7 @@
       "id": "block_storage/v3/get_snapshot_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -276,7 +276,7 @@
       "id": "block_storage/v3/set_snapshot_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -302,7 +302,7 @@
       "id": "block_storage/v3/delete_snapshot_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -327,7 +327,7 @@
       "id": "block_storage/v3/reset_snapshot_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -353,7 +353,7 @@
       "id": "block_storage/v3/reset_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -383,7 +383,7 @@
       "id": "block_storage/v3/set_snapshot_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -404,7 +404,7 @@
       "id": "block_storage/v3/manage_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -425,7 +425,7 @@
       "id": "block_storage/v3/unmanage_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
       ],
       "review": "pending"
     },
@@ -908,7 +908,7 @@
       "id": "block_storage/v3/get_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -944,7 +944,7 @@
       "id": "block_storage/v3/find_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -975,7 +975,7 @@
       "id": "block_storage/v3/volumes",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -996,7 +996,7 @@
       "id": "block_storage/v3/create_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1033,7 +1033,7 @@
       "id": "block_storage/v3/delete_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1058,7 +1058,7 @@
       "id": "block_storage/v3/update_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1079,7 +1079,7 @@
       "id": "block_storage/v3/fetch_volume_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1101,7 +1101,7 @@
       "id": "block_storage/v3/get_volume_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1126,7 +1126,7 @@
       "id": "block_storage/v3/set_volume_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1152,7 +1152,7 @@
       "id": "block_storage/v3/delete_volume_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1200,7 +1200,7 @@
       "id": "block_storage/v3/extend_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1226,7 +1226,7 @@
       "id": "block_storage/v3/complete_volume_extend",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1252,7 +1252,7 @@
       "id": "block_storage/v3/set_volume_readonly",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1284,7 +1284,7 @@
       "id": "block_storage/v3/retype_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1309,7 +1309,7 @@
       "id": "block_storage/v3/set_volume_bootable_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1334,7 +1334,7 @@
       "id": "block_storage/v3/set_volume_image_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1360,7 +1360,7 @@
       "id": "block_storage/v3/delete_volume_image_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1396,7 +1396,7 @@
       "id": "block_storage/v3/reset_volume_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1422,8 +1422,8 @@
       "id": "block_storage/v3/revert_volume_to_snapshot",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/snapshots",
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots",
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1458,7 +1458,7 @@
       "id": "block_storage/v3/attach_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1493,7 +1493,7 @@
       "id": "block_storage/v3/detach_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1514,7 +1514,7 @@
       "id": "block_storage/v3/manage_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1535,7 +1535,7 @@
       "id": "block_storage/v3/unmanage_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1600,7 +1600,7 @@
       "id": "block_storage/v3/migrate_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1630,7 +1630,7 @@
       "id": "block_storage/v3/complete_volume_migration",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1680,7 +1680,7 @@
       "id": "block_storage/v3/upload_volume_to_image",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1701,7 +1701,7 @@
       "id": "block_storage/v3/reserve_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1722,7 +1722,7 @@
       "id": "block_storage/v3/unreserve_volume",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1743,7 +1743,7 @@
       "id": "block_storage/v3/begin_volume_detaching",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1764,7 +1764,7 @@
       "id": "block_storage/v3/abort_volume_detaching",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1789,7 +1789,7 @@
       "id": "block_storage/v3/init_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1814,7 +1814,7 @@
       "id": "block_storage/v3/terminate_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1841,8 +1841,8 @@
       "id": "block_storage/v3/create_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments",
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments",
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -1863,7 +1863,7 @@
       "id": "block_storage/v3/get_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
       ],
       "review": "pending"
     },
@@ -1884,7 +1884,7 @@
       "id": "block_storage/v3/attachments",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
       ],
       "review": "pending"
     },
@@ -1910,7 +1910,7 @@
       "id": "block_storage/v3/delete_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
       ],
       "review": "pending"
     },
@@ -1935,7 +1935,7 @@
       "id": "block_storage/v3/update_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
       ],
       "review": "pending"
     },
@@ -1956,7 +1956,7 @@
       "id": "block_storage/v3/complete_attachment",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/attachments"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
       ],
       "review": "pending"
     },
@@ -2001,7 +2001,7 @@
       "id": "block_storage/v3/backups",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2022,7 +2022,7 @@
       "id": "block_storage/v3/get_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2053,7 +2053,7 @@
       "id": "block_storage/v3/find_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2074,7 +2074,7 @@
       "id": "block_storage/v3/create_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2105,7 +2105,7 @@
       "id": "block_storage/v3/delete_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2130,7 +2130,7 @@
       "id": "block_storage/v3/update_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2151,7 +2151,7 @@
       "id": "block_storage/v3/fetch_backup_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2173,7 +2173,7 @@
       "id": "block_storage/v3/get_backup_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2198,7 +2198,7 @@
       "id": "block_storage/v3/import_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2219,7 +2219,7 @@
       "id": "block_storage/v3/export_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2241,7 +2241,7 @@
       "id": "block_storage/v3/export_record",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2266,7 +2266,7 @@
       "id": "block_storage/v3/set_backup_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2292,7 +2292,7 @@
       "id": "block_storage/v3/delete_backup_metadata",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2325,8 +2325,8 @@
       "id": "block_storage/v3/restore_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups",
-        "gophercloudsdk/blockstorage/v3/volumes"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups",
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
       ],
       "review": "pending"
     },
@@ -2351,7 +2351,7 @@
       "id": "block_storage/v3/reset_backup_status",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -2377,7 +2377,7 @@
       "id": "block_storage/v3/reset_backup",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/backups"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
       ],
       "review": "pending"
     },
@@ -4282,7 +4282,7 @@
       "id": "block_storage/v3/create_transfer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },
@@ -4308,7 +4308,7 @@
       "id": "block_storage/v3/delete_transfer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },
@@ -4334,7 +4334,7 @@
       "id": "block_storage/v3/find_transfer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },
@@ -4355,7 +4355,7 @@
       "id": "block_storage/v3/get_transfer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },
@@ -4386,7 +4386,7 @@
       "id": "block_storage/v3/transfers",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },
@@ -4411,7 +4411,7 @@
       "id": "block_storage/v3/accept_transfer",
       "kind": "proxy",
       "candidates": [
-        "gophercloudsdk/blockstorage/v3/transfers"
+        "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
       ],
       "review": "pending"
     },

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // UpdateOpts replaces project overrides. Omitted values use server defaults;

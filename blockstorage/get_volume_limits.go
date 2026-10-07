@@ -2,8 +2,8 @@ package blockstorage
 
 import (
 	"context"
+	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlimits"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/cloudlimits"
 )
 
 // GetVolumeLimits reads selected Cinder v3 limits. A nonempty project identity

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/gophercloudsdk/internal/servicewait"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/internal/servicewait"
-	"gophercloudsdk/resource"
 )
 
 type waitValue struct {

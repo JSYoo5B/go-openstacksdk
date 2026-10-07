@@ -11,7 +11,7 @@ import (
 	"context"
 
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/keymanager/v1/secretstores"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores"
 )
 
 func ReadBackends(ctx context.Context, client *gophercloud.ServiceClient) (*secretstores.SecretStore, *secretstores.SecretStore, error) {
@@ -51,7 +51,7 @@ import (
 	"context"
 
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/keymanager/v1/secretstores"
+	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores"
 )
 
 func ListNonDefaultBackends(ctx context.Context, client *gophercloud.ServiceClient) ([]*secretstores.SecretStore, error) {
@@ -174,8 +174,8 @@ import (
     "os"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/keymanager/v1/secretstores"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores"
 )
 
 func main() {

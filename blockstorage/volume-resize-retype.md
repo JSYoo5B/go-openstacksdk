@@ -30,9 +30,9 @@ import (
     "strconv"
     "time"
 
-    sdk "gophercloudsdk"
-    "gophercloudsdk/blockstorage"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func main() {

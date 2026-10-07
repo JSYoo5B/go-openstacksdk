@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"gophercloudsdk/request"
-	"gophercloudsdk/resource"
+	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 // ListOpts controls the actual quota collection. Limit zero omits page size;

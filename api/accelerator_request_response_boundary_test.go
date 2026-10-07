@@ -10,9 +10,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests"
+	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
-	"gophercloudsdk/accelerator/v2/acceleratorrequests"
-	"gophercloudsdk/internal/testcloud"
 )
 
 func TestAcceleratorRequestAcceptedBodyCancellationRetainsResponse(t *testing.T) {

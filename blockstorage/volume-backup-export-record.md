@@ -34,10 +34,10 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    sdk "gophercloudsdk"
-    "gophercloudsdk/blockstorage"
-    "gophercloudsdk/blockstorage/v3/backups"
-    "gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/gophercloudsdk"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
+    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
+    "github.com/JSYoo5B/gophercloudsdk/resource"
 )
 
 func Inspect(response *blockstorage.VolumeBackupExportResponse, value json.RawMessage, err error) {
