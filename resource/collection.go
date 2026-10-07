@@ -81,6 +81,9 @@ type Adapter[T any] struct {
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
+	// WaitGuard is an SDK-owned invariant checked around polling and progress.
+	// Ordinary collections leave it nil.
+	WaitGuard func(context.Context) error
 	// LocalStatus keeps WithStatus out of the wire query for bindings whose
 	// controllers expose a state field but no generic status query parameter.
 	LocalStatus bool
@@ -462,6 +465,11 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 		return nil, c.wrap("wait", err)
 	}
 	for {
+		if c.binding.WaitGuard != nil {
+			if err := c.binding.WaitGuard(ctx); err != nil {
+				return nil, c.wrap("wait", err)
+			}
+		}
 		if err := ctx.Err(); err != nil {
 			return nil, c.wrap("wait", err)
 		}
@@ -480,6 +488,11 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 		}
 		if err := reportWaitProgress(o, v, progressField); err != nil {
 			return nil, c.wrap("wait", err)
+		}
+		if c.binding.WaitGuard != nil {
+			if err := c.binding.WaitGuard(ctx); err != nil {
+				return nil, c.wrap("wait", err)
+			}
 		}
 		if err := o.pause(ctx); err != nil {
 			return nil, c.wrap("wait", err)

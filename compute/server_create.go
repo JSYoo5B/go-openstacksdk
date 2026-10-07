@@ -31,6 +31,7 @@ type createServerOptions struct {
 	fields                        map[string]any
 	wait                          bool
 	waitOptions                   []resource.WaitOption
+	waitPolicy                    *resource.WaitPolicy
 	bootVolume                    *resource.Ref
 	bootVolumeSize                int
 	bootVolumeType                string
@@ -126,11 +127,13 @@ func WithSecurityGroups(names ...string) CreateServerOption {
 func WithWait(opts ...resource.WaitOption) CreateServerOption {
 	opts = append([]resource.WaitOption(nil), opts...)
 	return func(o *createServerOptions) error {
-		if err := resource.ValidateWaitOptionsFor[servers.Server](opts...); err != nil {
+		policy, err := resource.PrepareWaitOptionsFor[servers.Server](opts...)
+		if err != nil {
 			return err
 		}
 		o.wait = true
-		o.waitOptions = opts
+		o.waitPolicy = &policy
+		o.waitOptions = []resource.WaitOption{resource.WithWaitPolicy(policy)}
 		return nil
 	}
 }
