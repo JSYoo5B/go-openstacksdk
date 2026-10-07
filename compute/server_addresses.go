@@ -3,6 +3,7 @@ package compute
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -21,7 +22,10 @@ type ServerAddress struct {
 	Type       string
 	MACAddress string
 	MACPresent bool
-	Fields     map[string]json.RawMessage
+	// Supplemental is true for Neutron/Nova IP-list enrichment, rather than
+	// an address observed in the supplied Nova server response.
+	Supplemental bool
+	Fields       map[string]json.RawMessage
 }
 
 // ServerAddressView owns the address snapshot and calculated access fields.
@@ -43,6 +47,28 @@ type serverAddressState struct {
 	roles                  *network.NetworkRoleSnapshot
 	rolesLoaded            bool
 	loadRoles              func(context.Context) (*network.NetworkRoleSnapshot, error)
+	servers                *Servers
+	sourceGuard            func(context.Context) error
+}
+
+func (s *Service) prepareAddressView(ctx context.Context, server *Server, options []ServerAddressOption, readAddresses bool) (*serverAddressState, error) {
+	collection := s.Servers
+	state, err := collection.prepareServerAddresses(ctx, server, options, readAddresses)
+	if err != nil {
+		return nil, err
+	}
+	var sourceError error
+	state.servers = collection
+	state.sourceGuard = func(ctx context.Context) error {
+		if ctx.Err() != nil {
+			return errors.Join(ctx.Err(), context.Cause(ctx))
+		}
+		if sourceError == nil && s.Servers != collection {
+			sourceError = invalid("compute server collection changed during address calculation")
+		}
+		return sourceError
+	}
+	return state, state.sourceGuard(ctx)
 }
 
 func (s *Servers) prepareServerAddresses(ctx context.Context, server *Server, options []ServerAddressOption, readAddresses bool) (*serverAddressState, error) {
@@ -50,7 +76,7 @@ func (s *Servers) prepareServerAddresses(ctx context.Context, server *Server, op
 		return nil, invalid("context is required")
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, errors.Join(err, context.Cause(ctx))
 	}
 	if s == nil || server == nil {
 		return nil, invalid("server and server collection are required")
@@ -80,6 +106,9 @@ func parseServerAddresses(server *Server, order []string) (*ServerAddressView, e
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, invalid("server addresses: %v", err)
 	}
+	if raw == nil {
+		view.Addresses = nil
+	}
 	var keys []string
 	for key, rows := range raw {
 		keys = append(keys, key)
@@ -89,6 +118,12 @@ func parseServerAddresses(server *Server, order []string) (*ServerAddressView, e
 			}
 			var address ServerAddress
 			address.Fields = row
+			if _, present := row["version"]; !present {
+				return nil, invalid("server addresses %q row %d requires version", key, i)
+			}
+			if value, present := row["addr"]; !present || string(value) == "null" {
+				return nil, invalid("server addresses %q row %d requires a string addr", key, i)
+			}
 			for field, target := range map[string]any{"version": &address.Version, "addr": &address.Address,
 				"OS-EXT-IPS:type": &address.Type, "OS-EXT-IPS-MAC:mac_addr": &address.MACAddress} {
 				if value, present := row[field]; present {
@@ -101,8 +136,10 @@ func parseServerAddresses(server *Server, order []string) (*ServerAddressView, e
 			address.MACPresent = present && string(mac) != "null"
 			view.Addresses[key] = append(view.Addresses[key], address)
 		}
-		if rows == nil || len(rows) == 0 {
+		if rows == nil {
 			view.Addresses[key] = nil
+		} else if len(rows) == 0 {
+			view.Addresses[key] = []ServerAddress{}
 		}
 	}
 	slices.Sort(keys)
@@ -122,6 +159,9 @@ func (state *serverAddressState) networkRoles(ctx context.Context) (*network.Net
 		if state.loadRoles != nil {
 			roles, err := state.loadRoles(ctx)
 			if err != nil {
+				return nil, errors.Join(err, state.sourceGuard(ctx))
+			}
+			if err := state.sourceGuard(ctx); err != nil {
 				return nil, err
 			}
 			if roles != nil {
@@ -130,7 +170,7 @@ func (state *serverAddressState) networkRoles(ctx context.Context) (*network.Net
 		}
 		state.rolesLoaded = true
 	}
-	return state.roles, ctx.Err()
+	return state.roles, state.sourceGuard(ctx)
 }
 
 func (state *serverAddressState) candidates(version int, tag string, name, mac *string) []string {
@@ -155,7 +195,7 @@ func (state *serverAddressState) candidates(version int, tag string, name, mac *
 }
 
 func (state *serverAddressState) best(ctx context.Context, addresses []string, public, cloudPublic bool) (string, error) {
-	if err := ctx.Err(); err != nil {
+	if err := state.sourceGuard(ctx); err != nil {
 		return "", err
 	}
 	if len(addresses) == 0 {
@@ -166,7 +206,7 @@ func (state *serverAddressState) best(ctx context.Context, addresses []string, p
 			candidate, cancel := context.WithTimeout(ctx, state.options.probeBudget)
 			reachable := probeAddress(candidate, address, state.options.probePort)
 			cancel()
-			if err := ctx.Err(); err != nil {
+			if err := state.sourceGuard(ctx); err != nil {
 				return "", err
 			}
 			if reachable {
@@ -222,8 +262,9 @@ selectedMAC:
 			if role == nil {
 				continue
 			}
-			address, err := state.best(ctx, state.candidates(4, tag, &role.Name, mac), false, !state.options.private)
-			if err != nil || address != "" {
+			candidates := state.candidates(4, tag, &role.Name, mac)
+			address, err := state.best(ctx, candidates, false, !state.options.private)
+			if err != nil || len(candidates) != 0 {
 				return address, err
 			}
 		}
@@ -251,8 +292,9 @@ func (state *serverAddressState) publicIPv4(ctx context.Context, enabled bool) (
 		if role == nil {
 			continue
 		}
-		address, err := state.best(ctx, state.candidates(4, "", &role.Name, nil), true, !state.options.private)
-		if err != nil || address != "" {
+		candidates := state.candidates(4, "", &role.Name, nil)
+		address, err := state.best(ctx, candidates, true, !state.options.private)
+		if err != nil || len(candidates) != 0 {
 			return address, err
 		}
 	}
@@ -261,8 +303,9 @@ func (state *serverAddressState) publicIPv4(ctx context.Context, enabled bool) (
 		if filter[1] != "" {
 			name = &filter[1]
 		}
-		address, err := state.best(ctx, state.candidates(4, filter[0], name, nil), true, !state.options.private)
-		if err != nil || address != "" {
+		candidates := state.candidates(4, filter[0], name, nil)
+		address, err := state.best(ctx, candidates, true, !state.options.private)
+		if err != nil || len(candidates) != 0 {
 			return address, err
 		}
 	}
@@ -284,22 +327,23 @@ func (state *serverAddressState) publicIPv6(ctx context.Context) (string, error)
 	return state.best(ctx, state.candidates(6, "", nil, nil), true, true)
 }
 
-func (state *serverAddressState) defaultIP(ctx context.Context) (string, error) {
+func (state *serverAddressState) defaultIP(ctx context.Context) (string, bool, error) {
 	roles, err := state.networkRoles(ctx)
 	if err != nil || roles.DefaultNetwork == nil {
-		return "", err
+		return "", false, err
 	}
 	versions := []int{4}
 	if state.options.localIPv6 && !state.options.forceIPv4 {
 		versions = []int{6, 4}
 	}
 	for _, version := range versions {
-		address, err := state.best(ctx, state.candidates(version, "", &roles.DefaultNetwork.Name, nil), true, !state.options.private)
-		if err != nil || address != "" {
-			return address, err
+		candidates := state.candidates(version, "", &roles.DefaultNetwork.Name, nil)
+		address, err := state.best(ctx, candidates, true, !state.options.private)
+		if err != nil || len(candidates) != 0 {
+			return address, len(candidates) != 0, err
 		}
 	}
-	return "", ctx.Err()
+	return "", false, ctx.Err()
 }
 
 // Match the stable CPython 3.13 IPv4 is_private table, rather than RFC1918-only
@@ -335,11 +379,12 @@ func (s *Service) GetServerPublicIP(ctx context.Context, server *Server, options
 	if s.Servers != nil && !s.dependenciesUseExternal() {
 		readAddresses = false
 	}
-	state, err := s.Servers.prepareServerAddresses(ctx, server, options, readAddresses)
+	state, err := s.prepareAddressView(ctx, server, options, readAddresses)
 	if err != nil {
 		return "", err
 	}
-	return state.publicIPv4(ctx, s.dependenciesUseExternal())
+	address, err := state.publicIPv4(ctx, state.servers.dependencies.NetworkPolicy.UseExternalNetwork())
+	return address, errors.Join(err, state.sourceGuard(ctx))
 }
 
 func (s *Service) GetServerPrivateIP(ctx context.Context, server *Server, options ...ServerAddressOption) (string, error) {
@@ -347,11 +392,12 @@ func (s *Service) GetServerPrivateIP(ctx context.Context, server *Server, option
 		return "", invalid("compute service is required")
 	}
 	readAddresses := s.Servers != nil && s.dependenciesUseInternal()
-	state, err := s.Servers.prepareServerAddresses(ctx, server, options, readAddresses)
+	state, err := s.prepareAddressView(ctx, server, options, readAddresses)
 	if err != nil {
 		return "", err
 	}
-	return state.privateIPv4(ctx, s.dependenciesUseInternal())
+	address, err := state.privateIPv4(ctx, state.servers.dependencies.NetworkPolicy.UseInternalNetwork())
+	return address, errors.Join(err, state.sourceGuard(ctx))
 }
 
 func (s *Service) dependenciesUseExternal() bool {

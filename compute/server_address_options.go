@@ -116,8 +116,8 @@ func WithAddressNetworkOrder(names ...string) ServerAddressOption {
 	return func(o *serverAddressOptions) error {
 		seen := make(map[string]bool, len(names))
 		for _, name := range names {
-			if name == "" || seen[name] {
-				return invalid("address network order requires unique nonempty names")
+			if seen[name] {
+				return invalid("address network order requires unique keys")
 			}
 			seen[name] = true
 		}
