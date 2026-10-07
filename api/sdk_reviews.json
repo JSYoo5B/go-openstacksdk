@@ -2037,7 +2037,7 @@
     {
       "operation": "python:compute/v2/get_server_password",
       "source_fingerprint": "584a1b0270d924bdc9c35580ad72be091fa7ccd32499d016dd49a6756ac616b5",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers.API.GetPassword"
       ],
@@ -2059,12 +2059,12 @@
         "compute/v2/servers/README.md"
       ],
       "differences": [
-        "Python missing/null responses return None; Go returns an empty string.",
-        "Go accepts an explicit server ID and exposes optional RSA decryption."
+        "Python accepts a server ID or mutable Server; Go accepts an explicit server ID and returns (string, error), with optional SDK-owned RSA PKCS#1 v1.5 decryption. No server lookup or plaintext decryption is implied by the default call.",
+        "Python missing/null password values return None and its typing cast does not validate other JSON value types. Go missing/null values become an empty string and non-string password values produce the native typed decode error.",
+        "Python Server.get_password uses an explicit session default or Server maximum-supported microversion discovery (Server ceiling2.100). Go preserves the configured Gophercloud service-client microversion without discovery or an automatic upgrade.",
+        "Python raise_from_response accepts statuses below400 before JSON parsing. Go keeps native GetPassword GET200 acceptance and native JSON/HTTP error causes wrapped with GetPassword/servers; this scalar result does not expose a mutable Resource or an owned raw receipt."
       ],
-      "remaining": [
-        "Audit the inherited Server Resource microversion selection and response/error classification before claiming the whole Python operation equivalent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/revert_quota_set",
@@ -4745,7 +4745,7 @@
     {
       "operation": "python:compute/v2/get_limits",
       "source_fingerprint": "b0d53414ee2aa3198d6fd907bca9765d5f3ebd318f3d06a69cc5ee21ebe4b1f1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/compute/v2/limits.API.Fetch",
         "github.com/JSYoo5B/gophercloudsdk/compute/v2/limits.API.InProject",
@@ -4793,17 +4793,17 @@
         }
       ],
       "differences": [
-        "Native generated Get remains unchanged. SDK Fetch/scope return LimitsResource with native absolute data, SDK-owned legacy Rate, raw fields and HTTP metadata; Go context/error are explicit.",
-        "Fetch without tenant query retains server current-project behavior and leaves ProjectID empty; a scope explicitly fixes tenant_id even for recorded current authentication and does not provide list/change/wait methods.",
+        "Native generated Get remains unchanged. SDK Fetch/scope return LimitsResource with native absolute data, SDK-owned legacy Rate, raw fields and HTTP metadata; Go context/error are explicit. Native typed integers use platform int and represent null/missing as zero while raw fields preserve their presence.",
+        "Fetch without tenant query retains server current-project behavior and leaves ProjectID empty; a scope explicitly fixes tenant_id even for recorded current authentication and does not provide list/change/wait methods. Named Resource/project convenience inputs map to explicit resource.Ref/ID and library-owned optional name resolution.",
         "Current Nova v2.1 reports empty rate data. SDK rate models only preserve historical/returned data; they do not enforce limits or restore the removed legacy Nova v2 API.",
-        "Python project_id input alias maps to tenant_id; Go uses InProject or native GetOpts.TenantID and rejects the unsupported wire alias."
+        "Pinned Limits declares a project_id-to-tenant_id QueryParameters alias, but get_limits calls Limits.fetch and Resource.fetch forwards **params directly to session.get without transposing that mapping. A Python project_id keyword therefore remains project_id on the wire. Go deliberately rejects this unsupported wire key and uses InProject, GetOpts.TenantID or WithGetQuery(\"tenant_id\", value). Other Go query extensions use explicit string values rather than Python dynamic kwargs coercion.",
+        "Python returns a fresh mutable Limits Resource and supplies Resource/session version discovery and fetch controls such as skip_cache, base_path, resource_response_key or explicit microversion. Go reads a fixed limits singleton using the selected source client, owned raw/typed output and caller context; it does not emulate those Resource/session controls or mutable cache state. AbsoluteLimits ceiling2.57 is not the outer Limits minimum version.",
+        "Python Resource translation accepts statuses below400 and may retain Resource defaults after non-parseable JSON. Go requires actual200 and strict known limits/absolute/rate JSON, retaining accepted raw body/header/status and the original decode/read/context cause on failure."
       ],
       "documentation": [
         "compute/v2/limits/README.md"
       ],
-      "remaining": [
-        "Compare inherited Resource fetch/cache/skip_cache/session/adapter selection, Python aliases and dynamically typed query inputs beyond the verified singleton HTTP mapping."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:blockstorage/v3/limits.Get",
@@ -4867,7 +4867,7 @@
     {
       "operation": "python:block_storage/v3/get_limits",
       "source_fingerprint": "99194e02c126e2824b8116b8604166abcd1d8fbb7ee069082a2ab852fecbea5f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits.API.Fetch",
         "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits.API.InProject",
@@ -4918,14 +4918,14 @@
         "Cinder project filtering requires selected numeric3.39+; symbolic latest may negotiate below3.39 and is accepted only for unfiltered requests. The SDK preserves the source version/headers instead of automatically upgrading, and rejects conflicting header/type configurations before HTTP.",
         "Fetch without query leaves ProjectID empty and uses server current-project behavior. Project scopes send one fixed project_id query and have no list/change/wait methods.",
         "Pinned Python Limits._max_microversion=3.39 caps server-discovery negotiation only when session default_microversion is absent; Resource._get_microversion returns an explicit session default unchanged. Go takes explicit references and preserves selected versions above3.39 rather than reproducing automatic Resource/session version selection.",
-        "Cinder silently ignores project_id for non-admin callers. ProjectID records the requested filter, not server-confirmed response identity; cross-project reads require server admin context and the SDK does not infer that policy from local roles."
+        "Cinder silently ignores project_id for non-admin callers. ProjectID records the requested filter, not server-confirmed response identity; cross-project reads require server admin context and the SDK does not infer that policy from local roles.",
+        "Python accepts a project ID or Project Resource and treats a falsy project as no filter. Go uses explicit resource.Ref/ID or current-auth scopes; an explicitly empty, invalid or conflicting selector is rejected. Name resolution and CurrentProject are additive conveniences rather than Python implicit project-name lookup.",
+        "Python returns a mutable Limits Resource with descriptor/session state, accepts statuses below400 and can retain defaults after non-parseable response JSON. Go returns independently owned fixed-singleton data, accepts actual200 only and validates known absolute/rate JSON with exact optional int64 values; malformed accepted data retains raw HTTP evidence and native causes. General Resource/cache/session controls remain separate SDK goals rather than missing behavior in this documented named read mapping."
       ],
       "documentation": [
         "blockstorage/v3/limits/README.md"
       ],
-      "remaining": [
-        "Compare inherited Resource/session/cache/adapter selection, Project Resource inputs and automatic maximum microversion selection beyond the verified singleton HTTP mapping."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:containerinfra/v1/quotas.Create",
@@ -20942,7 +20942,7 @@
     {
       "operation": "python:image/v2/get_member",
       "source_fingerprint": "6ca94da419a40f5f86451ec44287092d7d4d37c5aa8e87ef4f915f739fa2e14d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetImageMember",
         "github.com/JSYoo5B/gophercloudsdk/image.WithImageMemberOpts",
@@ -21013,13 +21013,13 @@
       ],
       "differences": [
         "Python convenience proxy extractsIDs and builds fresh Resource; upper passive raw nullable/date DTO differs from Resource descriptors/cache/session and native time.Time model.",
-        "Strict200/fullUTF8/canonical failure evidence differs from Python broad non-error status/ValueError handling."
-      ],
-      "remaining": [
-        "Python convenience proxy extractsIDs and builds fresh Resource; upper passive raw nullable/date DTO differs from Resource descriptors/cache/session and native time.Time model.",
         "Strict200/fullUTF8/canonical failure evidence differs from Python broad non-error status/ValueError handling.",
-        "Actual deployment/server/Python SDK behavior was not executed; local proof is bounded to implemented contracts."
-      ]
+        "The pinned get_member extracts member/image Resource IDs and creates a fresh Member seeded with the requested member alternate ID and image URI. Go takes explicit parent Ref plus literal memberID, does not reuse a supplied mutable Member or synthesize requested IDs into the response; canonical MemberID/ImageID are actual nullable response values. Explicit image Name resolution is an additive Go convenience.",
+        "Python Member.member_id is a Body descriptor for member (alternate ID) and recognizes both descriptor and wire names while retaining request identity when the response omits it. Go projects the canonical member_id key only; a response member alias, id, location or other extension remains accessible as exact RawMessage in Metadata.Body instead of being promoted or defaulted. Dates remain literal nullable strings and unknown response data is retained rather than discarded.",
+        "Get is strict about a nonempty safe UTF-8 member segment, context/source and ordinary-header options, and accepts actual HTTP200 only. Wrong canonical types or malformed successful bodies return nil typed DTO plus actual ResponseError evidence instead of Python dynamic descriptor values or a seeded Resource after ValueError. HTTP404 is an error; no Find/list fallback or IgnoreMissing policy is introduced.",
+        "No authenticated deployment was executed by this audit. Existing local contract tests and root-run regression checks establish the named Go mapping; full mutable Resource/session behavior and independent Find/List/mutation APIs remain outside this getter."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:image/v2/update_member",
@@ -21556,7 +21556,7 @@
     {
       "operation": "python:image/v2/get_metadef_namespace",
       "source_fingerprint": "82b5f34b96834f62ca17b5fd3b244235390ca01345980d2b3897c32d4e405318",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces.API.Get",
         "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces.WithGetOpts",
@@ -21637,14 +21637,13 @@
         "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
         "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
         "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Typed optional ResourceType GET projection is an explicit Go wire convenience; pinned Python proxy does not expose a named resource_type argument."
+        "Typed optional ResourceType GET projection is an explicit Go wire convenience; pinned Python proxy does not expose a named resource_type argument.",
+        "The pinned get_metadef_namespace accepts a literal namespace or mutable MetadefNamespace and fetches it directly. Go uses a required literal namespace string, makes a default body/query-free fixed GET, returns a fresh passive Namespace DTO and does not merge the request namespace or cached Resource attributes into omitted response fields. A response id remains raw rather than overriding the Namespace pointer or selecting another route.",
+        "Go IsProtected reads the canonical protected JSON Boolean as a nullable pointer; Python exposes is_protected through the protected descriptor and applies Python bool coercion. Resource type associations, tags, properties, objects and other nested response values are available through independently owned Metadata.Body RawMessages instead of Python list/dict descriptors, tag default[] or mutable tag methods. Missing/null fields remain missing/null without synthetic defaults; Self is retained even though Python _translate_response removes self.",
+        "The optional ResourceType selector is an additive typed Go wire projection; the named pinned getter exposes no such argument. Context and ordinary-header options replace adapter/session injection, and the selected client microversion remains unchanged. No additional version discovery is required by these pinned classes, whose inherited maximum microversion is None.",
+        "The Go read accepts actual HTTP200 and a valid UTF-8 nonnull object, rejects wrong canonical types and unsafe/empty/over-80-rune literal identities before HTTP, and preserves accepted failure evidence. Python Resource accepts any status below400 and may retain request/cached attributes when JSON decoding raises ValueError. The raw DTO is the documented Go alternative; actual deployment and other named child/tag/mutation APIs are separate scopes."
       ],
-      "remaining": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Typed optional ResourceType GET projection is an explicit Go wire convenience; pinned Python proxy does not expose a named resource_type argument."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/metadef_namespaces",
@@ -21945,7 +21944,7 @@
     {
       "operation": "python:image/v2/get_metadef_object",
       "source_fingerprint": "1350842ed9ec084bf8c3c505119fddc31596d3cb2e9a4460e835bed6f169c436",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects.NamespaceScope.Get",
@@ -22017,13 +22016,13 @@
       "differences": [
         "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
         "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
+        "The pinned get_metadef_object extracts object and namespace Resource IDs and constructs a fresh object with name alternate ID and namespace_name URI seed. Go owns an explicit zero-HTTP InNamespace scope plus literal child Get; NamespaceName() exposes the requested parent and Object.Name reflects only the actual nullable response rather than a synthesized request-name seed. Returned name/self/schema never drive routes.",
+        "Python properties and required descriptors have no declared type and may return arbitrary JSON values. Go provides Properties as an optional object of RawMessages and Required as an optional nonnull string array, with nil/empty distinctions and no coercion; the complete actual document remains independently accessible in Metadata.Body. Names/dates are literal nullable strings, raw id/parent/unknown fields are preserved rather than promoted, and Self is retained whereas Python Resource removes self.",
+        "Concrete header/FullOpts options own snapshots and callbacks, with context/error and captured scope source replacing arbitrary Resource/session/adapter input. The default getter has no body/query, no resolver/parent GET, no IgnoreMissing and no list fallback. Scope/client microversion stays selected; the pinned class inherits maximum microversion None.",
+        "Go enforces safe nonempty UTF-8 namespace/child names up to80runes and actual HTTP200 plus strict nonnull canonical JSON. Python dynamic Resource permits broader input/status/coercion behavior and can retain seeds after JSON ValueError. Existing local tests preserve native rejection and accepted body/read/Close/context/source evidence, without claiming authenticated deployment or other object CRUD/list/bulk APIs."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/metadef_objects",
@@ -24320,7 +24319,7 @@
     {
       "operation": "python:object_store/v1/get_account_metadata",
       "source_fingerprint": "9a13363f1d86c32ef69c5b77cffaf22e14a9ea2d285017ce8a0a6d30b2ca642d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts.API.GetMetadata",
         "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts.WithGetMetadataOpts",
@@ -24397,12 +24396,12 @@
       ],
       "differences": [
         "Python returns a mutable Account Resource using header descriptors and Adapter/session state; Go returns independently owned raw evidence and atomic nullable MetadataInfo.",
-        "Go Values deliberately includes Temp-URL-Key and Temp-URL-Key-2, which Python known descriptors consume before custom metadata extraction. Literal timestamp/signed nullable counters and stricter atomic invalid-header rejection differ."
+        "Go Values deliberately includes Temp-URL-Key and Temp-URL-Key-2, which Python known descriptors consume before custom metadata extraction. Literal timestamp/signed nullable counters and stricter atomic invalid-header rejection differ.",
+        "The named Python call has no account input or query options. Go performs a bodyless HEAD at the exact configured account Endpoint and offers additive concrete request headers/Newest; ResourceBase does not select another account. Python Resource.head may use session discovery/state, while Go keeps its configured client and live provider authentication.",
+        "Python header translation accepts statuses below400. Go accepts actual204 only and exposes raw Body/Header/Status plus optional exact signed int64 counters and a literal timestamp, rejecting malformed canonical headers atomically; errors retain typed native/transport or accepted-response causes.",
+        "Python Account known header descriptors and _last_headers are a mutable view; Go returns owned Header rather than descriptor objects. Temp URL keys remain available both in raw Header and intentionally in Values. Other raw headers remain accessible without descriptor coercion. Cache/session translation and setter refresh are separate API scope, and server authorization/metadata limits remain server policy."
       ],
-      "remaining": [
-        "Mutable Python Resource descriptors/cache/_last_headers, known-header consumption and generic Adapter/session translation are not reproduced; Temp URL Values and exact nullable/literal projection are deliberate Go differences.",
-        "Broader Python/native coercion, response acceptance/header normalization and deployment alias/URL encoding/storage policy remain outside this bounded raw account metadata layer."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/set_account_metadata",
@@ -24550,7 +24549,7 @@
     {
       "operation": "python:object_store/v1/get_container_metadata",
       "source_fingerprint": "d7c4595c8d592bce019cad0d4e249c8b756bde10b829128a76c7b76390d6b5fe",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers.API.GetMetadata",
         "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers.WithGetMetadataOpts",
@@ -24627,12 +24626,12 @@
       ],
       "differences": [
         "Python returns a mutable Container through Resource/header descriptors and Adapter/session state; Go owns raw actual204 evidence and atomic nullable MetadataInfo.",
-        "Values intentionally includes Temp-URL-Key and Temp-URL-Key-2; literal LastModified/Timestamp and signed nullable counters differ from Python known-descriptor consumption and native float/date/ACL parsing."
+        "Values intentionally includes Temp-URL-Key and Temp-URL-Key-2; literal LastModified/Timestamp and signed nullable counters differ from Python known-descriptor consumption and native float/date/ACL parsing.",
+        "Python accepts a literal name or mutable Container Resource; Go takes a required literal UTF-8 name with no lookup or parent HEAD. It preserves a once-escaped child route on configured ResourceBase/Endpoint and rejects empty/slash/control/backslash/dot unsafe names rather than adapting arbitrary Resource state.",
+        "Python header translation accepts statuses below400. Go accepts actual204 only and validates canonical metadata/counters/timestamp headers atomically; raw Body/Header/Status and original typed native/transport or accepted-response causes remain available on the documented paths.",
+        "Python known ACL/sync/version/storage/content-type/header descriptors and mutable _last_headers are represented by owned raw Header in Go, rather than additional typed descriptor aliases. Missing typed counters stay nil, values use exact signed int64, and timestamp/LastModified stay literal. Temp URL keys deliberately remain in Values. Cache/session/header descriptor coercion and automatic setter refresh are separate API scope; deployment authorization and limits are server policy."
       ],
-      "remaining": [
-        "Python mutable Container/descriptor/cache/_last_headers and generic Adapter/session behavior are not reproduced. Known-header extraction and Temp URL Values are deliberately different.",
-        "Stricter safe literal names/effectivebase/source/header validation and actual204 acceptance are explicit Go policy; server authorization/limits/encoding/header normalization/storage durability remain outside this client parity review."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/set_container_metadata",

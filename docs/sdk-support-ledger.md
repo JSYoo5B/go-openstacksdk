@@ -1863,3 +1863,24 @@ Owned final200..399·strict non-null UTF-8 JSON·accepted 실패 record/Response
 [외부 소비자 main](install.md)을 checkout 밖에서 컴파일했습니다. consumer의 `go.mod`에만 local replace가 있으며 SDK 의존성에는 replace가 없습니다. 정확한 main SHA256 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`로 공개 root·Compute/Network·Barbican3종·public `request.Config` alias가 빌드됩니다. canonical imports로 갱신한 Barbican 생성 가이드의 정확한 main도 SHA256 `015754160c4352f6bea65f41262e7cb0f49f5a7ddb97e3f5fa83fce018701c91`에서 빌드 PASS했습니다. 인증·OpenStack 호출은 실행하지 않았습니다.
 
 namespace 단위 `3f02405`를 push한 후 같은 main을 새 소비자 module에서 `GOWORK=off`로 설치·빌드했습니다. `go get`과 `go build -mod=readonly` exit0, `go list -m -json`의 canonical Path·실제 버전 `v0.0.0-20261007215549-3f0240534253`·원격 module-cache Dir을 확인했고 Replace가 없습니다. local checkout과 다른 cache 소스에서 빌드했으며 remote source에도 인증/HTTP 요청을 실행하지 않았습니다. 이 기반 작업은 완료 API 수를 늘리지 않습니다.
+
+## 핵심 user 고정 조회8개 완료 판정
+
+2026-10-08에 이미 구현된8개 named read의 source·필수 입력/기본값·고정 경로·반환값/오류·실제 assertion·문서를 다시 대조하고 Go 차이를 명시해 `go_mapping`으로 판정했습니다. 단순히 generic Resource 문구를 삭제해 완료 수를 늘리지 않았으며, 입력/default/result/error별로 Go의 concrete mapping을 검토했습니다. 전체 공통 Resource/session 목표와 별도 Find/List/mutation API는 그대로 남습니다.
+
+| 소스 연산 | 기존 계약 | 사용법 |
+|---|---:|---|
+| `python:compute/v2/get_server_password` | 2 | [Password](../compute/v2/servers/README.md) |
+| `python:compute/v2/get_limits` | 4 | [Nova limits](../compute/v2/limits/README.md) |
+| `python:block_storage/v3/get_limits` | 4 | [Cinder limits](../blockstorage/v3/limits/README.md) |
+| `python:object_store/v1/get_account_metadata` | 7 | [Swift account](../objectstorage/v1/accounts/README.md) |
+| `python:object_store/v1/get_container_metadata` | 7 | [Swift container](../objectstorage/v1/containers/README.md) |
+| `python:image/v2/get_member` | 7 | [Glance member](../image/members.md) |
+| `python:image/v2/get_metadef_namespace` | 6 | [Namespace](../image/v2/metadefnamespaces/README.md) |
+| `python:image/v2/get_metadef_object` | 6 | [Object](../image/v2/metadefobjects/README.md) |
+
+43개 기존 계약,112개의 고유 test anchor,8문서와38Go API 참조를 보존했습니다. Missing anchor/doc target0이며 다른505개 review는 그대로입니다. Nova limits의 `project_id→tenant_id` 설명은 실제 pinned proxy→Limits.fetch→Resource.fetch가 params를 직접 전달하므로 교정했습니다. Password는 selected client microversion·nativeGET200·missing/null의 빈 문자열·엄격 string decode를 Python의 runtime cast/None/status/discovery와 구분합니다. Swift는 system header를 독립 raw Header에 보존하고, Glance는 요청 seed를 합성하지 않는 nullable/raw DTO를 명시합니다. 다른 project 조회의 권한은 서버 정책이며 기본 자기 scope 조회의 user 순서를 유지합니다.
+
+Password 테스트 `6597eac6`는 기존 fixture/table과 공개 testhelper를 재사용해 실제 성공 값·토큰/2.87헤더·203 native 오류를 검사합니다. 집중 race PASS. 문서 `0c7edac7`은 pinned Python 비교와 Swift metadata getter 표기를 교정했고 둘 다 push했습니다. 최종 `make check`는40개 실제 test package PASS, pinned metadata를 사용하는 source-import generator anchor도 해당 환경에서 검사했습니다. Go source1,939개 SHA256 `c62109d1a35f53bbd5aa143f321ef5016e2e774651eee0c5fb1d1b7a38dc671c`이 gate 전후 같습니다. 이후 JSON/prose만 갱신했고 final parity/집계196개 PASS입니다. 실클라우드 실행이나112개 독립 test group을 주장하지 않습니다.
+
+완료 수188→196(+8), 핵심114→122/2,292, reviews513·계약3,236은 그대로입니다. 변경된 review는 위8개뿐이며 source IDs/fingerprints·catalog bytes·기존 계약/test/doc anchors를 보존했습니다. 전체3,362개 API와 inherited/descriptor/Resource 표면 목표는 계속 진행합니다.

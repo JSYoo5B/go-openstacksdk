@@ -55,11 +55,11 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
-2026-10-08에 checkout 밖의 독립 소비자 2개로 위 main을 빌드했습니다. local-replace 검증과 원격 설치 검증을 구분하며, 원격 소비자는 `GOWORK=off`이고 replace가 없습니다. 실제 설치 버전은 `v0.0.0-20261007215549-3f0240534253`이며 module cache에서 빌드했습니다. source SHA256은 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`입니다. API 완료 수는188개를 유지합니다.
+2026-10-08에 checkout 밖의 독립 소비자 2개로 위 main을 빌드했습니다. local-replace 검증과 원격 설치 검증을 구분하며, 원격 소비자는 `GOWORK=off`이고 replace가 없습니다. 실제 설치 버전은 `v0.0.0-20261007215549-3f0240534253`이며 module cache에서 빌드했습니다. source SHA256은 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`입니다. 이 설치 단위 검증 당시 API 완료 수는188개였으며, 이후 판정으로 현재196개입니다. 최신 개수는 [구현 현황](implementation-plan.md)에서 확인합니다.
 
 | 검사 | 상태 |
 |---|---|
-| 고정 소스·기존 판정 보존 | PASS:3,362개 fingerprint·513개 판정·188개 완료 유지 |
+| 고정 소스·기존 판정 보존 | PASS:namespace 단위의3,362개 fingerprint·513개 판정·당시188개 완료 유지 |
 | SDK 재생성 일치 | PASS:생성기 race test·재생성 drift0 |
 | 기존 전체 계약 검사·핵심 smoke | PASS:40개 test package·5흐름/9그룹; Go source SHA 보존 |
 | 외부 module의 local-replace 빌드 | PASS:위 main 그대로 별도 module에서 빌드; consumer에만 replace |
