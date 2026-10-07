@@ -33,6 +33,11 @@ func (f *FloatingIPs) executeFloatingIPPlan(ctx context.Context, selection Float
 				}
 				value, _, err := f.planWrite(ctx, guard, http.MethodPut, candidate.ID, body, headers,
 					func(ip *FloatingIP) error { return verifyFloatingIPAssignment(ip, candidate.ID, expected) }, 200)
+				// A matching accepted body is current evidence even when its read,
+				// Close or source check failed. Never adopt an invalid response.
+				if value != nil && verifyFloatingIPAssignment(value, candidate.ID, expected) == nil {
+					result.FloatingIP = value
+				}
 				if err != nil {
 					return result, floatingIPWrap("associate reused IP", err)
 				}
@@ -94,15 +99,15 @@ func (f *FloatingIPs) planWrite(ctx context.Context, guard func(context.Context)
 	if id != "" {
 		endpoint = client.ServiceURL("floatingips", url.PathEscape(id))
 	}
-	response, err := rest.DoJSONGuardedHeaders(ctx, client, guard, method, endpoint, body, headers, codes...)
+	response, requestErr := rest.DoJSONGuardedHeaders(ctx, client, guard, method, endpoint, body, headers, codes...)
 	accepted := false
 	if response != nil {
 		for _, code := range codes {
 			accepted = accepted || response.StatusCode == code
 		}
 	}
-	if err != nil {
-		return nil, accepted, err
+	if response == nil || !accepted {
+		return nil, accepted, requestErr
 	}
 	value, err := rest.Decode(response, "floatingip", planMetadata[FloatingIP])
 	if err == nil && verify != nil {
@@ -110,7 +115,7 @@ func (f *FloatingIPs) planWrite(ctx context.Context, guard func(context.Context)
 			err = response.Fail(validation)
 		}
 	}
-	return value, accepted, err
+	return value, accepted, errors.Join(requestErr, err)
 }
 
 func (f *FloatingIPs) planAvailableIP(ctx context.Context, expected floatingipapi.CreateOpts, guard func(context.Context) error) (*availableFloatingIP, bool, error) {

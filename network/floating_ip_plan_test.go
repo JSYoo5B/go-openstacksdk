@@ -300,7 +300,7 @@ func TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry(t *testi
 					return original.RoundTrip(r)
 				}
 				posts.Add(1)
-				payload := `{"floatingip":{"id":"fip","port_id":"port","fixed_ip_address":"10.0.0.10"}}`
+				payload := `{"floatingip":{"id":"fip","floating_network_id":"external","floating_ip_address":"198.51.100.10","port_id":"port","fixed_ip_address":"10.0.0.10","status":"DOWN"}}`
 				if scenario == "malformed" {
 					payload = `{"floatingip":`
 				}
@@ -328,8 +328,15 @@ func TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry(t *testi
 			}
 			result, err := ips.EnsurePrepared(ctx, plan)
 			var evidence *resource.ResponseError
-			if err == nil || result == nil || !result.Allocated || result.Reused || result.FloatingIP != nil || posts.Load() != 1 || !errors.As(err, &evidence) || evidence.StatusCode != 201 || evidence.Header.Get("X-Plan-Evidence") != "accepted" || len(evidence.Body) == 0 {
+			if err == nil || result == nil || !result.Allocated || result.Reused || posts.Load() != 1 || !errors.As(err, &evidence) || evidence.StatusCode != 201 || evidence.Header.Get("X-Plan-Evidence") != "accepted" || len(evidence.Body) == 0 {
 				t.Fatalf("result=%+v err=%v evidence=%+v posts=%d", result, err, evidence, posts.Load())
+			}
+			if scenario == "malformed" {
+				if result.FloatingIP != nil {
+					t.Fatal(result, err)
+				}
+			} else if result.FloatingIP == nil || result.FloatingIP.ID != "fip" || result.FloatingIP.PortID != "port" || result.FloatingIP.Status != "DOWN" {
+				t.Fatal(result, err)
 			}
 			if scenario == "close" && !errors.Is(err, cause) || scenario == "cancel close" && (!errors.Is(err, cause) || !errors.Is(err, context.Canceled)) {
 				t.Fatal(err)
