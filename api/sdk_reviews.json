@@ -38134,6 +38134,77 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/add_ip_list",
+      "source_fingerprint": "e44a67bf4d71659089f6035ca1841583fb3be8a39db8c74b7d8fa68d6f641170",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/network.FloatingIPs.Attach",
+        "gophercloudsdk/network.FloatingIPs.PrepareAttach",
+        "gophercloudsdk/network.FloatingIPs.AttachPrepared",
+        "gophercloudsdk/network.FloatingIPPlanner.PrepareAttach",
+        "gophercloudsdk/network.PrepareAttachFloatingIPOptions",
+        "gophercloudsdk/network.WithAttachFloatingIPPolicy",
+        "gophercloudsdk/network.WithAttachDestinationPolicy"
+      ],
+      "documentation": [
+        "network/floating-ip-attach.md",
+        "docs/implementation-plan.md"
+      ],
+      "differences": [
+        "These APIs implement an independently callable one-existing-IP Neutron foundation, not the public ordered Server-returning add_ip_list operation. IP is an explicit resource ID or Name(floating IPv4 address); no ID/name guessing, allocation or current-token project lookup applies. Stable preexisting association to another port can be moved subject to Neutron authorization.",
+        "Go consumes all address pages including empty linked pages, performs local exact address matching, and rejects ambiguity, late failures and inconsistent response identity. An opaque service-bound plan pins IP address, destination and original optional revision and rechecks port/IP; concurrent unrelated association drift fails rather than silently changing targets.",
+        "The result is FloatingIPAssignment(Reused=true,Allocated=false), not Python Server Resource. Default attachment is async; optional Neutron ACTIVE wait uses the common five-minute/two-second waiter and parent context. Raw Nova observation, TCP reachability and ordered dispatch are not provided by this primitive. Known validated models and actual HTTP/process/decode/validation causes are preserved without fallback or automatic cleanup."
+      ],
+      "remaining": [
+        "Integrate the exact-IP primitive into the public ordered address-list consumer, retaining caller order and duplicates, known Server, completed prior entries and current partial assignment under one operation deadline. Map full dynamic single-string/list/Server Resource inputs, fixed/NAT forwarding and source-specific returned Server normalization/interface/address semantics.",
+        "Implement pool > truthy ips > auto priority and explicit-request bypass of automatic skip conditions in Create/GetActive/Wait/Ensure; retain source wait/reuse/timeout defaults or document exact Go policy. This standalone primitive does not complete add_ip_list or add_ips_to_server.",
+        "Implement or deliberately map Nova-network attachment and source backend/fallback/error ordering; Neutron-only Attach does not provide Nova mutation or has_service/session/discovery behavior.",
+        "Complete inherited Resource/descriptor/configuration/location/normalization/cache and authenticated Python/cloud interoperability contracts beyond the local HTTP fixtures and compiled Go example."
+      ],
+      "contracts": [
+        {
+          "behavior": "Owner-free exact existing-IP preparation/execution allows a foreign recorded owner and stable other-port movement with no allocation or free/project/network filters. Preparation does not mutate, Selection is value-only, original revision0 remains If-Match0 after recheck revision7, and absent/null omit the condition. PUT body is exactly the selected port_id and fixed_ip_address.",
+          "tests": [
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachMovesExactExistingIPWithoutOwnerOrAllocation"
+          ]
+        },
+        {
+          "behavior": "Address query selection consumes all pages including empty JSON/HTTP links and locally checks exact addresses. Duplicate exact rows are ambiguous, missing/terminal204 are NotFound, and late403,malformed JSON or changed continuation filter fail before destination/mutation with native or accepted-response proof. Invalid selected ID/network,negative revision and contradictory owner aliases retain actual200 body/header proof on both ID and address paths.",
+          "tests": [
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachAddressConsumesEveryPageBeforeSelection",
+            "network/floating_ip_attach_boundaries_test.go:TestFloatingIPAttachInvalidSelectedModelsRetainHTTPProof"
+          ]
+        },
+        {
+          "behavior": "Execution rejects changed IP ID,address,external network,recorded owner or unrelated association and changed port server/fixed address before PUT.412 retains the known original candidate and native conflict evidence without retry/fallback/allocation.",
+          "tests": [
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachRechecksPinnedIPAndPortBeforeMutation"
+          ]
+        },
+        {
+          "behavior": "Accepted PUT200 complete matching models survive read/Close/source/cancel errors with original cause,status/header/body and exactly one mutation; malformed or wrong-ID/address/owner/fixed responses retain the prior valid candidate plus joined validation/decode/process causes. Fatal errors do not enter readiness wait or native RetryFunc.",
+          "tests": [
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachAcceptedPUTRetainsOnlyExactValidatedModel"
+          ]
+        },
+        {
+          "behavior": "Prepared Ensure destination/wait policy is reused without its allocation/project/reuse rules; NoWait preserves prepared wait policy for a later Active override. Same-tuple attachment skips PUT and still polls actual ACTIVE; alternate completion field cannot bypass actual Status, changed wait address and actual ERROR fail on first wait GET, and timeout retains the known IP.",
+          "tests": [
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachPreparedPolicyAndResultAreOwned",
+            "network/floating_ip_attach_test.go:TestFloatingIPAttachWaitRequiresActualStatusAndPinnedAddress"
+          ]
+        },
+        {
+          "behavior": "Nil/canceled/invalid input/options/zero or failed plans stop before HTTP, foreign-service plans reject, and caller mutation of initial-failure result ID,address or Tags does not change the same executable plan on reuse; tags null/empty array are preserved. Source changes remain sticky after restoration, accepted selection Close source errors preserve200 proof, and revision-header/source/outer-guard retry changes prevent another physical mutation while retaining original503 evidence.",
+          "tests": [
+            "network/floating_ip_attach_boundaries_test.go:TestFloatingIPAttachPreflightRejectsInvalidInputAndPlans",
+            "network/floating_ip_attach_boundaries_test.go:TestFloatingIPAttachPlanSnapshotSurvivesCallerMutationAndRejectsForeignService",
+            "network/floating_ip_attach_boundaries_test.go:TestFloatingIPAttachGuardsSourceCloseAndPhysicalRetries"
+          ]
+        }
+      ]
     }
   ]
 }
