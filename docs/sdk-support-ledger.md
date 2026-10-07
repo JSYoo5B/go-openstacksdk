@@ -10,6 +10,7 @@
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Available Neutron 내부·named 완료 (`c434d93`, `6bf368b`, `2c5e2c8`) | 기존 Query/Create/Allocate·공개 testhelper/fixture 재사용. 신규 HTTP9그룹·typed NAT3사례, 집중 race·전체40 package check·smoke5흐름 PASS. | [최종 근거](#available-neutron-내부-선택과-named-완료). remaining1→0, go_mapping175→176·핵심101→102. |
 | Available 직접·외부 Nova (`3b00178`, `b9ef579`) | 기존 Query/Create·fixture 재사용, raw filter→matching 전체 정규화·clean404 fresh·actual compat/partial proof의 HTTP4그룹. 관련3 package race·전체40 package check PASS. | [최종 근거](#available의-직접외부-nova-선택-완료). named unresolved 유지, remaining2→1. Neutron 내부 public-list fallback·로컬 필터·selected network allocation만 남음. |
 | Secret·schema named getter | 기존 Secret 8그룹·Glance schema HTTP5/core6/옵션3과 Connection 근거 재검토. 관련 4 package 집중 race·전체 40 package check PASS. | Secret getter 1개·schema getter 4개 go_mapping, 기존 25개 계약 보존. [최종 근거](#secret와-schema-named-getter-완료). 다른 선언·전체 Resource/session은 별도. |
 | Available 반환 view (`4897448`, `cf2c5e1`, `239eb9e`) | [신규 HTTP7그룹](../connection_floating_ip_available_view_test.go): Resource/Wire·strict/location·configured fallback mode·옵션 snapshot·guard·원본 receipt와 부분 결과. 정확한 독립 main 컴파일·`239eb9e` 전체40 package check PASS. | 기존 named Available은 unresolved 유지. Neutron 내부 목록404 후 필터·할당과 Nova raw 필터·정규화·list404 생성 순서의 2항목이 남음. [사용법](../compute/floating-ip-available.md), [이번 보완](#available-반환-view와-진척-집계-동기화). |
@@ -1757,3 +1758,16 @@ raw `instance_id:null` → literal pool 순서로 먼저 필터하고, matching 
 **Available의 필수 remaining은 2→1입니다.** Neutron public unfiltered list404의 configured-normalized Nova inventory를 같은 Neutron port/network/project filter로 소비하고, 필요하면 이미 선택한 Neutron network에 fresh allocation하는 내부 분기를 이어서 구현합니다. 내부 목록 fallback과 외부 Nova availability를 구분하며 그 분기를 닫기 전에는 named 전체를 승격하지 않습니다. 다른 Resource/session·IP 소비자·후속 서비스의 전체 목표도 유지합니다.
 
 사용법·4개 계약·remaining 갱신 `099caaa`를 원격 main에 push했습니다. 최종 동일 소스의 `make smoke`는 핵심5개 흐름·기존9개 그룹 PASS이며 `.reports/core-smoke.json`에 source SHA256과 실제 테스트 결과를 보존했습니다. 구현 계획의 집계도 완료175개·계약3,189개와 일치합니다.
+
+
+## Available Neutron 내부 선택과 named 완료
+
+2026-10-08. 마지막 Neutron 분기를 기존 공개 Query inventory, raw Allocate/Create-adoption 및 no-wait port completion 엔진에 연결했습니다. concrete SDK plan이 nullable project와 external network를 먼저 선택하고, public unfiltered 목록의 Resource를 port=null → selected network → project 순서로 소비합니다. 내부 목록404에서 정규화한 Nova 후보가 같은 Neutron 조건을 만족하면 실제 Nova backend로 재사용하고, 없으면 선택한 Neutron ID로 새 할당을 수행합니다. pure pre-accept helper NotFound가 별도 외부 Nova availability를 실행할 때만 원래 literal pool로 목록을 다시 조회합니다. top-level Inventory/Creation과 Nova의 별도 이력을 보존합니다.
+
+공통 준비/할당 seam `d190fd6`, typed NAT Name/ID와 missing-name 오류 `2c5e2c8`, cloud 연결 `c434d93`, 기존 fixture 재사용 검증 `6bf368b`, 전체·서비스 사용법 `b1cb273`을 작은 의미 단위로 커밋했습니다. 새 HTTP9그룹은 [기존 Connection fixture](../connection_floating_ip_available_test.go)·reply/cause helper를 재사용합니다. 내부/외부 fallback, nullable/canonical project, strict missing alias, 완전한 목록 소비와 실제 page 오류, optional server lazy, request seed/Wire 분리, selected-port-only gate, accepted203 처리 실패와 passive null 응답을 검증합니다. [NAT 3사례](../network/floating_ip_allocate_test.go)는 같은 공개 testhelper cloud에서 typed Name exact/ID bypass/missing error를 확인합니다. 새 mock cloud나 독립 목록·정규화·할당 엔진을 만들지 않았습니다.
+
+root/Compute/Network 집중 race와 전체 `make check`가 PASS했습니다. 전체 gate는 vet·race40개 테스트 package·pinned parity·자동 진척 정합성·gofmt이며 Go 소스1,922개가 전후 SHA256 `c31ea5e572b5a5d803d7b97bdbcee5fb039804a72102fe687c43532bbe6d222e`로 같았습니다. 로그는 `/private/tmp/gophercloudsdk-available-neutron-focused.log`, `/private/tmp/gophercloudsdk-available-neutron-check.log`, receipt는 `/private/tmp/gophercloudsdk-available-neutron-gate-receipt.json`입니다. 동일 소스의 `make smoke`는 핵심5흐름·기존9그룹 PASS이며 `.reports/core-smoke.json`에 실제 결과를 남겼습니다. [Python/Go 가이드](../compute/floating-ip-available.md)의 기존 main fence는 바이트 그대로 보존했고 이번에 독립 컴파일을 다시 실행했다고 주장하지 않습니다. 실제 OpenStack 인증·Python 실행도 수행하지 않았습니다.
+
+고정 source의 named 입력·기본값·결과·오류를 유한하게 대조해 마지막 remaining1개를 닫았습니다. Available의 기존49계약은 유지하며 현재 public inventory/error 순서에 맞게4개 문구를 교정하고 실제6계약을 추가했습니다(이 연산55계약). source operation ID·pin·fingerprint와 다른504개 review는 그대로입니다. typed 입력·owned Resource/Wire·부분 receipt/context는 문서에 적힌 Go 매핑이며, 다른 inherited Resource/session 또는 IP consumer 전체를 이 연산의 새 blocker로 추가하지 않습니다.
+
+판정 후 별도 parity/progress 검증으로 최종 metadata를 확인합니다. 전체3,362=go_mapping176/unresolved3,185/unsupported1, review505=go_mapping176/unresolved328/unsupported1, 계약3,195개입니다. 핵심은102/2,292이며 Network 책임으로 이 연산을 한 번만 집계하여 Neutron23/758이 됩니다. 서비스별 수는 user/admin 합산입니다. 다음 구현은 핵심 user effective quota getter이고, 권한 profile에 따라 달라지는 secretstore getter는 별도 순서로 추적합니다. 전체 SDK 목표는 계속 active입니다.
