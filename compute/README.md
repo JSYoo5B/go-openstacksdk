@@ -192,7 +192,7 @@ flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/r
 
 Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사용합니다. `WaitForServerState`는 다른 대상을 120초 기본으로, `WaitForState`는 대상을 명시하고 SDK timeout 없이 기다립니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 패키지 함수 `compute.WaitForState/WaitForDelete`는 기존 typed collection을 받습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
 
-[기존 서버 readiness](server-ready.md)의 `service.WaitForServer(ctx, AutomaticFloatingIPRequest, ...)`와 `conn.WaitForServer`는 별도 상위 작업입니다. 기본180초·5초로 raw 현재 상태와 주소 준비를 기다리고 필요할 때 조건부 Neutron assignment·IP ACTIVE·Nova 관측까지 수행합니다. `GetActiveServer`는 supplied 상태만 판정하고 기본 비동기 IP 접수 결과를 반환합니다.
+[기존 서버 readiness](server-ready.md)의 `service.WaitForServer(ctx, AutomaticFloatingIPRequest, ...)`와 `conn.WaitForServer`는 별도 상위 작업입니다. 기본180초·5초로 raw 현재 상태와 주소 준비를 기다리고 필요할 때 조건부 Neutron/Nova assignment·Neutron IP ACTIVE·raw Nova 관측까지 수행합니다. `GetActiveServer`는 supplied 상태만 판정하고 기본 비동기 IP 접수 결과를 반환합니다.
 
 서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. 필요성 판단·순차 IP/pool 선택과 raw Nova 관측은 [상위 IP dispatch](server-ip-dispatch.md)로 제공하며, 전체 cloud Resource/session·서비스 정책은 계속 추적합니다.
 
@@ -200,4 +200,6 @@ Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)�
 
 [서버 주소 가이드](server-addresses.md)는 조회한 Nova 모델의 public/private 주소와 기존 Floating IP 보충, default interface·IPv6·접속 검사 정책을 비교합니다. Connection이 설정과 공유 역할 cache를 제공합니다. [자동 생성 흐름](create-with-automatic-floating-ip.md)에서 생성·대기와 조건부 할당·주소 수렴을 연결합니다. 일반 Create/Wait 전체 계약은 계속 별도로 추적합니다.
 
-[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. [pool·순차 IP dispatch](server-ip-dispatch.md)는 같은 Plan/Ensure·GetActive/Wait·자동 생성 메서드의 `WithFloatingIPPool`·`WithFloatingIPAddresses`로 사용합니다. 일반 Create/Wait 전체 계약과 Nova mutation/fallback·전체 cloud Resource/session은 별도 remaining입니다.
+[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron/Nova assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. [pool·순차 IP dispatch](server-ip-dispatch.md)는 같은 Plan/Ensure·GetActive/Wait·자동 생성 메서드의 `WithFloatingIPPool`·`WithFloatingIPAddresses`로 사용합니다. 일반 Create/Wait 전체 계약과 Nova의 별도 공개 CRUD·detach/cleanup·함수별 fallback·전체 cloud Resource/session은 별도 remaining입니다.
+
+[Legacy Nova floating IP](server-nova-floating-ip.md)는 같은 Service/Connection IP 소비자의 Nova backend를 제공합니다. 명시 pool/IP의 configured Nova·None 또는 정확한 Network endpoint 부재에서 실행하며, 자동 source=None은 skip을 유지합니다. pool은 literal 값이고 `NovaAssignment`로 실제 모델과 action202 증거를 읽습니다. selected Compute2.36 이상과 Neutron 전용 port/NAT/project override는 `ErrUnsupported`입니다. 동기 상위 entry는 실제 서버 ACTIVE·목표 주소를 확인하며 Neutron IP ACTIVE는 Neutron backend에만 적용합니다.
