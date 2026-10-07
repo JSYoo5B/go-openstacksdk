@@ -34854,6 +34854,214 @@
         "Complete user-reference adaptation and URI-bound UserGroup model/default/context/capability normalization. The pinned user_groups(user) method has no **query argument, so no missing public query option is inferred.",
         "Finish inherited default pagination, HTTP/decode/session/cache comparisons. Native GroupPage consumes links.next; the pinned inherited Resource._get_next_link checks rel/href links, top-level next, Link headers and marker fallbacks, so the Go two-page test is not proof of Python continuation parity. UserGroup inherits _max_microversion=None."
       ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/create_server",
+      "source_fingerprint": "45daa231f24b83562883e27a7faa75396e19b66535f2a9cfbd2a3bb5a7af3007",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.Servers.Create",
+        "gophercloudsdk/compute.WithNetworkInterfaces",
+        "gophercloudsdk/compute.WithNetworkMode",
+        "gophercloudsdk/compute.WithNetworks"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag",
+            "connection_server_nics_test.go:TestConnectionServerNICIDsNeedNoNetworkEndpoint"
+          ]
+        },
+        {
+          "behavior": "Connection resolves exact network/port names and preserves missing/ambiguous/403 causes without creating a server. Resolver failures, empty/unsafe returned IDs and cancellation stop before Nova.",
+          "tests": [
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs",
+            "connection_server_nics_test.go:TestConnectionServerNICNameFailuresPreventNovaCreation",
+            "compute/server_networks_test.go:TestServerNICResolverFailuresAndCancellationStopBeforeNova"
+          ]
+        },
+        {
+          "behavior": "The last valid WithNetworks/NIC/mode selection replaces the previous selection, so discarded names or tag gates have no effect. Options own input slices and Optional tag values and can be reused concurrently.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICSelectionUsesLastValidOption",
+            "compute/server_networks_test.go:TestServerNICOptionsOwnSlicesTagsAndConcurrentReuse",
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs"
+          ]
+        },
+        {
+          "behavior": "Mode auto/none requires selected Compute 2.37+, and every present tag, including empty or null, requires selected 2.42+. Invalid options/Refs/version gates fail before dependency lookup; the shared client version and Nova headers are preserved.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICInvalidOptionsFailBeforeDependencyLookup",
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag"
+          ]
+        },
+        {
+          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
+            "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
+          ]
+        },
+        {
+          "behavior": "NIC choices preserve existing/new volume boot mapping and false delete-on-termination. An ACTIVE wait failure returns the created BUILD server and the error without server/port/volume cleanup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/server-network-interfaces.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
+        "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+      ],
+      "remaining": [
+        "Implement configured default-network lookup and compare advertised min/max plus default microversion checks used by supports/require_microversion; selected Go version checks alone are not that policy.",
+        "Finish automatic/reused floating IP setup and cleanup, server group/scheduler hints, extra volume combinations, count/default/security-group/userdata/metadata contracts, post-create GET/fault/wait error behavior and all partial failure paths.",
+        "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/create_server",
+      "source_fingerprint": "5672dbfe26ca55fd03196754eb061724ac68b4b597e3ad54190a498dbe94dde8",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.Servers.Create",
+        "gophercloudsdk/compute.WithNetworkInterfaces",
+        "gophercloudsdk/compute.WithNetworkMode",
+        "gophercloudsdk/compute.WithNetworks"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag",
+            "connection_server_nics_test.go:TestConnectionServerNICIDsNeedNoNetworkEndpoint"
+          ]
+        },
+        {
+          "behavior": "Connection resolves exact network/port names and preserves missing/ambiguous/403 causes without creating a server. Resolver failures, empty/unsafe returned IDs and cancellation stop before Nova.",
+          "tests": [
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs",
+            "connection_server_nics_test.go:TestConnectionServerNICNameFailuresPreventNovaCreation",
+            "compute/server_networks_test.go:TestServerNICResolverFailuresAndCancellationStopBeforeNova"
+          ]
+        },
+        {
+          "behavior": "The last valid WithNetworks/NIC/mode selection replaces the previous selection, so discarded names or tag gates have no effect. Options own input slices and Optional tag values and can be reused concurrently.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICSelectionUsesLastValidOption",
+            "compute/server_networks_test.go:TestServerNICOptionsOwnSlicesTagsAndConcurrentReuse",
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs"
+          ]
+        },
+        {
+          "behavior": "Mode auto/none requires selected Compute 2.37+, and every present tag, including empty or null, requires selected 2.42+. Invalid options/Refs/version gates fail before dependency lookup; the shared client version and Nova headers are preserved.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICInvalidOptionsFailBeforeDependencyLookup",
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag"
+          ]
+        },
+        {
+          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
+            "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
+          ]
+        },
+        {
+          "behavior": "NIC choices preserve existing/new volume boot mapping and false delete-on-termination. An ACTIVE wait failure returns the created BUILD server and the error without server/port/volume cleanup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/server-network-interfaces.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
+        "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+      ],
+      "remaining": [
+        "Complete the inherited Proxy._create/Server.create input-attribute/descriptor/query/header/URI, defaults, extension handling and full response/error/model/location/session/cache comparison beyond the NIC contracts recorded here.",
+        "Compare remaining server properties, scheduler hints and boot mapping surfaces, request-count options and microversion policies. This higher-level required-ref workflow is not the complete kwargs-based Proxy API."
+      ]
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Create",
+      "source_fingerprint": "b8ba8b7ecf5b3209ffe853b2617b76e8a6965e483ba0a5f0b78f88409a5ae922",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk/compute.Servers.Create",
+        "gophercloudsdk/compute.WithNetworkInterfaces",
+        "gophercloudsdk/compute.WithNetworkMode",
+        "gophercloudsdk/compute.WithNetworks"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag",
+            "connection_server_nics_test.go:TestConnectionServerNICIDsNeedNoNetworkEndpoint"
+          ]
+        },
+        {
+          "behavior": "Connection resolves exact network/port names and preserves missing/ambiguous/403 causes without creating a server. Resolver failures, empty/unsafe returned IDs and cancellation stop before Nova.",
+          "tests": [
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs",
+            "connection_server_nics_test.go:TestConnectionServerNICNameFailuresPreventNovaCreation",
+            "compute/server_networks_test.go:TestServerNICResolverFailuresAndCancellationStopBeforeNova"
+          ]
+        },
+        {
+          "behavior": "The last valid WithNetworks/NIC/mode selection replaces the previous selection, so discarded names or tag gates have no effect. Options own input slices and Optional tag values and can be reused concurrently.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICSelectionUsesLastValidOption",
+            "compute/server_networks_test.go:TestServerNICOptionsOwnSlicesTagsAndConcurrentReuse",
+            "connection_server_nics_test.go:TestConnectionServerNICsResolveExactNamesAndOwnInputs"
+          ]
+        },
+        {
+          "behavior": "Mode auto/none requires selected Compute 2.37+, and every present tag, including empty or null, requires selected 2.42+. Invalid options/Refs/version gates fail before dependency lookup; the shared client version and Nova headers are preserved.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICInvalidOptionsFailBeforeDependencyLookup",
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag"
+          ]
+        },
+        {
+          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
+            "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
+          ]
+        },
+        {
+          "behavior": "NIC choices preserve existing/new volume boot mapping and false delete-on-termination. An ACTIVE wait failure returns the created BUILD server and the error without server/port/volume cleanup.",
+          "tests": [
+            "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/server-network-interfaces.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
+        "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+      ],
+      "remaining": [
+        "Review the complete native CreateOpts/SchedulerHintOpts and generated API.Create contract, including remaining fields/counts, userdata/security groups, extensions, success/response/error and version paths beyond these high-level NIC assertions.",
+        "The high-level API adds name resolution, selected-version policy and optional wait; these partial assertions do not promote the whole native Create declaration or the generated native method."
+      ]
     }
   ]
 }

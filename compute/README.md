@@ -76,9 +76,9 @@ if err != nil {
 }
 ```
 
-이미지와 네트워크의 이름은 연결이 제공한 서비스에서, flavor는 Compute에서 찾습니다. 이름이 중복되거나 없으면 POST 전에 실패합니다. ID를 지정한 의존성은 사전 조회하지 않습니다. 기본 네트워크 선택은 Nova에 맡기며, `WithNetworks()`의 빈 선택은 오류입니다.
+이미지와 네트워크의 이름은 연결이 제공한 서비스에서, flavor는 Compute에서 찾습니다. 이름이 중복되거나 없으면 POST 전에 실패합니다. ID를 지정한 의존성은 사전 조회하지 않습니다. 선택된 Compute microversion 2.37 이상에서 네트워크 선택을 생략하면 `networks: "auto"`를 보냅니다. 이전 버전이나 버전 미설정에서는 필드를 생략합니다. `WithNetworks()`의 빈 선택은 오류입니다. [NIC 선택 가이드](server-network-interfaces.md)는 기존 port·고정 IP·tag와 auto/none mode, 선택 교체·기본값과 Python 차이를 설명합니다.
 
-현재 옵션은 `WithMetadata`, `WithKeyName`, `WithUserData`, `WithConfigDrive`, `WithAvailabilityZone`, `WithSecurityGroups`, `WithNetworks`, `WithBootVolume`, `WithBootVolumeSize`, `WithBootVolumeType`, `WithDeleteBootVolumeOnTermination`, `WithWait`, `WithField`입니다. UserData의 인코딩은 Gophercloud가 처리합니다. map/slice/확장 JSON 입력은 옵션 생성 시 복사하여 이후 애플리케이션의 변경으로 요청이 달라지지 않게 합니다.
+현재 옵션은 `WithMetadata`, `WithKeyName`, `WithUserData`, `WithConfigDrive`, `WithAvailabilityZone`, `WithSecurityGroups`, `WithNetworks`, `WithNetworkInterfaces`, `WithNetworkMode`, `WithBootVolume`, `WithBootVolumeSize`, `WithBootVolumeType`, `WithDeleteBootVolumeOnTermination`, `WithWait`, `WithField`입니다. UserData의 인코딩은 Gophercloud가 처리합니다. map/slice/확장 JSON 입력은 옵션 생성 시 복사하여 이후 애플리케이션의 변경으로 요청이 달라지지 않게 합니다.
 
 ## 기존 볼륨으로 부팅
 

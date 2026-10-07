@@ -1140,3 +1140,22 @@ Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=159, unsu
 최종 판정은 declared inventory 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200입니다. 저장된 review 470개는 go_mapping 161·부분 판정 308·unsupported 1이며, 판정 없는 2,892개도 미해결에 포함됩니다. 전체 SDK 목표는 그대로 진행하며 다음 핵심 user 단위는 Nova 서버 NIC 선택입니다.
 
 Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.
+
+
+### Nova 서버 생성의 NIC 선택
+
+핵심 user API의 이미지·기존 볼륨·새 부팅 볼륨 생성에 concrete `ServerNetworkInterface`·`WithNetworkInterfaces`·`WithNetworkMode`를 추가했습니다. Connection의 lazy Neutron port resolver를 SDK가 제공하고 ID는 조회 없이 전송합니다. 네트워크·포트 이름의 정확한 일치, 누락·중복·403, resolver의 unsafe/빈 ID와 취소를 POST 전에 전달합니다. 기존 WithNetworks도 같은 선택에 포함되며 마지막 유효한 옵션이 앞선 목록/mode를 교체합니다. 옵션 자체의 오류는 뒤 선택으로 숨기지 않습니다. [Python/Go 비교와 독립 예제](../compute/server-network-interfaces.md)에 API와 기본값을 설명합니다.
+
+NIC 순서, uuid+port 조합, 고정 IP만 있는 항목·tag만 있는 항목·빈 객체를 보존합니다. 고정 IP는 local parser 없이 문자열 그대로 보내고 유효성은 Nova에 맡깁니다. 기존 `request.Optional[string]`의 zero/Present/Null을 tag에 사용해 생략·빈 문자열·null을 구분합니다. SDK의 owned body overlay가 native Network.Tag의 empty omission을 보완합니다. caller slice와 Optional 값은 생성 시·호출 시 복사하고 동시 재사용에서 요청을 독립적으로 조립합니다. caller의 Python-style dict를 변경하는 정책이나 새 builder 구현을 요구하지 않습니다.
+
+선택한 Compute 버전에서 명시 mode는 2.37 이상, present tag는 2.42 이상을 조회 전에 검사합니다. native tag의 2.32–2.36 구간은 이 cloud 수준 API의 정책으로 선택하지 않았습니다. NIC 옵션은 cached client 버전·headers를 바꾸거나 추가 discovery를 하지 않습니다. 네트워크 선택이 없으면 selected 2.37 이상에서 auto를 넣고 이전/미선택에서는 키를 생략합니다. 이는 [Nova의 2.37 입력 요구](https://docs.openstack.org/nova/2026.1/reference/api-microversion-history.html)에 맞춘 기존 기본값 교정입니다. 명시한 [{}]는 auto로 바꾸지 않습니다. configured default-network 탐색 및 Python advertised bounds/default-microversion 검사는 별도 남은 계약입니다.
+
+신규 HTTP 테스트 11그룹(Compute 7·Connection 4)은 wire 조합·빈/null tag·prefix·토큰·두 Nova version header, 안전한 ID/정확 이름, lookup 실패·취소, last-selection precedence·동시 옵션 재사용, tag/mode 숫자 경계·협상 cache 공유와 기본 auto를 확인했습니다. 신규 부팅 조합은 기존/새 볼륨 mapping·imageRef 빈 값·delete_on_termination false와 대기 실패의 생성 결과 보존, cleanup 요청 부재를 검증합니다. 리뷰에서 기본 legacy/unselected networks의 필드 생략과 명시 null을 구분하는 assertion을 추가했고, 이후 최종 코드로 전체 `make check`의 vet·race·parity·gofmt가 통과했습니다(테스트 패키지 40개, cache 재사용 포함). 완전한 Python pin source와 native metadata를 각각 OPENSTACKSDK_SOURCE·GOPHERCLOUD_METADATA에 지정했습니다.
+
+코드·테스트는 `55927d3`로 commit/push했습니다. 최종 Go 1,776개이며 기존 generated Go 338개와 source/native/resource inventory는 byte-identical입니다. 가이드의 정확한 Go fence를 별도 모듈에서 `go build -mod=readonly`로 컴파일했고 authenticated OpenStack/Python 실행은 하지 않았습니다. 고정 Python cloud·Proxy·Native NIC 처리와 utils capability 정책의 정적 소스 검토에서도 신규 계약과 remaining의 범위를 확인했습니다.
+
+기존 470 review의 literal prefix·필드·source pins를 유지하고 cloud ComputeCloudMixin.create_server·Compute Proxy create_server·native servers.Create의 3개 부분 판정만 추가했습니다. 세 전체 연산은 unresolved이며 자동 floating IP·재사용, configured network·capability 정책, scheduler hints/server group·count/defaults·추가 volume, 생성 후 GET/fault, 전체 Resource·response·session/cache 비교는 남습니다. 명시 none은 Python Proxy와 대응하고 cloud helper의 자동 치환과 구분합니다. 이번 NIC 구현을 서버 생성 전체나 전체 SDK 완료로 판정하지 않았습니다.
+
+현재 review 473개는 go_mapping 161·부분 판정 311·unsupported 1입니다. declared inventory 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200이며 판정 없는 2,889개도 미해결입니다. 전체 목표와 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
+
+Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.

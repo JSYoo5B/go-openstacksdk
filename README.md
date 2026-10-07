@@ -34,7 +34,7 @@ gophercloudsdk/
 
 | 서비스 | 리소스 | Get / Find / List / All | Delete | Wait | Create |
 |---|---|---|---|---|---|
-| [Compute](compute/README.md) | 서버 | 지원 | 지원 | 지원 | 이미지·기존 볼륨·이미지에서 만든 새 볼륨 부팅, 이름 해석, 선택적 대기 |
+| [Compute](compute/README.md) | 서버 | 지원 | 지원 | 지원 | 이미지·기존 볼륨·새 부팅 볼륨, [NIC·port·고정 IP·tag와 auto/none](compute/server-network-interfaces.md), 이름 해석, 선택적 대기 |
 | Compute | flavor | 지원 | 미지원 | 미지원 | 미지원 |
 | [Network](network/README.md) | 네트워크 | 지원 | 지원 | 지원 | 미지원 |
 | Network | 포트 | 지원 | 지원 | 지원 | 개별 API |
