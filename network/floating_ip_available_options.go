@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/netip"
 	"time"
 
 	"gophercloudsdk/resource"
@@ -90,7 +91,16 @@ func WithAvailableProject(id string) AvailableFloatingIPOption {
 }
 
 func WithAvailableFixedAddress(address string) AvailableFloatingIPOption {
-	return func(o *availableFloatingIPOptions) error { o.fixed = address; return nil }
+	return func(o *availableFloatingIPOptions) error {
+		if address != "" {
+			parsed, err := netip.ParseAddr(address)
+			if err != nil || !parsed.Is4() {
+				return floatingIPInvalid("available fixed address must be IPv4")
+			}
+		}
+		o.fixed = address
+		return nil
+	}
 }
 
 func WithAvailableNATDestination(ref resource.Ref) AvailableFloatingIPOption {

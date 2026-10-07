@@ -41,6 +41,10 @@ func availabilityField(fields map[string]json.RawMessage, names ...string) json.
 // sent. Known allocations and HTTP evidence survive response-processing errors.
 func (f *FloatingIPs) Available(ctx context.Context, input AvailableFloatingIPRequest, options ...AvailableFloatingIPOption) (*FloatingIPAvailability, error) {
 	input.Networks = append([]resource.Ref(nil), input.Networks...)
+	p, err := f.NewPlanner(ctx)
+	if err != nil {
+		return nil, err
+	}
 	policy, err := PrepareAvailableFloatingIPOptions(ctx, options...)
 	if err != nil {
 		return nil, err
@@ -60,8 +64,7 @@ func (f *FloatingIPs) Available(ctx context.Context, input AvailableFloatingIPRe
 		ctx, cancel = context.WithTimeout(ctx, policy.options.timeout)
 		defer cancel()
 	}
-	p, err := f.NewPlanner(ctx)
-	if err != nil {
+	if err := p.Check(ctx); err != nil {
 		return nil, err
 	}
 	owner, err := cloudlocation.ProjectID(f.api.RawClient().ProviderClient)
