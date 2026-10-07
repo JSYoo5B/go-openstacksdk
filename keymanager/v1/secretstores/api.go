@@ -12,6 +12,7 @@ import (
 	"net/url"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/internal/cloudread"
 	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/request"
 	"gophercloudsdk/resource"
@@ -113,17 +114,30 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Secret
 			yield(nil, request.Wrap("List", kind, err))
 			return
 		}
-		query, control, err := prepareList(owned)
+		source, err := cloudread.Capture(ctx, client, "key-manager")
+		if err != nil {
+			yield(nil, request.Wrap("List", kind, err))
+			return
+		}
+		guard := func(ctx context.Context) error {
+			if err := validate(ctx, client); err != nil {
+				return err
+			}
+			return source.Guard(ctx)
+		}
+		query, control, filters, err := prepareList(owned)
 		if err == nil {
-			// Custom options may alter the configured source. Every subsequent
-			// page repeats this check through the collection specification.
-			err = validate(ctx, client)
+			// Capture the selected source before any user option callback.
+			// The shared guard also runs around every HTTP attempt and read.
+			err = guard(ctx)
 		}
 		if err != nil {
 			yield(nil, request.Wrap("List", kind, err))
 			return
 		}
-		for value, err := range rest.ListWithControl(ctx, spec(client), query, control) {
+		selected := spec(&source.Client)
+		selected.SourceGuard = guard
+		for value, err := range listWithFilters(ctx, selected, query, control, filters) {
 			if !yield(value, request.Wrap("List", kind, err)) {
 				return
 			}

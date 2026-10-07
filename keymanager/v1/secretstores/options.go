@@ -75,17 +75,21 @@ func WithListPaginated(value bool) ListOption {
 // typed query and does not enable Python Body filtering or attribute aliases.
 func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
-func prepareList(options []ListOption) (url.Values, rest.ListControl, error) {
+func prepareList(options []ListOption) (url.Values, rest.ListControl, []resource.ListOption, error) {
 	config, err := request.Apply(ListOpts{}, options...)
 	if err == nil {
-		err = request.ValidateCapabilities(config, false, true, false)
+		err = request.ValidateCapabilities(config, false, true, false, listFiltersArgument)
 	}
 	if err != nil {
-		return nil, rest.ListControl{}, err
+		return nil, rest.ListControl{}, nil, err
+	}
+	filters, err := capturedListFilters(config.Arguments)
+	if err != nil {
+		return nil, rest.ListControl{}, nil, err
 	}
 	value := copyOptions(config.Options)
 	if value.Limit < 0 || value.MaxItems < 0 {
-		return nil, rest.ListControl{}, fmt.Errorf("%w: limit and max items must be non-negative", resource.ErrInvalidOption)
+		return nil, rest.ListControl{}, nil, fmt.Errorf("%w: limit and max items must be non-negative", resource.ErrInvalidOption)
 	}
 	query := make(url.Values)
 	for key, text := range map[string]string{
@@ -105,13 +109,13 @@ func prepareList(options []ListOption) (url.Values, rest.ListControl, error) {
 	}
 	for key, values := range config.Query {
 		if strings.TrimSpace(key) == "" {
-			return nil, rest.ListControl{}, fmt.Errorf("%w: empty query key", resource.ErrInvalidOption)
+			return nil, rest.ListControl{}, nil, fmt.Errorf("%w: empty query key", resource.ErrInvalidOption)
 		}
 		switch strings.ToLower(key) {
 		case "max_items", "paginated", "session", "resource_type", "base_path", "list_base_path", "allow_unknown_params", "microversion", "headers", "jmespath_filters":
-			return nil, rest.ListControl{}, fmt.Errorf("%w: query %q requires a dedicated SDK option", resource.ErrInvalidOption, key)
+			return nil, rest.ListControl{}, nil, fmt.Errorf("%w: query %q requires a dedicated SDK option", resource.ErrInvalidOption, key)
 		}
 		query[key] = append([]string(nil), values...)
 	}
-	return query, rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated, LimitHint: true}, nil
+	return query, rest.ListControl{MaxItems: value.MaxItems, SinglePage: value.Paginated != nil && !*value.Paginated, LimitHint: true}, filters, nil
 }
