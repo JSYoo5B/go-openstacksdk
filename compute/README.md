@@ -200,7 +200,7 @@ Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)�
 
 [서버 주소 가이드](server-addresses.md)는 조회한 Nova 모델의 public/private 주소와 기존 Floating IP 보충, default interface·IPv6·접속 검사 정책을 비교합니다. Connection이 설정과 공유 역할 cache를 제공합니다. [자동 생성 흐름](create-with-automatic-floating-ip.md)에서 생성·대기와 조건부 할당·주소 수렴을 연결합니다. 일반 Create/Wait 전체 계약은 계속 별도로 추적합니다.
 
-[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron/Nova assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. [pool·순차 IP dispatch](server-ip-dispatch.md)는 같은 Plan/Ensure·GetActive/Wait·자동 생성 메서드의 `WithFloatingIPPool`·`WithFloatingIPAddresses`로 사용합니다. 일반 Create/Wait 전체 계약과 독립 IP Create·direct proxy add/remove·unattached cleanup·함수별 fallback·전체 cloud Resource/session은 별도 remaining입니다.
+[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron/Nova assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. [pool·순차 IP dispatch](server-ip-dispatch.md)는 같은 Plan/Ensure·GetActive/Wait·자동 생성 메서드의 `WithFloatingIPPool`·`WithFloatingIPAddresses`로 사용합니다. 일반 Create/Wait 전체 계약과 direct proxy add/remove·unattached cleanup·함수별 fallback·전체 cloud Resource/session은 별도 remaining입니다.
 
 [Legacy Nova floating IP](server-nova-floating-ip.md)는 같은 Service/Connection IP 소비자의 Nova backend를 제공합니다. 명시 pool/IP의 configured Nova·None 또는 정확한 Network endpoint 부재에서 실행하며, 자동 source=None은 skip을 유지합니다. pool은 literal 값이고 `NovaAssignment`로 실제 모델과 action202 증거를 읽습니다. selected Compute2.36 이상과 Neutron 전용 port/NAT/project override는 `ErrUnsupported`입니다. 동기 상위 entry는 실제 서버 ACTIVE·목표 주소를 확인하며 Neutron IP ACTIVE는 Neutron backend에만 적용합니다.
 
@@ -209,3 +209,5 @@ Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)�
 [독립 Floating IP 목록·검색·단건·pool 조회](floating-ip-queries.md)는 `ListFloatingIPs`, `SearchFloatingIPs`, `GetFloatingIP`, `GetFloatingIPByID`, `ListFloatingIPPools`, `SearchFloatingIPPools`를 Service와 Connection에 제공합니다. 기본 Get은 목록 검색, UUID direct는 옵션으로 선택합니다. Neutron dict Search는 ID를 무시하며, Nova source 정규화의 합성 ACTIVE는 실제 연결 상태와 별도로 읽습니다.
 
 [독립 Floating IP 삭제](floating-ip-delete.md)는 `service.DeleteFloatingIP`·`conn.DeleteFloatingIP`으로 retry·검증을 수행합니다. `Deleted`와 실제 no-match `Absent`·아직 존재하는 `Down`을 구분하고, 실패에도 accepted DELETE와 조회 기록을 보존합니다.
+
+[독립 Floating IP 생성](floating-ip-create.md)은 가용 IP를 재사용하지 않고 새 allocation을 생성합니다. SDK가 Neutron/Nova·port 우선·optional server/NAT·공개 Get 대기·wait timeout 정리를 처리하며, 접수된 응답과 compatibility/wait/cleanup 부분 결과를 보존합니다.

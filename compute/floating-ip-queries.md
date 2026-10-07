@@ -159,6 +159,8 @@ Get에서 JMES 결과가 원본 row 목록이 아니면 `Value`에 source 방식
 
 Neutron Resource view는 known Body의 missing null, name/IP alias, project/tenant alias, missing tags[], revision/port_details/tags descriptor 변환과 location을 제공합니다. 예를 들어 canonical project_id present-null은 tenant_id로 보충하지 않습니다. Neutron 단건 응답에 id가 빠지면 Resource는 요청 ID를 유지하지만 Wire에 ID를 만들지 않습니다. 응답에 id가 present-null 또는 다른 값이면 그 응답 값을 유지합니다. missing key와 present-null은 Wire에서 계속 구별됩니다. native Python mutable Resource의 fetch/commit/context 전체를 이 값 모델이 제공하지는 않습니다.
 
+Neutron은 iterator가 반환한 각 raw 행의 descriptor 정규화와 known Body 로컬 필터를 **다음 페이지 요청 전에** 적용합니다. 따라서 앞 페이지의 변환·필터 오류를 뒤 페이지404나 fallback으로 숨기지 않습니다. 빈 nested dictionary는 실제 값이 truthy이면 shape를 소비하지 않고 일치합니다. 최종 목록은 전체 조회가 성공한 뒤 반환하며, 준비한 행을 재사용해 location과 필터를 두 번 소비하지 않습니다. max_items와 continuation marker는 필터 전 physical 행을 기준으로 합니다.
+
 Nova는 cloud 정규화 view를 만들며 `Normalized=true`입니다. canonical present-null이 legacy alias를 우선하고, instance_id를 attached 계산에 소비하며 location/project와 properties를 구성합니다. `WithFloatingIPQueryStrict(true)`는 Nova 호환 aliases 및 properties의 extra top-level 복원을 제외합니다. properties 자체를 제거하거나 Neutron view를 strict 형태로 바꾸는 옵션은 아닙니다.
 
 Nova 정규화의 `NormalizationSource`는 source의 configured Neutron 판정까지 기록합니다. 예를 들어 Neutron404 후 Nova 응답을 받으면 `Backend=FloatingIPNova`지만 `NormalizationSource=FloatingIPNeutron`일 수 있으며 attached는 port, missing status는 UNKNOWN 규칙을 사용합니다. 직접 Nova/None 정규화는 Python과 같이 canonical status ACTIVE를 합성합니다. 이는 **조회 view의 source 호환 값**이며 실제 IP ACTIVE나 연결 완료 증거가 아닙니다. raw mutation/Available의 [Nova model](server-nova-floating-ip.md)은 이 합성 상태를 사용하지 않습니다.
@@ -204,6 +206,8 @@ pools = conn.search_floating_ip_pools(name="public*")
 
 비교 pin은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`다. [공개 list/search/get/pools](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L435-L606), [cloud 로컬 filter와 Get 선택](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L201), [Neutron Resource query/body 정책](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2217-L2358), [Nova 정규화](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1766-L1830)를 기준으로 한다.
 
-이 조회 mapping은 전체 Python Resource/Proxy 구현의 지원 완료를 뜻하지 않습니다. mutable Resource·임의 object/Munch passthrough·inherited fetch/commit/session/cache/discovery/context, reserved-key·unknown attr 충돌·alias 입력 순서, Python UUID의 모든 특수 표기 및 JSON 바깥의 동적 filter/control 값은 별도 계약과 증거가 필요합니다. 응답200과 strict continuation/source guard, owned JSON 및 임의 표현식 Value가 제공하는 범위와 실제 OpenStack 배포별 HTTP 검증은 구분합니다.
+이 named Cloud 조회들은 concrete 입력과 SDK 소유 필터·기본값·backend 선택·owned 결과를 제공하는 Go 매핑입니다. Python 임의 object/Munch·JSON 바깥 동적 filter/control·특수 UUID 표기는 문서화한 typed 입력 경계로 대응합니다. 전체 mutable Resource·inherited fetch/commit/session/cache/discovery·다른 Resource/Proxy 선언은 별도 SDK 작업으로 추적합니다. 응답200·canonical UTF-8·안전한 member/continuation·source/context guard·기록된 location은 명시적인 Go 정책입니다. 아래 예제의 컴파일과 HTTP 계약 테스트는 인증된 실제 OpenStack 배포 실행과 구분합니다.
 
 [독립 Floating IP 삭제](floating-ip-delete.md)는 이 공개 Get 정책으로 접수 후 결과를 확인합니다. 기본값은 추가 DELETE1회이며, 목록의 no-match와 present DOWN을 별도로 반환합니다.
+
+새 IP 할당·선택적 대기·timeout 정리는 [CreateFloatingIP](floating-ip-create.md)에서 제공합니다.
