@@ -12,9 +12,9 @@
 
 **현재 작업 (2026-10-08): 핵심 user Barbican 삭제3개·목록1개·고정 getter2개 완료.** 기존 기반의 실제 named 계약을 닫아 **전체179→185(+6)·핵심105→111·Barbican5→11/67**로 반영했습니다. 삭제와 목록의 누락은 공유 engine과 기존 fixture로 보완했고, 이미 구현한 getter2개는 기존 HTTP·공유 Connection·디코더 증거를 재사용해 완료 심사했습니다.
 
-삭제는 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 목록은 `026967a`·`ee67234`·`dfcba00`·`e9670e5`·`a1218bb`로 작은 의미 단위로 커밋하고 push했습니다. 최종 source의 집중4 package race·전체40 package check·문서 main build·기존 preview5흐름/9그룹이 PASS했습니다. 조회 예제의 기존2개 Go 함수도 그대로 추출해 컴파일했습니다. 판정·prose만 바뀐 getter 단계에서는 같은 Go 전체 테스트를 반복하지 않고 final parity/집계만 확인합니다. Source pin·기존 계약/anchors를 유지하며 generic Resource/session과 Go typed/seeded ID·strict status의 차이를 명시합니다.
+삭제는 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 목록은 `026967a`·`ee67234`·`dfcba00`·`e9670e5`·`a1218bb`, 고정 getter2개 완료 판정은 `c3cf874`로 작은 의미 단위로 커밋하고 push했습니다. 최종 source의 집중4 package race·전체40 package check·문서 main build·기존 preview5흐름/9그룹이 PASS했습니다. 조회 예제의 기존2개 Go 함수도 그대로 추출해 컴파일했습니다. 판정·prose만 바뀐 getter 단계에서는 같은 Go 전체 테스트를 반복하지 않고 final parity/집계만 확인합니다. Source pin·기존 계약/anchors를 유지하며 generic Resource/session과 Go typed/seeded ID·strict status의 차이를 명시합니다.
 
-**다음 단위: Barbican Container/Order/Secret 사용자 생성 API 소스 대조.** 고정 Python의 입력·기본값·응답·오류를 유한 목록으로 정리하고 기존 native Create·REST·owned metadata projection·옵션 snapshot·fixture를 재사용할 지점을 확인합니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
+**다음 단위: Barbican Container/Order/Secret 사용자 생성3개 공통 보완.** 소스 대조에서 ref-only POST 응답 뒤 입력 속성이 결과에서 사라지는 누락과 accepted 응답 원문·header·status/error 증거 부재를 확인했습니다. Python은 입력으로 만든 Resource에 응답 속성을 병합하며 추가 GET/payload GET을 하지 않습니다. 기존 native Create는 호환성을 유지하고, 기존 guarded REST·metadata projection·옵션 snapshot·HTTP fixture를 재사용하는 SDK 소유 경로를 마련합니다. 명시 null/empty·descriptor alias 입력과 결과 병합을 유한 계약으로 검증합니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
@@ -39,7 +39,7 @@
 | Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
 | Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `97e205e` push 완료 |
 | Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `a1218bb` push 완료 |
-| Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | 이번 완료 판정 단위로 커밋·push |
+| Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | `c3cf874` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
