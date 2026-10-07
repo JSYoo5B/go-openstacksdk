@@ -36,7 +36,7 @@ func TestJSONRetryPreservesSDKOwnedHeaders(t *testing.T) {
 				}
 				return nil
 			}
-			_, err := rest.DoJSON(context.Background(), client, http.MethodPut, limitsGuardedTarget,
+			_, err := rest.DoJSONGuardedHeaders(context.Background(), client, nil, http.MethodPut, limitsGuardedTarget,
 				map[string]string{"target": "original"}, map[string]string{"If-Match": "revision_number=0"}, 200)
 			var native gophercloud.ErrUnexpectedResponseCode
 			if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "original denied retry" || attempts.Load() != 1 {

@@ -45,6 +45,18 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 // callbacks, authentication and accepted read/Close failures. Its nil-guard
 // form retains DoJSON's existing behavior.
 func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, codes...)
+}
+
+// DoJSONGuardedHeaders additionally fixes operation-owned headers through native
+// retries and physical attempts. Use this for invariants such as a selected
+// Neutron revision, not for ordinary caller headers whose source precedence and
+// retry policy are intentionally retained by DoJSONGuarded.
+func DoJSONGuardedHeaders(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, codes...)
+}
+
+func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, codes ...int) (*Response, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -67,8 +79,11 @@ func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 		return nil, fmt.Errorf("%w: explicit success codes are required", resource.ErrInvalidOption)
 	}
 	expectedCodes := append([]int(nil), codes...)
-	expectedHeaders := maps.Clone(headers)
-	options := &gophercloud.RequestOpts{OkCodes: append([]int(nil), expectedCodes...), KeepResponseBody: true, MoreHeaders: maps.Clone(expectedHeaders)}
+	var expectedHeaders map[string]string
+	if fixedHeaders {
+		expectedHeaders = maps.Clone(headers)
+	}
+	options := &gophercloud.RequestOpts{OkCodes: append([]int(nil), expectedCodes...), KeepResponseBody: true, MoreHeaders: maps.Clone(headers)}
 	var expectedBody []byte
 	if body != nil {
 		encoded, err := json.Marshal(body)

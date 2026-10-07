@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
@@ -188,5 +189,115 @@ func TestFloatingIPPlanWaitAndPreflightPreserveCancellationCause(t *testing.T) {
 	}
 	if _, err := ips.PrepareEnsure(ctx, ensureFloatingRequest()); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatal(err)
+	}
+}
+
+func TestFloatingIPPlanRevisionHeadersRejectRetryChangesAndSourceOverride(t *testing.T) {
+	for _, scenario := range []string{"delete", "replace", "source override"} {
+		t.Run(scenario, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			ensurePortFixture(t, cloud)
+			plannedPortRead(t, cloud)
+			cloud.Mux.HandleFunc("GET /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
+				testcloud.JSON(w, 200, `{"floatingips":[{"id":"free","project_id":"owner","floating_network_id":"external","floating_ip_address":"198.51.100.11","revision_number":0}]}`)
+			})
+			var updates atomic.Int32
+			cloud.Mux.HandleFunc("PUT /v2.0/floatingips/free", func(w http.ResponseWriter, r *http.Request) {
+				updates.Add(1)
+				if r.Header.Get("If-Match") != "revision_number=0" {
+					t.Error(r.Header)
+				}
+				http.Error(w, "original PUT503", 503)
+			})
+			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				t.Errorf("unexpected allocation/cleanup %s %s", r.Method, r.URL)
+				http.Error(w, "unexpected", 500)
+			})
+			client := cloud.Client("network", "/v2.0")
+			if scenario == "source override" {
+				client.MoreHeaders = map[string]string{"If-Match": "revision_number=7"}
+			} else {
+				client.ProviderClient.RetryFunc = func(_ context.Context, _, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
+					if scenario == "delete" {
+						delete(opts.MoreHeaders, "If-Match")
+					} else {
+						opts.MoreHeaders["If-Match"] = "revision_number=5"
+					}
+					return nil
+				}
+			}
+			ips := network.New(client).FloatingIPs
+			plan, err := ips.PrepareEnsure(context.Background(), ensureFloatingRequest(), network.WithEnsureProject("owner"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := ips.EnsurePrepared(context.Background(), plan)
+			wantUpdates := int32(1)
+			if scenario == "source override" {
+				wantUpdates = 0
+			}
+			if result == nil || !result.Reused || result.Allocated || result.FloatingIP.ID != "free" || result.FloatingIP.PortID != "" || !errors.Is(err, resource.ErrInvalidOption) || updates.Load() != wantUpdates {
+				t.Fatal(result, err, updates.Load())
+			}
+			if scenario != "source override" {
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(err, &native) || native.Actual != 503 || !strings.Contains(string(native.Body), "original PUT503") {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func TestFloatingIPPlanPUTFailurePreservesOriginalCandidateAndHTTPProof(t *testing.T) {
+	for _, scenario := range []string{"wrong ID", "wrong fixed", "revision412"} {
+		t.Run(scenario, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			ensurePortFixture(t, cloud)
+			plannedPortRead(t, cloud)
+			cloud.Mux.HandleFunc("GET /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
+				testcloud.JSON(w, 200, `{"floatingips":[{"id":"free","project_id":"owner","floating_network_id":"external","floating_ip_address":"198.51.100.11","revision_number":0}]}`)
+			})
+			var updates atomic.Int32
+			cloud.Mux.HandleFunc("PUT /v2.0/floatingips/free", func(w http.ResponseWriter, r *http.Request) {
+				updates.Add(1)
+				w.Header().Set("X-Request-Id", "association")
+				if scenario == "revision412" {
+					http.Error(w, "revision changed", 412)
+					return
+				}
+				extra := map[string]any{"id": "free"}
+				if scenario == "wrong ID" {
+					extra["id"] = "different"
+				} else {
+					extra["fixed_ip_address"] = "10.0.0.99"
+				}
+				respondEnsuredFloatingIP(w, 200, "port", "10.0.0.10", "ACTIVE", extra)
+			})
+			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				t.Errorf("unexpected allocation/cleanup %s %s", r.Method, r.URL)
+				http.Error(w, "unexpected", 500)
+			})
+			ips := network.New(cloud.Client("network", "/v2.0")).FloatingIPs
+			plan, err := ips.PrepareEnsure(context.Background(), ensureFloatingRequest(), network.WithEnsureProject("owner"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := ips.EnsurePrepared(context.Background(), plan)
+			if err == nil || result == nil || !result.Reused || result.Allocated || result.FloatingIP.ID != "free" || result.FloatingIP.PortID != "" || updates.Load() != 1 {
+				t.Fatal(result, err, updates.Load())
+			}
+			if scenario == "revision412" {
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(err, &native) || native.Actual != 412 {
+					t.Fatal(err)
+				}
+			} else {
+				var accepted *resource.ResponseError
+				if !errors.As(err, &accepted) || accepted.StatusCode != 200 || accepted.Header.Get("X-Request-Id") != "association" || len(accepted.Body) == 0 {
+					t.Fatal(err, accepted)
+				}
+			}
+		})
 	}
 }

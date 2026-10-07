@@ -94,7 +94,7 @@ func (f *FloatingIPs) planWrite(ctx context.Context, guard func(context.Context)
 	if id != "" {
 		endpoint = client.ServiceURL("floatingips", url.PathEscape(id))
 	}
-	response, err := rest.DoJSONGuarded(ctx, client, guard, method, endpoint, body, headers, codes...)
+	response, err := rest.DoJSONGuardedHeaders(ctx, client, guard, method, endpoint, body, headers, codes...)
 	accepted := false
 	if response != nil {
 		for _, code := range codes {
