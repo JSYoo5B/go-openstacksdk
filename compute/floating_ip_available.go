@@ -3,6 +3,7 @@ package compute
 import (
 	"context"
 	"errors"
+	"slices"
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -14,12 +15,13 @@ import (
 type AvailableFloatingIPRequest = network.AvailableFloatingIPRequest
 
 // AvailableFloatingIPResult exposes common identity/address and the actual
-// backend model. FallbackError records a clean Neutron NotFound that selected
-// Nova. Neither raw model nor its status/association is synthesized.
+// backend model. FloatingIP separates the cloud resource view from actual Wire
+// fields. FallbackError records a clean Neutron NotFound that selected Nova.
 type AvailableFloatingIPResult struct {
 	Backend           FloatingIPSource
 	ID, Address       string
 	Reused, Allocated bool
+	FloatingIP        *FloatingIPRecord
 	Neutron           *network.FloatingIPAvailability
 	Nova              *NovaFloatingIPAvailability
 	FallbackError     error
@@ -32,9 +34,11 @@ type NovaFloatingIPAvailability struct {
 }
 
 type availableIPOptions struct {
-	source  *FloatingIPSource
-	network []network.AvailableFloatingIPOption
-	timeout time.Duration
+	source   *FloatingIPSource
+	network  []network.AvailableFloatingIPOption
+	timeout  time.Duration
+	location *resource.CloudLocation
+	strict   bool
 }
 
 type AvailableFloatingIPOption func(*availableIPOptions) error
@@ -48,6 +52,23 @@ func WithAvailableIPSource(source FloatingIPSource) AvailableFloatingIPOption {
 		o.source = &copy
 		return nil
 	}
+}
+
+// WithAvailableIPLocation supplies owned location facts for the returned view.
+// The default uses Connection configuration and the recorded project scope.
+func WithAvailableIPLocation(value resource.CloudLocation) AvailableFloatingIPOption {
+	owned := value.Clone()
+	return func(o *availableIPOptions) error {
+		copy := owned.Clone()
+		o.location = &copy
+		return nil
+	}
+}
+
+// WithAvailableIPStrict omits compatibility aliases and flattened properties
+// from normalized Nova views. The properties object and actual Wire remain.
+func WithAvailableIPStrict(strict bool) AvailableFloatingIPOption {
+	return func(o *availableIPOptions) error { o.strict = strict; return nil }
 }
 
 func WithAvailableIPNetworkOptions(options ...network.AvailableFloatingIPOption) AvailableFloatingIPOption {
@@ -89,11 +110,17 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 	base := s.captureAutomaticComputeSource()
 	servers, source := s.Servers, s.Servers.addressPolicy.options.source
 	o := availableIPOptions{}
-	for _, apply := range options {
+	for _, apply := range slices.Clone(options) {
+		if err := base(ctx); err != nil {
+			return nil, err
+		}
 		if apply == nil {
 			return nil, invalid("nil available floating IP option")
 		}
-		if err := apply(&o); err != nil {
+		next := cloneAvailableIPOptions(o)
+		err := apply(&next)
+		o = cloneAvailableIPOptions(next)
+		if err = errors.Join(err, base(ctx)); err != nil {
 			return nil, err
 		}
 	}
@@ -102,7 +129,13 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 			return nil, err
 		}
 	}
-	policy, err := network.PrepareAvailableFloatingIPOptions(ctx, o.network...)
+	nested := slices.Clone(o.network)
+	for i, apply := range nested {
+		if apply != nil {
+			nested[i] = guardAvailableIPOption(apply, func() error { return base(ctx) })
+		}
+	}
+	policy, err := network.PrepareAvailableFloatingIPOptions(ctx, nested...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,12 +161,14 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 		source = *o.source
 	}
 	result := &AvailableFloatingIPResult{Backend: source}
+	view := &floatingIPQueryState{state: state, options: FloatingIPQueryOpts{Location: o.location, Strict: o.strict}, source: source, ctx: ctx}
 	if source == FloatingIPNeutron {
 		service, err := state.loadNetwork(ctx)
 		if err != nil {
 			return result, err
 		}
 		if service != nil {
+			view.neutronMode = true
 			value, err := service.FloatingIPs.Available(ctx, input, network.WithAvailableFloatingIPPolicy(policy))
 			result.Neutron = value
 			if value != nil {
@@ -143,7 +178,7 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 				}
 			}
 			if err = errors.Join(err, state.check(ctx)); err == nil || value != nil || !availableIPNotFound(err) {
-				return result, err
+				return view.finishAvailable(result, service.RawClient(), err)
 			}
 			result.FallbackError = err
 		}
@@ -187,7 +222,60 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 	if value.FloatingIP != nil {
 		result.ID, result.Address = value.FloatingIP.ID, value.FloatingIP.Address
 	}
-	return result, errors.Join(err, state.check(ctx))
+	return view.finishAvailable(result, b.client, errors.Join(err, state.check(ctx)))
+}
+
+func cloneAvailableIPOptions(value availableIPOptions) availableIPOptions {
+	copy := value
+	copy.network = slices.Clone(value.network)
+	if value.source != nil {
+		source := *value.source
+		copy.source = &source
+	}
+	if value.location != nil {
+		location := value.location.Clone()
+		copy.location = &location
+	}
+	return copy
+}
+
+func guardAvailableIPOption[T any](apply func(*T) error, guard func() error) func(*T) error {
+	return func(value *T) error {
+		if err := guard(); err != nil {
+			return err
+		}
+		return errors.Join(apply(value), guard())
+	}
+}
+
+// Adapt the already observed row without another lookup, allocation, source
+// capture or deadline. Known Wire remains available when view conversion fails.
+func (p *floatingIPQueryState) finishAvailable(result *AvailableFloatingIPResult, client *gophercloud.ServiceClient, prior error) (*AvailableFloatingIPResult, error) {
+	var wire *resource.RawResource
+	if value := result.Neutron; result.Backend == FloatingIPNeutron && value != nil && value.FloatingIP != nil {
+		wire = (&resource.RawResource{Metadata: value.Metadata}).Clone()
+	} else if value := result.Nova; result.Backend == FloatingIPNova && value != nil && value.FloatingIP != nil {
+		wire = (&resource.RawResource{Metadata: value.FloatingIP.Metadata}).Clone()
+	}
+	if wire == nil {
+		return result, errors.Join(prior, p.state.check(p.ctx))
+	}
+	result.FloatingIP = &FloatingIPRecord{Backend: result.Backend, Wire: wire.Clone()}
+	if err := p.state.check(p.ctx); err != nil {
+		return result, errors.Join(prior, err)
+	}
+	record, err := p.record(result.Backend, client, wire, false)
+	if record != nil {
+		result.FloatingIP = record
+	}
+	if err != nil {
+		if result.Backend == FloatingIPNova {
+			err = result.Nova.FloatingIP.fail(err)
+		} else if receipt := result.Neutron.AllocationResponse; receipt != nil {
+			err = (&rest.Response{StatusCode: receipt.StatusCode, Header: receipt.Header.Clone(), Body: slices.Clone(receipt.Envelope)}).Fail(err)
+		}
+	}
+	return result, errors.Join(prior, err, p.state.check(p.ctx))
 }
 
 // Only a pure NotFound chain may select another backend. Accepted response,
