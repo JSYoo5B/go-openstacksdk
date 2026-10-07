@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
+	th "github.com/gophercloud/gophercloud/v2/testhelper"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/keymanager/v1/secretstores"
 	"gophercloudsdk/request"
@@ -606,5 +607,322 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 	var evidence *resource.ResponseError
 	if values != nil || !errors.As(err, &evidence) || !errors.Is(err, cause) || evidence.StatusCode != 200 || calls.Load() != before+1 {
 		t.Fatal("read error lost evidence or retried", values, err, calls.Load())
+	}
+}
+
+func TestKeyManagerSecretStoresSemanticBodyAttributesUseOriginalFields(t *testing.T) {
+	cloud := testcloud.New(t)
+	var calls atomic.Int32
+	encodedRef := "https://foreign.invalid/v1/secret-stores/store%2fpart?tenant=kept#fragment"
+	plainRef := "https://foreign.invalid/v1/secret-stores/plain-b"
+	created := "2016-08-22T23:46:45.114283+09:00"
+	rows := strings.Join([]string{
+		secretStoreRow(t, encodedRef, map[string]any{"id": "literal-a", "created": created, "updated": "raw-updated", "label": "A"}),
+		secretStoreRow(t, plainRef, map[string]any{"created": nil, "label": "B"}),
+		secretStoreRow(t, "https://foreign.invalid/c", map[string]any{"id": nil, "created": "", "updated": nil, "label": "C"}),
+		secretStoreRow(t, "https://foreign.invalid/d", map[string]any{"id": "", "updated": "", "label": "D"}),
+		secretStoreRow(t, "", map[string]any{"secret_store_ref": nil, "label": "E"}),
+		`{"name":"Different","status":"ACTIVE","label":"F"}`,
+	}, ",")
+	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, http.MethodGet)
+		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		calls.Add(1)
+		if r.URL.RawQuery != "" {
+			t.Error("local Body attributes leaked to the wire", r.URL)
+		}
+		testcloud.JSON(w, 200, secretStorePage(rows, ""))
+	})
+	a := secretstores.New(secretStoresClient(cloud))
+	for _, tc := range []struct {
+		name, field string
+		value       any
+		labels      []string
+	}{
+		{"id-is-full-ref", "id", plainRef, []string{"B"}},
+		{"literal-id-priority", "id", "literal-a", []string{"A"}},
+		{"id-is-not-convenience-id", "id", "plain-b", nil},
+		{"literal-null-and-missing-ref", "id", nil, []string{"C", "E", "F"}},
+		{"literal-empty-is-not-null", "id", "", []string{"D"}},
+		{"derived-id-ignores-literal-id", "secret_store_id", "store%2fpart", []string{"A"}},
+		{"derived-id-null-and-omission", "secret_store_id", nil, []string{"E", "F"}},
+		{"full-ref-retains-query-fragment", "secret_store_ref", encodedRef, []string{"A"}},
+		{"ref-null-and-omission", "secret_store_ref", nil, []string{"E", "F"}},
+		{"created-original-text", "created_at", created, []string{"A"}},
+		{"created-is-not-parsed", "created_at", "2016-08-22T14:46:45.114283Z", nil},
+		{"created-null-and-omission", "created_at", nil, []string{"B", "D", "E", "F"}},
+		{"created-empty-is-not-null", "created_at", "", []string{"C"}},
+		{"updated-original-text", "updated_at", "raw-updated", []string{"A"}},
+		{"updated-null-and-omission", "updated_at", nil, []string{"B", "C", "E", "F"}},
+		{"updated-empty-is-not-null", "updated_at", "", []string{"D"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			before := calls.Load()
+			values, err := a.All(context.Background(), secretstores.WithListFilter(tc.field, tc.value))
+			var labels, ids []string
+			for _, label := range tc.labels {
+				ids = append(ids, map[string]string{"A": "literal-a", "B": "plain-b"}[label])
+			}
+			secretStoreWantIDs(t, values, err, ids...)
+			for _, value := range values {
+				var label string
+				if err := json.Unmarshal(value.Body["label"], &label); err != nil {
+					t.Fatal(err)
+				}
+				labels = append(labels, label)
+			}
+			if !reflect.DeepEqual(labels, tc.labels) || calls.Load() != before+1 {
+				t.Fatal("wrong original-field matches or passive reference follow", labels, tc.labels, calls.Load()-before)
+			}
+		})
+	}
+	t.Run("only-selected-formatter-rejects-empty-ref", func(t *testing.T) {
+		cloud := testcloud.New(t)
+		var requests atomic.Int32
+		cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
+			requests.Add(1)
+			th.TestMethod(t, r, http.MethodGet)
+			th.TestHeader(t, r, "X-Auth-Token", "test-token")
+			testcloud.JSON(w, 200, secretStorePage(secretStoreRow(t, "", map[string]any{"id": "literal"}), ""))
+		})
+		api := secretstores.New(secretStoresClient(cloud))
+		values, err := api.All(context.Background(), secretstores.WithListFilter("id", "literal"))
+		secretStoreWantIDs(t, values, err, "literal")
+		values, err = api.All(context.Background(), secretstores.WithListFilter("secret_store_id", "literal"))
+		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || requests.Load() != 2 {
+			t.Fatal("selected HREF formatter did not fail once", values, err, requests.Load())
+		}
+	})
+
+}
+
+func TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation(t *testing.T) {
+	cloud := testcloud.New(t)
+	var calls atomic.Int32
+	want := url.Values{"limit": {"7"}, "marker": {"start"}, "name": {"server-pattern"}, "status": {"READY"}, "global_default": {"false"}, "crypto_plugin": {"alpha", "beta"}, "secret_store_plugin": {""}, "created": {"wire-created-a", "wire-created-b"}, "updated": {"wire-updated"}, "created_at": {"raw-wire-extension"}, "vendor": {"kept"}}
+	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, http.MethodGet)
+		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		calls.Add(1)
+		if !reflect.DeepEqual(r.URL.Query(), want) {
+			t.Error("query attributes, original captured values or Body separation changed", r.URL.Query(), want)
+		}
+		// Declared queries belong to the server: differing response values must
+		// not be rechecked locally. Only created_at/secret_store_id are local.
+		testcloud.JSON(w, 200, secretStorePage(secretStoreRow(t, "https://foreign.invalid/store-one", map[string]any{"global_default": true, "crypto_plugin": "different", "secret_store_plugin": "different", "created": "raw-body", "updated": "different"}), "https://foreign.invalid/not-read"))
+	})
+	plugins := []string{"alpha", "beta"}
+	fields := map[string]any{"limit": 7, "marker": "start", "name": "server-pattern", "status": "READY", "global_default": false, "crypto_plugin": plugins, "secret_store_plugin": "", "created": []string{"wire-created-a", "wire-created-b"}, "updated": "wire-updated", "created_at": "raw-body", "secret_store_id": "store-one", "location": func() {}}
+	semantic := secretstores.WithListFilters(fields)
+	plugins[0], fields["global_default"], fields["created_at"] = "caller-change", true, "caller-change"
+	delete(fields, "secret_store_id")
+	falseValue := false
+	options := []secretstores.ListOption{semantic, secretstores.WithListOptions(secretstores.ListOpts{Paginated: &falseValue}), secretstores.WithListQuery("created_at", "raw-wire-extension"), secretstores.WithListQuery("vendor", "kept")}
+	a := secretstores.New(secretStoresClient(cloud))
+	seq := a.List(context.Background(), options...)
+	options[0] = secretstores.WithListFilters(map[string]any{"created_at": "caller-change"})
+	if calls.Load() != 0 {
+		t.Fatal("semantic iterator construction performed HTTP")
+	}
+	for range 2 {
+		var values []*secretstores.SecretStore
+		for value, err := range seq {
+			if err != nil {
+				t.Fatal(err)
+			}
+			values = append(values, value)
+		}
+		secretStoreWantIDs(t, values, nil, "store-one")
+	}
+	var group sync.WaitGroup
+	for range 4 {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			values, err := a.All(context.Background(), semantic, secretstores.WithListPaginated(false), secretstores.WithListQuery("created_at", "raw-wire-extension"), secretstores.WithListQuery("vendor", "kept"))
+			if err != nil || len(values) != 1 || values[0].ID != "store-one" {
+				t.Error(values, err)
+			}
+		}()
+	}
+	group.Wait()
+	if calls.Load() != 6 {
+		t.Fatal("semantic option reuse performed extra HTTP", calls.Load())
+	}
+}
+
+func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing.T) {
+	cloud := testcloud.New(t)
+	var calls atomic.Int32
+	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
+		th.TestMethod(t, r, http.MethodGet)
+		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		calls.Add(1)
+		want := url.Values{"vendor": {"wire"}}
+		if r.URL.Query().Has("name") {
+			want.Set("name", "raw")
+		}
+		if !reflect.DeepEqual(r.URL.Query(), want) {
+			t.Error("semantic clear changed raw query or leaked local/unknown fields", r.URL.Query(), want)
+		}
+		testcloud.JSON(w, 200, secretStorePage(secretStoreRow(t, "https://foreign.invalid/kept", map[string]any{"created": "keep"}), ""))
+	})
+	client := secretStoresClient(cloud)
+	a := secretstores.New(client)
+	for _, tc := range []struct {
+		name    string
+		options []secretstores.ListOption
+		want    error
+	}{
+		{"local-control", []secretstores.ListOption{secretstores.WithListFilter("max_items", 1)}, resource.ErrInvalidOption},
+		{"session-control", []secretstores.ListOption{secretstores.WithListFilter("session", true)}, resource.ErrUnsupported},
+		{"typed-limit-collision", []secretstores.ListOption{secretstores.WithListOptions(secretstores.ListOpts{Limit: 3}), secretstores.WithListFilter("limit", 3)}, resource.ErrInvalidOption},
+		{"raw-name-collision", []secretstores.ListOption{secretstores.WithListQuery("name", "same"), secretstores.WithListFilter("name", "same")}, resource.ErrInvalidOption},
+		{"null-query-presence-collision", []secretstores.ListOption{secretstores.WithListFilter("name", nil), secretstores.WithListQuery("name", "")}, resource.ErrInvalidOption},
+		{"selected-local-encoding-error", []secretstores.ListOption{secretstores.WithListFilter("created_at", func() {})}, resource.ErrInvalidOption},
+		{"options-cannot-replace-source", []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), func(config *request.Config[secretstores.ListOpts]) error { client.Endpoint += "changed/"; return nil }}, resource.ErrInvalidOption},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			endpoint := client.Endpoint
+			defer func() { client.Endpoint = endpoint }()
+			seq := a.List(context.Background(), tc.options...)
+			if calls.Load() != 0 {
+				t.Fatal("semantic preflight was eager")
+			}
+			var seen int
+			for value, err := range seq {
+				seen++
+				if value != nil || !errors.Is(err, tc.want) {
+					t.Fatal(value, err)
+				}
+				if tc.name == "selected-local-encoding-error" {
+					var cause *json.UnsupportedTypeError
+					if !errors.As(err, &cause) {
+						t.Fatal("selected JSON cause was lost", err)
+					}
+				}
+			}
+			if seen != 1 || calls.Load() != 0 {
+				t.Fatal("invalid semantic option reached HTTP", seen, calls.Load())
+			}
+		})
+	}
+	for _, options := range [][]secretstores.ListOption{
+		{secretstores.WithListFilters(map[string]any{"created_at": "keep", "location": func() {}, "vendor": json.RawMessage(`{]`)})},
+		{secretstores.WithListFilter("created_at", func() {}), secretstores.WithListFilter("session", true), secretstores.WithListFilters(map[string]any{"created_at": "keep"})},
+		{secretstores.WithListFilter("created_at", func() {}), secretstores.WithListFilter("created_at", "keep")},
+		{secretstores.WithListFilter("name", "ignored"), secretstores.WithListFilter("created_at", "not-kept"), secretstores.WithListFilters(nil), secretstores.WithListQuery("name", "raw")},
+	} {
+		options = append(options, secretstores.WithListQuery("vendor", "wire"))
+		values, err := a.All(context.Background(), options...)
+		secretStoreWantIDs(t, values, err, "kept")
+	}
+	if calls.Load() != 4 {
+		t.Fatal("unknown/discarded values or semantic replacement changed HTTP", calls.Load())
+	}
+}
+
+func TestKeyManagerSecretStoresSemanticRawCapAndContinuation(t *testing.T) {
+	for _, mode := range []string{"all-pages", "cap-one", "cap-two", "single-page", "filtered-marker", "late-404", "break"} {
+		t.Run(mode, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var calls atomic.Int32
+			firstRef := "https://foreign.invalid/first%2fraw?query=kept#fragment"
+			cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
+				th.TestMethod(t, r, http.MethodGet)
+				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				page := calls.Add(1)
+				want := url.Values{"vendor": {"kept"}}
+				switch mode {
+				case "cap-one":
+					want.Set("limit", "1")
+				case "cap-two":
+					want.Set("limit", "2")
+				case "filtered-marker":
+					want.Set("limit", "9")
+				}
+				if page > 1 {
+					marker := "second"
+					if mode == "filtered-marker" {
+						marker = firstRef
+					}
+					want.Set("marker", marker)
+				}
+				if !reflect.DeepEqual(r.URL.Query(), want) {
+					t.Error("raw-row cap, full-ref marker or preserved query changed", r.URL.Query(), want)
+				}
+				if page > 1 {
+					if mode == "late-404" {
+						testcloud.JSON(w, 404, `{"error":"next-page"}`)
+						return
+					}
+					rows := ""
+					if mode != "filtered-marker" {
+						rows = secretStoreRow(t, "https://foreign.invalid/later", map[string]any{"created": "keep"})
+					}
+					testcloud.JSON(w, 200, secretStorePage(rows, ""))
+					return
+				}
+				rows := secretStoreRow(t, firstRef, map[string]any{"created": "not-kept"})
+				next := cloud.Server.URL + secretStoresPath + "?vendor=kept&marker=second"
+				if mode == "filtered-marker" {
+					next = ""
+				} else {
+					rows += "," + secretStoreRow(t, "https://foreign.invalid/same-page", map[string]any{"created": "keep"})
+					if mode == "cap-one" || mode == "cap-two" || mode == "single-page" || mode == "break" {
+						next = "https://foreign.invalid/must-not-follow"
+					}
+				}
+				testcloud.JSON(w, 200, secretStorePage(rows, next))
+			})
+			options := []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), secretstores.WithListQuery("vendor", "kept")}
+			wantIDs, wantCalls := []string{"same-page", "later"}, int32(2)
+			switch mode {
+			case "cap-one":
+				options = append(options, secretstores.WithListMaxItems(1))
+				wantIDs, wantCalls = nil, 1
+			case "cap-two":
+				options = append(options, secretstores.WithListMaxItems(2))
+				wantIDs, wantCalls = []string{"same-page"}, 1
+			case "single-page":
+				options = append(options, secretstores.WithListPaginated(false))
+				wantIDs, wantCalls = []string{"same-page"}, 1
+			case "filtered-marker":
+				options = append(options, secretstores.WithListOptions(secretstores.ListOpts{Limit: 9}))
+				wantIDs = nil
+			case "late-404":
+				wantIDs = []string{"same-page"}
+			case "break":
+				wantIDs, wantCalls = []string{"same-page"}, 1
+			}
+			a := secretstores.New(secretStoresClient(cloud))
+			var values []*secretstores.SecretStore
+			var terminal error
+			for value, err := range a.List(context.Background(), options...) {
+				if err != nil {
+					if value != nil {
+						t.Fatal(value, err)
+					}
+					terminal = err
+					break
+				}
+				values = append(values, value)
+				if mode == "break" {
+					break
+				}
+			}
+			if mode == "late-404" {
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(terminal, &native) || native.Actual != 404 || string(native.Body) != `{"error":"next-page"}` {
+					t.Fatal("filtered iterator lost late HTTP error", terminal)
+				}
+			} else if terminal != nil {
+				t.Fatal(terminal)
+			}
+			secretStoreWantIDs(t, values, nil, wantIDs...)
+			if calls.Load() != wantCalls {
+				t.Fatal("cap refilled filtered rows or fetched an ignored continuation", calls.Load(), wantCalls)
+			}
+		})
 	}
 }

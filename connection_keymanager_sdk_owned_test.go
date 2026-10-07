@@ -12,6 +12,7 @@ import (
 	sdk "gophercloudsdk"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/keymanager/v1/quotas"
+	"gophercloudsdk/keymanager/v1/secretstores"
 	"gophercloudsdk/resource"
 )
 
@@ -110,7 +111,7 @@ func TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject(t *testing.T) {
 	if err != nil || preferred == nil || preferred.ID != "store-b" {
 		t.Fatal(preferred, err)
 	}
-	listed, err := service.SecretStores.All(context.Background())
+	listed, err := service.SecretStores.All(context.Background(), secretstores.WithListFilter("secret_store_id", "store-c"))
 	if err != nil || len(listed) != 1 || listed[0].ID != "store-c" {
 		t.Fatal(listed, err)
 	}
