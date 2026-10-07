@@ -121,8 +121,10 @@ func queryNotFound(err error) bool {
 }
 
 type floatingIPQueryRow struct {
-	wire   *resource.RawResource
-	origin *rest.Response
+	wire     *resource.RawResource
+	origin   *rest.Response
+	record   *FloatingIPRecord
+	prepared bool
 }
 
 func (p *floatingIPQueryState) collect(backend FloatingIPSource, client *gophercloud.ServiceClient, path, plural string, params floatingIPQueryParameters) ([]floatingIPQueryRow, []*FloatingIPQueryResponse, error) {
@@ -157,7 +159,20 @@ func (p *floatingIPQueryState) collect(backend FloatingIPSource, client *gopherc
 		if err != nil {
 			return rows, pages, errors.Join(err, p.state.check(p.ctx))
 		}
-		rows = append(rows, floatingIPQueryRow{wire: row, origin: origin})
+		entry := floatingIPQueryRow{wire: row, origin: origin}
+		if backend == FloatingIPNeutron {
+			// Neutron constructs and filters each Resource before following
+			// continuation. A later 404 must not hide this row's error.
+			values, err := p.records(backend, client, []floatingIPQueryRow{entry}, params.local)
+			if err != nil {
+				return rows, pages, errors.Join(err, p.state.check(p.ctx))
+			}
+			entry.prepared = true
+			if len(values) != 0 {
+				entry.record = values[0]
+			}
+		}
+		rows = append(rows, entry)
 	}
 	return rows, pages, p.state.check(p.ctx)
 }
@@ -217,6 +232,12 @@ func (p *floatingIPQueryState) records(backend FloatingIPSource, client *gopherc
 		if err := p.state.check(p.ctx); err != nil {
 			return nil, err
 		}
+		if row.prepared {
+			if row.record != nil {
+				values = append(values, row.record)
+			}
+			continue
+		}
 		record, err := p.record(backend, client, row.wire, false)
 		if err != nil {
 			return nil, row.origin.Fail(err)
@@ -250,6 +271,9 @@ func floatingIPLocalMatch(want, actual json.RawMessage) (bool, error) {
 	filters, err := cloudfilter.ObjectMembers(want)
 	if err != nil {
 		return false, err
+	}
+	if len(filters) == 0 {
+		return true, nil
 	}
 	members, err := cloudfilter.ObjectMembers(actual)
 	if err != nil {
