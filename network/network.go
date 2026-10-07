@@ -22,6 +22,7 @@ type Service struct {
 	Networks    *resource.Collection[Network]
 	Ports       *resource.Collection[Port]
 	FloatingIPs *FloatingIPs
+	Roles       *NetworkRoles
 	client      *gophercloud.ServiceClient
 }
 
@@ -34,7 +35,8 @@ func New(client *gophercloud.ServiceClient) *Service {
 // Dependencies connects named server references to Compute. Connection
 // supplies this resolver; explicit server IDs need no Compute lookup.
 type Dependencies struct {
-	Server func(context.Context, resource.Ref) (string, error)
+	Server       func(context.Context, resource.Ref) (string, error)
+	NetworkRoles NetworkRolePolicy
 }
 
 // NewWithDependencies adds cross-service references while preserving New's
@@ -59,5 +61,6 @@ func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Depende
 	s.Networks = resource.NewCollection(adapter)
 	s.Ports = s.API.Ports.Resources
 	s.FloatingIPs = newFloatingIPs(s, dependencies)
+	s.Roles = newNetworkRoles(client, dependencies.NetworkRoles)
 	return s
 }
