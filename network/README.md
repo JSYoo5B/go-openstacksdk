@@ -252,3 +252,5 @@ created, err := service.FloatingIPs.Create(ctx,
 [Compute의 legacy Nova backend](../compute/server-nova-floating-ip.md)는 Nova pool/list/allocation/add action을 별도 `NovaAssignment`로 반환합니다. 직접 Network API와 immutable Neutron plan의 모델·목적지·revision·ACTIVE 계약은 그대로 사용합니다.
 
 [FloatingIPs.Available](floating-ip-available.md)은 외부 network·project에서 첫 free IP를 반환하거나 새로 할당합니다. free 재사용은 Server를 지정해도 연결하지 않으며, 새 allocation의 optional Server만 ports·fixed IPv4·NAT 선택에 사용합니다. 설정에 따른 backend 선택과 pure NotFound 전환은 [Connection·Compute Available](../compute/floating-ip-available.md)에서 제공합니다.
+
+[Connection·Compute의 Floating IP 조회](../compute/floating-ip-queries.md)는 cloud의 목록·검색·단건·pool API6개입니다. Neutron에서는 known query와 Resource Body descriptor view를 사용하고 legacy Nova fallback·pool은 Compute로 연결합니다. 이 facade와 직접 Network Proxy/Resource 전체 지원은 별도로 추적합니다.

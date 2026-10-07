@@ -165,3 +165,5 @@ Python Neutron 성공은 network FloatingIP Resource를 그대로 반환한다. 
 Python의 unfiltered list 내부404→Nova와 바깥 Available fallback이 중첩되는 순서는 Go의 직접 backend 전환과 다르다. cloud has_service/version/config 전체, configured API GET cache, 모든 함수별 fallback·lookup/cleanup/error 정책, standalone pool/IP CRUD·delete verification 및 full Resource/session 표면은 계속 비교할 범위다. [기존 Compute IP consumer](server-ip-dispatch.md)의 연결·wait나 [Python의 별도 public create](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L775-L842)의 주변 계약을 이 Available 구현만으로 완료 처리하지 않는다.
 
 Python 비교는 고정 source 정적 확인이다. 위 Python 예제나 인증된 OpenStack 실행의 확인을 뜻하지 않는다. 실제 HTTP fixture·정확한 독립 main 컴파일·최종 revision gate 결과는 확인된 근거만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록한다.
+
+전체 IP 목록·검색·단건과 pool 조회는 [Floating IP query 가이드](floating-ip-queries.md)의 별도6개 API를 사용합니다. 이 Available entry는 free-first 재사용 또는 allocation이며, query의 nullable row·Nova 논리 정규화 view와 반환 계약이 다릅니다.

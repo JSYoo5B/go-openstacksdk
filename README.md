@@ -479,3 +479,4 @@ Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션�
 
 `UploadVolumeToImage`는 Cinder의 볼륨 이미지 내보내기에 필요한 기본값, 옵션 생략 여부, 조건부 3.1 지원 확인과 응답 처리를 제공합니다. [Python·Connection·package·service 사용법](blockstorage/volume-upload-image.md)을 참고하세요.
 
+[독립 Floating IP 목록·검색·조회](compute/floating-ip-queries.md)는 Connection과 Compute Service의 IP 조회4개·pool 조회2개를 제공합니다. Neutron dictionary와 로컬 JMESPath 검색, 함수별404 처리, 논리 Resource와 실제 Wire·페이지 증거를 구분합니다. Python 비교와 concrete 옵션 예제를 함께 설명합니다.
