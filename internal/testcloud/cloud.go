@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 type Cloud struct {
@@ -21,13 +22,12 @@ func (c *Cloud) Client(service, path string) *gophercloud.ServiceClient {
 
 func New(t *testing.T) *Cloud {
 	t.Helper()
-	mux := http.NewServeMux()
-	server := httptest.NewServer(mux)
-	t.Cleanup(server.Close)
-	provider := &gophercloud.ProviderClient{HTTPClient: *server.Client()}
+	fake := testhelper.SetupHTTP()
+	t.Cleanup(fake.Teardown)
+	provider := &gophercloud.ProviderClient{HTTPClient: *fake.Server.Client()}
 	provider.UseTokenLock()
 	provider.SetToken("test-token")
-	return &Cloud{Server: server, Mux: mux, Provider: provider}
+	return &Cloud{Server: fake.Server, Mux: fake.Mux, Provider: provider}
 }
 
 func JSON(w http.ResponseWriter, status int, body string) {
