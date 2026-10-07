@@ -2,6 +2,8 @@
 
 Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md)의 `sdk.Connect(ctx, ...)`로 준비합니다. 아래 Go 조각은 오류를 반환하는 함수 안에서 사용하며, `fmt`, `time`, `compute`, `resource`를 필요한 만큼 import합니다.
 
+명시 ID의 flavor·서버 metadata·키페어와 콘솔 출력은 [Compute 조회 비교](user-read-apis.md)의 `ComputeV2(ctx)` 독립 실행 예제를 참고하세요. metadata의 두 Python 이름은 같은 Go 조회로 대응하며, 새 콘솔 API는 length 생략과0을 구분합니다.
+
 ## openstacksdk 대응
 
 | openstacksdk | gophercloudsdk |

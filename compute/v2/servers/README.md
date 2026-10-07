@@ -2,6 +2,8 @@
 
 서버 API는 응답의 해석까지 SDK가 처리합니다.
 
+`Metadata(ctx, serverID)`와 `ConsoleOutput(ctx, serverID, options...)`의 Python 대응·문자열 반환·length 생략과0은 [Compute 조회 가이드](../../user-read-apis.md)를 참고하세요. 기존 native `ShowConsoleOutput`은 별도로 유지합니다.
+
 | 작업 | 반환값 |
 |---|---|
 | `CreateImage` | 생성한 이미지 ID와 error |

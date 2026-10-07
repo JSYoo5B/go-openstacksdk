@@ -99,6 +99,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "compute/v2" {
 		out.WriteString("Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/detail` 전체를 검사하며, caller가 지정하지 않은 `is_public`은 목록에만 `None`으로 설정합니다. 기본 extra specs 추가 조회는 하지 않습니다. `resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가 비어 있을 때만 반환된 ID의 `/os-extra_specs`를 조회합니다. 후속 GET에는 caller query를 전달하지 않으며 실패를 미존재로 숨기지 않습니다. 이 옵션은 Flavor만 지원하고 summary/all-projects 목록 모드는 제공하지 않습니다.\n\n")
+		out.WriteString("명시 ID의 `get_flavor`는 `FindIdentity`에 `FindFallbackNever`와 strict 미존재 옵션을 함께 지정합니다. `Servers.Metadata`는 두 Python metadata 조회 이름에 대응하는 문자열 map이고, `KeyPairs.Get`은 이름과 optional owner를 직접 조회합니다. 새 `Servers.ConsoleOutput`은 선택적 length의 생략과0을 구분하며 native `ShowConsoleOutput`은 유지합니다. [Compute 조회의 Python/Go 비교](../user-read-apis.md)에 독립 main·기본값·typed 반환과 source response 차이를 설명합니다.\n\n")
 	}
 	if key == "image/v2" {
 		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")

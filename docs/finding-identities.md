@@ -217,6 +217,22 @@ func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
 
 ## Nova flavor와 extra specs
 
+Python `conn.compute.get_flavor(flavor_id, get_extra_specs=True)`처럼 ID GET만
+사용하려면 `FindFallbackNever`와 strict 미존재 옵션을 함께 지정합니다. 이 조합은
+400/403/404 뒤 목록 fallback을 하지 않으며 기본 `find_flavor` 정책과 구분합니다.
+
+```go
+flavor, err := compute.Flavors.FindIdentity(ctx, flavorID,
+    resource.WithIdentityFindFallback(resource.FindFallbackNever),
+    resource.WithIdentityFindIgnoreMissing(false),
+    resource.WithIdentityFindExtraSpecs(true))
+```
+
+위 조각은 `compute` 서비스·`flavorID`가 있는 함수 안에서 사용합니다.
+`get_extra_specs` 생략/false는 마지막 옵션을 생략하거나 false로 지정합니다.
+[GET 전용 조회의 독립 main과 반환 차이](../compute/user-read-apis.md#flavor의-get-전용-정책)를 참고하세요.
+이 GET-only 조합의 대응이 `find_flavor`의 상속 continuation/query 전체를 완료한 것은 아닙니다.
+
 Flavor 자동 조회는 GET부터 시도하고 fallback은 `/flavors/detail` 전체를 검사합니다.
 이름은 서버 query mapping에 없으므로 SDK가 자동 `name` hint를 추가하지 않습니다.
 목록에서 `is_public`을 지정하지 않았다면 문자열 `None`을 보내 공개·비공개 flavor를

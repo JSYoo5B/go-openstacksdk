@@ -21,6 +21,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/detail` 전체를 검사하며, caller가 지정하지 않은 `is_public`은 목록에만 `None`으로 설정합니다. 기본 extra specs 추가 조회는 하지 않습니다. `resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가 비어 있을 때만 반환된 ID의 `/os-extra_specs`를 조회합니다. 후속 GET에는 caller query를 전달하지 않으며 실패를 미존재로 숨기지 않습니다. 이 옵션은 Flavor만 지원하고 summary/all-projects 목록 모드는 제공하지 않습니다.
 
+명시 ID의 `get_flavor`는 `FindIdentity`에 `FindFallbackNever`와 strict 미존재 옵션을 함께 지정합니다. `Servers.Metadata`는 두 Python metadata 조회 이름에 대응하는 문자열 map이고, `KeyPairs.Get`은 이름과 optional owner를 직접 조회합니다. 새 `Servers.ConsoleOutput`은 선택적 length의 생략과0을 구분하며 native `ShowConsoleOutput`은 유지합니다. [Compute 조회의 Python/Go 비교](../user-read-apis.md)에 독립 main·기본값·typed 반환과 source response 차이를 설명합니다.
+
 `conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
 `Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.
