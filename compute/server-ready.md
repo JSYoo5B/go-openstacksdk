@@ -36,7 +36,7 @@ Python의 ERROR 분기는 fault.message가 있으면 이유를 포함한 SDKExce
 
 Python의 [attach helper](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1109-L1123)는 supplied floating 주소가 없고 선택한 IP의 port_id가 있으면 wait=false에서도 Compute GET을 한 번 하여 이미 연결된 주소인지 확인합니다. Go의 Neutron async branch는 이 refresh를 하지 않고 접수한 Assignment와 분리한 supplied Server를 반환합니다. Observed=false는 raw Nova 수렴을 검사하지 않았다는 의미입니다.
 
-Python Wait는 get_server의 lookup Exception과 None을 재시도하고, `timeout - int(elapsed)`를 후속 IP 작업에 전달합니다. Go의 raw target 조회·응답 소유권·취소·source 오류 정책과 연속 context deadline은 이 동작 전체와 같지 않습니다. 일반 get_server의 Resource/interface expansion, pool > ips > auto dispatch와 Nova-network mutation은 별도로 추적합니다.
+Python Wait는 get_server의 lookup Exception과 None을 재시도하고, `timeout - int(elapsed)`를 후속 IP 작업에 전달합니다. Go의 raw target 조회·응답 소유권·취소·source 오류 정책과 연속 context deadline은 이 동작 전체와 같지 않습니다. Neutron pool → 순차 명시 IPv4 → automatic 소비자는 [IP dispatch](server-ip-dispatch.md)에 연결되어 있으며, 일반 get_server의 Resource/interface expansion과 Nova-network mutation/fallback은 별도로 추적합니다.
 
 ## 독립 Go 예제
 
@@ -144,7 +144,7 @@ func run(ctx context.Context, cloud, file, mode, external string, enabled, activ
 }
 ```
 
-GetActive의 known non-ACTIVE·ERROR·주소 오류·automatic skip에는 Compute endpoint가 필요하지 않습니다. 필요한 Neutron selection/assignment는 Network 서비스가 필요할 수 있습니다. GetActive의 기본 Neutron async assignment는 IP ACTIVE 대기와 raw Nova 관측을 하지 않으므로 이 작업을 위해 Compute를 사전에 준비하지 않습니다. 기존 Nova-source floating 주소 보충이 필요한 판단은 별도로 lazy Compute를 사용할 수 있습니다. `WithActiveServerWait(true)`로 실제 IP readiness와 raw 관측을 요청하거나 WaitForServer를 사용하면 필요한 시점에 Compute를 발견합니다. Connect 자체의 인증 요청과 이 endpoint 준비를 구분합니다.
+GetActive의 known non-ACTIVE·ERROR·주소 오류·automatic skip에는 Compute endpoint가 필요하지 않습니다. 필요한 Neutron selection/assignment는 Network 서비스가 필요할 수 있습니다. GetActive의 기본 Neutron async assignment는 IP ACTIVE 대기와 raw Nova 관측을 하지 않으므로 이 작업을 위해 Compute를 사전에 준비하지 않습니다. 명시 IP도 선택한 port/IP의 재검증 GET은 수행하지만 IP ACTIVE polling·raw Nova 관측은 생략합니다. 기존 Nova-source floating 주소 보충이 필요한 판단은 별도로 lazy Compute를 사용할 수 있습니다. `WithActiveServerWait(true)`로 실제 IP readiness와 raw 관측을 요청하거나 WaitForServer를 사용하면 필요한 시점에 Compute를 발견합니다. Connect 자체의 인증 요청과 이 endpoint 준비를 구분합니다.
 
 ## 상태·주소·부분 결과
 
@@ -154,9 +154,9 @@ GetActive의 known non-ACTIVE·ERROR·주소 오류·automatic skip에는 Comput
 | supplied ERROR/fault | 알려진 Server와 failed-state 오류; mutation 없음 | supplied 상태 대신 raw 현재 모델을 판정 |
 | ACTIVE nil 주소 | typed unavailable·알려진 Server, DELETE 없음 | raw ACTIVE nil이면 metadata 준비를 같은 budget에서 poll |
 | ACTIVE map/모든 rows가 명시 비어 있음 | typed unavailable·알려진 Server, DELETE 없음 | typed unavailable·마지막 matching Server, DELETE 없음 |
-| ACTIVE 실제 rows와 known skip | 결정된 reason과 Server, assignment 없음 | raw readiness 후 같은 skip, observation 필요 없음 |
-| Neutron 필요, GetActive wait=false | 접수한 assignment와 partial Server; Observed=false | 적용되지 않음; wait=true 강제 |
-| Neutron 필요, wait=true | actual IP ACTIVE 후 exact raw Nova IPv4 floating row 관측 | 동일 |
+| ACTIVE 실제 rows와 automatic known skip | 결정된 reason과 Server, assignment 없음 | raw readiness 후 같은 skip, observation 필요 없음 |
+| 선택한 Neutron assignment, GetActive wait=false | 접수한 assignment와 partial Server; Observed=false | 적용되지 않음; wait=true 강제 |
+| 선택한 Neutron assignment, wait=true | actual IP ACTIVE 후 exact raw Nova IPv4 floating row 관측 | 동일 |
 | later HTTP/decode/Close/source/cause 오류 | 알려진 Server/Assignment와 실제 error proof | 마지막 matching Server/Assignment와 실제 error proof |
 
 Go는 상태를 대소문자 구분 없이 비교하며, pinned Python helper는 ERROR/ACTIVE literal을 비교합니다. ERROR는 user failure states를 비워도 반드시 실패입니다. Native Fault 모델은 source의 key 미제공/null/빈 message 구분과 mutable Resource/extra_data taxonomy 전부를 보존하지 않습니다. malformed addresses를 clean absence로 바꾸지 않습니다. 접수된 GET200/203 body에서 동일 ID의 유효한 Server를 확인한 뒤 Close/source/취소 오류가 나면 마지막 모델과 응답 증거를 함께 반환합니다. wrong-ID·malformed envelope는 대상 모델로 채택하지 않습니다.
@@ -167,7 +167,7 @@ raw 조회가 성공하기 전 반환 Server는 supplied 모델의 복사본일 
 
 ## 옵션과 전체 budget
 
-`WithServerReadyAutomaticIPOptions`는 기존 concrete automatic 옵션을 owned slice로 받아 준비합니다. 기본 auto/reuse true·전체180초·raw poll5초이며 caller options가 기본값을 바꿉니다. `WithServerReadyWaitOptions`는 server waiter의 interval/progress/failure 정책을 한 번 준비하고 재사용합니다. 기본 server waiter 자체 timeout은 SDK unlimited, interval5초이며 전체180초 context 안에 있습니다. 더 짧은 server timeout과 부모 deadline이 적용될 수 있으며 단계마다 전체 예산을 다시 시작하지 않습니다.
+`WithServerReadyAutomaticIPOptions`는 기존 concrete automatic 옵션을 owned slice로 받아 준비합니다. 이 slice에 `WithFloatingIPPool`·`WithFloatingIPAddresses`를 주면 같은 [선택 우선순위와 순차 부분 결과](server-ip-dispatch.md)를 적용합니다. 기본 auto/reuse true·전체180초·raw poll5초이며 caller options가 기본값을 바꿉니다. `WithServerReadyWaitOptions`는 server waiter의 interval/progress/failure 정책을 한 번 준비하고 재사용합니다. 기본 server waiter 자체 timeout은 SDK unlimited, interval5초이며 전체180초 context 안에 있습니다. 더 짧은 server timeout과 부모 deadline이 적용될 수 있으며 단계마다 전체 예산을 다시 시작하지 않습니다.
 
 `WithActiveServerWait`의 기본은 GetActive에서 false이고 WaitForServer는 최종 true로 고정합니다. async라도 전체 정책과 waiter 옵션을 preflight합니다. `WithServerReadyWaitOptions` 안의 status override는 준비 단계에서 거부합니다. 실제 모델의 문자열 attribute인 `Status`를 지정해도 `ErrUnsupported`이며, 미존재·비문자열 attribute도 모델 검증에서 `ErrUnsupported`입니다. 빈 값·구분자 등 잘못된 attribute 문법은 옵션 검증의 `ErrInvalidOption`입니다. IP waiter의 별도 custom status 옵션은 기존 계약을 유지하며 synchronous 완료 후 실제 IP Status가 ACTIVE인지도 검증합니다. 잘못된 옵션 때문에 역할/port/할당 HTTP가 먼저 나가지 않도록 합니다. nested application 옵션을 각 단계에서 다시 적용하지 않습니다. network.WithEnsureNoWait는 최종 prepared 정책에서 async를 선택하기 위한 concrete 옵션이며 기존 automatic/create가 요구하던 actual ACTIVE·관측 기본 계약을 바꾸지 않습니다.
 
@@ -175,6 +175,6 @@ supplied Server의 top-level field와 ID는 옵션 callback 전에 캡처합니�
 
 ## 남은 소스 계약과 검증
 
-공개 get_active_server/wait_for_server의 typed supplied entry를 제공해도 전체 source operation은 unresolved로 추적합니다. pool > explicit ips > automatic dispatch와 Nova mutation/fallback, full has_service/config/network/session/Resource model, public/private/interface 필드 expansion, cloud get_server의 lookup/defaultquery/broad Exception·missing retry, fault/extra_data/cleanup 정책과 integer remaining-time budget은 남습니다. Go의 noDELETE와 owned partial-response 정책은 명시한 차이이며 Python의 cleanup 결과와 같다고 주장하지 않습니다.
+공개 get_active_server/wait_for_server의 typed supplied entry와 Neutron pool → 순차 명시 IPv4 → automatic 소비자를 제공해도 전체 source operation은 unresolved로 추적합니다. Nova mutation/fallback, standalone cloud IP helper의 기본60초·비동기 Server 반환, full has_service/config/network/session/Resource model, public/private/interface 필드 expansion, cloud get_server의 lookup/defaultquery/broad Exception·missing retry, fault/extra_data/cleanup 정책과 integer remaining-time budget은 남습니다. Go의 noDELETE와 owned partial-response 정책은 명시한 차이이며 Python의 cleanup 결과와 같다고 주장하지 않습니다.
 
-신규 17개 테스트 그룹의 입력 상태·비동기 접수·강제 관측·raw metadata·부분 실패·취소·동일 deadline·180초 기본값·옵션 1회 적용·lazy Compute 수명 검증은 [지원대장](../docs/sdk-support-ledger.md#기존-서버의-active-판정과-상위-대기)에 기록합니다. 집중 검증과 전체 gate, 정확한 독립 main의 컴파일·SHA는 실제 결과를 기준으로 구분합니다. Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다.
+readiness 기반의 17개 테스트 그룹은 입력 상태·비동기 접수·강제 관측·raw metadata·부분 실패·취소·동일 deadline·180초 기본값·옵션 1회 적용·lazy Compute 수명 검증은 [지원대장](../docs/sdk-support-ledger.md#기존-서버의-active-판정과-상위-대기)에 기록합니다. 집중 검증과 전체 gate, 정확한 독립 main의 컴파일·SHA는 실제 결과를 기준으로 구분합니다. Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다.

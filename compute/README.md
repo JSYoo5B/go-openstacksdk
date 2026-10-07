@@ -19,7 +19,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.create_server(..., auto_ip=True, wait=True)` | [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md): 실제 ACTIVE·주소 준비·조건부 IP·Nova 관측 |
 | `conn.get_active_server(server, wait=False)` | [GetActiveServer](server-ready.md): supplied 상태 판정·조건부 IP 접수; 선택적 ACTIVE/주소 관측 |
 | `conn.wait_for_server(server, timeout=180)` | [Service·Connection WaitForServer](server-ready.md): 같은 ID의 raw 현재 상태·주소 준비·필요한 IP 관측 |
-| `conn.create_server(..., ip_pool="public", wait=True)` | [CreateWithFloatingIP](create-with-floating-ip.md): 서버·IP ACTIVE와 공통 timeout·부분 결과 |
+| `conn.create_server(..., ip_pool="public", wait=True)` | [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)의 `AutomaticIP`에 `compute.WithFloatingIPPool(resource.Name("public"))`; [pool·IP dispatch](server-ip-dispatch.md) |
+| `conn.create_server(..., ips=["203.0.113.10", "203.0.113.11"], wait=True)` | 같은 `AutomaticIP`에 `compute.WithFloatingIPAddresses(...)`; 순차 연결·관측과 `Attempts` 부분 결과 |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=True)` | 위 호출에 `compute.WithDeleteBootVolumeOnTermination(true)` 추가 |
 | `conn.create_server(..., image=image, boot_from_volume=True, volume_size=50)` | 이미지가 있는 요청에 `compute.WithBootVolumeSize(50)` 추가 |
@@ -191,10 +192,10 @@ Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사
 
 [기존 서버 readiness](server-ready.md)의 `service.WaitForServer(ctx, AutomaticFloatingIPRequest, ...)`와 `conn.WaitForServer`는 별도 상위 작업입니다. 기본180초·5초로 raw 현재 상태와 주소 준비를 기다리고 필요할 때 조건부 Neutron assignment·IP ACTIVE·Nova 관측까지 수행합니다. `GetActiveServer`는 supplied 상태만 판정하고 기본 비동기 IP 접수 결과를 반환합니다.
 
-서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.
+서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. 필요성 판단·순차 IP/pool 선택과 raw Nova 관측은 [상위 IP dispatch](server-ip-dispatch.md)로 제공하며, 전체 cloud Resource/session·서비스 정책은 계속 추적합니다.
 
 Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. Configured default는 getter 및 floating source/NAT 선택과 같은 성공 snapshot을 사용하며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 명시 `WithDefaultNetwork(resource.Name(...))`은 기존 exact-name 조회를 생성마다 수행합니다.
 
 [서버 주소 가이드](server-addresses.md)는 조회한 Nova 모델의 public/private 주소와 기존 Floating IP 보충, default interface·IPv6·접속 검사 정책을 비교합니다. Connection이 설정과 공유 역할 cache를 제공합니다. [자동 생성 흐름](create-with-automatic-floating-ip.md)에서 생성·대기와 조건부 할당·주소 수렴을 연결합니다. 일반 Create/Wait 전체 계약은 계속 별도로 추적합니다.
 
-[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. 일반 Create/Wait 전체 계약과 Nova mutation·pool/명시 IP 전체 우선순위는 별도 remaining입니다.
+[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 이 정책을 생성·ACTIVE 대기에 연결하고 초기 생성 응답과 마지막 서버를 보존합니다. [pool·순차 IP dispatch](server-ip-dispatch.md)는 같은 Plan/Ensure·GetActive/Wait·자동 생성 메서드의 `WithFloatingIPPool`·`WithFloatingIPAddresses`로 사용합니다. 일반 Create/Wait 전체 계약과 Nova mutation/fallback·전체 cloud Resource/session은 별도 remaining입니다.
