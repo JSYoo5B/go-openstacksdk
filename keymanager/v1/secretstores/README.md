@@ -31,17 +31,16 @@ provider의 인증·재인증·transport와 `MoreHeaders`를 사용하며, endpo
 추측하거나 microversion을 자동 선택하지 않습니다. Preferred 조회는 현재
 토큰 프로젝트를 사용하고, 없는 경우 global default로 대체하지 않습니다.
 
-| 호출 | 경로 | 성공 응답 |
+| Python | Go 호출 | 경로 / 성공 응답 |
 |---|---|---|
-| `GetGlobalDefault` | GET `secret-stores/global-default` | 200, 루트 객체 |
-| `GetPreferred` | GET `secret-stores/preferred` | 200, 루트 객체 |
-| `List` / `All` | GET `secret-stores` | 200, `secret_stores` 배열 |
+| `conn.key_manager.get_global_default_secret_store()` | `service.SecretStores.GetGlobalDefault(ctx)` | GET `secret-stores/global-default` / 200 루트 객체 |
+| `conn.key_manager.get_preferred_secret_store()` | `service.SecretStores.GetPreferred(ctx)` | GET `secret-stores/preferred` / 200 루트 객체 |
+| `conn.key_manager.secret_stores(**query)` | `service.SecretStores.List` / `All` | GET `secret-stores` / 200 `secret_stores` 배열 |
 
 단건 404는 `resource.ErrNotFound`와 원래 HTTP 오류를 보존합니다. 기능이
 비활성화돼 발생한 404도 그대로 오류입니다. Transport·context 오류를
 resource absence로 바꾸지 않습니다. 허용된 200의 읽기·JSON·모델 오류는
-`resource.ResponseError`에 원래 body/header/status와 원인을 보존하며 재전송하지
-않습니다. 목록의 terminal 오류에서는 `All`이 부분 결과를 반환하지 않습니다.
+`resource.ResponseError`에 원래 body/header/status와 원인을 보존합니다. SDK는 이 오류를 이유로 조합 단계의 재전송을 추가하지 않으며, configured Provider의 native retry·재인증은 별도 transport 정책을 유지합니다. 목록의 terminal 오류에서는 `All`이 부분 결과를 반환하지 않습니다.
 
 ## 목록 옵션
 
@@ -138,7 +137,7 @@ query/fragment는 제외하며 trailing slash는 빈 ID입니다. UUID 형식·�
 일으키지 않습니다.
 
 Pinned Python의 `Resource.id`는 alternate ref의 formatter를 거치지 않아 전체 URL을
-반환하고 `secret_store_id` getter가 마지막 component를 제공합니다. Go의 편의용
+반환하고 `secret_store_id` getter가 마지막 component를 제공합니다. 단건 Python getter는 요청 selector를 id로 seed하므로 응답에 literal id가 없으면 `Resource.id`가 `global-default` 또는 `preferred`로 남습니다. Go는 selector를 응답 Body에 추가하지 않고 실제 literal id 또는 ref에서 추출한 편의용 ID를 반환합니다. Python `secret_store_id`는 별도의 ref formatter 속성입니다. Go의 편의용
 ID와 원문 marker 분리는 이 차이를 명시합니다. Go는 typed 문자열·boolean을
 검사하고, literal id가 없어 편의용 ID를 추출할 때만 absolute reference 문법을
 검사합니다. Literal id가 있으면 ref URL을 파싱하지 않습니다. Malformed 응답은
@@ -157,7 +156,7 @@ Source pin은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 
 ## 권한
 
-[Barbican2024.1 정책](https://docs.openstack.org/barbican/2024.1/configuration/policy.html)의 `secretstores:get`은 new defaults에서 project reader의 목록 조회를 허용합니다. [Train 기본값](https://docs.openstack.org/barbican/train/configuration/policy.html)은 admin이며 운영 정책에 따라 달라질 수 있습니다. SDK는 역할을 추측하거나 전환하지 않고 실제403을 반환합니다.
+[Barbican2024.1 정책](https://docs.openstack.org/barbican/2024.1/configuration/policy.html)의 `secretstores:get`·`secretstores:get_global_default`·`secretstores:get_preferred`는 new defaults에서 project reader의 목록·단건 조회를 허용합니다. [Train 기본값](https://docs.openstack.org/barbican/train/configuration/policy.html)은 admin이며 운영 정책에 따라 달라질 수 있습니다. SDK는 역할을 추측하거나 전환하지 않고 실제403을 반환합니다.
 
 ## 단독 목록 예제
 

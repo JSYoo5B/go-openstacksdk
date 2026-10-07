@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [SecretStore 목록 필터](#secretstore-목록-필터-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [SecretStore fixed getter2개](#secretstore-fixed-getter2개-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| SecretStore fixed getter2개 | 기존 shared decoder/HTTP error 표·고정 selector·cached Connection/registry 증거 재사용. 같은 최종40 package gate·기존2 Go 함수 build PASS. | [최종 근거](#secretstore-fixed-getter2개-완료). 기존3계약씩과 anchors/fp 보존·go_mapping183→185·핵심109→111·Barbican9→11/67. |
 | SecretStore 목록 필터 (`026967a`, `ee67234`, `dfcba00`, `e9670e5`) | 기존 semantic classifier/JSON matcher·guarded pagination·public helper·HTTP/Connection fixture 재사용. 신규4그룹·집중4 package race·전체40 package check·main build PASS. | [최종 근거](#secretstore-목록-필터-완료). 기존6계약/old anchors 보존, named1개 완료·go_mapping182→183·핵심108→109·Barbican8→9/67. |
 | Barbican Container/Order/Secret 삭제 (`5e7cb7e`, `96b76d4`, `e336575`) | 기존 Collection missing 정책·cloudread/REST guard·public testhelper·leaf/Connection/body fixture 재사용. HTTP6그룹·집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS. | [최종 근거](#barbican-containerordersecret-삭제-완료). finite5계약씩·3 named rows 완료, go_mapping179→182·핵심105→108·Barbican5→8/67. |
 | Barbican Container/Order metadata getter (`359fad7`, `d0f61b8`, `b6e1c90`) | 공통 Fetch·기존 leaf/Connection fixture·공개 testhelper·body fault adapter 재사용.6그룹 focused race·전체40 package check·main build·smoke5흐름 PASS. | [최종 근거](#barbican-containerorder-metadata-getter-완료). finite5계약씩·2 named rows만 완료, go_mapping177→179·핵심103→105·Barbican3→5/67. |
@@ -1825,3 +1826,15 @@ root/Compute/Network 집중 race와 전체 `make check`가 PASS했습니다. 전
 [문서 main](../keymanager/v1/secretstores/README.md#단독-목록-예제)은 정확히 추출해 최종 SDK로 컴파일 PASS했습니다. SHA256은 `cca4fc4852c5d617d2940c2c90e367a47f68386f072418d300a45d22095a547d`입니다. 기존2개 Go 함수 fence는 바이트 그대로 보존했습니다. typed canonical/strict200·원문 row/error-only local formatter·Go JSON equality와 Python mutable Resource/session/JMESPath 차이는 명시합니다. 실제 OpenStack/Python 실행은 하지 않았고 deployment 권한·서버 marker 지원은 offline proof에서 추정하지 않습니다.
 
 기존 named review1개만 `go_mapping`으로 바꾸고 기존6계약·old anchors·fp·다른509행을 보존했습니다. 전체183/3362·핵심109/2292·Barbican9/67, review510=go_mapping183/unresolved326/unsupported1, contracts3221입니다. 후속 심사는 기존 두 selector getter이며 전체 SDK 목표는 active입니다.
+
+## SecretStore fixed getter2개 완료
+
+`python:key_manager/v1/get_global_default_secret_store`와 `get_preferred_secret_store`의 no-input fixed-selector 조회를 기존 `GetGlobalDefault(ctx)`/`GetPreferred(ctx)`로 제공합니다. 각각 `secret-stores/global-default`/`secret-stores/preferred`의 root 객체 하나를 읽으며 project/name lookup·response-ref follow·wait·상호 fallback을 추가하지 않습니다. [Python/Go 비교](../keymanager/v1/secretstores/README.md)는 URI·엄격한200·canonical typed 모델·raw Body/Header/StatusCode와 seeded identity 차이를 설명합니다.
+
+별도 구현·mock·동일 오류 테스트를 추가하지 않았습니다. [기존 singleton 테스트](../api/keymanager_secretstores_test.go)는 두 성공 경로·모델·원문·독립 결과를 검증합니다. HTTP404/403·잘못된 성공 코드/JSON/typed field·transport에 포함된404·read evidence는 대표 preferred 경로의 shared get/decoder/error 표를 재사용합니다. 두 selector에서 모든 오류 조합을 각각 실행했다고 주장하지 않습니다. [기존 Connection](../connection_keymanager_sdk_owned_test.go)은 cached client·현재 token·reverse base·header·standard canceled HTTP0·missing preferred의 global fallback0을 확인합니다.
+
+Python은 getter selector를 Resource.id로 seed하므로 응답 literal id가 없으면 그 selector가 남습니다. Go는 selector를 응답 Body에 주입하지 않고 실제 literal id/null/empty 또는 ref 마지막 component를 편의용 ID로 반환합니다. unseeded list의 full alternate-ref id와 이 singleton seed를 구분합니다. strict200/non-null object/typed decode·URL parser·configured native retry/reauth·caller context는 명시한 Go 정책입니다. generic Resource/cache/session·동적 adapter 및 getter의 추가 custom-cancellation cause 일관성은 별도 SDK 기반 과제로 남기며, List에서 보완한 custom-cause 동작을 getter에서도 검증했다고 쓰지 않습니다.
+
+동일 최종 Go source1,934개 SHA256 `006bd5af3c44440db9129b0939ca3b613dcd331d9f1d5ccb5f5e37c1ee9a802f`의 전체40 package race/vet/pinned parity/progress/format PASS 근거를 재사용합니다. Metadata/prose 변경을 이유로 같은 Go 테스트나 preview를 반복하지 않습니다. [기존 ReadBackends와 ListNonDefaultBackends](../keymanager/v1/secretstores/README.md)의 두 Go 함수 fence를 바이트 그대로 추출해 함께 컴파일 PASS했습니다. 각각 SHA256 `7eee4df71b221bb21bd02593a3654ab5ae28b8a005d67e9541e5e5fb13261fdc`, `b541c8ef625cee2e9a9cf405930bd4037616a17343593f29b692122875ae53a1`이며 log는 `/private/tmp/gophercloudsdk-secretstore-getters-example-build.log`, receipt는 `/private/tmp/gophercloudsdk-secretstore-getters-example-receipt.json`입니다. 실제 OpenStack/Python 실행은 하지 않았습니다. new-default reader 정책과 과거 admin/deployment403 차이도 문서에 남깁니다.
+
+기존 named2개 행의3계약씩·old anchors·operation/fp/Go API를 유지하고 실제 필수 누락이 없는 것으로 심사해 `go_mapping`·remaining[]로 변경했습니다. 다른508행과 contracts3221·reviews510은 보존했습니다. 전체185/3362·핵심111/2292·Barbican11/67, reviews510=go_mapping185/unresolved324/unsupported1이며 catalog unresolved3176은 미검토 선언을 포함합니다. 모든 SDK가 끝난 상태는 아니며 목표는 active입니다. 다음은3개 사용자 생성 선언을 기존 native/REST/projection/fixture와 대조합니다.

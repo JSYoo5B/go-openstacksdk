@@ -12471,21 +12471,21 @@
     {
       "operation": "python:key_manager/v1/get_global_default_secret_store",
       "source_fingerprint": "06af4323c4016ba21d0b411240d1644cacaff4ebcbdb4ce9b4bb9c777927709d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/keymanager/v1/secretstores.New",
         "gophercloudsdk/keymanager/v1/secretstores.API.GetGlobalDefault"
       ],
       "contracts": [
         {
-          "behavior": "The deployment global default is read with one GET secret-stores/global-default accepting 200 and a ROOT object. There is no project/name lookup, response-ref follow-up or implicit global/preferred fallback. Source client/provider, configured headers, response ownership and exact raw/canonical model fields are retained.",
+          "behavior": "Pinned _proxy.py:374-382 is a no-input named getter returning one SecretStore through the fixed 'global-default' selector. Go GetGlobalDefault(ctx) reads the deployment global default using one GET secret-stores/global-default, HTTP200 and a ROOT object. There is no project/name lookup, response-ref follow-up, extra wait or implicit preferred fallback. Original client/provider, configured headers and exact raw/canonical typed fields are retained; response values/headers/body are caller-owned and passive foreign references never trigger HTTP.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences",
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
           ]
         },
         {
-          "behavior": "The shared singleton decoder rejects unexpected success status, malformed/null/array root JSON and invalid canonical typed fields with accepted evidence. Actual HTTP404 remains strict NotFound with native cause; wrapped transport404 remains transport failure, not resource absence. Nil/invalid source and canceled context fail without HTTP; no error causes a resend.",
+          "behavior": "The shared singleton engine's representative preferred-route table rejects unexpected201/204, malformed/null/array root JSON and invalid canonical typed fields while preserving native HTTP or accepted ResponseError evidence. Actual HTTP404 remains strict ErrNotFound with native body/header/status; HTTP403 propagates. A transport error containing native404 stays a transport failure instead of becoming resource absence. Existing nil/invalid-source and standard canceled-context preflight performs no HTTP; the SDK composition does not resend because of these failures, while configured Provider retry/reauthentication remains a separate transport policy.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresStrictSingletonErrorsAndAcceptedEvidence",
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures",
@@ -12493,7 +12493,7 @@
           ]
         },
         {
-          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. Both singleton getters use the reverse ResourceBase, tokens rotated after facade creation and configured source headers on that shared client, with no extra catalog lookup. Standard cancellation performs no HTTP and missing preferred causes no global-default fallback. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
           "tests": [
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
@@ -12506,33 +12506,33 @@
         "keymanager/v1/README.md"
       ],
       "differences": [
-        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
-        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
-        "Go returns a decoded value and context/error instead of a mutable seeded Python SecretStore Resource. Typed canonical field/ref validation is a deliberate stricter policy; Body retains accepted untyped extension data."
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil while Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; case variants remain extensions. Python untyped descriptor coercion and mutable/default/seeded/cache/dirty Resource state remain separate common SDK scope.",
+        "For this singleton Python Proxy._get_resource seeds id='global-default', and Resource._translate_response updates existing Body state, so an omitted response literal id retains that selector as Resource.id. Go does not seed response metadata with the request selector: its convenience ID prefers response literal id including null/empty, otherwise passively extracts the final raw component of absolute secret_store_ref. Python secret_store_id independently formats the ref. This differs from an unseeded list Resource.id's full alternate reference; no response reference becomes a new request target.",
+        "Go accepts exactly HTTP200 and a non-null ROOT JSON object, then validates canonical typed fields and any reference used to derive its convenience ID. Generic Python fetch accepts final status<400 and can retain its seeded resource when JSON parsing raises ValueError; arbitrary untyped field values and eager formatter/property behavior are broader. Strict typed decode/canonical-key/passive-ref validation with owned raw evidence is the documented Go mapping.",
+        "Configured Provider authentication, reauthentication, transport/native retry and the selected service endpoint/ResourceBase/header/version are reused. No-input fixed-selector APIs provide no per-call base_path/session/adapter/header/microversion/skip_cache override. Generic fetch/request caching, descriptor/model overload and lifecycle compatibility remain separate original goal scope rather than unrelated blockers for these two named getters.",
+        "HTTP/error table faults use the shared engine's representative preferred-route fixture; both global and preferred routes have direct ordinary/Connection success evidence. This does not claim every fault was re-executed for both selectors. Offline fixture/example evidence does not imply live-cloud/Python execution or complete SecretStore List/CRUD/Find/Wait support.",
+        "Barbican 2024.1 new-default policy permits project-reader secretstores:get_global_default/get_preferred, while Train defaults require admin and deployment overrides may return403. Go neither assumes effective privilege nor automatically changes roles; these read-only getters do not imply preferred-backend administration."
       ],
-      "remaining": [
-        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
-        "Inherited Resource.fetch/Proxy request cache and generic per-call session/adapter/base_path/header/microversion controls remain separate from these fixed singleton getters. Neither SecretStore nor this mapping establishes a class-specific maximum-version negotiation requirement."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/get_preferred_secret_store",
       "source_fingerprint": "5dcee4cc7a15557103d6f03faa2ff4767e5d163a9a61e615654b365be95b6c1a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/keymanager/v1/secretstores.New",
         "gophercloudsdk/keymanager/v1/secretstores.API.GetPreferred"
       ],
       "contracts": [
         {
-          "behavior": "The current authenticated-project preferred backend is read with one GET secret-stores/preferred accepting 200 and a ROOT object. There is no project/name lookup, response-ref follow-up or implicit global/preferred fallback. Source client/provider, configured headers, response ownership and exact raw/canonical model fields are retained.",
+          "behavior": "Pinned _proxy.py:384-392 is a no-input named getter returning one SecretStore through the fixed 'preferred' selector. Go GetPreferred(ctx) reads the current authenticated project's preferred backend using one GET secret-stores/preferred, HTTP200 and a ROOT object. There is no project/name lookup, response-ref follow-up, extra wait or implicit global-default fallback. Original client/provider, configured headers and exact raw/canonical typed fields are retained; response values/headers/body are caller-owned and passive foreign references never trigger HTTP.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences",
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject"
           ]
         },
         {
-          "behavior": "The shared singleton decoder rejects unexpected success status, malformed/null/array root JSON and invalid canonical typed fields with accepted evidence. Actual HTTP404 remains strict NotFound with native cause; wrapped transport404 remains transport failure, not resource absence. Nil/invalid source and canceled context fail without HTTP; no error causes a resend.",
+          "behavior": "The shared singleton engine's representative preferred-route table rejects unexpected201/204, malformed/null/array root JSON and invalid canonical typed fields while preserving native HTTP or accepted ResponseError evidence. Actual HTTP404 remains strict ErrNotFound with native body/header/status; HTTP403 propagates. A transport error containing native404 stays a transport failure instead of becoming resource absence. Existing nil/invalid-source and standard canceled-context preflight performs no HTTP; the SDK composition does not resend because of these failures, while configured Provider retry/reauthentication remains a separate transport policy.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresStrictSingletonErrorsAndAcceptedEvidence",
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures",
@@ -12540,7 +12540,7 @@
           ]
         },
         {
-          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. Both singleton getters use the reverse ResourceBase, tokens rotated after facade creation and configured source headers on that shared client, with no extra catalog lookup. Standard cancellation performs no HTTP and missing preferred causes no global-default fallback. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
           "tests": [
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
@@ -12553,14 +12553,14 @@
         "keymanager/v1/README.md"
       ],
       "differences": [
-        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
-        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
-        "Go returns a decoded value and context/error instead of a mutable seeded Python SecretStore Resource. Typed canonical field/ref validation is a deliberate stricter policy; Body retains accepted untyped extension data."
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil while Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; case variants remain extensions. Python untyped descriptor coercion and mutable/default/seeded/cache/dirty Resource state remain separate common SDK scope.",
+        "For this singleton Python Proxy._get_resource seeds id='preferred', and Resource._translate_response updates existing Body state, so an omitted response literal id retains that selector as Resource.id. Go does not seed response metadata with the request selector: its convenience ID prefers response literal id including null/empty, otherwise passively extracts the final raw component of absolute secret_store_ref. Python secret_store_id independently formats the ref. This differs from an unseeded list Resource.id's full alternate reference; no response reference becomes a new request target.",
+        "Go accepts exactly HTTP200 and a non-null ROOT JSON object, then validates canonical typed fields and any reference used to derive its convenience ID. Generic Python fetch accepts final status<400 and can retain its seeded resource when JSON parsing raises ValueError; arbitrary untyped field values and eager formatter/property behavior are broader. Strict typed decode/canonical-key/passive-ref validation with owned raw evidence is the documented Go mapping.",
+        "Configured Provider authentication, reauthentication, transport/native retry and the selected service endpoint/ResourceBase/header/version are reused. No-input fixed-selector APIs provide no per-call base_path/session/adapter/header/microversion/skip_cache override. Generic fetch/request caching, descriptor/model overload and lifecycle compatibility remain separate original goal scope rather than unrelated blockers for these two named getters.",
+        "HTTP/error table faults use the shared engine's representative preferred-route fixture; both global and preferred routes have direct ordinary/Connection success evidence. This does not claim every fault was re-executed for both selectors. Offline fixture/example evidence does not imply live-cloud/Python execution or complete SecretStore List/CRUD/Find/Wait support.",
+        "Barbican 2024.1 new-default policy permits project-reader secretstores:get_global_default/get_preferred, while Train defaults require admin and deployment overrides may return403. Go neither assumes effective privilege nor automatically changes roles; these read-only getters do not imply preferred-backend administration."
       ],
-      "remaining": [
-        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
-        "Inherited Resource.fetch/Proxy request cache and generic per-call session/adapter/base_path/header/microversion controls remain separate from these fixed singleton getters. Neither SecretStore nor this mapping establishes a class-specific maximum-version negotiation requirement."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/get_quota",

@@ -10,19 +10,19 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 작업 (2026-10-08): 핵심 user Barbican 삭제3개와 SecretStore 목록1개 완료.** 기본 missing·strict 삭제와9개 query/5개 로컬 속성 분류를 닫아 **전체179→183·핵심105→109·Barbican5→9/67**로 반영했습니다. 삭제는 공유 engine, 목록 필터는 기존 FilterDescriptor/JSON matcher/REST pagination에 연결했고 public List/All·ListOpts layout을 유지했습니다.
+**현재 작업 (2026-10-08): 핵심 user Barbican 삭제3개·목록1개·고정 getter2개 완료.** 기존 기반의 실제 named 계약을 닫아 **전체179→185(+6)·핵심105→111·Barbican5→11/67**로 반영했습니다. 삭제와 목록의 누락은 공유 engine과 기존 fixture로 보완했고, 이미 구현한 getter2개는 기존 HTTP·공유 Connection·디코더 증거를 재사용해 완료 심사했습니다.
 
-삭제 구현·테스트·사용법은 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 필터 구현·기존 fixture 확장·취소 원인 보완·비교 문서는 `026967a`·`ee67234`·`dfcba00`·`e9670e5`로 작게 커밋하고 push했습니다. 목록은 기존4 package 집중 race·전체40 package check·정확한 main build가 PASS했습니다. 공통 알고리즘을 새로 테스트하지 않고 HTTP4그룹과 기존 cached Connection에 새 binding 증거를 추가했습니다. 검토에서 찾은 option 오류+custom cancel의 cause 누락은 공통 ContextError와 기존 테스트 표2사례로 보완했습니다.
+삭제는 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 목록은 `026967a`·`ee67234`·`dfcba00`·`e9670e5`·`a1218bb`로 작은 의미 단위로 커밋하고 push했습니다. 최종 source의 집중4 package race·전체40 package check·문서 main build·기존 preview5흐름/9그룹이 PASS했습니다. 조회 예제의 기존2개 Go 함수도 그대로 추출해 컴파일했습니다. 판정·prose만 바뀐 getter 단계에서는 같은 Go 전체 테스트를 반복하지 않고 final parity/집계만 확인합니다. Source pin·기존 계약/anchors를 유지하며 generic Resource/session과 Go typed/seeded ID·strict status의 차이를 명시합니다.
 
-**다음 단위: 기존 SecretStore preferred/global-default getter2개 완료 심사.** 기존 고정 경로·디코더·error 표·공유 Connection 테스트와 보존한 Go 예제 함수를 재사용합니다. Python singleton의 selector-seeded ID와 Go response/ref ID 차이를 문서에 명시한 뒤 named 유한 계약을 판단합니다. 목록의 project-reader new defaults와 과거 admin 정책 차이는 [가이드](../keymanager/v1/secretstores/README.md#권한)에 기록합니다. 전체 SDK와 외부 설치용 alpha 준비는 계속 진행합니다.
+**다음 단위: Barbican Container/Order/Secret 사용자 생성 API 소스 대조.** 고정 Python의 입력·기본값·응답·오류를 유한 목록으로 정리하고 기존 native Create·REST·owned metadata projection·옵션 snapshot·fixture를 재사용할 지점을 확인합니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 183 (5.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 185 (5.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,178 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,176 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 510 | 아직 개별 기록 없는 선언 2,852 |
 | 기록한 부분·전체 계약 | 3,221 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
@@ -38,7 +38,8 @@
 | Barbican effective quota getter | 176 → 177 (+1) | 기존 strict/error fixture·context guard 재사용, 집중3 package race·전체40 package check·조회 main build PASS | `1546e7d` push 완료 |
 | Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
 | Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `97e205e` push 완료 |
-| Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `e9670e5` push 완료 |
+| Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `a1218bb` push 완료 |
+| Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | 이번 완료 판정 단위로 커밋·push |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -51,12 +52,12 @@
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 109 / 2,292 | 4.8% | 227 | 1,955 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 111 / 2,292 | 4.8% | 225 | 1,955 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 183 / 3,362 | 5.4% | 326 | 2,852 | 1 |
+| 전체 | 185 / 3,362 | 5.5% | 324 | 2,852 | 1 |
 
 **핵심 서비스**
 
@@ -68,7 +69,7 @@
 | Network / Neutron | 23 / 758 | 52 | 683 | 0 |
 | Image / Glance | 4 / 120 | 75 | 41 | 0 |
 | Block Storage / Cinder | 65 / 480 | 29 | 386 | 0 |
-| Key Manager / Barbican | 9 / 67 | 12 | 46 | 0 |
+| Key Manager / Barbican | 11 / 67 | 10 | 46 | 0 |
 | Object Storage / Swift | 0 / 74 | 29 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
