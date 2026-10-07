@@ -81,7 +81,9 @@ def get_all_schemas(conn):
 
 고정 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [16개 proxy getter](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1951-L2161)는 `_get(..., requires_id=False, base_path=...)`를 호출합니다. 첫 6개는 `Schema`, 나머지 10개는 `MetadefSchema` Resource를 fetch합니다. mutable Resource·descriptor coercion·dirty/cache·adapter/session 동작은 Go의 passive DTO와 다릅니다.
 
-Python `Schema.additional_properties`는 dict descriptor이고 `MetadefSchema.additional_properties`는 bool descriptor입니다. properties/definitions/required에도 변환이 적용될 수 있습니다. Go는 알려진 canonical field의 형태를 엄격히 읽고 `additionalProperties`는 임의의 raw JSON으로 보존하므로 Python의 변환 결과를 full parity로 주장하지 않습니다.
+Python `Schema`는 additional_properties와 properties에 dict descriptor를 선언합니다. 별도 `MetadefSchema`는 additional_properties에 bool, properties와 definitions에 dict, required에 list descriptor를 선언합니다. Go는 알려진 canonical field의 형태를 엄격히 읽고 `additionalProperties`는 임의의 raw JSON으로 보존하므로 Python의 변환 결과를 full parity로 주장하지 않습니다.
+
+인자가 없는 `get_image_schema`·`get_images_schema`·`get_member_schema`·`get_members_schema` 4개 선언은 고정 조회·결과·오류 계약을 검토해 `go_mapping`으로 판정합니다. 일반 header 옵션과 독립된 raw 응답을 사용하는 Go 차이는 명시합니다. 다른 12개 getter와 상속 Resource/cache/session의 전체 판정을 이 4개 완료로 대신하지 않습니다.
 
 ## 실제 서버의 raw·minimal 형태
 

@@ -136,6 +136,11 @@ state, generic `base_path` overrides, or payload `skip_cache` controls. Native
 change it. These remaining differences are explicit rather than a claim of
 complete inherited Resource parity.
 
+The declared `get_secret(secret)` metadata-plus-conditional-payload getter is
+reviewed as a `go_mapping` with these explicit Go differences. Its native
+neighbors, separate find/list declarations and inherited Resource lifecycle
+retain their own support reviews; this closes only the named getter contract.
+
 HTTP evidence is in
 [keymanager_secret_fetch_test.go](../../../api/keymanager_secret_fetch_test.go),
 covering the eight `TestKeyManagerSecretFetch` contract groups with local HTTP

@@ -13261,7 +13261,7 @@
     {
       "operation": "python:key_manager/v1/get_secret",
       "source_fingerprint": "94631b837ba474df7d457622920d53ac31204a224053331dfd3cbfad03f9b980",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/keymanager/v1/secrets.New",
         "gophercloudsdk/keymanager/v1/secrets.API.Fetch",
@@ -13323,13 +13323,12 @@
         "Go returns an owned FetchedSecret with fixed request SecretID and separate FetchedPayload evidence instead of accepting and mutating an existing Python Secret Resource. Python merges declared response attributes into seeded Body and cleans it only after both requests and UTF-8 decoding succeed; Go additionally returns successfully decoded metadata alongside later failures. Request identity is not inserted into the actual response Body.",
         "WithFetchContentType supplies the seeded non-None selection behavior explicitly; WithFetchPayload(false) is a Go metadata-only extension. Go canonical string/pointer response fields and string content-type selection are deliberately narrower than Python's untyped descriptors, while raw ContentTypes/BitLength/Body preserve unknown values and precise JSON numbers.",
         "Go requires explicit guarded ID or Name references, escapes the fixed ID segment and never follows response references. Python Resource.id prefers a literal id, including null, and otherwise returns the full alternate secret_ref; the distinct secret_id HREFToUUID descriptor extracts a final raw URI component on access. Go does not conflate those values or fabricate a response ID.",
-        "Go owns Accept for each phase and rejects auth/body/version header overrides plus conflicting case variants. Source MoreHeaders retains native precedence over allowed per-call headers. SDK composition does not resend accepted failures; configured provider retry/reauthentication behavior remains the shared transport policy."
+        "Go owns Accept for each phase and rejects auth/body/version header overrides plus conflicting case variants. Source MoreHeaders retains native precedence over allowed per-call headers. SDK composition does not resend accepted failures; configured provider retry/reauthentication behavior remains the shared transport policy.",
+        "The public get_secret(secret) input is mapped to an explicit resource.Ref and SDK-owned Fetch defaults/options: automatic metadata-plus-conditional-payload retrieval is the default, WithFetchContentType supplies an existing non-None selection including empty string, and WithFetchPayload(false) adds metadata-only use. Arbitrary supplied Python Secret/subclass/seeded Body and header objects, retention of an old payload when a later response omits it, mapped-field merging and cached dirty state are deliberately replaced by independently owned actual metadata and payload evidence.",
+        "The named public getter exposes only secret, not the direct Resource.fetch base_path/requires_id/skip_cache/session controls. The pinned custom Secret.fetch ignores microversion, params, resource_response_key, error_message and prepared headers; metadata GET does not forward skip_cache and payload GET does. Go uses the configured authenticated provider/context and fixed captured secret URIs without recreating optional Adapter GET caching or this inherited mutable lifecycle. No class-specific maximum-microversion negotiation is inferred.",
+        "The concrete Fetch mapping closes only this declared metadata-plus-conditional-payload getter. Native Secrets.Get, GetPayload, Resources.Find/List/Wait and the separate find_secret/list/query declarations keep their own models, defaults, paging and support reviews; completing get_secret does not establish their complete source mapping."
       ],
-      "remaining": [
-        "The complete Python str-or-Secret input overload and mutable seeded Resource descriptor/default/coercion/dirty/cache lifecycle are not implemented. Arbitrary seeded Body/header attributes, retained old payload on an absent new payload and Python mapped-field merge/unknown-discard behavior are not equivalent to Go's actual response projection and independent payload object.",
-        "Full inherited Resource/session/cache and direct Resource.fetch base_path/requires_id controls remain outside this fixed composition. The pinned custom Secret.fetch ignores microversion, params, resource_response_key, error_message and prepared headers, performs metadata without skip_cache, and forwards skip_cache only to payload; this review does not invent a class maximum-microversion negotiation requirement or claim generic Resource.fetch equivalence.",
-        "Native Secrets.Get, GetPayload, Resources.Find/List/Wait remain separately callable APIs with their native model/query/pagination policies. Adding Fetch closes the metadata-plus-conditional-payload callable gap for get_secret; it does not claim find_secret fallback, automatic query/Body classification or the complete inherited Resource surface."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/find_secret",
@@ -18861,7 +18860,7 @@
     {
       "operation": "python:image/v2/get_images_schema",
       "source_fingerprint": "54573b03c49a3b7b95ef4c5aa520395b541a4ac46ac25ae7763dab0e48fe1d25",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/image.Service.GetImagesSchema",
         "gophercloudsdk/image.WithGetSchemaOpts",
@@ -18936,20 +18935,19 @@
       ],
       "differences": [
         "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetImagesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Pinned ordinary image.v2.schema.Schema declares additional_properties as a dict descriptor and properties as a dict descriptor. Definitions and required descriptors, and bool conversion for additionalProperties, belong to the different MetadefSchema class; these four named getters use ordinary Schema. Go exposes additionalProperties as independent arbitrary raw JSON and optionally projects Definitions/Required through explicit canonical shapes while retaining the actual Body, rather than reproducing Python descriptor coercion or fabricating absent values.",
         "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies.",
+        "This public schema getter has no ID, supplied Resource, query or request body argument. Proxy._get internally creates a bare Schema with requires_id=False at the declared fixed path. Go adds concrete ordinary-header replacement/merge helpers and returns a new independently owned Schema value; arbitrary supplied subclasses, mutable cached Resource identity and generic fetch/session/cache controls are separate surfaces rather than caller inputs of this named method.",
+        "Go requires original actual HTTP200, canonical UTF-8/non-null JSON-object and declared typed-field shapes, and returns actual Body/Header/StatusCode evidence on accepted processing errors. It preserves configured native prebody retry/reauth/transport behavior and captures route/header policy instead of reproducing all Python Adapter response translation, cached304 and exception/coercion policies. Local fixture/compile checks are evidence for this client mapping, not authenticated deployment or server schema-validation policy.",
+        "Plural schema getters still return one discovery document, with embedded URL/$ref/templates, unknown fields, identity and dates kept passive. Following those values, listing resources, CRUD, Name resolution, recursive JSONSchema validation, schema-driven permission/quota gates, wait or cleanup are outside this named getter and are not synthesized by the Go result. Completing this row does not promote inherited Resource/session or any other image/metadata getter declaration."
       ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_image_schema",
       "source_fingerprint": "a70198ac574c2637cd4f7b2ff72f7b545f2695b575d52cfe8ca8644cfb500a76",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/image.Service.GetImageSchema",
         "gophercloudsdk/image.WithGetSchemaOpts",
@@ -19024,20 +19022,19 @@
       ],
       "differences": [
         "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetImageSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Pinned ordinary image.v2.schema.Schema declares additional_properties as a dict descriptor and properties as a dict descriptor. Definitions and required descriptors, and bool conversion for additionalProperties, belong to the different MetadefSchema class; these four named getters use ordinary Schema. Go exposes additionalProperties as independent arbitrary raw JSON and optionally projects Definitions/Required through explicit canonical shapes while retaining the actual Body, rather than reproducing Python descriptor coercion or fabricating absent values.",
         "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies.",
+        "This public schema getter has no ID, supplied Resource, query or request body argument. Proxy._get internally creates a bare Schema with requires_id=False at the declared fixed path. Go adds concrete ordinary-header replacement/merge helpers and returns a new independently owned Schema value; arbitrary supplied subclasses, mutable cached Resource identity and generic fetch/session/cache controls are separate surfaces rather than caller inputs of this named method.",
+        "Go requires original actual HTTP200, canonical UTF-8/non-null JSON-object and declared typed-field shapes, and returns actual Body/Header/StatusCode evidence on accepted processing errors. It preserves configured native prebody retry/reauth/transport behavior and captures route/header policy instead of reproducing all Python Adapter response translation, cached304 and exception/coercion policies. Local fixture/compile checks are evidence for this client mapping, not authenticated deployment or server schema-validation policy.",
+        "Plural schema getters still return one discovery document, with embedded URL/$ref/templates, unknown fields, identity and dates kept passive. Following those values, listing resources, CRUD, Name resolution, recursive JSONSchema validation, schema-driven permission/quota gates, wait or cleanup are outside this named getter and are not synthesized by the Go result. Completing this row does not promote inherited Resource/session or any other image/metadata getter declaration."
       ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_members_schema",
       "source_fingerprint": "081d45ff15b7978d9e842c93d688ae35cc3ecf2d362b7a274498531d0c705c6f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/image.Service.GetMembersSchema",
         "gophercloudsdk/image.WithGetSchemaOpts",
@@ -19112,20 +19109,19 @@
       ],
       "differences": [
         "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMembersSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Pinned ordinary image.v2.schema.Schema declares additional_properties as a dict descriptor and properties as a dict descriptor. Definitions and required descriptors, and bool conversion for additionalProperties, belong to the different MetadefSchema class; these four named getters use ordinary Schema. Go exposes additionalProperties as independent arbitrary raw JSON and optionally projects Definitions/Required through explicit canonical shapes while retaining the actual Body, rather than reproducing Python descriptor coercion or fabricating absent values.",
         "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies.",
+        "This public schema getter has no ID, supplied Resource, query or request body argument. Proxy._get internally creates a bare Schema with requires_id=False at the declared fixed path. Go adds concrete ordinary-header replacement/merge helpers and returns a new independently owned Schema value; arbitrary supplied subclasses, mutable cached Resource identity and generic fetch/session/cache controls are separate surfaces rather than caller inputs of this named method.",
+        "Go requires original actual HTTP200, canonical UTF-8/non-null JSON-object and declared typed-field shapes, and returns actual Body/Header/StatusCode evidence on accepted processing errors. It preserves configured native prebody retry/reauth/transport behavior and captures route/header policy instead of reproducing all Python Adapter response translation, cached304 and exception/coercion policies. Local fixture/compile checks are evidence for this client mapping, not authenticated deployment or server schema-validation policy.",
+        "Plural schema getters still return one discovery document, with embedded URL/$ref/templates, unknown fields, identity and dates kept passive. Following those values, listing resources, CRUD, Name resolution, recursive JSONSchema validation, schema-driven permission/quota gates, wait or cleanup are outside this named getter and are not synthesized by the Go result. Completing this row does not promote inherited Resource/session or any other image/metadata getter declaration."
       ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_member_schema",
       "source_fingerprint": "dc70a2860a2c9c7ef6dfa64b27e680ce4f07694fe10be39c40a7ee4d39fcd487",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/image.Service.GetMemberSchema",
         "gophercloudsdk/image.WithGetSchemaOpts",
@@ -19200,15 +19196,14 @@
       ],
       "differences": [
         "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMemberSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
+        "Pinned ordinary image.v2.schema.Schema declares additional_properties as a dict descriptor and properties as a dict descriptor. Definitions and required descriptors, and bool conversion for additionalProperties, belong to the different MetadefSchema class; these four named getters use ordinary Schema. Go exposes additionalProperties as independent arbitrary raw JSON and optionally projects Definitions/Required through explicit canonical shapes while retaining the actual Body, rather than reproducing Python descriptor coercion or fabricating absent values.",
         "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
+        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies.",
+        "This public schema getter has no ID, supplied Resource, query or request body argument. Proxy._get internally creates a bare Schema with requires_id=False at the declared fixed path. Go adds concrete ordinary-header replacement/merge helpers and returns a new independently owned Schema value; arbitrary supplied subclasses, mutable cached Resource identity and generic fetch/session/cache controls are separate surfaces rather than caller inputs of this named method.",
+        "Go requires original actual HTTP200, canonical UTF-8/non-null JSON-object and declared typed-field shapes, and returns actual Body/Header/StatusCode evidence on accepted processing errors. It preserves configured native prebody retry/reauth/transport behavior and captures route/header policy instead of reproducing all Python Adapter response translation, cached304 and exception/coercion policies. Local fixture/compile checks are evidence for this client mapping, not authenticated deployment or server schema-validation policy.",
+        "Plural schema getters still return one discovery document, with embedded URL/$ref/templates, unknown fields, identity and dates kept passive. Following those values, listing resources, CRUD, Name resolution, recursive JSONSchema validation, schema-driven permission/quota gates, wait or cleanup are outside this named getter and are not synthesized by the Go result. Completing this row does not promote inherited Resource/session or any other image/metadata getter declaration."
       ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_tasks_schema",
