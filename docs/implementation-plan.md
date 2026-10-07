@@ -66,7 +66,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-07, 코드/테스트 기준 `afee318`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
+아래는 2026-10-07의 최근 완료 단위와 진행 중인 작업입니다. 마지막 완료 단위의 코드/테스트 기준은 `afee318`, 문서·판정 기준은 `9d557a0`입니다. 진행 중인 변경의 검증은 별도로 표시합니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
@@ -84,7 +84,8 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | Floating IP 선택 계획과 실행 | 고정 needs/available/NAT·owner/응답·재선택 차이 검토 완료 | owner-free PrepareEnsure·owned plan·동일 tuple 실행·port 재GET·guarded REST·부분 201/202 결과 완료 | 신규 plan 13그룹·공유 헤더 1그룹·집중 4 package race·전체 40 package check 완료 | Python/Go 비교·정확한 main 최종 코드 컴파일·상대 링크 확인 완료 | 기존 available/native Create 2행 부분 근거 갱신·상태/핀 유지, 자동 cloud 연산 unresolved | 공통 헤더 `0258a1a`·계획 `c2cf46b`·경계 `37692fc`·헤더 범위/PUT `9ea3e22` push 완료. [사용법](../network/floating-ip-plan.md)·문서 `f77250d` push 완료. [검증 기록](sdk-support-ledger.md#floating-ip-선택-계획과-실행)과 판정은 분리 커밋으로 보존 |
 | 자동 IP 필요성·조건부 연결·Nova 수렴 | 고정 needs/skip/source·available/attach·raw Nova wait와 부분 실패 검토 완료 | guarded planner·lazy decision·조건부 Neutron assignment·raw Nova target 관측·부분 결과 완료 | 신규19그룹 집중3 package race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크245개 확인 완료 | add_ips 부분 판정1행·기존 available/getter3행 갱신; 전체 연산 unresolved·지원 승격 없음 | planner `532a1be`·context `744092f`·구현 `64cb181`·경계 `a048624`·BUILD `ba78cd4`·문서 `488a84a` push 완료. [사용법](../compute/server-automatic-ip.md), [검증 기록](sdk-support-ledger.md#기존-서버의-자동-floating-ip-판단연결nova-관측). 일반 Create/Wait·Nova mutation·pool/ips 우선순위 remaining |
 | 자동 IP와 서버 생성·ACTIVE 대기의 통합 | 고정 create/get_active/wait·metadata·fault/삭제·budget 비교 완료 | owned 생성·raw ACTIVE/주소 준비·조건부 IP·known Creation/Server/Assignment·전체 deadline 완료 | 신규16그룹·집중13그룹4 package race·전체40 package check 완료 | Python/Go 비교·정확한 main 컴파일·상대 파일 링크 확인 완료 | create/wait2행 갱신·get_active 부분1행 추가, 전체 연산 unresolved·지원 승격 없음 | 대기 정책 `745f50d`·의존 조회 `3249f71`·통합 `f3ed74a`·경계 `afee318` push 완료. [사용법](../compute/create-with-automatic-floating-ip.md), [검증 기록](sdk-support-ledger.md#서버-생성과-자동-floating-ip-통합). 문서·판정·진행표는 별도 커밋으로 보존 |
-| standalone 서버 readiness/Wait와 명시 IP/pool 흐름 | 다음 소스 검토 | 대기 | 대기 | 대기 | 미완료, 지원 승격 없음 | 다음1단계 핵심 user 작업. 생성 통합을 재사용하되 public 기존 서버 입력·status/fault/주소·dispatch·시간 제한·부분 결과의 남은 계약을 별도로 비교 |
+| 기존 서버의 `GetActiveServer`·`WaitForServer` | 고정 status/fault/주소·180초/5초·async/sync·삭제 차이 검토 완료 | 공개 API·조건부 Neutron 대기·lazy Compute source guard 구현 중 | 변경 후 기존 4 package race 회귀 통과; 새 API HTTP 경계 검증 진행 예정 | Python/Go 비교 초안 준비; 실제 예제 빌드 대기 | 미완료, 지원 승격 없음 | 1단계 핵심 user 작업. 현재 변경은 미커밋; 입력 상태 분기·강제 관측·부분 결과·취소·source 교체 테스트 후 작은 커밋으로 보존 |
+| 명시 IP 목록·pool의 선택·연결 흐름 | 고정 pool > ips > auto·backend·주소 순서·부분 실패 예비 조사 완료 | 대기 | 대기 | 대기 | 미완료, 지원 승격 없음 | 기존 서버 readiness 다음 1단계 단위. 순차 연결의 앞선 성공을 보존하고 Nova·재사용/생성·timeout 차이를 별도로 비교 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
