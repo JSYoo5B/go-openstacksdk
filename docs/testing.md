@@ -8,12 +8,25 @@
 
 ```sh
 make check
+make smoke
 go test -race ./...
 go test -coverpkg=./... ./...
 go test -run TestCreate ./...
 ```
 
 Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필요합니다. `make check`는 vet, 60초 package timeout을 적용한 race test, 지원 판정 근거와 gofmt 상태를 확인합니다. `go test`는 실행 예제를 빌드하지만 예제의 main을 실행하지 않습니다.
+
+`make smoke`는 [개발 preview의 5개 핵심 흐름](release-milestones.md)을 기존 테스트에서 선택해 실행하고 `.reports/core-smoke.json`에 실제 결과를 저장합니다. 새로운 mock이나 같은 계약의 테스트를 따로 복제하지 않습니다.
+
+## 공개 테스트 도구 재사용
+
+공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다.
+
+새 테스트는 공개 `testhelper.TestMethod`, `TestHeader`, `TestHeaderUnset`, `TestBody`, `TestJSONRequest`와 `testhelper/fixture.SetupHandler`를 먼저 검토합니다. 단순 요청 검증과 고정 응답에 맞으면 재사용하고, SDK의 단계 순서·부분 결과·정확한 raw JSON·응답 소유권 검증만 추가합니다. Cinder 생성 계약의 공통 wire 검증은 method·source·token에 공개 helper를 사용합니다. `SetupHandler`는 upstream 고정 token을 검사하므로 SDK의 token 교체·공유 검증에는 별도 handler가 필요합니다.
+
+JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 정밀도 검증에는 사용하지 않습니다. 고정 v2.15.0의 deep-equality helper는 slice 길이가 같은지도 보장하지 않으므로 정확한 순서·횟수·추가 요청 부재 검증에는 `reflect.DeepEqual` 등의 기존 검사를 유지합니다. 이미 검증한 fixture·공통 엔진·표 기반 테스트를 확장하며 동등한 setup/assertion을 새로 복제하지 않습니다.
+
+Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위
 

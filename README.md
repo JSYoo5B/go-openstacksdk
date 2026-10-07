@@ -8,6 +8,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 **현재 SDK 완료 수와 진행 중인 작업:** [자동 집계·현재 단계](docs/implementation-plan.md#현재-집계와-진행-중인-작업). 아래의 Gophercloud 공개 연산 수는 고정 transport 목록이며, SDK 완료 수는 위 링크의 연산별 판정으로 확인합니다.
 
+**사용 가능한 개발 preview:** `make smoke`로 핵심 user 5개 흐름을 실행하고 실제 결과를 확인합니다. [단계별 사용·릴리즈 기준](docs/release-milestones.md)에 현재 검증 범위와 첫 외부 설치용 alpha의 남은 조건을 기록합니다.
+
 ## 디렉토리와 지원 범위
 
 ```text
