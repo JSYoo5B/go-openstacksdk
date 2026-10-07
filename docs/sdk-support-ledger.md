@@ -1703,3 +1703,5 @@ shared clone `b0bcc4c`·구현 `14ed0f6`·진행 `be023a1`·기본 검증 `27da5
 다음 핵심 user 검토에서는 Available의 실제 source-normalized 반환 view·Neutron 목록404의 public List→Nova normalization→Neutron filter/필요시 allocation 순서, Nova의 permissive raw normalized lane에 남은 계약을 확인했습니다. 현재 Available의 실제 모델·부분 검증을 보존하고 Query/Create에서 검증한 정책과 일관되게 보완합니다. 핵심 user→핵심 admin→후속 user→후속 admin 및 Swift 핵심 유지 순서는 그대로입니다.
 
 최종 새 metadata의 `paritycheck`가 완료170개 집계로 통과했습니다(`/private/tmp/gophercloudsdk-floating-ip-unattached-final-parity.log`). 변경한10개 Markdown의 상대 파일 링크1,147개에 누락이 없고 기존 Go fence18개·컴파일한 신규 main이 그대로입니다(`gophercloudsdk-floating-ip-unattached-doc-receipt.json`). Anchor 자동 확인은 제외했습니다. 전체 gate 이후 Go source는 변경되지 않았습니다.
+
+최종 가이드 `158c2fd`·기존 문서 연결 `9d066b4`·새 named 판정 `0136cfa`·진행/검증 기록 `e56409b`를 분리 커밋해 원격 main에 push했습니다. `b75fc9c..e56409b`의 원격 반영·깨끗한 작업트리·미푸시 커밋0개를 확인했습니다.
