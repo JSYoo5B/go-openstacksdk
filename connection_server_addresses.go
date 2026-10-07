@@ -6,6 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/compute"
+	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/network"
 )
 
@@ -24,6 +25,21 @@ func (c *Connection) addressComputeClient(ctx context.Context) (*gophercloud.Ser
 	if err != nil {
 		return nil, err
 	}
+	if service == nil || service.API == nil || service.Servers == nil || service.RawClient() == nil {
+		return nil, invalid("raw compute service is required")
+	}
+	api, servers, collection, flavors, client := service.API, service.Servers, service.Servers.Collection, service.Flavors, service.RawClient()
+	apiServers := api.Servers
+	provider := c.provider
+	rest.RegisterOperationSource(ctx, func(ctx context.Context) error {
+		c.mu.Lock()
+		cached := c.compute
+		c.mu.Unlock()
+		if c.provider != provider || cached != service || service.API != api || service.Servers != servers || servers.Collection != collection || service.Flavors != flavors || service.RawClient() != client || api.Servers != apiServers || api.RawClient() != client {
+			return invalid("lazy compute service source changed")
+		}
+		return nil
+	})
 	return service.RawClient(), nil
 }
 
