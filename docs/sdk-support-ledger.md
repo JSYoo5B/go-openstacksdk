@@ -1901,3 +1901,18 @@ Python rel/href·projects_links·최상위 next·HTTP Link·짧은 nonempty 페�
 공통 페이지/fixture `29a0dfe4`, source descriptor `eb95f1a0`, 구현 `ad29902e`, 테스트 `c27b5706`, 사용 문서 `74545abc`를 나누어 push했습니다. exact Python1행만4계약→8계약으로 보강하고 다른512 reviews·catalog bytes와3,362개 source IDs/fingerprints를 보존했습니다. 전체196→197/3,362·핵심122→123/2,292·Keystone3/389, reviews513=go_mapping197/unresolved315/unsupported1, contracts3,240입니다. catalog unresolved3,164에는 미검토2,849개가 포함합니다. user/admin 서비스 합산 수이며 전체 목표는 active입니다. 다음은 공개 query가 없는 user_groups의 실제 기본 continuation gap을 같은 membership 엔진으로 보완합니다.
 
 최신 코드·사용법 커밋 `74545abcb4f3e0412d42a7dd0696a15a9f403a29`을 새 consumer에서 `GOWORK=off`로 원격 설치하고 두 membership main 및 기존 설치 main을 `go build -mod=readonly`로 빌드했습니다. get/build exit0·Replace 없음·실제 버전 `v0.0.0-20261007224720-74545abcb4f3`이며 원격 module-cache Go source SHA가 위 최종 로컬 gate와 같습니다. receipt는 `/private/tmp/gophercloudsdk-user-projects-remote-consumer-receipt.json`입니다. JSON/prose만 갱신한 뒤에는 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt만 확인합니다.
+
+
+## Keystone user_groups 목록 완료
+
+2026-10-08에 `python:identity/v3/user_groups`를 SDK 소유 `Users.ListGroupRecords(ctx,userID)`로 구현했습니다. 공개 Python 함수에는 query 인자가 없으므로 새 Go API도 별도 옵션 없이 시작합니다. 기존 native 두 membership method와 UserProject 공개 타입·concrete 옵션·필터는 유지합니다. [Python 비교와 두 독립 main](../identity/v3/users/memberships.md)에 명시 ID·nullable/raw 반환·strict200/204·source/session 차이를 설명합니다.
+
+Project와 Group은 같은 SDK-private membership reader에서 lazy source 캡처·고정 사용자 경로·HTTP 응답 소유권·guard·페이지 검증을 사용합니다. Group의 Resource는 URI user_id만 결합하고 Wire는 실제 응답을 유지합니다. Project의 options dict normalization을 Group에 적용하지 않습니다. Group 고유 raw/URI·캐시/live auth·기본 continuation·대표 오류는 기존 testcloud/public Gophercloud testhelper·body fault/transport wrapper를 재사용하는 [HTTP3그룹](../api/identity_user_group_records_test.go)으로 검증하며 공통 알고리즘의 오류 표를 복제하지 않습니다.
+
+Source default의 실제 누락도 공통 REST에서 보완했습니다. 첫 advertised next가 초기 query에 없던 양수 limit을 추가할 수 있고 이후 값은 고정됩니다. source의 최초 limit=None과 같이 server-only limit은 marker fallback을 켜지 않습니다. 허용/거부10사례는 기존 listSpec/collectList를 쓰는 공통 표에서 검증하고, Group/Project의 기존 continuation 표에 binding 사례를 추가했습니다. 초기 explicit/semantic limit·cap hint와 기존 offset/reduction 정책의 회귀는 기존 테스트를 실행합니다. 최초 요청은 빈 query, 빈 page/no next 종료, fixed origin/path/filter와 conflict/cycle 보호를 유지합니다.
+
+집중 race52그룹과 최종 전체 `make check`의41개 실제 test package가 PASS했습니다. Go source1,949개 SHA256 `1e706afb6b7b1b7baa524ba48a36a752303905baf73b593b01504a946fc331f5`가 gate 전후 동일하며 `/private/tmp/gophercloudsdk-user-groups-gate-receipt.json`에 근거가 있습니다. 고정 generator build/run exit0·기존 Go drift0·Identity README 동기화1입니다. 정확한 guide main SHA는 native `77ef7047e192ef0df2ec0e5c714c5da31706aa7db59cbc8e387e8303e8a194d3`, owned `2ba141b608c4c5a08d1f3b79e0f1f4d539d9a1289fb7179f18c25d28895c5dad`이며 consumer-only replace build PASS입니다.
+
+공유 pager `e45094f6`·membership 공통화 `aefd9d60`·Group 구현/테스트 `3fd07d91`·문서 `36e16d08`을 작게 커밋하고 push했습니다. 최신 코드/문서 exact revision `36e16d08dc5f7b3f04802614be593e38f7e1fcb2`를 새 module에서 `GOWORK=off`로 원격 설치해 두 membership main과 설치 main을 빌드했습니다. get/build exit0·Replace 없음·실제 버전 `v0.0.0-20261007231141-36e16d08dc5f`·remote module-cache Go SHA가 위 로컬 gate와 같습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+exact user_groups 한 행만4계약→7계약으로 보강하고 다른512개 review·catalog bytes·3,362개 IDs/fingerprints를 보존했습니다. 전체197→198/3,362·핵심123→124/2,292·Keystone3→4/389, reviews513=go_mapping198/unresolved314/unsupported1, contracts3,243입니다. catalog unresolved3,163에는 미검토2,849개가 포함됩니다. named 목록 완료가 전체 mutable Resource/session·Group CRUD 완료를 뜻하지 않으며 전체 목표는 active입니다. 이후 JSON/prose만 바뀌므로 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt를 확인합니다.

@@ -34864,9 +34864,10 @@
     {
       "operation": "python:identity/v3/user_groups",
       "source_fingerprint": "e17d0ff21f36fb38bfdde4427a0ea22a56ab66b70955ae3f7332b12e176c11dc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListGroups"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListGroups",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListGroupRecords"
       ],
       "contracts": [
         {
@@ -34893,19 +34894,42 @@
           "tests": [
             "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
           ]
+        },
+        {
+          "behavior": "The additive ListGroupRecords iterator uses the explicit user parent and selected cached Identity/IdentityV3 service without an eager user or group lookup. Its public signature has no options/query, and the first GET retains the endpoint/resource-base prefix, live authentication, selected client headers and no body/query. Repeating the lazy sequence issues a fresh request. Successful UserGroupRecord values retain independent actual Wire and parent-bound Resource raw fields, HTTP status/header, nullable known fields and exact large vendor numbers; Resource sets only user_id and does not apply Project's options dict conversion to Group options:false.",
+          "tests": [
+            "api/identity_user_group_records_test.go:TestIdentityUserGroupRecordsOwnedViewAndCachedConnection"
+          ]
+        },
+        {
+          "behavior": "The owned Group binding consumes default advertised dictionary links.next, rel/href links, groups_links, top-level next and HTTP Link continuations, retaining the fixed collection path and live token on the second page. Its first request has no query. The first advertised next may introduce one positive server limit, which is retained if later next links omit it; a later introduction, changed limit, zero/negative/duplicate limit or added nonpagination filter is rejected with the actual accepted page evidence. A server-introduced limit does not enable marker fallback: a short second page without next ends after two requests. Empty advertised pages and actual204 yield no rows; consumer break stops before unconsumed rows or another request. Shared membership paging validates conflicting channels, foreign paths/origins, widened filters outside that first server-limit allowance and repeated marker/URL cycles; no initial caller query or artificial marker/limit request is added.",
+          "tests": [
+            "api/identity_user_group_records_test.go:TestIdentityUserGroupRecordsContinuationFormsAndConsumerStop",
+            "internal/rest/list_test.go:TestListFirstServerLimitIsOptInAndFixedAcrossContinuations",
+            "internal/rest/list_test.go:TestListDictionaryLinksAreExplicitAndGuarded",
+            "internal/rest/list_test.go:TestListContinuationCannotWidenCollectionFiltersOrMarkers",
+            "internal/rest/list_test.go:TestListHTTPLinksAreOptInAndConflictingNextLinksFail",
+            "internal/rest/list_test.go:TestListCyclesRejectRepeatedMarkerBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Invalid explicit IDs, a nil API and pre-cancelled custom causes yield one terminal error without HTTP. Accepted read/Close faults preserve complete body/header/status and the original cause with one physical request and one Close; actual403 preserves native status/body/headers. Later malformed objects, cancellation after a yielded row and late source replacement preserve the prior row and one terminal failure. Source drift during the first or later accepted transport retains the accepted response evidence and rejects a successful record; context cancellation preserves context.Canceled and the custom cause.",
+          "tests": [
+            "api/identity_user_group_records_test.go:TestIdentityUserGroupRecordsPreflightFaultsAndPartialResults"
+          ]
         }
       ],
       "documentation": [
         "identity/v3/users/memberships.md"
       ],
       "differences": [
-        "Pinned user_groups accepts a user ID or User resource and has no public query argument; Go requires an explicit user ID string and returns native Group aliases rather than URI-bound UserGroup Resources.",
-        "Python UserGroup disables CRUD and carries user_id/location/connection context. Python Group leaves unknown Body retention disabled, while native Go Group has typed Links and unknown Extra fields."
+        "Python user_groups accepts a user ID or User Resource and performs no user fetch; Go ListGroupRecords requires an explicit nonempty single unescaped URL path segment and validates it before HTTP. There is no public **query/options argument in either mapping, so the inherited Group query declaration and Resource.list controls are not invented as missing inputs for this named function. Native ListGroups remains unchanged with its Group alias, signature and pager.",
+        "The named result maps to SDK-owned UserGroupRecord with independent RawResource Resource/Wire fields, rather than a mutable Python UserGroup Resource. Resource copies actual JSON and binds the requested user_id; Wire keeps the actual response user_id or omission. RawResource retains nullable known fields, extension precision and unknown raw values instead of applying native Group string/Links decoding or Python Group's disabled unknown-Body-retention/default/computed-location/connection policies. Group vendor options:false remains false; only UserProject uses the options dict descriptor normalization. Passive self/links data are retained without fetching or resource-routing methods.",
+        "The owned operation uses strict HTTP200 groups arrays plus native-compatible HTTP204 emptiness, requiring nonnull object rows instead of Python adapter-wide successful statuses and dynamic non-list-to-singleton envelopes. Selected Identity headers/microversion/provider policy are preserved; this entry does not run Python discovery/_max_microversion=None selection or expose operation-local version/list controls.",
+        "Shared owned membership paging supports source rel/href/top-level-next/HTTP-Link routes and adds groups_links/native dictionary links.next compatibility. The first request remains queryless; the first advertised next may add one positive server limit, which is fixed thereafter and retained when later links omit it. This does not activate marker fallback because the original source Resource.list call captures initial limit=None. Every advertised channel is validated, with conflicting destinations, foreign origins/paths, other added/replaced filters, invalid or later-changed limits and cycles rejected rather than following Python's ordered continuation precedence and path normalization. The entry creates no initial marker/limit or fallback request and stops on empty pages or when no next is advertised.",
+        "Accepted response read/Close/decode/source failures retain original HTTP evidence and are not resent by SDK composition; provider-configured native retry and reauthentication are separate. Explicit user IDs, RawResource/result ownership and fixed source guards are intentional Go mapping policies. Full mutable Resource/session/cache and inherited Group actions remain in the original SDK goal and are not promoted by completion of this named list; UserGroup list-only capabilities do not disable native Group CRUD."
       ],
-      "remaining": [
-        "Complete user-reference adaptation and URI-bound UserGroup model/default/context/capability normalization. The pinned user_groups(user) method has no **query argument, so no missing public query option is inferred.",
-        "Finish inherited default pagination, HTTP/decode/session/cache comparisons. Native GroupPage consumes links.next; the pinned inherited Resource._get_next_link checks rel/href links, top-level next, Link headers and marker fallbacks, so the Go two-page test is not proof of Python continuation parity. UserGroup inherits _max_microversion=None."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/create_server",
