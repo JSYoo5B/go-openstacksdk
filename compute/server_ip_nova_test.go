@@ -121,6 +121,7 @@ func newNovaIPFixture(t *testing.T, fail string) *novaIPFixture {
 		address := action["address"]
 		f.event("attach:" + address)
 		if f.fail == "actionHTTP" && address == dispatchAddresses["b"] {
+			w.Header().Set("X-Proof", "Nova-denied")
 			http.Error(w, "second attach denied", 403)
 			return
 		}
@@ -246,6 +247,12 @@ func TestNovaServerIPAllocationAndCompatibilityFailureKeepPartial(t *testing.T) 
 			if !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Proof") != "Nova-get-29" {
 				t.Fatal(err)
 			}
+			if result.NovaAssignment.FloatingIP.Address != dispatchAddresses["pool"] || result.NovaAssignment.FloatingIP.Pool != "public" {
+				t.Fatal("drift response replaced original allocation", result.NovaAssignment)
+			}
+		}
+		if fail == "allocatedWrongPool" && (result.NovaAssignment.FloatingIP.Pool != "unexpected" || !strings.Contains(string(result.NovaAssignment.AllocationResponse.Body), "unexpected")) {
+			t.Fatal("actual allocation fields were replaced", result.NovaAssignment)
 		}
 	}
 }
