@@ -42,7 +42,8 @@ func (c *Connection) addressComputeClient(ctx context.Context) (*gophercloud.Ser
 
 func (c *Connection) addressFacade() *compute.Service {
 	return compute.New(nil, compute.Dependencies{
-		NetworkRoles: c.GetNetworkRoles, AddressNetworks: c.addressNetworkService, AddressCompute: c.addressComputeClient,
+		CloudLocation: c.CurrentLocation,
+		NetworkRoles:  c.GetNetworkRoles, AddressNetworks: c.addressNetworkService, AddressCompute: c.addressComputeClient,
 		NetworkPolicy: c.options.networkRoles, ServerAddresses: c.options.serverAddresses,
 	})
 }

@@ -174,7 +174,8 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 			return nil, err
 		}
 		c.compute = compute.New(client, compute.Dependencies{
-			NetworkRoles: c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,
+			CloudLocation: c.CurrentLocation,
+			NetworkRoles:  c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,
 			AddressCompute: c.addressComputeClient, NetworkPolicy: c.options.networkRoles, ServerAddresses: c.options.serverAddresses,
 			DefaultNetwork:          c.defaultServerNetwork,
 			DefaultNetworkUsesRoles: !c.options.defaultNetworkSet && c.options.configuredDefaultNetwork != "",

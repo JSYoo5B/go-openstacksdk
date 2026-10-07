@@ -34,6 +34,7 @@ type FloatingIPQueryResult struct {
 	Pages              []*FloatingIPQueryResponse
 	FallbackError      error
 	SuppressedNotFound error
+	Failure            *FloatingIPQueryResponse
 }
 type GetFloatingIPResult struct {
 	Backend            FloatingIPSource
@@ -43,11 +44,13 @@ type GetFloatingIPResult struct {
 	Pages              []*FloatingIPQueryResponse
 	FallbackError      error
 	SuppressedNotFound error
+	Failure            *FloatingIPQueryResponse
 }
 type FloatingIPPoolQueryResult struct {
-	Value json.RawMessage
-	Pools []*resource.RawResource
-	Pages []*FloatingIPQueryResponse
+	Value   json.RawMessage
+	Pools   []*resource.RawResource
+	Pages   []*FloatingIPQueryResponse
+	Failure *FloatingIPQueryResponse
 }
 type FloatingIPSelectionError struct {
 	ID     string

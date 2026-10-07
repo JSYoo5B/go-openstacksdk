@@ -57,6 +57,9 @@ type Dependencies struct {
 	AddressCompute  func(context.Context) (*gophercloud.ServiceClient, error)
 	NetworkPolicy   network.NetworkRolePolicy
 	ServerAddresses ServerAddressPolicy
+	// CloudLocation supplies recorded/configured normalization facts without I/O.
+	// Connection installs it; direct clients default to their recorded scope.
+	CloudLocation func() (resource.CloudLocation, error)
 }
 
 type Servers struct {
