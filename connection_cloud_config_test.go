@@ -50,10 +50,16 @@ func TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings(t *testing.
 			if err != nil || configuration.defaultNetwork != tc.want {
 				t.Fatalf("default=%q want=%q err=%v", configuration.defaultNetwork, tc.want, err)
 			}
+			if configuration.networkRoles.DefaultNetworkSelector() != tc.want {
+				t.Fatalf("role selector=%q want=%q", configuration.networkRoles.DefaultNetworkSelector(), tc.want)
+			}
 			// Changes after loading cannot change auth or either settings layer.
 			writeCloudConfigFile(t, path, "clouds: {dev: {auth: {username: changed}}}\n")
 			writeCloudConfigFile(t, filepath.Join(filepath.Dir(path), "secure.yaml"), "clouds: {dev: {auth: {password: changed}}}\n")
 			writeCloudConfigFile(t, publicPath, "public-clouds: {provider: {networks: []}}\n")
+			if configuration.networkRoles.DefaultNetworkSelector() != tc.want {
+				t.Fatal("role policy changed after file mutation")
+			}
 			auth, endpoint, tlsConfig, err := clouds.Parse(configuration.parseOptions...)
 			if err != nil || auth.Username != "snapshot-user" || auth.Password != "secure-password" || auth.IdentityEndpoint != "https://identity.example/v3" || auth.TenantName != "inherited-project" || auth.Scope == nil || auth.Scope.ProjectName != "inherited-project" || auth.Scope.DomainName != "Default" || endpoint.Region != "region-file" || endpoint.Availability != gophercloud.AvailabilityInternal || tlsConfig == nil || !tlsConfig.InsecureSkipVerify {
 				t.Fatalf("native snapshot settings incorrect; err=%v", err)

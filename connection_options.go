@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
 )
 
@@ -40,9 +41,26 @@ type connectionOptions struct {
 	defaultNetwork           resource.Ref
 	defaultNetworkSet        bool
 	configuredDefaultNetwork string
+	networkRoles             network.NetworkRolePolicy
+	networkRolesSet          bool
 }
 
 type ConnectionOption func(*connectionOptions) error
+
+// WithNetworkRoles replaces clouds.yaml routing-role configuration with owned
+// concrete options. It also supplies a configured default interface for Create;
+// WithDefaultNetwork/WithoutDefaultNetwork still take precedence for server NICs.
+func WithNetworkRoles(options ...network.NetworkRoleOption) ConnectionOption {
+	options = append([]network.NetworkRoleOption(nil), options...)
+	return func(o *connectionOptions) error {
+		policy, err := network.PrepareNetworkRoleOptions(options...)
+		if err != nil {
+			return err
+		}
+		o.networkRoles, o.networkRolesSet = policy, true
+		return nil
+	}
+}
 
 // WithDefaultNetwork selects a network for server creation when no NIC or
 // network mode is supplied. IDs bypass Neutron; names use exact-name lookup.

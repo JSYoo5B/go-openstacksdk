@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gophercloudsdk/network"
+
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 	"gopkg.in/yaml.v2"
 )
@@ -18,6 +20,7 @@ import (
 type cloudConfiguration struct {
 	parseOptions   []clouds.ParseOption
 	defaultNetwork string
+	networkRoles   network.NetworkRolePolicy
 }
 
 type cloudNetworkDocument struct {
@@ -124,6 +127,10 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		result.parseOptions = append(result.parseOptions, clouds.WithCloudsPublicYAML(bytes.NewReader(public)))
 	}
 	result.defaultNetwork, err = configuredDefaultNetwork(settings)
+	if err != nil {
+		return result, err
+	}
+	result.networkRoles, err = configuredNetworkRoles(settings)
 	return result, err
 }
 

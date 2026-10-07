@@ -60,6 +60,9 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 			return nil, fmt.Errorf("load cloud configuration: %w", err)
 		}
 		o.configuredDefaultNetwork = configuration.defaultNetwork
+		if !o.networkRolesSet {
+			o.networkRoles = configuration.networkRoles
+		}
 	} else {
 		auth, err = openstack.AuthOptionsFromEnv()
 		if err != nil {
@@ -105,12 +108,15 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 		return nil, err
 	}
 	if o.auth != nil || o.cloud != "" || len(o.cloudFiles) != 0 || o.httpConfigured {
-		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion, location and default network options")
+		return nil, invalid("FromProvider accepts endpoint, region, interface, microversion, location, default network and network role options")
 	}
 	return newConnection(provider, o, gophercloud.EndpointOpts{})
 }
 
 func newConnection(provider *gophercloud.ProviderClient, o connectionOptions, eo gophercloud.EndpointOpts) (*Connection, error) {
+	if o.networkRolesSet {
+		o.configuredDefaultNetwork = o.networkRoles.DefaultNetworkSelector()
+	}
 	if o.region != nil {
 		eo.Region = *o.region
 		o.locationFacts.RegionName = locationString(*o.region)
@@ -215,6 +221,7 @@ func (c *Connection) Network(ctx context.Context) (*network.Service, error) {
 			return nil, err
 		}
 		c.network = network.NewWithDependencies(client, network.Dependencies{
+			NetworkRoles: c.options.networkRoles,
 			Server: func(ctx context.Context, ref resource.Ref) (string, error) {
 				service, err := c.Compute(ctx)
 				if err != nil {
