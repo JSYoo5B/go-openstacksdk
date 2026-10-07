@@ -187,4 +187,4 @@ Python 비교는 고정 소스를 읽은 결과이며 Python 예제 실행이나
 
 [공유 네트워크 역할 조회](../network/network-roles.md)는 기본 NIC와 Ensure의 source/NAT 선택에 연결되어 같은 성공 snapshot을 사용합니다. 자동 IP 필요성 판단·생략과 위 나머지 상위 정책은 남은 범위입니다.
 
-기존 서버의 [자동 floating IPv4 판단·조건부 실행](server-automatic-ip.md)은 별도 공개 API로 제공됩니다. 이 문서의 명시 `CreateWithFloatingIP`는 기존 계약을 유지하며 자동 필요성·raw Nova 주소 관측을 수행하지 않습니다. 일반 생성/대기와 새 자동 메서드의 통합은 다음 구현 범위입니다.
+기존 서버의 [자동 floating IPv4 판단·조건부 실행](server-automatic-ip.md)은 별도 공개 API로 제공됩니다. 이 문서의 명시 `CreateWithFloatingIP`는 기존 계약을 유지하며 자동 필요성·raw Nova 주소 관측을 수행하지 않습니다. [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 별도 명시 compound로 생성·실제 ACTIVE/주소 준비와 자동 판단·조건부 연결·raw 관측을 이어갑니다.
