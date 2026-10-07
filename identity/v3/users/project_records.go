@@ -4,19 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"iter"
 	"maps"
-	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
 	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/request"
 	"github.com/JSYoo5B/gophercloudsdk/resource"
-	"github.com/gophercloud/gophercloud/v2"
 )
 
 const userProjectRecordKind = "identity.user_projects"
@@ -34,10 +29,7 @@ func (value *UserProjectRecord) UnmarshalJSON(data []byte) error {
 	if value == nil {
 		return fmt.Errorf("%w: user-project receiver is required", resource.ErrInvalidOption)
 	}
-	if value.Wire == nil {
-		value.Wire = &resource.RawResource{}
-	}
-	if err := json.Unmarshal(data, value.Wire); err != nil {
+	if err := unmarshalMembershipRecord(data, &value.Wire); err != nil {
 		return err
 	}
 	value.Resource = nil
@@ -55,18 +47,16 @@ func prepareUserProjectRecord(value *UserProjectRecord, userID string) error {
 	if value == nil || value.Wire == nil || value.Wire.Body == nil {
 		return fmt.Errorf("%w: user-project response fields are required", resource.ErrInvalidOption)
 	}
-	view := value.Wire.Clone()
+	view, err := cloneMembershipRecordView(value.Wire, userID)
+	if err != nil {
+		return err
+	}
 	if raw, exists := view.Body["options"]; exists {
 		trimmed := bytes.TrimSpace(raw)
 		if !bytes.Equal(trimmed, []byte("null")) && (len(trimmed) == 0 || trimmed[0] != '{') {
 			view.Body["options"] = json.RawMessage("{}")
 		}
 	}
-	parent, err := json.Marshal(userID)
-	if err != nil {
-		return err
-	}
-	view.Body["user_id"] = parent
 	value.Resource = view
 	return nil
 }
@@ -123,64 +113,14 @@ func userProjectsWithFilters(ctx context.Context, selected rest.CollectionSpec[U
 // The native ListProjects method and its native Project results remain available.
 func (a *API) ListProjectRecords(ctx context.Context, userID string, options ...ListProjectRecordsOption) iter.Seq2[*UserProjectRecord, error] {
 	owned := append([]ListProjectRecordsOption(nil), options...)
-	return func(yield func(*UserProjectRecord, error) bool) {
-		wrap := func(err error) error {
-			if err != nil {
-				err = cloudread.ContextError(ctx, err)
-			}
-			return request.Wrap("ListProjectRecords", userProjectRecordKind, err)
-		}
-		if err := cloudread.Context(ctx); err != nil {
-			yield(nil, wrap(err))
-			return
-		}
-		if err := resource.ID(userID).Validate(); err != nil {
-			yield(nil, wrap(err))
-			return
-		}
-		var client *gophercloud.ServiceClient
-		if a != nil {
-			client = a.client
-		}
-		source, err := cloudread.Capture(ctx, client, "identity")
-		if err != nil {
-			yield(nil, wrap(err))
-			return
-		}
-		guard := func(ctx context.Context) error {
-			var replacement error
-			if a == nil || a.client != client {
-				replacement = fmt.Errorf("%w: selected users API client changed", resource.ErrInvalidOption)
-			}
-			return errors.Join(replacement, source.Guard(ctx), rest.CheckOperationGuard(ctx))
-		}
-		parameters, err := prepareProjectList(ctx, guard, owned)
-		if err == nil {
-			err = source.WithPolicy(ctx, parameters.microversion, parameters.headers)
-		}
-		if err == nil {
-			err = guard(ctx)
-		}
-		if err != nil {
-			yield(nil, wrap(err))
-			return
-		}
-		selected := rest.CollectionSpec[UserProjectRecord]{
-			Client: &source.Client, Path: "users/" + url.PathEscape(userID) + "/projects",
-			Kind: userProjectRecordKind, PluralKey: "projects",
-			Metadata: userProjectMetadata, Validate: guard, SourceGuard: guard,
-			ListCodes:    []int{http.StatusOK, http.StatusNoContent},
-			ValidateItem: func(value *UserProjectRecord) error { return prepareUserProjectRecord(value, userID) },
-			Paging: rest.PagePolicy[UserProjectRecord]{
-				LinkKeys: []string{"links", "projects_links"}, NextKey: "next", DictionaryLinks: true,
-				HTTPLink: true, MarkerFallback: true, Marker: userProjectMarker,
-				MarkerOnShortPage: true, MaxItemsLimitHint: true, StopOnEmptyPage: true,
-			},
-		}
-		for value, err := range userProjectsWithFilters(ctx, selected, parameters.query, parameters.control, parameters.filters) {
-			if !yield(value, wrap(err)) {
-				return
-			}
-		}
-	}
+	return a.listMembershipRecords(ctx, userID, membershipRecordRead{
+		operation: "ListProjectRecords", kind: userProjectRecordKind, plural: "projects",
+		prepare: func(ctx context.Context, guard func(context.Context) error) (projectListParameters, error) {
+			return prepareProjectList(ctx, guard, owned)
+		},
+		project: prepareUserProjectRecord, marker: userProjectMarker,
+		iterate: func(ctx context.Context, selected rest.CollectionSpec[UserProjectRecord], parameters projectListParameters) iter.Seq2[*UserProjectRecord, error] {
+			return userProjectsWithFilters(ctx, selected, parameters.query, parameters.control, parameters.filters)
+		},
+	})
 }
