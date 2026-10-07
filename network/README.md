@@ -25,6 +25,7 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.create_floating_ip(network="public", server=server, wait=True)` | `service.FloatingIPs.Create(ctx, request, network.WithServer(ref), network.WithWait())` |
 | `conn.add_ip_list(server, ips=[address])`의 기존 Neutron IP 한 개 연결 기반 | `service.FloatingIPs.Attach(ctx, request)`; [대상·대기·부분 결과 차이](floating-ip-attach.md) |
 | `conn.add_ips_to_server(server, ip_pool="public", reuse=True)`의 Neutron pool 선택·연결 기반 | `service.FloatingIPs.Ensure(ctx, request, network.WithEnsureWait())`; [재사용·결과·대기 차이](floating-ip-ensure.md) |
+| 독립 `conn.add_ips_to_server` / `add_ip_list` | [Compute·Connection Add helper](../compute/server-ip-helpers.md): 기본60초·비동기와 raw 주소 wait |
 | pool → 순차 명시 IP → automatic 선택과 서버 관측 | [Compute IP dispatch](../compute/server-ip-dispatch.md)의 `WithFloatingIPPool`·`WithFloatingIPAddresses` |
 
 openstacksdk는 일부 query 이름을 Python 속성 이름으로 매핑합니다. `WithQuery`는 Neutron의 실제 HTTP query 이름을 받습니다. [공식 Network API](https://docs.openstack.org/openstacksdk/latest/user/proxies/network.html)

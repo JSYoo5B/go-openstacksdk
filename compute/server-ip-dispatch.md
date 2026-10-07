@@ -2,6 +2,8 @@
 
 기존 `PlanServerFloatingIP`, `EnsureServerFloatingIP`, `GetActiveServer`, `WaitForServer`, `CreateWithAutomaticFloatingIP`에서 같은 IP 선택 옵션을 사용합니다. Connection이 인증·cloud 설정·서비스 연결·공유 네트워크 역할을 준비하므로 애플리케이션에서 builder나 resolver를 구현할 필요가 없습니다.
 
+독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)도 같은 선택 기반을 사용합니다. 해당 entry는 기본60초·비동기이고 wait는 ACTIVE 조건 없이 raw 주소만 관측하므로 이 문서의 기존 Ensure/ready/create 정책과 구분합니다.
+
 ## 선택 순서와 입력
 
 | 입력 | 선택되는 작업 |
@@ -196,6 +198,6 @@ func run(ctx context.Context, cloud, id, pool, ips string, execute bool) error {
 
 ## 확인 범위와 남은 작업
 
-이 단위는 기존 Service/Connection 소비자에 Neutron pool > ordered IP > auto 분기를 연결합니다. Python 독립 `add_ips_to_server` / `add_ip_list`의 기본60초·wait=false API를 새 이름의 Go entry로 제공한 것은 아닙니다. Nova-network mutation/fallback, Python async helper의 선택적 Compute refresh, cloud get_server의 Resource/interface/location/session normalization·lookup retry·fault/extra_data·cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait 전체 연산의 완료를 이 부분 구현만으로 주장하지 않습니다.
+이 단위는 기존 Service/Connection 소비자에 Neutron pool > ordered IP > auto 분기를 연결합니다. 독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)는 별도 기본60초·wait=false entry를 제공합니다. Python의 dynamic 입력·full returned Resource 계약은 계속 비교합니다. Nova-network mutation/fallback, Python async helper의 선택적 Compute refresh, cloud get_server의 Resource/interface/location/session normalization·lookup retry·fault/extra_data·cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait 전체 연산의 완료를 이 부분 구현만으로 주장하지 않습니다.
 
 Python 비교는 고정 source의 정적 검토입니다. 로컬 HTTP fixtures는 순서·duplicates·pool priority·read-only Plan·selector 검증·async/sync 차이·옵션1회·고정 ID·공통 deadline 동일성/취소·partial response/source guard를 검증합니다. Python 예제나 인증된 OpenStack cloud 실행을 뜻하지 않습니다. 독립 main의 컴파일과 최종 검증 revision은 실제 실행 결과만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다.

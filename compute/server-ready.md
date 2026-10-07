@@ -12,6 +12,8 @@
 
 요청은 기존 `compute.AutomaticFloatingIPRequest{Server: supplied, Network: externalRef}`입니다. `Network`는 floating IP allocation network이며 서버 NIC를 추가하거나 변경하지 않습니다. ID/Name을 `resource.Ref`로 명시하고 zero이면 공유 역할/router 경로를 사용합니다.
 
+독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)는 별도 기본60초·비동기 entry입니다. 선택적 wait는 서버/IP ACTIVE 없이 raw 목표 주소를 확인하며, 이 문서의 직접 API나 기존 상위 readiness 조건을 바꾸지 않습니다.
+
 ## Python과 비교
 
 비교 소스는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [wait_for_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L1359-L1415)와 [get_active_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L1417-L1481)입니다.
@@ -175,6 +177,6 @@ supplied Server의 top-level field와 ID는 옵션 callback 전에 캡처합니�
 
 ## 남은 소스 계약과 검증
 
-공개 get_active_server/wait_for_server의 typed supplied entry와 Neutron pool → 순차 명시 IPv4 → automatic 소비자를 제공해도 전체 source operation은 unresolved로 추적합니다. Nova mutation/fallback, standalone cloud IP helper의 기본60초·비동기 Server 반환, full has_service/config/network/session/Resource model, public/private/interface 필드 expansion, cloud get_server의 lookup/defaultquery/broad Exception·missing retry, fault/extra_data/cleanup 정책과 integer remaining-time budget은 남습니다. Go의 noDELETE와 owned partial-response 정책은 명시한 차이이며 Python의 cleanup 결과와 같다고 주장하지 않습니다.
+공개 get_active_server/wait_for_server의 typed supplied entry와 Neutron pool → 순차 명시 IPv4 → automatic 소비자를 제공해도 전체 source operation은 unresolved로 추적합니다. Nova mutation/fallback, standalone cloud IP helper의 전체 Resource 반환·정규화, full has_service/config/network/session/Resource model, public/private/interface 필드 expansion, cloud get_server의 lookup/defaultquery/broad Exception·missing retry, fault/extra_data/cleanup 정책과 integer remaining-time budget은 남습니다. Go의 noDELETE와 owned partial-response 정책은 명시한 차이이며 Python의 cleanup 결과와 같다고 주장하지 않습니다.
 
 readiness 기반의 17개 테스트 그룹으로 확인한 입력 상태·비동기 접수·강제 관측·raw metadata·부분 실패·취소·동일 deadline·180초 기본값·옵션 1회 적용·lazy Compute 수명 검증은 [지원대장](../docs/sdk-support-ledger.md#기존-서버의-active-판정과-상위-대기)에 기록합니다. 집중 검증과 전체 gate, 정확한 독립 main의 컴파일·SHA는 실제 결과를 기준으로 구분합니다. Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다.

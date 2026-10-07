@@ -14,6 +14,8 @@
 
 같은 메서드에 `WithFloatingIPPool` 또는 `WithFloatingIPAddresses`를 주면 [pool → 순차 명시 IPv4 → automatic 선택](server-ip-dispatch.md)을 사용합니다. 이 문서는 selector가 없는 기본 automatic 분기를 설명하며, 명시 pool/IP에는 disabled/private·이미 public/floating 같은 자동 skip 조건을 적용하지 않습니다.
 
+독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)는 별도 기본60초·비동기 entry입니다. 선택적 wait는 서버/IP ACTIVE 없이 raw 목표 주소를 확인하며, 이 문서의 직접 API나 기존 상위 readiness 조건을 바꾸지 않습니다.
+
 ## Python cloud와 비교
 
 비교 기준은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`입니다. [add_ips_to_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1489-L1525)는 pool → 명시 IP 목록 → `auto_ip`+needs 순서로 작업을 선택합니다. 다음은 auto branch를 요청하는 예입니다.
@@ -235,6 +237,6 @@ Connection은 주소 설정과 Network 역할 cache를 공유하고 필요한 en
 
 Go는 disabled/private 같은 known skip을 앞에서 확인하고 명시 empty와 nil refresh를 분리하여 불필요한 Network/owner 요청을 피합니다. Python needs의 일부 floating-network SDKException→false 처리를 그대로 숨기지 않고 clean semantic absence와 fatal 오류를 구분합니다. strict tuple ambiguity와 port reGET/revision, 실제 assigned IPv4의 모든 raw floating row 관측, accepted partial 증거 보존과 no-cleanup 정책도 의도된 차이입니다.
 
-[CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 생성·ACTIVE/주소 준비부터 이 자동 정책까지 이어갑니다. [GetActiveServer·상위 WaitForServer](server-ready.md)는 기존 서버의 supplied 상태 판정·raw 현재 상태 대기와 조건부 IP 작업을 제공합니다. GetActive의 기본 비동기 접수와 이 문서의 Ensure·생성·상위 Wait가 요구하는 실제 IP ACTIVE·Nova 관측을 구분합니다. 일반 `Servers.Create`, `CreateWithFloatingIP`, collection 대기의 계약은 유지합니다. 서버 부팅의 추가 조합, fault/extra_data·ACTIVE-no-address 삭제 정책, cloud lookup의 exception retry/integer remaining budget, Nova-network mutation/fallback, standalone cloud `add_ip_list`/`add_ips_to_server`의 기본60초·비동기 Server 반환, full service/config/Resource/session/normalization·cleanup은 남습니다. `add_auto_ip`의 unconditional/string 결과 계약도 별도입니다.
+[CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md)는 생성·ACTIVE/주소 준비부터 이 자동 정책까지 이어갑니다. [GetActiveServer·상위 WaitForServer](server-ready.md)는 기존 서버의 supplied 상태 판정·raw 현재 상태 대기와 조건부 IP 작업을 제공합니다. GetActive의 기본 비동기 접수와 이 문서의 Ensure·생성·상위 Wait가 요구하는 실제 IP ACTIVE·Nova 관측을 구분합니다. 일반 `Servers.Create`, `CreateWithFloatingIP`, collection 대기의 계약은 유지합니다. 서버 부팅의 추가 조합, fault/extra_data·ACTIVE-no-address 삭제 정책, cloud lookup의 exception retry/integer remaining budget, Nova-network mutation/fallback, standalone cloud IP helper의 전체 Resource 반환·정규화, full service/config/Resource/session/normalization·cleanup은 남습니다. `add_auto_ip`의 unconditional/string 결과 계약도 별도입니다.
 
 Python 비교는 고정 source의 정적 검토이며 Python 예제·인증된 OpenStack 실행을 뜻하지 않습니다. 실제 신규 HTTP fixture의 skip/guard/selection/assignment/raw observation/partial/cancellation 근거와 집중·전체 검증 revision, 독립 main 정확한 SHA·컴파일 receipt는 [지원 판정대장](../docs/sdk-support-ledger.md)에 확인한 결과만 기록합니다. 전체 cloud 연산은 해당 remaining이 남으면 unresolved로 유지합니다.

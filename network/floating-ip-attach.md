@@ -15,6 +15,8 @@
 
 `Name`에는 유효한 floating **IPv4 주소**를 넣습니다. IP ID와 주소를 문자열 모양으로 추측하지 않습니다. 주소 검색은 `floating_ip_address`만 전송하며 현재 프로젝트·미연결 여부·외부 network로 제한하지 않습니다. Neutron 권한이 허용하면 다른 프로젝트의 IP나 이미 다른 포트에 연결된 IP도 지정할 수 있습니다. 모순된 project/tenant 응답은 오류이고, 조회에서 확인한 owner는 실행 응답의 일관성을 검증하는 데만 사용합니다.
 
+독립 [AddIPsToServer·AddIPList](../compute/server-ip-helpers.md)는 별도 기본60초·비동기 entry입니다. 선택적 wait는 서버/IP ACTIVE 없이 raw 목표 주소를 확인하며, 이 문서의 직접 API나 기존 상위 readiness 조건을 바꾸지 않습니다.
+
 ## openstacksdk와 비교
 
 비교 소스는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [add_ip_list와 Neutron 연결](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1342-L1391)입니다. Python은 주소 목록을 순서대로 찾아 연결하고 Server를 반환합니다.
@@ -27,7 +29,7 @@ server = conn.add_ip_list(
 )
 ```
 
-이 Network API는 **기존 Neutron IP 한 개의 연결 기반**입니다. `FloatingIPAssignment`를 반환하며 기본은 비동기이고 `WithAttachWait`는 실제 Neutron IP ACTIVE를 기다립니다. [Compute의 IP dispatch](../compute/server-ip-dispatch.md)가 이 기반과 Ensure를 pool → 순차 명시 IPv4 → automatic 순서로 소비합니다. 동기 소비자는 실제 IP ACTIVE와 raw Nova 목표 주소를 확인하고, GetActiveServer 기본 async는 접수 결과를 반환합니다. 직접 Network Attach는 Server 반환·raw Nova 관측·여러 주소 dispatch를 수행하지 않습니다. Nova-network backend와 standalone cloud `add_ip_list`의 기본60초·비동기 Server 반환·전체 Resource/session/normalization 계약은 남아 있으므로 전체 `add_ip_list` 지원 완료로 세지 않습니다.
+이 Network API는 **기존 Neutron IP 한 개의 연결 기반**입니다. `FloatingIPAssignment`를 반환하며 기본은 비동기이고 `WithAttachWait`는 실제 Neutron IP ACTIVE를 기다립니다. [Compute의 IP dispatch](../compute/server-ip-dispatch.md)가 이 기반과 Ensure를 pool → 순차 명시 IPv4 → automatic 순서로 소비합니다. 기존 Ensure/Get/Wait/Create의 동기 소비자는 실제 IP ACTIVE와 raw Nova 목표 주소를 확인하고, GetActiveServer 기본 async는 접수 결과를 반환합니다. 직접 Network Attach는 Server 반환·raw Nova 관측·여러 주소 dispatch를 수행하지 않습니다. Nova-network backend와 standalone cloud `add_ip_list`의 full returned Resource/normalization·전체 Resource/session/normalization 계약은 남아 있으므로 전체 `add_ip_list` 지원 완료로 세지 않습니다.
 
 ## 독립 Go 예제
 

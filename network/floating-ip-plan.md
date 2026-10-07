@@ -11,6 +11,8 @@
 
 계획 준비에는 recorded project 조회, floating IP 후보 목록, POST·PUT·DELETE가 없습니다. 인증된 unscoped provider도 **선택할 network와 port를 조회할 권한이 있으면** 준비할 수 있습니다. project owner가 필요한 실행은 별도입니다. PrepareEnsure는 서버 ACTIVE나 port 생성을 기다리지 않으며, 준비된 기존 서버의 port가 필요합니다.
 
+독립 [AddIPsToServer·AddIPList](../compute/server-ip-helpers.md)는 별도 기본60초·비동기 entry입니다. 선택적 wait는 서버/IP ACTIVE 없이 raw 목표 주소를 확인하며, 이 문서의 직접 API나 기존 상위 readiness 조건을 바꾸지 않습니다.
+
 ## Python cloud와 비교
 
 비교 소스는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`입니다. Python public cloud에는 같은 선택을 opaque plan으로 고정하는 두 단계 API가 없습니다. [add_ips_to_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1489-L1525)는 pool → 명시 IP 목록 → auto+needs 순서로 연결 작업을 선택합니다.
@@ -171,7 +173,7 @@ plan이 직접 실행하는 owned REST 목록·명시 Neutron lookup·port 재�
 
 공유 role cache의 성공값·Reset·동시 discovery는 기존 정책을 따릅니다. 이미 일반 role discovery가 진행 중인 경우 그 결과를 기다려 공유할 수 있으며, 모든 기존 public getter/native/raw 요청이 이 plan의 보호 정책으로 바뀌는 것은 아닙니다. 서버 이름 조회는 기존 Connection resolver를 사용합니다. 환경의 외부 변경을 자동 탐지하거나 cache를 매번 강제로 새로 읽는 정책은 아니므로 필요한 topology 변경에는 [Reset 규칙](network-roles.md)을 적용합니다.
 
-고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 별도 [Compute 자동 메서드](../compute/server-automatic-ip.md)는 기존 서버의 조건부 Neutron 실행과 raw Nova 관측을 제공합니다. [자동 IP 서버 생성](../compute/create-with-automatic-floating-ip.md)과 [GetActive/Wait](../compute/server-ready.md)도 같은 Neutron 정책을 소비합니다. 같은 상위 entry의 [pool·순차 IP dispatch](../compute/server-ip-dispatch.md)도 제공합니다. 일반 Create의 전체 source dispatch, standalone cloud IP helper의 기본값, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup은 계속 남습니다. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
+고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 별도 [Compute 자동 메서드](../compute/server-automatic-ip.md)는 기존 서버의 조건부 Neutron 실행과 raw Nova 관측을 제공합니다. [자동 IP 서버 생성](../compute/create-with-automatic-floating-ip.md)과 [GetActive/Wait](../compute/server-ready.md)도 같은 Neutron 정책을 소비합니다. 같은 상위 entry의 [pool·순차 IP dispatch](../compute/server-ip-dispatch.md)도 제공합니다. 일반 Create의 전체 source dispatch, standalone cloud IP helper의 전체 입력·반환 의미, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup은 계속 남습니다. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
 
 [plan HTTP 테스트](floating_ip_plan_test.go)와 [설정·응답 경계 테스트](floating_ip_plan_boundaries_test.go)는 owner 지연·owned 선택·typed absence·목적지 재GET·전체 후보·revision·실제 ACTIVE·접수 후 부분 결과·source guard를 확인하도록 작성되어 있습니다. 테스트 실행 결과와 최종 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md)에 실제 검증 revision과 함께 기록합니다. Python 비교는 고정 소스 정적 검토이며 Python 예제·실클라우드 실행 근거는 별도입니다.
 

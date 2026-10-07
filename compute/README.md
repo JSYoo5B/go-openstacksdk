@@ -15,6 +15,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
+| `conn.add_ips_to_server(server, ip_pool="public")` | [AddIPsToServer](server-ip-helpers.md): 기본60초·비동기, pool → IP 목록 → auto |
+| `conn.add_ip_list(server, ips)` | [AddIPList](server-ip-helpers.md): positional 목록·중복·빈 목록 no-op, 선택적인 raw 주소 관측 |
 | `conn.get_server_public_ip(server)` / `get_server_private_ip(server)` | [주소 선택·보충](server-addresses.md): owned view·MAC·IPv6·private 설정과 기존 association 조회 |
 | `conn.create_server(..., auto_ip=True, wait=True)` | [CreateWithAutomaticFloatingIP](create-with-automatic-floating-ip.md): 실제 ACTIVE·주소 준비·조건부 IP·Nova 관측 |
 | `conn.get_active_server(server, wait=False)` | [GetActiveServer](server-ready.md): supplied 상태 판정·조건부 IP 접수; 선택적 ACTIVE/주소 관측 |
