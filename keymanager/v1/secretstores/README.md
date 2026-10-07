@@ -71,6 +71,35 @@ func ListNonDefaultBackends(ctx context.Context, client *gophercloud.ServiceClie
 전송됩니다. 빈 문자열 필드는 생략합니다. `WithListQuery`는 명시적 빈 문자열이나
 추가 wire query를 전달하며 같은 이름의 typed query보다 우선합니다.
 
+## 선언된 속성 필터
+
+Python의 `secret_stores(**query)`처럼 선언된 속성을 전달하려면 `WithListFilter` 또는 `WithListFilters`를 사용합니다. SDK가 서버 query와 응답의 로컬 조건을 구분합니다. `name`/`status`는 서버 query이며 로컬 exact-match를 추가하지 않습니다. Unknown semantic 속성은 버리고, `WithListQuery`는 미선언 이름도 서버에 전달하는 별도의 wire 확장입니다.
+
+| 분류 | 속성 |
+|---|---|
+| 서버 query | `name`, `status`, `global_default`, `crypto_plugin`, `secret_store_plugin`, `created`, `updated`, `limit`, `marker` |
+| 로컬 Body 비교 | `id`, `created_at`, `updated_at`, `secret_store_ref`, `secret_store_id` |
+
+```python
+stores = conn.key_manager.secret_stores(
+    name="backend-pattern", secret_store_id="store-id", limit=10,
+)
+```
+
+```go
+stores, err := service.SecretStores.All(ctx,
+    secretstores.WithListFilter("name", "backend-pattern"),
+    secretstores.WithListFilter("secret_store_id", "store-id"),
+    secretstores.WithListOptions(secretstores.ListOpts{Limit: 10}),
+)
+```
+
+`created_at`/`updated_at`은 원문 `created`/`updated`를 비교하며 `created`/`updated` 서버 query와 구분합니다. `id`는 literal 원문 id가 있으면 null/empty를 포함해 그 값을 사용하고, 없으면 전체 원래 `secret_store_ref`를 비교합니다. `secret_store_id`만 ref의 마지막 원문 path component를 비교하므로 반환 모델의 편의용 `ID`와 다른 값일 수 있습니다. 생략/null은 null 조건이고 selected formatter가 해석할 수 없는 ref는 로컬 조건 평가 오류입니다. 이 오류는 원인을 보존하지만 새 HTTP ResponseError를 합성하지 않습니다. 참조는 HTTP 대상이 되지 않습니다.
+
+개별 속성의 마지막 옵션이 우선합니다. `WithListFilters`는 semantic 집합만 교체하고 nil/empty는 비웁니다. 값은 옵션 생성 시 복사하며 검증은 순회할 때 합니다. typed/raw query와 같은 wire 키의 semantic query를 함께 지정하면 값이 같아도 HTTP 전 오류입니다. 로컬 Body와 raw wire query는 서로 다른 namespace입니다. Query boolean은 소문자로 보내며 scalar 배열은 반복 query, null/빈 배열은 URL 값 생략입니다. query 객체는 오류입니다. Go의 공통 JSON 비교는 boolean과 number를 구분하고 원문 큰 숫자·생략/null을 보존합니다. Python의 `True == 1` 비교와 다릅니다.
+
+로컬 필터에서 제외된 행도 `MaxItems`를 소모하며 결과 수를 채우는 추가 페이지를 요청하지 않습니다. 링크·marker와 첫 페이지 옵션은 기존 목록 엔진을 사용합니다. 별도 builder나 predicate를 구현할 필요가 없습니다.
+
 `WithListOptions`는 pointer 값을 생성 시점과 적용 시점에 각각 복사합니다.
 `List`는 lazy하며 option slice를 보유한 iterator를 재사용할 수 있습니다.
 `MaxItems`는 0이면 무제한, 음수면 HTTP 전에 오류입니다. `Paginated`가 nil 또는
@@ -116,11 +145,7 @@ ID와 원문 marker 분리는 이 차이를 명시합니다. Go는 typed 문자�
 오류로 반환합니다.
 Python descriptor의 값 변환·일부 URI 허용 범위와 동일하다고 주장하지 않습니다.
 
-`WithListQuery`는 Go의 wire extension이므로 Python의 unknown query discard,
-Body attribute 로컬 필터·alias, JMESPath와 같지 않습니다. Inherited Resource의
-cache/dirty state, model overload, generic per-call base path/version/header
-controls도 이 세 API의 구현 범위 밖입니다. 전체 Python Resource parity를
-주장하지 않습니다.
+`WithListQuery`의 wire extension과 `WithListFilter(s)`의 declared query/Body 분류는 서로 다른 옵션입니다. deprecated JMESPath·동적 conflicting-attribute 복구는 지원하지 않습니다. Inherited Resource의 cache/dirty state, model overload, generic per-call base path/version/header controls는 별도 SDK 범위입니다. 반환 모델의 strict typed decode와 canonical-key 정책도 위에 설명한 Go 매핑을 따릅니다.
 
 검증 근거: [HTTP 계약 테스트](../../../api/keymanager_secretstores_test.go).
 Source pin은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
@@ -129,3 +154,89 @@ Source pin은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의
 `Resource._get_next_link`입니다. REST 상태·응답 형식은
 [공식 Secret Stores API](https://docs.openstack.org/barbican/wallaby/api/reference/store_backends.html)를
 참조했습니다. 테스트는 격리된 HTTP fixture이며 실제 cloud 테스트가 아닙니다.
+
+## 권한
+
+[Barbican2024.1 정책](https://docs.openstack.org/barbican/2024.1/configuration/policy.html)의 `secretstores:get`은 new defaults에서 project reader의 목록 조회를 허용합니다. [Train 기본값](https://docs.openstack.org/barbican/train/configuration/policy.html)은 admin이며 운영 정책에 따라 달라질 수 있습니다. SDK는 역할을 추측하거나 전환하지 않고 실제403을 반환합니다.
+
+## 단독 목록 예제
+
+`-cloud dev -name backend-pattern -id store-id`는 name 서버 query와 secret_store_id 로컬 조건을 함께 사용합니다. 빈 flag는 그 조건을 생략합니다. caller timeout은 인증·발견·전체 순회를 포함하며 SDK가 timeout을 새로 시작하지 않습니다.
+
+```go
+package main
+
+import (
+    "context"
+    "encoding/json"
+    "flag"
+    "fmt"
+    "net/http"
+    "os"
+    "time"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/keymanager/v1/secretstores"
+)
+
+func main() {
+    cloud := flag.String("cloud", "dev", "clouds.yaml entry")
+    name := flag.String("name", "", "server name query")
+    id := flag.String("id", "", "local secret_store_id condition")
+    timeout := flag.Duration("timeout", time.Minute, "authentication and list timeout")
+    flag.Parse()
+    if err := run(*cloud, *name, *id, *timeout); err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        os.Exit(1)
+    }
+}
+
+func run(cloud, name, id string, timeout time.Duration) error {
+    if timeout <= 0 {
+        return fmt.Errorf("timeout must be positive")
+    }
+    ctx, cancel := context.WithTimeout(context.Background(), timeout)
+    defer cancel()
+    conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
+    if err != nil {
+        return err
+    }
+    service, err := conn.KeyManagerV1(ctx)
+    if err != nil {
+        return err
+    }
+    options := []secretstores.ListOption{
+        secretstores.WithListOptions(secretstores.ListOpts{Limit: 10}),
+    }
+    if name != "" {
+        options = append(options, secretstores.WithListFilter("name", name))
+    }
+    if id != "" {
+        options = append(options, secretstores.WithListFilter("secret_store_id", id))
+    }
+    stores, err := service.SecretStores.All(ctx, options...)
+    if err != nil {
+        return err
+    }
+    type item struct {
+        ID         string                     `json:"id"`
+        StatusCode int                        `json:"status_code"`
+        Header     http.Header                `json:"header"`
+        Body       map[string]json.RawMessage `json:"body"`
+    }
+    output := make([]item, 0, len(stores))
+    for _, store := range stores {
+        output = append(output, item{
+            ID: store.ID,
+            StatusCode: store.StatusCode,
+            Header: store.Header,
+            Body: store.Body,
+        })
+    }
+    encoder := json.NewEncoder(os.Stdout)
+    encoder.SetIndent("", "  ")
+    return encoder.Encode(output)
+}
+```
+
+출력의 `id`는 Go 모델의 편의용 ID입니다. `body`는 해당 목록 row 원문이며 header/status_code는 실제 GET 응답입니다. SDK 모듈 안 별도 디렉토리의 main.go로 저장합니다. 실제 OpenStack·Python 실행은 별도 환경에서 수행합니다.

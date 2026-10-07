@@ -57,7 +57,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	docs := read("keymanager/v1/README.md")
-	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "SecretConsumers.InSecret", "consumer ID·Resources·Find·Wait 없음", "advertised offset next", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)", "Containers.Fetch(ctx", "Orders.Fetch(ctx", "metadata-fetch.md", "Containers.Remove", "Orders.Remove", "Secrets.Remove", "metadata-delete.md"} {
+	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "SecretConsumers.InSecret", "consumer ID·Resources·Find·Wait 없음", "advertised offset next", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)", "Containers.Fetch(ctx", "Orders.Fetch(ctx", "metadata-fetch.md", "Containers.Remove", "Orders.Remove", "Secrets.Remove", "metadata-delete.md", "WithListFilter", "WithListFilters"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing documented actual capability %q: %s", part, docs)
 		}
