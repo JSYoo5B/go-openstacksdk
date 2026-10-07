@@ -60,21 +60,30 @@ func (f *FloatingIPs) allocateDestination(ctx context.Context, serverID string, 
 		})
 	}
 	for _, port := range ports {
-		var fixed []struct {
-			IPAddress string `json:"ip_address"`
-		}
+		var fixed []json.RawMessage
 		if raw, present := port.Body["fixed_ips"]; present {
 			if err := json.Unmarshal(raw, &fixed); err != nil {
 				return zero, err
 			}
 		}
-		for _, ip := range fixed {
+		for _, item := range fixed {
+			var fields map[string]json.RawMessage
+			if err := json.Unmarshal(item, &fields); err != nil || fields == nil {
+				if input.FixedAddress != "" {
+					return zero, floatingIPInvalid("fixed-address selection needs object entries")
+				}
+				continue
+			}
+			var literal string
+			if json.Unmarshal(fields["ip_address"], &literal) != nil {
+				continue
+			}
 			if input.FixedAddress != "" {
-				if ip.IPAddress != input.FixedAddress {
+				if literal != input.FixedAddress {
 					continue
 				}
 			} else {
-				address, err := netip.ParseAddr(ip.IPAddress)
+				address, err := netip.ParseAddr(literal)
 				if err != nil || !address.Is4() {
 					continue
 				}
@@ -83,7 +92,7 @@ func (f *FloatingIPs) allocateDestination(ctx context.Context, serverID string, 
 			if err := resource.ID(id).Validate(); err != nil {
 				return zero, err
 			}
-			return FloatingIPSelection{ServerID: serverID, PortID: id, PortNetworkID: allocationString(port, "network_id"), FixedIPv4: ip.IPAddress}, p.Check(ctx)
+			return FloatingIPSelection{ServerID: serverID, PortID: id, PortNetworkID: allocationString(port, "network_id"), FixedIPv4: literal}, p.Check(ctx)
 		}
 	}
 	if input.FixedAddress != "" {

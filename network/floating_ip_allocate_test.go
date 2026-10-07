@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -89,7 +90,10 @@ func TestFloatingIPAllocateOptionalServerAndLiteralFixedSelection(t *testing.T) 
 				}
 				body := `{"ports":[]}`
 				if mode != "no ports" {
-					body = `{"ports":[{"id":"old","network_id":"nat","created_at":"2026-01-01","fixed_ips":[{"ip_address":"10.0.0.1"}]},{"id":"new","network_id":"nat","created_at":"2026-02-01","fixed_ips":[{"ip_address":"2001:db8::1"},{"ip_address":"10.0.0.2"}]}]}`
+					body = `{"ports":[{"id":"old","network_id":"nat","created_at":"2026-01-01","fixed_ips":[{"ip_address":"10.0.0.1"}]},{"id":"new","network_id":"nat","created_at":"2026-02-01","fixed_ips":[{"ip_address":{}},{"ip_address":"2001:db8::1"},{"ip_address":"10.0.0.2"}]}]}`
+				}
+				if mode == "latest NAT" {
+					body = strings.Replace(body, `"fixed_ips":[{"ip_address":{}}`, `"fixed_ips":[true,{"ip_address":{}}`, 1)
 				}
 				testcloud.JSON(w, 200, body)
 			})
