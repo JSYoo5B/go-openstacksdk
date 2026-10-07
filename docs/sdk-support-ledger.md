@@ -4,7 +4,7 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 판정은 **Go 매핑170 / 전체 선언3,362**, review505개·계약3,179개입니다(2026-10-08). 상세 집계와 진행 단계는 [구현 계획](implementation-plan.md#현재-집계와-진행-중인-작업), 최신 검증은 [미연결 Floating IP 정리](#미연결-floating-ip-일괄-정리)을 확인합니다. 아래 단위별 과거 집계는 당시 revision의 이력이며 현재 수치를 대신하지 않습니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [미연결 Floating IP 정리](#미연결-floating-ip-일괄-정리)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 

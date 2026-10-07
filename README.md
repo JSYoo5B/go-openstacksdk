@@ -6,6 +6,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 [구현 순서와 단계별 현황](docs/implementation-plan.md)은 **핵심 user API → 핵심 admin API → 매니지드 user API → 매니지드 admin API** 순으로 작업을 배치하고 소스 검토·구현·테스트·문서·최종 판정·커밋과 push를 구분합니다. 전체 API의 지원 범위와 완료 기준은 [지원 판정대장](docs/sdk-support-ledger.md)에서 확인합니다.
 
+**현재 SDK 완료 수와 진행 중인 작업:** [자동 집계·현재 단계](docs/implementation-plan.md#현재-집계와-진행-중인-작업). 아래의 Gophercloud 공개 연산 수는 고정 transport 목록이며, SDK 완료 수는 위 링크의 연산별 판정으로 확인합니다.
+
 ## 디렉토리와 지원 범위
 
 ```text
