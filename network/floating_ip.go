@@ -31,6 +31,7 @@ type FloatingIPs struct {
 	externalNetworks *resource.Collection[externalNetwork]
 	roles            *NetworkRoles
 	dependencies     Dependencies
+	owner            *Service
 }
 
 type externalNetwork struct {
@@ -68,7 +69,7 @@ func newFloatingIPs(s *Service, dependencies Dependencies) *FloatingIPs {
 	return &FloatingIPs{
 		Collection: s.API.FloatingIPs.Resources, api: s.API.FloatingIPs,
 		ports: s.API.Ports, networks: s.Networks, externalNetworks: external,
-		dependencies: dependencies, roles: s.Roles,
+		dependencies: dependencies, roles: s.Roles, owner: s,
 	}
 }
 

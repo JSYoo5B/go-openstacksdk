@@ -3,7 +3,9 @@ package network
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"iter"
 	"slices"
 	"sync"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
 	"github.com/gophercloud/gophercloud/v2/pagination"
+	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/resource"
 )
 
@@ -72,18 +75,28 @@ func (r *NetworkRoles) Reset() {
 }
 
 func (r *NetworkRoles) Discover(ctx context.Context) (*NetworkRoleSnapshot, error) {
+	return r.discoverCached(ctx, nil)
+}
+
+func (r *NetworkRoles) discoverCached(ctx context.Context, guard func(context.Context) error) (*NetworkRoleSnapshot, error) {
 	if ctx == nil {
 		return nil, floatingIPInvalid("context is required")
 	}
+	check := func() error {
+		if guard != nil {
+			return guard(ctx)
+		}
+		return ctx.Err()
+	}
 	for {
-		if err := ctx.Err(); err != nil {
+		if err := check(); err != nil {
 			return nil, err
 		}
 		r.mu.Lock()
 		if r.cache != nil {
 			result := cloneNetworkRoles(r.cache)
 			r.mu.Unlock()
-			return result, ctx.Err()
+			return result, check()
 		}
 		if flight := r.inflight; flight != nil {
 			r.mu.Unlock()
@@ -91,15 +104,17 @@ func (r *NetworkRoles) Discover(ctx context.Context) (*NetworkRoleSnapshot, erro
 			case <-flight:
 				continue
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, check()
 			}
 		}
 		flight, generation := make(chan struct{}), r.generation
 		r.inflight = flight
 		r.mu.Unlock()
-		result, err := r.discover(ctx)
+		result, err := r.discover(ctx, guard)
 		if err == nil {
-			err = ctx.Err()
+			err = check()
+		} else if guard != nil {
+			err = errors.Join(err, check())
 		}
 		r.mu.Lock()
 		if err == nil && generation == r.generation {
@@ -115,26 +130,15 @@ func (r *NetworkRoles) Discover(ctx context.Context) (*NetworkRoleSnapshot, erro
 	}
 }
 
-func (r *NetworkRoles) discover(ctx context.Context) (*NetworkRoleSnapshot, error) {
+func (r *NetworkRoles) discover(ctx context.Context, guard func(context.Context) error) (*NetworkRoleSnapshot, error) {
 	if !r.policy.UseExternalNetwork() && !r.policy.UseInternalNetwork() {
 		return &NetworkRoleSnapshot{}, nil
 	}
 	if r.client == nil || r.client.ProviderClient == nil {
 		return nil, floatingIPInvalid("authenticated network client is required")
 	}
-	pager := floatingIPSelectionPager(networks.List(r.client, networks.ListOpts{}), func(p pagination.PageResult) pagination.Page {
-		return networks.NetworkPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: p}}
-	})
 	var all []*RoleNetwork
-	for value, err := range resource.Stream(ctx, pager, func(p pagination.Page) ([]RoleNetwork, error) {
-		var envelope struct {
-			Networks []RoleNetwork `json:"networks"`
-		}
-		if err := p.(floatingIPSelectionPage).Page.(networks.NetworkPage).ExtractInto(&envelope); err != nil {
-			return nil, err
-		}
-		return envelope.Networks, nil
-	}) {
+	for value, err := range r.roleNetworks(ctx, guard) {
 		if err != nil {
 			return nil, fmt.Errorf("discover networks: %w", err)
 		}
@@ -150,12 +154,7 @@ func (r *NetworkRoles) discover(ctx context.Context) (*NetworkRoleSnapshot, erro
 	}
 	if len(all) != 0 && !configuredDestination {
 		gatewayNetworks = map[string]bool{}
-		pager := floatingIPSelectionPager(subnets.List(r.client, subnets.ListOpts{}), func(p pagination.PageResult) pagination.Page {
-			return subnets.SubnetPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: p}}
-		})
-		for subnet, err := range resource.Stream(ctx, pager, func(p pagination.Page) ([]subnets.Subnet, error) {
-			return subnets.ExtractSubnets(p.(floatingIPSelectionPage).Page)
-		}) {
+		for subnet, err := range r.roleSubnets(ctx, guard) {
 			if err != nil {
 				return nil, fmt.Errorf("discover NAT subnets: %w", err)
 			}
@@ -165,6 +164,40 @@ func (r *NetworkRoles) discover(ctx context.Context) (*NetworkRoleSnapshot, erro
 		}
 	}
 	return classifyNetworkRoles(all, gatewayNetworks, r.policy)
+}
+
+func (r *NetworkRoles) roleNetworks(ctx context.Context, guard func(context.Context) error) iter.Seq2[*RoleNetwork, error] {
+	if guard != nil {
+		return rest.List(ctx, rest.CollectionSpec[RoleNetwork]{Client: r.client, Path: "networks", Kind: "network roles",
+			PluralKey: "networks", Validate: guard, SourceGuard: guard, Metadata: planMetadata[RoleNetwork], ListCodes: []int{200, 204},
+			Paging: rest.PagePolicy[RoleNetwork]{HTTPLink: true}}, nil)
+	}
+	pager := floatingIPSelectionPager(networks.List(r.client, networks.ListOpts{}), func(p pagination.PageResult) pagination.Page {
+		return networks.NetworkPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: p}}
+	})
+	return resource.Stream(ctx, pager, func(p pagination.Page) ([]RoleNetwork, error) {
+		var envelope struct {
+			Networks []RoleNetwork `json:"networks"`
+		}
+		if err := p.(floatingIPSelectionPage).Page.(networks.NetworkPage).ExtractInto(&envelope); err != nil {
+			return nil, err
+		}
+		return envelope.Networks, nil
+	})
+}
+
+func (r *NetworkRoles) roleSubnets(ctx context.Context, guard func(context.Context) error) iter.Seq2[*subnets.Subnet, error] {
+	if guard != nil {
+		return rest.List(ctx, rest.CollectionSpec[subnets.Subnet]{Client: r.client, Path: "subnets", Kind: "NAT subnets",
+			PluralKey: "subnets", Validate: guard, SourceGuard: guard, Metadata: planMetadata[subnets.Subnet], ListCodes: []int{200, 204},
+			Paging: rest.PagePolicy[subnets.Subnet]{HTTPLink: true}}, nil)
+	}
+	pager := floatingIPSelectionPager(subnets.List(r.client, subnets.ListOpts{}), func(p pagination.PageResult) pagination.Page {
+		return subnets.SubnetPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: p}}
+	})
+	return resource.Stream(ctx, pager, func(p pagination.Page) ([]subnets.Subnet, error) {
+		return subnets.ExtractSubnets(p.(floatingIPSelectionPage).Page)
+	})
 }
 
 func cloneRoleNetwork(n *RoleNetwork) *RoleNetwork {
