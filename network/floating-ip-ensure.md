@@ -8,6 +8,8 @@
 
 독립 [AddIPsToServer·AddIPList](../compute/server-ip-helpers.md)는 별도 기본60초·비동기 entry입니다. 선택적 wait는 서버/IP ACTIVE 없이 raw 목표 주소를 확인하며, 이 문서의 직접 API나 기존 상위 readiness 조건을 바꾸지 않습니다.
 
+서버 연결 없이 free IP를 얻거나 새 allocation만 반환하려면 [FloatingIPs.Available](floating-ip-available.md)을 사용합니다. Available는 free 재사용에서 optional Server를 사용하지 않고 PUT·ACTIVE·raw Nova 대기를 하지 않습니다. 설정에 따른 Neutron/Nova standalone 조회는 [Connection AvailableFloatingIP](../compute/floating-ip-available.md)로 제공합니다.
+
 ## Python과 Go의 대응
 
 | 고정 openstacksdk cloud 호출 | gophercloudsdk |

@@ -203,6 +203,6 @@ Python의 Nova normalization은 `status="ACTIVE"`를 합성하고 `instance_id`�
 
 automatic source가Nova여도 Network 서비스가 있으면 source needs는 외부 network/NAT topology를 확인합니다. Go도 이 판단과 Nova pool 값을 분리합니다. explicit IP/pool은 자동 needs를 우회하며 Neutron endpoint나 owner를 미리 요구하지 않습니다. 순수한 native endpoint 부재와 단일 wrapped 부재만 Nova를 선택합니다. 다른 오류가 Join된 catalog 실패는 원인을 보존하고 Compute/HTTP/mutation으로 진행하지 않습니다. Neutron HTTP 실패 후 자동 Nova fallback은 구분합니다.
 
-이 단위는 기존 Compute IP 소비자의 Nova list/선택/할당/add action 경로를 제공합니다. 독립 public legacy pool/IP CRUD·direct proxy add/remove·delete verification·unattached cleanup 전체는 이번 단위에서 추가하지 않았으며 미해결로 추적합니다. 이 가이드로 전체 source operation을 완료로 승격하지 않습니다. Python 함수별 fallback, async already-attached/pool refresh, full Resource/interface/location/session normalization·mutable model·lookup retry/error/cleanup 정책은 계속 남는 비교 범위입니다.
+이 단위는 기존 Compute IP 소비자의 Nova list/선택/할당/add action 경로를 제공합니다. 별도 [AvailableFloatingIP](floating-ip-available.md)은 서버 연결 없이 free 선택 또는 새 할당을 반환하며 configured source=None에서도 explicit getter의 Nova 경로를 제공합니다. 독립 public legacy pool/IP CRUD·direct proxy add/remove·delete verification·unattached cleanup 전체는 이번 단위에서 추가하지 않았으며 미해결로 추적합니다. 이 가이드로 전체 source operation을 완료로 승격하지 않습니다. Python 함수별 fallback, async already-attached/pool refresh, full Resource/interface/location/session normalization·mutable model·lookup retry/error/cleanup 정책은 계속 남는 비교 범위입니다.
 
 Python 비교는 고정 source 정적 확인입니다. 예제 컴파일·로컬 HTTP fixture·최종 revision의 gate 결과는 실제 확인된 근거만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다. Python 예제나 인증된 cloud 실행을 확인했다는 뜻은 아닙니다.
