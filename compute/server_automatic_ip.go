@@ -124,6 +124,7 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 	if s == nil || s.API == nil || s.Servers == nil {
 		return nil, nil, nil, invalid("compute service is required")
 	}
+	ctx = rest.WithOperationSources(ctx)
 	baseGuard := s.captureAutomaticComputeSource()
 	o := automaticFloatingIPOptions{enabled: true, timeout: 5 * time.Minute, interval: 2 * time.Second}
 	for _, apply := range options {

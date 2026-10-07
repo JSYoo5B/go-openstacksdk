@@ -51,7 +51,6 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	if s == nil || s.API == nil || s.Servers == nil || s.client == nil || s.client.ProviderClient == nil {
 		return nil, invalid("authenticated compute service is required")
 	}
-	ctx = rest.WithOperationSources(ctx)
 	state, ctx, cancel, err := s.prepareAutomaticIP(ctx, AutomaticFloatingIPRequest{Server: &Server{ID: "pending-creation"}, Network: options.FloatingIPNetwork}, options.AutomaticIP)
 	if err != nil {
 		return nil, err
