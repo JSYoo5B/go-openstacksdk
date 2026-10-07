@@ -32454,7 +32454,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -32555,7 +32555,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -34863,7 +34863,9 @@
         "gophercloudsdk/compute.Servers.Create",
         "gophercloudsdk/compute.WithNetworkInterfaces",
         "gophercloudsdk/compute.WithNetworkMode",
-        "gophercloudsdk/compute.WithNetworks"
+        "gophercloudsdk/compute.WithNetworks",
+        "gophercloudsdk.WithDefaultNetwork",
+        "gophercloudsdk.WithoutDefaultNetwork"
       ],
       "contracts": [
         {
@@ -34897,7 +34899,7 @@
           ]
         },
         {
-          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
             "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
@@ -34908,19 +34910,53 @@
           "tests": [
             "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
           ]
+        },
+        {
+          "behavior": "Connection owns a default-network Ref and explicit disable policy; the last option wins, invalid Refs remain errors, explicit NICs/modes bypass the default callback and Neutron endpoint lookup, and default IDs work for image/existing-volume/new-volume boots without altering their mappings.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkIDsOptionsAndBootSources",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkDisableAndExplicitSelections",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkOptionValidationAndConcurrentReuse",
+            "compute/default_network_test.go:TestServerDefaultNetworkIsSkippedByExplicitNICsAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
+            "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
+            "compute/default_network_test.go:TestServerDefaultNetworkDoesNotLeakBetweenRequestsAndPreservesWaitFailure"
+          ]
+        },
+        {
+          "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
+          "tests": [
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+          ]
+        },
+        {
+          "behavior": "YAML default name matches exact network name OR ID across unfiltered complete pagination. Cross-kind collisions and duplicate names are ambiguous; missing/unsafe IDs, a later-page 403 and cancellation preserve errors and prevent Nova POST. Connection override/disable and explicit Create selection bypass the configured lookup.",
+          "tests": [
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
-        "compute/README.md"
+        "compute/README.md",
+        "compute/server-default-network.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results."
       ],
       "remaining": [
-        "Implement configured default-network lookup and compare advertised min/max plus default microversion checks used by supports/require_microversion; selected Go version checks alone are not that policy.",
+        "Complete shared default/NAT/external/internal network role discovery, subnet and relation validation, service/flags, cache/reset behavior and advertised min/max plus default microversion checks used by supports/require_microversion; the configured default selection contract recorded here does not cover that entire policy.",
         "Finish automatic/reused floating IP setup and cleanup, server group/scheduler hints, extra volume combinations, count/default/security-group/userdata/metadata contracts, post-create GET/fault/wait error behavior and all partial failure paths.",
         "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
       ]
@@ -34933,7 +34969,9 @@
         "gophercloudsdk/compute.Servers.Create",
         "gophercloudsdk/compute.WithNetworkInterfaces",
         "gophercloudsdk/compute.WithNetworkMode",
-        "gophercloudsdk/compute.WithNetworks"
+        "gophercloudsdk/compute.WithNetworks",
+        "gophercloudsdk.WithDefaultNetwork",
+        "gophercloudsdk.WithoutDefaultNetwork"
       ],
       "contracts": [
         {
@@ -34967,7 +35005,7 @@
           ]
         },
         {
-          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
             "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
@@ -34978,16 +35016,50 @@
           "tests": [
             "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
           ]
+        },
+        {
+          "behavior": "Connection owns a default-network Ref and explicit disable policy; the last option wins, invalid Refs remain errors, explicit NICs/modes bypass the default callback and Neutron endpoint lookup, and default IDs work for image/existing-volume/new-volume boots without altering their mappings.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkIDsOptionsAndBootSources",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkDisableAndExplicitSelections",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkOptionValidationAndConcurrentReuse",
+            "compute/default_network_test.go:TestServerDefaultNetworkIsSkippedByExplicitNICsAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
+            "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
+            "compute/default_network_test.go:TestServerDefaultNetworkDoesNotLeakBetweenRequestsAndPreservesWaitFailure"
+          ]
+        },
+        {
+          "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
+          "tests": [
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+          ]
+        },
+        {
+          "behavior": "YAML default name matches exact network name OR ID across unfiltered complete pagination. Cross-kind collisions and duplicate names are ambiguous; missing/unsafe IDs, a later-page 403 and cancellation preserve errors and prevent Nova POST. Connection override/disable and explicit Create selection bypass the configured lookup.",
+          "tests": [
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
-        "compute/README.md"
+        "compute/README.md",
+        "compute/server-default-network.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results."
       ],
       "remaining": [
         "Complete the inherited Proxy._create/Server.create input-attribute/descriptor/query/header/URI, defaults, extension handling and full response/error/model/location/session/cache comparison beyond the NIC contracts recorded here.",
@@ -35002,7 +35074,9 @@
         "gophercloudsdk/compute.Servers.Create",
         "gophercloudsdk/compute.WithNetworkInterfaces",
         "gophercloudsdk/compute.WithNetworkMode",
-        "gophercloudsdk/compute.WithNetworks"
+        "gophercloudsdk/compute.WithNetworks",
+        "gophercloudsdk.WithDefaultNetwork",
+        "gophercloudsdk.WithoutDefaultNetwork"
       ],
       "contracts": [
         {
@@ -35036,7 +35110,7 @@
           ]
         },
         {
-          "behavior": "No explicit selection sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
             "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
@@ -35047,20 +35121,112 @@
           "tests": [
             "compute/server_networks_test.go:TestServerNICsPreserveVolumeBootAndCreatedServerOnWaitFailure"
           ]
+        },
+        {
+          "behavior": "Connection owns a default-network Ref and explicit disable policy; the last option wins, invalid Refs remain errors, explicit NICs/modes bypass the default callback and Neutron endpoint lookup, and default IDs work for image/existing-volume/new-volume boots without altering their mappings.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkIDsOptionsAndBootSources",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkDisableAndExplicitSelections",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkOptionValidationAndConcurrentReuse",
+            "compute/default_network_test.go:TestServerDefaultNetworkIsSkippedByExplicitNICsAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
+            "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
+            "compute/default_network_test.go:TestServerDefaultNetworkDoesNotLeakBetweenRequestsAndPreservesWaitFailure"
+          ]
+        },
+        {
+          "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
+          "tests": [
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+          ]
+        },
+        {
+          "behavior": "YAML default name matches exact network name OR ID across unfiltered complete pagination. Cross-kind collisions and duplicate names are ambiguous; missing/unsafe IDs, a later-page 403 and cancellation preserve errors and prevent Nova POST. Connection override/disable and explicit Create selection bypass the configured lookup.",
+          "tests": [
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
-        "compute/README.md"
+        "compute/README.md",
+        "compute/server-default-network.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy."
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results."
       ],
       "remaining": [
         "Review the complete native CreateOpts/SchedulerHintOpts and generated API.Create contract, including remaining fields/counts, userdata/security groups, extensions, success/response/error and version paths beyond these high-level NIC assertions.",
         "The high-level API adds name resolution, selected-version policy and optional wait; these partial assertions do not promote the whole native Create declaration or the generated native method."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_default_network",
+      "source_fingerprint": "be23b8e8bc0366356f25675e425fb8096569476dde0542f8c641af07409c8bbd",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connect",
+        "gophercloudsdk.WithDefaultNetwork",
+        "gophercloudsdk.WithoutDefaultNetwork",
+        "gophercloudsdk/compute.Servers.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Connection owns a default-network Ref and explicit disable policy; the last option wins, invalid Refs remain errors, explicit NICs/modes bypass the default callback and Neutron endpoint lookup, and default IDs work for image/existing-volume/new-volume boots without altering their mappings.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkIDsOptionsAndBootSources",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkDisableAndExplicitSelections",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkOptionValidationAndConcurrentReuse",
+            "compute/default_network_test.go:TestServerDefaultNetworkIsSkippedByExplicitNICsAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "tests": [
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
+            "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
+            "compute/default_network_test.go:TestServerDefaultNetworkDoesNotLeakBetweenRequestsAndPreservesWaitFailure"
+          ]
+        },
+        {
+          "behavior": "Cloud/secure/public files are snapshotted once for native auth/endpoint/TLS and SDK metadata. Network lists replace at each precedence layer, [] clears inheritance, null/duplicate defaults/invalid flags are configuration errors, and empty/null metadata profile stops network inheritance while retaining native auth fallback.",
+          "tests": [
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationSearchAndReadFailures",
+            "connection_cloud_config_test.go:TestCloudNetworkConfigurationValidation"
+          ]
+        },
+        {
+          "behavior": "YAML default name matches exact network name OR ID across unfiltered complete pagination. Cross-kind collisions and duplicate names are ambiguous; missing/unsafe IDs, a later-page 403 and cancellation preserve errors and prevent Nova POST. Connection override/disable and explicit Create selection bypass the configured lookup.",
+          "tests": [
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/server-default-network.md"
+      ],
+      "differences": [
+        "The SDK applies a default network to server creation rather than exposing the Python Network-or-None getter; a zero dependency Ref means no default. Typed option IDs bypass lookup, names resolve exactly and YAML selection matches name OR ID over all pages.",
+        "Network selection HTTP failures are propagated and successful/failed results are not cached. Python combines role discovery with a sticky cache and can swallow list failures; these paths are not equivalent.",
+        "YAML network names are nonblank strings; Python truthy numeric names are stringified and whitespace names can be preserved. List/flag shape failures return ErrInvalidOption instead of Python incidental TypeError/AttributeError. Metadata profile presence follows Python while native zero-profile authentication fallback remains unchanged."
+      ],
+      "remaining": [
+        "Implement and expose the complete default getter result/Resource behavior and shared NAT source/destination, external/internal IPv4/IPv6 role discovery, subnet inference, relationship validation and nullable response boundaries.",
+        "Compare network service availability and raw use_external_network/use_internal_network truthiness, no-service/both-disabled returns, network/subnet failure policies, locking, cached Network/None identities and successful cloud mutation cache reset contracts.",
+        "Finish config loader region/argument overlays, builtin/vendor profiles and remaining configuration Resource/session behavior; the snapshot parser and standard file metadata policy are not the entire Python configuration loader."
       ]
     }
   ]

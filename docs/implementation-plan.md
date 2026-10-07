@@ -57,15 +57,16 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-07, 코드 기준 `55927d3`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
+아래는 2026-10-07, 코드 기준 `afb3023`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
 | Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
 | Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |
-| Identity 사용자별 프로젝트·그룹 목록 | native page와 Python 모델·상속 비교 완료 | 반환 모델·추출기 교정 완료 | 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | native 2개 `go_mapping`, Python 2개 부분 판정·정합성 검증 완료 | 코드·테스트 `ff685e9` push 완료. 문서·판정은 이번 갱신에 포함. [검증 기록](sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록), [사용법](../identity/v3/users/memberships.md). NIC 선택으로 연결 완료 |
-| Nova 서버 NIC 선택 | cloud·Proxy·native와 capability 정책 비교 완료 | concrete NIC·mode·port 이름 해석·default auto 완료 | 11개 신규 HTTP 그룹·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 관련 3개 부분 판정, 전체 연산 unresolved | 코드·테스트 `55927d3` push 완료. [사용법](../compute/server-network-interfaces.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-nic-선택). 문서·판정은 이번 갱신에 포함 |
-| 서버 생성의 기본 네트워크·자동 IP | 고정 cloud 정책의 남은 범위 확인, 세부 조사 예정 | 대기 | 대기 | NIC 가이드에 remaining 기록 | 미완료, 지원 승격 없음 | 다음 1단계 후보. default-network 탐색과 floating IP 자동 선택·재사용·부분 실패를 작은 계약으로 나눠 조사 |
+| Identity 사용자별 프로젝트·그룹 목록 | native page와 Python 모델·상속 비교 완료 | 반환 모델·추출기 교정 완료 | 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | native 2개 `go_mapping`, Python 2개 부분 판정·정합성 검증 완료 | 코드·테스트 `ff685e9` push 완료. 문서·판정 `4ba94ab` push 완료. [검증 기록](sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록), [사용법](../identity/v3/users/memberships.md). NIC 선택으로 연결 완료 |
+| Nova 서버 NIC 선택 | cloud·Proxy·native와 capability 정책 비교 완료 | concrete NIC·mode·port 이름 해석·default auto 완료 | 11개 신규 HTTP 그룹·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 관련 3개 부분 판정, 전체 연산 unresolved | 코드·테스트 `55927d3` push 완료. [사용법](../compute/server-network-interfaces.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-nic-선택). 문서·판정 `16d51cc` push 완료 |
+| Nova 서버 생성의 기본 네트워크 | config/cloud/native의 선택·상속·오류·cache 비교 완료 | Connection concrete 옵션·파일 snapshot·YAML 전체 페이지 name/ID 선택 완료 | 신규 12그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 3개 부분 판정 갱신·default getter 1개 부분 판정, 전체 연산 unresolved | 코드·테스트 `0355600`·`afb3023` push 완료. [사용법](../compute/server-default-network.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-기본-네트워크). 문서·판정은 이번 갱신에 포함 |
+| 서버 생성의 자동 IP·공유 네트워크 정책 | 고정 cloud 기본/NAT/외부·내부 분류·cache 차이의 소스 조사 완료, 자동 IP 세부 계약 조사 예정 | 대기 | 대기 | 기본 네트워크 가이드에 remaining 기록 | 미완료, 지원 승격 없음 | 다음 1단계 후보. floating IP 선택·재사용·부분 실패 및 이를 막는 네트워크 역할·service/flags·capability 정책을 작은 계약으로 나눠 구현 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
@@ -86,6 +87,6 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 `make check`는 vet·race test·지원 판정 정합성·gofmt를 실행합니다. `paritycheck`는 API와 테스트 함수 및 문서의 존재, source pin/fingerprint, 판정과 남은 기능의 정합성을 확인합니다. **테스트가 계약을 충분히 증명하는지, 실제 실행이 통과했는지는 수동 검토와 실행 결과로 확인합니다.** 현재 HTTP 테스트는 로컬 모의 서버 검증이며 실클라우드 acceptance나 Python 예제 실행은 별도 미검증 범위입니다.
 
-2026-10-07의 지원 판정은 직접 선언 **3,362개** 중 `supported` 0개, `go_mapping` 161개, `unsupported` 1개, `unresolved` 3,200개입니다. 저장된 review 473개에는 Go 매핑 161개·부분 검토 311개·미지원 1개가 있고, review가 없는 2,889개도 미해결에 포함됩니다. 이 개수는 두 소스의 선언 집계이며 중복을 제거한 HTTP endpoint 수나 상속 표면을 포함한 전체 SDK 완료율이 아닙니다. 구현·테스트가 있는 연산도 전체 계약 검토가 남으면 미해결로 유지합니다.
+2026-10-07의 지원 판정은 직접 선언 **3,362개** 중 `supported` 0개, `go_mapping` 161개, `unsupported` 1개, `unresolved` 3,200개입니다. 저장된 review 474개에는 Go 매핑 161개·부분 검토 312개·미지원 1개가 있고, review가 없는 2,888개도 미해결에 포함됩니다. 이 개수는 두 소스의 선언 집계이며 중복을 제거한 HTTP endpoint 수나 상속 표면을 포함한 전체 SDK 완료율이 아닙니다. 구현·테스트가 있는 연산도 전체 계약 검토가 남으면 미해결로 유지합니다.
 
 전체 완료는 [기존 완료 기준](sdk-support-ledger.md#완료-판정)을 따릅니다. 우선순위 조정으로 `unsupported`·`unresolved`를 제외하거나 생성 transport 수를 SDK 완료 수로 바꾸지 않습니다.

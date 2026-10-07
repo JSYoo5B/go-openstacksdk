@@ -1159,3 +1159,24 @@ NIC 순서, uuid+port 조합, 고정 IP만 있는 항목·tag만 있는 항목·
 현재 review 473개는 go_mapping 161·부분 판정 311·unsupported 1입니다. declared inventory 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200이며 판정 없는 2,889개도 미해결입니다. 전체 목표와 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
 
 Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.
+
+
+### Nova 서버 생성의 기본 네트워크
+
+핵심 user API에서 Connection이 기본 네트워크를 소유합니다. `WithDefaultNetwork(resource.Ref)`·`WithoutDefaultNetwork()`를 Connect와 FromProvider가 받아 애플리케이션 builder/resolver 없이 서버 생성에 적용합니다. Create의 NIC/mode가 먼저이며, 다음은 명시한 Connection default/disable, YAML default, selected 2.37+ auto 또는 이전/미선택의 networks 생략입니다. 유효한 마지막 default 옵션이 앞선 값을 교체하고 옵션 자체의 오류는 뒤 옵션으로 숨기지 않습니다. `[{}]`와 fixed-IP-only 입력도 명시 선택이므로 default callback과 Neutron endpoint 조회를 건너뜁니다.
+
+명시 Ref ID는 Neutron 없이 보내고 Ref 이름은 기존 exact-name lookup을 사용합니다. YAML의 `networks[].name`은 전체 페이지에서 name OR ID로 비교하며 다른 행의 ID/name 충돌과 중복 이름은 ErrAmbiguous입니다. 없는 후보, unsafe ID, 뒤 페이지의 403과 context 취소는 서버 POST 전에 반환합니다. 선택 결과는 cache하지 않아 성공·실패 후에도 다음 생성에서 다시 조회합니다. 기본값은 요청별 overlay에 들어가므로 ID 선택 뒤 zero Ref fallback으로 바뀌는 요청과 동일 옵션·동일 Connection의 동시 재사용에서 앞선 선택이 새 요청에 남지 않습니다.
+
+clouds/secure/public bytes를 한 번 snapshot해 SDK 설정과 native 인증·endpoint·TLS parser에 같은 내용으로 전달합니다. 기존 native의 명시 파일/OS_CLIENT_CONFIG_FILE/cwd/XDG 검색, 옆 secure와 필요한 경우의 별도 public 검색을 보존합니다. network 목록은 secure > 본문 > public 순서로 전체 교체하며 []는 상속을 비우고 null은 ErrInvalidOption입니다. multiple default/NAT destination와 잘못된 flag shape도 인증 전에 오류로 반환합니다. flag의 문자열은 공백 제거 없이 case-insensitive true만 true입니다. secure profile 변경과 empty/null metadata profile을 구분하고 인증의 native zero-profile fallback은 유지합니다. public에서 상속한 project auth, secure password, 원본 username·endpoint·region·TLS를 파일 변경 후에도 보존하는 assertion으로 확인했습니다.
+
+Go 정책에서는 YAML 이름이 비어 있지 않은 문자열이어야 합니다. Python의 truthy 숫자 이름 stringification과 공백 이름, incidental TypeError/AttributeError와는 구분합니다. legacy external_network 문자열도 default로 읽고 networks 동시 입력은 거부합니다. 이것은 Python config loader 전체의 region/args/vendor 처리나 cloud의 NAT/IPv4/IPv6/관계 검증·service/flags·shared cache getter를 완성한 것으로 판정하지 않습니다. Python 목록 실패를 삼키는 sticky cache와 비교해 Go의 오류 보존·재조회 차이도 공개 문서에 기록했습니다.
+
+코드·테스트는 옵션 단위 `0355600`, 파일 설정·선택 단위 `afb3023`로 commit/push했습니다. 신규 12개 테스트 그룹(Compute 3·Connection 기본값 4·설정 3·YAML HTTP 2)과 기존 인증 회귀의 집중 race 검증이 통과했습니다. 이미지·기존 볼륨·새 이미지 볼륨의 기본 NIC와 기존 block mapping·empty imageRef·삭제 정책을 함께 확인했습니다. ACTIVE 대기 실패는 생성 BUILD 서버와 ErrFailedState를 반환하고 cleanup 요청을 만들지 않습니다.
+
+코드 `afb3023`과 이번 판정·문서에서 Go 1.27.1로 `OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check`를 실행했습니다. vet·race test·parity·gofmt 모두 PASS, 테스트 패키지 40개이며 cache 재사용을 포함합니다. 기본 네트워크 집중 테스트도 PASS입니다. [가이드](../compute/server-default-network.md)의 정확한 Go fence를 별도 모듈에서 `go build -mod=readonly`로 컴파일했습니다(source SHA-256 c72af726ed9655adc5020d225e84a67709e9b983df1c3ed824fab8f859b7426a). 변경한 가이드의 상대 파일 링크도 확인했습니다. 모든 HTTP 검증은 로컬 fixture이며 인증한 OpenStack/Python 예제 실행은 하지 않았습니다.
+
+기존 create 3개 부분 판정에 default 계약을 추가하고 `python:cloud/_network_common/NetworkCommonCloudMixin/get_default_network`를 unresolved로 추가했습니다. 이 getter의 공개 Network/None 반환과 shared role/NAT·subnet·관계·service/flags·cache/reset·Resource 계약은 remaining에 보존합니다. create의 advertised min/max/default microversion, 자동/reused floating IP·cleanup, scheduler hints와 추가 필드·volume·response/model/session 계약도 남습니다. 기존 다른 review와 source pins, generated Go 및 API/resource/source inventory는 변경하지 않았습니다. Go 파일은 1,782개입니다.
+
+현재 review 474개는 go_mapping 161·부분 판정 312·unsupported 1이며 판정 없는 선언은 2,888개입니다. 전체 선언 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200입니다. 신규 부분 계약을 전체 연산 승격이나 SDK 완료로 세지 않았습니다. 다음은 같은 핵심 user 단계의 자동 floating IP와 필요한 공유 네트워크 정책입니다.
+
+Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.
