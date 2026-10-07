@@ -58,6 +58,9 @@ func setupServerIPFixture(t *testing.T, cloud *testcloud.Cloud, scenario string,
 			return
 		}
 		id, status, name := "created", "ACTIVE", "web"
+		if scenario == "pending" && counts.serverGets.Load() == 1 {
+			status = "BUILD"
+		}
 		if scenario == "server ERROR" {
 			status = "ERROR"
 		}
@@ -71,6 +74,9 @@ func setupServerIPFixture(t *testing.T, cloud *testcloud.Cloud, scenario string,
 	})
 	cloud.Mux.HandleFunc("GET /network/v2.0/ports", func(w http.ResponseWriter, r *http.Request) {
 		counts.ports.Add(1)
+		if scenario == "pending" && counts.serverGets.Load() != 2 {
+			t.Error("IP setup before second ACTIVE observation")
+		}
 		if counts.serverGets.Load() == 0 || r.URL.Query().Get("device_id") != "created" {
 			t.Error("IP setup before same server was ACTIVE", r.URL)
 		}
@@ -214,7 +220,7 @@ type serverWorkflowTransport func(*http.Request) (*http.Response, error)
 func (f serverWorkflowTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) {
-	for _, scenario := range []string{"success", "IP deadline", "parent deadline"} {
+	for _, scenario := range []string{"success", "IP deadline", "parent deadline", "unlimited", "limit restored"} {
 		t.Run(scenario, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			fixture := scenario
@@ -230,8 +236,8 @@ func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) 
 			var deadlines []time.Time
 			cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
 				deadline, set := r.Context().Deadline()
-				if !set {
-					t.Error("missing overall deadline", r.URL)
+				if set != (scenario != "unlimited") {
+					t.Error("unexpected deadline presence", scenario, r.URL)
 				}
 				mutex.Lock()
 				deadlines = append(deadlines, deadline)
@@ -252,8 +258,16 @@ func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) 
 			if err != nil {
 				t.Fatal(err)
 			}
-			result, err := service.Servers.CreateWithFloatingIP(ctx, serverFloatingIPRequest(), compute.WithWorkflowTimeout(limit), compute.WithServerOptions(compute.WithWait(resource.WithUnlimitedWait())), compute.WithFloatingIPOptions(network.WithEnsureWait(resource.WithUnlimitedWait())))
-			if scenario == "success" && err != nil || scenario != "success" && !errors.Is(err, context.DeadlineExceeded) {
+			options := []compute.CreateServerWithFloatingIPOption{compute.WithWorkflowTimeout(limit), compute.WithServerOptions(compute.WithWait(resource.WithUnlimitedWait())), compute.WithFloatingIPOptions(network.WithEnsureWait(resource.WithUnlimitedWait()))}
+			if scenario == "unlimited" || scenario == "parent deadline" {
+				options = append(options, compute.WithUnlimitedWorkflowTimeout())
+			}
+			if scenario == "limit restored" {
+				options = append(options, compute.WithUnlimitedWorkflowTimeout(), compute.WithWorkflowTimeout(time.Second))
+			}
+			result, err := service.Servers.CreateWithFloatingIP(ctx, serverFloatingIPRequest(), options...)
+			expectTimeout := scenario == "IP deadline" || scenario == "parent deadline"
+			if !expectTimeout && err != nil || expectTimeout && !errors.Is(err, context.DeadlineExceeded) {
 				t.Fatal(err)
 			}
 			if result == nil || result.Server.Status != "ACTIVE" || result.Assignment == nil || result.Assignment.FloatingIP.ID != "fip" {
@@ -372,5 +386,48 @@ func TestConnectionServerFloatingIPOptionsSnapshotConcurrentReuse(t *testing.T) 
 	}
 	if results[0] == nil || results[1] == nil || results[0].Server == results[1].Server || results[0].Assignment == results[1].Assignment || results[0].Assignment.FloatingIP == results[1].Assignment.FloatingIP {
 		t.Fatal("results alias across calls", results)
+	}
+}
+
+func TestConnectionServerFloatingIPPollsServerBeforeStartingIP(t *testing.T) {
+	cloud := testcloud.New(t)
+	counts := setupServerIPFixture(t, cloud, "pending")
+	service, err := connection(t, cloud).Compute(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var callbacks atomic.Int32
+	result, err := service.Servers.CreateWithFloatingIP(context.Background(), serverFloatingIPRequest(), compute.WithServerOptions(compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(int) { callbacks.Add(1) }))))
+	if err != nil || result == nil || result.Server.Status != "ACTIVE" || result.Assignment == nil || counts.serverGets.Load() != 2 || callbacks.Load() != 1 || counts.ports.Load() != 1 {
+		t.Fatalf("result=%+v err=%v serverGETs=%d callbacks=%d ports=%d", result, err, counts.serverGets.Load(), callbacks.Load(), counts.ports.Load())
+	}
+}
+
+func TestConnectionServerFloatingIPMissingNetworkStopsBeforeNovaPOST(t *testing.T) {
+	cloud := testcloud.New(t)
+	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Error("unexpected mutation/lookup", r.Method, r.URL)
+		http.Error(w, "unexpected", 500)
+	})
+	missing := errors.New("Neutron endpoint missing")
+	var catalogs atomic.Int32
+	cloud.Provider.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
+		catalogs.Add(1)
+		if opts.Type != "network" {
+			t.Error(opts)
+		}
+		return "", missing
+	}
+	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := conn.Compute(context.Background())
+	if err != nil || catalogs.Load() != 0 {
+		t.Fatalf("eager network dependency: %v catalogs=%d", err, catalogs.Load())
+	}
+	result, err := service.Servers.CreateWithFloatingIP(context.Background(), serverFloatingIPRequest())
+	if result != nil || !errors.Is(err, missing) || catalogs.Load() != 1 {
+		t.Fatalf("result=%+v err=%v catalogs=%d", result, err, catalogs.Load())
 	}
 }
