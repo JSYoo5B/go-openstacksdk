@@ -83,3 +83,24 @@ func TestFloatingIPPlannerOuterGuardStopsColdRoleRetry(t *testing.T) {
 		t.Fatal(err, original, attempts.Load())
 	}
 }
+
+func TestFloatingIPPlannerPreflightPreservesNilAndCancellation(t *testing.T) {
+	cloud := testcloud.New(t)
+	ips := network.New(cloud.Client("network", "/v2.0")).FloatingIPs
+	if planner, err := ips.NewPlanner(nil); planner != nil || !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal(planner, err)
+	}
+	planner, err := ips.NewPlanner(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancelCause(context.Background())
+	cause := errors.New("planning canceled")
+	cancel(cause)
+	if _, err := planner.PrepareEnsure(ctx, network.EnsureFloatingIPRequest{Server: resource.ID("server")}); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+		t.Fatal(err)
+	}
+	if next, err := ips.NewPlanner(ctx); next != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+		t.Fatal(next, err)
+	}
+}

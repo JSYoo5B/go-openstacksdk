@@ -19,6 +19,12 @@ type FloatingIPPlanner struct {
 }
 
 func (f *FloatingIPs) NewPlanner(ctx context.Context) (*FloatingIPPlanner, error) {
+	if ctx == nil {
+		return nil, floatingIPInvalid("context is required")
+	}
+	if ctx.Err() != nil {
+		return nil, errors.Join(ctx.Err(), context.Cause(ctx))
+	}
 	if f == nil || f.api == nil || f.ports == nil || f.roles == nil || f.owner == nil || f.owner.API == nil {
 		return nil, floatingIPInvalid("floating IP service is required")
 	}
@@ -64,6 +70,9 @@ func (p *FloatingIPPlanner) NetworkRoles(ctx context.Context) (*NetworkRoleSnaps
 func (p *FloatingIPPlanner) PrepareEnsure(ctx context.Context, input EnsureFloatingIPRequest, options ...EnsureFloatingIPOption) (FloatingIPPlan, error) {
 	policy, err := PrepareEnsureFloatingIPOptions(ctx, options...)
 	if err != nil {
+		if ctx != nil {
+			err = errors.Join(err, ctx.Err(), context.Cause(ctx))
+		}
 		return FloatingIPPlan{}, err
 	}
 	if err := p.Check(ctx); err != nil {
