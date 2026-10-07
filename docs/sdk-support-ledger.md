@@ -1322,3 +1322,35 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 다음 작업은 Compute의 public/floating-any-family/fixed/private/source/service 조건에 따른 자동 필요성·lazy skip, **준비한 plan의 조건부 실행과 raw Nova target-address 수렴**, Server/View/Assignment의 단계별 부분 결과입니다. 풀/명시 IP/auto 우선순위, Nova networking 및 source fallback·has_service/session/Resource·cleanup 계약도 남아 있습니다. Neutron plan 기반이나 합성 주소 view만으로 전체 cloud Create/Wait/add-auto/availability 완료로 판정하지 않습니다.
 
 일반 Get/Create/Wait의 주소 확장, 자동 needs/skip·source availability·준비한 network/port/fixed 선택의 조건부 assignment, pool/명시 IP 우선순위, raw Nova 주소 수렴과 cleanup은 계속 남습니다. 별도 view와 명시 CreateWithFloatingIP가 이를 끝낸 것으로 판정하지 않습니다. 다음 핵심 user 단위는 자동 필요성 decision을 실제 연결 계획에 고정하고 합성 주소를 관측 완료로 쓰지 않는 흐름입니다.
+
+
+## 기존 서버의 자동 Floating IP 판단·연결·Nova 관측
+
+2026-10-07 핵심 user 단계에서 `compute.Service`와 Connection의 `PlanServerFloatingIP`·`EnsureServerFloatingIP`를 추가했습니다. [Python/Go 사용법과 독립 main](../compute/server-automatic-ip.md)에 concrete request/옵션, 판단 reason, 부분 결과와 차이를 기록했습니다. Plan은 독립 진단이며 다음 Ensure에 전달할 실행 token이 아닙니다. 한 Ensure 안에서만 역할 분류·대상 선택·실행이 같은 planner와 tuple을 유지합니다. 일반 Create/Wait 및 기존 명시 CreateWithFloatingIP는 이 새 API를 자동 소비하지 않습니다.
+
+SDK가 disabled/source-none·private·활성 external AccessIPv4·any-family floating·명시 empty 주소를 먼저 판단합니다. 확정 skip은 endpoint·Network·owner·mutation을 요구하지 않습니다. nil 주소만 raw Nova200/203 GET으로 한 번 갱신하고 ID·주소 형식·ERROR/fault를 확인합니다. 새 주소의 AccessIPv4도 다시 검사합니다. 남은 ACTIVE 후보의 기존 association 보충은 필요성 증거로 사용할 수 있지만, SupplementalError를 allocation 가능성의 증거로 숨기지 않습니다. public/private 계산은 같은 guarded 역할 snapshot을 소비하며 full/default/IPv6 expansion을 반복하지 않습니다.
+
+`FloatingIPs.NewPlanner`는 HTTP/owner 없이 source를 묶고, lazy NetworkRoles의 복사본을 제공합니다. 한 planner의 역할 snapshot은 Reset이나 반환 모델 수정으로 바뀌지 않고 다음 planner는 새 inventory를 사용합니다. 주소 분류 후 plan도 이 snapshot으로 source/NAT 대상을 고정합니다. outer context guard는 Compute만 확인하고 Network guard와 분리하여 재귀 호출을 피합니다. 이 작업에서 시작하는 cold REST와 mutation/조회 retry·accepted response는 같은 source 검사를 유지합니다. 기존 public/native discovery에서 이미 시작한 shared flight까지 새 guard의 소유 요청으로 바꾸지 않습니다.
+
+정확한 missing Network endpoint나 선택한 Nova source는 Needed=true/backend=nova일 수 있으며 mutation은 ErrUnsupported입니다. Neutron의 HTTP403·404·decode·취소·source 변경을 서비스 부재로 바꾸지 않습니다. 완료된 no-external/no-owned-port/제약 없는 fixed 탐색 부재만 clean skip입니다. typed absence에 다른 cause가 합쳐지면 성공 skip으로 숨기지 않습니다. 필요한 Neutron 실행은 공급된 실제 ACTIVE metadata와 mandatory raw observation의 Compute client·URL을 IP 변경 전에 확인하며, reuse owner는 실행 직전에 바인딩합니다. scope/capability 실패는 알려진 Decision과 nil Assignment로 남습니다.
+
+조건부 실행은 PrepareEnsure의 같은 선택을 EnsurePrepared로 소비하고 actual IP ACTIVE를 필수로 기다립니다. 이전 poll/timeout/progress 설정은 WithEnsureActive가 보존하며 description 같은 상태 attribute로 실제 ACTIVE를 우회하지 못합니다. 이후 원래 server ID의 raw GET에서 actual ACTIVE와 exact assigned version4/type=floating 행을 모든 network row에서 찾습니다. 목표가 두 번째 floating 행이어도 성공하지만 AccessIPv4·fixed/IPv6 행·다른 floating IP·Supplemental 데이터는 성공 증거가 아닙니다. 서버 ID는 시작 시 고정하고 progress에는 detached native 모델을 전달합니다.
+
+전체 기본 예산은 5분이고 raw poll은 2초입니다. 한 deadline이 classification·selection·assignment·관측을 제한하고 부모 deadline이 먼저면 부모가 이깁니다. 유효한 아직 미수렴 raw 응답만 다시 poll합니다. HTTP/ERROR/형식/ID/source/취소 오류는 실패로 보존하고 blanket lookup retry를 하지 않습니다. accepted allocation의 nil 모델도 Allocated=true/actual response와 남기며, 관측 오류·취소·timeout에는 실제 Assignment와 마지막 유효 raw Server/fault 또는 이전 known Server를 유지합니다. fallback allocation·Nova mutation·자동 DELETE는 수행하지 않습니다.
+
+신규 테스트는 [planner](../network/floating_ip_planner_test.go) 3그룹, [자동 판단·실행](../compute/server_automatic_ip_test.go) 9그룹, [capability·use flags·accepted Close·취소·raw retry](../compute/server_automatic_ip_boundaries_test.go) 5그룹, [Connection lazy policy/catalog](../connection_server_automatic_ip_test.go) 2그룹의 **19그룹**입니다. 실제 요청 field/경로·횟수와 부분 결과를 확인했습니다. Compute 관측 부재/잘못된 URL·owner 부재·BUILD metadata는 변경 전에 실패합니다. Connection skip는 locator0, missing Network는 Network locator1/Compute locator0입니다. raw503/source 교체는 한 요청과 원래503을 보존하고 accepted200 Close/error/cancel은 실제 status/header/body와 알려진 리소스를 유지합니다.
+
+```sh
+go test -race -timeout 60s . ./compute ./network \
+  -run 'TestAutomaticIP|TestConnectionAutomaticIP|TestFloatingIPPlan' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+최종 집중 로그는 `/private/tmp/gophercloudsdk-automatic-ip-boundaries-final.log`입니다. 코드/테스트 `ba78cd4`에서 전체 make check의 vet·race·parity·gofmt가 통과했으며 테스트 package는 40개입니다(`/private/tmp/gophercloudsdk-automatic-ip-check.log`). Production Go는 `64cb181` 이후 같고 이후 변경은 테스트입니다. 독립 source/코드·실제 assertion·문서 검토에서 nil planner context·custom cause 보존, 고정 server ID·progress 모델 분리와 mutation 전 observation capability를 보완했습니다. 집중 fixture의 함수명/import·empty-role 설정은 최종 검증 전에 교정했으며 이전 실패를 PASS로 기록하지 않습니다.
+
+가이드의 정확한 main SHA-256은 `51261cd97094531da0c46df9ea3e6a9110f3eb0f081dc17da1ade0b09f79fe1d`입니다. 별도 module에서 `go build -mod=mod -o automatic-ip-example .`로 컴파일했고 production Go는 최종 코드와 같습니다. 새 guide와 변경한 root/서비스 문서 7개에서 상대 파일 링크245개·missing0을 확인했습니다. Anchor·Python runtime·인증된 OpenStack 실행의 검증은 아닙니다. 임시 receipt 외에 명령·revision·테스트·source hash·범위를 이 저장소 기록에 남깁니다.
+
+공통 planner `532a1be`, context preflight `744092f`, Compute 자동 흐름 `64cb181`, 추가 경계 `a048624`, BUILD metadata 경계 `ba78cd4`, 사용 문서 `488a84a`를 작은 커밋으로 보존하여 push했습니다. 판정·진행표·검증 근거는 별도 커밋으로 저장합니다. 실제 public add_ips_to_server의 unresolved 부분 판정1개와 기존 available/public/private getter3개만 갱신했습니다. 기존 create/wait/native review·모든 status·source pin/fingerprint·catalog/generated inventory는 그대로입니다. Private needs/attach/module helper나 Go API에 Python catalog ID를 만들지 않았습니다.
+
+현재 review494개는 go_mapping161·unresolved332·unsupported1이며 unreviewed2868개입니다. 전체 선언3362의 supported0·go_mapping161·unsupported1·unresolved3200과 native1126/resources235/generatedGo338은 유지되고 Go 파일은1835개입니다. 이번 구현을 전체 cloud 연산의 지원 승격으로 세지 않습니다. pool>명시 ips>auto 전체 dispatch, Nova allocation/association/fallback, full has_service/config/session/Resource와 cloud create/get_active/wait·fault/ACTIVE-no-address·cleanup·예산/예외 정책은 남습니다. 다음 핵심 user 단위는 새 자동 흐름을 서버 생성·ACTIVE 대기와 연결하되 실제 부분 결과와 전체 시간 예산을 보존하는 작업입니다.

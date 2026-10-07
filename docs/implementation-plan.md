@@ -66,7 +66,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-07, 코드 기준 `9ea3e22`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
+아래는 2026-10-07, 코드/테스트 기준 `ba78cd4`에서 확인한 최근 단위와 다음 작업입니다. 전체 API의 단계별 보드는 아직 없으며 이 표부터 단위별 진행 상태를 저장소에 남깁니다. 이후 작업을 시작하거나 단계가 바뀔 때 행과 근거를 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
@@ -82,7 +82,8 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | 상위 Network CRUD와 공유 cache hook | 고정 cloud·Proxy·Resource의 생성/수정/삭제·AZ·기본값·cache 차이 비교 완료 | concrete 옵션·owned lookup/응답·접수 후 원래 cache Reset 완료 | 기본 7그룹·경계 12그룹·Connection 1그룹 집중 race 완료; 공통 삭제/조회·HTTP guard·204 7그룹 추가, 전체 40 package check 완료 | Python/Go 독립 예제·기본값/오류·native 모델 한계 작성, 독립 main 컴파일 완료 | cloud 3행 부분 판정 추가·기존 12행 갱신, 전체 gate·예제 컴파일·정합성 검증 완료, 지원 승격 없음 | 공통 오류 `fd863f3`·guard `2d95f3e`·CRUD `69aa03d`·조회 `8d0477d`·경계 `f71e838`·204 `5bfea18` 커밋·push 완료. [사용법](../network/network-mutations.md). 문서 `a1dc85c` push 완료. 판정·단계 기록은 이번 분리 커밋에 포함 |
 | 서버 주소 선택·기존 IP 보충 | 고정 raw/cloud/meta·역할/MAC·IPv6·probe·source/설정 차이 검토 완료 | owned view·public/private/default·Neutron/Nova 보충·Connection lazy/cache·concrete policy 완료 | 신규 23그룹 집중 race·전체 40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크 확인 완료 | cloud getter 2행 부분 판정 추가; 전체 Get/Create/Wait unresolved 유지 | `0cc3815`·`864b0e6`·`bbd39c6`·`5e889a6`·`8e982e4` 커밋·push 완료. [사용법](../compute/server-addresses.md), [검증 기록](sdk-support-ledger.md#서버-주소-선택과-기존-floating-ip-보충). 문서 `726ea3b` push 완료; 판정·단계 기록은 분리 커밋으로 보존 |
 | Floating IP 선택 계획과 실행 | 고정 needs/available/NAT·owner/응답·재선택 차이 검토 완료 | owner-free PrepareEnsure·owned plan·동일 tuple 실행·port 재GET·guarded REST·부분 201/202 결과 완료 | 신규 plan 13그룹·공유 헤더 1그룹·집중 4 package race·전체 40 package check 완료 | Python/Go 비교·정확한 main 최종 코드 컴파일·상대 링크 확인 완료 | 기존 available/native Create 2행 부분 근거 갱신·상태/핀 유지, 자동 cloud 연산 unresolved | 공통 헤더 `0258a1a`·계획 `c2cf46b`·경계 `37692fc`·헤더 범위/PUT `9ea3e22` push 완료. [사용법](../network/floating-ip-plan.md)·문서 `f77250d` push 완료. [검증 기록](sdk-support-ledger.md#floating-ip-선택-계획과-실행)과 판정은 분리 커밋으로 보존 |
-| 자동 IP 필요성·조건부 연결·Nova 수렴 | 고정 needs/skip/source·available/attach·raw Nova wait와 부분 실패 조사 완료 | 진행: guarded planner·Compute 자동 decision·조건부 Neutron assignment·raw Nova target 관측 구현 완료; 추가 경계 검증 완료 | planner 신규 3그룹·Compute 신규 14그룹·Connection 신규 2그룹과 기존 plan 집중 3 package race 통과; 전체 gate 대기 | 새 Python/Go 비교 가이드 작성·연결 완료; 독립 main 컴파일·링크 검토 진행 | 미완료, 지원 승격 없음 | 1단계 진행 중. 공유 snapshot 기반 `532a1be` push 완료. planner context `744092f`·자동 판단·실행 `64cb181` push 완료. 추가 경계를 작은 커밋으로 보존하고 문서 예제·전체 gate·부분 판정 검토 진행. 일반 Create/Wait 통합과 Nova mutation은 remaining |
+| 자동 IP 필요성·조건부 연결·Nova 수렴 | 고정 needs/skip/source·available/attach·raw Nova wait와 부분 실패 검토 완료 | guarded planner·lazy decision·조건부 Neutron assignment·raw Nova target 관측·부분 결과 완료 | 신규19그룹 집중3 package race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크245개 확인 완료 | add_ips 부분 판정1행·기존 available/getter3행 갱신; 전체 연산 unresolved·지원 승격 없음 | planner `532a1be`·context `744092f`·구현 `64cb181`·경계 `a048624`·BUILD `ba78cd4`·문서 `488a84a` push 완료. [사용법](../compute/server-automatic-ip.md), [검증 기록](sdk-support-ledger.md#기존-서버의-자동-floating-ip-판단연결nova-관측). 일반 Create/Wait·Nova mutation·pool/ips 우선순위 remaining |
+| 자동 IP와 서버 생성·ACTIVE 대기의 통합 | 고정 create/get_active/wait 분기 조사; 세부 계약 검토 중 | 대기 | 대기 | 대기 | 미완료, 지원 승격 없음 | 다음1단계 작업. 기존 부팅/NIC 옵션과 단일 deadline, actual ACTIVE·주소 필요성 판단·조건부 assignment·raw Nova 관측, 알려진 Server/Assignment 및 오류 보존을 연결 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
@@ -103,6 +104,6 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 `make check`는 vet·race test·지원 판정 정합성·gofmt를 실행합니다. `paritycheck`는 API와 테스트 함수 및 문서의 존재, source pin/fingerprint, 판정과 남은 기능의 정합성을 확인합니다. **테스트가 계약을 충분히 증명하는지, 실제 실행이 통과했는지는 수동 검토와 실행 결과로 확인합니다.** 현재 HTTP 테스트는 로컬 모의 서버 검증이며 실클라우드 acceptance나 Python 예제 실행은 별도 미검증 범위입니다.
 
-2026-10-07의 지원 판정은 직접 선언 **3,362개** 중 `supported` 0개, `go_mapping` 161개, `unsupported` 1개, `unresolved` 3,200개입니다. 저장된 review 493개에는 Go 매핑 161개·부분 검토 331개·미지원 1개가 있고, review가 없는 2,869개도 미해결에 포함됩니다. 이 개수는 두 소스의 선언 집계이며 중복을 제거한 HTTP endpoint 수나 상속 표면을 포함한 전체 SDK 완료율이 아닙니다. 구현·테스트가 있는 연산도 전체 계약 검토가 남으면 미해결로 유지합니다.
+2026-10-07의 지원 판정은 직접 선언 **3,362개** 중 `supported` 0개, `go_mapping` 161개, `unsupported` 1개, `unresolved` 3,200개입니다. 저장된 review 494개에는 Go 매핑 161개·부분 검토 332개·미지원 1개가 있고, review가 없는 2,868개도 미해결에 포함됩니다. 이 개수는 두 소스의 선언 집계이며 중복을 제거한 HTTP endpoint 수나 상속 표면을 포함한 전체 SDK 완료율이 아닙니다. 구현·테스트가 있는 연산도 전체 계약 검토가 남으면 미해결로 유지합니다.
 
 전체 완료는 [기존 완료 기준](sdk-support-ledger.md#완료-판정)을 따릅니다. 우선순위 조정으로 `unsupported`·`unresolved`를 제외하거나 생성 transport 수를 SDK 완료 수로 바꾸지 않습니다.

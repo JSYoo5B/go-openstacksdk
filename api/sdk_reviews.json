@@ -35525,7 +35525,15 @@
         "gophercloudsdk/network.NetworkRoles.Reset",
         "gophercloudsdk/network.FloatingIPs.PrepareEnsure",
         "gophercloudsdk/network.FloatingIPs.EnsurePrepared",
-        "gophercloudsdk/network.FloatingIPPlan.Selection"
+        "gophercloudsdk/network.FloatingIPPlan.Selection",
+        "gophercloudsdk.Connection.PlanServerFloatingIP",
+        "gophercloudsdk.Connection.EnsureServerFloatingIP",
+        "gophercloudsdk/compute.Service.PlanServerFloatingIP",
+        "gophercloudsdk/compute.Service.EnsureServerFloatingIP",
+        "gophercloudsdk/network.FloatingIPs.NewPlanner",
+        "gophercloudsdk/network.FloatingIPPlanner.NetworkRoles",
+        "gophercloudsdk/network.FloatingIPPlanner.PrepareEnsure",
+        "gophercloudsdk/network.FloatingIPPlanner.Check"
       ],
       "contracts": [
         {
@@ -35666,6 +35674,16 @@
             "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanRevisionHeadersRejectRetryChangesAndSourceOverride",
             "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanPUTFailurePreservesOriginalCandidateAndHTTPProof"
           ]
+        },
+        {
+          "behavior": "The separate Compute automatic existing-server consumer now uses one guarded planner for owned address-role classification and concrete Neutron selection, skips known policy/address cases without owner work, preflights required raw observation capability before mutation, executes the selected tuple and observes the assigned floating IPv4 in actual ACTIVE Nova response rows. It preserves Decision/Assignment/known Server and context/HTTP evidence; this does not provide the optional-server availability getter or integrate ordinary Create/Wait.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPKnownSkipsAvoidAllServiceAndOwnerWork",
+            "network/floating_ip_planner_test.go:TestFloatingIPPlannerSharesOwnedClassificationAndSelectionSnapshot",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPObservationCapabilityAndReuseOwnerPreflight",
+            "compute/server_automatic_ip_test.go:TestAutomaticIPExecutesFixedTargetAndObservesSecondRawFloatingIPv4",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPAcceptedRawCloseFailuresRetainEvidenceWithoutRetry"
+          ]
         }
       ],
       "documentation": [
@@ -35674,7 +35692,8 @@
         "compute/create-with-floating-ip.md",
         "network/network-roles.md",
         "network/network-mutations.md",
-        "network/floating-ip-plan.md"
+        "network/floating-ip-plan.md",
+        "compute/server-automatic-ip.md"
       ],
       "differences": [
         "Pinned available_floating_ip accepts an optional existing Server and returns the first free floating-IP Resource/Munch, allocating only when none is free. Ensure requires a safe explicit server Ref and always selects/verifies its unique IPv4 destination, associates a free IP, and deliberately prefers an IP already attached there. It returns a FloatingIPAssignment with Reused/Allocated phases; this is an idiomatic standalone workflow foundation rather than an equivalent availability getter.",
@@ -35683,13 +35702,14 @@
         "Python chooses Neutron versus Nova from service/configured floating_ip_source and falls back to Nova on selected NotFound failures. Go is Neutron-only and preserves selection/association errors without fallback, retry-to-allocate or implicit cleanup. Pinned creation wait timeout can delete a newly allocated IP; Go returns the allocated assignment for explicit cleanup.",
         "Standalone plain PrepareEnsureFloatingIPOptions resolves the recorded owner per Ensure call; service-bound PrepareEnsureActive intentionally holds the owner resolved before Nova creation. Reuse=false without explicit owner continues to leave scope to Neutron. Native alias results do not emulate Python Resource/normalization/location/session/cache state or server interface refresh.",
         "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution.",
-        "PrepareEnsure/EnsurePrepared are an explicit Go-only two-stage Neutron foundation holding an immutable selection, late owner binding and port revalidation. They do not implement the optional-server availability getter, automatic need/skip or raw Nova address convergence; shared cache/in-flight and existing public/native paths retain their own policies."
+        "PrepareEnsure/EnsurePrepared are an explicit Go-only two-stage Neutron foundation holding an immutable selection, late owner binding and port revalidation. They do not implement the optional-server availability getter, automatic need/skip or raw Nova address convergence; shared cache/in-flight and existing public/native paths retain their own policies.",
+        "A separate existing-server Compute automatic lane now conditionally consumes the immutable Neutron target and requires raw Nova observation; metadata supplementation only informs need/skip. The public availability getter remains partial, and general Create/Wait plus Nova/pool/explicit-IP dispatch keep their separate remaining contracts."
       ],
       "remaining": [
         "Provide or deliberately map the full public availability getter: optional/absent Server, network/pool dynamic inputs, unattached result behavior and return Resource/Munch identity/normalization. Compare list_floating_ips filtering/defaults/pagination/error/cache and current_project_id policies beyond the bounded Go selection path.",
         "Shared configured floating source/default/NAT roles now feed the bounded Go consumers, with verified bounded cache invalidation from owned high Network Service mutations. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, mutable Resource/cache/session semantics and source destination/source behavior beyond the explicit or multiple-owned-port boundaries; generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset. The source optional-server availability getter remains partial.",
         "Compare floating_ip_source/service selection, Nova-network pool listing/allocation/normalization and Neutron NotFound fallback. Finish private _neutron_create_floating_ip optional server/port/fixed-address semantics, destination heuristics, timeout/cleanup/exception ordering and Resource/Adapter behavior; private helpers are dependencies and have no separate declared catalog IDs.",
-        "The explicit CreateWithFloatingIP workflow now connects prepared Ensure to Nova creation and mandatory server/IP ACTIVE waits under one overall deadline. Ordinary Create remains separate. Complete full cloud create_server/add_auto_ip/wait_for_server automatic/reused/explicit IP branching, source/role/cache policies, refreshed server interfaces and cleanup/error ordering. The independent owner-free Neutron plan now fixes selected external/port/fixed targets through assignment, but Compute automatic decision and conditional dispatch plus raw Nova observation are still unimplemented."
+        "The explicit CreateWithFloatingIP workflow connects prepared Ensure to Nova creation and mandatory server/IP ACTIVE waits under one overall deadline. A separate existing-server Compute automatic lane now fixes role/target selection through conditional Neutron assignment and actual raw Nova address observation. Ordinary Create and cloud Wait remain separate. Complete full cloud create_server/add_auto_ip/wait_for_server automatic/reused/explicit IP and pool branching, source/service/Resource/cache/returned-interface policy and cleanup/error ordering beyond these bounded workflows."
       ]
     },
     {
@@ -37437,18 +37457,20 @@
         "gophercloudsdk/compute.Service.ExpandServerInterfaces"
       ],
       "documentation": [
-        "compute/server-addresses.md"
+        "compute/server-addresses.md",
+        "compute/server-automatic-ip.md"
       ],
       "differences": [
         "The getter returns (string,error), with empty string for no usable result, and accepts the native Nova Server snapshot. Independent ExpandServerInterfaces returns owned typed fields and address/provenance snapshots; it does not mutate the supplied Server or implicitly expand Get/Create/Wait.",
         "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
         "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
-        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException."
+        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.",
+        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping."
       ],
       "remaining": [
         "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
         "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
-        "Integrate address expansion into complete cloud get/create/wait lifecycle; implement automatic needs/skip/source dispatch, prepared assignment, pool/explicit IP priority and raw Nova observed-address convergence with partial results. Existing explicit CreateWithFloatingIP and synthesized rows do not prove those workflows."
+        "Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow."
       ],
       "contracts": [
         {
@@ -37530,18 +37552,20 @@
         "gophercloudsdk/compute.Service.ExpandServerInterfaces"
       ],
       "documentation": [
-        "compute/server-addresses.md"
+        "compute/server-addresses.md",
+        "compute/server-automatic-ip.md"
       ],
       "differences": [
         "The getter returns (string,error), with empty string for no usable result, and accepts the native Nova Server snapshot. Independent ExpandServerInterfaces returns owned typed fields and address/provenance snapshots; it does not mutate the supplied Server or implicitly expand Get/Create/Wait.",
         "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
         "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
-        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException."
+        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.",
+        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping."
       ],
       "remaining": [
         "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
         "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
-        "Integrate address expansion into complete cloud get/create/wait lifecycle; implement automatic needs/skip/source dispatch, prepared assignment, pool/explicit IP priority and raw Nova observed-address convergence with partial results. Existing explicit CreateWithFloatingIP and synthesized rows do not prove those workflows."
+        "Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow."
       ],
       "contracts": [
         {
@@ -37603,6 +37627,124 @@
           "tests": [
             "compute/server_address_expansion_test.go:TestServerAddressCalculationPreservesCancellationCauseAtEachDependencyBoundary",
             "compute/server_address_expansion_test.go:TestServerAddressSupplementNullableFixedAndFloatingFieldsDoNotBecomeEmptyAddresses"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/add_ips_to_server",
+      "source_fingerprint": "85f4e3d4c234d68e2ff10961e1cd1cc4ebb26018ace7b203ff1150e98ce4bc6e",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.PlanServerFloatingIP",
+        "gophercloudsdk.Connection.EnsureServerFloatingIP",
+        "gophercloudsdk/compute.Service.PlanServerFloatingIP",
+        "gophercloudsdk/compute.Service.EnsureServerFloatingIP",
+        "gophercloudsdk/compute.WithAutomaticIPEnabled",
+        "gophercloudsdk/compute.WithAutomaticAddressOptions",
+        "gophercloudsdk/compute.WithAutomaticEnsureOptions",
+        "gophercloudsdk/compute.WithAutomaticIPTimeout",
+        "gophercloudsdk/compute.WithUnlimitedAutomaticIPTimeout",
+        "gophercloudsdk/compute.WithAutomaticIPPollInterval",
+        "gophercloudsdk/compute.WithAutomaticIPProgress",
+        "gophercloudsdk/network.FloatingIPs.NewPlanner",
+        "gophercloudsdk/network.FloatingIPPlanner.NetworkRoles",
+        "gophercloudsdk/network.FloatingIPPlanner.PrepareEnsure",
+        "gophercloudsdk/network.FloatingIPPlanner.Check"
+      ],
+      "documentation": [
+        "compute/server-automatic-ip.md",
+        "compute/server-addresses.md",
+        "network/floating-ip-plan.md"
+      ],
+      "differences": [
+        "The pinned public add_ips_to_server returns a mutable Server Resource and dispatches pool > truthy explicit ips > auto_ip/needs. These concrete Go APIs provide a separate bounded existing-server automatic Neutron lane and structured Decision/Assignment/Observed partial results; Plan is diagnostic and a separate Ensure call replans, while one Ensure retains its chosen target internally.",
+        "Go puts known disabled/private/AccessIPv4/floating/explicit-empty skips ahead of endpoint/owner work and validates concrete inputs/options. It preserves nil versus empty addresses and uses owned address evidence. Full dynamic dict/Munch/Resource inputs, Python alias/coercion/session/normalization and complete has_service configuration/version behavior are not mapped by this bounded workflow.",
+        "Unlike the source needs helper swallowing some floating-network SDKException as false, only a clean completed semantic plan absence becomes a skip. HTTP/decode/read/Close/source/cancellation/ambiguous or other explicit-selector failures remain errors. Strict destination tuple selection, revision protection and re-GET behavior follow the separately reviewed Go Neutron plan.",
+        "Raw Nova observation requires an actual ACTIVE matching server and exact assigned version4 floating-tagged row anywhere in the raw address inventory, rather than selecting only the first floating IPv4. Supplemental metadata, AccessIPv4, fixed/IPv6 rows and Neutron ACTIVE alone cannot prove observation. Go retains known resources and does not automatically clean up or fall back on failures.",
+        "The Go operation defaults to a five-minute overall deadline and two-second raw observation poll with concrete overrides; the pinned add_ips_to_server defaults to timeout60 and wait=false. Ensure always requires actual Neutron ACTIVE and raw Nova observation when it assigns. Supplied-model skips remain lazy, while nil refresh, Nova-source supplementation and observation can require Compute."
+      ],
+      "remaining": [
+        "Provide or deliberately map the full public pool > explicit ips > auto_ip dispatch, dynamic Server/Resource inputs, fixed/NAT forwarding combinations, all wait/reuse/timeout defaults and returned Server interface/location/model normalization. This new row records only the independently callable existing-server bounded Neutron automatic branch, not the entire public operation.",
+        "Implement or compare Nova-network allocation/association/pool normalization and the source-specific fallback/error ordering. A Nova Needed decision currently produces ErrUnsupported for mutation; precise missing endpoint classification does not close full has_service settings, API-version/discovery/session and catalog-error policy.",
+        "Integrate the bounded automatic branch and raw address observation into complete cloud Create/Get/get_active_server/Wait lifecycles. Preserve the remaining cloud status/fault/ACTIVE-without-addresses handling,180-second/5-second wait behavior, broad missing/lookup exception retry, integer remaining-budget and cleanup/error ordering; existing general Create/Wait APIs have not been integrated.",
+        "Complete full configuration/vendor-profile/raw-string/nullable policies, inherited Resource/descriptor/adapter/session/cache contracts and other raw/native/out-of-band cache invalidation. Compare the remaining source IP/helper expansion and interface selection semantics beyond the tested owned address/role paths. Local HTTP fixtures and example compilation are not authenticated-cloud or Python runtime parity."
+      ],
+      "contracts": [
+        {
+          "behavior": "The bounded existing-server automatic lane keeps policy skips separate from an undetermined/error decision. Disabled/source-none, private policy, enabled external AccessIPv4, any-family floating tags including an empty address, and explicit empty/null-row inventories return a clean reason without Compute/Network/role/owner work or assignment. Supplied address presence is tested separately from nil refresh.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPKnownSkipsAvoidAllServiceAndOwnerWork"
+          ]
+        },
+        {
+          "behavior": "Nil addresses cause one owned raw Nova refresh; explicit empty addresses do not. Actual200/203 responses are accepted. Refreshed AccessIPv4 or floating evidence can skip; still-nil addresses return no-fixed. Missing404, malformed address rows, wrong server identity and ERROR fail before Network/IP work, retaining accepted response or known fault evidence instead of becoming a skip.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPNilOnlyRefreshPreservesActualEvidence"
+          ]
+        },
+        {
+          "behavior": "A missing Network backend or a requested Nova source can produce Needed=true/Backend=nova while Ensure returns ErrUnsupported without mutation. Completed absent external network or owned ports can skip; nonempty IPv6-only destination and denied port inventory remain undetermined errors. A semantic absence joined with accepted-response cancellation remains a failure with context cause and HTTP proof.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPBackendAndCompletedAbsenceStayDistinct",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPSelectionAbsenceWithAcceptedCancellationIsFailure",
+            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
+          ]
+        },
+        {
+          "behavior": "Existing Neutron association supplementation may add an owned Supplemental floating row and avoid allocation, but does not set Observed or make a Nova GET. Supplement403 remains an error with SupplementalError rather than a successful skip. Calculated public IPv4 can skip; an untagged private IPv4 can require assignment, and disabled external/internal role-use policies do not turn a supplied AccessIPv4 into external evidence.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPSupplementedExistingAddressSkipsAndFailuresStayVisible",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPComputedAddressAndRoleUseFlagsPreserveNeedPolicy"
+          ]
+        },
+        {
+          "behavior": "One lazy FloatingIPPlanner supplies owned classification roles and the subsequent external/NAT/port selection from one role snapshot. Construction performs no HTTP or owner binding. Returned role edits and Reset do not alter that planner snapshot; a new planner reads the next inventory. Cold-role retries check the installed outer Compute guard and retain original503 while stopping before another physical role request.",
+          "tests": [
+            "network/floating_ip_planner_test.go:TestFloatingIPPlannerSharesOwnedClassificationAndSelectionSnapshot",
+            "network/floating_ip_planner_test.go:TestFloatingIPPlannerOuterGuardStopsColdRoleRetry",
+            "compute/server_automatic_ip_test.go:TestAutomaticIPColdRoleRetryChecksOuterComputeSource"
+          ]
+        },
+        {
+          "behavior": "A needed Neutron execution preflights required raw Compute observation capability and URL before mutation. Missing Compute, invalid Compute URL and unknown reuse owner return the determined Decision without allocation or raw observation; unsupported capability/scope remains ErrUnsupported. Existing ACTIVE server is required for the assignment lane, and the prepared Neutron target is executed without reselection.",
+          "tests": [
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPObservationCapabilityAndReuseOwnerPreflight",
+            "compute/server_automatic_ip_test.go:TestAutomaticIPExecutesFixedTargetAndObservesSecondRawFloatingIPv4"
+          ]
+        },
+        {
+          "behavior": "Successful assignment uses the selected external network, server-owned port and fixed IPv4, requires actual Neutron IP ACTIVE, then observes the exact assigned version4/type=floating address in any raw Nova network row with an ACTIVE matching server identity. The target may be the second floating row. Reset during observation and sequential caller Server-ID edits do not move the fixed target; the progress callback receives a detached model so its ID/name/address edits do not alter the known result or original input address data.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPExecutesFixedTargetAndObservesSecondRawFloatingIPv4"
+          ]
+        },
+        {
+          "behavior": "Fixed rows, version6 floating rows, another floating address, AccessIPv4 alone, BUILD status and empty raw addresses are not observation success. Cancellation preserves its custom cause, the allocated Assignment and last raw Server/fault evidence. Raw ERROR,404 and malformed rows fail instead of being retried by a blanket cloud exception policy; callback edits do not replace the retained Server.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPRawNonEvidenceCancelRetainsAssignmentAndLastServer"
+          ]
+        },
+        {
+          "behavior": "Accepted malformed allocation retains Allocated=true with nil IP and actual201 proof. A false description-based status cannot bypass actual Neutron ACTIVE, and failure returns the known Server/Assignment before raw Nova observation. Accepted raw200 Close failure, cancellation or source change retains original known Server/allocated Assignment and actual response status/header/body with one raw request. Raw503 retry that replaces the Compute collection stops before resending and preserves original HTTP error and Assignment.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPAcceptedAllocationAndActualIPReadinessKeepPartialResources",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPAcceptedRawCloseFailuresRetainEvidenceWithoutRetry",
+            "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPRawRetrySourceChangePreservesAssignmentAndOriginalHTTPError"
+          ]
+        },
+        {
+          "behavior": "Nil options, nonpositive timeout/poll interval, nil progress callback and invalid nested waiter options fail before selection or mutation. A parent deadline still bounds raw observation when the SDK whole-operation timeout is disabled, retaining the allocated Assignment. Planner nil/canceled preflight preserves custom context cause.",
+          "tests": [
+            "compute/server_automatic_ip_test.go:TestAutomaticIPStaticValidationAndDeadlineDoNotPermitMutation",
+            "network/floating_ip_planner_test.go:TestFloatingIPPlannerPreflightPreservesNilAndCancellation"
+          ]
+        },
+        {
+          "behavior": "Connection applies the installed owned address policy and per-call overlays lazily. Private/source-none/IPv6-floating/per-call-private skips make zero endpoint locator calls; a precise missing Network endpoint can choose the Nova backend with one Network locator call and no Compute resolution, then return ErrUnsupported without assignment.",
+          "tests": [
+            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints",
+            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
           ]
         }
       ]
