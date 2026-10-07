@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Secret·schema named getter](#secret와-schema-named-getter-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican effective quota getter](#barbican-effective-quota-getter-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Barbican effective quota getter (`53018d5`, `4525edc`, `5fc3a36`) | 기존 fixture·body wrapper·context guard·공개 testhelper 재사용. focused3 package race·전체40 package check·별도 조회 main 컴파일 PASS. | [최종 근거](#barbican-effective-quota-getter-완료). existing3+new1 계약, go_mapping176→177·핵심102→103·Barbican2→3/67. |
 | Available Neutron 내부·named 완료 (`c434d93`, `6bf368b`, `2c5e2c8`) | 기존 Query/Create/Allocate·공개 testhelper/fixture 재사용. 신규 HTTP9그룹·typed NAT3사례, 집중 race·전체40 package check·smoke5흐름 PASS. | [최종 근거](#available-neutron-내부-선택과-named-완료). remaining1→0, go_mapping175→176·핵심101→102. |
 | Available 직접·외부 Nova (`3b00178`, `b9ef579`) | 기존 Query/Create·fixture 재사용, raw filter→matching 전체 정규화·clean404 fresh·actual compat/partial proof의 HTTP4그룹. 관련3 package race·전체40 package check PASS. | [최종 근거](#available의-직접외부-nova-선택-완료). named unresolved 유지, remaining2→1. Neutron 내부 public-list fallback·로컬 필터·selected network allocation만 남음. |
 | Secret·schema named getter | 기존 Secret 8그룹·Glance schema HTTP5/core6/옵션3과 Connection 근거 재검토. 관련 4 package 집중 race·전체 40 package check PASS. | Secret getter 1개·schema getter 4개 go_mapping, 기존 25개 계약 보존. [최종 근거](#secret와-schema-named-getter-완료). 다른 선언·전체 Resource/session은 별도. |
@@ -1771,3 +1772,13 @@ root/Compute/Network 집중 race와 전체 `make check`가 PASS했습니다. 전
 고정 source의 named 입력·기본값·결과·오류를 유한하게 대조해 마지막 remaining1개를 닫았습니다. Available의 기존49계약은 유지하며 현재 public inventory/error 순서에 맞게4개 문구를 교정하고 실제6계약을 추가했습니다(이 연산55계약). source operation ID·pin·fingerprint와 다른504개 review는 그대로입니다. typed 입력·owned Resource/Wire·부분 receipt/context는 문서에 적힌 Go 매핑이며, 다른 inherited Resource/session 또는 IP consumer 전체를 이 연산의 새 blocker로 추가하지 않습니다.
 
 판정 후 별도 parity/progress 검증으로 최종 metadata를 확인합니다. 전체3,362=go_mapping176/unresolved3,185/unsupported1, review505=go_mapping176/unresolved328/unsupported1, 계약3,195개입니다. 핵심은102/2,292이며 Network 책임으로 이 연산을 한 번만 집계하여 Neutron23/758이 됩니다. 서비스별 수는 user/admin 합산입니다. 다음 구현은 핵심 user effective quota getter이고, 권한 profile에 따라 달라지는 secretstore getter는 별도 순서로 추적합니다. 전체 SDK 목표는 계속 active입니다.
+
+## Barbican effective quota getter 완료
+
+`python:key_manager/v1/get_quota`의 필수 입력·기본값·결과·오류 계약을 닫았습니다. Python public getter는 ID 없이 `_get(Quota, requires_id=False)`를 호출합니다. Go의 `service.Quotas.Get(ctx)`는 기존 shared Provider의 현재 토큰·source 경로로 고정 `/quotas` GET을 제출합니다. raw nullable 다섯 필드와 전체 Body/Data, 큰 숫자·확장 필드·독립 Header/StatusCode를 반환합니다. 프로젝트 조회·default fallback·변경·추가 List/Find/Wait를 합성하지 않습니다.
+
+기존 strict GET 테스트에 native403/404 증거와 accepted200 Close 실패를 추가했습니다. 요청 method/path/query/body·단일 호출과 native expected/actual code·URL·Body/Header·Get/quotas cause를 확인합니다. 기존 payload body wrapper를 재사용하여 body를 읽고 정확히 한 번 Close하며, custom 원인과 완전한 원문·metadata를 보존하고 native retry callback 및 SDK 조합 재전송이 없음을 검증합니다. 기존 preflight 그룹은 공통 context guard로 custom cancellation cause와 `context.Canceled`를 보존하며 HTTP0회를 확인합니다. 별도 서버/harness와 중복 fixture를 만들지 않았습니다.
+
+집중 quota/Connection/cloudread3 package race와 전체 `make check` PASS입니다. 전체 gate는 vet·race40 test package·pinned parity·집계·gofmt이며 Go 소스1,922개가 전후 SHA256 `bd52ce8182a8e245c34893a64bbaff2471f8227699a32813d08492d51f994597`로 같았습니다. 로그는 `/private/tmp/gophercloudsdk-quota-get-focused.log`, `/private/tmp/gophercloudsdk-quota-get-check.log`, receipt는 `/private/tmp/gophercloudsdk-quota-get-gate-receipt.json`입니다. [읽기 전용 standalone main](../keymanager/v1/quotas/README.md#현재-프로젝트-quota-읽기)은 별도 `/private/tmp` 디렉토리에서 컴파일 PASS했고 새 main SHA256은 `3c8a56ccec10695583edbc5b49eb99a37ef646ee15bc982bb4f15a072300baed`입니다. 기존 Configure fence는 그대로 보존했으며 재컴파일했다고 주장하지 않습니다. 실제 cloud 인증·Python 실행은 수행하지 않았습니다.
+
+기존3 contracts와 test refs를 유지하고 실제 오류 증거 계약1개를 추가했습니다. Go의 strict200/non-null quotas envelope, caller-owned raw snapshot·concrete context/header 옵션은 명시적인 Go 차이로 기록했습니다. public getter의 필수 입력이 아닌 generic Resource/session/cache와 ProjectQuota 관리·SecretStore 정책은 독립 scope로 남깁니다. 해당 row만 `go_mapping`·remaining[]로 바뀌어 전체177/3362·핵심103/2292·Barbican3/67, 리뷰505·contracts3196입니다. 함수 생성 자체나 전체 Barbican 완료로 집계하지 않습니다.

@@ -12556,7 +12556,7 @@
     {
       "operation": "python:key_manager/v1/get_quota",
       "source_fingerprint": "f99c8f1e357f5da29b11e750640eb414f720e32d0f10cea7850cab83219d3cee",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/keymanager/v1/quotas.New",
         "gophercloudsdk/keymanager/v1/quotas.API.Get",
@@ -12571,7 +12571,7 @@
           ]
         },
         {
-          "behavior": "Wrong/missing/null/array envelopes and malformed accepted JSON/read failures retain ResponseError body/header/status and cause without resend. Unexpected GET203 retains native cause; nil/invalid source, unsupported field/query/header inputs and canceled/nil context fail before HTTP.",
+          "behavior": "Wrong/missing/null/array envelopes and malformed accepted JSON/read failures retain ResponseError body/header/status and cause without an SDK composition resend. Unexpected GET203 retains native cause; nil/invalid source, shared GET options validation and canceled/nil context fail before HTTP. Effective GET preflight preserves both context.Canceled and the caller's custom cancellation cause.",
           "tests": [
             "api/keymanager_quotas_test.go:TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence",
             "api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight",
@@ -12585,6 +12585,12 @@
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
             "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
           ]
+        },
+        {
+          "behavior": "Actual effective GET404/403 and unexpected203 use one fixed GET quotas request without body/query, project/name lookup or default fallback under the fixture's default provider policy. Native expected200/actual status, exact URL/method, body/header and Get/quotas operation cause remain observable without false accepted-response classification. An accepted HTTP200 Close failure preserves its complete original body/header/status and custom cause, reads the body and closes it once, invokes no native retry callback and causes no SDK composition resend.",
+          "tests": [
+            "api/keymanager_quotas_test.go:TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence"
+          ]
         }
       ],
       "documentation": [
@@ -12592,13 +12598,13 @@
         "keymanager/v1/README.md"
       ],
       "differences": [
-        "GET fields secrets/orders/containers/consumers/cas are json.RawMessage rather than mutable untyped Python descriptors: omitted/null/large integer/unknown values and exact canonical-versus-case-variant keys remain in owned Body/Data, with actual response headers/status.",
-        "Effective quotas are an ID-free read. The singleton returns an owned decoded value and does not fabricate a cached quota ID or automatically negotiate a class-specific microversion."
+        "Go maps the input-free public getter to API.Get(ctx), using a concrete context and configured authenticated key-manager client. WithGetHeader is an additional owned Go option; it does not introduce project lookup, body/query injection, a quota identifier or a new List/Find/Wait surface.",
+        "Go deliberately requires the published HTTP200 success and a non-null quotas object envelope. Pinned Resource._translate_response at resource.py:1338-1399 unwraps quotas when present but can also consume a root object and suppresses JSON ValueError; exceptions.raise_from_response at exceptions.py:214-222 permits statuses below400. Go treats unexpected success status, wrong/missing envelope and malformed accepted JSON as errors with actual evidence rather than returning an empty or differently shaped resource.",
+        "Go returns independently owned raw response fields, Body/Data and Header/StatusCode rather than a mutable Python Quota Resource with dynamic descriptors, cached state or seeded-instance merges. Omitted json.RawMessage is nil and JSON null is retained as null bytes; unknown/case-variant data and exact large JSON numbers remain observable.",
+        "The named Python get_quota() exposes no per-call Resource.fetch session, adapter, base_path, microversion, params or skip_cache overload. Go retains its configured shared provider, source path, transport and live authentication; optional inherited GET cache and generic Resource/session lifecycle remain separately tracked SDK scope rather than incomplete declared getter inputs. No class-specific maximum-microversion negotiation is inferred from Quota.",
+        "Completion is restricted to python:key_manager/v1/get_quota. ProjectQuota get/update/delete, SecretStore singleton/list operations, other native declarations and full inherited Resource/session mappings retain their independent reviews and goal scope."
       ],
-      "remaining": [
-        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
-        "Optional inherited Proxy GET cache/cache_enabled/skip_cache policies are not provided by the singleton API. Dedicated owned headers are supported, but arbitrary Python Resource/adapter injection is not a new public overload."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/get_project_quota",
