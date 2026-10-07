@@ -18,12 +18,14 @@ import (
 type Network = networks.Network
 
 type Service struct {
-	API         *networkapi.Service
-	Networks    *resource.Collection[Network]
-	Ports       *resource.Collection[Port]
-	FloatingIPs *FloatingIPs
-	Roles       *NetworkRoles
-	client      *gophercloud.ServiceClient
+	API              *networkapi.Service
+	Networks         *resource.Collection[Network]
+	Ports            *resource.Collection[Port]
+	FloatingIPs      *FloatingIPs
+	Roles            *NetworkRoles
+	client           *gophercloud.ServiceClient
+	mutationNetworks *resource.Collection[Network]
+	mutationRoles    *NetworkRoles
 }
 
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
@@ -57,10 +59,14 @@ func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Depende
 	adapter.IterateControlled = nil
 	adapter.List = func(q url.Values) pagination.Pager { return networks.List(client, query.Adapter(q)) }
 	adapter.Extract = networks.ExtractNetworks
-	adapter.Delete = func(ctx context.Context, id string) error { return networks.Delete(ctx, client, id).ExtractErr() }
+	adapter.Delete = func(ctx context.Context, id string) error {
+		_, err := s.deleteNetworkID(ctx, id)
+		return err
+	}
 	s.Networks = resource.NewCollection(adapter)
 	s.Ports = s.API.Ports.Resources
 	s.Roles = newNetworkRoles(client, dependencies.NetworkRoles)
+	s.mutationNetworks, s.mutationRoles = s.Networks, s.Roles
 	s.FloatingIPs = newFloatingIPs(s, dependencies)
 	return s
 }
