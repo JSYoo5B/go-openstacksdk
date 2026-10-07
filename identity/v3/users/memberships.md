@@ -8,9 +8,10 @@ Keystone v3에서 사용자가 접근할 수 있는 프로젝트와 속한 그�
 |---|---|---|
 | `conn.identity.user_projects(user, **query)` | `identity.Users.ListProjectRecords(ctx, userID, options...)` | `iter.Seq2[*users.UserProjectRecord, error]` |
 | 프로젝트 목록의 native 호환 호출 | `identity.Users.ListProjects(ctx, userID)` | `iter.Seq2[*projects.Project, error]` |
-| `conn.identity.user_groups(user)` | `identity.Users.ListGroups(ctx, userID)` | `iter.Seq2[*groups.Group, error]` |
+| `conn.identity.user_groups(user)` | `identity.Users.ListGroupRecords(ctx, userID)` | `iter.Seq2[*users.UserGroupRecord, error]` |
+| 그룹 목록의 native 호환 호출 | `identity.Users.ListGroups(ctx, userID)` | `iter.Seq2[*groups.Group, error]` |
 
-`users`, `projects`, `groups`는 `github.com/JSYoo5B/gophercloudsdk/identity/v3` 아래의 패키지입니다. 새 `UserProjectRecord`는 SDK 소유 모델이며 `Resource`와 `Wire`를 각각 독립된 `*resource.RawResource`로 제공합니다. 기존 `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. native `ListProjects`·`ListGroups`의 인자·결과 타입·pager는 그대로이고, Python의 mutable Resource 상태나 연결 context를 native alias에 추가하지 않습니다.
+`users`, `projects`, `groups`는 `github.com/JSYoo5B/gophercloudsdk/identity/v3` 아래의 패키지입니다. 새 `UserProjectRecord`·`UserGroupRecord`는 SDK 소유 모델이며 `Resource`와 `Wire`를 각각 독립된 `*resource.RawResource`로 제공합니다. 기존 `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. native `ListProjects`·`ListGroups`의 인자·결과 타입·pager는 그대로이고, Python의 mutable Resource 상태나 연결 context를 native alias에 추가하지 않습니다.
 
 Python:
 
@@ -94,7 +95,7 @@ for project in conn.identity.user_projects(
     print(project.id, project.name, project.domain_id)
 ```
 
-대응하는 독립 실행 Go 예제입니다. 인증 설정을 준비한 뒤 사용자 ID를 첫 인자로 전달합니다. 원문 행과 Resource projection을 두 칸 들여쓴 JSON으로 출력합니다. native Project 모델이 필요한 호출자는 `record.Resource.Decode(&target)`로 별도로 변환하고 그 변환 오류를 처리할 수 있습니다.
+대응하는 독립 실행 Go 예제입니다. 인증 설정을 준비한 뒤 사용자 ID를 첫 인자로 전달합니다. 프로젝트와 그룹의 원문 행·Resource view를 두 칸 들여쓴 JSON으로 출력합니다. native 모델이 필요한 호출자는 `record.Resource.Decode(&target)`로 별도로 변환하고 그 변환 오류를 처리할 수 있습니다.
 
 ```go
 package main
@@ -147,6 +148,19 @@ func run(ctx context.Context) error {
 		}
 		fmt.Println(string(data))
 	}
+	for record, err := range identity.Users.ListGroupRecords(ctx, os.Args[1]) {
+		if err != nil {
+			return fmt.Errorf("list user group records: %w", err)
+		}
+		data, err := json.MarshalIndent(map[string]any{
+			"resource": record.Resource,
+			"wire": record.Wire,
+		}, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(data))
+	}
 	return nil
 }
 ```
@@ -174,13 +188,25 @@ semantic query는 `domain_id`, `is_domain`, `name`, `parent_id`, `is_enabled`, `
 
 Go의 RawResource는 전체 Python descriptor 객체가 아닙니다. `enabled`→`is_enabled` 응답 키 변환, `is_domain`·`enabled`의 Python truthiness coercion, 생략된 `tags`의 `[]` 기본값, 생략 속성·computed location·연결 상태를 자동으로 추가하지 않습니다. 받은 필드 이름과 값은 Wire에 남고, Resource에도 위의 options·부모 변환 외에는 그대로 남습니다. 응답 `self`도 수동 데이터이며 GET하거나 Python list처럼 제거하지 않습니다. Python Resource의 mutation/commit·cache·연결 객체 상태를 만들지 않으며, UserProject의 list-only source capability를 별도 Projects CRUD에 적용하지 않습니다.
 
-### record 목록의 페이지와 오류
+### 프로젝트 record 목록의 페이지와 오류
 
 새 목록은 실제 GET200의 `projects` 배열을 읽고 204는 빈 목록으로 처리합니다. 행은 nonnull JSON object여야 합니다. source Python은 HTTP adapter의 성공 범위를 사용하고 non-list envelope를 한 행으로 감싸지만, Go는 이 고정 성공 코드와 배열 구조를 검사합니다. 응답 read·Close·JSON decoding 오류는 실제 body·헤더·상태와 원인을 보존하고 SDK가 같은 요청을 자동 재전송하지 않습니다. provider에 설정된 native retry·재인증은 별도 정책입니다.
 
-`rel`/`href` links, 최상위 `next`, HTTP Link header를 읽고 native `links.next` dict도 호환 확장으로 허용합니다. 여러 continuation 표현이 함께 있으면 각각 검사하고 서로 다른 목적지를 광고하면 거부합니다. Python의 표현별 우선순위를 그대로 사용하지 않습니다. 지정한 limit은 양수 한 개이고 marker는 비어 있지 않은 string 한 개여야 합니다. semantic limit/marker의 null·빈 배열도 허용하지 않습니다. limit이 있으면 짧은 nonempty 페이지 뒤에도 마지막 원문 string `id`를 marker로 사용하고, 빈 페이지에서는 광고된 next가 있어도 끝납니다. MaxItems만 지정한 경우 wire limit hint를 공급합니다. cap은 로컬 필터 전 원문 행을 세므로 제외된 행도 소비하며, cap 이후의 행을 decode하거나 continuation을 검사하지 않습니다. Paginated=false는 첫 페이지만 소비합니다.
+`rel`/`href` links, 최상위 `next`, HTTP Link header를 읽고 native `links.next` dict도 호환 확장으로 허용합니다. 여러 continuation 표현이 함께 있으면 각각 검사하고 서로 다른 목적지를 광고하면 거부합니다. Python의 표현별 우선순위를 그대로 사용하지 않습니다. 지정한 limit은 양수 한 개이고 marker는 비어 있지 않은 string 한 개여야 합니다. semantic limit/marker의 null·빈 배열도 허용하지 않습니다. 최초 요청에 limit이 있으면 짧은 nonempty 페이지 뒤에도 마지막 원문 string `id`를 marker로 사용하고, 빈 페이지에서는 광고된 next가 있어도 끝납니다. MaxItems만 지정한 경우 wire limit hint를 공급합니다. cap은 로컬 필터 전 원문 행을 세므로 제외된 행도 소비하며, cap 이후의 행을 decode하거나 continuation을 검사하지 않습니다. Paginated=false는 첫 페이지만 소비합니다.
 
-다음 URL은 같은 collection 경로와 선택한 source에 머물러야 하며 기존 필터를 바꾸거나 새 필터를 추가할 수 없습니다. 반복 marker·URL, 잘못된 continuation, 후속 페이지의 HTTP/JSON/context 실패는 terminal 오류입니다. 앞서 반환한 record는 유지하고 `break`하면 후속 요청을 중단합니다. 이 경로·필터·source 보호는 임의 base_path 및 동적 session을 허용하는 Python과 다른 Go 정책입니다.
+최초 요청에 limit이 없으면 서버의 첫 next가 양수 limit 한 개를 추가할 수 있고, 이후 요청에서는 그 값을 유지합니다. 이후의 limit 변경이나 처음부터 지정한 limit의 교체는 거부합니다. 서버가 limit을 추가하더라도 최초 limit이 없었던 요청에 marker fallback을 새로 활성화하지 않습니다. 고정 Python도 최초 local limit=None을 유지하면서 광고된 next query를 따라갑니다.
+
+다음 URL은 같은 collection 경로와 선택한 source에 머물러야 하며 위의 첫 server limit 외에는 기존 필터를 바꾸거나 새 필터를 추가할 수 없습니다. 반복 marker·URL, 잘못된 continuation, 후속 페이지의 HTTP/JSON/context 실패는 terminal 오류입니다. 앞서 반환한 record는 유지하고 `break`하면 후속 요청을 중단합니다. 이 경로·필터·source 보호는 임의 base_path 및 동적 session을 허용하는 Python과 다른 Go 정책입니다.
+
+## 그룹의 SDK 소유 record
+
+Python `conn.identity.user_groups(user)`에는 query나 다른 공개 선택 인자가 없습니다. Go도 `ListGroupRecords(ctx, userID)`로 호출하며 프로젝트의 `WithProjectList...` 옵션을 그룹에 전달하지 않습니다. 사용자 ID 조회나 group GET을 먼저 수행하지 않고 선택한 Identity client의 `/users/{userID}/groups`를 lazy하게 순회합니다. 고정 사용자 ID 정책은 프로젝트와 같고 source/version·provider·인증 정책은 선택한 client에서 유지합니다.
+
+`UserGroupRecord.Wire`는 받은 행의 원문·실제 응답 헤더·상태를 보존하고, `Resource`는 독립 복사본에 요청 부모 `user_id`만 설정합니다. unknown vendor 필드·큰 정수·known 속성의 null과 생략을 raw JSON으로 남기며 native Group의 string/Links schema를 자동 적용하지 않습니다. Group에는 Project의 options descriptor가 없으므로 vendor `options:false`도 Resource에서 false로 유지합니다. Python Group은 unknown Body retention을 비활성화하고 descriptor 기본값·computed location·연결 Resource 상태를 제공하므로 이 owned raw 모델과 다릅니다. 응답 self 링크는 수동 데이터이고 자동 GET하지 않습니다.
+
+기본 목록은 실제 GET200의 `groups` 배열과 native 호환204 빈 응답을 처리하고, nonnull object 행을 요구합니다. 배열이 아닌 envelope를 단일 행으로 감싸는 Python 정책은 사용하지 않습니다. `rel`/`href` links, `groups_links`, 최상위 next, HTTP Link header와 native dict `links.next` 호환 형식을 지원합니다. 빈 페이지는 광고된 continuation이 있어도 끝나고, `break`는 후속 행·페이지 소비를 중단합니다. 공개 limit 입력이 없어 최초 요청은 query 없이 시작합니다. 서버가 첫 next에 양수 limit을 추가하면 이후 고정된 값을 유지하지만 marker fallback을 활성화하지 않습니다. next가 더 없으면 임의 marker 요청이나 limit을 만들어내지 않습니다. 여러 next 채널의 충돌·외부 source/path·그 밖의 query 변경·반복 marker/URL을 거부합니다.
+
+Project와 Group은 같은 SDK 소유 membership paging·source guard 엔진을 재사용합니다. accepted read·Close·JSON 오류는 원문·헤더·상태와 원인을 보존하고 SDK가 다시 요청하지 않습니다. 뒤 페이지의 HTTP/decode 실패나 취소 전까지 반환한 행은 유지합니다. Python의 mutable Resource/cache/session 상태 또는 UserGroup의 list-only capability를 별도 Group CRUD에 설치하지 않으며 기존 native `ListGroups`는 그대로 사용할 수 있습니다.
 
 ## native Iterator와 부분 결과
 
@@ -194,6 +220,6 @@ Iterator를 순회할 때 HTTP를 요청하고, native Project/Group pager의 �
 
 고정 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [user_projects](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1112-L1131), [user_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1414-L1429)와 Resource 정의를 소스에서 비교했습니다. 로컬 HTTP 계약 테스트는 올바른 모델과 필드, 두 페이지의 경로·토큰·`links.next`, 빈 목록·204, 오류 전파·이전 행 보존, 취소·조기 종료와 기존 추출기의 회귀를 검증합니다. 실클라우드 권한 정책이나 Python 예제를 실행한 검증은 아닙니다.
 
-기존 native `ListProjects`에는 query·로컬 필터·목록 제어 옵션이 없습니다. 별도 `ListProjectRecords`가 이 문서의 concrete 대응을 제공합니다. `user_groups(user)`에는 공개 query 인자가 없으며 Go의 `ListGroups`는 기존 native 모델/pager 경계를 유지합니다. Python User/Resource 입력 대신 Go는 명시적인 사용자 ID를 받고, Go의 `context.Context`는 요청 취소와 시간 제한을 전달하는 별도 개념입니다. 상속된 mutable Resource·session/cache 상태는 전체 SDK 목표에서 별도로 추적합니다.
+기존 native `ListProjects`에는 query·로컬 필터·목록 제어 옵션이 없습니다. 별도 `ListProjectRecords`가 이 문서의 concrete 대응을 제공합니다. `user_groups(user)`의 공개 query 인자 부재는 `ListGroupRecords`에도 유지하며 native `ListGroups`도 기존 모델/pager 경계를 유지합니다. Python User/Resource 입력 대신 Go는 명시적인 사용자 ID를 받고, Go의 `context.Context`는 요청 취소와 시간 제한을 전달하는 별도 개념입니다. 상속된 mutable Resource·session/cache 상태는 전체 SDK 목표에서 별도로 추적합니다.
 
 native `ListProjects`·`ListGroups`는 pager의 `links.next`를 사용합니다. 고정 Python의 상속된 `_get_next_link`는 `rel`/`href` 링크, 최상위 `next`, Link header와 marker fallback을 처리하므로 기존 두 페이지 native 테스트를 Python continuation 동등성의 근거로 사용하지 않습니다. source descriptor는 [UserProject manifest](../../../api/openstacksdk/resources/identity/v3/user_project.json)에 기록하고 생성 시 fresh AST·고정 source hash와 대조합니다. source class는 UserProject이며 Users.Resources의 User 또는 native Project collection에 이 semantic descriptor를 설치하지 않습니다. 이 문서의 소스 비교는 Python 실행 결과가 아닙니다. 새 record 목록의 판정은 [Keystone user_projects 완료 기록](../../../docs/sdk-support-ledger.md#keystone-user_projects-목록-완료)에서, 이전 native 반환형 교정은 [사용자별 목록 이력](../../../docs/sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록)에서 추적합니다. 전체 Resource/session 목표는 계속 구현합니다.

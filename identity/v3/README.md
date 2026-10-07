@@ -15,7 +15,7 @@ Gophercloud v2.15.0의 identity/v3 API를 하나의 인증된 서비스 객체�
 
 `Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
 
-`Users.ListProjectRecords(ctx, userID, options...)`는 사용자별 프로젝트를 SDK 소유 `UserProjectRecord`로 조회합니다. 고정 부모 user ID와 concrete 목록 옵션을 사용하며, 고정 Python UserProject의 query 별칭·네 Body 필터와 원문 응답을 구분합니다. [사용자별 프로젝트·그룹의 Python/Go 비교](users/memberships.md)는 Resource/Wire 소유권·목록 제어·고정 경로 정책을 설명합니다. 기존 native `Users.ListProjects`의 Project alias·인자·pager와 `Users.ListGroups`의 Group alias는 유지합니다.
+`Users.ListProjectRecords(ctx, userID, options...)`와 `Users.ListGroupRecords(ctx, userID)`는 사용자별 프로젝트·그룹을 SDK 소유 record로 조회합니다. 고정 부모 user ID와 독립 Resource/Wire 응답을 사용하고, 프로젝트는 concrete 옵션으로 고정 Python UserProject의 query 별칭·네 Body 필터를 조립합니다. 공개 query 인자가 없는 UserGroup에는 목록 옵션을 추가하지 않습니다. [사용자별 프로젝트·그룹의 Python/Go 비교](users/memberships.md)는 소유권·목록 제어·고정 경로 정책을 설명합니다. 기존 native `Users.ListProjects`의 Project alias·인자·pager와 `Users.ListGroups`의 Group alias는 유지합니다.
 
 ## Go 사용
 

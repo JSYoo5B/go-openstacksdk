@@ -88,7 +88,7 @@ Create/Update와 각 서비스의 API 호출은 버전별 패키지에서 concre
 
 ## 모든 서비스의 사용 문서
 
-Keystone의 [사용자별 프로젝트·그룹 조회](identity/v3/users/memberships.md)는 native `Project`·`Group` iterator와 SDK 소유 `ListProjectRecords`를 제공합니다. 새 목록은 concrete 옵션으로 query·별칭·로컬 Body 필터·행 수·페이지 정책을 조립하고, 사용자 범위의 Resource view와 실제 Wire 응답을 분리합니다. Python 비교와 두 독립 Go 예제에서 반환형·부분 결과·호환성을 설명합니다.
+Keystone의 [사용자별 프로젝트·그룹 조회](identity/v3/users/memberships.md)는 native `Project`·`Group` iterator와 SDK 소유 `ListProjectRecords`·`ListGroupRecords`를 제공합니다. 프로젝트는 concrete 옵션으로 query·별칭·로컬 Body 필터·행 수·페이지 정책을 조립하고, 그룹은 공개 query 인자 없는 source 호출을 유지합니다. 두 목록 모두 사용자 범위의 Resource view와 실제 Wire 응답을 분리합니다. Python 비교와 두 독립 Go 예제에서 반환형·부분 결과·호환성을 설명합니다.
 
 Neutron의 [9개 리소스 조건부 Update](network/v2/revision-updates.md)는 concrete `UpdateOpts.RevisionNumber`를 HTTP `If-Match` 조건으로 전달합니다. nil과 revision 0을 구별하고 `WithUpdateOptions`로 선택한 최종 조건을 사용합니다. 412 충돌은 오류로 반환하므로 호출자가 충돌 처리 정책을 선택합니다.
 
