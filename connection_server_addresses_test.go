@@ -101,3 +101,50 @@ func TestConnectionServerAddressMissingNeutronRetainsNovaAndIPv6(t *testing.T) {
 		t.Fatal(view, err)
 	}
 }
+
+func TestConnectServerAddressYAMLSourceAndTypedReplacement(t *testing.T) {
+	for _, source := range []string{"none", "nova", "typed neutron"} {
+		t.Run(source, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			configuredSource := source
+			if source == "typed neutron" {
+				configuredSource = "none"
+			}
+			opts := defaultNetworkCloudOptions(t, cloud, "    private: true\n    force_ipv4: true\n    floating_ip_source: "+configuredSource+"\n    networks: [{name: private, nat_destination: true}]\n")
+			if source == "typed neutron" {
+				opts = append(opts, sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(compute.FloatingIPNeutron), compute.WithAddressReachability(false), compute.WithLocalIPv6(false)))
+			}
+			connectionRoleFixture(t, cloud)
+			ports, neutron, nova := 0, 0, 0
+			cloud.Mux.HandleFunc("GET /network/v2.0/ports", func(w http.ResponseWriter, r *http.Request) {
+				ports++
+				testcloud.JSON(w, 200, `{"ports":[{"id":"port","device_id":"server","mac_address":"mac"}]}`)
+			})
+			cloud.Mux.HandleFunc("GET /network/v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
+				neutron++
+				testcloud.JSON(w, 200, `{"floatingips":[{"port_id":"port","fixed_ip_address":"10.0.0.1","floating_ip_address":"8.8.8.8"}]}`)
+			})
+			cloud.Mux.HandleFunc("GET /compute/os-floating-ips", func(w http.ResponseWriter, r *http.Request) {
+				nova++
+				testcloud.JSON(w, 200, `{"floating_ips":[{"port_id":"port","fixed_ip":"10.0.0.1","ip":"8.8.8.8"}]}`)
+			})
+			conn, err := sdk.Connect(context.Background(), opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			server := connectionAddressServer()
+			server.AccessIPv6 = "2001:db8::1"
+			view, err := conn.ExpandServerInterfaces(context.Background(), server, compute.WithAddressReachability(false))
+			wantPorts, wantNeutron, wantNova, wantPublic, wantInterface, wantV6 := 0, 0, 0, "", "10.0.0.1", ""
+			if source == "nova" {
+				wantPorts, wantNova, wantPublic = 1, 1, "8.8.8.8"
+			}
+			if source == "typed neutron" {
+				wantPorts, wantNeutron, wantPublic, wantInterface, wantV6 = 1, 1, "8.8.8.8", "8.8.8.8", "2001:db8::1"
+			}
+			if err != nil || view.PublicIPv4 != wantPublic || view.InterfaceIP != wantInterface || view.PublicIPv6 != wantV6 || ports != wantPorts || neutron != wantNeutron || nova != wantNova {
+				t.Fatalf("view=%+v err=%v ports=%d neutron=%d nova=%d", view, err, ports, neutron, nova)
+			}
+		})
+	}
+}
