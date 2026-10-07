@@ -132,8 +132,9 @@ func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 // distinguishing original-policy rejection from a direct native HTTP error.
 type statusPolicyError struct{ cause error }
 
-func (e *statusPolicyError) Error() string { return e.cause.Error() }
-func (e *statusPolicyError) Unwrap() error { return e.cause }
+func (e *statusPolicyError) Error() string            { return e.cause.Error() }
+func (e *statusPolicyError) Unwrap() error            { return e.cause }
+func (e *statusPolicyError) TerminalSDKFailure() bool { return true }
 
 // responseRequestOwnership checks serialized bytes, not interface identity.
 // A nil expected body means no request body; an explicit JSON null has bytes.

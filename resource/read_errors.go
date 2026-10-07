@@ -12,6 +12,10 @@ import (
 // transport or accepted-response pipeline, even when it contains an HTTP code.
 // Such errors cannot establish absence or permit an identity list fallback.
 func terminalReadError(err error) bool {
+	var terminal interface{ TerminalSDKFailure() bool }
+	if errors.As(err, &terminal) && terminal.TerminalSDKFailure() {
+		return true
+	}
 	var accepted *ResponseError
 	var transport *url.Error
 	var syntax *json.SyntaxError
@@ -20,4 +24,21 @@ func terminalReadError(err error) bool {
 	return errors.As(err, &accepted) || errors.As(err, &transport) || errors.As(err, &syntax) || errors.As(err, &typed) || errors.As(err, &target) ||
 		errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) ||
 		errors.Is(err, ErrInvalidOption) || errors.Is(err, ErrUnsupported)
+}
+
+// A joined deletion failure carries more than missing-resource evidence.
+// Preserve callback errors even when they use no SDK sentinel or known type.
+func terminalDeleteError(err error) bool {
+	if terminalReadError(err) {
+		return true
+	}
+	var joined interface{ Unwrap() []error }
+	if !errors.As(err, &joined) {
+		return false
+	}
+	causes := joined.Unwrap()
+	if len(causes) == 1 {
+		return terminalDeleteError(causes[0])
+	}
+	return len(causes) > 1
 }

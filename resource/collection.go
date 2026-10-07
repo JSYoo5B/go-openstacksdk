@@ -392,7 +392,7 @@ func (c *Collection[T]) Delete(ctx context.Context, ref Ref, opts ...LookupOptio
 	id := ref.value
 	if ref.byName {
 		v, err := c.Find(ctx, ref, opts...)
-		if errors.Is(err, ErrNotFound) && o.ignoreMissing {
+		if !terminalDeleteError(err) && errors.Is(err, ErrNotFound) && o.ignoreMissing {
 			return nil
 		}
 		if err != nil {
@@ -407,7 +407,7 @@ func (c *Collection[T]) Delete(ctx context.Context, ref Ref, opts ...LookupOptio
 		}
 	}
 	err = c.binding.Delete(ctx, id)
-	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+	if !terminalDeleteError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		if o.ignoreMissing {
 			return nil
 		}
