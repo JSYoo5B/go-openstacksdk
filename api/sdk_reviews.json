@@ -34774,9 +34774,18 @@
     {
       "operation": "python:identity/v3/user_projects",
       "source_fingerprint": "5fe52579c36f88cfe5512ea448cd5eb26a066eebf978cc8823810461b5df2f6f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListProjects"
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListProjects",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.API.ListProjectRecords",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListOptions",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListMaxItems",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListPaginated",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListMicroversion",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListHeader",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListQuery",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListFilter",
+        "github.com/JSYoo5B/gophercloudsdk/identity/v3/users.WithProjectListFilters"
       ],
       "contracts": [
         {
@@ -34803,20 +34812,54 @@
           "tests": [
             "api/identity_user_memberships_test.go:TestIdentityUserMembershipListsRetainRowsBeforeContinuationFailure"
           ]
+        },
+        {
+          "behavior": "The additive SDK-owned ListProjectRecords iterator is lazy and applies options once per iteration while preserving the fixed explicit user parent and selected Identity endpoint/token. All eleven canonical queries and fifteen spellings are classified from the pinned UserProject inheritance; canonical bulk values win over wire aliases, including null/false/empty values, while unknown or superseded invalid values are discarded. Individually repeated aliases use the final value, input maps/scalar slices remain owned, and operation-local headers and the explicit identity 3.13 microversion reach HTTP. The static descriptor is independently linked to the UserProject manifest, whose exact class/URI/body/query/MRO and six fixed source hashes are verified against fresh AST extraction; User/Project native collection metadata cannot substitute for this owned binding.",
+          "tests": [
+            "api/identity_user_project_records_test.go:TestIdentityUserProjectRecordsSemanticQueriesAliasesAndOwnedOptions",
+            "identity/v3/users/project_records_descriptor_test.go:TestUserProjectRecordDescriptorMatchesPinnedOwnedManifest",
+            "internal/cmd/sdkgen/python_user_project_filters_test.go:TestUserProjectPythonFilterManifestKeepsOwnedParentAndInheritedDescriptors",
+            "internal/cmd/sdkgen/python_user_project_filters_test.go:TestUserProjectPythonFilterVerificationReadsFreshSourceAndRejectsProofDrift"
+          ]
+        },
+        {
+          "behavior": "The four declared local Body filters id/description/options/links are evaluated after server query classification without becoming wire parameters; nested objects use subset matching and query-only names are left to the server. Each successful row owns separate Resource and actual Wire raw fields, exact extension numbers, status and headers. Resource binds the requested user_id and maps nonnull nonobject options to an empty object while preserving absent/null options; Wire retains the response user_id and original false/array values. View, wire and rows do not alias. The cached Connection Identity/IdentityV3 service and its Users API share the selected provider/resource base and use live authentication.",
+          "tests": [
+            "api/identity_user_project_records_test.go:TestIdentityUserProjectRecordsLocalBodiesNormalizedViewAndIndependentWire"
+          ]
+        },
+        {
+          "behavior": "The owned iterator preserves initial filters across dictionary links.next, rel/href links or projects_links, top-level next and HTTP Link continuations. Explicit limits use the last raw ID for marker fallback even on short nonempty pages, and empty pages terminate. SinglePage consumes only the first page; MaxItems supplies an omitted wire limit hint and caps raw rows before Body matching, leaving trailing malformed unconsumed rows untouched. Consumed malformed rows preserve whole-page HTTP evidence and any prior matching row. Shared continuation validation rejects foreign collection paths, widened filters, conflicting next sources and cycles rather than adopting Python precedence; shared accepted 204 handling terminates without JSON or continuation decoding.",
+          "tests": [
+            "api/identity_user_project_records_test.go:TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage",
+            "internal/rest/list_test.go:TestListDictionaryLinksAreExplicitAndGuarded",
+            "internal/rest/list_test.go:TestListContinuationCannotWidenCollectionFiltersOrMarkers",
+            "internal/rest/list_test.go:TestListHTTPLinksAreOptInAndConflictingNextLinksFail",
+            "internal/rest/list_test.go:TestListCyclesRejectRepeatedMarkerBeforeHTTP",
+            "internal/rest/list_no_content_test.go:TestListAcceptedNoContentTerminatesWithoutDecodingOrContinuation"
+          ]
+        },
+        {
+          "behavior": "Lazy preflight rejects nil options, invalid explicit user IDs, duplicate parent user_id in semantic/raw query, semantic-versus-wire collisions and selected object query values before HTTP; a source-changing callback stops subsequent callbacks and requests. Pre-cancel and cancellation after a yielded row preserve both context.Canceled and the custom cause. Accepted read/Close/decode failures retain whole response body/status/header and original causes with one physical request and one body Close; later native 403 or malformed-page failures retain the earlier row and one terminal error. The reused per-attempt SourceGuard stops native retries after source changes and preserves accepted HTTP evidence.",
+          "tests": [
+            "api/identity_user_project_records_test.go:TestIdentityUserProjectRecordsPreflightOwnedFaultsAndPartialErrors",
+            "internal/rest/collection_source_guard_test.go:TestCollectionSourceGuardStopsRetryAcrossOperations",
+            "internal/rest/collection_source_guard_test.go:TestCollectionSourceGuardKeepsAcceptedResponseEvidence"
+          ]
         }
       ],
       "documentation": [
         "identity/v3/users/memberships.md"
       ],
       "differences": [
-        "Pinned user_projects accepts a user ID or User resource without fetching the user first; Go requires an explicit user ID string and returns native Project aliases rather than URI-bound UserProject Resources.",
-        "Python UserProject disables CRUD and carries user_id/location/connection context. Python is_enabled maps to wire enabled; native Go Project uses Enabled, native tags/options and Extra policy."
+        "Python accepts a user ID or User Resource without fetching that user first; Go ListProjectRecords requires an explicit nonempty single unescaped URL path segment. Both the semantic and raw user_id query are rejected before HTTP to keep the parent fixed; Python's public user_projects raises a duplicate-keyword TypeError for an overriding user_id. Native ListProjects remains queryless with its Project alias and existing pager/signature.",
+        "The named result maps to an owned UserProjectRecord with independent RawResource Resource/Wire fields, rather than a mutable Python UserProject Resource. Resource copies actual fields, binds the selected user_id and applies only the local options dict conversion (nonnull nonobject becomes {}, absent/null stays distinct). It does not synthesize response is_enabled aliases, Python boolean truthiness, missing tags=[], absent descriptor defaults, computed location, connection/cache state, or strip/passively fetch self. These broader Resource lifecycle capabilities remain in the original SDK goal; mapping this list does not enable UserProject CRUD or change native Project CRUD.",
+        "Semantic fields use the pinned eleven-query/four-Body classification and canonical bulk alias precedence. Go query scalars use lowercase bools/exact JSON numbers/repeated scalar arrays, omit null URL values and reject selected objects; this is an explicit typed serialization policy rather than Python/requests dynamic stringification. Unknown semantic values are discarded, whereas explicit unknown wire queries are a Go extension; semantic-versus-typed/raw query overlaps are errors even for equal values. Local Body matching compares exact JSON types and recursive subsets of nonempty objects, deliberately distinguishing booleans from numbers unlike Python equality.",
+        "Typed Limit=0 and empty Marker omit those wire keys, MaxItems=0 is unlimited, negative limits/caps are rejected, and nil Paginated means all pages. Limits and markers that are sent must be a positive single limit and nonempty single marker. MaxItems counts raw rows and provides an omitted limit hint before local filtering. Concrete header and microversion options are supported; nil microversion preserves the selected Identity client and no Python discovery/_max_microversion=None selection is added. Python-only base_path, deprecated jmespath_filters, allow_unknown_params, resource_type and session controls are reserved instead of exposing arbitrary paths or Python execution.",
+        "The owned operation accepts strict HTTP200 projects arrays and native-compatible HTTP204 empty results; it requires nonnull object rows instead of Python's dynamic non-list-to-singleton envelope handling and adapter-wide accepted statuses. Raw JSON preserves extension precision and null/omission independently of native Project known-field decoding. Accepted response read/Close/decode failures are not resent by the SDK composition; provider-configured native retries and reauthentication remain separate.",
+        "The shared owned pager supports Python rel/href/top-level-next/HTTP-Link/marker routes and adds native dictionary links.next/projects_links compatibility. It validates all advertised channels and rejects conflicting destinations, foreign origins/paths, replacement filters, repeated markers or URLs; Python uses ordered continuation precedence and may normalize paths differently. Raw string IDs are required only when a fallback marker is needed. Cap, consumer break and empty-page termination preserve lazy behavior; shared helper tests supplement the four operation HTTP groups rather than claiming every helper boundary was independently repeated for this endpoint."
       ],
-      "remaining": [
-        "Implement the public **query contract: domain_id/is_domain/name/parent_id, is_enabled-to-enabled, inherited tag aliases and limit/marker, including alias-versus-wire precedence. This native operation exposes no query options.",
-        "Compare inherited Resource.list controls reachable through **query: paginated/base_path/max_items, headers/microversion, Body-field local filtering and deprecated JMESPath. Complete the URI-bound model/default/unknown-field/context policy.",
-        "Finish inherited continuation, HTTP/decode/session/cache behavior. Native ProjectPage consumes links.next; the pinned inherited Resource._get_next_link checks rel/href links, top-level next, Link headers and marker fallbacks, so the Go two-page test is not proof of Python continuation parity. UserProject inherits _max_microversion=None."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/user_groups",

@@ -10,23 +10,27 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 완료 (2026-10-08): 핵심 user 조회8개 판정, 전체188→196(+8).** Nova Password/limits2개, Cinder limits1개, Swift account/container metadata2개, Glance member/namespace/object getter3개의 실제 source·입력·기본 경로·응답·오류와 Go 차이를 대조했습니다. 기존43계약·API/test/doc anchors를 보존했고, 핵심 서비스 완료는114→122/2,292입니다. 직전 Barbican 생성3개를 포함한 최근 구간은179→196(+17)입니다.
+**최신 완료 (2026-10-08): Keystone user_projects, 전체196→197(+1)·핵심122→123/2,292.** SDK 소유 `ListProjectRecords`에11개 canonical query·15개 입력 이름,4개 로컬 Body 필터, 원문 행 기준 cap·페이지 순회와 고정 사용자 Resource/Wire를 연결했습니다. 공개 Gophercloud testhelper·기존 fault wrapper·공통 classifier/matcher/REST iterator를 재사용합니다. 초기 집중48그룹과 최종 전체41 test package `make check`가 PASS했고, 최종 Go source1,946개 SHA256 `fbdfa62d28b4474c0ba083c253c883952b3e75201422c6896454beaaa762967e`가 gate 전후 같습니다. 기존4계약과 다른512개 판정을 보존하고4계약을 추가했습니다. 새 named 목록의 Go 매핑 완료이며 전체 mutable Resource/session 구현 완료를 뜻하지 않습니다.
+
+공통 페이지·fixture `29a0dfe4`, 고정 descriptor `eb95f1a0`, leaf 구현 `ad29902e`, HTTP 테스트 `c27b5706`, Python 비교·두 독립 Go 예제 `74545abc`를 작은 단위로 커밋·push했습니다. 재생성은 기존 Go를 보존하고 Identity README만 동기화했습니다. 문서의 두 main은 외부 consumer-only replace 빌드를 통과했고, `74545abc`를 새 module에서 replace 없이 원격 설치해 같은 두 main과 설치 안내 main도 빌드했습니다. 원격 module-cache 소스의 Go SHA도 최종 로컬 gate와 같습니다.
+
+**직전 완료 (2026-10-08): 핵심 user 조회8개 판정, 전체188→196(+8).** Nova Password/limits2개, Cinder limits1개, Swift account/container metadata2개, Glance member/namespace/object getter3개의 실제 source·입력·기본 경로·응답·오류와 Go 차이를 대조했습니다. 기존43계약·API/test/doc anchors를 보존했고, 핵심 서비스 완료는114→122/2,292입니다. 직전 Barbican 생성3개를 포함한 최근 구간은179→196(+17)입니다.
 
 Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected value를 추가해 보완했습니다. 공개 Gophercloud `TestMethod`·`TestHeader`로 선택된 microversion/token을 확인하고 같은 표에서 HTTP203 거부를 검증합니다. 테스트는 `6597eac6`, Python 비교·alias 설명 교정은 `0c7edac7`로 작게 커밋·push했습니다. 집중 race와 최종40 test package `make check`가 PASS했고, Go source1,939개 SHA256 `c62109d1a35f53bbd5aa143f321ef5016e2e774651eee0c5fb1d1b7a38dc671c`이 gate 전후 같습니다. 최종 판정 parity와196개 집계도 PASS했습니다. 문서·JSON만 바뀐 뒤 같은 전체 Go 검사를 반복하지 않습니다. 전체 Resource/session·공통 context cause 및 남은 API/workflow 목표는 계속 추적합니다.
 
-**외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 실제 버전 `v0.0.0-20261007215549-3f0240534253`의 사용법은 [설치 안내](install.md)에 있습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
+**외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**다음 단위: Keystone user_projects의 실제 query·페이지 순회 차이.** 이미 구현된 공통 필터 엔진·iterator·fixture를 재사용하고, `**query`를 받는 pinned Python named 함수와 query 없는 현재 scope의 누락을 보완합니다. 자기 사용자 조회를 핵심 user에 유지하며, user→admin→후속 user→후속 admin 순서는 같습니다. 새 API를 완료 판정하기 전까지196개를 유지합니다.
+**다음 단위: Keystone user_groups의 실제 기본 continuation 차이.** 공개 Python 함수에는 query 인자가 없으므로 불필요한 query 옵션·descriptor를 추가하지 않습니다. 기존 native API를 보존하면서 사용자 범위 raw record·guard·페이지 엔진을 재사용해 rel/href·groups_links·최상위 next·HTTP Link 처리를 연결합니다. 기존 fixture의 서비스 고유 행·기본 페이지·부분 오류만 보완하며 user→admin→후속 user→후속 admin 순서는 같습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 196 (5.8%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 197 (5.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,165 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,164 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 513 | 아직 개별 기록 없는 선언 2,849 |
-| 기록한 부분·전체 계약 | 3,236 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,240 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -44,6 +48,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | `c3cf874` push 완료 |
 | Barbican Container/Order/Secret 생성 | 185 → 188 (+3) | 공통 raw/seed projection·기존 leaf/cached/body fixture6그룹, 집중3 package race·최종40 package check·문서 main build PASS | `1eae268`·`9c14ed4`·`8b8c67f` push 완료 |
 | 핵심 user 고정 조회8개 | 188 → 196 (+8) | 기존43계약·112개 test anchor 재검토, Password 표/assertion 보강·집중 race·최종40 package check·196개 parity PASS | 테스트 `6597eac6`·비교 문서 `0c7edac7` push 완료; 판정·집계는 이 완료 단위에 포함 |
+| Keystone user_projects SDK 소유 목록 | 196 → 197 (+1) | 공통 필터·REST·public testhelper/fault fixture 재사용, HTTP4그룹·descriptor/proof3그룹·초기 집중48그룹·최종41 package check·두 main build PASS | 구현 `ad29902e`·테스트 `c27b5706`·문서 `74545abc` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -56,18 +61,18 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 122 / 2,292 | 5.3% | 217 | 1,952 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 123 / 2,292 | 5.4% | 216 | 1,952 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 196 / 3,362 | 5.8% | 316 | 2,849 | 1 |
+| 전체 | 197 / 3,362 | 5.9% | 315 | 2,849 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 2 / 389 | 7 | 380 | 0 |
+| Identity / Keystone | 3 / 389 | 6 | 380 | 0 |
 | Compute / Nova | 8 / 333 | 21 | 304 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 23 / 758 | 52 | 683 | 0 |

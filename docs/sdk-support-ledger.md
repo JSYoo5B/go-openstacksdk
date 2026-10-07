@@ -1884,3 +1884,20 @@ namespace 단위 `3f02405`를 push한 후 같은 main을 새 소비자 module에
 Password 테스트 `6597eac6`는 기존 fixture/table과 공개 testhelper를 재사용해 실제 성공 값·토큰/2.87헤더·203 native 오류를 검사합니다. 집중 race PASS. 문서 `0c7edac7`은 pinned Python 비교와 Swift metadata getter 표기를 교정했고 둘 다 push했습니다. 최종 `make check`는40개 실제 test package PASS, pinned metadata를 사용하는 source-import generator anchor도 해당 환경에서 검사했습니다. Go source1,939개 SHA256 `c62109d1a35f53bbd5aa143f321ef5016e2e774651eee0c5fb1d1b7a38dc671c`이 gate 전후 같습니다. 이후 JSON/prose만 갱신했고 final parity/집계196개 PASS입니다. 실클라우드 실행이나112개 독립 test group을 주장하지 않습니다.
 
 완료 수188→196(+8), 핵심114→122/2,292, reviews513·계약3,236은 그대로입니다. 변경된 review는 위8개뿐이며 source IDs/fingerprints·catalog bytes·기존 계약/test/doc anchors를 보존했습니다. 전체3,362개 API와 inherited/descriptor/Resource 표면 목표는 계속 진행합니다.
+
+
+## Keystone user_projects 목록 완료
+
+2026-10-08에 `python:identity/v3/user_projects`를 별도 SDK 소유 `Users.ListProjectRecords(ctx,userID,options...)`로 구현했습니다. 기존 native `ListProjects`/`ListGroups`의 인자·모델·pager와4개 계약은 유지합니다. [사용 가이드](../identity/v3/users/memberships.md)는 Python kwargs와 concrete With 옵션, native 및 owned 독립 main을 설명합니다.
+
+기존 FilterDescriptor·JSON matcher·REST 목록·cloudread guard를 사용합니다.11개 canonical query/15개 입력 이름과4개 Body 속성을 분류하고 bulk canonical 값/개별 마지막 옵션 정책을 유지합니다. 부모 user_id는 HTTP 전 보호하고 local options dict conversion을 거친 Resource와 실제 Wire의 원문·큰 숫자·null/생략·헤더/status를 독립적으로 보존합니다. query 이름/불리언은 서버 조건이며 로컬 필터로 재해석하지 않습니다. 필터로 제외된 행도 raw cap을 소비하고 trailing row decoder·next 검사는 cap 뒤에 실행하지 않습니다.
+
+Python rel/href·projects_links·최상위 next·HTTP Link·짧은 nonempty 페이지의 마지막 raw ID marker를 연결하고, Keystone native dict links.next는 명시적인 호환 확장으로 추가했습니다. 고정 경로·source·필터 보호와 충돌/순환 거부, strict200 배열·204 빈 목록, typed JSON·명시 ID·선택된 version, mutable Resource/cache/session·JMES/base_path와 descriptor 기본값의 Go 차이는 문서와 review에 남겼습니다. named read-only 목록 완료가 전체 inherited Resource 또는 UserProject CRUD 구현을 뜻하지 않습니다.
+
+[HTTP4그룹](../api/identity_user_project_records_test.go)은 기존 testcloud/public SetupHTTP·TestMethod/TestHeader와 payload read/Close wrapper를 재사용합니다. descriptor·fresh-source proof3그룹은 UserProject→Project→TagMixin/Resource의 실제 MRO, URI1·source SHA6·AST30·parser3.14를 검사합니다. 공통 REST의 기존 listSpec도 공개 SetupHTTP를 쓰며, dictionary links는 opt-in과 actual response 증거만 작은 표로 추가했습니다. 공통 알고리즘의 전 오류/중단 표를 서비스마다 복제하지 않았습니다.
+
+초기 집중48그룹이 PASS했고, options normalization-before-filter와 원래 client policy 보존을 같은 표에서 추가 확인한 최종 source의 전체 `make check`가41개 실제 test package PASS했습니다. Go source1,946개 SHA256 `fbdfa62d28b4474c0ba083c253c883952b3e75201422c6896454beaaa762967e`는 전후 동일합니다. `/private/tmp/gophercloudsdk-user-projects-gate-receipt.json`과 `...-check.log`에 결과가 있습니다. 재생성 exit0이며 기존 Go 변동0/Identity README 동기화1입니다. guide 두 main SHA256은 native `77ef7047e192ef0df2ec0e5c714c5da31706aa7db59cbc8e387e8303e8a194d3`, owned `3dfa22489bfa333c822e55461b37236fc8de7333e2f32f30e399993f094e8b40`이며 외부 consumer-only replace 빌드 PASS입니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
+
+공통 페이지/fixture `29a0dfe4`, source descriptor `eb95f1a0`, 구현 `ad29902e`, 테스트 `c27b5706`, 사용 문서 `74545abc`를 나누어 push했습니다. exact Python1행만4계약→8계약으로 보강하고 다른512 reviews·catalog bytes와3,362개 source IDs/fingerprints를 보존했습니다. 전체196→197/3,362·핵심122→123/2,292·Keystone3/389, reviews513=go_mapping197/unresolved315/unsupported1, contracts3,240입니다. catalog unresolved3,164에는 미검토2,849개가 포함합니다. user/admin 서비스 합산 수이며 전체 목표는 active입니다. 다음은 공개 query가 없는 user_groups의 실제 기본 continuation gap을 같은 membership 엔진으로 보완합니다.
+
+최신 코드·사용법 커밋 `74545abcb4f3e0412d42a7dd0696a15a9f403a29`을 새 consumer에서 `GOWORK=off`로 원격 설치하고 두 membership main 및 기존 설치 main을 `go build -mod=readonly`로 빌드했습니다. get/build exit0·Replace 없음·실제 버전 `v0.0.0-20261007224720-74545abcb4f3`이며 원격 module-cache Go source SHA가 위 최종 로컬 gate와 같습니다. receipt는 `/private/tmp/gophercloudsdk-user-projects-remote-consumer-receipt.json`입니다. JSON/prose만 갱신한 뒤에는 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt만 확인합니다.

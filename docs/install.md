@@ -6,7 +6,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@3f0240534253ef06c7c60b708ac2ce8d3c100677
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@74545abcb4f3e0412d42a7dd0696a15a9f403a29
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -55,7 +55,9 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
-2026-10-08에 checkout 밖의 독립 소비자 2개로 위 main을 빌드했습니다. local-replace 검증과 원격 설치 검증을 구분하며, 원격 소비자는 `GOWORK=off`이고 replace가 없습니다. 실제 설치 버전은 `v0.0.0-20261007215549-3f0240534253`이며 module cache에서 빌드했습니다. source SHA256은 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`입니다. 이 설치 단위 검증 당시 API 완료 수는188개였으며, 이후 판정으로 현재196개입니다. 최신 개수는 [구현 현황](implementation-plan.md)에서 확인합니다.
+2026-10-08에 push한 `74545abcb4f3`을 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Keystone native/owned 두 main](../identity/v3/users/memberships.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261007224720-74545abcb4f3`입니다. module-cache Go source1,946개 SHA256 `fbdfa62d28b4474c0ba083c253c883952b3e75201422c6896454beaaa762967e`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 현재 API 완료 수는197개입니다.
+
+아래는 namespace 도입 당시의 검증 이력입니다. checkout 밖의 독립 소비자 2개로 위 main을 빌드했습니다. local-replace 검증과 원격 설치 검증을 구분하며, 원격 소비자는 `GOWORK=off`이고 replace가 없습니다. 실제 설치 버전은 `v0.0.0-20261007215549-3f0240534253`이며 module cache에서 빌드했습니다. source SHA256은 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`입니다. 이 설치 단위 검증 당시 API 완료 수는188개였으며, 해당 직전 판정 구간에서196개까지 증가했습니다. 최신 개수는 [구현 현황](implementation-plan.md)에서 확인합니다.
 
 | 검사 | 상태 |
 |---|---|
@@ -64,3 +66,5 @@ GOWORK=off go build -mod=readonly ./...
 | 기존 전체 계약 검사·핵심 smoke | PASS:40개 test package·5흐름/9그룹; Go source SHA 보존 |
 | 외부 module의 local-replace 빌드 | PASS:위 main 그대로 별도 module에서 빌드; consumer에만 replace |
 | push된 정확한 커밋의 replace 없는 설치·빌드 | PASS:`3f0240534253`; `go get`·`go build -mod=readonly` exit0, Replace 없음 |
+
+| Keystone 목록 추가 후 외부 설치·빌드 | PASS:`74545abcb4f3`, no replace; 설치 main+native/owned membership main3개와 원격/로컬 Go SHA 일치 |
