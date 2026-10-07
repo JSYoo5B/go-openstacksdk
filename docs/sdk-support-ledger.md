@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 판정은 **Go 매핑169 / 전체 선언3,362**, review504개·계약3,165개입니다(2026-10-08). 상세 집계와 진행 단계는 [구현 계획](implementation-plan.md#현재-집계와-진행-중인-작업), 최신 검증은 [Floating IP 완료 기록](#독립-floating-ip-생성과-조회-완료)을 확인합니다. 아래 단위별 과거 집계는 당시 revision의 이력이며 현재 수치를 대신하지 않습니다.
+현재 판정은 **Go 매핑170 / 전체 선언3,362**, review505개·계약3,179개입니다(2026-10-08). 상세 집계와 진행 단계는 [구현 계획](implementation-plan.md#현재-집계와-진행-중인-작업), 최신 검증은 [미연결 Floating IP 정리](#미연결-floating-ip-일괄-정리)을 확인합니다. 아래 단위별 과거 집계는 당시 revision의 이력이며 현재 수치를 대신하지 않습니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| 미연결 Floating IP 일괄 정리 (`14ed0f6`, `27da548`, `b75fc9c`) | [기본9](../connection_floating_ip_unattached_delete_test.go)·[경계3](../connection_floating_ip_unattached_delete_boundaries_test.go): 전체 목록 후 순차 삭제·false 계속/error 중단·truthiness·fallback backend·partial/owned Count·한 budget/cache. 신규12·집중169그룹 race·전체40 package check·정확한 main 컴파일 통과. | Cloud named1개 go_mapping·14계약. [사용법](../compute/floating-ip-unattached-delete.md)·[최종 근거](#미연결-floating-ip-일괄-정리). 전체 Resource/session·다른 native/Proxy CRUD는 별도 목표. |
 | 독립 Floating IP Create (`bf3024a`)와 조회 수정 (`e4dfabe`, `f839131`) | 신규 Create24·조회 회귀3그룹, 관련157그룹 집중 race·전체40 package check·정확한 Create main 컴파일 통과. accepted/fallback·wait/cleanup과 Neutron eager descriptor/local filter·physical cap/marker를 확인. | Cloud 생성1개·조회6개 go_mapping. [사용법](../compute/floating-ip-create.md)·[조회](../compute/floating-ip-queries.md)·[최종 근거](#독립-floating-ip-생성과-조회-완료). 별도 Resource/session·DeleteUnattached는 전체 목표에서 계속 추적. |
 | 독립 Floating IP 삭제 (`98b5c7e`, `5a9a5ff`, `eb14968`, `bb52340`, `0880f87`) | [HTTP 기본9](../connection_floating_ip_delete_test.go)·[경계11](../connection_floating_ip_delete_boundaries_test.go)·[순수 옵션3](../compute/floating_ip_delete_options_test.go): default retry·공개 Get·404 false·DOWN view·부분 접수·페이지/취소/source·전체 budget·cached dependency. 신규23·관련88그룹 집중 race, 전체40 package check·정확한 main 컴파일 통과. | [Python/Go 사용법](../compute/floating-ip-delete.md), [검증 기록](#독립-floating-ip-삭제와-공개-조회-재검증). Cloud 삭제1개 go_mapping·22계약. 전체 mutable Resource/session과 다른 선언은 별도 목표. [최종 재검토](#floating-ip-named-계약-재검토와-현재-집계). |
 | Legacy Nova floating IP backend (`d8b4d10`, `03b994c`, `fc0d79b`, `1d96736`, `5b13e09`, `611f0fe`, `4f8a1bf`) | [Compute 기본7](../compute/server_ip_nova_test.go)·[경계14](../compute/server_ip_nova_boundaries_test.go)·[Connection4](../connection_server_ip_nova_test.go): list/pool·allocation200/compat GET·action202·ordered partial·전체 budget·standalone raw-only/상위 ACTIVE·정확한 catalog 부재. 신규25그룹 집중 race·전체40 package check·독립 main 컴파일 통과. | [Python/Go 사용법](../compute/server-nova-floating-ip.md), [검증 기록](#legacy-nova-floating-ip-backend). 후속 독립 availability·query·Delete는 아래 별도 단위에서 기록합니다. 독립 IP Create·query·Delete는 최신 단위에서 완료했습니다. direct proxy add/remove·unattached cleanup·다른 함수의 fallback·full Resource/session은 별도입니다. |
@@ -1673,3 +1674,32 @@ PATH=/opt/homebrew/bin:$PATH make check
 최종 metadata `paritycheck`가 완료169개 집계로 통과했습니다(`/private/tmp/gophercloudsdk-floating-ip-completion-final-parity.log`). 변경한9개 Markdown의 상대 파일 링크1,129개에 누락이 없고 기존 Go fence16개·컴파일한 Create main이 그대로입니다(`gophercloudsdk-floating-ip-completion-doc-receipt.json`). Anchor 자동 확인은 제외했습니다. 전체 gate 이후 Go source는 변경되지 않았습니다.
 
 최종 SSH push 재시도가 성공해 `bf3024a..73bcfba`를 원격 main에 반영했습니다. 작업트리는 깨끗하며 미푸시 커밋0개를 확인했습니다. 앞선 서버 오류는 완료된 원격 반영을 막는 현재 조건이 아닙니다. 진행 문서의 push 상태도 성공으로 갱신합니다.
+
+## 미연결 Floating IP 일괄 정리
+
+2026-10-08. 핵심 user API의 `Connection.DeleteUnattachedFloatingIPs`와 `compute.Service.DeleteUnattachedFloatingIPs`를 추가했습니다. 고정 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 `_network_common.py:1048–1078`와 Gophercloud v2.15.0을 비교했습니다. SDK는 standalone Delete의 concrete 옵션·기본 retry1·captured source·하나의 whole context/budget을 재사용합니다. 앱 builder나 resolver를 새로 요구하지 않습니다.
+
+configured Neutron과 Network 서비스가 있을 때만 정리 gate를 통과합니다. Nova/None·clean endpoint 부재는 목록/Compute/삭제 HTTP 없이 성공한 정수0에 대응합니다. source/context/catalog 복합 오류는 skip으로 숨기지 않습니다. unfiltered 일반 List를 모든 페이지까지 먼저 완료하고, public Resource의 port_id에 Python JSON truthiness를 적용합니다. 필터·owner·상태·주소 조건을 추가하지 않으며 physical 순서와 중복을 보존합니다. Neutron 목록404→Nova inventory여도 실제 Delete는 configured Neutron을 사용합니다. strict fallback의 missing port_id는 source attribute 실패에 대응하는 typed 오류이며 port/attached로 대체하지 않습니다.
+
+개별 Delete false는 뒤 candidate를 계속 처리하고 오류만 즉시 중단합니다. ID는 해당 eligible row의 순서에서 소비해 늦은 unsafe/missing 값 앞의 성공을 보존합니다. `Count`는 하위 Delete가 오류 없이 Deleted=true로 완료한 수, `AllDeleted`는 오류 없이 모든 bool이 true인 완료 상태입니다. 빈 결과0·부분 성공 뒤 false·오류를 구분하고, accepted만인 실패 요청을 Count로 올리지 않습니다. 하위 완료 뒤 aggregate guard 오류는 이미 완료된 Count를 지우지 않습니다. DOWN 정책 true와 actual Absent도 구분합니다. selected row·Inventory·Wire·verification·response proof와 retained options는 독립 소유입니다.
+
+신규 [기본9그룹](../connection_floating_ip_unattached_delete_test.go)은 eager paged order/default retry·source/service gate zero·false continue/error stop/second404·0/negative/1/3 retries once·12개 port truthiness·strict/Nova inventory backend·early/late list403/descriptor/malformed/cycle/Close/source/cancel·sequential bad ID/duplicate·accepted202 partial/실제25ms cap·owned views/재사용 옵션을 검증합니다. [상위 경계3그룹](../connection_floating_ip_unattached_delete_boundaries_test.go)은 nil/context/source/timeout/서버 교체 preflight, 완료 뒤 마지막 실제 guard들에 동적 fault를 넣은 Count 보존, cached Service→Connection·SourceNone override·default verification까지 같은 deadline/의존성 재사용을 확인합니다. 동적 guard fixture는 특정 내부 호출 수를 상수로 고정하지 않고 정상 실행에서 관측한 마지막 경계에 fault를 주며 completed lower result의 Count를 확인합니다.
+
+```sh
+go test -race -timeout 60s ./ ./compute ./network ./resource ./internal/rest \
+  -run 'TestFloatingIPUnattached|TestFloatingIPCreate|TestFloatingIPAllocate|TestFloatingIPDelete|TestFloatingIPQuery|TestFloatingIPAvailable|TestConnectionAvailableIP|TestAvailableIPService|TestNovaServerIP|TestConnectionNovaIP|TestCollectionFindIdentity'
+
+OPENSTACKSDK_SOURCE=/path/to/pinned/openstacksdk \
+GOPHERCLOUD_METADATA=/path/to/gophercloud-package-metadata.json \
+PATH=/opt/homebrew/bin:$PATH make check
+```
+
+최종 코드·테스트 revision `b75fc9c`의 집중169그룹(root83·Compute32·Network14·Resource40) race와 전체 `make check`가 통과했습니다. vet·race·고정 parity·gofmt, 테스트 package40개·Go 파일1,916개이며 source SHA256은 검증 전후 `2a538651feae19b26323573fddd8a37533e366637bea8e1f526fbf284e08f915`로 같습니다. 로그/receipt는 `/private/tmp/gophercloudsdk-floating-ip-unattached-final-focused.log`, `gophercloudsdk-floating-ip-unattached-check.log`, `gophercloudsdk-floating-ip-unattached-gate-receipt.json`입니다.
+
+[Python/Go 가이드](../compute/floating-ip-unattached-delete.md)의 정확한 독립 main을 현재 SDK에서 컴파일했습니다(`/private/tmp/gophercloudsdk-floating-unattached-example-iqoovbwi/main.go`, SHA256 `7ab30d255661e0afee08fb056e3f4f94c605cffeb2dea9fb01aa8916298b9829`, `gophercloudsdk-floating-ip-unattached-example.log/receipt.json`). 기존7개 문서의 Go fence18개를 보존하며 최종 파일 링크와 metadata 정합성을 확인합니다. 인증된 OpenStack이나 Python 예제는 실행하지 않았습니다. source의 실제 두 단계 create/attach race 설명과 이 작업의 inventory snapshot→순차 mutation 경계를 가이드에 적었습니다.
+
+shared clone `b0bcc4c`·구현 `14ed0f6`·진행 `be023a1`·기본 검증 `27da548`·경계 `b75fc9c`를 작은 커밋으로 저장하고 직접 push했습니다. 새 catalog의 기존 `delete_unattached_floating_ips` ID/fingerprint에만 go_mapping 한 행을 추가했습니다. 기존504행·source pins·순서는 그대로이며, 신규14계약·12실제 테스트·공개 API11개·사용 문서·Go 차이를 연결했습니다. review505=go_mapping170/unresolved334/unsupported1, 전체 선언3,362=supported0/go_mapping170/unsupported1/unresolved3,191, 계약3,179개입니다. 다른 CRUD/native/Proxy/전체 Resource/session 선언의 지원 판정을 대신하지 않습니다.
+
+다음 핵심 user 검토에서는 Available의 실제 source-normalized 반환 view·Neutron 목록404의 public List→Nova normalization→Neutron filter/필요시 allocation 순서, Nova의 permissive raw normalized lane에 남은 계약을 확인했습니다. 현재 Available의 실제 모델·부분 검증을 보존하고 Query/Create에서 검증한 정책과 일관되게 보완합니다. 핵심 user→핵심 admin→후속 user→후속 admin 및 Swift 핵심 유지 순서는 그대로입니다.
+
+최종 새 metadata의 `paritycheck`가 완료170개 집계로 통과했습니다(`/private/tmp/gophercloudsdk-floating-ip-unattached-final-parity.log`). 변경한10개 Markdown의 상대 파일 링크1,147개에 누락이 없고 기존 Go fence18개·컴파일한 신규 main이 그대로입니다(`gophercloudsdk-floating-ip-unattached-doc-receipt.json`). Anchor 자동 확인은 제외했습니다. 전체 gate 이후 Go source는 변경되지 않았습니다.

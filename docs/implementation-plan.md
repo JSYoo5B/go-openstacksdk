@@ -6,18 +6,18 @@
 
 ## 현재 집계와 진행 중인 작업
 
-2026-10-08 02:10 KST 기준입니다. 새 작업의 **착수와 검증 중 상태도 즉시 이 문서에 반영**하고, 단위 종료 시 검증·문서·판정을 갱신합니다. 독립 Create·조회6개·삭제1개의 named 계약·테스트·문서·최종 검토를 완료했습니다. 일반 조회의 실제 오류2개도 수정하고 신규3그룹과 전체40 package 검증을 끝내 `go_mapping` 판정에 반영했습니다.
+2026-10-08 02:28 KST 기준입니다. 새 작업의 **착수와 검증 중 상태도 즉시 이 문서에 반영**하고, 단위 종료 시 검증·문서·판정을 갱신합니다. 독립 Create·조회6개·삭제1개의 named 계약·테스트·문서·최종 검토를 완료했습니다. 일반 조회의 실제 오류2개도 수정하고 신규3그룹과 전체40 package 검증을 끝내 `go_mapping` 판정에 반영했습니다.
 
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 169 (5.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 170 (5.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,192 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 504 | Go 매핑169·부분/미해결334·미지원1; 아직 개별 기록 없는 선언2,858 |
-| 기록한 부분·전체 계약 | 3,165 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,191 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 505 | Go 매핑170·부분/미해결334·미지원1; 아직 개별 기록 없는 선언2,857 |
+| 기록한 부분·전체 계약 | 3,179 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 
-최근 완료한 **독립 CreateFloatingIP**: Neutron fresh allocation, Nova POST→compat GET, 선택적 Neutron public-Get wait와 SDK timeout cleanup을 구현했습니다. 신규24그룹과 조회 회귀3그룹을 포함한 집중 race 157그룹, revision `f839131`의 전체 `make check`(vet·race·고정 parity·gofmt, 테스트 package40개), Python 비교 가이드의 정확한 독립 main 컴파일을 완료했습니다. 조회의 다음 페이지 전 정규화/로컬 필터 순서와 빈 nested dictionary 버그를 고쳤습니다. 조회6개·삭제1개·생성1개를 `go_mapping`으로 닫아 완료 집계를161→169로 갱신했습니다. 코드·테스트·가이드·최종 판정·집계는 작은 커밋으로 저장했고 `73bcfba`까지 push 완료했습니다. GitHub 일시 서버 오류 이후 최종 재시도가 성공했습니다. 현재는 **DeleteUnattachedFloatingIPs**를 구현 중입니다. 고정 소스의 Neutron gate·전체 목록 후 순차 삭제·false 계속/error 중단·빈 결과0을 검토했고, 기존 삭제 옵션·단일 query state/budget을 재사용하는 Service/Connection 구현과 owned 부분 결과를 작성했습니다. HTTP 회귀와 Python 비교 가이드를 작성 중이며 새 단위는 아직 컴파일·실행·완료 판정 전입니다.
+최근 완료한 **독립 CreateFloatingIP**: Neutron fresh allocation, Nova POST→compat GET, 선택적 Neutron public-Get wait와 SDK timeout cleanup을 구현했습니다. 신규24그룹과 조회 회귀3그룹을 포함한 집중 race 157그룹, revision `f839131`의 전체 `make check`(vet·race·고정 parity·gofmt, 테스트 package40개), Python 비교 가이드의 정확한 독립 main 컴파일을 완료했습니다. 조회의 다음 페이지 전 정규화/로컬 필터 순서와 빈 nested dictionary 버그를 고쳤습니다. 조회6개·삭제1개·생성1개를 `go_mapping`으로 닫아 완료 집계를161→169로 갱신했습니다. 코드·테스트·가이드·최종 판정·집계는 작은 커밋으로 저장했고 `73bcfba`까지 push 완료했습니다. GitHub 일시 서버 오류 이후 최종 재시도가 성공했습니다. 최근 **DeleteUnattachedFloatingIPs**도 완료했습니다. Neutron gate·전체 목록 후 순차 삭제·false 계속/error 중단·빈 결과0·partial Count를 기존 concrete 삭제 옵션과 한 budget으로 제공합니다. 신규 HTTP12그룹을 포함한 집중 race169그룹·정확한 독립 main 컴파일·revision `b75fc9c` 전체40 package check가 통과했습니다. 새 named API1개를 go_mapping으로 반영해 완료 집계를169→170으로 갱신했습니다. 공통 clone `b0bcc4c`·구현 `14ed0f6`·검증 `27da548`/`b75fc9c`는 push 완료했습니다. 사용 문서·최종 판정·집계는 작은 커밋으로 공유합니다. 다음은 Available의 source-normalized 반환 view와 Neutron 목록404 fallback 순서, Nova 선택/생성 lane의 실제 남은 계약입니다. 기존 조회·Create 구현을 재사용해 보완합니다.
 
 ## 서비스 우선순위
 
@@ -110,7 +110,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | 독립 Floating IP 목록·검색·단건·pool 조회 | 고정 cloud6연산·dict/JMES·404·Resource/Nova 정규화 비교 완료 | Service·Connection API6개·owned view/Wire·공통 concrete 옵션 완료 | 기존25+신규 회귀3그룹·관련 집중 race·최종40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·기존 Go fence/상대 파일 링크 확인 완료 | Cloud6개 go_mapping; Neutron eager descriptor/local filter·빈 nested dict 오류 수정·판정 정합성 완료 | 기존 코드 push 완료; 수정 `e4dfabe`·회귀 `f839131`·최종 문서/판정 `73bcfba`까지 push 완료. [사용법](../compute/floating-ip-queries.md)·[검증 기록](sdk-support-ledger.md#floating-ip-named-계약-재검토와-현재-집계)
 | 독립 Floating IP 삭제·공개 조회 재검증 | 고정 cloud retry·DELETE helper·일반 Get·passive 응답·버전 차이 검토 완료 | Service/Connection·SDK 소유 옵션·논리 Attempts·접수/조회 proof 완료 | 신규 HTTP20·pure3의23그룹·관련88그룹 집중 race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·기존 Go 예제/상대 파일 링크 확인 완료 | 기존23그룹·22계약 재감사 완료; named Cloud 삭제1개 go_mapping, 다른 Proxy/Resource 선언은 별도 | 공유 조회 `8d08c61`·구현 `98b5c7e`·옵션 `5a9a5ff`·기본 `eb14968`·경계 `bb52340`·success guard `0880f87`·문서 `edeabe2`/`86c79bd` push 완료. 판정 `afb6063`·진행 기록은 별도 작은 커밋. [사용법](../compute/floating-ip-delete.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-삭제와-공개-조회-재검증). 다음: 독립 IP Create·선택적 대기/timeout 정리, 그 뒤 unattached cleanup과 남은 핵심 user 계약 |
 | 독립 Floating IP Create·선택적 wait/timeout 정리 | fresh·port 우선·Network/pool presence·Resource seed·wait-only60초·cleanup 비교 완료 | Neutron·Nova·Service/Connection·wait/cleanup 구현 완료 | 신규24그룹·조회 회귀3그룹·集中157그룹 race·최종40 package check 완료 | Python 비교·정확한 독립 main 컴파일·상대 링크 검증 완료 | Cloud Create1개 go_mapping; 실제19계약·24신규그룹 연결 | 코드·테스트 `bf3024a`, 가이드 `6af6a88`, 판정 `e1a580a`, 집계 `73bcfba`까지 push 완료. [사용법](../compute/floating-ip-create.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-생성과-조회-완료). 다음: unattached cleanup |
-| 미연결 Floating IP 일괄 정리 | 고정 Neutron gate·whole inventory·port truthiness·false/error·retry·fallback backend 비교 완료 | 기존 concrete Delete 옵션·단일 query state·owned Inventory/Items/Count/AllDeleted 작성 | 실제 HTTP 회귀9그룹 작성 중; 실행 전 | Python 비교·독립 main 작성 중 | 새 named 선언 검증·판정 전; 완료 수169 유지 | 현재 구현·테스트 작성. 다음: 집중 race→작은 커밋/push→예제 컴파일·전체 check·최종 판정 |
+| 미연결 Floating IP 일괄 정리 | Neutron gate·eager inventory·port truthiness·false/error·retry·fallback backend 비교 완료 | Service/Connection·기존 concrete Delete 옵션·owned partial Count/Items 완료 | 신규 HTTP12그룹·집중 race169그룹·`b75fc9c` 전체40 package check 통과 | Python 비교·정확한 독립 main 컴파일·문서 링크 확인 완료 | Cloud named1개 go_mapping·실제14계약·12신규그룹 연결 | 공통 `b0bcc4c`·구현 `14ed0f6`·검증 `27da548`/`b75fc9c` push 완료. 문서·판정·집계 작은 커밋/push. [사용법](../compute/floating-ip-unattached-delete.md)·[검증 기록](sdk-support-ledger.md#미연결-floating-ip-일괄-정리). 다음: 남은 핵심 user 계약 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
