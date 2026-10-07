@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [SecretStore fixed getter2개](#secretstore-fixed-getter2개-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican 생성3개](#barbican-containerordersecret-생성-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Barbican Container/Order/Secret 생성 (`1eae268`, `9c14ed4`, `8b8c67f`) | 공통 REST/source/projection·기존 leaf/cached/body fixture/public helper 재사용6그룹. 집중3 package race·최종40 package check·정확한 main build PASS. | [최종 근거](#barbican-containerordersecret-생성-완료). named3개·15계약 추가, 기존510행/pins/fp 보존·185→188·핵심111→114·Barbican11→14/67. |
 | SecretStore fixed getter2개 | 기존 shared decoder/HTTP error 표·고정 selector·cached Connection/registry 증거 재사용. 같은 최종40 package gate·기존2 Go 함수 build PASS. | [최종 근거](#secretstore-fixed-getter2개-완료). 기존3계약씩과 anchors/fp 보존·go_mapping183→185·핵심109→111·Barbican9→11/67. |
 | SecretStore 목록 필터 (`026967a`, `ee67234`, `dfcba00`, `e9670e5`) | 기존 semantic classifier/JSON matcher·guarded pagination·public helper·HTTP/Connection fixture 재사용. 신규4그룹·집중4 package race·전체40 package check·main build PASS. | [최종 근거](#secretstore-목록-필터-완료). 기존6계약/old anchors 보존, named1개 완료·go_mapping182→183·핵심108→109·Barbican8→9/67. |
 | Barbican Container/Order/Secret 삭제 (`5e7cb7e`, `96b76d4`, `e336575`) | 기존 Collection missing 정책·cloudread/REST guard·public testhelper·leaf/Connection/body fixture 재사용. HTTP6그룹·집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS. | [최종 근거](#barbican-containerordersecret-삭제-완료). finite5계약씩·3 named rows 완료, go_mapping179→182·핵심105→108·Barbican5→8/67. |
@@ -1838,3 +1839,17 @@ Python은 getter selector를 Resource.id로 seed하므로 응답 literal id가 �
 동일 최종 Go source1,934개 SHA256 `006bd5af3c44440db9129b0939ca3b613dcd331d9f1d5ccb5f5e37c1ee9a802f`의 전체40 package race/vet/pinned parity/progress/format PASS 근거를 재사용합니다. Metadata/prose 변경을 이유로 같은 Go 테스트나 preview를 반복하지 않습니다. [기존 ReadBackends와 ListNonDefaultBackends](../keymanager/v1/secretstores/README.md)의 두 Go 함수 fence를 바이트 그대로 추출해 함께 컴파일 PASS했습니다. 각각 SHA256 `7eee4df71b221bb21bd02593a3654ab5ae28b8a005d67e9541e5e5fb13261fdc`, `b541c8ef625cee2e9a9cf405930bd4037616a17343593f29b692122875ae53a1`이며 log는 `/private/tmp/gophercloudsdk-secretstore-getters-example-build.log`, receipt는 `/private/tmp/gophercloudsdk-secretstore-getters-example-receipt.json`입니다. 실제 OpenStack/Python 실행은 하지 않았습니다. new-default reader 정책과 과거 admin/deployment403 차이도 문서에 남깁니다.
 
 기존 named2개 행의3계약씩·old anchors·operation/fp/Go API를 유지하고 실제 필수 누락이 없는 것으로 심사해 `go_mapping`·remaining[]로 변경했습니다. 다른508행과 contracts3221·reviews510은 보존했습니다. 전체185/3362·핵심111/2292·Barbican11/67, reviews510=go_mapping185/unresolved324/unsupported1이며 catalog unresolved3176은 미검토 선언을 포함합니다. 모든 SDK가 끝난 상태는 아니며 목표는 active입니다. 다음은3개 사용자 생성 선언을 기존 native/REST/projection/fixture와 대조합니다.
+
+## Barbican Container/Order/Secret 생성 완료
+
+`python:key_manager/v1/create_container`, `create_order`, `create_secret`를 각 leaf의 같은 `CreateRecord(ctx, ...CreateRecordOption)`로 제공합니다. [생성 가이드](../keymanager/v1/metadata-create.md)는 Python kwargs와 Go의 단건/bulk/Options·extension·header helper를 비교하고 세 서비스의 전체 main을 제공합니다. 빌드 전용 예제이며 실제 OpenStack/Python 실행은 하지 않았습니다.
+
+공통 엔진은 선언된 attrs를 JSON 변환 전에 선택해 unknown func/channel을 버리고, null/empty/숫자·timestamp 원문·alias를 소유합니다. 요청은 raw flat Body를 유지하고 list/dict 변환은 반환 view에만 적용합니다. 입력으로 seed한 `Resource`에 실제 선언 응답을 overlay하며 literal id/null/empty와 full reference id·별도 nullable HREF suffix를 구분합니다. `Wire`·`Envelope`·header·status에는 입력을 합성하지 않습니다. 생성 뒤 metadata/payload GET·wait·cleanup·response-ref follow를 추가하지 않습니다. native `Create`·모델 alias·Container/Secret201 및 Order202는 별도 경로로 유지합니다.
+
+[실제 테스트6그룹](../api/keymanager_create_records_test.go)은 기존3종 leaf/cached Connection fixture·public `testhelper`·body fault wrapper를 재사용합니다. kind별 ordinary201/Order202·empty/seed/null·raw/view 분리는 각각 확인하고, ownership와 accepted/status/JSON/read/Close/source/context/native-retry 오류 표는 대표 Container 공통 engine에서 검증합니다. 서비스마다 같은 오류 표를 복제하지 않았으며 native 호환성은 alias/signature/status/response-only model·필수 Type 근거로 한정합니다. native serializer의 모든 입력을 새 HTTP 표로 검사했다거나 native Create3개를 완료 판정했다고 주장하지 않습니다.
+
+Focused3 package race가 PASS했고 shared package는 compile-only/no test files입니다. 최종1,939 Go source SHA256 `9ff54c8fe59d0d282cb5671ef88f186717eec6179ed684f3390538776fa1f826`의 전체40 package vet/race·pinned parity·progress·gofmt gate가 PASS하며 전후 source가 같습니다. 로그는 `/private/tmp/gophercloudsdk-keymanager-create-check.log`, receipt는 `/private/tmp/gophercloudsdk-keymanager-create-gate-receipt.json`입니다. [정확한 공개 main](../keymanager/v1/metadata-create.md#전체-흐름-예제)은 SHA256 `b84ef2bf0c5f9dc2a148ccd7223ae6691715bcf98496ee33d4eb3054860b9204`로 추출해 컴파일 PASS했습니다. 생성 소스나 main은 이후 바뀌지 않았고 metadata/prose만 갱신하므로 같은 Go 전체 gate를 반복하지 않습니다. 같은 최종 source의 기존 preview5흐름/9그룹과 마지막 parity/188개 progress-check도 PASS했습니다. 기존 smoke runner와 테스트를 그대로 사용했으며 새 harness를 만들지 않았습니다.
+
+Owned final200..399·strict non-null UTF-8 JSON·accepted 실패 record/ResponseError·callback/source/context guard는 문서에 명시한 Go 정책입니다. 입력 map의 canonical-wire 우선과 Python insertion order·malformed JSON ValueError 무시·computed location·untyped 객체/Resource lifecycle/cache/session 차이를 구분합니다. 응답 실패에서는 Resource=nil이지만 실제 receipt와 유효한 Wire가 있으면 유지합니다. SDK 조합 단계의 재전송과 configured Provider native retry/reauthentication을 혼동하지 않습니다.
+
+기존510 reviews·source pins·catalog IDs/fp를 보존하고 exact public3행만5계약씩 추가했습니다. 전체188/3362·핵심114/2292·Barbican14/67, reviews513=go_mapping188/unresolved324/unsupported1, contracts3236이며 catalog unresolved3173은 미검토 선언을 포함합니다. 선언별 매핑 완료가 전체 inherited Resource/SDK 완료는 아니며 원래 목표는 active입니다. 다음은 canonical module과 외부 consumer의 local/remote compile proof를 준비해 검증한 핵심 흐름을 설치할 수 있게 합니다.

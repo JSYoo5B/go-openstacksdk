@@ -10,21 +10,21 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 작업 (2026-10-08): 핵심 user Barbican 삭제3개·목록1개·고정 getter2개 완료.** 기존 기반의 실제 named 계약을 닫아 **전체179→185(+6)·핵심105→111·Barbican5→11/67**로 반영했습니다. 삭제와 목록의 누락은 공유 engine과 기존 fixture로 보완했고, 이미 구현한 getter2개는 기존 HTTP·공유 Connection·디코더 증거를 재사용해 완료 심사했습니다.
+**현재 작업 (2026-10-08): 핵심 user Barbican 생성3개 완료.** Container/Order/Secret의 ref-only 응답 뒤 입력 속성이 사라지는 누락을 공통 `CreateRecord`로 보완해 **전체185→188(+3)·핵심111→114·Barbican11→14/67**로 반영했습니다. 직전 삭제·목록·고정 getter6개와 합하면 이 구간은179→188(+9)입니다. 생략·null·빈 값과 alias를 library 옵션으로 처리하고 입력 Resource view와 실제 POST Wire/receipt를 구분합니다.
 
-삭제는 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 목록은 `026967a`·`ee67234`·`dfcba00`·`e9670e5`·`a1218bb`, 고정 getter2개 완료 판정은 `c3cf874`로 작은 의미 단위로 커밋하고 push했습니다. 최종 source의 집중4 package race·전체40 package check·문서 main build·기존 preview5흐름/9그룹이 PASS했습니다. 조회 예제의 기존2개 Go 함수도 그대로 추출해 컴파일했습니다. 판정·prose만 바뀐 getter 단계에서는 같은 Go 전체 테스트를 반복하지 않고 final parity/집계만 확인합니다. Source pin·기존 계약/anchors를 유지하며 generic Resource/session과 Go typed/seeded ID·strict status의 차이를 명시합니다.
+공통 구현·세 leaf는 `1eae268`, Python 비교·정확한 main·재생성 hook은 `9c14ed4`, 기존 fixture 재사용6 HTTP그룹은 `8b8c67f`로 작게 커밋·push했습니다. 집중3 package race와 최종40 package `make check`가 PASS했고, 공통 package는 컴파일 확인이며 자체 테스트가 있다고 세지 않습니다. 최종 Go source1,939개 SHA256 `9ff54c8fe59d0d282cb5671ef88f186717eec6179ed684f3390538776fa1f826`이 gate 전후 같습니다. 같은 최종 소스의 기존 핵심 preview5흐름/9그룹과 최종 metadata parity/188개 집계도 PASS했습니다. 완료 판정과 문서 갱신은 별도 작은 커밋으로 반영합니다. 원문/json/formatter/native 정책과 Python의 차이는 [생성 가이드](../keymanager/v1/metadata-create.md)에 명시합니다.
 
-**진행 중: Barbican Container/Order/Secret 사용자 생성3개 최종 검증.** 소스 대조에서 ref-only POST 응답 뒤 입력 속성이 결과에서 사라지는 누락과 accepted 응답 원문·header·status/error 증거 부재를 확인했습니다. Python은 입력으로 만든 Resource에 응답 속성을 병합하며 추가 GET/payload GET을 하지 않습니다. 기존 native Create는 호환성을 유지하고, 기존 guarded REST·metadata projection·옵션 snapshot·HTTP fixture를 재사용하는 공통 엔진과 세 leaf의 동일한 `CreateRecord` 옵션을 `1eae268`로, Python 비교 가이드·문서 main·재생성 hook을 `9c14ed4`로 커밋·push했습니다. 기존 shared decoder·source guard·옵션 JSON snapshot·leaf/cached Connection·body fault wrapper를 재사용하며, 새 harness 없이 서비스별 binding과 공통 오류를 나누어 검증합니다. 새 HTTP6그룹과 기존 계약을 포함한 집중3 package race 및 문서 main build가 PASS했습니다. 공통 package는 컴파일 확인이며 자체 테스트가 있다고 세지 않습니다. 전체 gate와 최종 named 판정은 남아 있으므로 아직 완료 수에 추가하지 않습니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
+**다음 단위: 외부 설치 가능한 alpha의 모듈 경로·소비자 빌드.** 현재 local-only `gophercloudsdk` 경로를 실제 원격 저장소의 `github.com/JSYoo5B/gophercloudsdk`와 일치시키려면 imports·generator identity·Python candidates/filter manifests·review API anchors를 함께 옮겨야 합니다. source IDs/fingerprint·기존 판정·API 개수는 유지하고, 외부 module의 local-replace 빌드와 push한 정확한 commit의 replace 없는 설치 검증을 구분합니다. 단순 namespace 변경을 API 완료로 더하거나 미배포 tag를 만들지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서를 유지하며 전체 Resource/session·공통 context cause 일관성과 남은 API/workflow는 원래 SDK 목표로 계속 추적합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 185 (5.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 188 (5.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,176 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 510 | 아직 개별 기록 없는 선언 2,852 |
-| 기록한 부분·전체 계약 | 3,221 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,173 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 513 | 아직 개별 기록 없는 선언 2,849 |
+| 기록한 부분·전체 계약 | 3,236 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -40,6 +40,7 @@
 | Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `97e205e` push 완료 |
 | Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `a1218bb` push 완료 |
 | Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | `c3cf874` push 완료 |
+| Barbican Container/Order/Secret 생성 | 185 → 188 (+3) | 공통 raw/seed projection·기존 leaf/cached/body fixture6그룹, 집중3 package race·최종40 package check·문서 main build PASS | `1eae268`·`9c14ed4`·`8b8c67f` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -52,12 +53,12 @@
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 111 / 2,292 | 4.8% | 225 | 1,955 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 114 / 2,292 | 5.0% | 225 | 1,952 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 185 / 3,362 | 5.5% | 324 | 2,852 | 1 |
+| 전체 | 188 / 3,362 | 5.6% | 324 | 2,849 | 1 |
 
 **핵심 서비스**
 
@@ -69,7 +70,7 @@
 | Network / Neutron | 23 / 758 | 52 | 683 | 0 |
 | Image / Glance | 4 / 120 | 75 | 41 | 0 |
 | Block Storage / Cinder | 65 / 480 | 29 | 386 | 0 |
-| Key Manager / Barbican | 11 / 67 | 10 | 46 | 0 |
+| Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 0 / 74 | 29 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
