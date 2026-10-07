@@ -26,7 +26,8 @@ type CreateServerRequest struct {
 
 type createServerOptions struct {
 	base                          servers.CreateOpts
-	networks                      []resource.Ref
+	networkInterfaces             []ServerNetworkInterface
+	networkMode                   string
 	fields                        map[string]any
 	wait                          bool
 	waitOptions                   []resource.WaitOption
@@ -116,23 +117,6 @@ func WithSecurityGroups(names ...string) CreateServerOption {
 	names = append([]string(nil), names...)
 	return func(o *createServerOptions) error {
 		o.base.SecurityGroups = append([]string(nil), names...)
-		return nil
-	}
-}
-
-// WithNetworks replaces the network selection. Defaults are left to Nova.
-func WithNetworks(refs ...resource.Ref) CreateServerOption {
-	refs = append([]resource.Ref(nil), refs...)
-	return func(o *createServerOptions) error {
-		if len(refs) == 0 {
-			return invalid("network selection must not be empty")
-		}
-		for _, ref := range refs {
-			if err := ref.Validate(); err != nil {
-				return err
-			}
-		}
-		o.networks = append([]resource.Ref(nil), refs...)
 		return nil
 	}
 }
@@ -229,6 +213,9 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 			return nil, err
 		}
 	}
+	if err := o.validateNetworkVersion(s.client.Microversion); err != nil {
+		return nil, err
+	}
 	hasImage := request.Image != (resource.Ref{})
 	if hasImage == (o.bootVolume != nil) {
 		return nil, invalid("exactly one of image or boot volume is required")
@@ -305,23 +292,8 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 		}
 		o.base.FlavorRef = flavor.ID
 	}
-	if len(o.networks) > 0 {
-		networks := make([]servers.Network, 0, len(o.networks))
-		for _, ref := range o.networks {
-			id := ref.String()
-			if ref.IsName() {
-				if s.dependencies.Network == nil {
-					return nil, fmt.Errorf("%w: network resolver is unavailable", resource.ErrUnsupported)
-				}
-				resolved, err := s.dependencies.Network(ctx, ref)
-				if err != nil {
-					return nil, s.wrap("resolve network", err)
-				}
-				id = resolved
-			}
-			networks = append(networks, servers.Network{UUID: id})
-		}
-		o.base.Networks = networks
+	if err := s.prepareServerNetworks(ctx, &o); err != nil {
+		return nil, err
 	}
 	created, err := servers.Create(ctx, s.client, serverBody{base: o.base, fields: o.fields}, nil).Extract()
 	if err != nil {

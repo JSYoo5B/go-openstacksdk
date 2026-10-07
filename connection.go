@@ -172,6 +172,13 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 				}
 				return value.ID, nil
 			},
+			Port: func(ctx context.Context, ref resource.Ref) (string, error) {
+				service, err := c.Network(ctx)
+				if err != nil {
+					return "", err
+				}
+				return service.Ports.ResolveID(ctx, ref)
+			},
 			Volume: func(ctx context.Context, ref resource.Ref) (string, error) {
 				service, err := c.BlockStorage(ctx)
 				if err != nil {

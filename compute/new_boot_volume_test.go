@@ -59,6 +59,9 @@ func TestCreateNewBootVolumeMapping(t *testing.T) {
 					mapping["volume_type"] = tc.volumeType
 				}
 				want := map[string]any{"name": "new-volume-server", "imageRef": "", "flavorRef": "flavor-id", "block_device_mapping_v2": []any{mapping}}
+				if tc.microversion != "" {
+					want["networks"] = "auto"
+				}
 				if !reflect.DeepEqual(body.Server, want) {
 					t.Errorf("server body=%#v want=%#v", body.Server, want)
 				}
