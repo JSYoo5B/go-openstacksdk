@@ -48,21 +48,28 @@ type Dependencies struct {
 	// FloatingIPs is installed lazily by Connection for CreateWithFloatingIP.
 	// Applications using Connection need no service builder or resolver.
 	FloatingIPs func(context.Context) (*network.FloatingIPs, error)
+	// Address helpers share Connection's routing configuration and lazy cache.
+	NetworkRoles    func(context.Context) (*network.NetworkRoleSnapshot, error)
+	AddressNetworks func(context.Context) (*network.Service, error)
+	NetworkPolicy   network.NetworkRolePolicy
+	ServerAddresses ServerAddressPolicy
 }
 
 type Servers struct {
 	*resource.Collection[Server]
-	dependencies Dependencies
-	flavors      *resource.Collection[Flavor]
-	client       *gophercloud.ServiceClient
+	dependencies  Dependencies
+	flavors       *resource.Collection[Flavor]
+	client        *gophercloud.ServiceClient
+	addressPolicy ServerAddressPolicy
 }
 
 func New(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
+	addressPolicy, _ := prepareServerAddressPolicy(dependencies.ServerAddresses, nil)
 	service := &Service{
 		API:    computeapi.New(client),
 		client: client,
 		Servers: &Servers{
-			dependencies: dependencies, client: client,
+			dependencies: dependencies, client: client, addressPolicy: addressPolicy,
 			Collection: resource.NewCollection[Server](resource.Adapter[Server]{
 				Kind:                     "server",
 				IdentityFind:             true,
