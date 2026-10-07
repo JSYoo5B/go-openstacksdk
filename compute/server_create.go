@@ -195,50 +195,85 @@ func (b serverBody) ToServerCreateMap() (map[string]any, error) {
 // WithBootVolume uses an existing volume; WithBootVolumeSize creates a new
 // volume from Image. Floating IP setup is a separate workflow.
 func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts ...CreateServerOption) (*Server, error) {
+	if ctx == nil {
+		return nil, invalid("context is required")
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	o, err := s.prepareCreateServerOptions(request, opts...)
+	if err != nil {
+		return nil, err
+	}
+	created, err := s.createServerPrepared(ctx, request, o)
+	if err != nil {
+		return nil, err
+	}
+	if !o.wait {
+		return created, nil
+	}
+	ready, err := s.Wait(ctx, resource.ID(created.ID), "ACTIVE", o.waitOptions...)
+	if err != nil {
+		return created, s.wrap("create/wait", err)
+	}
+	return ready, nil
+}
+
+// Pure input preparation is shared by asynchronous Create and compound workflows.
+// Each caller owns the resulting values; option closures are applied once.
+func (s *Servers) prepareCreateServerOptions(request CreateServerRequest, opts ...CreateServerOption) (createServerOptions, error) {
+	var o createServerOptions
 	if strings.TrimSpace(request.Name) == "" {
-		return nil, invalid("server name must not be empty")
+		return o, invalid("server name must not be empty")
 	}
 	if err := request.Flavor.Validate(); err != nil {
-		return nil, fmt.Errorf("flavor: %w", err)
+		return o, fmt.Errorf("flavor: %w", err)
 	}
-	o := createServerOptions{base: servers.CreateOpts{Name: request.Name}, fields: make(map[string]any)}
+	o = createServerOptions{base: servers.CreateOpts{Name: request.Name}, fields: make(map[string]any)}
 	for _, apply := range opts {
 		if apply == nil {
-			return nil, invalid("nil create option")
+			return o, invalid("nil create option")
 		}
 		if err := apply(&o); err != nil {
-			return nil, err
+			return o, err
 		}
 	}
 	if err := o.validateNetworkVersion(s.client.Microversion); err != nil {
-		return nil, err
+		return o, err
 	}
 	hasImage := request.Image != (resource.Ref{})
 	if hasImage == (o.bootVolume != nil) {
-		return nil, invalid("exactly one of image or boot volume is required")
+		return o, invalid("exactly one of image or boot volume is required")
 	}
 	if o.bootVolume != nil && o.bootVolumeSize > 0 {
-		return nil, invalid("existing boot volume and new boot volume size are mutually exclusive")
+		return o, invalid("existing boot volume and new boot volume size are mutually exclusive")
 	}
 	if o.bootVolume == nil && o.bootVolumeSize == 0 && o.deleteBootVolumeOnTermination != nil {
-		return nil, invalid("boot volume deletion policy requires WithBootVolume or WithBootVolumeSize")
+		return o, invalid("boot volume deletion policy requires WithBootVolume or WithBootVolumeSize")
 	}
 	if o.bootVolumeType != "" {
 		if o.bootVolumeSize == 0 {
-			return nil, invalid("boot volume type requires WithBootVolumeSize")
+			return o, invalid("boot volume type requires WithBootVolumeSize")
 		}
 		if !microversionAtLeast(s.client.Microversion, 2, 67) {
-			return nil, fmt.Errorf("%w: boot volume type requires Compute microversion 2.67 or later (client uses %q)", resource.ErrUnsupported, s.client.Microversion)
+			return o, fmt.Errorf("%w: boot volume type requires Compute microversion 2.67 or later (client uses %q)", resource.ErrUnsupported, s.client.Microversion)
 		}
 	}
 	if hasImage {
 		if err := request.Image.Validate(); err != nil {
-			return nil, fmt.Errorf("image: %w", err)
+			return o, fmt.Errorf("image: %w", err)
 		}
-	} else {
+	}
+	return o, nil
+}
+
+// Resolve dependencies and POST without waiting, preserving the actual creation
+// response so the caller can validate subsequent observations against its ID.
+func (s *Servers) createServerPrepared(ctx context.Context, request CreateServerRequest, o createServerOptions) (*Server, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if o.bootVolume != nil {
 		volumeID := o.bootVolume.String()
 		if o.bootVolume.IsName() {
 			if s.dependencies.Volume == nil {
@@ -299,14 +334,7 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 	if err != nil {
 		return nil, s.wrap("create", err)
 	}
-	if !o.wait {
-		return created, nil
-	}
-	ready, err := s.Wait(ctx, resource.ID(created.ID), "ACTIVE", o.waitOptions...)
-	if err != nil {
-		return created, s.wrap("create/wait", err)
-	}
-	return ready, nil
+	return created, nil
 }
 
 // Ensure the extension adapter satisfies the upstream contract inside the SDK.
