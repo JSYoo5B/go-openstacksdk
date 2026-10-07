@@ -49,13 +49,13 @@ func TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints(t *testi
 	}
 }
 
-func TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute(t *testing.T) {
+func TestConnectionAutomaticIPMissingNetworkRequiresComputeForNovaExecution(t *testing.T) {
 	cloud := testcloud.New(t)
 	locates := 0
 	cloud.Provider.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
 		locates++
-		if opts.Type != "network" {
-			t.Error("eager Compute endpoint", opts.Type)
+		if (locates == 1 && opts.Type != "network") || (locates == 2 && opts.Type != "compute") {
+			t.Error("unexpected endpoint order", opts.Type, locates)
 		}
 		return "", &gophercloud.ErrEndpointNotFound{}
 	}
@@ -64,7 +64,7 @@ func TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute(t *testing
 		t.Fatal(err)
 	}
 	result, err := conn.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: connectionAddressServer()})
-	if result == nil || !result.Decision.Needed || result.Decision.Backend != compute.FloatingIPNova || !errors.Is(err, resource.ErrUnsupported) || result.Assignment != nil || locates != 1 {
+	if result == nil || !result.Decision.Needed || result.Decision.Backend != compute.FloatingIPNova || !errors.Is(err, resource.ErrUnsupported) || result.Assignment != nil || result.NovaAssignment != nil || locates != 2 {
 		t.Fatal(result, err, locates)
 	}
 }

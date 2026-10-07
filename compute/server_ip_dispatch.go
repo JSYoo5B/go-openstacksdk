@@ -3,7 +3,6 @@ package compute
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -11,10 +10,6 @@ import (
 	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
 )
-
-func explicitIPUnsupported() error {
-	return fmt.Errorf("%w: explicit Nova floating IP assignment is not implemented", resource.ErrUnsupported)
-}
 
 // Explicit requests bypass automatic needs/skip classification. Backend
 // absence/configuration remains distinct from a disabled automatic decision.
@@ -101,11 +96,13 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 	if err := state.explicitBackend(ctx); err != nil {
 		return state.finishExplicit(ctx, result, -1, err)
 	}
-	if state.decision.Backend != FloatingIPNeutron {
-		return state.finishExplicit(ctx, result, -1, explicitIPUnsupported())
-	}
 	if state.requireServerActive && !strings.EqualFold(state.last.Status, "ACTIVE") {
 		return state.finishExplicit(ctx, result, -1, invalid("explicit floating IP assignment requires an ACTIVE server"))
+	}
+	if state.decision.Backend == FloatingIPNova {
+		if _, err := state.novaBackend(ctx); err != nil {
+			return state.finishExplicit(ctx, result, -1, err)
+		}
 	}
 	owned, err := cloneAutomaticProgressServer(state.last)
 	if err != nil {
@@ -128,6 +125,25 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 	}
 	for index, address := range addresses {
 		result.Attempts = append(result.Attempts, ServerFloatingIPAttempt{Index: index, RequestedAddress: address})
+		if state.decision.Backend == FloatingIPNova {
+			assignment, err := state.novaAssignment(ctx, address, state.options.pool)
+			attempt := &result.Attempts[index]
+			attempt.NovaAssignment = assignment
+			if assignment != nil {
+				result.NovaAssignment = assignment
+			}
+			if err = errors.Join(err, state.check(ctx)); err != nil {
+				return state.finishExplicit(ctx, result, index, err)
+			}
+			if state.observeAssignment {
+				if err := state.observe(ctx, assignment.FloatingIP.Address); err != nil {
+					return state.finishExplicit(ctx, result, index, err)
+				}
+				attempt.Observed = true
+			}
+			attempt.Completed = true
+			continue
+		}
 		var assignment *network.FloatingIPAssignment
 		var err error
 		if state.options.dispatchMode() == ServerIPPool {

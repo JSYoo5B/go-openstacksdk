@@ -52,6 +52,9 @@ type ServerFloatingIPDecision struct {
 	// AttachmentSelections records ordered read-only or executed explicit-IP
 	// selections. These values cannot be used to execute the private plans.
 	AttachmentSelections []network.FloatingIPAttachSelection
+	// NovaSelections are diagnostics for the legacy backend, never executable
+	// plans. Nova pool names are literal names rather than Neutron network IDs.
+	NovaSelections []NovaFloatingIPSelection
 }
 
 // ServerFloatingIPAttempt records each started explicit pool/IP item. Completed
@@ -60,6 +63,7 @@ type ServerFloatingIPAttempt struct {
 	Index            int
 	RequestedAddress string
 	Assignment       *network.FloatingIPAssignment
+	NovaAssignment   *NovaFloatingIPAssignment
 	Completed        bool
 	Observed         bool
 	Error            error
@@ -70,12 +74,13 @@ type ServerFloatingIPAttempt struct {
 // ready/create workflows additionally require actual ACTIVE; standalone Add
 // helpers observe the address without imposing a server-state requirement.
 type AutomaticServerIPResult struct {
-	Server     *Server
-	Decision   *ServerFloatingIPDecision
-	Assignment *network.FloatingIPAssignment
-	Observed   bool
-	Mode       ServerIPDispatchMode
-	Attempts   []ServerFloatingIPAttempt
+	Server         *Server
+	Decision       *ServerFloatingIPDecision
+	Assignment     *network.FloatingIPAssignment
+	NovaAssignment *NovaFloatingIPAssignment
+	Observed       bool
+	Mode           ServerIPDispatchMode
+	Attempts       []ServerFloatingIPAttempt
 }
 
 type automaticFloatingIPOptions struct {

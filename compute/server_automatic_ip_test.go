@@ -227,6 +227,7 @@ func TestAutomaticIPBackendAndCompletedAbsenceStayDistinct(t *testing.T) {
 			options := automaticOptions()
 			switch scenario {
 			case "missing catalog":
+				server.Status = "ACTIVE"
 				f.service = compute.New(nil, compute.Dependencies{AddressNetworks: func(context.Context) (*network.Service, error) { return nil, nil }})
 			case "Nova network":
 				options = append(options, compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova)))
@@ -246,8 +247,12 @@ func TestAutomaticIPBackendAndCompletedAbsenceStayDistinct(t *testing.T) {
 				t.Fatal(result, err)
 			}
 			switch scenario {
-			case "missing catalog", "Nova network":
+			case "missing catalog":
 				if !errors.Is(err, resource.ErrUnsupported) || !result.Decision.Needed || result.Decision.Backend != compute.FloatingIPNova {
+					t.Fatal(result, err)
+				}
+			case "Nova network":
+				if !errors.Is(err, resource.ErrInvalidOption) || !result.Decision.Needed || result.Decision.Backend != compute.FloatingIPNova {
 					t.Fatal(result, err)
 				}
 			case "no external", "no ports":

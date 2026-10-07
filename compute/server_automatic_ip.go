@@ -48,7 +48,7 @@ type serverIPReadiness struct {
 
 // PlanServerFloatingIP selects pool, ordered addresses, then lazy automatic
 // need/skip policy. Neutron targets are prepared without scope or mutation.
-// A Nova backend can be Needed even though its mutation is not implemented.
+// Nova diagnostics do not allocate or associate an IP.
 func (s *Service) PlanServerFloatingIP(ctx context.Context, input AutomaticFloatingIPRequest, options ...AutomaticFloatingIPOption) (*ServerFloatingIPDecision, error) {
 	state, ctx, cancel, err := s.prepareAutomaticIP(ctx, input, options)
 	if err != nil {
@@ -92,11 +92,13 @@ func (state *automaticIPState) ensureAutomatic(ctx context.Context) (*AutomaticS
 	if !state.decision.Needed {
 		return result, state.check(ctx)
 	}
-	if state.decision.Backend != FloatingIPNeutron {
-		return result, fmt.Errorf("%w: automatic Nova floating IP assignment is not implemented", resource.ErrUnsupported)
-	}
 	if state.requireServerActive && !strings.EqualFold(state.last.Status, "ACTIVE") {
 		return result, invalid("automatic floating IP assignment requires an ACTIVE server")
+	}
+	if state.decision.Backend == FloatingIPNova {
+		if _, err := state.novaBackend(ctx); err != nil {
+			return result, err
+		}
 	}
 	// A synchronous workflow verifies mandatory observation before side effects.
 	if state.observeAssignment {
@@ -107,6 +109,19 @@ func (state *automaticIPState) ensureAutomatic(ctx context.Context) (*AutomaticS
 		if err := rest.ValidateTarget(client, client.ServiceURL("servers", url.PathEscape(state.serverID))); err != nil {
 			return result, err
 		}
+	}
+	if state.decision.Backend == FloatingIPNova {
+		assignment, err := state.novaAssignment(ctx, "", state.input.Network)
+		result.NovaAssignment = assignment
+		if err = errors.Join(err, state.check(ctx)); err != nil {
+			return result, err
+		}
+		if state.observeAssignment {
+			err = state.observe(ctx, assignment.FloatingIP.Address)
+			result.Server = state.last
+			result.Observed = err == nil
+		}
+		return result, errors.Join(err, state.check(ctx))
 	}
 	assignment, err := state.network.FloatingIPs.EnsurePrepared(ctx, state.plan)
 	result.Assignment = assignment
@@ -490,7 +505,13 @@ func (state *automaticIPState) decide(ctx context.Context) error {
 	if service == nil {
 		state.decision.Backend = FloatingIPNova
 	} else {
-		plan, err := state.planner.PrepareEnsure(ctx, network.EnsureFloatingIPRequest{Server: resource.ID(state.serverID), Network: state.input.Network}, network.WithEnsureFloatingIPPolicy(state.policy))
+		networkRef := state.input.Network
+		if state.decision.Backend == FloatingIPNova {
+			// Source needs still verifies reachable Neutron topology when that
+			// service exists, but a Nova pool is not a Neutron network ID.
+			networkRef = resource.Ref{}
+		}
+		plan, err := state.planner.PrepareEnsure(ctx, network.EnsureFloatingIPRequest{Server: resource.ID(state.serverID), Network: networkRef}, network.WithEnsureFloatingIPPolicy(state.policy))
 		if err != nil {
 			if check := state.check(ctx); check != nil {
 				return errors.Join(err, check)

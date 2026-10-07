@@ -39,6 +39,29 @@ type EnsureFloatingIPPolicy struct {
 	prepared bool
 }
 
+// FloatingIPPolicySettings is a value snapshot of the prepared destination and
+// allocation policy. Other SDK backends can consume it without reapplying user
+// options or treating Neutron-only destination selectors as portable fields.
+type FloatingIPPolicySettings struct {
+	Reuse                   bool
+	ProjectID, FixedAddress string
+	Port, NATDestination    resource.Ref
+}
+
+func (p EnsureFloatingIPPolicy) Settings() (FloatingIPPolicySettings, error) {
+	if !p.prepared {
+		return FloatingIPPolicySettings{}, floatingIPInvalid("ensure floating IP policy must be prepared")
+	}
+	s := FloatingIPPolicySettings{Reuse: p.options.reuse, ProjectID: p.options.projectID, FixedAddress: p.options.destination.fixedAddress}
+	if p.options.destination.port != nil {
+		s.Port = *p.options.destination.port
+	}
+	if p.options.destination.destination != nil {
+		s.NATDestination = *p.options.destination.destination
+	}
+	return s, nil
+}
+
 func PrepareEnsureFloatingIPOptions(ctx context.Context, options ...EnsureFloatingIPOption) (EnsureFloatingIPPolicy, error) {
 	var policy EnsureFloatingIPPolicy
 	if ctx == nil {

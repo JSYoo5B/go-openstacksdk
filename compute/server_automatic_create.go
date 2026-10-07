@@ -56,11 +56,12 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 		return nil, err
 	}
 	defer cancel()
-	// A configured legacy backend is already known to be unsupported for an
-	// explicit request. Reject that capability before creating the server;
-	// unknown endpoint availability remains lazy until the assignment stage.
+	// Validate a known legacy backend's version and destination capabilities
+	// before creating the server. Discovery of an absent Network remains lazy.
 	if state.options.dispatchMode() != ServerIPAutomatic && state.address.options.source != FloatingIPNeutron {
-		return nil, explicitIPUnsupported()
+		if _, err := state.novaBackend(ctx); err != nil {
+			return nil, err
+		}
 	}
 	state.retainAcceptedServer = true
 	reader := *s.Servers

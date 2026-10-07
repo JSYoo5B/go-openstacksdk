@@ -37997,11 +37997,11 @@
           ]
         },
         {
-          "behavior": "A missing Network backend or a requested Nova source can produce Needed=true/Backend=nova while Ensure returns ErrUnsupported without mutation. Completed absent external network or owned ports can skip; nonempty IPv6-only destination and denied port inventory remain undetermined errors. A semantic absence joined with accepted-response cancellation remains a failure with context cause and HTTP proof.",
+          "behavior": "A missing Network backend or requested Nova source produces Needed=true/Backend=nova. Strong Ensure rejects a supplied BUILD server before assignment; missing authenticated Compute capability returns ErrUnsupported. Completed absent external network or owned ports can skip; nonempty IPv6-only destination and denied port inventory remain undetermined errors. A semantic absence joined with accepted-response cancellation remains a failure with context cause and HTTP proof.",
           "tests": [
             "compute/server_automatic_ip_test.go:TestAutomaticIPBackendAndCompletedAbsenceStayDistinct",
             "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPSelectionAbsenceWithAcceptedCancellationIsFailure",
-            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
+            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkRequiresComputeForNovaExecution"
           ]
         },
         {
@@ -38054,10 +38054,10 @@
           ]
         },
         {
-          "behavior": "Connection applies the installed owned address policy and per-call overlays lazily. Private/source-none/IPv6-floating/per-call-private skips make zero endpoint locator calls; a precise missing Network endpoint can choose the Nova backend with one Network locator call and no Compute resolution, then return ErrUnsupported without assignment.",
+          "behavior": "Connection applies the installed owned address policy and per-call overlays lazily. Private/source-none/IPv6-floating/per-call-private skips make zero endpoint locator calls. A precise missing Network endpoint selects Nova, then actual Ensure execution resolves Compute; the tested missing Compute endpoint preserves ErrUnsupported and its original endpoint error after Network→Compute locator2, with both Neutron and Nova assignments nil.",
           "tests": [
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints",
-            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
+            "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkRequiresComputeForNovaExecution"
           ]
         },
         {
