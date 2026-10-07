@@ -416,3 +416,30 @@ func TestAvailableIPViewAcceptedFailuresPreserveRawReceipts(t *testing.T) {
 		}
 	}
 }
+
+func TestAvailableIPNeutronViewErrorsKeepPhysicalReceipts(t *testing.T) {
+	for _, allocated := range []bool{false, true} {
+		t.Run(fmt.Sprint("allocated=", allocated), func(t *testing.T) {
+			_, conn, state := connectionAvailableFixture(t, compute.FloatingIPNeutron)
+			state.neutronFree = !allocated
+			result, err := conn.AvailableFloatingIP(context.Background(), connectionAvailableRequest(),
+				compute.WithAvailableIPLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage("invalid")}}),
+				compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
+			if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Backend != compute.FloatingIPNeutron || result.Allocated != allocated || result.Reused == allocated || result.FloatingIP == nil || result.FloatingIP.Wire == nil || result.FloatingIP.Resource != nil || result.Neutron == nil || result.Neutron.FloatingIP == nil {
+				t.Fatal(result, err)
+			}
+			var proof *resource.ResponseError
+			if allocated {
+				receipt := result.Neutron.AllocationResponse
+				if !errors.As(err, &proof) || receipt == nil || proof.StatusCode != receipt.StatusCode || string(proof.Body) != string(receipt.Envelope) || !reflect.DeepEqual(proof.Header, receipt.Header) || result.ID != "allocated-neutron" || len(state.events) != 4 {
+					t.Fatal(result, err, proof, state)
+				}
+			} else if errors.As(err, &proof) || result.Neutron.AllocationResponse != nil || result.ID != "neutron" || len(state.events) != 3 {
+				t.Fatal("invented receipt for free row", result, err, proof, state)
+			}
+			if !reflect.DeepEqual(state.locators, []string{"network"}) {
+				t.Fatal("view failure selected another backend", state)
+			}
+		})
+	}
+}
