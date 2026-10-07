@@ -64,10 +64,16 @@ type generator struct {
 func main() {
 	metadataPath := flag.String("metadata", "", "go list -deps -export -json ./openstack/... output")
 	output := flag.String("output", ".", "SDK module root")
-	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for Subnet, Secret, Container, Order, AddressGroup and QoSPolicy semantic filters)")
+	pythonSource := flag.String("openstacksdk-source", "", "audited OpenStackSDK source checkout (required for pinned resource semantic filters)")
 	flag.Parse()
 	if *metadataPath == "" {
 		fatal(fmt.Errorf("-metadata is required"))
+	}
+	// The manual UserProject record is independent of native collection plans.
+	// Verify its checked-in descriptor through the same fresh-source protocol
+	// without attaching it to Users.Resources or altering native ListProjects.
+	if _, err := loadUserProjectPythonFilterManifest(*output, *pythonSource); err != nil {
+		fatal(err)
 	}
 	pythonFilters, err := loadPythonFilterManifest(*output, *pythonSource)
 	if err != nil {

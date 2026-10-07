@@ -15,6 +15,47 @@ import sys
 
 
 PIN = "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe"
+USER_PROJECT_RESOURCE = "openstack.identity.v3.project.UserProject"
+USER_PROJECT_FILES = (
+    "openstack/identity/v3/project.py",
+    "openstack/common/tag.py",
+    "openstack/resource.py",
+    "openstack/fields.py",
+    "openstack/proxy.py",
+    "openstack/identity/v3/_proxy.py",
+)
+USER_PROJECT_ANCHORS = (
+    ("openstack/identity/v3/project.py", "UserProject"),
+    ("openstack/identity/v3/project.py", "UserProject.user_id"),
+    ("openstack/identity/v3/project.py", "Project"),
+    ("openstack/identity/v3/project.py", "Project._query_mapping"),
+    ("openstack/identity/v3/project.py", "Project.description"),
+    ("openstack/identity/v3/project.py", "Project.domain_id"),
+    ("openstack/identity/v3/project.py", "Project.is_domain"),
+    ("openstack/identity/v3/project.py", "Project.is_enabled"),
+    ("openstack/identity/v3/project.py", "Project.options"),
+    ("openstack/identity/v3/project.py", "Project.parent_id"),
+    ("openstack/identity/v3/project.py", "Project.links"),
+    ("openstack/common/tag.py", "TagMixin._tag_query_parameters"),
+    ("openstack/common/tag.py", "TagMixin.tags"),
+    ("openstack/resource.py", "Resource.id"),
+    ("openstack/resource.py", "Resource.name"),
+    ("openstack/resource.py", "Resource.location"),
+    ("openstack/resource.py", "Resource.__getattribute__"),
+    ("openstack/resource.py", "Resource._attributes_iterator"),
+    ("openstack/resource.py", "Resource._attr_to_dict"),
+    ("openstack/resource.py", "Resource.to_dict"),
+    ("openstack/resource.py", "QueryParameters.__init__"),
+    ("openstack/resource.py", "QueryParameters._validate"),
+    ("openstack/resource.py", "QueryParameters._transpose"),
+    ("openstack/resource.py", "Resource.list"),
+    ("openstack/resource.py", "Resource._get_next_link"),
+    ("openstack/fields.py", "_BaseComponent.__get__"),
+    ("openstack/fields.py", "_convert_type"),
+    ("openstack/proxy.py", "Proxy._get_resource"),
+    ("openstack/proxy.py", "Proxy._list"),
+    ("openstack/identity/v3/_proxy.py", "Proxy.user_projects"),
+)
 FILES = (
     "openstack/network/v2/subnet.py",
     "openstack/network/v2/_base.py",
@@ -473,6 +514,8 @@ TRUNK_ANCHORS = (
     ('openstack/resource.py', 'ResourceMixinProtocol'),
 )
 TARGETS = {
+    "user_project": (USER_PROJECT_RESOURCE, USER_PROJECT_FILES, USER_PROJECT_ANCHORS,
+                     "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"),
     "subnet": (RESOURCE, FILES, ANCHORS, "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"),
     "trunk": (TRUNK_RESOURCE, TRUNK_FILES, TRUNK_ANCHORS,
               "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"),
