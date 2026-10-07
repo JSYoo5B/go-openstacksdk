@@ -12391,7 +12391,7 @@
     {
       "operation": "python:key_manager/v1/secret_stores",
       "source_fingerprint": "1902e76ae70dd45fcf8ce5789a4b7635038a37ed5c1cdeb2c1d5142edb399e4f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "gophercloudsdk/keymanager/v1/secretstores.New",
         "gophercloudsdk/keymanager/v1/secretstores.API.List",
@@ -12400,43 +12400,52 @@
         "gophercloudsdk/keymanager/v1/secretstores.WithListGlobalDefault",
         "gophercloudsdk/keymanager/v1/secretstores.WithListQuery",
         "gophercloudsdk/keymanager/v1/secretstores.WithListMaxItems",
-        "gophercloudsdk/keymanager/v1/secretstores.WithListPaginated"
+        "gophercloudsdk/keymanager/v1/secretstores.WithListPaginated",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListFilter",
+        "gophercloudsdk/keymanager/v1/secretstores.WithListFilters"
       ],
       "contracts": [
         {
-          "behavior": "Pinned _proxy.py:361 delegates SecretStore to Resource.list. The owned lazy List/All performs GET secret-stores accepting only 200 with a secret_stores array; typed name/status/global_default/plugin/created/updated plus inherited limit/marker are server query values, not extra local name/status predicates. Explicit false is preserved and raw repeated/empty extension values, owned option snapshots, iterator slice snapshots, independent reuse and concurrent library-option reuse are tested.",
+          "behavior": "Pinned _proxy.py:361-373 delegates the optional **query to SecretStore Resource.list and returns a lazy generator. Go List/All performs GET secret-stores accepting HTTP200 with a secret_stores array. All nine declared query names (name, status, global_default, crypto_plugin, secret_store_plugin, created, updated, limit and marker) remain server conditions rather than extra local predicates. WithListFilter/WithListFilters discards unknown semantic names, preserves explicit false/empty/repeated scalar query values and keeps raw WithListQuery extensions independent. Typed and semantic value/slice snapshots, lazy iterator slice ownership, independent reuse and concurrent library-option reuse are exercised.",
           "tests": [
-            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse"
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear"
           ]
         },
         {
-          "behavior": "Listed models preserve canonical typed fields and complete raw row evidence without following external references. Case-variant extensions cannot overwrite or break canonical decoding; response null/omission, literal-id priority and raw percent/Unicode/space/trailing-slash reference behavior remain observable.",
+          "behavior": "The five declared non-query Body attributes are evaluated from original fields: id prefers literal key presence including null/empty or otherwise the full original ref; created_at/updated_at select original created/updated text; secret_store_ref keeps the full ref; secret_store_id independently formats the last original path component even when literal id exists. Null/omission and empty remain distinct. Models retain canonical typed fields and raw row evidence without following foreign references; case-variant fields stay extensions and cannot replace canonical decoding. A selected empty-ref formatter fails once with ErrInvalidOption while a literal-id condition succeeds on that row; this local condition error does not synthesize a new HTTP ResponseError.",
           "tests": [
-            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences"
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticBodyAttributesUseOriginalFields"
           ]
         },
         {
-          "behavior": "A supplied limit, including a generated max-items limit hint, enables marker fallback on short nonempty pages using the literal canonical id if present or the FULL original secret_store_ref otherwise; null/empty literal id never falls back to the ref and yields accepted response evidence if a continuation marker is needed. With no limit or hint only advertised links are followed, and empty pages stop.",
+          "behavior": "A supplied limit, including a generated max-items limit hint, enables marker fallback on short nonempty pages using the literal canonical id if present or the FULL original secret_store_ref otherwise. A fully filtered short page still advances with that original full-ref marker; null/empty literal id never falls back to the ref and yields accepted response evidence if a continuation marker is needed. With no limit or hint only advertised links are followed, and empty pages stop.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresMarkerFallbackUsesFullRawReference",
-            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence"
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticRawCapAndContinuation"
           ]
         },
         {
-          "behavior": "Local max-items uses a limit hint only if limit is absent, preserves explicit limit, counts raw rows before yield and stops before trailing row decode/continuation after the cap. Single-page, consumer break and empty-page stops perform no extra HTTP. Invalid consumed models or malformed whole-page JSON retain full accepted response body/header/status; All discards partial output on terminal errors.",
+          "behavior": "MaxItems applies to consumed raw rows before local matching, using a limit hint only if limit is absent and preserving explicit limit. Filtered rows consume the cap rather than causing a refill page: cap-one yields no matches and cap-two yields one on the fixture's first page. Cap, single-page, consumer break and empty-page stops perform no extra HTTP and do not follow ignored continuations. Invalid consumed models or malformed whole-page JSON retain full accepted response body/header/status; All discards partial output on terminal errors while List can expose completed rows before a later HTTP404.",
           "tests": [
-            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence"
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListControlsAndLazyRowEvidence",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticRawCapAndContinuation"
           ]
         },
         {
-          "behavior": "Advertised next/plural-links/HTTP Link continuation preserves filters and the same origin/exact collection path; foreign or changed-path/filter links and cycles fail. Later HTTP/cancellation/source-type/read errors remain terminal with no resend or partial All result. Live shared provider/middleware/token and lazy unsupported/negative/nil/control-query preflight are preserved.",
+          "behavior": "Advertised next/plural-links/HTTP Link continuation preserves filters and the same origin/exact collection path; foreign or changed-path/filter links and cycles fail. Later HTTP/cancellation/source-type/read errors remain terminal with their causes and no SDK composition resend or partial All result. Shared provider/middleware/token and lazy negative/nil/unsupported/control-query preflight are preserved. Semantic reserved controls, typed/raw query collisions including selected null presence, and selected JSON encoding failures stop before HTTP; superseded/cleared errors and unknown values are discarded. Capture before user options rejects endpoint replacement before HTTP, and a bulk clear replaces only semantic state while retaining raw query. Pre-cancel and an option which cancels with a custom cause and returns its own error preserve context.Canceled, the custom cause and the original option error before HTTP.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresContinuationGuardsAndTerminalFailures",
-            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures"
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear",
+            "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticRawCapAndContinuation"
           ]
         },
         {
-          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.",
+          "behavior": "Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. The cached SecretStores.All consumes a declared local secret_store_id condition using the shared reverse ResourceBase, rotated token and configured headers without an extra lookup or reference follow. Cancellation performs no HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or publicly exposing the hidden semantic-filter Collection as Resources CRUD/Find/Wait.",
           "tests": [
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject",
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
@@ -12449,15 +12458,15 @@
         "keymanager/v1/README.md"
       ],
       "differences": [
-        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil but Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; unknown case variants stay in Body.",
-        "Go convenience ID prefers exact literal id (including null/empty), otherwise passively extracts the final raw path component of an absolute secret_store_ref, preserving Unicode/space/percent spelling and excluding query/fragment. Python Resource.id returns the full alternate ref while secret_store_id applies HREFToUUID; Go marker selection retains the full raw ref rather than the convenience ID. References never trigger HTTP.",
-        "WithListQuery is an explicit wire extension, preserving repeated/empty values and overriding a same-key typed query; it does not automatically discard unknown query or classify Python Body kwargs. SDK controls are dedicated owned options. Same-origin/exact-path/filter guards and immediate cap/first-page termination are explicit Go policies, not claims that Barbican supports marker fallback on a live deployment."
+        "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil while Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; case variants remain extensions. Python untyped field values and mutable Resource descriptor/default/seeded/dirty/cache state are broader and remain separate goal scope.",
+        "Go convenience ID prefers exact literal id including null/empty, otherwise extracts the final raw path component of an absolute secret_store_ref. Semantic id and marker instead use literal raw id or the full alternate ref; semantic secret_store_id formats the reference independently. Ref formatting preserves Unicode/space/percent spelling, excludes query/fragment and never causes HTTP. Go URL parsing differs from Python urlsplit at some malformed authorities/control normalization, and selected-only formatting differs from eager Python property/to_dict evaluation.",
+        "WithListFilter/WithListFilters maps the declared nine identity query names and five local Body attributes without caller builders or predicates; unknown semantic names are discarded. WithListQuery remains a separate explicit wire extension with repeated/empty values and overriding a same-key typed query. Later individual semantic assignments win; a bulk nil/empty replaces only semantic state. Same-key semantic and typed/raw query selections fail before HTTP rather than permissive dynamic merging.",
+        "Semantic scalar arrays become repeated query values, booleans use lowercase text, numbers retain JSON text, and null/empty arrays retain selection presence without URL values. Query objects/nested arrays and selected non-JSON values are rejected. Local common JSON comparison preserves exact decimal numbers, original timestamps and null/missing semantics but distinguishes booleans from numbers, unlike Python True==1; returned rows still use the documented typed decoder.",
+        "Go accepts strict HTTP200 and a secret_stores array, while generic Python Resource.list accepts final status<400 and can wrap a non-list plural value. Decode/read model failures retain accepted HTTP evidence; selected local formatter failures preserve the condition cause without synthesizing ResponseError. Configured Provider authentication/reauthentication/native retry remains its own transport policy. Exact origin/path/filter/cycle guards and immediate cap/first-page termination are explicit Go policies; fixture proof does not establish live Barbican marker support.",
+        "SDK list controls require dedicated concrete options. Deprecated Proxy._list jmespath_filters and __conflicting_attrs recovery, optional GET request caching and inherited per-call session/resource_type/base_path/microversion/header/allow_unknown_params injection are separate common compatibility scope, not falsely implemented by the declared field classifier. The selected configured client/version is retained rather than replaced by an invented generic resource facade.",
+        "Completion is restricted to the finite named python:key_manager/v1/secret_stores operation and its documented Go mapping. Other SecretStore getters, native operations, Resource lifecycle and independent list/CRUD/Find/Wait declarations are reviewed separately. Barbican 2024.1 project-reader new-default policy differs from Train admin policy and deployment overrides; no automatic privilege change is made. Offline HTTP tests and main compilation do not imply live-cloud or Python execution."
       ],
-      "remaining": [
-        "Complete pinned Resource.list/QueryParameters automatic query alias/transposition/unknown-discard and declared non-query Body local classification, descriptor equality/default/coercion semantics, deprecated Proxy._list JMESPath and __conflicting_attrs recovery are not implemented for SecretStore.",
-        "Returned values do not provide the complete inherited Resource descriptor/default/coercion/unknown-Body/seeded/cache/dirty lifecycle. Python untyped string/plugin/timestamp descriptors and alternate-ID access remain broader than the deliberate Go typed/canonical-key response policy.",
-        "Inherited per-call Resource.list session/resource_type/base_path/microversion/header/allow_unknown_params controls and full optional request-cache behavior remain separate. Existing guarded link/marker paging proves its stated lane, not every inherited Resource pagination policy or response-descriptor state."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/get_global_default_secret_store",

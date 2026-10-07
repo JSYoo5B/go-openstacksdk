@@ -10,19 +10,19 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 작업 (2026-10-08): 핵심 user Barbican Container/Order/Secret 삭제 3개 완료.** 공유 삭제 엔진을 기존 `Remove`·`Resources.Delete`에 연결한 `5e7cb7e`, 재사용 fixture 테스트 `96b76d4`, Python 비교·컴파일한 main `e336575`를 작은 단위로 커밋했습니다. 기본 missing 무시·strict 옵션·실제 응답 오류 보존을 검증하고 **전체179→182·핵심105→108·Barbican5→8/67**로 반영했습니다.
+**현재 작업 (2026-10-08): 핵심 user Barbican 삭제3개와 SecretStore 목록1개 완료.** 기본 missing·strict 삭제와9개 query/5개 로컬 속성 분류를 닫아 **전체179→183·핵심105→109·Barbican5→9/67**로 반영했습니다. 삭제는 공유 engine, 목록 필터는 기존 FilterDescriptor/JSON matcher/REST pagination에 연결했고 public List/All·ListOpts layout을 유지했습니다.
 
-Gophercloud 공개 testhelper·기존 leaf/Connection fixture·body fault adapter를 재사용한 HTTP6그룹, 공통 Collection/REST·generator 회귀의 집중4 package race, 전체40 package vet/race가 PASS했습니다. pinned parity·집계·format도 통과했습니다. 계획 문서 편집에서 빠진 집계 마커는 복구하고 남은 gate만 재실행했으며 이미 통과한 Go 검증을 반복하지 않았습니다. 단독 main build와 현재 소스의 기존 preview5흐름/9그룹도 PASS했습니다. named 삭제3개만 완료로 세고 native Delete·Name 확장·다른 CRUD의 독립 판정은 유지합니다.
+삭제 구현·테스트·사용법은 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 필터 구현·기존 fixture 확장·취소 원인 보완·비교 문서는 `026967a`·`ee67234`·`dfcba00`·`e9670e5`로 작게 커밋하고 push했습니다. 목록은 기존4 package 집중 race·전체40 package check·정확한 main build가 PASS했습니다. 공통 알고리즘을 새로 테스트하지 않고 HTTP4그룹과 기존 cached Connection에 새 binding 증거를 추가했습니다. 검토에서 찾은 option 오류+custom cancel의 cause 누락은 공통 ContextError와 기존 테스트 표2사례로 보완했습니다.
 
-**다음 단위: Barbican 사용자 목록 API.** 이미 구현한 목록 엔진·fixture와 고정 Python의 필수 계약을 대조해 닫을 수 있는 named 선언부터 처리합니다. 새 서버/harness나 공통 페이지 알고리즘을 만들기 전에 기존 기반을 재사용합니다. 세부 착수 범위는 다음 소스 검토 결과로 갱신합니다. 외부 설치용 alpha 준비는 [릴리즈 기준](release-milestones.md)에 남아 있습니다.
+**다음 단위: 기존 SecretStore preferred/global-default getter2개 완료 심사.** 기존 고정 경로·디코더·error 표·공유 Connection 테스트와 보존한 Go 예제 함수를 재사용합니다. Python singleton의 selector-seeded ID와 Go response/ref ID 차이를 문서에 명시한 뒤 named 유한 계약을 판단합니다. 목록의 project-reader new defaults와 과거 admin 정책 차이는 [가이드](../keymanager/v1/secretstores/README.md#권한)에 기록합니다. 전체 SDK와 외부 설치용 alpha 준비는 계속 진행합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 182 (5.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 183 (5.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,179 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,178 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 510 | 아직 개별 기록 없는 선언 2,852 |
 | 기록한 부분·전체 계약 | 3,221 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
@@ -37,7 +37,8 @@ Gophercloud 공개 testhelper·기존 leaf/Connection fixture·body fault adapte
 | AvailableFloatingIP named getter | 175 → 176 (+1) | Query/Create/Allocate 재사용·Neutron 내부/Nova fallback, 집중 race·전체40 package check·smoke5흐름 PASS | `c61acae` push 완료 |
 | Barbican effective quota getter | 176 → 177 (+1) | 기존 strict/error fixture·context guard 재사용, 집중3 package race·전체40 package check·조회 main build PASS | `1546e7d` push 완료 |
 | Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
-| Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `5e7cb7e`·`96b76d4`·`e336575`; 이번 완료 판정과 함께 push |
+| Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `97e205e` push 완료 |
+| Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `e9670e5` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -50,12 +51,12 @@ Gophercloud 공개 testhelper·기존 leaf/Connection fixture·body fault adapte
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 108 / 2,292 | 4.7% | 228 | 1,955 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 109 / 2,292 | 4.8% | 227 | 1,955 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 182 / 3,362 | 5.4% | 327 | 2,852 | 1 |
+| 전체 | 183 / 3,362 | 5.4% | 326 | 2,852 | 1 |
 
 **핵심 서비스**
 
@@ -67,7 +68,7 @@ Gophercloud 공개 testhelper·기존 leaf/Connection fixture·body fault adapte
 | Network / Neutron | 23 / 758 | 52 | 683 | 0 |
 | Image / Glance | 4 / 120 | 75 | 41 | 0 |
 | Block Storage / Cinder | 65 / 480 | 29 | 386 | 0 |
-| Key Manager / Barbican | 8 / 67 | 13 | 46 | 0 |
+| Key Manager / Barbican | 9 / 67 | 12 | 46 | 0 |
 | Object Storage / Swift | 0 / 74 | 29 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
