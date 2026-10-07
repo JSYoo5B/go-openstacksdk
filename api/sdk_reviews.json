@@ -35522,7 +35522,10 @@
         "gophercloudsdk/compute.Servers.CreateWithFloatingIP",
         "gophercloudsdk/network.FloatingIPs.Create",
         "gophercloudsdk/network.NetworkRoles.Discover",
-        "gophercloudsdk/network.NetworkRoles.Reset"
+        "gophercloudsdk/network.NetworkRoles.Reset",
+        "gophercloudsdk/network.FloatingIPs.PrepareEnsure",
+        "gophercloudsdk/network.FloatingIPs.EnsurePrepared",
+        "gophercloudsdk/network.FloatingIPPlan.Selection"
       ],
       "contracts": [
         {
@@ -35635,6 +35638,34 @@
           "tests": [
             "connection_network_mutations_test.go:TestConnectionNetworkMutationRefreshesGetterDefaultNICAndFloatingRoles"
           ]
+        },
+        {
+          "behavior": "The separate Neutron PrepareEnsure lane selects an owned concrete external-network/server-port/fixed-IPv4 plan without recorded-project lookup or IP mutation. Selection returns a copy. EnsurePrepared binds reuse owner only at execution, refuses zero/foreign plans and rechecks the exact port ID/server/network/fixed address before IP listing or mutation, preserving accepted GET evidence on drift instead of reselecting. Ordinary Ensure keeps its earlier owner preflight.",
+          "tests": [
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanDefersOwnerAndPreservesConcreteSelection",
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanRechecksPortWithoutReselectionOrMutation",
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanSourceGuardStopsMutationRetryAndRejectsForeignPlans"
+          ]
+        },
+        {
+          "behavior": "Only completed automatic no-external/no-server-port or unconstrained explicit-fixed search absence receives a typed plan absence. IPv6-only nonempty ports, wrong NAT, ambiguous destinations, explicit port404 and later403 remain errors. A single preparation holds one shared role snapshot across Reset; a later preparation sees new inventory. Initial public dependency replacement and changes during cold owned role response Close stop the plan, retaining response evidence and making no follow-up request.",
+          "tests": [
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanTypedAbsenceDoesNotHideSelectionOrHTTPErrors",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanUsesOneRoleSnapshotAcrossReset",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanRejectsInitialPublicDependencyReplacement",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanColdRoleReadGuardsAcceptedCloseBeforeNextHTTP"
+          ]
+        },
+        {
+          "behavior": "Prepared assignment consumes empty/HTTP-Link candidate pages before selecting an attached IP over a free one, preserves revision zero for guarded PUT, and waits for actual ACTIVE with target invariants. Source-changing native mutation retry stops before resending and remains rejected after restoration. The owned REST lane also prevents retry removal/change/conflicting-case rewrite of SDK If-Match while existing unrelated caller headers/authentication retain their policy. Wait callback and preparation cancellation preserve the custom context cause and known assignment. Actual prepared PUT fixtures reject caller retry deletion/replacement or conflicting source revision headers, preserve original503/412 evidence and the original free candidate, and preserve accepted200 body/header/status on ID or fixed-address mismatch, without replacement allocation or cleanup.",
+          "tests": [
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanReusesAfterAllPagesAndWaitsForActualACTIVE",
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanSourceGuardStopsMutationRetryAndRejectsForeignPlans",
+            "internal/rest/request_headers_test.go:TestJSONRetryPreservesSDKOwnedHeaders",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanWaitAndPreflightPreserveCancellationCause",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanRevisionHeadersRejectRetryChangesAndSourceOverride",
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanPUTFailurePreservesOriginalCandidateAndHTTPProof"
+          ]
         }
       ],
       "documentation": [
@@ -35642,7 +35673,8 @@
         "network/floating-ip-ensure.md",
         "compute/create-with-floating-ip.md",
         "network/network-roles.md",
-        "network/network-mutations.md"
+        "network/network-mutations.md",
+        "network/floating-ip-plan.md"
       ],
       "differences": [
         "Pinned available_floating_ip accepts an optional existing Server and returns the first free floating-IP Resource/Munch, allocating only when none is free. Ensure requires a safe explicit server Ref and always selects/verifies its unique IPv4 destination, associates a free IP, and deliberately prefers an IP already attached there. It returns a FloatingIPAssignment with Reused/Allocated phases; this is an idiomatic standalone workflow foundation rather than an equivalent availability getter.",
@@ -35650,13 +35682,14 @@
         "Go automatic allocation first consumes shared configured ExternalIPv4Floating roles, with enabled-router gateway fallback only for a successful empty role list. Without explicit port/fixed/NAT settings and with multiple server-owned ports, Create/Ensure use the shared NAT destination; IPv6-only ports count and unique fixed IPv4-pair validation remains strict. Shared successful roles are cached, while candidate IP/port selection remains per call. These assertions do not establish identical Python mutable cache, pager/session or automatic-need policies.",
         "Python chooses Neutron versus Nova from service/configured floating_ip_source and falls back to Nova on selected NotFound failures. Go is Neutron-only and preserves selection/association errors without fallback, retry-to-allocate or implicit cleanup. Pinned creation wait timeout can delete a newly allocated IP; Go returns the allocated assignment for explicit cleanup.",
         "Standalone plain PrepareEnsureFloatingIPOptions resolves the recorded owner per Ensure call; service-bound PrepareEnsureActive intentionally holds the owner resolved before Nova creation. Reuse=false without explicit owner continues to leave scope to Neutron. Native alias results do not emulate Python Resource/normalization/location/session/cache state or server interface refresh.",
-        "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution."
+        "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution.",
+        "PrepareEnsure/EnsurePrepared are an explicit Go-only two-stage Neutron foundation holding an immutable selection, late owner binding and port revalidation. They do not implement the optional-server availability getter, automatic need/skip or raw Nova address convergence; shared cache/in-flight and existing public/native paths retain their own policies."
       ],
       "remaining": [
         "Provide or deliberately map the full public availability getter: optional/absent Server, network/pool dynamic inputs, unattached result behavior and return Resource/Munch identity/normalization. Compare list_floating_ips filtering/defaults/pagination/error/cache and current_project_id policies beyond the bounded Go selection path.",
         "Shared configured floating source/default/NAT roles now feed the bounded Go consumers, with verified bounded cache invalidation from owned high Network Service mutations. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, mutable Resource/cache/session semantics and source destination/source behavior beyond the explicit or multiple-owned-port boundaries; generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset. The source optional-server availability getter remains partial.",
         "Compare floating_ip_source/service selection, Nova-network pool listing/allocation/normalization and Neutron NotFound fallback. Finish private _neutron_create_floating_ip optional server/port/fixed-address semantics, destination heuristics, timeout/cleanup/exception ordering and Resource/Adapter behavior; private helpers are dependencies and have no separate declared catalog IDs.",
-        "The explicit CreateWithFloatingIP workflow now connects prepared Ensure to Nova creation and mandatory server/IP ACTIVE waits under one overall deadline. Ordinary Create remains separate. Complete full cloud create_server/add_auto_ip/wait_for_server automatic/reused/explicit IP branching, source/role/cache policies, refreshed server interfaces and cleanup/error ordering."
+        "The explicit CreateWithFloatingIP workflow now connects prepared Ensure to Nova creation and mandatory server/IP ACTIVE waits under one overall deadline. Ordinary Create remains separate. Complete full cloud create_server/add_auto_ip/wait_for_server automatic/reused/explicit IP branching, source/role/cache policies, refreshed server interfaces and cleanup/error ordering. The independent owner-free Neutron plan now fixes selected external/port/fixed targets through assignment, but Compute automatic decision and conditional dispatch plus raw Nova observation are still unimplemented."
       ]
     },
     {
@@ -35666,7 +35699,10 @@
       "go_api": [
         "gophercloudsdk/network/v2/extensions/layer3/floatingips.API.Create",
         "gophercloudsdk/network.FloatingIPs.Create",
-        "gophercloudsdk/network.FloatingIPs.Ensure"
+        "gophercloudsdk/network.FloatingIPs.Ensure",
+        "gophercloudsdk/network.FloatingIPs.PrepareEnsure",
+        "gophercloudsdk/network.FloatingIPs.EnsurePrepared",
+        "gophercloudsdk/network.FloatingIPPlan.Selection"
       ],
       "contracts": [
         {
@@ -35713,21 +35749,31 @@
           "tests": [
             "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
           ]
+        },
+        {
+          "behavior": "The independent prepared-plan allocation lane accepts native POST201/202, retains decoded allocated resources on owner invariant failure and preserves actual status/header/body evidence. Malformed201/202 and accepted201 Close/source/cancellation failures retain Allocated=true even with no decoded model, never retry accepted failure or delete automatically. This bounded owned REST workflow does not change the generated native API.Create transport.",
+          "tests": [
+            "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanPOSTCodesAndInvariantFailuresKeepAcceptedResources",
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry",
+            "network/floating_ip_plan_test.go:TestFloatingIPPlanDefersOwnerAndPreservesConcreteSelection"
+          ]
         }
       ],
       "documentation": [
         "network/README.md",
         "network/floating-ip-ensure.md",
-        "network/network-roles.md"
+        "network/network-roles.md",
+        "network/floating-ip-plan.md"
       ],
       "differences": [
         "The generated facade owns concrete options/builders and extracts a native typed value. Higher-level Create/Ensure add safe Ref/name selection, unique IPv4 destination policy, optional wait and partial allocation results around that native call; these workflow differences do not characterize all native CreateOptsBuilder inputs.",
         "Ensure adds reuse and presence-aware native Update revision handling without changing the separately reviewed native Update declaration. No unconditional conflict fallback, new allocation after association failure, or automatic cleanup is introduced.",
-        "Selected high-level Create/Ensure allocation fixtures now use the shared NAT role for the bounded automatic multi-owned-port case and preserve explicit/single-port lanes. The generated native API.Create still accepts supplied concrete options; these role-consuming fixtures do not establish its complete input/body/accepted-status/decoder/session contract."
+        "Selected high-level Create/Ensure allocation fixtures now use the shared NAT role for the bounded automatic multi-owned-port case and preserve explicit/single-port lanes. The generated native API.Create still accepts supplied concrete options; these role-consuming fixtures do not establish its complete input/body/accepted-status/decoder/session contract.",
+        "The separate prepared-plan workflow uses owned guarded REST for exact selected targets and accepted-response evidence, including201/202 allocation proof and partial decoded models. Existing fresh Create/Ensure and the generated native API.Create keep their distinct lanes; no whole native transport/decoder parity is inferred from plan fixtures."
       ],
       "remaining": [
         "Audit the complete native Create declaration and facade rather than promote it from allocation fixtures: required/body defaults and validation, Description/FloatingIP/SubnetID/TenantID/ProjectID combinations, permitted extensions, final option replacement and all request/error/accepted-status paths.",
-        "Complete native result/decoder timestamp/model/null/unknown-field behavior and underlying request options, live auth/retry/redirect/body/header/response ownership comparisons. These Ensure tests exercise selected 201 workflow responses and do not establish the whole native Create contract."
+        "Complete native result/decoder timestamp/model/null/unknown-field behavior and underlying request options, live auth/retry/redirect/body/header/response ownership comparisons. Bounded existing Ensure201 and prepared-plan201/202 allocation fixtures, including response proof and partial failures, do not establish the whole native Create contract."
       ]
     },
     {

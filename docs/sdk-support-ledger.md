@@ -1298,4 +1298,27 @@ public IPv4는 useExternal → AccessIPv4 → external role 이름 → floating 
 
 코드/테스트는 선택 `0cc3815`, 보충 `864b0e6`, Connection 설정 `bbd39c6`, YAML HTTP `5e889a6`, nullable/취소 원인 `8e982e4`로 분리해 모두 push했습니다. 사용 문서는 `726ea3b`로 분리하여 push했고 판정·단계 기록도 별도 커밋으로 보존합니다. catalog의 cloud public/private getter 2개에 unresolved 부분 판정을 추가하여 reviews493·unreviewed2869입니다. 전체 declared3362의 supported0/go_mapping161/unsupported1/unresolved3200과 native1126/resources235/generatedGo338은 변하지 않았습니다. meta module/private 함수에는 catalog ID를 새로 만들지 않았습니다.
 
+## Floating IP 선택 계획과 실행
+
+2026-10-07 핵심 user의 자동 IP 흐름에 필요한 Neutron 선택·실행 기반을 구현했습니다. `FloatingIPs.PrepareEnsure`는 project owner를 읽거나 IP를 변경하지 않고 외부 network·server ID·port network/ID·fixed IPv4를 concrete plan으로 준비합니다. `Selection()`은 복사본이고 `EnsurePrepared`는 같은 서비스의 plan만 실행합니다. owner는 실행에서 준비하고 선택한 port의 ID·서버·network·fixed IPv4를 GET으로 다시 확인합니다. 조회 실패나 대상 변화는 재선택·대체 allocation으로 바꾸지 않습니다. 기존 `Ensure`의 owner 선확인 순서는 보존합니다.
+
+준비는 공유 역할 snapshot을 한 번 보유하고, cache Reset이 사이에 있어도 한 plan의 floating source와 NAT가 다른 inventory를 섞지 않습니다. 다음 준비는 새 cache/inventory를 사용합니다. 이 준비에서 시작하는 uncached role network/subnet 및 직접 소유하는 Neutron 목록·명시 lookup·port 재GET·mutation·wait는 guarded REST입니다. 일반 public/native discovery에서 이미 시작한 shared flight, 서버 이름 resolver와 전체 raw API를 같은 보호 범위로 확대하지 않습니다. 완료한 탐색의 no-external/no-server-port/제약 없는 fixed 검색 부재만 typed absence이며 HTTP·모호함·IPv6-only·명시 선택 오류는 그대로 남깁니다. 취소/source 오류가 함께 있으면 typed absence만 찾아 skip하지 않습니다.
+
+가용 IP는 전체 페이지와 빈 HTTP Link next를 읽은 뒤 같은 destination의 attached IP를 free 후보보다 우선합니다. free 후보의 revision 0도 If-Match로 보호하고 실제 PUT 재시도에서 삭제/교체나 source header override를 차단합니다. 후보가 없으면 같은 tuple을 POST하며 native와 같은 201/202를 허용합니다. 접수 뒤 decode/read/Close·source·취소·owner 검증 실패는 실제 status/header/body와 Allocated 결과를 보존합니다. PUT 모델 불일치와 412·wait 실패는 원래 candidate/assignment를 보존하고 새 allocation·fallback·자동 DELETE를 하지 않습니다. 선택적 대기는 같은 IP의 실제 ACTIVE와 identity/owner/destination을 검증하며 **raw Nova 주소 반영을 증명하지 않습니다.**
+
+[기본 plan 테스트](../network/floating_ip_plan_test.go) 6그룹과 [ownership·역할 snapshot·201/202·취소·PUT 경계](../network/floating_ip_plan_boundaries_test.go) 7그룹, [공유 SDK 헤더 보호](../internal/rest/request_headers_test.go) 1그룹을 추가했습니다. 집중 Network/REST·Cinder metadata·API race 회귀가 성공했습니다. 처음 전체 검증에서 일반 caller/source 헤더 우선순위에 영향을 준 회귀를 찾았고, **기존 DoJSON/DoJSONGuarded를 보존하며 prepared assignment만 DoJSONGuardedHeaders를 사용하는 범위 수정**으로 해결했습니다. 최종 코드 `9ea3e22`의 source pins/metadata를 지정한 `make check`는 vet·race·parity·gofmt와 전체 40개 테스트 패키지에서 성공했습니다.
+
+```sh
+go test -race -timeout 60s ./internal/rest ./internal/cindermetadata ./network ./api \
+  -run '(Test.*Metadata.*Header|Test.*KeyManagerSecretFetch|TestFloatingIPPlan|TestJSONRetry|TestResponsePolicy|TestDoJSONGuarded|TestRESTOwnership|TestCollectionDeleteDoesNotIgnore)' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make check
+```
+
+[Python/Go 사용 가이드](../network/floating-ip-plan.md)의 정확한 독립 main을 최종 코드로 컴파일했습니다(sha256 `dfb81b0f841e15c9236613d9ac12d829947be4c4e7ba9ecacc344fa7166c9ea2`). guide·root/Network README·Ensure 가이드의 상대 파일 링크 210개를 확인했으며 anchor나 실클라우드/Python 실행을 검증한 근거로 삼지 않습니다. 실행 로그·receipt는 임시 디렉터리에 있고 위 코드 revision·명령·테스트·예제 hash와 결과를 저장소에 보존합니다.
+
+공통 헤더 `0258a1a`, plan 구현 `c2cf46b`, 추가 경계 `37692fc`, 서비스 헤더 회귀 범위 수정/PUT 검증 `9ea3e22`, 사용 문서 `f77250d`를 각각 커밋·push했습니다. 실제 catalog의 기존 cloud `available_floating_ip`와 native `floatingips.Create` 2행에 bounded plan 근거만 추가하고 status·source pin/fingerprint·다른 판정은 보존합니다. Go-only plan/private helper의 Python operation ID는 만들지 않았습니다. reviews493(go_mapping161/unresolved331/unsupported1)·unreviewed2869, 전체3362의 supported0/go_mapping161/unsupported1/unresolved3200은 유지됩니다.
+
+다음 작업은 Compute의 public/floating-any-family/fixed/private/source/service 조건에 따른 자동 필요성·lazy skip, **준비한 plan의 조건부 실행과 raw Nova target-address 수렴**, Server/View/Assignment의 단계별 부분 결과입니다. 풀/명시 IP/auto 우선순위, Nova networking 및 source fallback·has_service/session/Resource·cleanup 계약도 남아 있습니다. Neutron plan 기반이나 합성 주소 view만으로 전체 cloud Create/Wait/add-auto/availability 완료로 판정하지 않습니다.
+
 일반 Get/Create/Wait의 주소 확장, 자동 needs/skip·source availability·준비한 network/port/fixed 선택의 조건부 assignment, pool/명시 IP 우선순위, raw Nova 주소 수렴과 cleanup은 계속 남습니다. 별도 view와 명시 CreateWithFloatingIP가 이를 끝낸 것으로 판정하지 않습니다. 다음 핵심 user 단위는 자동 필요성 decision을 실제 연결 계획에 고정하고 합성 주소를 관측 완료로 쓰지 않는 흐름입니다.
