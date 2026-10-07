@@ -1,0 +1,13 @@
+package gophercloudsdk
+
+import (
+	"context"
+	"gophercloudsdk/compute"
+)
+
+func (c *Connection) DeleteFloatingIP(ctx context.Context, input compute.DeleteFloatingIPRequest, options ...compute.FloatingIPDeleteOption) (*compute.DeleteFloatingIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().DeleteFloatingIP(ctx, input, options...)
+}
