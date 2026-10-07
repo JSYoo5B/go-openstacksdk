@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"sync"
 
-	"gophercloudsdk/internal/project"
 	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/resource"
 )
@@ -59,12 +58,17 @@ func (f *FloatingIPs) PrepareEnsure(ctx context.Context, input EnsureFloatingIPR
 		}
 		return plan, err
 	}
-	if f == nil || f.api == nil || f.ports == nil || f.roles == nil || f.owner == nil || f.owner.API == nil {
-		return plan, floatingIPInvalid("floating IP service is required")
-	}
-	if err := project.ValidateClient(ctx, f.api.RawClient()); err != nil {
+	planner, err := f.NewPlanner(ctx)
+	if err != nil {
 		return plan, err
 	}
+	return f.prepareEnsurePlan(ctx, input, policy, planner.guard, planner.NetworkRoles)
+}
+
+func (f *FloatingIPs) prepareEnsurePlan(ctx context.Context, input EnsureFloatingIPRequest, policy EnsureFloatingIPPolicy,
+	guard func(context.Context) error, getRoles func(context.Context) (*NetworkRoleSnapshot, error)) (FloatingIPPlan, error) {
+	var plan FloatingIPPlan
+	var err error
 	if err := input.Server.Validate(); err != nil {
 		return plan, fmt.Errorf("server: %w", err)
 	}
@@ -73,20 +77,8 @@ func (f *FloatingIPs) PrepareEnsure(ctx context.Context, input EnsureFloatingIPR
 			return plan, fmt.Errorf("external network: %w", err)
 		}
 	}
-	guard := f.planSourceGuard()
 	if err := guard(ctx); err != nil {
 		return plan, err
-	}
-	var roles *NetworkRoleSnapshot
-	getRoles := func(ctx context.Context) (*NetworkRoleSnapshot, error) {
-		if roles == nil {
-			var err error
-			roles, err = f.roles.discoverCached(ctx, guard)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return roles, guard(ctx)
 	}
 	serverID := input.Server.String()
 	if input.Server.IsName() {
@@ -173,6 +165,6 @@ func (f *FloatingIPs) planSourceGuard() func(context.Context) error {
 			portClient != client || client.ProviderClient != provider || client.Endpoint != endpoint || client.ResourceBase != base || client.Microversion != version || client.Type != kind) {
 			changed = floatingIPInvalid("floating IP plan service source changed")
 		}
-		return errors.Join(changed, ctx.Err(), context.Cause(ctx))
+		return errors.Join(changed, ctx.Err(), context.Cause(ctx), rest.CheckOperationGuard(ctx))
 	}
 }

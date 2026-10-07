@@ -111,3 +111,9 @@ func WithEnsureFixedAddress(address string) EnsureFloatingIPOption {
 func WithEnsureWait(options ...resource.WaitOption) EnsureFloatingIPOption {
 	return ensureDestinationOption(WithWait(options...))
 }
+
+// WithEnsureActive requires actual ACTIVE readiness without replacing earlier
+// wait options or resolving project scope. Compound workflows apply it last.
+func WithEnsureActive() EnsureFloatingIPOption {
+	return func(o *ensureFloatingIPOptions) error { o.destination.wait = true; return nil }
+}
