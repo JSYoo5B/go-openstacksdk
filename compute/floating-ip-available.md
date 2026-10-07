@@ -15,6 +15,8 @@ free IP를 반환하는 것은 연결이나 예약이 아닙니다. Neutron의 o
 | `compute.WithAvailableIPSource(compute.FloatingIPNova)` | standalone legacy Nova pool/list/allocation 경로 |
 | `compute.WithAvailableIPSource(compute.FloatingIPNone)` | 이 explicit getter에서는 Nova 경로. 자동 needs의 source=None skip와 구분 |
 | `compute.WithAvailableIPNetworkOptions(...)` | Neutron의 concrete Available 옵션을 준비하여 전달. 여러 그룹은 순서대로 적용 |
+| `compute.WithAvailableIPLocation(location)` | 반환 view에 쓸 `resource.CloudLocation` 전체 facts override. 생략하면 Connection의 cloud/auth 기록 사용 |
+| `compute.WithAvailableIPStrict(true)` | Nova 정규화의 호환 alias·extra top-level 복원 제외. 기본 false; properties와 Wire는 보존 |
 | `compute.WithAvailableIPTimeout(time.Minute)` | backend 발견·network 선택·fallback·목록·allocation·Nova compat GET 전체의 SDK deadline |
 | `compute.WithUnlimitedAvailableIPTimeout()` | SDK 전체 deadline 해제. 부모 context·transport·Neutron 개별 timeout은 유지 |
 
@@ -26,7 +28,7 @@ Neutron fixed/NAT/project 옵션은 `WithAvailableIPNetworkOptions(network.WithA
 
 ## 독립 Go 예제
 
-SDK 모듈 안의 별도 디렉토리에 `main.go`로 저장합니다. `-source`를 생략하면 cloud 설정을 사용하며 `neutron`, `nova`, `none`으로 호출별 source를 지정할 수 있습니다. `-network`는 Neutron의 정확한 이름 또는 Nova의 literal pool입니다. 빈 값이면 backend의 default 선택을 사용합니다. 이 프로그램은 실제 Available 작업을 호출하므로 free 후보가 없으면 새 IP를 생성할 수 있습니다.
+SDK 모듈 안의 별도 디렉토리에 `main.go`로 저장합니다. `-source`를 생략하면 cloud 설정을 사용하며 `neutron`, `nova`, `none`으로 호출별 source를 지정할 수 있습니다. `-strict`는 Nova 반환 view의 호환 alias를 생략합니다. location은 Connection의 cloud/auth 기록을 사용합니다. `-network`는 Neutron의 정확한 이름 또는 Nova의 literal pool입니다. 빈 값이면 backend의 default 선택을 사용합니다. 이 프로그램은 실제 Available 작업을 호출하므로 free 후보가 없으면 새 IP를 생성할 수 있습니다.
 
 ```go
 package main
@@ -52,16 +54,17 @@ func main() {
     pool := flag.String("network", "public", "network name or literal Nova pool")
     server := flag.String("server-id", "", "optional server for new Neutron allocation")
     project := flag.String("project", "", "optional Neutron reuse filter only")
+    strict := flag.Bool("strict", false, "omit Nova view compatibility aliases")
     flag.Parse()
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
     defer cancel()
-    if err := run(ctx, *cloud, *source, *pool, *server, *project); err != nil {
+    if err := run(ctx, *cloud, *source, *pool, *server, *project, *strict); err != nil {
         fmt.Fprintln(os.Stderr, err)
         os.Exit(1)
     }
 }
 
-func run(ctx context.Context, cloud, source, pool, serverID, project string) error {
+func run(ctx context.Context, cloud, source, pool, serverID, project string, strict bool) error {
     conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud),
         sdk.WithMicroversion(sdk.Compute, "2.35"))
     if err != nil {
@@ -76,6 +79,7 @@ func run(ctx context.Context, cloud, source, pool, serverID, project string) err
     }
     options := []compute.AvailableFloatingIPOption{
         compute.WithAvailableIPTimeout(time.Minute),
+        compute.WithAvailableIPStrict(strict),
     }
     if source != "" {
         options = append(options, compute.WithAvailableIPSource(compute.FloatingIPSource(source)))
@@ -89,6 +93,16 @@ func run(ctx context.Context, cloud, source, pool, serverID, project string) err
         summary := map[string]any{
             "backend": result.Backend, "id": result.ID, "address": result.Address,
             "reused": result.Reused, "allocated": result.Allocated,
+        }
+        if record := result.FloatingIP; record != nil {
+            summary["normalization_source"] = record.NormalizationSource
+            summary["normalized"] = record.Normalized
+            if record.Resource != nil {
+                summary["resource"] = record.Resource.Body
+            }
+            if record.Wire != nil {
+                summary["wire"] = record.Wire.Body
+            }
         }
         if result.FallbackError != nil {
             summary["fallback_error"] = result.FallbackError.Error()
@@ -128,17 +142,30 @@ Neutron free 선택은 network/current project/port null만 검사합니다. sta
 | `Backend` | 현재 선택한 Neutron/Nova branch. 준비 실패에서 이 값만으로 HTTP 실행을 입증하지 않음 |
 | `ID`, `Address` | 해당 backend의 알려진 실제 모델에서 읽은 공통 값. model 미확인 allocation에서는 비어 있을 수 있음 |
 | `Reused`, `Allocated` | free 후보 반환 또는 새 POST 접수. 연결·예약·ACTIVE 성공을 뜻하지 않음 |
+| `FloatingIP` | `*compute.FloatingIPRecord`; 공개 Resource view와 실제 Wire를 분리. view 오류에서는 Wire만 남을 수 있음 |
 | `Neutron` | `*network.FloatingIPAvailability`; native 모델, raw Metadata 및 allocation Envelope/header/status |
 | `Nova` | `*compute.NovaFloatingIPAvailability`; actual raw Nova IP와 allocation response |
 | `FallbackError` | 결과 없이 Neutron pure NotFound에서 Nova를 선택한 원인. 성공 반환과 동시에 남을 수 있음 |
 
 allocation 접수 뒤 응답 검증·read/Close·후속 GET·source·취소 오류가 발생하면 알려진 모델과 실제 receipt를 result 옆에 보존합니다. 성공과 실패에서 실제 backend를 읽고, error가 있어도 `Allocated`와 모델/응답 증거를 확인합니다. 오류가 있는 partial을 유효한 다음 mutation 대상으로 간주하지 않습니다. 이미 할당한 자원을 자동 삭제하거나 다른 backend/network로 재할당하지 않습니다.
 
-Nova 모델에는 합성 IP ACTIVE나 합성 InstanceID/association을 넣지 않습니다. canonical 주소 키의 present-null 우선순위와 raw JSON의 누락/null·큰 정수·extension은 `Metadata.Body`에 남습니다. Neutron의 native string 필드는 null과 누락을 빈 문자열로 보일 수 있으므로 원래 의미가 필요하면 lower `Metadata.Body`를 확인합니다.
+Nova raw 모델에는 합성 IP ACTIVE나 합성 InstanceID/association을 넣지 않습니다. canonical 주소 키의 present-null 우선순위와 raw JSON의 누락/null·큰 정수·extension은 `Metadata.Body`와 `FloatingIP.Wire.Body`에 남습니다. Neutron의 native string 필드는 null과 누락을 빈 문자열로 보일 수 있으므로 원래 의미가 필요하면 Wire를 확인합니다.
+
+## Resource·Wire·location·strict
+
+`result.FloatingIP.Resource`는 공개 반환용 owned view이고 `Wire`는 이미 받은 실제 row입니다. view 변환을 위해 목록·단건을 다시 조회하거나 allocation을 다시 실행하지 않습니다. Neutron view는 누락된 known Body 기본값, name/project alias, tags/revision/port_details 변환과 location을 제공합니다. Neutron은 `Normalized=false`이며 strict 옵션으로 이 view의 alias를 제거하지 않습니다. Resource·Wire·lower 모델을 각각 수정해도 다른 view의 JSON bytes를 변경하지 않습니다.
+
+Nova는 `Normalized=true`입니다. 직접 Nova/None은 Python과 같이 Resource의 canonical status ACTIVE를 합성합니다. 실제 Wire의 status가 DOWN이어도 view가 ACTIVE일 수 있으므로 이를 IP ACTIVE·연결·예약 증거로 사용하지 않습니다. Neutron 서비스 발견 후의 외부 fallback에서 실제 backend가 Nova여도 `NormalizationSource=FloatingIPNeutron`을 유지하고, attached는 port, missing status는 UNKNOWN 규칙을 사용합니다. `Backend`는 실제 반환 모델의 backend이며 정규화 규칙과 구분합니다.
+
+`WithAvailableIPStrict(true)`는 Nova view의 port_id/router_id/project_id/tenant_id/floating_network_id 호환 alias와 properties의 extra top-level 복원만 생략합니다. properties 객체 자체와 unknown·nullable Wire는 보존합니다. 기본 false에서는 두 위치에 extension을 읽을 수 있습니다. canonical present-null은 legacy alias보다 우선합니다. Nova raw status 등 소비되지 않은 key는 properties에 남을 수 있으며 canonical 합성 status를 덮어쓰지 않습니다.
+
+location은 Connection의 기록된 cloud·region·project facts로 구성하고 알 수 없는 값은 null로 둡니다. `WithAvailableIPLocation(location)`은 `resource.CloudLocation` 전체 값을 owned snapshot으로 지정합니다. 이 옵션은 인증 scope나 Neutron reuse project를 바꾸지 않습니다. `WithAvailableIPNetworkOptions(network.WithAvailableProject(...))`의 reuse filter와 구분합니다. 옵션 생성 후 원본 location의 pointer·JSON을 변경해도 준비된 값은 바뀌지 않습니다.
+
+location·descriptor·정규화 오류 또는 source/context 종료로 성공한 view를 만들 수 없으면 `FloatingIP.Resource`는 nil일 수 있습니다. 이미 받은 `Wire`와 알려진 raw backend 모델·allocation receipt는 보존하며 원래 오류와 함께 반환합니다. view 오류 때문에 다른 backend로 fallback하거나 새 allocation을 추가하지 않습니다. accepted 응답 처리 오류가 있어도 독립적으로 변환 가능한 Resource가 남을 수 있으므로 nil 여부만으로 작업 성공을 판단하지 않습니다.
 
 ## 준비한 옵션과 시간 정책
 
-outer Compute 옵션과 nested Network 옵션은 한 번 준비하고 fallback에서 다시 application closure를 실행하지 않습니다. network 후보 slice는 options 전에 복사합니다. 준비 중 service/client source 교체와 작업 중 source·endpoint·version 변화는 오류로 종료합니다. 공통 유효성 검증은 실제 backend에서 사용하지 않는 Network 옵션에도 적용됩니다.
+outer Compute 옵션과 nested Network 옵션은 한 번 준비하고 fallback에서 다시 application closure를 실행하지 않습니다. network 후보와 옵션 목록은 적용 전에 복사하고 source/location/Network 옵션은 각 적용 단계에서 owned snapshot으로 유지합니다. 각 callback 전후 source·context를 검사하며 준비 중 교체·취소가 발생하면 뒤 callback과 HTTP를 실행하지 않습니다. 작업 중 source·endpoint·version 변화도 오류로 종료합니다. 공통 유효성 검증은 실제 backend에서 사용하지 않는 Network 옵션에도 적용됩니다.
 
 기본 SDK deadline은 없습니다. `WithAvailableIPTimeout`과 더 이른 parent deadline은 backend discovery부터 fallback/Nova compat GET까지 같은 context를 제한하며 단계마다 다시 시작하지 않습니다. nested `network.WithAvailableTimeout`은 Neutron lower 단계에만 더 짧은 제한을 줄 수 있고 Nova에 적용하지 않습니다. timeout/취소가 Neutron NotFound fallback으로 변환되지 않습니다. unlimited 옵션은 SDK 제한만 제거하고 부모 context 및 transport timeout을 없애지 않습니다.
 
@@ -160,10 +187,12 @@ ip = conn.available_floating_ip(network="public", server=server)
 
 Python public Available의 인자는 network/server뿐이며 자체 wait/reuse/timeout 인자가 없다. Go의 concrete project/fixed/NAT/time 옵션은 추가 기능이다. Python의 network 문자열 name OR ID 및 dynamic list 입력과 Go typed Ref/단일 Nova pool 정책은 같은 입력 표면이 아니다. Go는 source None의 standalone Nova 선택·Neutron free 재사용과 optional allocation server·NotFound fallback을 제공하지만 partial receipt와 joined 원인을 보존하며 일부 fallback의 오류 처리 차이가 있다.
 
-Python Neutron 성공은 network FloatingIP Resource를 그대로 반환한다. Nova path의 normalizer는 configured source를 다시 확인하므로 configured-Neutron fallback은 실제 Nova data에도 Neutron식 status/attached를 적용할 수 있다. Go는 **실제 backend 모델**을 유지하고 Nova ACTIVE·association을 합성하지 않는다. Python location/project·strict aliases·properties·nullable aliases·mutable Resource의 inherited fetch/commit/session·query semantics를 이 result 구조만으로 완료하지 않는다.
+Python Neutron 성공은 network FloatingIP Resource를 그대로 반환한다. Go의 `FloatingIP`는 SDK 소유 반환 view로 location·기본값·Nova strict aliases/properties를 제공하고 실제 backend 모델과 Wire를 함께 보존한다. Nova view의 합성 ACTIVE와 configured-Neutron fallback의 정규화 규칙은 실제 접수/연결 증거와 별도로 읽는다. 이 값 모델은 Python mutable Resource의 inherited fetch/commit/session 전체를 제공하지 않는다.
 
-Python의 unfiltered list 내부404→Nova와 바깥 Available fallback이 중첩되는 순서는 Go의 직접 backend 전환과 다르다. cloud has_service/version/config 전체, configured API GET cache, 모든 함수별 fallback·lookup/cleanup/error 정책, standalone pool/IP CRUD·delete verification 및 full Resource/session 표면은 계속 비교할 범위다. [기존 Compute IP consumer](server-ip-dispatch.md)의 연결·wait나 [Python의 별도 public create](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L775-L842)의 주변 계약을 이 Available 구현만으로 완료 처리하지 않는다.
+Available의 named 매핑은 다음 두 실제 선택 분기가 남아 미완료다. 첫째, Python은 unfiltered Neutron list404에서 configured-source로 정규화한 Nova 목록을 Neutron network/project/null-port로 필터한 뒤 필요하면 Neutron allocation을 수행하지만, 현재 getter는 외부 Nova 경로로 직접 전환한다. 둘째, Python Nova list404는 빈 후보로 처리해 fresh POST·compat GET을 진행하지만 현재 getter는 오류로 종료한다. 이번 Resource view 추가로 이 두 분기를 완료하지 않는다. Nova getter의 selected IPv4/pool/association 검증도 Python의 passive row 정규화보다 엄격하다.
+
+cloud has_service/version/config 전체, configured API GET cache와 mutable Resource/session은 별도 전체 SDK 범위다. [기존 Compute IP consumer](server-ip-dispatch.md)의 연결·wait 및 [독립 Create](floating-ip-create.md)·[Delete](floating-ip-delete.md)·[조회](floating-ip-queries.md)의 판정은 각 선언에서 추적하며 이 Available 반환 view의 완료 여부와 합산하지 않는다.
 
 Python 비교는 고정 source 정적 확인이다. 위 Python 예제나 인증된 OpenStack 실행의 확인을 뜻하지 않는다. 실제 HTTP fixture·정확한 독립 main 컴파일·최종 revision gate 결과는 확인된 근거만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록한다.
 
-전체 IP 목록·검색·단건과 pool 조회는 [Floating IP query 가이드](floating-ip-queries.md)의 별도6개 API를 사용합니다. 이 Available entry는 free-first 재사용 또는 allocation이며, query의 nullable row·Nova 논리 정규화 view와 반환 계약이 다릅니다.
+전체 IP 목록·검색·단건과 pool 조회는 [Floating IP query 가이드](floating-ip-queries.md)의 별도6개 API를 사용합니다. Available은 같은 `FloatingIPRecord`의 Resource·Wire 반환 view를 사용하지만 free-first 선택 또는 allocation과 raw mutation 후보 검증을 수행하는 별도 작업입니다.
