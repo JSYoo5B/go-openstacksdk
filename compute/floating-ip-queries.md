@@ -211,3 +211,5 @@ pools = conn.search_floating_ip_pools(name="public*")
 [독립 Floating IP 삭제](floating-ip-delete.md)는 이 공개 Get 정책으로 접수 후 결과를 확인합니다. 기본값은 추가 DELETE1회이며, 목록의 no-match와 present DOWN을 별도로 반환합니다.
 
 새 IP 할당·선택적 대기·timeout 정리는 [CreateFloatingIP](floating-ip-create.md)에서 제공합니다.
+
+[미연결 Floating IP 일괄 정리](floating-ip-unattached-delete.md)는 Neutron 전체 목록을 확보한 뒤 port가 비어 있는 항목을 순차 삭제합니다. 개별 false는 계속 처리하고 오류는 중단하며 SDK 소유 옵션·한 deadline·항목별 부분 결과를 제공합니다.

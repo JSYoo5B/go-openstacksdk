@@ -239,7 +239,7 @@ created, err := service.FloatingIPs.Create(ctx,
 
 네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `gophercloudsdk/network/v2/networks`, `gophercloudsdk/network/v2/extensions/layer3/floatingips`를 import합니다.
 
-위 `Create` 작업은 Neutron에서 새 IPv4 floating IP를 생성합니다. [FloatingIPs.Ensure](floating-ip-ensure.md)는 현재 프로젝트의 이미 연결된 IP·가용 IP·새 allocation을 순서대로 선택하고 서버의 fixed IPv4에 연결합니다. 명시 network 또는 공유 floating 역할·router gateway에서 외부 network를 선택하며, 조건에 따라 공유 NAT 역할로 destination을 좁힙니다. 알려진 revision으로 PUT을 보호하고 실패 시 선택/할당 결과를 보존합니다. 자동 필요성 판단·pool·순차 IPv4와 raw Nova 관측은 [Compute IP dispatch](../compute/server-ip-dispatch.md)에서 제공합니다. direct proxy add/remove·unattached cleanup·함수별 fallback과 전체 cloud 서비스·Resource/session/lifecycle은 남은 범위입니다. Neutron의 404·403·409는 원래 HTTP 오류를 보존하며 다른 API로 전환하지 않습니다. 지정한 기존 IP의 고정 연결은 [FloatingIPs.Attach](floating-ip-attach.md)로 제공하며 해제·일반 수정은 `service.API.FloatingIPs.Update`에서 개별 호출할 수 있습니다. 이 범위를 Python cloud 계층 전체와 동일하게 구현했다고 간주하지 않습니다.
+위 `Create` 작업은 Neutron에서 새 IPv4 floating IP를 생성합니다. [FloatingIPs.Ensure](floating-ip-ensure.md)는 현재 프로젝트의 이미 연결된 IP·가용 IP·새 allocation을 순서대로 선택하고 서버의 fixed IPv4에 연결합니다. 명시 network 또는 공유 floating 역할·router gateway에서 외부 network를 선택하며, 조건에 따라 공유 NAT 역할로 destination을 좁힙니다. 알려진 revision으로 PUT을 보호하고 실패 시 선택/할당 결과를 보존합니다. 자동 필요성 판단·pool·순차 IPv4와 raw Nova 관측은 [Compute IP dispatch](../compute/server-ip-dispatch.md)에서 제공합니다. direct proxy add/remove·함수별 fallback과 전체 cloud 서비스·Resource/session/lifecycle은 남은 범위입니다. Neutron의 404·403·409는 원래 HTTP 오류를 보존하며 다른 API로 전환하지 않습니다. 지정한 기존 IP의 고정 연결은 [FloatingIPs.Attach](floating-ip-attach.md)로 제공하며 해제·일반 수정은 `service.API.FloatingIPs.Update`에서 개별 호출할 수 있습니다. 이 범위를 Python cloud 계층 전체와 동일하게 구현했다고 간주하지 않습니다.
 
 [network_test.go](network_test.go)는 추가 query의 URL 인코딩과 이름을 통한 삭제를, [floating_ip_test.go](floating_ip_test.go)는 이름 해석·다중 페이지 포트 선택·IPv4 조건·중복·명시 포트·extension·상태 대기·생성 후 실패 보존을, [Ensure·선택 테스트](floating-ip-ensure.md#고정-소스와-남은-범위)는 기존 IP 재사용·owner·revision·빈 페이지·부분 실패를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.
 
@@ -247,7 +247,7 @@ created, err := service.FloatingIPs.Create(ctx,
 
 서버 생성부터 floating IP 연결·ACTIVE 대기까지 공통 deadline으로 실행하려면 Compute의 [CreateWithFloatingIP](../compute/create-with-floating-ip.md)를 사용합니다. 실패 시 실제 서버와 이 서비스의 IP assignment를 함께 보존합니다.
 
-[네트워크 역할 조회](network-roles.md)는 외부·내부 IPv4/IPv6, floating source, NAT destination과 기본 인터페이스를 SDK가 설정과 Neutron 응답에서 분류합니다. Getter, configured 기본 NIC, Ensure의 자동 외부 network와 Create/Ensure의 조건부 NAT 선택이 성공 snapshot을 공유하고, 반환한 모델은 각 호출자가 소유합니다. `WithNetworkRoles`로 설정을 교체하고 `ResetNetworkRoles`로 cache를 갱신할 수 있습니다. IP 후보와 서버 port는 호출마다 조회합니다. [상위 네트워크 CRUD](network-mutations.md)의 접수된 변경은 같은 cache를 자동 초기화합니다. Raw/native/API·외부 변경은 명시 Reset이 필요합니다. [서버 주소 계산·보충](../compute/server-addresses.md)은 구현되어 있으며, [기존 서버의 조건부 Neutron assignment·raw Nova 관측](../compute/server-automatic-ip.md)도 제공합니다. 전체 cloud lifecycle·direct proxy add/remove·unattached cleanup·서비스 가용성 정책은 남은 범위입니다.
+[네트워크 역할 조회](network-roles.md)는 외부·내부 IPv4/IPv6, floating source, NAT destination과 기본 인터페이스를 SDK가 설정과 Neutron 응답에서 분류합니다. Getter, configured 기본 NIC, Ensure의 자동 외부 network와 Create/Ensure의 조건부 NAT 선택이 성공 snapshot을 공유하고, 반환한 모델은 각 호출자가 소유합니다. `WithNetworkRoles`로 설정을 교체하고 `ResetNetworkRoles`로 cache를 갱신할 수 있습니다. IP 후보와 서버 port는 호출마다 조회합니다. [상위 네트워크 CRUD](network-mutations.md)의 접수된 변경은 같은 cache를 자동 초기화합니다. Raw/native/API·외부 변경은 명시 Reset이 필요합니다. [서버 주소 계산·보충](../compute/server-addresses.md)은 구현되어 있으며, [기존 서버의 조건부 Neutron assignment·raw Nova 관측](../compute/server-automatic-ip.md)도 제공합니다. 전체 cloud lifecycle·direct proxy add/remove·서비스 가용성 정책은 남은 범위입니다.
 
 [Compute의 legacy Nova backend](../compute/server-nova-floating-ip.md)는 Nova pool/list/allocation/add action을 별도 `NovaAssignment`로 반환합니다. 직접 Network API와 immutable Neutron plan의 모델·목적지·revision·ACTIVE 계약은 그대로 사용합니다.
 
@@ -258,3 +258,5 @@ created, err := service.FloatingIPs.Create(ctx,
 [Connection·Compute Floating IP 삭제](../compute/floating-ip-delete.md)는 cloud의 backend 선택과 기본 재검증을 제공하며, Neutron DELETE404에서 Nova로 전환하지 않습니다. 직접 Network의 generic Delete와 별도 반환 계약입니다.
 
 [독립 Floating IP 생성](../compute/floating-ip-create.md)은 가용 IP를 재사용하지 않고 새 allocation을 생성합니다. SDK가 Neutron/Nova·port 우선·optional server/NAT·공개 Get 대기·wait timeout 정리를 처리하며, 접수된 응답과 compatibility/wait/cleanup 부분 결과를 보존합니다.
+
+[미연결 Floating IP 일괄 정리](../compute/floating-ip-unattached-delete.md)는 Neutron 전체 목록을 확보한 뒤 port가 비어 있는 항목을 순차 삭제합니다. 개별 false는 계속 처리하고 오류는 중단하며 SDK 소유 옵션·한 deadline·항목별 부분 결과를 제공합니다.

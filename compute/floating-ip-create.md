@@ -213,3 +213,5 @@ Python의 timeout loop는 allocation 뒤 wall-clock을 확인하며 in-flight HT
 
 이 named Cloud 생성은 concrete 입력·SDK 기본값·fresh allocation·선택적 대기·timeout 정리를 제공하는 Go 매핑입니다. Python의 임의 object/Munch·JSON 바깥 동적 입력·null/unsafe executable ID·timeout=None은 typed Go 입력과 context 정책으로 대응하며, 전체 mutable Resource·inherited fetch/commit/session/cache/discovery·직접 Network Proxy/native 선언·DeleteUnattached는 별도 SDK 구현 범위로 추적합니다. async 결과는 접수한 리소스의 현재 view입니다. 해당 범위나 인증된 실제 클라우드 검증을 이 생성의 완료 근거로 대신하지 않습니다.
 
+
+[미연결 Floating IP 일괄 정리](floating-ip-unattached-delete.md)는 Neutron 전체 목록을 확보한 뒤 port가 비어 있는 항목을 순차 삭제합니다. 개별 false는 계속 처리하고 오류는 중단하며 SDK 소유 옵션·한 deadline·항목별 부분 결과를 제공합니다.

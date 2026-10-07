@@ -157,3 +157,5 @@ SDK의 추가 timeout은 Python Delete에는 없는 옵션입니다. 옵션 준�
 기존 generic `Network.FloatingIPs.Delete`의 ignoreMissing/error-only 정책, [Available](floating-ip-available.md)의 free IP 조회·할당, [IP helper](server-ip-helpers.md)의 서버 연결과 이 standalone 삭제를 구분합니다. 이 API는 서버·port detach, `delete_unattached_floating_ips`, Create의 timeout cleanup, 직접 Network Proxy의 revision-aware Delete 전체를 수행하지 않습니다. 전체 Floating IP CRUD와 Python Resource parity는 해당 후속 범위를 함께 검토해야 합니다.
 
 새 IP 할당·선택적 대기·timeout 정리는 [CreateFloatingIP](floating-ip-create.md)에서 제공합니다.
+
+[미연결 Floating IP 일괄 정리](floating-ip-unattached-delete.md)는 Neutron 전체 목록을 확보한 뒤 port가 비어 있는 항목을 순차 삭제합니다. 개별 false는 계속 처리하고 오류는 중단하며 SDK 소유 옵션·한 deadline·항목별 부분 결과를 제공합니다.
