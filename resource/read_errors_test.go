@@ -118,6 +118,8 @@ func terminalReadCases() []struct {
 		{"deadline", errors.Join(native, context.DeadlineExceeded)},
 		{"invalid-option", errors.Join(native, ErrInvalidOption)},
 		{"unsupported", errors.Join(native, ErrUnsupported)},
+		{"callback", errors.Join(native, errors.New("untyped callback failed"))},
+		{"nested callback", errors.Join(errors.Join(native, errors.New("nested callback failed")))},
 	}
 }
 

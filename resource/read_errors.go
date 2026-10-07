@@ -12,6 +12,9 @@ import (
 // transport or accepted-response pipeline, even when it contains an HTTP code.
 // Such errors cannot establish absence or permit an identity list fallback.
 func terminalReadError(err error) bool {
+	if joinedResponseFailure(err) {
+		return true
+	}
 	var terminal interface{ TerminalSDKFailure() bool }
 	if errors.As(err, &terminal) && terminal.TerminalSDKFailure() {
 		return true
@@ -29,16 +32,17 @@ func terminalReadError(err error) bool {
 // A joined deletion failure carries more than missing-resource evidence.
 // Preserve callback errors even when they use no SDK sentinel or known type.
 func terminalDeleteError(err error) bool {
-	if terminalReadError(err) {
-		return true
-	}
+	return terminalReadError(err)
+}
+
+func joinedResponseFailure(err error) bool {
 	var joined interface{ Unwrap() []error }
 	if !errors.As(err, &joined) {
 		return false
 	}
 	causes := joined.Unwrap()
 	if len(causes) == 1 {
-		return terminalDeleteError(causes[0])
+		return joinedResponseFailure(causes[0])
 	}
 	return len(causes) > 1
 }

@@ -205,6 +205,8 @@ origin·path·query 연속성 검사는 별도 REST binding의 정책이며 nati
 
 공통 GET과 FindIdentity의 GET은 실제 HTTP 404를 `ErrNotFound`로 감싸며 원래 Gophercloud 오류를 보존합니다. URL 전송 오류, 받아들인 응답의 `ResponseError`, JSON 해석·읽기 실패와 context 취소·deadline 오류는 미존재로 처리하지 않습니다. 이런 오류의 내부 원인에 404나 `ErrNotFound`가 있어도 `Find(..., WithIgnoreMissing())`와 `WaitDeleted`는 오류를 반환합니다. 실제 미존재와 성공한 nil/deleted 응답에 대한 기존 동작은 유지됩니다.
 
+`Delete`의 기본 missing 무시는 순수 미존재 응답에 적용합니다. 이름 lookup이나 삭제의 404에 callback·source·취소·응답 정책 실패가 함께 담기면 전체 오류를 보존합니다. 이런 실패는 `WithMissingError()` 여부와 관계없이 숨기거나 새 미존재 오류로 분류하지 않습니다. 여러 원인을 담은 중첩 `errors.Join`도 같은 규칙을 사용합니다.
+
 SDK 소유 Cyborg·Senlin·Masakari 모델의 `Metadata.Body`는 원래 JSON 필드를 `json.RawMessage`로 보존합니다. 큰 정수를 `float64`로 바꾸지 않으며 null·빈 값·생략도 구별합니다. `Metadata.Header`와 `StatusCode`는 받아들인 응답의 HTTP 근거입니다. Senlin·Masakari의 받아들인 응답을 읽거나 해석하지 못하면 `ResponseError`가 원문·헤더·상태·cause를 보존합니다. 생성 요청이 이미 성공했을 수 있으므로 이 오류만으로 자동 재전송하지 않습니다.
 
 Wait의 기본 timeout은 5분, 간격은 2초입니다. `WithUnlimitedWait()`는 SDK의 timeout을 없애며 부모 context의 취소와 deadline은 유지합니다. 뒤의 `WithTimeout(...)`으로 다시 제한할 수 있습니다. 대상 상태 비교는 대소문자를 구분하지 않습니다. 실패 상태는 서비스별 Adapter가 선언합니다. `WithFailureStates("ERROR", "BROKEN")`은 이를 정확한 대소문자 무시 비교로 교체하고, 인자 없는 `WithFailureStates()`는 상태에 의한 실패 검사를 끕니다. 대상 상태와 실패 상태가 같다면 대상 도달을 먼저 판정합니다. 서비스 조회 자체가 반환하는 실패 오류는 이 옵션으로 무시하지 않습니다.
