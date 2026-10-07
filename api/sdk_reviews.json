@@ -34875,7 +34875,10 @@
         "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
         "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP",
         "gophercloudsdk/compute.WithFloatingIPPool",
-        "gophercloudsdk/compute.WithFloatingIPAddresses"
+        "gophercloudsdk/compute.WithFloatingIPAddresses",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion"
       ],
       "contracts": [
         {
@@ -35123,10 +35126,29 @@
           ]
         },
         {
-          "behavior": "Typed automatic creation rejects selected malformed address/unsafe pool and statically known explicit Nova/None backend before Nova POST or dependency HTTP. If the second address is missing after creation, original Creation.AdminPass, latest raw Server, the completed/observed first assignment and failing second attempt remain with ErrNotFound, no third address or IP allocation. This is a bounded typed compound and does not implement source wait=false create behavior or legacy Nova dispatch.",
+          "behavior": "Typed automatic creation rejects selected malformed address/unsafe pool before POST. The historical known-unsupported legacy fixture includes a Neutron-only project override, so capability preflight rejects it before server POST or dependency HTTP; capable Nova backend is not rejected categorically. In the tested Neutron second-address failure, original Creation.AdminPass, latest raw Server, completed/observed first assignment and failing second attempt remain with ErrNotFound, no third address or allocation. Source wait=false creation remains separate; new bounded Nova creation has its own evidence.",
           "tests": [
             "compute/server_ip_dispatch_workflow_test.go:TestServerIPDispatchPureInvalidAndKnownUnsupportedCreateStopBeforePOST",
             "compute/server_ip_dispatch_workflow_test.go:TestServerIPDispatchCreateRetainsCreationFirstIPAndSecondFailure"
+          ]
+        },
+        {
+          "behavior": "The same bounded Nova ordered-address foundation is consumed by strong Ensure, GetActive async/sync, standalone Wait and automatic creation. Both items complete with separate NovaAssignment and no Neutron Assignment. GetActive async performs zero raw observations; Ensure/Get sync observe each item, while Wait/Create perform one initial actual ACTIVE readiness GET plus two target observations. Wait ignores supplied ERROR in favor of raw state. The image/flavor creation body is checked and original Creation.AdminPass stays separate from the last raw Server. This new upper success fixture is an explicit list, not every pool/auto/volume/NIC combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend"
+          ]
+        },
+        {
+          "behavior": "For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer"
+          ]
+        },
+        {
+          "behavior": "The Nova direct-list lane rejects selected Compute2.36/2.44 and Neutron-only port/NAT-network/project overrides with ErrUnsupported before HTTP or attempts; a nonnumeric latest microversion is an invalid option. Known legacy capability preflight for automatic creation separately rejects2.36, explicit port and project overrides before any server POST or other fixture HTTP. These capability limits are distinct from a blanket Nova backend prohibition.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPVersionAndNeutronSelectorsFailBeforeHTTP",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST"
           ]
         }
       ],
@@ -35141,7 +35163,8 @@
         "compute/server-automatic-ip.md",
         "network/floating-ip-plan.md",
         "compute/server-ready.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
@@ -35149,12 +35172,12 @@
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
         "CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow.",
-        "The explicit Service/Connection CreateWithAutomaticFloatingIP compound connects owned Nova creation, raw actual ACTIVE/address readiness and selected Neutron pool/ordered explicit/automatic dispatch with separate Creation/last Server/Automatic results. It always waits, rejects alternate status selectors and preserves original creation-only AdminPass. Source create_server defaults wait=false and only forwards IP dispatch through its wait=true path; ordinary Servers.Create and the older explicit workflow retain their separate contracts.",
+        "The explicit Service/Connection CreateWithAutomaticFloatingIP compound connects owned Nova creation, raw actual ACTIVE/address readiness and selected Neutron or bounded legacy Nova dispatch with separate Creation/last Server/Automatic results. It always waits, rejects alternate status selectors and preserves original creation-only AdminPass. Source create_server defaults wait=false and only forwards IP dispatch through its wait=true path; ordinary Servers.Create and the older explicit workflow retain their separate contracts.",
         "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
       ],
       "remaining": [
         "Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles; the owned high Network Service mutations now provide the verified bounded cache invalidation. Complete full has_service/private/source/flags, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion. Generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset; bounded roles and mutation hooks do not close the complete cloud create policy.",
-        "Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model/fault/error/cleanup behavior beyond typed CreateWithAutomaticFloatingIP, which now consumes bounded Neutron selected dispatch. New dispatch fixtures verify image/flavor body, ordered addresses and partial Creation/Server/assignments; they do not expand existing volume/NIC coverage to every dispatch combination. Ordinary Servers.Create/source wait=false refresh/expansion remain separate. Preserve remaining group/scheduler hints, extra/data-volume/count/security/userdata/metadata and full post-create GET/fault/wait contracts.",
+        "Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model/fault/error/cleanup behavior beyond typed CreateWithAutomaticFloatingIP, which now consumes bounded Neutron and legacy Nova selected dispatch. New Neutron/Nova dispatch fixtures verify image/flavor body, ordered addresses and partial Creation/Server/assignments; they do not expand existing volume/NIC coverage to every dispatch combination. Ordinary Servers.Create/source wait=false refresh/expansion remain separate. Preserve remaining group/scheduler hints, extra/data-volume/count/security/userdata/metadata and full post-create GET/fault/wait contracts.",
         "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
       ]
     },
@@ -35645,7 +35668,16 @@
         "gophercloudsdk/compute.Service.AddIPsToServer",
         "gophercloudsdk.Connection.AddIPsToServer",
         "gophercloudsdk/compute.WithServerIPAutomaticOptions",
-        "gophercloudsdk/compute.WithServerIPWait"
+        "gophercloudsdk/compute.WithServerIPWait",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion",
+        "gophercloudsdk/compute.Service.GetActiveServer",
+        "gophercloudsdk/compute.Service.WaitForServer",
+        "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk.Connection.GetActiveServer",
+        "gophercloudsdk.Connection.WaitForServer",
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
       ],
       "contracts": [
         {
@@ -35824,6 +35856,30 @@
             "compute/server_ip_helpers_test.go:TestStandaloneServerIPPoolUsesSamePriorityAndAsyncAllocationPolicy",
             "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
           ]
+        },
+        {
+          "behavior": "The bounded Nova pool consumer uses the literal selected pool ahead of ignored malformed address selectors. Reuse selects the first matching raw instance_id=null candidate without allocation; reuse=false sends POST200 with only the pool name, one compatibility GET and a further selected-IP recheck before action202. An empty-string instance_id is not a free null candidate. Automatic mode without a pool chooses the first returned pool and uses the same assignment foundation; automatic disabled/private/floating/empty skips send no fixture HTTP and create no NovaAssignment. These are assignment consumers, not the source optional-server availability getter.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPPoolReuseAndFreshAllocation",
+            "compute/server_ip_nova_test.go:TestNovaServerIPListAbsenceAndAssociationMetadataCannotAllocate",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAutomaticDefaultPoolAndKnownSkips"
+          ]
+        },
+        {
+          "behavior": "Nova matching is local and unfiltered: an unrelated null address in another pool does not poison a valid exact-address or free-pool selection, and present canonical null prevents the legacy address alias from becoming a second match. Fractional numeric IDs, selected missing association metadata and duplicate matching addresses fail without action/allocation; duplicate yields ErrAmbiguous. List204 is an error rather than absence, and an empty200 default-pool response is ErrNotFound. When a first IP inventory page already has a match but its advertised next page returns403, both address and pool consumers retain the late native status/header/body, return no NovaAssignment and send no selected-IP GET/action/allocation.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPLocalSelectionIgnoresUnrelatedNullAddresses",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPSelectedDecoderAndPoolResponseBoundaries",
+            "compute/server_ip_nova_test.go:TestNovaServerIPListAbsenceAndAssociationMetadataCannotAllocate",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate"
+          ]
+        },
+        {
+          "behavior": "A Nova allocation accepted200 retains Allocated=true, its decoded IP and AllocationResponse proof when a later compatibility GET is denied or contradicts the selected address/pool. Accepted allocation or compatibility Close failure preserves the known model beside the original Close cause and the actual failed response proof; no association action starts. A decoded wrong-pool allocation remains partial evidence and is not used as a new target.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPAllocationAndCompatibilityFailureKeepPartial",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAcceptedAllocationAndCompatibilityClosePreserveProof"
+          ]
         }
       ],
       "documentation": [
@@ -35837,24 +35893,25 @@
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-ip-dispatch.md",
-        "compute/server-ip-helpers.md"
+        "compute/server-ip-helpers.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
         "Pinned available_floating_ip accepts an optional existing Server and returns the first free floating-IP Resource/Munch, allocating only when none is free. Ensure requires a safe explicit server Ref and always selects/verifies its unique IPv4 destination, associates a free IP, and deliberately prefers an IP already attached there. It returns a FloatingIPAssignment with Reused/Allocated phases; this is an idiomatic standalone workflow foundation rather than an equivalent availability getter.",
         "Pinned Neutron selection filters port_id=None, network and current project over list_floating_ips. Go constrains the list query, rechecks owner/network locally, accepts native empty/null port strings, excludes IPv6/ERROR/inconsistent-owner rows and adds presence-aware revision guarding. Explicit Go ID/Name Refs and unique destination IPv4 policy narrow Python dynamic/list/name-or-ID inputs.",
         "Go automatic allocation first consumes shared configured ExternalIPv4Floating roles, with enabled-router gateway fallback only for a successful empty role list. Without explicit port/fixed/NAT settings and with multiple server-owned ports, Create/Ensure use the shared NAT destination; IPv6-only ports count and unique fixed IPv4-pair validation remains strict. Shared successful roles are cached, while candidate IP/port selection remains per call. These assertions do not establish identical Python mutable cache, pager/session or automatic-need policies.",
-        "Python chooses Neutron versus Nova from service/configured floating_ip_source and falls back to Nova on selected NotFound failures. Go is Neutron-only and preserves selection/association errors without fallback, retry-to-allocate or implicit cleanup. Pinned creation wait timeout can delete a newly allocated IP; Go returns the allocated assignment for explicit cleanup.",
+        "Python chooses Neutron versus Nova from configured source/service and can fall back on selected Neutron NotFound failures. Network Ensure remains Neutron-only; bounded Compute assignment consumers now also execute legacy Nova. Go preserves selected Neutron/association errors without automatic backend fallback or implicit cleanup. Source normalization can recheck configured backend after fallback and synthetic Nova ACTIVE is not actual readiness; Go keeps separate actual Nova models/action proof.",
         "Standalone plain PrepareEnsureFloatingIPOptions resolves the recorded owner per Ensure call; service-bound PrepareEnsureActive intentionally holds the owner resolved before Nova creation. Reuse=false without explicit owner continues to leave scope to Neutron. Native alias results do not emulate Python Resource/normalization/location/session/cache state or server interface refresh.",
         "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution.",
         "PrepareEnsure/EnsurePrepared are an explicit Go-only two-stage Neutron foundation holding an immutable selection, late owner binding and port revalidation. They do not implement the optional-server availability getter, automatic need/skip or raw Nova address convergence; shared cache/in-flight and existing public/native paths retain their own policies.",
-        "Existing stronger Compute Ensure/ready/create lanes require raw observation according to their own policy, while the independent AddIPsToServer pool consumer defaults to async/60seconds and may return a DOWN assignment. The optional-server availability getter is still partial; ordinary/full cloud lifecycle, source pool unattached-first semantics and legacy Nova/model contracts remain separate.",
-        "The typed pool selector uses the same prepared Ensure allocation/reuse policy and wins over ignored explicit address strings. This is not a standalone source availability getter: source reuse requests available_floating_ip(network=pool) without Server, while Go verifies a concrete destination, prefers an already-attached candidate and may allocate attached directly. Ordered upper workflow results and observation are separate from the source Resource/Munch return."
+        "Stronger Compute Ensure/ready/create keep their own raw readiness/observation policy. Independent AddIPsToServer defaults to async/whole60seconds and can return accepted DOWN Neutron Assignment or actual legacy NovaAssignment without synthetic status. The optional-server availability getter remains partial; ordinary/full cloud lifecycle, source Resource/normalization/cache and cleanup/error ordering remain separate.",
+        "The typed Neutron pool selector uses prepared Ensure and wins over ignored address strings. The bounded Nova pool consumer implements raw free candidate/first default pool/POST200 compatibility dependencies before concrete assignment, not a standalone optional-server availability getter. Source reuse returns an unattached IP Resource while these consumers continue into association/action; returned models and upper observations remain separate."
       ],
       "remaining": [
-        "Provide or deliberately map the full public availability getter: optional/absent Server, network/pool dynamic inputs, unattached result behavior and Resource/Munch identity/normalization. The new typed pool consumer still executes prepared Ensure rather than returning an unattached available IP. Compare list_floating_ips filtering/defaults/pagination/error/cache and current_project_id policies beyond the bounded selection path.",
+        "Provide or deliberately map the full standalone public availability getter: optional/absent Server, dynamic network/pool inputs, unattached result and Resource/Munch identity/location/normalization. Typed Neutron and Nova consumers continue into concrete assignment rather than returning the source unattached result. Compare public list/filter/pagination/error/cache/current_project policies beyond bounded dependency fixtures.",
         "Shared configured floating source/default/NAT roles now feed the bounded Go consumers, with verified bounded cache invalidation from owned high Network Service mutations. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, mutable Resource/cache/session semantics and source destination/source behavior beyond the explicit or multiple-owned-port boundaries; generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset. The source optional-server availability getter remains partial.",
-        "Compare floating_ip_source/service selection, Nova-network pool listing/allocation/normalization and Neutron NotFound fallback. Finish private _neutron_create_floating_ip optional server/port/fixed-address semantics, destination heuristics, timeout/cleanup/exception ordering and Resource/Adapter behavior; private helpers are dependencies and have no separate declared catalog IDs.",
-        "Prepared Ensure now feeds bounded typed explicit creation and selected automatic/pool/list Plan/Ensure/GetActive/Wait/automatic creation, plus independent AddIPsToServer with async/60second defaults. This is concrete destination attachment/assignment, not source optional-server unattached availability. Ordinary Create/Get and full cloud create_server/add_auto_ip/wait_for_server defaults/dispatch/model surface remain separate, along with source optional-server pool reuse/unattached allocation, Nova/service/Resource/cache/returned-interface and cleanup/error ordering."
+        "Compare full floating_ip_source/service selection, source normalization (including configured-Neutron Nova-fallback branch), public legacy pool/list/get/create/delete and Neutron NotFound fallback beyond bounded Nova allocation/pool dependencies. Finish private Neutron optional server/port/fixed/NAT semantics, timeout/cleanup/exception/Resource/Adapter ordering; private helpers have no separate declared catalog IDs.",
+        "Prepared Neutron and bounded Nova dependencies now feed selected typed Plan/Ensure/GetActive/Wait/automatic creation and independent async60second AddIPsToServer. These produce concrete assignments, not source optional-server availability. Ordinary Create/Get, full add_auto_ip return/expansion, source pool refresh/timing and Resource/cache/interface/error/cleanup ordering remain separate."
       ]
     },
     {
@@ -35972,7 +36029,10 @@
         "gophercloudsdk/resource.WaitPolicy.ValidateFixedStatus",
         "gophercloudsdk/resource.WithWaitPolicy",
         "gophercloudsdk/compute.WithFloatingIPPool",
-        "gophercloudsdk/compute.WithFloatingIPAddresses"
+        "gophercloudsdk/compute.WithFloatingIPAddresses",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion"
       ],
       "contracts": [
         {
@@ -36120,6 +36180,18 @@
           "tests": [
             "connection_server_ip_dispatch_test.go:TestConnectionOrderedIPSourceFailureKeepsFirstObservationAndAcceptedSecondIP"
           ]
+        },
+        {
+          "behavior": "The same bounded Nova ordered-address foundation is consumed by strong Ensure, GetActive async/sync, standalone Wait and automatic creation. Both items complete with separate NovaAssignment and no Neutron Assignment. GetActive async performs zero raw observations; Ensure/Get sync observe each item, while Wait/Create perform one initial actual ACTIVE readiness GET plus two target observations. Wait ignores supplied ERROR in favor of raw state. The image/flavor creation body is checked and original Creation.AdminPass stays separate from the last raw Server. This new upper success fixture is an explicit list, not every pool/auto/volume/NIC combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend"
+          ]
+        },
+        {
+          "behavior": "For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer"
+          ]
         }
       ],
       "documentation": [
@@ -36128,19 +36200,20 @@
         "compute/server-automatic-ip.md",
         "compute/server-ready.md",
         "network/floating-ip-plan.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
         "The review now includes typed existing-server Service/Connection.WaitForServer plus earlier explicit and automatic creation workflows. New standalone Wait fixes the supplied ID and fetches current raw Nova metadata even when the supplied model says ACTIVE or ERROR; supplied status/addresses/fault are not readiness evidence. This differs from the existing Servers/leaf WaitForServer collection surface, which only waits for status with120-second/two-second defaults.",
-        "Standalone Wait defaults to one 180-second overall context and five-second server/raw polls, with an unlimited server-local stage inside that context unless overridden. The actual default wire deadline is tested; earlier explicit/automatic creation workflows retain their five-minute budgets. Go propagates one continuous deadline across readiness, Neutron and observation instead of subtracting source integer elapsed time and restarting a forwarded remaining-time wait.",
+        "Standalone Wait defaults to one 180-second overall context and five-second server/raw polls, with an unlimited server-local stage inside that context unless overridden. The actual default wire deadline is tested; earlier explicit/automatic creation workflows retain their five-minute budgets. Go propagates one continuous deadline across readiness, selected Neutron/Nova execution and observation instead of subtracting source integer elapsed time and restarting a forwarded remaining-time wait.",
         "Go raw200/203 failures retain typed matching Server/response proof and original causes. First404 and later403 are terminal in the tested standalone lane; malformed/wrong-ID responses are not adopted, and accepted203 Close/source/cancel/ancestor errors retain a decoded matching model without decode retry. This is not pinned cloud get_server lookup/Resource expansion or its broad Exception/None retry policy.",
         "Raw actual ERROR remains failed even when application failure states are disabled. ACTIVE nil metadata polls; explicit zero rows return ServerAddressesUnavailableError with the last matching model and no DELETE. Pinned get_active_server deletes a falsy-address ACTIVE server and may accept a truthy empty-row map. Go case-insensitive state matching, typed Fault/errors and no-cleanup partial results differ from source literal states and exception/extra_data/model semantics.",
-        "Typed Wait consumes selected Neutron pool/ordered explicit/automatic dispatch after owned raw readiness. Assignments require actual IP ACTIVE and per-item exact raw Nova convergence despite WithActiveServerWait(false)/EnsureNoWait; clean automatic skips retain nil Assignment/Observed=false. Sequential Observed records successful item-time observations, not simultaneous presence of all prior targets in the last Server. Legacy Nova/source Resource/default/fallback surfaces remain separate.",
+        "Typed Wait consumes selected Neutron or bounded legacy Nova dispatch after owned raw actual ACTIVE readiness. Neutron requires actual IP ACTIVE; Nova has no IP status and retains actual model/action evidence. Both synchronous lanes require per-item exact raw ACTIVE-server target convergence; clean automatic skips have no assignment/Observed=false. Item-time Observed does not prove simultaneous final presence. Full source Resource/default/fallback behavior remains partial.",
         "Earlier guarded named-creation evidence retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Standalone Wait takes the supplied ID rather than completing ordinary cloud get_server name/filter/defaultquery/interface expansion; flavor-name creation keeps its existing defaults."
       ],
       "remaining": [
         "Complete dynamic Server/Resource inputs, full cloud get_server lookup/defaultquery/interface expansion and broad lookup-Exception/None retry beyond the new typed supplied-ID raw waiter. Compare the complete fault/extra_data taxonomy and all state/address/nullable inputs. Standalone180-second/five-second defaults now exist, but Go raw terminal-error, noDELETE and zero-row policies remain deliberate differences.",
-        "Compare full selected IP/default/fixed/NAT/reuse forwarding and shared configured network/service/flags/cache/source policy plus Nova-network fallback beyond bounded typed pool/list/automatic integration. Standalone Wait and automatic creation consume the shared dispatch, with new upper success fixtures limited to explicit lists; ordinary Servers.Create and the full cloud dispatch/model surface remain separate.",
+        "Compare full selected IP/default/fixed/NAT/reuse forwarding and shared configured network/service/flags/cache/source policy plus Nova-network fallback beyond bounded typed Neutron/Nova integration. Standalone Wait and automatic creation consume the shared dispatch, with new Neutron/Nova upper success fixtures limited to explicit lists; ordinary Servers.Create and the full cloud dispatch/model surface remain separate.",
         "Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts."
       ]
     },
@@ -37958,7 +38031,10 @@
         "gophercloudsdk.Connection.AddIPsToServer",
         "gophercloudsdk.Connection.AddIPList",
         "gophercloudsdk/compute.WithServerIPAutomaticOptions",
-        "gophercloudsdk/compute.WithServerIPWait"
+        "gophercloudsdk/compute.WithServerIPWait",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion"
       ],
       "documentation": [
         "compute/server-automatic-ip.md",
@@ -37967,19 +38043,21 @@
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-ip-dispatch.md",
-        "compute/server-ip-helpers.md"
+        "compute/server-ip-helpers.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
-        "The pinned public add_ips_to_server returns a mutable Server Resource and dispatches pool > truthy explicit ips > auto/needs. New independent Service/Connection AddIPsToServer provides typed Neutron pool/list/automatic modes with async/60second defaults and structured Decision/Attempts/Assignment/Server/Observed partials. Existing Plan/Ensure/ready/create consumers keep separate default/readiness policy; Plan is diagnostic and a later independent Ensure replans.",
+        "The pinned public add_ips_to_server returns mutable Server Resource and dispatches pool > truthy ips > auto/needs. Independent typed Service/Connection AddIPsToServer now provides bounded Neutron and legacy Nova selected modes with async/whole60second defaults and structured Decision/Attempts/Server/Observed plus separate Neutron Assignment or NovaAssignment. Existing Plan/Ensure/ready/create keep their distinct default/readiness policies; Nova Plan is diagnostic and independent execution replans.",
         "Disabled/private/AccessIPv4/floating/empty skips apply to automatic mode only. Pool/list requests bypass automatic needs, and only the final winning selector is validated; pool does not inspect ignored address strings. Empty list/zero pool clears selection. Concrete IPv4/Ref inputs, owned snapshots and option preparation replace Python dynamic coercion; full Resource/session/normalization and has_service configuration/version behavior remain partial.",
         "Unlike the source needs helper swallowing some floating-network SDKException as false, only a clean completed semantic plan absence becomes a skip. HTTP/decode/read/Close/source/cancellation/ambiguous or other explicit-selector failures remain errors. Strict destination tuple selection, revision protection and re-GET behavior follow the separately reviewed Go Neutron plan.",
         "Existing stronger Ensure, synchronous GetActive, Wait and creation require matching actual ACTIVE server and exact assigned version4 floating-tagged raw row. Independent WithServerIPWait instead observes that exact row under any server status and does not wait for Neutron ACTIVE; supplemental/AccessIPv4/fixed/IPv6 metadata cannot prove raw observation in either family. Both retain known resources without automatic cleanup/backend fallback; per-item observations do not prove simultaneous final presence.",
         "Independent AddIPsToServer defaults to one60-second overall context, async and five-second raw poll, with explicit helper wait/timeout overrides. Existing Ensure/automatic creation retain five-minute/two-second synchronous defaults; GetActive/Wait retain their180second/five-second and readiness policies. Go also bounds selection/HTTP work and shares one budget across items, whereas source forwards timeout60 into wait branches and repeated list attachments. Source async pre-attached-IP Compute refresh remains a separate difference.",
-        "The selected pool lane deliberately reuses Ensure: an already-attached candidate is preferred over a free one and a new allocation can be attached in its POST. Source reuse calls available_floating_ip(network=pool) without Server and first obtains an unattached IP, while source nonreuse creates, subtracts elapsed time, refreshes Compute and attaches again. Typed ordered Observed records each target when reached, not all prior targets in the final raw Server at once."
+        "The selected Neutron pool lane reuses Ensure and may prefer already-attached candidates or allocate attached directly. Bounded Nova pool mode instead selects raw instance_id=null in the literal pool or allocates by POST200, compatibility GET and separate action202; it retains actual pre-action association fields. Source optional-server availability/full normalization and nonreuse refresh/elapsed subtraction remain distinct. Sequential Observed records item-time targets, not simultaneous final presence.",
+        "Direct Nova/None explicit or precise absent-Network selected execution requires actual legacy Compute capability. Missing Compute, selected microversion>=2.36 and unsupported Neutron port/NAT/project overrides remain typed capability failures; source/backend/config failures do not trigger automatic Neutron-error fallback. Nova has no IP status and receives no synthetic ACTIVE. Token sharing and accepted action proof are preserved separately from observation."
       ],
       "remaining": [
-        "Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.",
-        "Implement or compare Nova-network allocation/association/pool normalization and source backend/fallback/error ordering. Explicit None/Nova or absent Network can be Needed with Nova Plan diagnostics, but mutation remains ErrUnsupported; precise endpoint classification does not close full service settings, API-version/discovery/session or catalog-error policy.",
+        "Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron and bounded Nova modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.",
+        "Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service/config/API-version/discovery/session/catalog policy beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.",
         "Complete source pool unattached-first availability, nonreuse post-create refresh/timing, broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.",
         "Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability."
       ],
@@ -38054,7 +38132,7 @@
           ]
         },
         {
-          "behavior": "Connection applies the installed owned address policy and per-call overlays lazily. Private/source-none/IPv6-floating/per-call-private skips make zero endpoint locator calls. A precise missing Network endpoint selects Nova, then actual Ensure execution resolves Compute; the tested missing Compute endpoint preserves ErrUnsupported and its original endpoint error after Network→Compute locator2, with both Neutron and Nova assignments nil.",
+          "behavior": "Connection applies installed owned address policy and per-call overlays lazily. Private/source-none/IPv6-floating/per-call-private skips make zero endpoint locator calls. The missing-Network execution fixture resolves Network then Compute, two locator calls in that order; absent Compute capability returns Needed/Backend=Nova and ErrUnsupported with neither Neutron nor Nova assignment. This is capability failure, not a blanket Nova execution prohibition.",
           "tests": [
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints",
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkRequiresComputeForNovaExecution"
@@ -38094,7 +38172,7 @@
           ]
         },
         {
-          "behavior": "Diagnostic Plan returns ordered explicit Neutron attachment selections without mutation or raw observation, retaining earlier selections when a later address is missing. Explicit pool/list requests with Nova/None source, or configured Neutron whose Network dependency is absent, remain Needed with Nova diagnostic backend and nil Plan error; Ensure returns ErrUnsupported with no attempts, assignment or observed success. Explicit requests are not converted to disabled/private automatic skips. The fixture separately asserts whether the Network dependency is consulted.",
+          "behavior": "Diagnostic Plan returns ordered explicit Neutron attachment selections without mutation or raw observation, retaining earlier selections when a later address is missing. Explicit pool/list requests with Nova/None source, or configured Neutron with absent Network, can remain Needed with Nova diagnostic backend and nil Plan error. In the old fixture Compute is absent, so execution is ErrUnsupported before attempts or assignment; capable Nova execution is covered separately. Explicit requests are not converted to disabled/private automatic skips, and the fixture separately asserts Network dependency use.",
           "tests": [
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchReadOnlyPlanKeepsOrderedSelectionsAndNeverClaimsMutation",
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchBackendAndSkippedAutomaticConditionsStayDistinct"
@@ -38108,7 +38186,7 @@
           ]
         },
         {
-          "behavior": "Typed automatic creation rejects selected malformed address/unsafe pool and statically known explicit Nova/None backend before Nova POST or dependency HTTP. If the second address is missing after creation, original Creation.AdminPass, latest raw Server, the completed/observed first assignment and failing second attempt remain with ErrNotFound, no third address or IP allocation. This is a bounded typed compound and does not implement source wait=false create behavior or legacy Nova dispatch.",
+          "behavior": "Typed automatic creation rejects selected malformed address/unsafe pool before POST. The historical known-unsupported legacy fixture includes a Neutron-only project override, so capability preflight rejects it before server POST or dependency HTTP; capable Nova backend is not rejected categorically. In the tested Neutron second-address failure, original Creation.AdminPass, latest raw Server, completed/observed first assignment and failing second attempt remain with ErrNotFound, no third address or allocation. Source wait=false creation remains separate; new bounded Nova creation has its own evidence.",
           "tests": [
             "compute/server_ip_dispatch_workflow_test.go:TestServerIPDispatchPureInvalidAndKnownUnsupportedCreateStopBeforePOST",
             "compute/server_ip_dispatch_workflow_test.go:TestServerIPDispatchCreateRetainsCreationFirstIPAndSecondFailure"
@@ -38209,6 +38287,107 @@
           "tests": [
             "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
           ]
+        },
+        {
+          "behavior": "The bounded legacy Nova standalone list lane consumes an unfiltered IP inventory, locally matches exact IPv4 and preserves ordered duplicates. The fixture attaches a,b,a from supplied SHUTOFF/nil metadata using integer IDs including9007199254740993 and retained unknown JSON-number digits. Each item performs list, selected-ID GET and POST addFloatingIp with the requested fixed IPv4; async performs no raw GET and wait observes the exact tagged target under raw BUILD or ERROR. Accepted202 empty action proof is distinct from raw observation. Neutron Assignment stays nil; separate NovaAssignment and per-item NovaSelections preserve the actual pre-action instance metadata rather than synthesizing association/status.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPOrderedAsyncAndRawOnlyObservation"
+          ]
+        },
+        {
+          "behavior": "Nova matching is local and unfiltered: an unrelated null address in another pool does not poison a valid exact-address or free-pool selection, and present canonical null prevents the legacy address alias from becoming a second match. Fractional numeric IDs, selected missing association metadata and duplicate matching addresses fail without action/allocation; duplicate yields ErrAmbiguous. List204 is an error rather than absence, and an empty200 default-pool response is ErrNotFound. When a first IP inventory page already has a match but its advertised next page returns403, both address and pool consumers retain the late native status/header/body, return no NovaAssignment and send no selected-IP GET/action/allocation.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPLocalSelectionIgnoresUnrelatedNullAddresses",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPSelectedDecoderAndPoolResponseBoundaries",
+            "compute/server_ip_nova_test.go:TestNovaServerIPListAbsenceAndAssociationMetadataCannotAllocate",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate"
+          ]
+        },
+        {
+          "behavior": "Missing second lookup or denied second Nova action preserves the completed first attempt and its historical Observed value, latest known Nova model and failing second Error; no third lookup starts. A complete accepted second action202 followed by Close, custom cancellation or service-source failure retains empty-body action proof, ActionAccepted=true, its pre-action IP model and the last first-target BUILD Server. The second remains incomplete/unobserved and no later observer or target work starts.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPSecondFailureKeepsHistoryAndCurrentModel",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAcceptedActionFailurePreservesPerItemHistory"
+          ]
+        },
+        {
+          "behavior": "A Nova IP already associated to the fixed server and requested fixed IPv4 is rechecked by ID and returned with AlreadyAttached=true, Reused=true and the actual associated raw model/header. ActionAccepted remains false and ActionResponse nil because no action is sent. Async returns without raw observation; the explicit wait variant adds only one raw target observation and completes. No synthetic IP ACTIVE or rewritten instance_id is supplied.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAlreadyAttachedKeepsRawModelAndSkipsAction"
+          ]
+        },
+        {
+          "behavior": "The Nova direct-list fixture keeps all six HTTP deadlines identical under one standalone budget: near60seconds,17second override, an earlier30second parent and unlimited equal to a three-minute parent with the default60second cap removed. Server ID/address slices are snapshotted before mutating option callbacks and nested factories execute once. A distinct actual one-second blocked raw observation expiry retains the first accepted action/incomplete attempt with DeadlineExceeded and stops before the second item. The60second assertion observes deadlines rather than waiting for expiry.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPOneHTTPBudgetAndOptionSnapshot",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPRealDeadlineStopsAfterAcceptedFirstAction"
+          ]
+        },
+        {
+          "behavior": "For denied Nova action403, a native RetryFunc that changes the owned JSON body or service source is called once but cannot resend the action or start the next item. ErrInvalidOption remains joined with the original native403 header/body and the selected known IP, without accepted-action proof. This verifies these two retry mutation boundaries, not every possible transport/session retry contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPRetryCannotChangeOwnedActionOrSource"
+          ]
+        },
+        {
+          "behavior": "Explicit read-only Plan for configured Nova, source None and configured Neutron with absent Network returns Needed=true/Backend=Nova and no Nova selections or fixture HTTP. The later independent standalone execution resolves the actual legacy Compute backend and completes; Plan did not hold an executable plan. Connection AddIPList resolves Compute for direct Nova/None, or Network then Compute for precise Network absence, sends no Nova query filters, preserves configured2.35 headers and supports async/raw-only wait from supplied SHUTOFF/nil metadata. Missing Compute capability remains separately unsupported.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadOnlyPlanAndExplicitBackendChoice",
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPBackendChoiceAndAsyncRawWait"
+          ]
+        },
+        {
+          "behavior": "The Connection Nova list consumer reads the live shared token for every HTTP request: after the first accepted action the second item uses the new token without rebuilding the backend. Empty positional lists under Nova/None with wait=true and an ignored unsafe pool make no endpoint locator calls, HTTP events or token reads. Replacing cached Compute.API during accepted second action Close retains first completed/observed history, decoded pre-action second IP and action202 empty-body proof with ErrInvalidOption; no third item or second raw observation starts.",
+          "tests": [
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPReadsLiveTokenAndEmptyListStaysLazy",
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPAcceptedCachedSourceFailureRetainsHistory"
+          ]
+        },
+        {
+          "behavior": "The same bounded Nova ordered-address foundation is consumed by strong Ensure, GetActive async/sync, standalone Wait and automatic creation. Both items complete with separate NovaAssignment and no Neutron Assignment. GetActive async performs zero raw observations; Ensure/Get sync observe each item, while Wait/Create perform one initial actual ACTIVE readiness GET plus two target observations. Wait ignores supplied ERROR in favor of raw state. The image/flavor creation body is checked and original Creation.AdminPass stays separate from the last raw Server. This new upper success fixture is an explicit list, not every pool/auto/volume/NIC combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend"
+          ]
+        },
+        {
+          "behavior": "For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer"
+          ]
+        },
+        {
+          "behavior": "The Nova direct-list lane rejects selected Compute2.36/2.44 and Neutron-only port/NAT-network/project overrides with ErrUnsupported before HTTP or attempts; a nonnumeric latest microversion is an invalid option. Known legacy capability preflight for automatic creation separately rejects2.36, explicit port and project overrides before any server POST or other fixture HTTP. These capability limits are distinct from a blanket Nova backend prohibition.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPVersionAndNeutronSelectorsFailBeforeHTTP",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST"
+          ]
+        },
+        {
+          "behavior": "The bounded Nova pool consumer uses the literal selected pool ahead of ignored malformed address selectors. Reuse selects the first matching raw instance_id=null candidate without allocation; reuse=false sends POST200 with only the pool name, one compatibility GET and a further selected-IP recheck before action202. An empty-string instance_id is not a free null candidate. Automatic mode without a pool chooses the first returned pool and uses the same assignment foundation; automatic disabled/private/floating/empty skips send no fixture HTTP and create no NovaAssignment. These are assignment consumers, not the source optional-server availability getter.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPPoolReuseAndFreshAllocation",
+            "compute/server_ip_nova_test.go:TestNovaServerIPListAbsenceAndAssociationMetadataCannotAllocate",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAutomaticDefaultPoolAndKnownSkips"
+          ]
+        },
+        {
+          "behavior": "A Nova allocation accepted200 retains Allocated=true, its decoded IP and AllocationResponse proof when a later compatibility GET is denied or contradicts the selected address/pool. Accepted allocation or compatibility Close failure preserves the known model beside the original Close cause and the actual failed response proof; no association action starts. A decoded wrong-pool allocation remains partial evidence and is not used as a new target.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPAllocationAndCompatibilityFailureKeepPartial",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAcceptedAllocationAndCompatibilityClosePreserveProof"
+          ]
+        },
+        {
+          "behavior": "With configured Nova source and an available Neutron topology, automatic classification consumes shared networks/owned ports and configured NAT selection, but the input Nova pool name is not resolved as a Neutron network identity. The fixture returns a Nova action assignment from supplied BUILD in the standalone async lane and records both topology inventory reads. This does not complete the source has_service or every configured topology/normalization combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAutomaticNeutronTopologyDoesNotConsumePoolAsNetwork"
+          ]
+        },
+        {
+          "behavior": "Connection explicit IP assignment and shared role discovery recognize only direct native missing-endpoint pointer/value or a single wrapped absence as clean Network absence. The positive AddIPList cases execute the Nova action; an error joined with a catalog sentinel, wrapped joined error or context.Canceled preserves that cause instead of selecting Nova. Negative cases make exactly one Network locator call with no Compute lookup, fixture HTTP/token read, attempt or assignment; when a partial result exists its backend remains Neutron. This is the tested catalog-error boundary, not full source has_service/discovery/session parity.",
+          "tests": [
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend"
+          ]
         }
       ]
     },
@@ -38233,27 +38412,31 @@
         "gophercloudsdk/compute.WithActiveServerWait",
         "gophercloudsdk/network.WithEnsureNoWait",
         "gophercloudsdk/compute.WithFloatingIPPool",
-        "gophercloudsdk/compute.WithFloatingIPAddresses"
+        "gophercloudsdk/compute.WithFloatingIPAddresses",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion"
       ],
       "documentation": [
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-automatic-ip.md",
         "compute/server-ready.md",
         "network/floating-ip-plan.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
-        "The typed Service/Connection.GetActiveServer includes selected pool/ordered explicit/automatic Neutron dispatch after supplied status and real-row readiness checks. Non-ACTIVE returns nil,nil, ERROR retains ErrFailedState, and ACTIVE enters the selected policy. It returns structured AutomaticServerIPResult and attempt evidence rather than a mutable Python Server Resource. Go case-insensitive state comparison remains a deliberate difference.",
-        "Standalone GetActiveServer defaults to auto/reuse true, asynchronous accepted assignment and a 180-second overall context with five-second raw-poll configuration; WithActiveServerWait(true) adds actual IP ACTIVE and exact raw Nova convergence only when assignment is needed. Earlier automatic/create helpers retain their synchronous five-minute/two-second defaults. The overall Go context bounds classification and HTTP work even in the async lane rather than merely passing a timeout into source wait branches.",
+        "The typed Service/Connection.GetActiveServer includes selected pool/ordered explicit/automatic Neutron or bounded legacy Nova dispatch after supplied status and real-row readiness checks. Non-ACTIVE returns nil,nil, ERROR retains ErrFailedState, and ACTIVE enters the selected policy. It returns structured AutomaticServerIPResult and attempt evidence rather than a mutable Python Server Resource. Go case-insensitive state comparison remains a deliberate difference.",
+        "Standalone GetActiveServer defaults to auto/reuse true, asynchronous accepted assignment and a 180-second overall context with five-second raw-poll configuration; WithActiveServerWait(true) adds actual Neutron IP ACTIVE where applicable and exact raw server ACTIVE/target convergence only when assignment is needed. Earlier automatic/create helpers retain their synchronous five-minute/two-second defaults. The overall Go context bounds classification and HTTP work even in the async lane rather than merely passing a timeout into source wait branches.",
         "Go ACTIVE nil metadata and explicit empty/null-row inventories return ServerAddressesUnavailableError with the known supplied Server and no refresh or DELETE, including when auto is disabled. Wait and creation instead poll raw ACTIVE nil metadata, but still fail explicit zero rows. The pinned helper deletes ACTIVE servers with a falsy address map and may accept a truthy map containing only empty rows; its cleanup/error ordering is intentionally different.",
-        "The bounded Neutron async entry can return an accepted DOWN FloatingIP with Assignment and Observed=false without a Compute endpoint or IP/raw wait. Pinned _attach_ip_to_server may still refresh Compute once even wait=False when the supplied floating address is absent and the selected floating IP has port_id; Go omits that refresh. Nova-source address supplementation may require lazy Compute separately, and Nova mutation remains unsupported.",
+        "The bounded Neutron async entry may return DOWN Assignment with no Compute endpoint or readiness/observation. Nova selected assignment requires legacy Compute and returns separate NovaAssignment/action proof; async performs no raw observation but does perform Nova inventory/recheck/action. Source optional Compute refresh for an already-attached address remains different, and full Nova normalization/fallback/model/session contracts remain partial.",
         "Go preserves native typed Server/Fault and known resources with typed SDK errors rather than the complete Python fault-key-presence/message/extra_data/Resource taxonomy. Valid ACTIVE input is detached in production before dependency callbacks or association; non-ACTIVE/ERROR do not inspect unrelated model/address fields. Complete mutable Resource, model/location/interface expansion and ownership cases remain distinct.",
         "Earlier creation-only guarded name resolution retains native typed models and200/204/300 list codes while owning page continuation and accepted Read/Close/source errors. It is separate from standalone supplied-model status checking and ordinary native lookup; flavor-name creation keeps its existing no-name-query/no-is_public-default behavior."
       ],
       "remaining": [
-        "Complete dynamic Server/Resource inputs, alias/default/coercion behavior for ips/ip_pool/NAT and returned Resource/location/public-private/interface normalization beyond typed supplied-server GetActiveServer. Selected Neutron pool/list/automatic dispatch and static status/async/sync controls now exist in the shared implementation, but current new upper success fixtures use explicit lists rather than every pool/selector combination.",
+        "Complete dynamic Server/Resource inputs, alias/default/coercion behavior for ips/ip_pool/NAT and returned Resource/location/public-private/interface normalization beyond typed supplied-server GetActiveServer. Selected Neutron and bounded Nova pool/list/automatic dispatch and static status/async/sync controls now exist in the shared implementation, but current new upper success fixtures use explicit lists rather than every pool/selector combination.",
         "Compare the complete ERROR/fault key-presence/message/extra_data exception taxonomy, all nullable/status/address/model and detached ownership cases beyond the current fixtures, source ACTIVE-without-addresses deletion and deletion-failure ordering, and mutable Resource/descriptor/adapter/session/cache semantics. The noDELETE, zero-row and case-insensitive policies are explicit Go differences.",
-        "Implement or compare Nova-network mutation/fallback and full service/config/source/destination availability beyond the bounded Neutron consumer. Complete source async attached-IP refresh, all timeout/unlimited/parent/HTTP/default combinations, full cloud Wait lookup/expansion/broad-exception/missing retry and integer remaining-budget contracts. Sequential Observed records per-item exact raw convergence, not final simultaneous presence of all targets."
+        "Compare full Nova mutation/fallback/service/config/source/destination availability beyond bounded executable assignment consumers. Complete public availability/CRUD/detach/remove, source async attached-IP refresh and Resource/location/normalization, all timeout/unlimited/parent/HTTP/default combinations, full cloud lookup/expansion/broad-exception retry and integer remaining budget. Sequential Observed remains item-time evidence, not final simultaneous presence."
       ],
       "contracts": [
         {
@@ -38380,6 +38563,18 @@
           "tests": [
             "connection_server_ip_dispatch_test.go:TestConnectionOrderedIPSourceFailureKeepsFirstObservationAndAcceptedSecondIP"
           ]
+        },
+        {
+          "behavior": "The same bounded Nova ordered-address foundation is consumed by strong Ensure, GetActive async/sync, standalone Wait and automatic creation. Both items complete with separate NovaAssignment and no Neutron Assignment. GetActive async performs zero raw observations; Ensure/Get sync observe each item, while Wait/Create perform one initial actual ACTIVE readiness GET plus two target observations. Wait ignores supplied ERROR in favor of raw state. The image/flavor creation body is checked and original Creation.AdminPass stays separate from the last raw Server. This new upper success fixture is an explicit list, not every pool/auto/volume/NIC combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend"
+          ]
+        },
+        {
+          "behavior": "For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer"
+          ]
         }
       ]
     },
@@ -38412,7 +38607,10 @@
         "gophercloudsdk.Connection.AddIPsToServer",
         "gophercloudsdk.Connection.AddIPList",
         "gophercloudsdk/compute.WithServerIPAutomaticOptions",
-        "gophercloudsdk/compute.WithServerIPWait"
+        "gophercloudsdk/compute.WithServerIPWait",
+        "gophercloudsdk/compute.WithFloatingIPSource",
+        "gophercloudsdk.WithServerAddressPolicy",
+        "gophercloudsdk.WithMicroversion"
       ],
       "documentation": [
         "network/floating-ip-attach.md",
@@ -38421,17 +38619,19 @@
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-ip-dispatch.md",
-        "compute/server-ip-helpers.md"
+        "compute/server-ip-helpers.md",
+        "compute/server-nova-floating-ip.md"
       ],
       "differences": [
-        "The Network Attach APIs remain a one-existing-IP Neutron foundation with explicit safe ID or Name(IPv4), stable existing association movement and no allocation/current-token owner policy. Typed upper workflows consume ordered Neutron lists; new independent Service/Connection AddIPList accepts an authoritative positional IPv4 slice, preserves its order/duplicates and makes empty a no-op. It defaults to async with one60-second context and returns structured Server/Attempts/Assignment, not a mutable Python Server Resource or dynamic str/list coercion.",
-        "Go consumes all address pages including empty linked pages, performs local exact address matching, and rejects ambiguity, late failures and inconsistent response identity. An opaque service-bound plan pins IP address, destination and original optional revision and rechecks port/IP; concurrent unrelated association drift fails rather than silently changing targets.",
-        "Network Attach remains async with an optional common five-minute/two-second Neutron ACTIVE waiter. Independent AddIPList defaults to async/60second whole context/five-second raw poll; WithServerIPWait observes each exact raw IPv4 without requiring server/IP ACTIVE. Existing Ensure/sync ready/create consumers keep stronger ACTIVE checks. Each Observed attempt is historical, not simultaneous final presence of all targets. Source list passes timeout60 independently to each attach; Go uses one shared operation context and preserves partial evidence without cleanup."
+        "Network Attach remains one-existing-IP Neutron foundation with safe IDs/IPv4 names and stable association movement. Typed ordered consumers and independent positional AddIPList now execute Neutron or bounded legacy Nova lists. Positional order/duplicates/empty no-op and async whole60second defaults remain; results contain structured Server/Attempts plus separate Neutron Assignment or NovaAssignment rather than mutable Python Resource or dynamic str/list coercion.",
+        "The Neutron Attach path consumes all address pages, locally matches exact addresses and pins opaque destination/revision/port invariants. The Nova consumer instead reads unfiltered legacy inventory, validates only the selected candidate, rechecks its ID/address/pool/association and sends addFloatingIp; it has no Neutron port/revision. Both reject ambiguity and late inventory failures before execution; current fixtures do not prove every pagination shape.",
+        "Network Attach remains async with an optional common five-minute/two-second Neutron ACTIVE waiter. Independent AddIPList defaults to async/60second whole context/five-second raw poll; WithServerIPWait observes each exact raw IPv4 without requiring server/IP ACTIVE. Existing Ensure/sync ready/create consumers keep stronger ACTIVE checks. Each Observed attempt is historical, not simultaneous final presence of all targets. Source list passes timeout60 independently to each attach; Go uses one shared operation context and preserves partial evidence without cleanup.",
+        "Bounded Nova execution retains actual allocation/pre-action fields and accepted200 allocation or202 empty-action evidence in additive NovaAssignment, without synthesizing IP ACTIVE or overwriting instance_id after action acceptance. Strong workflows still require actual raw server ACTIVE/target convergence; standalone wait observes the exact target under any status. Version<2.36 and no Neutron-only port/NAT/project overrides are deliberate capability restrictions. Full source normalization, configured-Neutron fallback branch semantics and async attached-IP refresh remain distinct."
       ],
       "remaining": [
         "Compare full dynamic single-string/list/Server Resource inputs and returned mutable Resource/interface/location/normalization against the new typed positional AddIPList. Independent wait=false/timeout60 and required empty-list semantics now have bounded fixtures, but Go common validation, one whole context and structured attempt results remain deliberate differences.",
         "Compare all fixed/NAT/port, raw-poll/progress, parent/unlimited/default and repeated-input combinations beyond the current standalone and stronger typed consumer fixtures. Ordinary Servers.Create and full cloud lifecycle/returned-interface behavior remain separate. Sequential Observed evidence does not prove all prior IPs remain simultaneously in the final Server.",
-        "Implement or deliberately map Nova-network attachment and source backend/fallback/error ordering. Explicit Nova/None and absent-Network diagnostic/mutation policy is bounded and does not close full has_service/discovery/session or source async attached-IP refresh semantics.",
+        "Complete source Nova attachment/backend/fallback/error ordering beyond the bounded executable legacy lane and precise missing-Network/direct-source capability cases. Preserve full has_service/discovery/version/session policy, source conditional async attached-IP refresh, Cloud versus Proxy fixed-address presence semantics and model normalization; full public floating-IP CRUD/detach/remove and authenticated interoperability remain outside these assignment fixtures.",
         "Complete inherited Resource/descriptor/configuration/location/normalization/cache and authenticated Python/cloud interoperability contracts beyond local HTTP fixtures and example compilation."
       ],
       "contracts": [
@@ -38495,7 +38695,7 @@
           ]
         },
         {
-          "behavior": "Diagnostic Plan returns ordered explicit Neutron attachment selections without mutation or raw observation, retaining earlier selections when a later address is missing. Explicit pool/list requests with Nova/None source, or configured Neutron whose Network dependency is absent, remain Needed with Nova diagnostic backend and nil Plan error; Ensure returns ErrUnsupported with no attempts, assignment or observed success. Explicit requests are not converted to disabled/private automatic skips. The fixture separately asserts whether the Network dependency is consulted.",
+          "behavior": "Diagnostic Plan returns ordered explicit Neutron attachment selections without mutation or raw observation, retaining earlier selections when a later address is missing. Explicit pool/list requests with Nova/None source, or configured Neutron with absent Network, can remain Needed with Nova diagnostic backend and nil Plan error. In the old fixture Compute is absent, so execution is ErrUnsupported before attempts or assignment; capable Nova execution is covered separately. Explicit requests are not converted to disabled/private automatic skips, and the fixture separately asserts Network dependency use.",
           "tests": [
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchReadOnlyPlanKeepsOrderedSelectionsAndNeverClaimsMutation",
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchBackendAndSkippedAutomaticConditionsStayDistinct"
@@ -38583,6 +38783,86 @@
           "behavior": "Standalone async direct-list and pool calls reuse an already-associated IP with the exact selected port/fixed tuple from supplied BUILD/nil metadata without resolving Compute, raw observation, allocation POST or association PUT. Each returns one completed Reused=true/Allocated=false assignment with Observed=false and preserves nil Server.Addresses. Direct-list performs one singular selected-IP GET; the already-attached pool path performs none. This is bounded reuse behavior, not source preattached Compute refresh or full availability parity.",
           "tests": [
             "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
+          ]
+        },
+        {
+          "behavior": "The bounded legacy Nova standalone list lane consumes an unfiltered IP inventory, locally matches exact IPv4 and preserves ordered duplicates. The fixture attaches a,b,a from supplied SHUTOFF/nil metadata using integer IDs including9007199254740993 and retained unknown JSON-number digits. Each item performs list, selected-ID GET and POST addFloatingIp with the requested fixed IPv4; async performs no raw GET and wait observes the exact tagged target under raw BUILD or ERROR. Accepted202 empty action proof is distinct from raw observation. Neutron Assignment stays nil; separate NovaAssignment and per-item NovaSelections preserve the actual pre-action instance metadata rather than synthesizing association/status.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPOrderedAsyncAndRawOnlyObservation"
+          ]
+        },
+        {
+          "behavior": "Nova matching is local and unfiltered: an unrelated null address in another pool does not poison a valid exact-address or free-pool selection, and present canonical null prevents the legacy address alias from becoming a second match. Fractional numeric IDs, selected missing association metadata and duplicate matching addresses fail without action/allocation; duplicate yields ErrAmbiguous. List204 is an error rather than absence, and an empty200 default-pool response is ErrNotFound. When a first IP inventory page already has a match but its advertised next page returns403, both address and pool consumers retain the late native status/header/body, return no NovaAssignment and send no selected-IP GET/action/allocation.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPLocalSelectionIgnoresUnrelatedNullAddresses",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPSelectedDecoderAndPoolResponseBoundaries",
+            "compute/server_ip_nova_test.go:TestNovaServerIPListAbsenceAndAssociationMetadataCannotAllocate",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate"
+          ]
+        },
+        {
+          "behavior": "Missing second lookup or denied second Nova action preserves the completed first attempt and its historical Observed value, latest known Nova model and failing second Error; no third lookup starts. A complete accepted second action202 followed by Close, custom cancellation or service-source failure retains empty-body action proof, ActionAccepted=true, its pre-action IP model and the last first-target BUILD Server. The second remains incomplete/unobserved and no later observer or target work starts.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPSecondFailureKeepsHistoryAndCurrentModel",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAcceptedActionFailurePreservesPerItemHistory"
+          ]
+        },
+        {
+          "behavior": "A Nova IP already associated to the fixed server and requested fixed IPv4 is rechecked by ID and returned with AlreadyAttached=true, Reused=true and the actual associated raw model/header. ActionAccepted remains false and ActionResponse nil because no action is sent. Async returns without raw observation; the explicit wait variant adds only one raw target observation and completes. No synthetic IP ACTIVE or rewritten instance_id is supplied.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAlreadyAttachedKeepsRawModelAndSkipsAction"
+          ]
+        },
+        {
+          "behavior": "The Nova direct-list fixture keeps all six HTTP deadlines identical under one standalone budget: near60seconds,17second override, an earlier30second parent and unlimited equal to a three-minute parent with the default60second cap removed. Server ID/address slices are snapshotted before mutating option callbacks and nested factories execute once. A distinct actual one-second blocked raw observation expiry retains the first accepted action/incomplete attempt with DeadlineExceeded and stops before the second item. The60second assertion observes deadlines rather than waiting for expiry.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPOneHTTPBudgetAndOptionSnapshot",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPRealDeadlineStopsAfterAcceptedFirstAction"
+          ]
+        },
+        {
+          "behavior": "For denied Nova action403, a native RetryFunc that changes the owned JSON body or service source is called once but cannot resend the action or start the next item. ErrInvalidOption remains joined with the original native403 header/body and the selected known IP, without accepted-action proof. This verifies these two retry mutation boundaries, not every possible transport/session retry contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPRetryCannotChangeOwnedActionOrSource"
+          ]
+        },
+        {
+          "behavior": "Explicit read-only Plan for configured Nova, source None and configured Neutron with absent Network returns Needed=true/Backend=Nova and no Nova selections or fixture HTTP. The later independent standalone execution resolves the actual legacy Compute backend and completes; Plan did not hold an executable plan. Connection AddIPList resolves Compute for direct Nova/None, or Network then Compute for precise Network absence, sends no Nova query filters, preserves configured2.35 headers and supports async/raw-only wait from supplied SHUTOFF/nil metadata. Missing Compute capability remains separately unsupported.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadOnlyPlanAndExplicitBackendChoice",
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPBackendChoiceAndAsyncRawWait"
+          ]
+        },
+        {
+          "behavior": "The Connection Nova list consumer reads the live shared token for every HTTP request: after the first accepted action the second item uses the new token without rebuilding the backend. Empty positional lists under Nova/None with wait=true and an ignored unsafe pool make no endpoint locator calls, HTTP events or token reads. Replacing cached Compute.API during accepted second action Close retains first completed/observed history, decoded pre-action second IP and action202 empty-body proof with ErrInvalidOption; no third item or second raw observation starts.",
+          "tests": [
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPReadsLiveTokenAndEmptyListStaysLazy",
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPAcceptedCachedSourceFailureRetainsHistory"
+          ]
+        },
+        {
+          "behavior": "The same bounded Nova ordered-address foundation is consumed by strong Ensure, GetActive async/sync, standalone Wait and automatic creation. Both items complete with separate NovaAssignment and no Neutron Assignment. GetActive async performs zero raw observations; Ensure/Get sync observe each item, while Wait/Create perform one initial actual ACTIVE readiness GET plus two target observations. Wait ignores supplied ERROR in favor of raw state. The image/flavor creation body is checked and original Creation.AdminPass stays separate from the last raw Server. This new upper success fixture is an explicit list, not every pool/auto/volume/NIC combination.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend"
+          ]
+        },
+        {
+          "behavior": "For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.",
+          "tests": [
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer"
+          ]
+        },
+        {
+          "behavior": "The Nova direct-list lane rejects selected Compute2.36/2.44 and Neutron-only port/NAT-network/project overrides with ErrUnsupported before HTTP or attempts; a nonnumeric latest microversion is an invalid option. Known legacy capability preflight for automatic creation separately rejects2.36, explicit port and project overrides before any server POST or other fixture HTTP. These capability limits are distinct from a blanket Nova backend prohibition.",
+          "tests": [
+            "compute/server_ip_nova_test.go:TestNovaServerIPVersionAndNeutronSelectorsFailBeforeHTTP",
+            "compute/server_ip_nova_boundaries_test.go:TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST"
+          ]
+        },
+        {
+          "behavior": "Connection explicit IP assignment and shared role discovery recognize only direct native missing-endpoint pointer/value or a single wrapped absence as clean Network absence. The positive AddIPList cases execute the Nova action; an error joined with a catalog sentinel, wrapped joined error or context.Canceled preserves that cause instead of selecting Nova. Negative cases make exactly one Network locator call with no Compute lookup, fixture HTTP/token read, attempt or assignment; when a partial result exists its backend remains Neutron. This is the tested catalog-error boundary, not full source has_service/discovery/session parity.",
+          "tests": [
+            "connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend"
           ]
         }
       ]
