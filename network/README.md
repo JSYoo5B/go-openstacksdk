@@ -1,6 +1,6 @@
 # Network
 
-Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP 생성·서버 연결 작업을 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. 아래 Go 조각은 `fmt`, `resource` 등을 import한 오류 반환 함수 안에서 사용합니다.
+Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP 생성·재사용·서버 연결 작업을 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. 아래 Go 조각은 `fmt`, `resource` 등을 import한 오류 반환 함수 안에서 사용합니다.
 
 ## openstacksdk 대응
 
@@ -20,6 +20,7 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.network.get_port(id)` | `service.Ports.Get(ctx, id)` |
 | `conn.network.get_ip(id)` | `service.FloatingIPs.Get(ctx, id)` |
 | `conn.create_floating_ip(network="public", server=server, wait=True)` | `service.FloatingIPs.Create(ctx, request, network.WithServer(ref), network.WithWait())` |
+| `conn.add_ips_to_server(server, ip_pool="public", reuse=True)` | `service.FloatingIPs.Ensure(ctx, request, network.WithEnsureWait())`; [재사용·결과·대기 차이](floating-ip-ensure.md) |
 
 openstacksdk는 일부 query 이름을 Python 속성 이름으로 매핑합니다. `WithQuery`는 Neutron의 실제 HTTP query 이름을 받습니다. [공식 Network API](https://docs.openstack.org/openstacksdk/latest/user/proxies/network.html)
 
@@ -228,6 +229,6 @@ created, err := service.FloatingIPs.Create(ctx,
 
 네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `gophercloudsdk/network/v2/networks`, `gophercloudsdk/network/v2/extensions/layer3/floatingips`를 import합니다.
 
-위 복합 작업은 Neutron에서 새 IPv4 floating IP를 생성합니다. 기존 floating IP 재사용·가용 IP 선택, Nova-network 자동 fallback, clouds.yaml 기반 외부 네트워크·NAT destination 자동 선택은 아직 제공하지 않습니다. Neutron의 404·403·409는 원래 HTTP 오류를 보존하며 다른 API로 전환하지 않습니다. 기존 floating IP 연결·해제·수정은 `service.API.FloatingIPs.Update`에서 개별 호출할 수 있습니다. 이 범위를 Python cloud 계층 전체와 동일하게 구현했다고 간주하지 않습니다.
+위 `Create` 작업은 Neutron에서 새 IPv4 floating IP를 생성합니다. [FloatingIPs.Ensure](floating-ip-ensure.md)는 현재 프로젝트의 이미 연결된 IP·가용 IP·새 allocation을 순서대로 선택하고 서버의 fixed IPv4에 연결합니다. 명시 network 또는 외부 목록·router gateway에서 자동 선택하며, 알려진 revision으로 PUT을 보호하고 실패 시 선택/할당 결과를 보존합니다. Nova-network 자동 fallback과 clouds.yaml 기반 외부 role·NAT destination 분류는 남은 범위입니다. Neutron의 404·403·409는 원래 HTTP 오류를 보존하며 다른 API로 전환하지 않습니다. 기존 floating IP 연결·해제·수정은 `service.API.FloatingIPs.Update`에서 개별 호출할 수 있습니다. 이 범위를 Python cloud 계층 전체와 동일하게 구현했다고 간주하지 않습니다.
 
-[network_test.go](network_test.go)는 추가 query의 URL 인코딩과 이름을 통한 삭제를, [floating_ip_test.go](floating_ip_test.go)는 이름 해석·다중 페이지 포트 선택·IPv4 조건·중복·명시 포트·extension·상태 대기·생성 후 실패 보존을, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.
+[network_test.go](network_test.go)는 추가 query의 URL 인코딩과 이름을 통한 삭제를, [floating_ip_test.go](floating_ip_test.go)는 이름 해석·다중 페이지 포트 선택·IPv4 조건·중복·명시 포트·extension·상태 대기·생성 후 실패 보존을, [Ensure·선택 테스트](floating-ip-ensure.md#고정-소스와-남은-범위)는 기존 IP 재사용·owner·revision·빈 페이지·부분 실패를, [전체 통합 테스트](../collections_test.go)는 서비스 공통 정책을 검증합니다.

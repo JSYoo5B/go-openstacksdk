@@ -1180,3 +1180,22 @@ Go 정책에서는 YAML 이름이 비어 있지 않은 문자열이어야 합니
 현재 review 474개는 go_mapping 161·부분 판정 312·unsupported 1이며 판정 없는 선언은 2,888개입니다. 전체 선언 3,362개 중 supported=0, go_mapping=161, unsupported=1, unresolved=3,200입니다. 신규 부분 계약을 전체 연산 승격이나 SDK 완료로 세지 않았습니다. 다음은 같은 핵심 user 단계의 자동 floating IP와 필요한 공유 네트워크 정책입니다.
 
 Final parity CLI PASS: declared inventory3362; supported=0, go_mapping=161, unsupported=1, unresolved=3200.
+
+
+## Neutron floating IP 재사용과 서버 연결
+
+2026-10-07 코드·테스트 `51223e7` 기준으로 핵심 user 흐름의 `network.FloatingIPs.Ensure`를 추가했습니다. 기존 `Create`는 새 allocation 작업이며 Ensure는 기존 서버 포트의 fixed IPv4에 이미 연결된 IP → 현재 project의 첫 unattached IP → 새 allocation 순서로 연결합니다. 이름/ID 해석과 서비스를 Connection이 연결하며 caller에게 builder·resolver 구현을 요구하지 않습니다.
+
+고정 Python `_network_common.py`의 available IP owner/local filter, 외부 network/router 선택, NAT 포트, auto/attach/wait/cleanup 분기와 native Neutron Create/Update·revision·decoder를 비교했습니다. 전체 catalog에 private helper ID가 없으므로 가상 연산을 만들지 않습니다. 공개 available 연산과 native Create의 부분 계약을 기록하며 기존 native Update의 검증 판정은 보존합니다.
+
+재사용 owner는 명시 ID 또는 기록된 Keystone v3 project/v2 tenant이며 endpoint·token에서 추정하지 않고 cache하지 않습니다. 알려진 owner는 allocation의 `project_id`에도 적용합니다. reuse=false이고 owner를 생략하면 recorded scope 조회와 available 목록을 생략하고 Neutron의 scope를 사용합니다. 포트·network·owner·project/tenant 일관성·IPv4 조건을 로컬에서 검증하며 여러 port/address 후보는 mutation 전 `ErrAmbiguous`입니다. already-attached를 free보다 우선해 중복 할당을 피합니다.
+
+network·router·port·floating IP 선택은 빈 JSON 중간 페이지의 next 링크도 따라가고 204는 종료합니다. 뒤 페이지 오류가 있으면 앞 후보로 mutation하지 않습니다. native pager의 Err/Headers와 응답 URL을 보존하여 반복 링크를 다시 요청하기 전에 차단합니다. embedded 모델용 native slice decoder가 outer JSON decoder를 우회하는 차이를 full envelope decoding으로 보완해 revision의 absent/null/0를 구분하고 알려진 값은 `If-Match: revision_number=N`으로 보냅니다. revision 없는 List → PUT의 원자적 claim은 보장하지 않습니다.
+
+PUT 오류의 nonnil zero native model로 원래 선택 IP를 덮지 않습니다. 성공 응답도 identity/network/owner/IPv4/destination 검증 후 교체하며, wait에서는 동일 ID의 실제 Status=ACTIVE도 확인합니다. timeout·취소·409·412·대기 오류·잘못된 응답에서 선택/접수 결과와 원래 오류를 보존합니다. 자동 allocation 재시도·Nova fallback·DELETE/detach/server 삭제는 수행하지 않습니다. POST 결과를 확인할 수 없는 transport 실패에는 IP ID를 만들지 않습니다.
+
+[Ensure 계약](../network/floating_ip_ensure_test.go) 4그룹, [페이지 선택·wait·cycle](../network/floating_ip_selection_test.go) 3그룹, [Connection 인증·서버 해석](../connection_floating_ip_ensure_test.go) 2그룹을 추가했습니다. 집중 `go test -race -timeout 60s . ./network -run 'FloatingIP'`와 정확한 source pins/metadata의 `make check`가 성공했고, 전체 40개 테스트 패키지·vet·race·parity·gofmt가 통과했습니다. [사용 비교](../network/floating-ip-ensure.md)의 독립 Go main fence 1을 임시 module에서 현재 로컬 SDK로 컴파일했습니다(sha256 `205179278a743f5bd33bd7dd1effe5ab088884c4e053e547f0b9b2aad1784a7c`). 인증된 OpenStack 실행이나 Python 예제 실행을 근거로 삼지 않았습니다.
+
+Python shared external/internal·IPv4/IPv6·YAML role/NAT/subnet/service flags·cache/reset·Resource/session 정책, requested network list, Nova-network fallback, IP-list 입력과 server 주소 convergence는 남습니다. 서버 생성의 `_needs_floating_ip` 조건, 공통 시간 제한·ACTIVE → IP 연계, auto/reuse/cleanup 및 생성 전체의 다른 입력/결과 계약도 남습니다. 이 기반 작업을 available/create_server 전체 지원으로 올리지 않았습니다. source/native/resource inventory와 generated API는 변경하지 않았으며 Go 파일은 1,788개입니다.
+
+현재 review는 476개(go_mapping 161·부분 판정 314·unsupported 1)이며 판정 없는 선언은 2,886개입니다. 전체 3,362개 선언의 supported=0·go_mapping=161·unsupported=1·unresolved=3,200은 유지됩니다. 새로운 부분 계약 2개를 전체 연산 완료로 세지 않았습니다.
