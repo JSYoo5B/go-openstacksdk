@@ -188,10 +188,14 @@ func (s *Service) GetFloatingIP(ctx context.Context, input GetFloatingIPRequest,
 		return nil, err
 	}
 	defer p.cancel()
-	if p.options.DirectGet && floatingIPUUID.MatchString(input.ID) {
-		return p.read(input.ID)
+	return p.get(input.ID)
+}
+
+func (p *floatingIPQueryState) get(id string) (*GetFloatingIPResult, error) {
+	if p.options.DirectGet && floatingIPUUID.MatchString(id) {
+		return p.read(id)
 	}
-	search, err := p.search(input.ID)
+	search, err := p.search(id)
 	if search == nil {
 		return nil, err
 	}
@@ -203,7 +207,7 @@ func (s *Service) GetFloatingIP(ctx context.Context, input GetFloatingIPRequest,
 	if err != nil {
 		var multiple *cloudfilter.MultipleError
 		if errors.As(err, &multiple) {
-			err = &FloatingIPSelectionError{ID: input.ID, Length: multiple.Length}
+			err = &FloatingIPSelectionError{ID: id, Length: multiple.Length}
 		} else {
 			err = floatingIPQueryInputError("selection", err)
 		}
