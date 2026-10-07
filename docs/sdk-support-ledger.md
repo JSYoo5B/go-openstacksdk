@@ -323,7 +323,9 @@ Senlin·Masakari 직접 선언 86개에 소스·공개 API·HTTP assertion·사�
 
 Identity v2 인증 응답의 token·catalog·user·metadata 보존과 Ironic virtual media의 typed body·추가 JSON·header 보존도 [인증 테스트](../api/authentication_contracts_test.go)와 [virtual media 테스트](../api/virtual_media_contracts_test.go)에서 확인할 수 있습니다. Python Proxy 목록에 직접 대응하지 않는 Gophercloud 연산도 원본 API ID를 가진 별도 항목으로 추적해야 합니다.
 
-## 우선 구현할 차이
+## 초기 조사에서 확인한 구현 차이
+
+현재 작업 순서와 진행 단계는 [구현 계획](implementation-plan.md)을 따릅니다. **핵심 user API → 핵심 admin API → 매니지드 user API → 매니지드 admin API** 순으로 진행합니다. 아래는 초기 조사에서 발견한 계약 차이를 보존한 기록입니다.
 
 초기 조사 당시 공통 리소스 목록의 미결 항목은 79개입니다. 그 안에는 CRUD 리소스뿐 아니라 인증, URL 도우미, list-only 자료, project별 singleton도 있으므로 전부 같은 Collection으로 만들지 않습니다.
 

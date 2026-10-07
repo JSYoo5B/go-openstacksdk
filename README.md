@@ -4,6 +4,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 이름 `gophercloudsdk`는 로컬 개발용이며, 저장소 공개 시 실제 모듈 경로로 변경해야 합니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
 
+[구현 순서와 단계별 현황](docs/implementation-plan.md)은 **핵심 user API → 핵심 admin API → 매니지드 user API → 매니지드 admin API** 순으로 작업을 배치하고 소스 검토·구현·테스트·문서·최종 판정·커밋과 push를 구분합니다. 전체 API의 지원 범위와 완료 기준은 [지원 판정대장](docs/sdk-support-ledger.md)에서 확인합니다.
+
 ## 디렉토리와 지원 범위
 
 ```text
