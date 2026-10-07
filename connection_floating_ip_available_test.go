@@ -166,11 +166,12 @@ func TestConnectionAvailableIPNeutronFreeUsesNoCompute(t *testing.T) {
 }
 
 func TestConnectionAvailableIPNotFoundFallbackAndOtherFailuresStayDistinct(t *testing.T) {
-	for _, scenario := range []string{"semantic", "list404", "catalog absent", "list403", "list204", "malformed", "mixed catalog"} {
+	for _, scenario := range []string{"semantic", "list404", "catalog absent", "list403", "list204", "malformed", "mixed catalog", "accepted404retry"} {
 		t.Run(scenario, func(t *testing.T) {
-			_, conn, state := connectionAvailableFixture(t, compute.FloatingIPNeutron)
+			cloud, conn, state := connectionAvailableFixture(t, compute.FloatingIPNeutron)
 			input := connectionAvailableRequest()
 			cause := errors.New("catalog failed")
+			var retries int
 			switch scenario {
 			case "semantic":
 				input.Networks = []resource.Ref{resource.Name("legacy")}
@@ -188,6 +189,13 @@ func TestConnectionAvailableIPNotFoundFallbackAndOtherFailuresStayDistinct(t *te
 				state.neutronBody = `{"floatingips":`
 			case "mixed catalog":
 				state.catalogError = errors.Join(gophercloud.ErrEndpointNotFound{}, cause)
+			case "accepted404retry":
+				state.neutronCode = 404
+				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, options *gophercloud.RequestOpts, _ error, _ uint) error {
+					retries++
+					options.OkCodes = append(options.OkCodes, 404)
+					return nil
+				}
 			}
 			result, err := conn.AvailableFloatingIP(context.Background(), input, compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
 			fallback := scenario == "semantic" || scenario == "list404" || scenario == "catalog absent"
@@ -201,6 +209,13 @@ func TestConnectionAvailableIPNotFoundFallbackAndOtherFailuresStayDistinct(t *te
 				}
 				if scenario == "mixed catalog" && !errors.Is(err, cause) {
 					t.Fatal(err)
+				}
+				if scenario == "accepted404retry" {
+					var terminal interface{ TerminalSDKFailure() bool }
+					var native gophercloud.ErrUnexpectedResponseCode
+					if retries != 1 || len(state.events) != 4 || !errors.As(err, &terminal) || !terminal.TerminalSDKFailure() || !errors.As(err, &native) || native.Actual != 404 {
+						t.Fatal(err, retries, native, state)
+					}
 				}
 			}
 		})

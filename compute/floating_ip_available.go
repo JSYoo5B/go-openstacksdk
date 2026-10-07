@@ -193,6 +193,10 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 // Only a pure NotFound chain may select another backend. Accepted response,
 // source, decode, cancellation or multiple-cause failures retain their cause.
 func availableIPNotFound(err error) bool {
+	var terminal interface{ TerminalSDKFailure() bool }
+	if errors.As(err, &terminal) && terminal.TerminalSDKFailure() {
+		return false
+	}
 	switch e := err.(type) {
 	case *resource.NotFoundError:
 		return true
