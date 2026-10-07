@@ -31,6 +31,9 @@ type NovaFloatingIPAvailability struct {
 	FloatingIP         *NovaFloatingIP
 	Reused, Allocated  bool
 	AllocationResponse *NovaFloatingIPResponse
+	Inventory          *FloatingIPQueryResult
+	PoolQuery          *FloatingIPPoolQueryResult
+	Creation           *CreateFloatingIPResult
 }
 
 type availableIPOptions struct {
@@ -190,39 +193,11 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 	if len(input.Networks) > 1 {
 		return result, invalid("Nova availability accepts one literal pool")
 	}
-	state.policy, err = network.PrepareEnsureFloatingIPOptions(ctx)
-	if err != nil {
-		return result, err
-	}
-	b, err := state.novaBackendFor(ctx, false)
-	if err != nil {
-		return result, err
-	}
 	var poolRef resource.Ref
 	if len(input.Networks) == 1 {
 		poolRef = input.Networks[0]
 	}
-	pool, err := b.pool(ctx, poolRef)
-	if err != nil {
-		return result, err
-	}
-	ip, err := b.selectPool(ctx, pool)
-	if err != nil {
-		return result, err
-	}
-	value := &NovaFloatingIPAvailability{FloatingIP: ip, Reused: ip != nil}
-	if ip == nil {
-		allocated, allocateErr := b.create(ctx, pool)
-		err = allocateErr
-		if allocated != nil {
-			value.FloatingIP, value.Allocated, value.AllocationResponse = allocated.FloatingIP, allocated.Allocated, allocated.AllocationResponse
-		}
-	}
-	result.Nova, result.Reused, result.Allocated = value, value.Reused, value.Allocated
-	if value.FloatingIP != nil {
-		result.ID, result.Address = value.FloatingIP.ID, value.FloatingIP.Address
-	}
-	return view.finishAvailable(result, b.client, errors.Join(err, state.check(ctx)))
+	return view.availableNova(result, poolRef)
 }
 
 func cloneAvailableIPOptions(value availableIPOptions) availableIPOptions {

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/gophercloud/gophercloud/v2"
+
 	"gophercloudsdk/internal/cloudfilter"
 	"gophercloudsdk/internal/cloudread"
 	"gophercloudsdk/internal/rest"
@@ -149,6 +151,12 @@ func (p *floatingIPQueryState) createNova(result *CreateFloatingIPResult, networ
 		}
 		pool = append(json.RawMessage(nil), pools.Pools[0].Body["name"]...)
 	}
+	return p.createNovaInPool(result, client, pool)
+}
+
+// Reuse the accepted POST and compatibility GET with an already selected pool.
+// Availability must not resolve the same default pool again before allocation.
+func (p *floatingIPQueryState) createNovaInPool(result *CreateFloatingIPResult, client *gophercloud.ServiceClient, pool any) (*CreateFloatingIPResult, error) {
 	response, requestErr := rest.DoJSONGuarded(p.ctx, client, p.state.check, http.MethodPost, client.ServiceURL("os-floating-ips"), map[string]any{"pool": pool}, nil, floatingIPDeleteCodes...)
 	result.Allocated, result.AllocationResponse = response != nil, queryResponse(FloatingIPNova, response)
 	if response == nil {
@@ -160,7 +168,7 @@ func (p *floatingIPQueryState) createNova(result *CreateFloatingIPResult, networ
 		result.Allocation = &FloatingIPRecord{Backend: FloatingIPNova, Wire: wire.Clone()}
 		result.FloatingIP = cloneFloatingIPRecord(result.Allocation)
 	}
-	err = errors.Join(requestErr, decodeErr, p.state.check(p.ctx))
+	err := errors.Join(requestErr, decodeErr, p.state.check(p.ctx))
 	if err != nil {
 		result.Failure = queryFailure(FloatingIPNova, err)
 		return result, err
