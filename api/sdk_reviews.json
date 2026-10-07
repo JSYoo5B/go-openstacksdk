@@ -35098,6 +35098,20 @@
             "connection_server_automatic_create_test.go:TestConnectionAutomaticCreateSharesConfiguredDefaultRoleSnapshot",
             "internal/rest/operation_guard_test.go:TestNestedOperationSourcesRetainAncestorsAndIsolateChildBindings"
           ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
+          ]
+        },
+        {
+          "behavior": "In the bounded automatic Neutron GetActiveServer, standalone WaitForServer, automatic creation and EnsureServerFloatingIP workflows, an accepted allocation body plus Close failure retains known Server and decoded DOWN Assignment with Allocated=true, Observed=false and actual201 response/header proof. Get/Ensure do not start raw observation; Wait/Create retain the one completed raw readiness fetch. Each has one allocation and no follow-up IP/observer/fallback/cleanup request. These fixtures do not complete explicit IP/pool or Nova dispatch.",
+          "tests": [
+            "compute/server_accepted_assignment_test.go:TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError"
+          ]
         }
       ],
       "documentation": [
@@ -35108,7 +35122,8 @@
         "network/network-roles.md",
         "network/network-mutations.md",
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-automatic-ip.md"
+        "compute/server-automatic-ip.md",
+        "network/floating-ip-plan.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
@@ -35757,6 +35772,14 @@
             "compute/server_automatic_ip_test.go:TestAutomaticIPExecutesFixedTargetAndObservesSecondRawFloatingIPv4",
             "compute/server_automatic_ip_boundaries_test.go:TestAutomaticIPAcceptedRawCloseFailuresRetainEvidenceWithoutRetry"
           ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
+          ]
         }
       ],
       "documentation": [
@@ -35844,11 +35867,19 @@
           ]
         },
         {
-          "behavior": "The independent prepared-plan allocation lane accepts native POST201/202, retains decoded allocated resources on owner invariant failure and preserves actual status/header/body evidence. Malformed201/202 and accepted201 Close/source/cancellation failures retain Allocated=true even with no decoded model, never retry accepted failure or delete automatically. This bounded owned REST workflow does not change the generated native API.Create transport.",
+          "behavior": "The independent prepared-plan allocation lane accepts native POST201/202 and retains decoded allocated resources on owner invariant failure. Malformed bodies retain Allocated=true/nil model and actual response proof; complete accepted201 Close/source/cancellation failures now retain the decoded known IP with the original processing cause. These fatal accepted errors never trigger retry, further wait or deletion. This owned REST lane does not change generated native API.Create transport.",
           "tests": [
             "network/floating_ip_plan_boundaries_test.go:TestFloatingIPPlanPOSTCodesAndInvariantFailuresKeepAcceptedResources",
             "network/floating_ip_plan_test.go:TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry",
             "network/floating_ip_plan_test.go:TestFloatingIPPlanDefersOwnerAndPreservesConcreteSelection"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
           ]
         }
       ],
@@ -36005,13 +36036,28 @@
             "connection_server_ready_test.go:TestConnectionReadyStaticBranchesAndInvalidPolicyKeepEndpointsLazy",
             "connection_server_ready_test.go:TestConnectionReadyLazyComputeGuardSurvivesReadinessAndIPStages"
           ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
+          ]
+        },
+        {
+          "behavior": "In the bounded automatic Neutron GetActiveServer, standalone WaitForServer, automatic creation and EnsureServerFloatingIP workflows, an accepted allocation body plus Close failure retains known Server and decoded DOWN Assignment with Allocated=true, Observed=false and actual201 response/header proof. Get/Ensure do not start raw observation; Wait/Create retain the one completed raw readiness fetch. Each has one allocation and no follow-up IP/observer/fallback/cleanup request. These fixtures do not complete explicit IP/pool or Nova dispatch.",
+          "tests": [
+            "compute/server_accepted_assignment_test.go:TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError"
+          ]
         }
       ],
       "documentation": [
         "compute/create-with-floating-ip.md",
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-automatic-ip.md",
-        "compute/server-ready.md"
+        "compute/server-ready.md",
+        "network/floating-ip-plan.md"
       ],
       "differences": [
         "The review now includes typed existing-server Service/Connection.WaitForServer plus earlier explicit and automatic creation workflows. New standalone Wait fixes the supplied ID and fetches current raw Nova metadata even when the supplied model says ACTIVE or ERROR; supplied status/addresses/fault are not readiness evidence. This differs from the existing Servers/leaf WaitForServer collection surface, which only waits for status with120-second/two-second defaults.",
@@ -36024,8 +36070,7 @@
       "remaining": [
         "Complete dynamic Server/Resource inputs, full cloud get_server lookup/defaultquery/interface expansion and broad lookup-Exception/None retry beyond the new typed supplied-ID raw waiter. Compare the complete fault/extra_data taxonomy and all state/address/nullable inputs. Standalone180-second/five-second defaults now exist, but Go raw terminal-error, noDELETE and zero-row policies remain deliberate differences.",
         "Complete IP pool > explicit ips > auto_ip branching, full shared configured network/NAT/service/flags/cache/source policy and Nova-network fallback. New standalone Wait and automatic creation consume the bounded conditional Neutron lane; ordinary Servers.Create and the new typed waiter have not become the complete source dispatch/model surface.",
-        "Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts.",
-        "Preserve decoded known FloatingIP models after accepted Neutron201/202 allocation read/Close/source errors: the current lower layer can retain Allocated=true and actual ResponseError proof while FloatingIP is nil. This existing model-retention gap is separate from the newly tested accepted raw Nova partials and has no new dedicated fixture in this readiness unit."
+        "Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts."
       ]
     },
     {
@@ -37924,6 +37969,20 @@
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPKnownSkipsUseFrozenPolicyWithoutEndpoints",
             "connection_server_automatic_ip_test.go:TestConnectionAutomaticIPMissingNetworkSelectsNovaWithoutCompute"
           ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
+          ]
+        },
+        {
+          "behavior": "In the bounded automatic Neutron GetActiveServer, standalone WaitForServer, automatic creation and EnsureServerFloatingIP workflows, an accepted allocation body plus Close failure retains known Server and decoded DOWN Assignment with Allocated=true, Observed=false and actual201 response/header proof. Get/Ensure do not start raw observation; Wait/Create retain the one completed raw readiness fetch. Each has one allocation and no follow-up IP/observer/fallback/cleanup request. These fixtures do not complete explicit IP/pool or Nova dispatch.",
+          "tests": [
+            "compute/server_accepted_assignment_test.go:TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError"
+          ]
         }
       ]
     },
@@ -37951,7 +38010,8 @@
       "documentation": [
         "compute/create-with-automatic-floating-ip.md",
         "compute/server-automatic-ip.md",
-        "compute/server-ready.md"
+        "compute/server-ready.md",
+        "network/floating-ip-plan.md"
       ],
       "differences": [
         "The review now includes typed supplied-server Service/Connection.GetActiveServer in addition to earlier automatic creation evidence. The new entry inspects supplied status: non-ACTIVE returns nil,nil, ERROR retains the known Server with ErrFailedState, and ACTIVE enters bounded conditional IP work. It returns AutomaticServerIPResult rather than a dynamic mutable Python Resource. Go compares status case-insensitively; pinned source uses literal ERROR/ACTIVE.",
@@ -37964,8 +38024,7 @@
       "remaining": [
         "Complete dynamic Server/Resource inputs, alias/default/coercion behavior for ips/ip_pool/nat_destination and returned Server Resource/location/public-private/interface normalization beyond the new typed supplied-server GetActiveServer. The bounded static ERROR/non-ACTIVE/ACTIVE surface and async/sync Neutron controls now exist, but do not complete the full source IP dispatcher.",
         "Compare the complete ERROR/fault key-presence/message/extra_data exception taxonomy, all nullable/status/address/model and detached ownership cases beyond the current fixtures, source ACTIVE-without-addresses deletion and deletion-failure ordering, and mutable Resource/descriptor/adapter/session/cache semantics. The noDELETE, zero-row and case-insensitive policies are explicit Go differences.",
-        "Finish pool > explicit ips > automatic dispatch, Nova-network mutation/fallback, full service/config availability and source/destination policy beyond the independently reviewed bounded Neutron lane. Complete source async attached-IP refresh/model semantics, timeout/unlimited/parent/HTTP/default edge cases and full cloud Wait lookup/expansion/broad-exception/missing retry plus integer remaining-budget contracts.",
-        "Preserve decoded known FloatingIP models after accepted Neutron201/202 allocation read/Close/source errors: the current lower layer can retain Allocated=true and actual ResponseError proof while FloatingIP is nil. This existing model-retention gap is separate from the newly tested accepted raw Nova partials and has no new dedicated fixture in this readiness unit."
+        "Finish pool > explicit ips > automatic dispatch, Nova-network mutation/fallback, full service/config availability and source/destination policy beyond the independently reviewed bounded Neutron lane. Complete source async attached-IP refresh/model semantics, timeout/unlimited/parent/HTTP/default edge cases and full cloud Wait lookup/expansion/broad-exception/missing retry plus integer remaining-budget contracts."
       ],
       "contracts": [
         {
@@ -38058,6 +38117,20 @@
           "behavior": "Connection supplied BUILD,ERROR,empty-address and disabled branches and an invalid standalone Wait status policy keep endpoint location at zero. Static errors retain the known Server, disabled Get retains its automatic reason, and invalid policy returns before lazy Compute discovery.",
           "tests": [
             "connection_server_ready_test.go:TestConnectionReadyStaticBranchesAndInvalidPolicyKeepEndpointsLazy"
+          ]
+        },
+        {
+          "behavior": "The SDK-owned prepared Neutron plan retains a decoded accepted201/202 allocation after complete-body read, Close, source or custom-cancellation errors with actual status/header/body and original cause; no retry, ACTIVE wait, observer or cleanup follows. Decoded wrong-owner allocation remains evidence alongside joined invariant/Close failures. Truncated202 read and Close causes remain joined with the actual json.SyntaxError and Allocated=true/nil model. Reused PUT200 adopts a complete matching body beside Close failure, but wrong-ID/fixed responses preserve the original candidate and both processing and validation causes; revision zero remains protected. This is owned workflow evidence, not a change to generated native transport.",
+          "tests": [
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
+            "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
+          ]
+        },
+        {
+          "behavior": "In the bounded automatic Neutron GetActiveServer, standalone WaitForServer, automatic creation and EnsureServerFloatingIP workflows, an accepted allocation body plus Close failure retains known Server and decoded DOWN Assignment with Allocated=true, Observed=false and actual201 response/header proof. Get/Ensure do not start raw observation; Wait/Create retain the one completed raw readiness fetch. Each has one allocation and no follow-up IP/observer/fallback/cleanup request. These fixtures do not complete explicit IP/pool or Nova dispatch.",
+          "tests": [
+            "compute/server_accepted_assignment_test.go:TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError"
           ]
         }
       ]
