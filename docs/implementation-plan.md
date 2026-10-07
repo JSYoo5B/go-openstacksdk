@@ -10,21 +10,21 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 작업 (2026-10-08): 핵심 user Barbican 조회 3개 완료.** Effective quota와 Container/Order metadata getter를 검증·문서·판정까지 닫아 **전체176→179·핵심102→105·Barbican2→5/67**로 반영했습니다. Quota는 기존 singleton/error 표와 context guard·body wrapper를 재사용했습니다. Container/Order는 한 Fetch 엔진에 기존 leaf/Connection fixture·공개 testhelper·body fault adapter를 연결한6그룹으로 검증했습니다. 별도 서버 harness를 만들거나 공통 HTTP 오류를 모든 서비스에서 반복하지 않았습니다.
+**현재 작업 (2026-10-08): 핵심 user Barbican Container/Order/Secret 삭제 3개 완료.** 공유 삭제 엔진을 기존 `Remove`·`Resources.Delete`에 연결한 `5e7cb7e`, 재사용 fixture 테스트 `96b76d4`, Python 비교·컴파일한 main `e336575`를 작은 단위로 커밋했습니다. 기본 missing 무시·strict 옵션·실제 응답 오류 보존을 검증하고 **전체179→182·핵심105→108·Barbican5→8/67**로 반영했습니다.
 
-공통 Fetch 구현 `359fad7`, 재사용 fixture 테스트 `d0f61b8`, Python 비교·컴파일한 main `b6e1c90`을 작은 단위로 커밋했습니다. 집중3 package race, 전체40 package `make check`, 기존 preview5흐름/9그룹 `make smoke`가 PASS했습니다. named getters2개만 추가 완료로 반영하고 mutable Resource/session과 별도 List/CRUD/Wait는 독립 scope로 유지합니다. 외부 설치용 alpha 준비는 [릴리즈 기준](release-milestones.md)에 남아 있습니다.
+Gophercloud 공개 testhelper·기존 leaf/Connection fixture·body fault adapter를 재사용한 HTTP6그룹, 공통 Collection/REST·generator 회귀의 집중4 package race, 전체40 package vet/race가 PASS했습니다. pinned parity·집계·format도 통과했습니다. 계획 문서 편집에서 빠진 집계 마커는 복구하고 남은 gate만 재실행했으며 이미 통과한 Go 검증을 반복하지 않았습니다. 단독 main build와 현재 소스의 기존 preview5흐름/9그룹도 PASS했습니다. named 삭제3개만 완료로 세고 native Delete·Name 확장·다른 CRUD의 독립 판정은 유지합니다.
 
-**다음 단위: Barbican Container/Order 사용자 삭제 API.** 고정 Python의 ignore_missing 기본값과 DELETE 경로·반환·오류를 먼저 대조합니다. 기존 native Delete와 Collection 삭제 정책을 재사용할 범위, SDK owned 응답·source 경계가 필요한 범위를 조사하고 있으며 아직 완료 API로 세지 않습니다. 이미 끝낸 Quota와 AvailableFloatingIP의 근거는 [대장](sdk-support-ledger.md)에 보존합니다.
+**다음 단위: Barbican 사용자 목록 API.** 이미 구현한 목록 엔진·fixture와 고정 Python의 필수 계약을 대조해 닫을 수 있는 named 선언부터 처리합니다. 새 서버/harness나 공통 페이지 알고리즘을 만들기 전에 기존 기반을 재사용합니다. 세부 착수 범위는 다음 소스 검토 결과로 갱신합니다. 외부 설치용 alpha 준비는 [릴리즈 기준](release-milestones.md)에 남아 있습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 179 (5.3%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 182 (5.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,182 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 507 | 아직 개별 기록 없는 선언 2,855 |
-| 기록한 부분·전체 계약 | 3,206 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,179 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 510 | 아직 개별 기록 없는 선언 2,852 |
+| 기록한 부분·전체 계약 | 3,221 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -37,6 +37,7 @@
 | AvailableFloatingIP named getter | 175 → 176 (+1) | Query/Create/Allocate 재사용·Neutron 내부/Nova fallback, 집중 race·전체40 package check·smoke5흐름 PASS | `c61acae` push 완료 |
 | Barbican effective quota getter | 176 → 177 (+1) | 기존 strict/error fixture·context guard 재사용, 집중3 package race·전체40 package check·조회 main build PASS | `1546e7d` push 완료 |
 | Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
+| Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `5e7cb7e`·`96b76d4`·`e336575`; 이번 완료 판정과 함께 push |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -49,12 +50,12 @@
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 105 / 2,292 | 4.6% | 228 | 1,958 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 108 / 2,292 | 4.7% | 228 | 1,955 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 179 / 3,362 | 5.3% | 327 | 2,855 | 1 |
+| 전체 | 182 / 3,362 | 5.4% | 327 | 2,852 | 1 |
 
 **핵심 서비스**
 
@@ -66,7 +67,7 @@
 | Network / Neutron | 23 / 758 | 52 | 683 | 0 |
 | Image / Glance | 4 / 120 | 75 | 41 | 0 |
 | Block Storage / Cinder | 65 / 480 | 29 | 386 | 0 |
-| Key Manager / Barbican | 5 / 67 | 13 | 49 | 0 |
+| Key Manager / Barbican | 8 / 67 | 13 | 46 | 0 |
 | Object Storage / Swift | 0 / 74 | 29 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
