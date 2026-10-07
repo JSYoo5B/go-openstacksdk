@@ -8,6 +8,7 @@
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| 명시 IP 목록·pool의 상위 소비자 (`71e8962`, `b2ee2af`, `7028370`, `bc8d096`) | [Compute 선택·부분 오류](../compute/server_ip_dispatch_test.go)·[상위 소비자](../compute/server_ip_dispatch_workflow_test.go)·[Connection](../connection_server_ip_dispatch_test.go)·[lazy source](../connection_server_automatic_sources_test.go): pool > ips > auto, 순서·중복·부분 Attempts, Get 비동기/Wait·Create 동기, 동일 deadline·옵션1회. 신규16그룹·전체40 package check 통과. | [Python/Go 사용법](../compute/server-ip-dispatch.md), [검증 기록](#명시-ip-목록과-pool의-상위-연결-흐름). 독립60초·비동기 entry, Nova mutation, source pool availability·Resource/session/model 계약은 남습니다. |
 | 상위 Network CRUD와 역할 cache (`fd863f3`, `2d95f3e`, `69aa03d`, `8d0477d`, `f71e838`, `5bfea18`) | [CRUD](../network/network_mutations_test.go)·[경계](../network/network_mutation_boundaries_test.go)·[Connection](../connection_network_mutations_test.go): 기본값·owned JSON/lookup/source·AZ·접수 증거·공유 cache Reset. 신규 27그룹, 전체 40 package check·독립 예제 컴파일 통과. | [Python/Go 사용법](../network/network-mutations.md), [검증 기록](#상위-network-crud와-공유-cache-hook). cloud 3개 부분 판정이며 mutable Resource·전체 session·응답 확장·다른 cache hook은 별도입니다. |
 | Nova·Cinder 데이터 볼륨 연결 (`2a64e79`, `19ea138`, `6d4ecab`, `f7dfdff`, `6bf3012`, `a51f8fa`, `504fe1d`) | [HTTP](../blockstorage/attach_volume_contracts_test.go)·[전송/대기](../blockstorage/attach_volume_transport_test.go)·[모델](../blockstorage/attach_volume_models_test.go)·[옵션](../blockstorage/attach_volume_options_test.go)·[Connection](../connection_attach_volume_test.go): fresh available 확인, Nova POST200, 기본 in-use 대기와 독립된 부분 응답. 신규27그룹·전체34 package race/vet·예제 컴파일 통과. | [Python/Go 사용법](../blockstorage/attach-volume.md). 실제 cloud attach_volume 한 선언을 의도적인 Go 입력·응답·timeout 정책으로 매핑합니다. 별도 Compute/Cinder API와 상속 Resource 범위는 각 판정을 유지합니다. |
 | Trove root 상태 오류 (`da5cb9d`, `9e886c3`, `4b09f98`, `fae0e29`, `99a18b3`, `04562ac`) | [helper](../internal/troveroot/extract_test.go)·[외부 HTTP](../api/trove_root_enabled_contracts_test.go)·[생성기](../internal/cmd/sdkgen/trove_root_enabled_extractors_test.go): native 오류보다 앞선 unchecked map assertion을 제거합니다. 기존 bool/error·literal true 비교·native request/retry를 유지하고 성공 nonobject 응답은 오류로 반환합니다. 신규18그룹·전체34 package race/vet·새 Go 예제 검증. | [Python Resource method 비교](../db/v1/instances/root-access.md). native 한 연산의 go_mapping이며 Python descriptor·mutable Resource/session/cache와 전체 SDK 범위는 별도입니다. |
@@ -1441,7 +1442,7 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 
 ## 기존 Floating IP의 고정 연결
 
-2026-10-07 핵심 user 단계에서 `FloatingIPs.Attach`·`PrepareAttach`·`AttachPrepared`와 `FloatingIPPlanner.PrepareAttach`를 추가했습니다. 고정 Python의 `add_ip_list`와 Neutron attach helper에 필요한 **기존 IP 한 개의 연결 기반**이며, 공개 순차 Server-returning consumer는 아직 구현하지 않았습니다. [Python/Go 사용법](../network/floating-ip-attach.md)에 request·concrete 옵션·두 단계 선택/실행과 남은 범위를 기록했습니다.
+2026-10-07 핵심 user 단계에서 `FloatingIPs.Attach`·`PrepareAttach`·`AttachPrepared`와 `FloatingIPPlanner.PrepareAttach`를 추가했습니다. 고정 Python의 `add_ip_list`와 Neutron attach helper에 필요한 **기존 IP 한 개의 연결 기반**입니다. 이 단위 완료 당시의 공개 순차 consumer 미구현 범위는 아래 [상위 연결 흐름](#명시-ip-목록과-pool의-상위-연결-흐름)에서 후속 검증합니다. [Python/Go 사용법](../network/floating-ip-attach.md)에 request·concrete 옵션·두 단계 선택/실행과 남은 범위를 기록했습니다.
 
 ID는 정확한 GET, Name(floating IPv4)은 주소 query와 전체 페이지의 local exact 검색을 사용합니다. 현재 token project·free 여부·allocation network 필터를 붙이지 않고, foreign recorded owner와 안정적인 다른-port 연결도 Neutron 권한 범위에서 이동할 수 있습니다. 준비에는 mutation이 없고 기존 IP ID/주소·외부 network·destination·원래 revision을 service-bound opaque plan에 고정합니다. 실행은 port/IP를 재검증하며 unrelated association drift를 거절하고, 원래 revision0은 재조회7 이후에도 header0을 유지합니다. 이미 요청 tuple이면 PUT 없이 필요한 ACTIVE를 기다립니다.
 
@@ -1461,3 +1462,30 @@ GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json make che
 새 가이드의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-attach-example-8s8h7cnt/main.go`, SHA256 `0b2e07a04bf3c002c13d0bac0ef097fac55351336b1e1855825f46472b335ff0`). 최종 진행표 링크까지 포함한 다섯 문서의 상대 파일 링크990개에 누락이 없고 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-attach-doc-receipt.json`). Python/runtime와 인증된 cloud 실행은 하지 않았습니다. 코드 변경 없이 review의 waiter 설명을5분으로 교정한 뒤 최종 parity도 통과했습니다(`/private/tmp/gophercloudsdk-attach-final-parity.log`).
 
 `add_ip_list`의 새 부분 판정은 unresolved이며 단일 Neutron foundation만 기록합니다. 기존495개 review·핀·fingerprint·status와 생성/선언 inventory는 유지하고 새1행만 추가합니다. review496=go_mapping161/unresolved334/unsupported1이며 전체 선언3362=supported0/go_mapping161/unsupported1/unresolved3200으로 지원 승격은 없습니다. 순서와 중복을 유지하는 목록 consumer·pool > ips > auto·Get/Wait/Create 통합·Nova-network mutation·raw Nova 수렴·전체 Server/Resource/session/normalization은 남습니다. 전체 SDK 목표와 서비스/user/admin 순서를 유지합니다.
+
+
+## 명시 IP 목록과 pool의 상위 연결 흐름
+
+2026-10-07 핵심 user 단계에서 기존 Compute·Connection의 Plan/Ensure/GetActive/Wait/CreateWithAutomaticFloatingIP가 같은 concrete 선택 정책을 소비하도록 연결했습니다. `WithFloatingIPPool` > `WithFloatingIPAddresses` > automatic 순서이며 옵션 순서와 무관합니다. zero pool·빈 목록은 해당 선택을 지우고, pool이 있으면 무시할 주소 문자열과 원래 allocation Network를 검증하지 않습니다. 공통 Ensure/address/wait 옵션의 유효성 검증은 유지합니다. [Python/Go 사용법](../compute/server-ip-dispatch.md)에 현재 entry와 source 기본값의 차이를 설명합니다.
+
+명시 목록은 IPv4 순서와 중복을 유지합니다. 기존 foreign-owner IP의 정확한 주소를 선택하고 같은 planner·operation context에서 destination 재검사→조건부 PUT→필요한 실제 Neutron ACTIVE→정확한 raw Nova 주소 관측을 한 항목씩 수행합니다. `Attempts`는 시작한 항목의 Assignment·Completed·Observed·Error를 기록하며 다음 항목 오류에도 이전 완료와 현재 알려진 부분 IP가 남습니다. scalar Assignment는 마지막 알려진 IP, Server는 마지막 채택한 raw 모델입니다. 각 Observed는 그 단계의 관측 기록이며, 마지막 Server 응답에서 모든 이전 IP가 동시에 남았다는 보장은 아닙니다. 첫 성공 뒤 두 번째 오류가 나면 세 번째 항목을 시작하거나 rollback·새 allocation·fallback을 하지 않습니다.
+
+명시 요청은 automatic의 disabled/private/public/floating skip을 우회합니다. 알려진 None/Nova 또는 없는 Network의 Plan은 Needed=true·Nova backend 진단을 반환할 수 있지만 mutation은 ErrUnsupported입니다. pool은 기존 Ensure의 attached-preference·free reuse 또는 attached POST 정책을 사용하며, Python pool의 서버 인자 없는 unattached-first available getter와 nonreuse 후속 refresh/timing을 그대로 구현한 것은 아닙니다. GetActive 기본 async는 IP 접수 후 반환하며 Compute discovery·IP ACTIVE·raw 관측을 요구하지 않습니다. sync GetActive·Wait·Create는 실제 IP ACTIVE와 각 raw 목표 관측을 요구합니다. Create의 원래 Creation.AdminPass와 이후 Server는 구분합니다.
+
+신규 **16개 테스트 그룹**은 [Compute 선택·부분 오류6](../compute/server_ip_dispatch_test.go), [상위 소비자7](../compute/server_ip_dispatch_workflow_test.go), [Connection2](../connection_server_ip_dispatch_test.go), [standalone lazy source1](../connection_server_automatic_sources_test.go)입니다. Compute fixture는 중복 순서·항목 사이 요청 순서·pool 옵션순서/reuse/ignored malformed IP·read-only Plan·선택 해제·backend 진단, 두 번째 lookup/PUT/Close/source/cancel/raw 오류와 accepted203 raw Close 모델을 검증합니다. 실제 HTTP deadline의 동일성과 두 번째 관측 중 취소를 확인하며 timer 만료를 기다린 검증은 아닙니다. 서버 ID/status는 옵션 적용 전에 snapshot하고 selector/address/Ensure/wait 옵션은 작업당 한 번 적용합니다.
+
+상위 성공 fixture는 명시 목록을 사용하는 Get async/sync·Wait·image/flavor Create이며 모든 pool·volume·NIC 조합을 검증한 증거는 아닙니다. Connection fixture는 async Compute discovery0, Wait discovery1과 raw3, 두 번째 accepted PUT Close 중 cached Compute API 변경에 대한 원래200 header/status·현재 IP·첫 관측 보존을 확인합니다. standalone source registry fixture는 raw progress에서 cached API/Servers/Flavors를 각각 바꾸어 이전 오류를 재현한 뒤 후속 raw GET 없이 ErrInvalidOption·알려진 allocation·마지막 Server를 보존하는 것을 확인했습니다.
+
+```sh
+go test -race -timeout 60s . ./compute ./network \
+  -run 'TestConnection(ExplicitIPDispatch|OrderedIP|StandaloneAutomaticIP|Ready)|TestServerIPDispatch|TestAutomaticIP|TestFloatingIPAttach' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json \
+PATH=/opt/homebrew/bin:$PATH make check
+```
+
+집중3 package race와 최종 code/tests `bc8d096`의 전체 check가 통과했습니다. vet·race·고정 parity·gofmt와 테스트 package40개, Go 파일1,865개를 확인했습니다. Go source SHA256 `486366420f4316298eddff657c743b3808d11f24fae61f89507be05f8e6eb01e`는 검증 전후 동일합니다(`/private/tmp/gophercloudsdk-ip-dispatch-check.log`, `gophercloudsdk-ip-dispatch-gate-receipt.json`). source 수정 `71e8962`, dispatch `b2ee2af`, Compute 검증 `7028370`, Connection 검증 `bc8d096`은 각각 커밋·push했습니다. 사용 문서 `e8dff01`도 별도로 커밋·push했습니다.
+
+새 가이드의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-example-l6ijwx5c/main.go`, SHA256 `589a21c96cda647ce7ad92f7cf9097368477bbd2052b53b506d0ecdda99aa5c4`). 기존11개 문서의 Go fence는 동일하고 새 예제만 추가했습니다. 변경한12개 문서의 상대 파일 링크 1084개에서 누락이 없고 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-doc-receipt.json`, `gophercloudsdk-ip-dispatch-example-receipt.json`). 기존6행 갱신 뒤 최종 고정 parity도 통과했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-final-parity.log`). Python 예제·인증된 cloud 실행은 하지 않았습니다.
+
+기존 add_ip_list/add_ips/available/create/get_active/wait6행에 이번 typed 소비자의 근거를 추가하고 남은 범위를 좁혔습니다. 신규 review나 지원 승격은 없으며496개 review의 go_mapping161/unresolved334/unsupported1, 전체3362개 선언의 supported0/go_mapping161/unsupported1/unresolved3200을 유지합니다. 별도 public60초·비동기 AddIPsToServer/AddIPList, Nova mutation·service fallback, source pool availability·ordinary Create/Get, full Resource/config/session/normalization/cleanup은 남습니다. 전체 SDK 목표와 서비스/user/admin 우선순위는 유지하며 다음 핵심 user 단위부터 이 남은 계약을 계속 처리합니다.
