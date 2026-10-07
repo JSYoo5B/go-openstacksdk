@@ -26,6 +26,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 
 JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 정밀도 검증에는 사용하지 않습니다. 고정 v2.15.0의 deep-equality helper는 slice 길이가 같은지도 보장하지 않으므로 정확한 순서·횟수·추가 요청 부재 검증에는 `reflect.DeepEqual` 등의 기존 검사를 유지합니다. 이미 검증한 fixture·공통 엔진·표 기반 테스트를 확장하며 동등한 setup/assertion을 새로 복제하지 않습니다.
 
+공통 알고리즘의 계약은 공통 패키지 테스트에서 검증하고, 서비스 테스트에는 경로·envelope·서비스 고유 분기와 binding 연결만 추가합니다. 기존 테스트 표에 사례를 넣을 수 있으면 별도 테스트 서버나 harness를 만들지 않습니다. 새로운 transport가 필요할 때도 기존 fault/body wrapper를 먼저 재사용합니다. 검증한 동일 소스의 전체 테스트는 문서·지원 판정 갱신 때문에 반복하지 않습니다.
+
 Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위

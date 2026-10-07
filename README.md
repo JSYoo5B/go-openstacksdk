@@ -138,7 +138,7 @@ Barbican은 `conn.KeyManagerV1(ctx)`의 `SecretStores`로 목록·global default
 `Quotas`로 현재 프로젝트 quota와 고정 프로젝트의 override 조회·교체·삭제를 제공합니다.
 SDK가 concrete options·기본 404 정책·요청 snapshot·실제 응답 증거를 처리합니다.
 [SecretStore 비교](keymanager/v1/secretstores/README.md)와
-[Quota 비교](keymanager/v1/quotas/README.md)에 Python/Go 사용법과 범위를 설명합니다.
+[Quota 비교](keymanager/v1/quotas/README.md)에 Python/Go 사용법과 범위를 설명합니다. 현재 프로젝트 quota만 읽을 때는 `service.Quotas.Get(ctx)`를 사용하며, 프로젝트 ID 없이 원문 값과 실제 HTTP 오류 증거를 반환합니다.
 `SecretConsumers.InSecret(ctx, resource.ID(secretID))`는 consumer association의 생성·삭제와
 offset 목록을 제공합니다. [SecretConsumer 비교](keymanager/v1/secretconsumers/README.md)에서
 association 입력과 실제 secret 응답을 구별합니다.
