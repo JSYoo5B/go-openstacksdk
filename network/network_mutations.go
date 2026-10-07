@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/internal/rest"
@@ -37,15 +38,32 @@ func wrapNetworkMutation(operation string, err error) error {
 func (s *Service) networkMutationTarget() (string, func(context.Context) error) {
 	client := s.client
 	provider, endpoint, base := client.ProviderClient, client.Endpoint, client.ResourceBase
+	var sourceError error
+	var mu sync.Mutex
 	return client.ServiceURL("networks"), func(ctx context.Context) error {
+		mu.Lock()
+		defer mu.Unlock()
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if s.client != client || client.ProviderClient != provider || client.Endpoint != endpoint || client.ResourceBase != base || s.Networks != s.mutationNetworks || s.Roles != s.mutationRoles {
-			return networkMutationInvalid("network service source changed during mutation")
+		if sourceError == nil && (s.client != client || client.ProviderClient != provider || client.Endpoint != endpoint || client.ResourceBase != base || s.Networks != s.mutationNetworks || s.Roles != s.mutationRoles) {
+			sourceError = networkMutationInvalid("network service source changed during mutation")
 		}
-		return nil
+		return sourceError
 	}
+}
+
+// Mutation lookups use the same owned source guard and response pipeline as
+// writes. The public Collection keeps its established native read contract.
+func (s *Service) networkMutationLookup(guard func(context.Context) error) *resource.Collection[Network] {
+	return rest.Collection(rest.CollectionSpec[Network]{
+		Client: s.client, Path: "networks", Kind: "network", SingleKey: "network", PluralKey: "networks",
+		ID: func(value *Network) string { return value.ID }, Name: func(value *Network) string { return value.Name },
+		NameQuery: func(name string) string { return name },
+		Metadata:  func(*Network) *resource.Metadata { return &resource.Metadata{} },
+		Validate:  guard, SourceGuard: guard, Get: true, GetCodes: []int{http.StatusOK},
+		ListCodes: []int{http.StatusOK, http.StatusNoContent}, Paging: rest.PagePolicy[Network]{HTTPLink: true},
+	})
 }
 
 // CreateNetwork applies cloud defaults and concrete options, then invalidates
@@ -84,7 +102,7 @@ func (s *Service) UpdateNetwork(ctx context.Context, ref resource.Ref, options .
 		return nil, err
 	}
 	if len(o.fields) == 0 && o.revision == nil {
-		current, err := s.Networks.Find(ctx, ref)
+		current, err := s.networkMutationLookup(guard).Find(ctx, ref)
 		if err == nil {
 			err = validateMutationNetwork(current, ref)
 		}
@@ -100,7 +118,7 @@ func (s *Service) UpdateNetwork(ctx context.Context, ref resource.Ref, options .
 		s.mutationRoles.Reset()
 		return current, nil
 	}
-	id, err := s.Networks.ResolveID(ctx, ref)
+	id, err := s.networkMutationLookup(guard).ResolveID(ctx, ref)
 	if err != nil {
 		return nil, wrapNetworkMutation("update/lookup", err)
 	}
@@ -122,7 +140,7 @@ func (s *Service) DeleteNetwork(ctx context.Context, ref resource.Ref) (bool, er
 	if err := ref.Validate(); err != nil {
 		return false, err
 	}
-	current, err := s.Networks.Find(ctx, ref, resource.WithIgnoreMissing())
+	current, err := s.networkMutationLookup(guard).Find(ctx, ref, resource.WithIgnoreMissing())
 	if err != nil {
 		return false, wrapNetworkMutation("delete/lookup", err)
 	}
