@@ -588,3 +588,39 @@ func TestNetworkMutationLookupSourceChangeStopsBeforeResendOrWrite(t *testing.T)
 		})
 	}
 }
+
+func TestNetworkMutationNoContentNameLookupKeepsMissingPolicyAndCache(t *testing.T) {
+	for _, operation := range []string{"update", "delete"} {
+		t.Run(operation, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			var inventories, lookups, writes atomic.Int32
+			cloud.Mux.HandleFunc("GET /v2.0/networks", func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Query().Get("name") == "missing" {
+					lookups.Add(1)
+					w.WriteHeader(204)
+					return
+				}
+				call := inventories.Add(1)
+				testcloud.JSON(w, 200, fmt.Sprintf(`{"networks":[{"id":"cache-%d","name":"private"}]}`, call))
+			})
+			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { writes.Add(1); w.WriteHeader(500) })
+			s := mutationService(t, cloud)
+			requireMutationCache(t, s, &inventories, 1)
+			if operation == "update" {
+				row, err := s.UpdateNetwork(context.Background(), resource.Name("missing"), network.WithNetworkName("changed"))
+				if row != nil || !errors.Is(err, resource.ErrNotFound) {
+					t.Fatal(row, err)
+				}
+			} else {
+				deleted, err := s.DeleteNetwork(context.Background(), resource.Name("missing"))
+				if deleted || err != nil {
+					t.Fatal(deleted, err)
+				}
+			}
+			if lookups.Load() != 1 || writes.Load() != 0 {
+				t.Fatal(lookups.Load(), writes.Load())
+			}
+			requireMutationCache(t, s, &inventories, 1)
+		})
+	}
+}

@@ -211,6 +211,14 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 					return
 				}
 			}
+			// An explicitly accepted 204 has no collection representation.
+			// Read/Close/source failures are already retained by DoJSONGuarded.
+			if response.StatusCode == http.StatusNoContent {
+				if err := ctx.Err(); err != nil {
+					fail(response.Fail(err))
+				}
+				return
+			}
 			fields, items, err := pageItems(response, spec.PluralKey)
 			if err != nil {
 				fail(response.Fail(err))
