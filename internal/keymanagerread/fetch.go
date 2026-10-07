@@ -125,35 +125,40 @@ func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, kind s
 
 func invalid(message string) error { return fmt.Errorf("%w: %s", resource.ErrInvalidOption, message) }
 
-// project has only the concrete getter's audited Body descriptors. Wire owns
-// all original extension fields; the Resource view excludes unknown/self keys.
+// project preserves the two existing Fetch request-ID seeds.
 func project(wire *resource.RawResource, kind, requestID string) (*resource.RawResource, error) {
+	return projectRecord(wire, kind, &requestID)
+}
+
+// projectRecord has only the finite resource's audited Body descriptors. A nil
+// requestID means creation: absent literal id derives from the full passive ref.
+func projectRecord(wire *resource.RawResource, kind string, requestID *string) (*resource.RawResource, error) {
+	if wire == nil || wire.Body == nil {
+		return nil, invalid("resource body is required")
+	}
+	if _, err := createAttributeMap(kind); err != nil {
+		return nil, err
+	}
 	view := wire.Clone()
 	view.Body = make(map[string]json.RawMessage)
-	// Known client attribute names are accepted when the canonical wire name
-	// is absent. Present canonical values (including null) win deterministically
-	// in Go; Python mixed-alias collisions instead follow body insertion order.
 	effective := wire.Clone()
-	aliases := map[string]string{"created_at": "created", "updated_at": "updated"}
-	if kind == "containers" {
-		aliases["container_id"] = "container_ref"
-	} else {
-		aliases["order_id"], aliases["secret_id"] = "order_ref", "secret_ref"
-	}
-	for attr, field := range aliases {
-		if _, exists := effective.Body[field]; !exists {
-			if raw, present := effective.Body[attr]; present {
-				effective.Body[field] = bytes.Clone(raw)
-			}
-		}
-	}
-	fields := map[string]string{"name": "name", "status": "status", "type": "type", "created_at": "created", "updated_at": "updated"}
-	if kind == "containers" {
-		fields["container_ref"], fields["secret_refs"], fields["consumers"] = "container_ref", "secret_refs", "consumers"
-	} else {
-		for _, key := range []string{"creator_id", "meta", "order_ref", "secret_ref", "sub_status", "sub_status_message"} {
+	// Deterministic canonical-wire priority applies to input and response aliases.
+	effective.Body = normalizedCreateFields(kind, wire.Body)
+	fields := map[string]string{"name": "name", "status": "status", "created_at": "created", "updated_at": "updated"}
+	switch kind {
+	case "containers":
+		for _, key := range []string{"type", "container_ref", "secret_refs", "consumers"} {
 			fields[key] = key
 		}
+	case "orders":
+		for _, key := range []string{"type", "creator_id", "meta", "order_ref", "secret_ref", "sub_status", "sub_status_message"} {
+			fields[key] = key
+		}
+	case "secrets":
+		for _, key := range []string{"algorithm", "bit_length", "content_types", "mode", "secret_ref", "secret_type", "payload", "payload_content_type", "payload_content_encoding"} {
+			fields[key] = key
+		}
+		fields["expires_at"] = "expiration"
 	}
 	for dest, source := range fields {
 		raw, err := resource.BodyRecordField(effective.Body, source, resource.BodyFieldJSON)
@@ -162,12 +167,23 @@ func project(wire *resource.RawResource, kind, requestID string) (*resource.RawR
 		}
 		view.Body[dest] = raw
 	}
-	// Python fetch starts with the caller's explicit Body id. Missing response
-	// id preserves that seed; a present null still overrides it.
-	if raw, present := wire.Body["id"]; present {
+	if raw, present := effective.Body["id"]; present {
 		view.Body["id"] = bytes.Clone(raw)
+	} else if requestID != nil {
+		view.Body["id"], _ = json.Marshal(*requestID)
 	} else {
-		view.Body["id"], _ = json.Marshal(requestID)
+		alternate := "secret_ref"
+		if kind == "containers" {
+			alternate = "container_ref"
+		}
+		if kind == "orders" {
+			alternate = "order_ref"
+		}
+		raw, err := resource.BodyRecordField(effective.Body, alternate, resource.BodyFieldJSON)
+		if err != nil {
+			return nil, err
+		}
+		view.Body["id"] = raw
 	}
 	view.Body["location"] = json.RawMessage("null")
 	format := func(dest, source string) error {
@@ -182,7 +198,8 @@ func project(wire *resource.RawResource, kind, requestID string) (*resource.RawR
 		view.Body[dest] = value
 		return nil
 	}
-	if kind == "containers" {
+	switch kind {
+	case "containers":
 		if err := format("container_id", "container_ref"); err != nil {
 			return nil, err
 		}
@@ -192,7 +209,7 @@ func project(wire *resource.RawResource, kind, requestID string) (*resource.RawR
 				view.Body[key] = append(append(json.RawMessage("["), raw...), ']')
 			}
 		}
-	} else {
+	case "orders":
 		if err := format("order_id", "order_ref"); err != nil {
 			return nil, err
 		}
@@ -202,6 +219,14 @@ func project(wire *resource.RawResource, kind, requestID string) (*resource.RawR
 		raw := bytes.TrimSpace(view.Body["meta"])
 		if !bytes.Equal(raw, []byte("null")) && len(raw) > 0 && raw[0] != '{' {
 			view.Body["meta"] = json.RawMessage("{}")
+		}
+	case "secrets":
+		if err := format("secret_id", "secret_ref"); err != nil {
+			return nil, err
+		}
+		raw := bytes.TrimSpace(view.Body["content_types"])
+		if !bytes.Equal(raw, []byte("null")) && len(raw) > 0 && raw[0] != '{' {
+			view.Body["content_types"] = json.RawMessage("{}")
 		}
 	}
 	return view, nil
