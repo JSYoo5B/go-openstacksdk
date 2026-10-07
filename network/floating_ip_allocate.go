@@ -85,7 +85,15 @@ func (f *FloatingIPs) Allocate(ctx context.Context, input AllocateFloatingIPRequ
 		}
 		selection.ServerID, selection.PortID, selection.PortNetworkID, selection.FixedIPv4 = serverID, destination.PortID, destination.PortNetworkID, destination.FixedIPv4
 	}
-	fields := map[string]any{"floating_network_id": networkID}
+	return f.allocateSelected(ctx, selection, p)
+}
+
+// Both ordinary creation and prepared availability use this minimal raw POST.
+func (f *FloatingIPs) allocateSelected(ctx context.Context, selection FloatingIPSelection, p *FloatingIPPlanner) (*FloatingIPAllocation, error) {
+	if err := p.Check(ctx); err != nil {
+		return nil, err
+	}
+	fields := map[string]any{"floating_network_id": selection.NetworkID}
 	if selection.PortID != "" {
 		fields["port_id"] = selection.PortID
 	}
@@ -111,8 +119,9 @@ func (f *FloatingIPs) Allocate(ctx context.Context, input AllocateFloatingIPRequ
 			key = ""
 		}
 	}
-	result.Wire, err = rest.Decode[resource.RawResource](response, key, func(row *resource.RawResource) *resource.Metadata { return &row.Metadata })
-	return result, errors.Join(requestErr, err, p.Check(ctx))
+	wire, decodeErr := rest.Decode[resource.RawResource](response, key, func(row *resource.RawResource) *resource.Metadata { return &row.Metadata })
+	result.Wire = wire
+	return result, errors.Join(requestErr, decodeErr, p.Check(ctx))
 }
 
 func (f *FloatingIPs) allocateNetwork(p *FloatingIPPlanner) *resource.Collection[Network] {

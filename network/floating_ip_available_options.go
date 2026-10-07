@@ -47,6 +47,9 @@ type AvailableFloatingIPPolicy struct {
 	prepared bool
 }
 
+// Timeout is the prepared Neutron helper budget, including internal fallbacks.
+func (p AvailableFloatingIPPolicy) Timeout() time.Duration { return p.options.timeout }
+
 func PrepareAvailableFloatingIPOptions(ctx context.Context, options ...AvailableFloatingIPOption) (AvailableFloatingIPPolicy, error) {
 	var p AvailableFloatingIPPolicy
 	if ctx == nil {

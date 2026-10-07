@@ -48,43 +48,7 @@ func (s *Service) CreateFloatingIP(ctx context.Context, input CreateFloatingIPRe
 	}
 	if backend == FloatingIPNeutron {
 		allocation, allocateErr := p.state.network.FloatingIPs.Allocate(p.ctx, network.AllocateFloatingIPRequest{Network: input.Network, Server: policy.Server, PortID: policy.PortID, FixedAddress: policy.FixedAddress, NATDestination: policy.NATDestination})
-		err = errors.Join(allocateErr, p.state.check(p.ctx))
-		if allocation != nil {
-			result.Selection, result.Allocated = allocation.Selection, allocation.Allocated
-			if receipt := allocation.AllocationResponse; receipt != nil {
-				result.AllocationResponse = &FloatingIPQueryResponse{Backend: backend, Metadata: receipt.Metadata, Envelope: append(json.RawMessage(nil), receipt.Envelope...)}
-			}
-			if allocation.Wire != nil {
-				seeded := allocation.Wire.Clone()
-				seed := map[string]string{"floating_network_id": allocation.Selection.NetworkID}
-				if _, present := seeded.Body["id"]; !present {
-					seeded.Body["id"] = json.RawMessage("null")
-				}
-				if allocation.Selection.PortID != "" {
-					seed["port_id"] = allocation.Selection.PortID
-				}
-				if allocation.Selection.FixedIPv4 != "" {
-					seed["fixed_ip_address"] = allocation.Selection.FixedIPv4
-				}
-				for key, value := range seed {
-					if _, present := seeded.Body[key]; !present {
-						seeded.Body[key], _ = json.Marshal(value)
-					}
-				}
-				record, recordErr := p.record(backend, client, seeded, false)
-				if record != nil {
-					record.Wire = allocation.Wire.Clone()
-				} else {
-					record = &FloatingIPRecord{Backend: backend, Wire: allocation.Wire.Clone()}
-				}
-				result.Allocation, result.FloatingIP = record, cloneFloatingIPRecord(record)
-				if recordErr != nil {
-					recordErr = createResponseError(result.AllocationResponse, recordErr)
-				}
-				err = errors.Join(err, recordErr)
-			}
-		}
-		result.Failure = queryFailure(backend, err)
+		err = p.adoptNeutronAllocation(result, client, allocation, allocateErr)
 		if err == nil {
 			return p.finishNeutronCreate(result, policy)
 		}
@@ -98,6 +62,48 @@ func (s *Service) CreateFloatingIP(ctx context.Context, input CreateFloatingIPRe
 		return result, errors.Join(resource.ErrUnsupported, invalid("Nova cannot create an arbitrary port mapping"))
 	}
 	return p.createNova(result, input.Network)
+}
+
+// Preserve request-seeded Resource fields separately from actual allocation Wire.
+func (p *floatingIPQueryState) adoptNeutronAllocation(result *CreateFloatingIPResult, client *gophercloud.ServiceClient, allocation *network.FloatingIPAllocation, prior error) error {
+	err := errors.Join(prior, p.state.check(p.ctx))
+	if allocation != nil {
+		result.Selection, result.Allocated = allocation.Selection, allocation.Allocated
+		if receipt := allocation.AllocationResponse; receipt != nil {
+			result.AllocationResponse = &FloatingIPQueryResponse{Backend: FloatingIPNeutron, Metadata: receipt.Metadata, Envelope: append(json.RawMessage(nil), receipt.Envelope...)}
+		}
+		if allocation.Wire != nil {
+			seeded := allocation.Wire.Clone()
+			seed := map[string]string{"floating_network_id": allocation.Selection.NetworkID}
+			if _, present := seeded.Body["id"]; !present {
+				seeded.Body["id"] = json.RawMessage("null")
+			}
+			if allocation.Selection.PortID != "" {
+				seed["port_id"] = allocation.Selection.PortID
+			}
+			if allocation.Selection.FixedIPv4 != "" {
+				seed["fixed_ip_address"] = allocation.Selection.FixedIPv4
+			}
+			for key, value := range seed {
+				if _, present := seeded.Body[key]; !present {
+					seeded.Body[key], _ = json.Marshal(value)
+				}
+			}
+			record, recordErr := p.record(FloatingIPNeutron, client, seeded, false)
+			if record != nil {
+				record.Wire = allocation.Wire.Clone()
+			} else {
+				record = &FloatingIPRecord{Backend: FloatingIPNeutron, Wire: allocation.Wire.Clone()}
+			}
+			result.Allocation, result.FloatingIP = record, cloneFloatingIPRecord(record)
+			if recordErr != nil {
+				recordErr = createResponseError(result.AllocationResponse, recordErr)
+			}
+			err = errors.Join(err, recordErr)
+		}
+	}
+	result.Failure = queryFailure(FloatingIPNeutron, err)
+	return err
 }
 
 func createResponseError(response *FloatingIPQueryResponse, cause error) error {
