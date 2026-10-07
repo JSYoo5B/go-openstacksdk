@@ -102,7 +102,7 @@ func (p *FloatingIPAvailabilityPlan) Allocate(ctx context.Context) (*FloatingIPA
 		if err := resource.ID(serverID).Validate(); err != nil {
 			return nil, err
 		}
-		destination, err := f.allocateDestination(ctx, serverID, AllocateFloatingIPRequest{FixedAddress: p.options.fixed, NATDestination: p.options.nat.String()}, p.planner)
+		destination, err := f.allocateDestinationWithNAT(ctx, serverID, AllocateFloatingIPRequest{FixedAddress: p.options.fixed}, p.planner, p.options.nat)
 		if err != nil {
 			return nil, err
 		}

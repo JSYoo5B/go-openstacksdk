@@ -13,6 +13,12 @@ import (
 )
 
 func (f *FloatingIPs) allocateDestination(ctx context.Context, serverID string, input AllocateFloatingIPRequest, p *FloatingIPPlanner) (FloatingIPSelection, error) {
+	return f.allocateDestinationWithNAT(ctx, serverID, input, p, resource.Ref{})
+}
+
+// Availability retains typed NAT references while ordinary cloud Create keeps
+// its name-or-ID string lookup. Both consume the same raw destination engine.
+func (f *FloatingIPs) allocateDestinationWithNAT(ctx context.Context, serverID string, input AllocateFloatingIPRequest, p *FloatingIPPlanner, nat resource.Ref) (FloatingIPSelection, error) {
 	var zero FloatingIPSelection
 	spec := rest.CollectionSpec[resource.RawResource]{Client: f.api.RawClient(), Path: "ports", Kind: "port", PluralKey: "ports", Validate: p.Check, SourceGuard: p.Check, ListCodes: []int{200}, Metadata: func(row *resource.RawResource) *resource.Metadata { return &row.Metadata }, Paging: rest.PagePolicy[resource.RawResource]{HTTPLink: true}}
 	var ports []*resource.RawResource
@@ -27,7 +33,13 @@ func (f *FloatingIPs) allocateDestination(ctx context.Context, serverID string, 
 	}
 	if input.FixedAddress == "" && len(ports) > 1 {
 		var networkID string
-		if input.NATDestination != "" {
+		if nat != (resource.Ref{}) {
+			var err error
+			networkID, err = f.allocateNetwork(p).ResolveID(ctx, nat)
+			if err != nil {
+				return zero, errors.Join(floatingIPInvalid("allocation NAT destination unavailable"), err)
+			}
+		} else if input.NATDestination != "" {
 			row, err := f.allocateNetwork(p).FindIdentity(ctx, input.NATDestination, resource.WithIdentityFindIgnoreMissing(false))
 			if err != nil {
 				return zero, errors.Join(floatingIPInvalid("allocation NAT destination unavailable"), err)
