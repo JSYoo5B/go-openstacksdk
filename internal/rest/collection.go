@@ -34,7 +34,7 @@ type CollectionSpec[T any] struct {
 	// ValidateItem checks service-specific response invariants after decoding.
 	// Failure retains the original singular response or whole list page.
 	ValidateItem                     func(*T) error
-	Get, Delete                      bool
+	Get, Delete, IdentityFind        bool
 	GetCodes, ListCodes, DeleteCodes []int
 	Failed                           func(string) bool
 	LocalStatus                      bool
@@ -68,7 +68,7 @@ func successCodes(codes []int, fallback int) []int {
 func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 	adapter := resource.Adapter[T]{Kind: spec.Kind, ID: spec.ID, Name: spec.Name,
 		Status: spec.Status, Failed: spec.Failed, LocalStatus: spec.LocalStatus,
-		NameQuery: spec.NameQuery, NameQueryKey: spec.NameQueryKey, ValidateID: spec.ValidateID}
+		NameQuery: spec.NameQuery, NameQueryKey: spec.NameQueryKey, ValidateID: spec.ValidateID, IdentityFind: spec.IdentityFind}
 	adapter.Iterate = func(ctx context.Context, query url.Values) iter.Seq2[*T, error] {
 		return List(ctx, spec, query)
 	}
