@@ -37380,6 +37380,186 @@
           ]
         }
       ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_public_ip",
+      "source_fingerprint": "0f54a8883d3db217ec3a3fa16b6a0e7274d9971104c38ed513e10afcf26a124f",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.GetServerPublicIP",
+        "gophercloudsdk/compute.Service.GetServerPublicIP",
+        "gophercloudsdk/compute.Service.ExpandServerInterfaces"
+      ],
+      "documentation": [
+        "compute/server-addresses.md"
+      ],
+      "differences": [
+        "The getter returns (string,error), with empty string for no usable result, and accepts the native Nova Server snapshot. Independent ExpandServerInterfaces returns owned typed fields and address/provenance snapshots; it does not mutate the supplied Server or implicitly expand Get/Create/Wait.",
+        "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
+        "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
+        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException."
+      ],
+      "remaining": [
+        "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
+        "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
+        "Integrate address expansion into complete cloud get/create/wait lifecycle; implement automatic needs/skip/source dispatch, prepared assignment, pool/explicit IP priority and raw Nova observed-address convergence with partial results. Existing explicit CreateWithFloatingIP and synthesized rows do not prove those workflows."
+      ],
+      "contracts": [
+        {
+          "behavior": "External use gate precedes AccessIPv4, configured external role NAME, any floating IPv4, literal public label and final CPython3.13 not-private IPv4 classification. Floating rows precede fixed rows in a selected step and empty selected candidates preserve priority.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerPublicAddressOrderingRolesFloatingAndAccessShortCircuit"
+          ]
+        },
+        {
+          "behavior": "Final classification rejects documentation, loopback, linklocal, benchmark and reserved IPv4 blocks; CPython3.13 exceptions .9/.10, shared100.64/10 and multicast are accepted, malformed and IPv4-mappedIPv6 strings are skipped. This final fallback follows parsed actual family rather than declared wire version.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerPublicAddressFinalFallbackUsesPython313Classification"
+          ]
+        },
+        {
+          "behavior": "Concrete address options are validated before lazy roles/services. Disabled internal/external getters skip malformed addresses; public AccessIPv4 skips parsing and role discovery. Connection metadata getters need no Compute endpoint.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerAddressUseFlagsSkipMalformedAddressesAndNetwork",
+            "compute/server_address_selection_test.go:TestServerAddressValidationPrecedesDependencyAndPropagatesRoleFailure",
+            "connection_server_addresses_test.go:TestConnectionServerAddressShortcutsAndInvalidInputsSelectNoEndpoint"
+          ]
+        },
+        {
+          "behavior": "An owned typed address view retains nil map versus empty map and null versus empty network lists, unknown JSON fields, MAC presence, family and wire row order; view mutation does not change the native server. Default interface tries IPv6 before IPv4 only under localIPv6/nonforced policy; an empty selected default stops family iteration but uses final interface fallback. Private/public/access fields and no-privateIPv6 semantics are independently scoped.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressExpansionDefaultPrivateIPv6AndOwnedSnapshot",
+            "compute/server_address_expansion_test.go:TestServerAddressExpansionEmptyDefaultStopsFamilyBeforeInterfaceFallback",
+            "compute/server_address_expansion_test.go:TestServerAddressEmptyCandidateDoesNotFallThroughRoleOrFloatingPriority"
+          ]
+        },
+        {
+          "behavior": "TCP reachability probes multiple public-cloud public candidates, skips that probing direction on a private cloud, falls back to the first candidate after all failures, and stops on the parent deadline. Candidate port/budget are concrete options; local TCP fixtures exercise the actual dial behavior.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerAddressReachabilitySelectionDirectionFallbackAndContext"
+          ]
+        },
+        {
+          "behavior": "Independent expansion supplements exactly ACTIVE servers without a nonIPv6 floating row. Neutron ports and per-port floating IPs traverse empty linked pages, locally filter server/port scope, map duplicate fixed addresses to the final network label, retain DOWN IPs, synthesize port MAC fields and mark Supplemental provenance without modifying input. Source none skips; source Nova uses unfiltered per-port /os-floating-ips, local port matching, canonical-null/legacy normalization and clean404 empty.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementGatesSkipNetworkAndOnlyNonIPv6Floating",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPagesScopeMACAndDuplicateFixedNetwork",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementNovaSourceLocalFilterAliasesAnd404",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPortMACMissingNullAndEmptyAreDistinct"
+          ]
+        },
+        {
+          "behavior": "Supplemental clean HTTP errors preserve earlier synthesized addresses with a diagnostic; explicitly accepted204 is terminal empty. Accepted malformed/Close/context/network source and Compute collection replacement failures preserve a partial view with an error and never mutate the server or allocate/delete resources.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPartialCleanHTTPFailureAndTerminal204",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementAcceptedFailuresKeepPartialAndGuardComputeOwner"
+          ]
+        },
+        {
+          "behavior": "Connection and its cached Compute share the same network role cache, while supplemental reads remain fresh each call. Missing Neutron endpoints yield empty roles without dropping supplied Nova private/IPv6 addresses. File profiles/base/secure snapshots, normalized booleans, global environment/client preference and percloud force/prefer priority, source-specific HTTP routing and typed whole-policy replacement are exercised.",
+          "tests": [
+            "connection_server_addresses_test.go:TestConnectionServerAddressFacadesShareRoleCacheAndFreshSupplementation",
+            "connection_server_addresses_test.go:TestConnectionServerAddressMissingNeutronRetainsNovaAndIPv6",
+            "connection_server_addresses_test.go:TestConnectServerAddressYAMLSourceAndTypedReplacement",
+            "connection_server_address_config_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
+            "connection_server_address_config_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
+          ]
+        },
+        {
+          "behavior": "Cancellation during address JSON snapshot, role getter and network getter preserves both context.Canceled and its explicit cancellation cause, plus a distinct dependency failure. Supplemental fixed null/missing stays distinct from a literal empty fixed address; canonical null never falls through to legacy. A selected null floating value fails the typed address schema with original accepted response and partial view.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressCalculationPreservesCancellationCauseAtEachDependencyBoundary",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementNullableFixedAndFloatingFieldsDoNotBecomeEmptyAddresses"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_private_ip",
+      "source_fingerprint": "3bbb074a43055863dcf7655b7d9045de9c4441d930ebc0ee4438a9510008b35c",
+      "status": "unresolved",
+      "go_api": [
+        "gophercloudsdk.Connection.GetServerPrivateIP",
+        "gophercloudsdk/compute.Service.GetServerPrivateIP",
+        "gophercloudsdk/compute.Service.ExpandServerInterfaces"
+      ],
+      "documentation": [
+        "compute/server-addresses.md"
+      ],
+      "differences": [
+        "The getter returns (string,error), with empty string for no usable result, and accepts the native Nova Server snapshot. Independent ExpandServerInterfaces returns owned typed fields and address/provenance snapshots; it does not mutate the supplied Server or implicitly expand Get/Create/Wait.",
+        "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
+        "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
+        "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException."
+      ],
+      "remaining": [
+        "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
+        "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
+        "Integrate address expansion into complete cloud get/create/wait lifecycle; implement automatic needs/skip/source dispatch, prepared assignment, pool/explicit IP priority and raw Nova observed-address convergence with partial results. Existing explicit CreateWithFloatingIP and synthesized rows do not prove those workflows."
+      ],
+      "contracts": [
+        {
+          "behavior": "Internal use gate precedes first floatingIPv4 MAC selection, all configured internal fixed passes, tag-unrestricted passes, literal private fixed/MAC and final private fallback without MAC. Missing/null and explicit-empty MAC remain distinct; comparison is case-sensitive and floatingIPv6 MAC does not constrain private IPv4.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerPrivateAddressRoleMACAndLegacyFallback"
+          ]
+        },
+        {
+          "behavior": "Concrete address options are validated before lazy roles/services. Disabled internal/external getters skip malformed addresses; public AccessIPv4 skips parsing and role discovery. Connection metadata getters need no Compute endpoint.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerAddressUseFlagsSkipMalformedAddressesAndNetwork",
+            "compute/server_address_selection_test.go:TestServerAddressValidationPrecedesDependencyAndPropagatesRoleFailure",
+            "connection_server_addresses_test.go:TestConnectionServerAddressShortcutsAndInvalidInputsSelectNoEndpoint"
+          ]
+        },
+        {
+          "behavior": "An owned typed address view retains nil map versus empty map and null versus empty network lists, unknown JSON fields, MAC presence, family and wire row order; view mutation does not change the native server. Default interface tries IPv6 before IPv4 only under localIPv6/nonforced policy; an empty selected default stops family iteration but uses final interface fallback. Private/public/access fields and no-privateIPv6 semantics are independently scoped.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressExpansionDefaultPrivateIPv6AndOwnedSnapshot",
+            "compute/server_address_expansion_test.go:TestServerAddressExpansionEmptyDefaultStopsFamilyBeforeInterfaceFallback",
+            "compute/server_address_expansion_test.go:TestServerAddressEmptyCandidateDoesNotFallThroughRoleOrFloatingPriority"
+          ]
+        },
+        {
+          "behavior": "TCP reachability probes multiple public-cloud public candidates, skips that probing direction on a private cloud, falls back to the first candidate after all failures, and stops on the parent deadline. Candidate port/budget are concrete options; local TCP fixtures exercise the actual dial behavior.",
+          "tests": [
+            "compute/server_address_selection_test.go:TestServerAddressReachabilitySelectionDirectionFallbackAndContext"
+          ]
+        },
+        {
+          "behavior": "Independent expansion supplements exactly ACTIVE servers without a nonIPv6 floating row. Neutron ports and per-port floating IPs traverse empty linked pages, locally filter server/port scope, map duplicate fixed addresses to the final network label, retain DOWN IPs, synthesize port MAC fields and mark Supplemental provenance without modifying input. Source none skips; source Nova uses unfiltered per-port /os-floating-ips, local port matching, canonical-null/legacy normalization and clean404 empty.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementGatesSkipNetworkAndOnlyNonIPv6Floating",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPagesScopeMACAndDuplicateFixedNetwork",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementNovaSourceLocalFilterAliasesAnd404",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPortMACMissingNullAndEmptyAreDistinct"
+          ]
+        },
+        {
+          "behavior": "Supplemental clean HTTP errors preserve earlier synthesized addresses with a diagnostic; explicitly accepted204 is terminal empty. Accepted malformed/Close/context/network source and Compute collection replacement failures preserve a partial view with an error and never mutate the server or allocate/delete resources.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementPartialCleanHTTPFailureAndTerminal204",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementAcceptedFailuresKeepPartialAndGuardComputeOwner"
+          ]
+        },
+        {
+          "behavior": "Connection and its cached Compute share the same network role cache, while supplemental reads remain fresh each call. Missing Neutron endpoints yield empty roles without dropping supplied Nova private/IPv6 addresses. File profiles/base/secure snapshots, normalized booleans, global environment/client preference and percloud force/prefer priority, source-specific HTTP routing and typed whole-policy replacement are exercised.",
+          "tests": [
+            "connection_server_addresses_test.go:TestConnectionServerAddressFacadesShareRoleCacheAndFreshSupplementation",
+            "connection_server_addresses_test.go:TestConnectionServerAddressMissingNeutronRetainsNovaAndIPv6",
+            "connection_server_addresses_test.go:TestConnectServerAddressYAMLSourceAndTypedReplacement",
+            "connection_server_address_config_test.go:TestCloudServerAddressConfigurationPriorityNormalizedBooleansAndValidation",
+            "connection_server_address_config_test.go:TestCloudServerAddressConfigurationUsesFrozenProfileBaseSecureLayers"
+          ]
+        },
+        {
+          "behavior": "Cancellation during address JSON snapshot, role getter and network getter preserves both context.Canceled and its explicit cancellation cause, plus a distinct dependency failure. Supplemental fixed null/missing stays distinct from a literal empty fixed address; canonical null never falls through to legacy. A selected null floating value fails the typed address schema with original accepted response and partial view.",
+          "tests": [
+            "compute/server_address_expansion_test.go:TestServerAddressCalculationPreservesCancellationCauseAtEachDependencyBoundary",
+            "compute/server_address_expansion_test.go:TestServerAddressSupplementNullableFixedAndFloatingFieldsDoNotBecomeEmptyAddresses"
+          ]
+        }
+      ]
     }
   ]
 }
