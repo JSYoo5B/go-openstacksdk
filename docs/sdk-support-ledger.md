@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican effective quota getter](#barbican-effective-quota-getter-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican Container/Order metadata getter](#barbican-containerorder-metadata-getter-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Barbican Container/Order metadata getter (`359fad7`, `d0f61b8`, `b6e1c90`) | 공통 Fetch·기존 leaf/Connection fixture·공개 testhelper·body fault adapter 재사용.6그룹 focused race·전체40 package check·main build·smoke5흐름 PASS. | [최종 근거](#barbican-containerorder-metadata-getter-완료). finite5계약씩·2 named rows만 완료, go_mapping177→179·핵심103→105·Barbican3→5/67. |
 | Barbican effective quota getter (`53018d5`, `4525edc`, `5fc3a36`) | 기존 fixture·body wrapper·context guard·공개 testhelper 재사용. focused3 package race·전체40 package check·별도 조회 main 컴파일 PASS. | [최종 근거](#barbican-effective-quota-getter-완료). existing3+new1 계약, go_mapping176→177·핵심102→103·Barbican2→3/67. |
 | Available Neutron 내부·named 완료 (`c434d93`, `6bf368b`, `2c5e2c8`) | 기존 Query/Create/Allocate·공개 testhelper/fixture 재사용. 신규 HTTP9그룹·typed NAT3사례, 집중 race·전체40 package check·smoke5흐름 PASS. | [최종 근거](#available-neutron-내부-선택과-named-완료). remaining1→0, go_mapping175→176·핵심101→102. |
 | Available 직접·외부 Nova (`3b00178`, `b9ef579`) | 기존 Query/Create·fixture 재사용, raw filter→matching 전체 정규화·clean404 fresh·actual compat/partial proof의 HTTP4그룹. 관련3 package race·전체40 package check PASS. | [최종 근거](#available의-직접외부-nova-선택-완료). named unresolved 유지, remaining2→1. Neutron 내부 public-list fallback·로컬 필터·selected network allocation만 남음. |
@@ -1782,3 +1783,15 @@ root/Compute/Network 집중 race와 전체 `make check`가 PASS했습니다. 전
 집중 quota/Connection/cloudread3 package race와 전체 `make check` PASS입니다. 전체 gate는 vet·race40 test package·pinned parity·집계·gofmt이며 Go 소스1,922개가 전후 SHA256 `bd52ce8182a8e245c34893a64bbaff2471f8227699a32813d08492d51f994597`로 같았습니다. 로그는 `/private/tmp/gophercloudsdk-quota-get-focused.log`, `/private/tmp/gophercloudsdk-quota-get-check.log`, receipt는 `/private/tmp/gophercloudsdk-quota-get-gate-receipt.json`입니다. [읽기 전용 standalone main](../keymanager/v1/quotas/README.md#현재-프로젝트-quota-읽기)은 별도 `/private/tmp` 디렉토리에서 컴파일 PASS했고 새 main SHA256은 `3c8a56ccec10695583edbc5b49eb99a37ef646ee15bc982bb4f15a072300baed`입니다. 기존 Configure fence는 그대로 보존했으며 재컴파일했다고 주장하지 않습니다. 실제 cloud 인증·Python 실행은 수행하지 않았습니다.
 
 기존3 contracts와 test refs를 유지하고 실제 오류 증거 계약1개를 추가했습니다. Go의 strict200/non-null quotas envelope, caller-owned raw snapshot·concrete context/header 옵션은 명시적인 Go 차이로 기록했습니다. public getter의 필수 입력이 아닌 generic Resource/session/cache와 ProjectQuota 관리·SecretStore 정책은 독립 scope로 남깁니다. 해당 row만 `go_mapping`·remaining[]로 바뀌어 전체177/3362·핵심103/2292·Barbican3/67, 리뷰505·contracts3196입니다. 함수 생성 자체나 전체 Barbican 완료로 집계하지 않습니다.
+
+## Barbican Container/Order metadata getter 완료
+
+`python:key_manager/v1/get_container`와 `get_order`의 fixed metadata GET을 SDK owned `Containers.Fetch`/`Orders.Fetch`로 제공합니다. 기존 generated native Get과 alias·Collections는 유지합니다. 공통 `internal/keymanagerread`는 기존 cloudread source/context guard·rest fixed request/ResponseError·RawResource clone/field projection·passive HREF formatter를 재사용합니다. 추가 app builder·전송 엔진·별도 테스트 harness는 만들지 않았습니다.
+
+원래 실행 RequestID/Ref와 response의 seeded/present-null id, nullable HREF accessor를 구분합니다. Response foreign refs는 passive이며 후속 HTTP를 만들지 않습니다. Container의 임의 배열 요소/scalar-to-list/default-null, Order arbitrary nested meta/non-object-to-empty-dict/default-null, untyped timestamps와 canonical alias 우선순위를 source-shaped view에 제공합니다. Wire/Envelope는 unknown/self/case-variant·null/presence·큰 정수의 실제 원문을 보존하고 각 Header/결과를 독립 소유합니다. Python current_location 주입에 대응하는 view location은 Go에서 null인 차이로 기록했습니다.
+
+[기존 fixture를 재사용한6그룹](../api/keymanager_metadata_fetch_test.go)은 두 leaf와 cached Connection, API 생성 후 token 교체·reverse ResourceBase·header/microversion, 고정 GET/빈 query/body, nullable/coercion/alias, ID/HREF, native403/404·203/302 without Location, malformed/empty/non-UTF8 성공 응답, Read/Close/source/custom-cancel 부분 결과를 검증합니다. 공통 오류는 대표 engine 경로에 배치하고 두 public binding의 차이는 함께 확인합니다. 옵션은 한 번 적용하며 slice/header snapshot을 보존하고 source/provider/version/cancel 변화와 retry route 교체는 추가 요청 전에 중단합니다. 기존 public `testhelper.TestMethod`/`TestHeader`, testcloud·leaf/Connection·secretFetch adapter·payload body wrapper를 재사용했습니다.
+
+집중3 package race와 전체 `make check` PASS입니다. 전체 gate는 vet·race40개 test package·pinned parity·progress-check·gofmt이며 Go 소스1,926개가 전후 SHA256 `a4e56701998c7a46a88fcd782efe138f543dd763bb53a1bcc4a6548c05c0a780`로 같았습니다. 로그는 `/private/tmp/gophercloudsdk-keymanager-metadata-fetch-focused.log`·`/private/tmp/gophercloudsdk-keymanager-metadata-fetch-check.log`, receipt는 `/private/tmp/gophercloudsdk-keymanager-metadata-fetch-gate-receipt.json`입니다. 동일 소스의 기존 preview5흐름/9그룹 `make smoke`도 PASS하고 `.reports/core-smoke.json`을 갱신했습니다. [공통 standalone main](../keymanager/v1/metadata-fetch.md#단독-go-예제)은 두 kind 분기를 별도 `/private/tmp`에서 컴파일 PASS했고 main SHA256은 `247142a5a9a64f0b880521f60b68fc879a0d96867927db3fb4fb135252c574ad`입니다. 실제 OpenStack 인증·조회와 Python 실행은 수행하지 않았습니다.
+
+각 선언의 finite5계약과 actual6 test anchors를 연결하여 두 named row만 `go_mapping`·remaining[]로 추가했습니다. Concrete ID Ref/Ref(), owned raw view/Wire, alias·HREF parsing·location, strict object decode와 generic Resource/session/cache의 차이를 명시했습니다. Native/List/Find/CRUD/Wait의 독립 판정은 바꾸지 않았습니다. 전체179/3362·핵심105/2292·Barbican5/67, 리뷰507·contracts3206입니다. 검증한 같은 Go 소스의 전체 테스트를 문서·판정 갱신 때문에 반복하지 않고 마지막 pinned parity·집계 정합성만 확인합니다.

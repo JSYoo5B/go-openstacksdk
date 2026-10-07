@@ -40143,6 +40143,136 @@
         "Existing typed query envelope/status/continuation and legacy Compute microversion checks remain documented Go policies. Selected Nova microversion>=2.36 is unsupported without hidden downgrade if a fallback query is actually required; final informational1xx/session redirect combinations and malformed Python runtime corners are not exact transport parity."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/get_container",
+      "source_fingerprint": "cc316069183b43268a055996b15045bbf97435664e98f6f7253855bd8d22ab6b",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/containers.New",
+        "gophercloudsdk/keymanager/v1/containers.API.Fetch",
+        "gophercloudsdk/keymanager/v1/containers.WithFetchHeader",
+        "gophercloudsdk/keymanager/v1/containers.FetchedContainer.Ref"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:114-127 dispatches one Container metadata fetch. The concrete Fetch lane executes one fixed explicit-ID GET containers/{RequestID} with no body/query/list/name lookup under the fixture's provider policy. Foreign response refs are passive, and changing or nil-ing public Resources does not redirect or redefine this owned request; Name is rejected before HTTP.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        },
+        {
+          "behavior": "The declared Container view preserves untyped name/status/type and raw created/updated values. secret_refs and consumers preserve arbitrary JSON elements, wrap non-null scalar/object values in a singleton list, and distinguish missing/null from empty arrays. Known client aliases are accepted only when the canonical key is absent; canonical null wins. Wire remains the original object with unknown/self/case-variant values and exact large integers.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchNullableDescriptorsAndAliases"
+          ]
+        },
+        {
+          "behavior": "RequestID and Ref() keep the original executable ID separately from Resource.Body.id and nullable ContainerID. A missing response id preserves the request seed and a present id/null replaces it without rerouting. The shared passive HREF formatter takes the last raw path component, preserves percent spelling and a trailing empty component, excludes query/fragment, and returns null for missing/null; invalid or nonstring refs retain the actual response proof.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchNullableDescriptorsAndAliases",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchIDSeedsAndReferenceFormatting"
+          ]
+        },
+        {
+          "behavior": "Leaf and cached Connection fixtures share the authenticated provider and selected reverse ResourceBase. Tokens rotated after API creation, source headers, operation headers and selected microversion remain effective. Resource/Wire/Envelope/Header are owned snapshots. Option slices and intermediate header maps are cloned and callbacks run once; captured route/provider/version or cancellation changes stop before later options/HTTP, and a native retry route change stops before a second request while retaining the original503 cause.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        },
+        {
+          "behavior": "Actual403/404 remain native HTTP errors with original body/header and Fetch operation/resource cause under the default fixture policy. Successful203/302 preserve actual status; accepted malformed/empty/non-object/non-UTF8 bodies and HREF formatter errors retain actual response evidence. The shared engine's complete known-object read/Close failure and post-response source/custom-cancellation failure return receipt and possible Wire with Resource=nil, preserve original/custom causes, close the tracked body once, invoke no native retry and perform no SDK composition resend. Pre-cancel and nil/invalid source/ref/options fail before HTTP.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchHTTPAndStrictAcceptedBodies",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchIDSeedsAndReferenceFormatting",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchAcceptedFailuresRetainRawEvidence",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/metadata-fetch.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Concrete resource.Ref and the fetched value's Ref() replace Python's ID-string or mutable Resource input. Only an explicit, valid single URL-path segment is executable; Name and full-HREF refs fail before HTTP. RequestID remains the route even when response id or passive refs differ. Arbitrary Resource/subclass/seeded-instance overloads remain separate lifecycle scope rather than a missing declared getter input.",
+        "The owned Resource view projects declared Body attributes and coercions while Wire and Envelope preserve the actual object, including unknown/self/case-variant fields, null/presence and exact large JSON numbers. This independently owned result replaces the mutable Python Resource and its dynamic descriptor/cache/instance state; generated native Get retains its previous alias and return type.",
+        "Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.",
+        "Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.",
+        "Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.",
+        "Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
+        "Completion is restricted to python:key_manager/v1/get_container. Native Container Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/get_order",
+      "source_fingerprint": "9d4a99c185572da2f02a623205677e7bd1970263ac32184fb8a062dc3b588459",
+      "status": "go_mapping",
+      "go_api": [
+        "gophercloudsdk/keymanager/v1/orders.New",
+        "gophercloudsdk/keymanager/v1/orders.API.Fetch",
+        "gophercloudsdk/keymanager/v1/orders.WithFetchHeader",
+        "gophercloudsdk/keymanager/v1/orders.FetchedOrder.Ref"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned _proxy.py:220-231 dispatches one Order metadata fetch. The concrete Fetch lane executes one fixed explicit-ID GET orders/{RequestID} with no body/query/list/name lookup under the fixture's provider policy. Foreign response refs are passive, and changing or nil-ing public Resources does not redirect or redefine this owned request; Name is rejected before HTTP.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        },
+        {
+          "behavior": "The declared Order view preserves inherited name, untyped creator/status/substatus/type and raw created/updated values. meta retains arbitrary nested dictionaries and exact large integers; non-null non-dict values become {}, while missing/null remain null. Known client aliases are accepted only when the canonical key is absent; canonical null wins. Wire remains the original object with unknown/self/case-variant fields.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchNullableDescriptorsAndAliases"
+          ]
+        },
+        {
+          "behavior": "RequestID and Ref() keep the original executable ID separately from Resource.Body.id and nullable OrderID/SecretID. A missing response id preserves the request seed and a present id/null replaces it without rerouting. Both Order and Secret refs are passive nullable last-path-component accessors. The shared formatter's percent/trailing-component rules and the Order second-formatter failure retain actual response proof.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchNullableDescriptorsAndAliases",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchIDSeedsAndReferenceFormatting"
+          ]
+        },
+        {
+          "behavior": "Leaf and cached Connection fixtures share the authenticated provider and selected reverse ResourceBase. Tokens rotated after API creation, source headers, operation headers and selected microversion remain effective. Resource/Wire/Envelope/Header are owned snapshots. Option slices and intermediate header maps are cloned and callbacks run once; captured route/provider/version or cancellation changes stop before later options/HTTP, and a native retry route change stops before a second request while retaining the original503 cause.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        },
+        {
+          "behavior": "Actual403/404 remain native HTTP errors with original body/header and Fetch operation/resource cause under the default fixture policy. Successful203/302 preserve actual status; accepted malformed/empty/non-object/non-UTF8 bodies and HREF formatter errors retain actual response evidence. The shared engine's complete known-object read/Close failure and post-response source/custom-cancellation failure return receipt and possible Wire with Resource=nil, preserve original/custom causes, close the tracked body once, invoke no native retry and perform no SDK composition resend. Pre-cancel and nil/invalid source/ref/options fail before HTTP.",
+          "tests": [
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchHTTPAndStrictAcceptedBodies",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchIDSeedsAndReferenceFormatting",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchAcceptedFailuresRetainRawEvidence",
+            "api/keymanager_metadata_fetch_test.go:TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/metadata-fetch.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Concrete resource.Ref and the fetched value's Ref() replace Python's ID-string or mutable Resource input. Only an explicit, valid single URL-path segment is executable; Name and full-HREF refs fail before HTTP. RequestID remains the route even when response id or passive refs differ. Arbitrary Resource/subclass/seeded-instance overloads remain separate lifecycle scope rather than a missing declared getter input.",
+        "The owned Resource view projects declared Body attributes and coercions while Wire and Envelope preserve the actual object, including unknown/self/case-variant fields, null/presence and exact large JSON numbers. This independently owned result replaces the mutable Python Resource and its dynamic descriptor/cache/instance state; generated native Get retains its previous alias and return type.",
+        "Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.",
+        "Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.",
+        "Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.",
+        "Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
+        "Completion is restricted to python:key_manager/v1/get_order. Native Order Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence."
+      ],
+      "remaining": []
     }
   ]
 }
