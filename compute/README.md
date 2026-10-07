@@ -186,3 +186,5 @@ flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/r
 Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사용합니다. `WaitForServerState`는 다른 대상을 120초 기본으로, `WaitForState`는 대상을 명시하고 SDK timeout 없이 기다립니다. `WaitForDelete`는 삭제 요청 없이 기본 120초 동안 삭제 완료를 관찰합니다. 패키지 함수 `compute.WaitForState/WaitForDelete`는 기존 typed collection을 받습니다. [서비스별 대기 비교](../docs/service-waits.md)에 옵션·context·Python 대응과 남은 차이를 설명합니다.
 
 서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.
+
+Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. `WithNetworkRoles`의 `DefaultInterface`는 Create의 기본 NIC selector로 전달되며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 기본 NIC는 생성마다 새로 조회하므로 역할 getter의 성공 cache와 별도로 동작합니다.

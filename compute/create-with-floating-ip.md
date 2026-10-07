@@ -182,3 +182,5 @@ SDK는 실패한 서버/IP를 자동 DELETE하지 않으며, 재사용 PUT이 40
 - Python NAT port의 최근 생성 port/첫 IPv4 선택. Go Ensure는 여러 후보를 엄격히 실패시키고 명시 선택을 받습니다.
 
 Python 비교는 고정 소스를 읽은 결과이며 Python 예제 실행이나 인증된 OpenStack 검증 결과가 아닙니다. 로컬 HTTP 테스트는 옵션 검증과 호출 순서, 공통 deadline/cancellation, 실제 ACTIVE·identity 검사, 재사용/새 allocation, revision 충돌, 실패 후 서버·IP 보존을 확인하는 범위입니다. 독립 Go 예제의 컴파일 확인과 해당 HTTP 테스트 실행 결과는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다. 실환경의 quota·라우터 연결성·Nova 주소 반영·네트워크 도달성은 이 로컬 검증에 포함하지 않습니다.
+
+[공유 네트워크 역할 조회](../network/network-roles.md)는 별도 getter로 제공됩니다. 현재 이 workflow의 Ensure 선택과 자동 IP 필요성 판단에는 연결되지 않았으므로, 역할 조회 자체와 위 remaining의 상위 정책 연계를 구분합니다.

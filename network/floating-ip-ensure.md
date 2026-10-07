@@ -150,4 +150,6 @@ timeout, context 취소, 실패 상태, poll HTTP 오류, 다른 ID/owner/destin
 
 전체 `_network_common`의 YAML role/NAT·subnet 관계, 외부/내부·IPv4/IPv6 분류, `has_service`/cloud flags, shared cache/reset, `_needs_floating_ip`, Nova network, IP 목록 입력과 Resource/session 모델은 남은 범위입니다. `create_server`의 auto IP 조건·전체 wait/response/cleanup 및 다른 생성 옵션까지 동일하게 구현했다고 판정하지 않습니다. Ensure의 부분 계약을 이 메서드들의 전체 지원으로 올리지 않습니다.
 
+[역할 getter와 공유 cache](network-roles.md)는 별도로 제공됩니다. 현재 Ensure의 자동 network/NAT 선택은 그 결과를 소비하지 않으므로, 역할 조회 구현과 이 연결 정책의 남은 연계를 구분합니다.
+
 [Ensure HTTP 테스트](floating_ip_ensure_test.go), [선택·대기 테스트](floating_ip_selection_test.go), [Connection 통합 테스트](../connection_floating_ip_ensure_test.go)는 다중·빈 페이지와 반복 링크, owner/local 제약·revision presence, 이미 연결된 IP·새 allocation, 실패 후 보존·fallback 금지·취소·timeout과 현재 인증 scope를 검증합니다. Python 비교는 고정 소스 확인이며 Python 예제나 인증된 OpenStack 실행을 검증한 것은 아닙니다. 실행 근거는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다.

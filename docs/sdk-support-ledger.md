@@ -1217,3 +1217,21 @@ server/Ensure 옵션·external Ref를 먼저 검증하고, Connection의 lazy Ne
 Python의 자동 IP 필요성/생략, public/floating/fixed 주소·private cloud·service/flags·NAT 판단, 공유 network 역할·IPv4/IPv6·subnet·cache/reset, IP-list/pool/auto 조합·Nova fallback, 주소 수렴·반환 객체 확장·fault/cleanup, create의 추가 필드·volume/server-group 및 Resource/session 계약은 남습니다. 새 explicit workflow를 cloud 전체 연산 지원으로 승격하지 않았습니다. source/native/resource inventory와 generated API는 변경하지 않았고 Go 파일은 1,793개입니다.
 
 현재 review는 477개(go_mapping 161·부분 판정 315·unsupported 1), 판정 없는 선언은 2,885개입니다. 전체 3,362개 선언의 supported=0·go_mapping=161·unsupported=1·unresolved=3,200은 유지됩니다. 다음은 같은 핵심 user 단계의 자동 floating IP 필요성·공유 네트워크 정책이며 전체 목표와 구현 순서는 그대로입니다.
+
+## 공유 네트워크 역할 조회와 설정
+
+2026-10-07 핵심 user 흐름의 공유 역할 탐색을 `network.Service.Roles.Discover`와 Connection의 `GetNetworkRoles`·역할 getter 10개·`UseExternalNetwork`/`UseInternalNetwork`에 연결했습니다. [Python/YAML/Go 비교와 독립 예제](../network/network-roles.md)에 설정·모델·분류·cache 동작을 설명합니다. `WithNetworkRoles`의 concrete 옵션을 Connection이 적용하며 애플리케이션 builder/resolver 구현을 요구하지 않습니다.
+
+고정 source의 configured name OR ID, router external/provider physical에 따른 IPv4·IPv6 분류, family 합계의 순서·중복, 별도 floating source 목록을 구현했습니다. 실제 subnet IP family나 도달성을 추론하는 API가 아닙니다. 명시 source는 첫 설정, 자동 source는 첫 router-external 후보이며 자동 destination은 gateway subnet이 있는 마지막 network입니다. 명시 destination이면 subnet 조회를 생략합니다. 단일 NAT/default selector의 누락·중복·이름/ID 충돌을 오류로 반환하고 설정 목록 검증은 설정 순서를 유지합니다. 빈 중간 network/subnet 페이지의 next도 따라가며 후속 HTTP/decode/cycle 오류를 성공 cache로 바꾸지 않습니다.
+
+동시 getter는 한 탐색을 공유하고 각 반환 snapshot·모델·native slice를 독립적으로 소유합니다. embedded native custom decoder와 extension을 전체 객체에서 각각 해석하여 timestamp와 router/provider 필드를 함께 보존합니다. 복사는 native slice의 []/null도 유지합니다. 성공 cache만 저장하며 취소된 follower는 leader를 취소하지 않습니다. Reset은 HTTP 없이 cache를 비우고 이전 flight의 성공이 cache를 복원하지 못하게 합니다. nil context·취소·nil/providerless direct client를 HTTP 전에 검사하고, Connection은 pointer/value native missing endpoint를 빈 역할로 처리하되 다른 catalog/HTTP 오류를 보존합니다.
+
+YAML 행은 `routes_externally`에서 family flag 기본값을 상속하고 secure > 본문 > public의 목록 전체 교체·빈 목록·동일 파일 bytes snapshot을 재사용합니다. typed 정책은 행과 discovery flag 전체를 교체하며 default selector를 기존 Create 경로에 전달합니다. 두 use flag false이면 endpoint/HTTP 없이 빈 결과, 하나만 false이면 전체 역할 탐색입니다. Go의 YAML 문자열은 정확한 case-insensitive true만 true이고 Python raw use flag truthiness와 다릅니다. 역할 selector의 ID 검증도 Python의 마지막 name-only 검증을 개선했습니다. mutable Python Resource/cache identity와 owned Go 반환 차이를 문서화했습니다.
+
+Network 구현·테스트 `0fc1be8`, Connection 통합·테스트 `39e376c`, client/YAML 경계 `4551ea7`을 각각 commit/push했습니다. [Network 신규 5그룹](../network/roles_test.go)과 [Connection 신규 4그룹](../connection_network_roles_test.go)이 family·NAT·페이지·오류 재조회·정상 flight 공유·follower deadline·reset generation·모델/배열 소유권·typed/YAML 교체·모든 getter·누락 endpoint·boolean 경계를 검증했습니다. [기존 cloud snapshot 8개 case](../connection_cloud_config_test.go)에는 역할 default selector와 파일 변경 후 보존 assertion을 추가했습니다. 집중 race 검사와 `4551ea7`의 최종 코드에 해당하는 전체 `make check`의 vet·race·parity·gofmt가 PASS이며 테스트 패키지는 40개입니다(cache 재사용 포함). 판정 변경 후 같은 source pin/metadata의 parity CLI도 다시 PASS했습니다.
+
+가이드의 정확한 독립 Go main fence 1을 별도 module에서 `go build -mod=mod -o network-roles-example .`로 컴파일했습니다(source SHA-256 `6942fa2dbcfc546039e394c75cdd787345ee73621987845ebdb9bde25c89e8d0`). HTTP 검증은 로컬 fixture이고 Python 예제나 인증된 OpenStack 실행을 근거로 삼지 않았습니다. 소스·테스트·문서 정적 검토에서 오류 순서, pointer/value missing endpoint, empty/null 복사 경계를 확인하고 수정했습니다.
+
+기존 default getter 부분 판정을 보완하고 실제 catalog의 나머지 getter 9개·use flag 2개에 unresolved 판정을 추가했습니다. 다른 기존 476개 판정·source pins와 source/native/resource inventory·generated API는 보존했으며 Go 파일은 1,800개입니다. 현재 review는 488개(go_mapping 161·부분 판정 326·unsupported 1), 판정 없는 선언은 2,874개입니다. 전체 3,362개 선언의 supported=0·go_mapping=161·unsupported=1·unresolved=3,200은 유지됩니다.
+
+완전한 has_service의 config disable·official defaults·version/session endpoint·warning 정책, cloud 네트워크 생성/수정/삭제의 자동 cache 무효화, 모든 loader/Resource/session/nullable 계약은 남습니다. Create 기본 NIC의 매번 조회하는 선택과 Ensure의 자동 external/router 선택은 아직 역할 cache를 소비하지 않습니다. 공유 역할을 기존 consumer와 자동 IP 필요성·private/source/service flags·NAT port·주소 확장/수렴·pool/IP-list/Nova 분기·fault/cleanup에 연결하는 작업을 같은 핵심 user 단계에서 이어갑니다. getter 구현을 전체 cloud 네트워크·서버 생성 지원이나 전체 SDK 완료로 판정하지 않았습니다.

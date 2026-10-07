@@ -159,4 +159,6 @@ YAML default가 있으면 Create 때 Neutron의 모든 페이지를 읽고 설�
 
 이번에 다루는 것은 server에 사용할 configured default network입니다. Python의 [shared network discovery](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L110-L365)에 있는 NAT source/destination, 외부/내부·IPv4/IPv6 network 역할 분류, shared cache, `has_service`, `use_external_network`/`use_internal_network` flags, 목록 실패 시 fallback까지 같은 동작을 제공했다고 판정하지 않습니다. Go는 선택한 network의 HTTP 실패를 보존하고 선택 결과를 cache하지 않습니다. Python의 advertised microversion bounds/default microversion 검사와 cloud create 전체의 자동 floating IP 등도 별도 남은 범위입니다. 지원 판정은 계속 부분 구현입니다.
 
+[별도 역할 getter와 공유 cache](../network/network-roles.md)는 외부·내부 family 및 NAT/default 역할을 제공합니다. `WithNetworkRoles`의 default selector도 Create로 전달되지만, 현재 이 NIC 선택 경로는 역할 cache를 사용하지 않고 매번 조회합니다.
+
 Python의 동작은 고정 소스에서 확인했습니다. Go의 [compute 테스트](default_network_test.go)와 [Connection HTTP 테스트](../connection_default_network_test.go)는 선택·생략·이름 해석·오류·boot mapping·옵션 재사용을 검증하는 local fixture입니다. Python 예제나 인증한 OpenStack 환경의 생성 작업을 실행했다는 근거로 사용하지 않습니다. YAML 파일 상속과 frozen 인증·region·TLS는 [설정 테스트](../connection_cloud_config_test.go), 전체 페이지 매칭·충돌·뒤 페이지 HTTP 오류·취소·명시 선택 우회는 [YAML HTTP 테스트](../connection_cloud_network_test.go)에서 검증합니다. 최종 실행 근거와 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md#nova-서버-생성의-기본-네트워크)에 기록합니다.
