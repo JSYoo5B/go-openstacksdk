@@ -29,6 +29,7 @@ type FloatingIPs struct {
 	ports            *portapi.API
 	networks         *resource.Collection[Network]
 	externalNetworks *resource.Collection[externalNetwork]
+	roles            *NetworkRoles
 	dependencies     Dependencies
 }
 
@@ -67,13 +68,14 @@ func newFloatingIPs(s *Service, dependencies Dependencies) *FloatingIPs {
 	return &FloatingIPs{
 		Collection: s.API.FloatingIPs.Resources, api: s.API.FloatingIPs,
 		ports: s.API.Ports, networks: s.Networks, externalNetworks: external,
-		dependencies: dependencies,
+		dependencies: dependencies, roles: s.Roles,
 	}
 }
 
 // Create allocates a new floating IP and optionally associates it with one
-// destination IPv4 address. Server/port selection is deterministic: multiple
-// eligible port/address pairs return ErrAmbiguous before creation. Neutron
+// destination IPv4 address. Automatic selection uses the shared NAT role when
+// a server has multiple ports. Multiple eligible port/address pairs within the
+// selected network return ErrAmbiguous before creation. Neutron
 // errors do not trigger Nova fallback. A wait or association failure after
 // allocation preserves the created resource alongside the error.
 func (f *FloatingIPs) Create(ctx context.Context, input CreateFloatingIPRequest, options ...CreateFloatingIPOption) (*FloatingIP, error) {
@@ -217,10 +219,40 @@ func (f *FloatingIPs) selectDestination(ctx context.Context, serverID string, o 
 		items := resource.Stream(ctx, pager, func(page pagination.Page) ([]Port, error) {
 			return nativeports.ExtractPorts(page.(floatingIPSelectionPage).Page)
 		})
+		var serverPorts []*Port
 		for port, err := range items {
 			if err != nil {
 				return floatingIPDestination{}, err
 			}
+			if port == nil {
+				return floatingIPDestination{}, fmt.Errorf("Neutron returned an empty port")
+			}
+			if serverID != "" && port.DeviceID != serverID {
+				continue
+			}
+			serverPorts = append(serverPorts, port)
+		}
+		// Count server-owned ports before filtering by IPv4. An IPv6-only
+		// second port also requires a NAT role unless selection is explicit.
+		if o.destination == nil && o.fixedAddress == "" && len(serverPorts) > 1 {
+			roles, err := f.roles.Discover(ctx)
+			if err != nil {
+				return floatingIPDestination{}, err
+			}
+			if roles.NATDestination == nil {
+				ids := make([]string, len(serverPorts))
+				for i, port := range serverPorts {
+					ids[i] = port.ID
+				}
+				sort.Strings(ids)
+				return floatingIPDestination{}, &resource.AmbiguousError{Resource: "floating IP NAT destination", Name: serverID, IDs: ids}
+			}
+			networkID = roles.NATDestination.ID
+			if err := resource.ID(networkID).Validate(); err != nil {
+				return floatingIPDestination{}, err
+			}
+		}
+		for _, port := range serverPorts {
 			if err := inspect(port); err != nil {
 				return floatingIPDestination{}, err
 			}

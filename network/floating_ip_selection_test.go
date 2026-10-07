@@ -30,7 +30,7 @@ func TestFloatingIPEnsureAutomaticNetworkConsumesEmptyAndLaterPages(t *testing.T
 					return
 				}
 				if r.URL.Query().Get("marker") == "" {
-					if r.URL.Query().Get("router:external") != "true" {
+					if r.URL.Query().Get("router:external") != "" {
 						t.Error(r.URL)
 					}
 					rows := `[{"id":"internal","router:external":false}]`
@@ -51,6 +51,9 @@ func TestFloatingIPEnsureAutomaticNetworkConsumesEmptyAndLaterPages(t *testing.T
 					return
 				}
 				testcloud.JSON(w, 200, `{"networks":[{"id":"external","router:external":true},{"id":"later","router:external":true}]}`)
+			})
+			cloud.Mux.HandleFunc("GET /v2.0/subnets", func(w http.ResponseWriter, r *http.Request) {
+				testcloud.JSON(w, 200, `{"subnets":[]}`)
 			})
 			cloud.Mux.HandleFunc("GET /v2.0/routers", func(w http.ResponseWriter, r *http.Request) {
 				routerPages.Add(1)

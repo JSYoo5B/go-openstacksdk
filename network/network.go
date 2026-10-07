@@ -60,7 +60,7 @@ func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Depende
 	adapter.Delete = func(ctx context.Context, id string) error { return networks.Delete(ctx, client, id).ExtractErr() }
 	s.Networks = resource.NewCollection(adapter)
 	s.Ports = s.API.Ports.Resources
-	s.FloatingIPs = newFloatingIPs(s, dependencies)
 	s.Roles = newNetworkRoles(client, dependencies.NetworkRoles)
+	s.FloatingIPs = newFloatingIPs(s, dependencies)
 	return s
 }

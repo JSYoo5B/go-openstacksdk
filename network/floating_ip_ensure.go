@@ -146,19 +146,15 @@ func (f *FloatingIPs) ensureExternalNetwork(ctx context.Context, ref resource.Re
 		}
 		return id, resource.ID(id).Validate()
 	}
-	var first string
-	for value, err := range f.externalNetworks.List(ctx) {
-		if err != nil {
+	roles, err := f.roles.Discover(ctx)
+	if err != nil {
+		return "", err
+	}
+	if len(roles.ExternalIPv4Floating) > 0 {
+		first := roles.ExternalIPv4Floating[0].ID
+		if err := resource.ID(first).Validate(); err != nil {
 			return "", err
 		}
-		if first == "" {
-			first = value.ID
-			if err := resource.ID(first).Validate(); err != nil {
-				return "", err
-			}
-		}
-	}
-	if first != "" {
 		return first, ctx.Err()
 	}
 	var gateway string

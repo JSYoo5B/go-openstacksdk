@@ -8,8 +8,8 @@ import (
 )
 
 // EnsureFloatingIPRequest selects a server and optionally its external network.
-// A zero Network selects the first external network in response order, or the
-// first enabled router's external gateway when none is listed.
+// A zero Network uses the shared floating IPv4 role candidates (including a
+// configured NAT source), then the first enabled router's external gateway.
 type EnsureFloatingIPRequest struct {
 	Server  resource.Ref
 	Network resource.Ref

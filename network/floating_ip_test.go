@@ -99,12 +99,16 @@ func TestFloatingIPCandidateAmbiguityNeverCreates(t *testing.T) {
 		name, ports string
 		want        []string
 	}{
-		{"two-ports", `[{"id":"b","device_id":"server","fixed_ips":[{"ip_address":"10.0.0.2"}]},{"id":"a","device_id":"server","fixed_ips":[{"ip_address":"10.0.0.1"}]}]`, []string{"a@10.0.0.1", "b@10.0.0.2"}},
+		{"two-ports", `[{"id":"b","device_id":"server","network_id":"nat","fixed_ips":[{"ip_address":"10.0.0.2"}]},{"id":"a","device_id":"server","network_id":"nat","fixed_ips":[{"ip_address":"10.0.0.1"}]}]`, []string{"a@10.0.0.1", "b@10.0.0.2"}},
 		{"two-fixed-ips", `[{"id":"port","device_id":"server","fixed_ips":[{"ip_address":"10.0.0.2"},{"ip_address":"10.0.0.1"}]}]`, []string{"port@10.0.0.1", "port@10.0.0.2"}},
 	} {
 		t.Run(check.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			cloud.Mux.HandleFunc("GET /v2.0/ports", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"ports":`+check.ports+`}`) })
+			cloud.Mux.HandleFunc("GET /v2.0/networks", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"networks":[{"id":"nat"}]}`) })
+			cloud.Mux.HandleFunc("GET /v2.0/subnets", func(w http.ResponseWriter, r *http.Request) {
+				testcloud.JSON(w, 200, `{"subnets":[{"network_id":"nat","gateway_ip":"10.0.0.254"}]}`)
+			})
 			cloud.Mux.HandleFunc("POST /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) { t.Fatal("created an ambiguous destination") })
 			service := network.New(cloud.Client("network", "/v2.0"))
 			created, err := service.FloatingIPs.Create(context.Background(), network.CreateFloatingIPRequest{Network: resource.ID("external")}, network.WithServer(resource.ID("server")))
