@@ -286,7 +286,7 @@ func run(ctx context.Context) error {
 }
 ```
 
-선행 getter는 필수 호출이 아닙니다. 생략하면 configured 기본 NIC 선택이 처음 탐색하고 이후 source/NAT 선택이 그 성공 cache를 재사용합니다. Topology 변경 후 다음 작업에 새 목록을 적용하려면 `conn.ResetNetworkRoles()`를 호출합니다. 이 예제는 실제 리소스를 생성하는 사용법이며, 문서 검증에서는 컴파일과 로컬 HTTP fixture를 확인합니다.
+선행 getter는 필수 호출이 아닙니다. 생략하면 configured 기본 NIC 선택이 처음 탐색하고 이후 source/NAT 선택이 그 성공 cache를 재사용합니다. [상위 네트워크 CRUD](network-mutations.md)의 접수된 생성·수정·삭제는 같은 cache를 자동 초기화합니다. Raw/native/API 호출이나 외부 변경 뒤에는 `conn.ResetNetworkRoles()`를 호출합니다. 이 예제는 실제 리소스를 생성하는 사용법이며, 문서 검증에서는 컴파일과 로컬 HTTP fixture를 확인합니다.
 
 ## cache, 복사, Reset과 오류
 
@@ -302,6 +302,6 @@ func run(ctx context.Context) error {
 
 비교 기준은 openstacksdk revision `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [NetworkCommonCloudMixin 역할 분류와 getter](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L95-L432), [CloudRegion의 역할 설정 selector](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/config/cloud_region.py#L1427-L1495)입니다. Source의 family 분류, aggregate 중복, NAT 선택 순서를 따르면서 오류 전파·호출자 소유 복사·취소·Reset의 동시성 계약을 Go API로 명시합니다.
 
-`has_service` 전체 정책, private/floating-IP-source flag, 서버 주소 extension 계산, 자동 Floating IP 필요 판단과 생략, cloud network mutation 후 cache 자동 무효화는 후속 범위입니다. 기본 NIC·source/NAT 소비와 명시적 `CreateWithFloatingIP`만으로 cloud `create_server` 전체 동작의 동등성을 주장하지 않습니다. 위 비교는 고정 소스에 대한 확인 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
+[상위 네트워크 CRUD](network-mutations.md)와 기존 `service.Networks.Delete`의 접수 후 cache hook은 구현했습니다. Raw/native/API·외부 변경 뒤에는 명시 Reset이 필요합니다. `has_service` 전체 정책, private/floating-IP-source flag, 서버 주소 extension 계산, 자동 Floating IP 필요 판단과 생략은 후속 범위입니다. 기본 NIC·source/NAT 소비와 명시적 `CreateWithFloatingIP`만으로 cloud `create_server` 전체 동작의 동등성을 주장하지 않습니다. 위 비교는 고정 소스에 대한 확인 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
 
 [Network 계약 테스트](roles_test.go)와 [Connection 통합 테스트](../connection_network_roles_test.go)는 분류·페이지·오류·동시 탐색·cache/Reset·설정과 반환값 소유권을 로컬 HTTP fixture로 검증합니다. 전체 검사와 위 독립 Go 예제의 컴파일 결과는 [지원 판정대장](../docs/sdk-support-ledger.md#공유-네트워크-역할-조회와-설정)에 기록했습니다. 인증된 OpenStack 또는 Python 예제 실행 결과는 포함하지 않습니다.

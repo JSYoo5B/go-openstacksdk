@@ -11,6 +11,9 @@ Neutron 네트워크·포트·floating IP의 공통 조회 정책과 floating IP
 | `conn.network.networks(status="ACTIVE")` | `service.Networks.List(ctx, resource.WithStatus("ACTIVE"))` |
 | `conn.network.networks(is_router_external=True)` | `service.Networks.List(ctx, resource.WithQuery("router:external", "true"))` |
 | `conn.network.delete_network(id)` | `service.Networks.Delete(ctx, resource.ID(id))` |
+| `conn.create_network("private")` | `service.CreateNetwork(ctx, network.CreateNetworkRequest{Name: "private"})` |
+| `conn.update_network(name, name="renamed")` | `service.UpdateNetwork(ctx, resource.Name(name), network.WithNetworkName("renamed"))` |
+| `conn.delete_network(name)` | `service.DeleteNetwork(ctx, resource.Name(name))`; `(bool, error)` |
 | `conn.network.find_router(name_or_id, ignore_missing=False)` | `service.API.Routers.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.network.find_security_group(name_or_id, project_id=projectID)` | `service.API.SecurityGroups.FindIdentity(ctx, nameOrID, resource.WithIdentityFindQuery("project_id", projectID))` |
 | `conn.network.find_subnet_pool(name_or_id)` | `service.API.SubnetPools.FindIdentity(ctx, nameOrID)` |
@@ -159,6 +162,10 @@ native 전체 페이지의 RFC3339 timestamp·nested Subport 디코드가 필터
 [Trunk Python/Go 사용법](v2/extensions/trunks/listing/README.md)에 전체 이름과
 `links.next` 페이지 순회, null·native 응답·호출별 옵션 차이를 설명합니다.
 
+## 생성·수정
+
+[네트워크 CRUD와 Python/Go 비교](network-mutations.md)에 concrete With 옵션, 생성 기본값과 수정의 false·null·빈 값, provider/AZ·extension, revision, 이름/ID·부분 응답과 공유 cache 초기화를 설명합니다. 기존 `Networks` Collection 타입과 direct-ID 삭제 동작은 유지합니다.
+
 ## 삭제와 대기
 
 ```go
@@ -235,4 +242,4 @@ created, err := service.FloatingIPs.Create(ctx,
 
 서버 생성부터 floating IP 연결·ACTIVE 대기까지 공통 deadline으로 실행하려면 Compute의 [CreateWithFloatingIP](../compute/create-with-floating-ip.md)를 사용합니다. 실패 시 실제 서버와 이 서비스의 IP assignment를 함께 보존합니다.
 
-[네트워크 역할 조회](network-roles.md)는 외부·내부 IPv4/IPv6, floating source, NAT destination과 기본 인터페이스를 SDK가 설정과 Neutron 응답에서 분류합니다. Getter, configured 기본 NIC, Ensure의 자동 외부 network와 Create/Ensure의 조건부 NAT 선택이 성공 snapshot을 공유하고, 반환한 모델은 각 호출자가 소유합니다. `WithNetworkRoles`로 설정을 교체하고 `ResetNetworkRoles`로 cache를 갱신할 수 있습니다. IP 후보와 서버 port는 호출마다 조회합니다. 자동 IP 필요성·주소 계산과 cloud mutation cache hook은 남은 범위입니다.
+[네트워크 역할 조회](network-roles.md)는 외부·내부 IPv4/IPv6, floating source, NAT destination과 기본 인터페이스를 SDK가 설정과 Neutron 응답에서 분류합니다. Getter, configured 기본 NIC, Ensure의 자동 외부 network와 Create/Ensure의 조건부 NAT 선택이 성공 snapshot을 공유하고, 반환한 모델은 각 호출자가 소유합니다. `WithNetworkRoles`로 설정을 교체하고 `ResetNetworkRoles`로 cache를 갱신할 수 있습니다. IP 후보와 서버 port는 호출마다 조회합니다. [상위 네트워크 CRUD](network-mutations.md)의 접수된 변경은 같은 cache를 자동 초기화합니다. Raw/native/API·외부 변경은 명시 Reset이 필요하며 자동 IP 필요성·주소 계산은 남은 범위입니다.

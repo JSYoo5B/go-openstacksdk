@@ -175,7 +175,7 @@ SDK는 실패한 서버/IP를 자동 DELETE하지 않으며, 재사용 PUT이 40
 다음 차이는 남아 있으므로 cloud `create_server`와 `_network_common` 전체 지원 판정은 계속 partial입니다.
 
 - `_needs_floating_ip`의 기존 public/floating 주소·fixed 주소·private cloud·service/flags에 따른 자동 생략, 외부 network/NAT 가능성 판정. 이 Go 메서드는 연결을 명시적으로 요청하는 흐름입니다.
-- 전체 `has_service`·private/floating source flags·session 정책과 cloud network mutation 후 cache 자동 무효화. 구현한 공유 역할과 소비 경로는 이 전체 정책의 일부입니다.
+- 전체 `has_service`·private/floating source flags·session 정책과 다른 mutation 경로의 cache hook. [상위 network CRUD](../network/network-mutations.md)의 공유 cache 자동 초기화는 구현했습니다. 구현한 공유 역할과 소비 경로는 이 전체 정책의 일부입니다.
 - `ips` 목록, pool/auto 선택 우선순위의 전체 조합, Nova floating IP fallback, cloud의 일부 생성 확장 입력과 추가 볼륨/server group 동작.
 - Python의 일부 activation timeout 이후 신규 IP 삭제, ACTIVE지만 주소가 없을 때 서버 삭제. Go workflow는 부분 결과를 보존합니다.
 - Python `_attach_ip_to_server(wait=True)`의 서버 주소 재조회·수렴 및 `public_v4`/`interface_ip` 같은 반환값 확장. Go는 실제 Nova server와 Neutron IP를 각각 반환합니다.
