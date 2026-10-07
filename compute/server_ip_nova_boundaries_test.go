@@ -75,12 +75,185 @@ func TestNovaServerIPAcceptedAllocationAndCompatibilityClosePreserveProof(t *tes
 		if !errors.Is(err, cause) || !errors.As(err, &proof) || proof.StatusCode != 200 || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.Allocated || result.NovaAssignment.FloatingIP.ID != "29" || result.NovaAssignment.FloatingIP.Address != dispatchAddresses["pool"] || result.NovaAssignment.ActionAccepted || result.NovaAssignment.AllocationResponse.Header.Get("X-Proof") != "Nova-allocated" {
 			t.Fatal(result, err, proof)
 		}
+		wantProof := "Nova-allocated"
+		if phase == "compatibility" {
+			wantProof = "Nova-get-29"
+		}
+		if proof.Header.Get("X-Proof") != wantProof {
+			t.Fatal("wrong failed response evidence", phase, proof)
+		}
 		want := []string{"allocate"}
 		if phase == "compatibility" {
 			want = append(want, "get:29")
 		}
 		if !reflect.DeepEqual(f.trace(), want) {
 			t.Fatal(f.trace(), want)
+		}
+	}
+}
+
+func TestNovaServerIPUpperObservationRequiresActualActiveServer(t *testing.T) {
+	for _, mode := range []string{"Ensure", "Get sync", "Wait", "Create"} {
+		for _, status := range []string{"BUILD", "ERROR"} {
+			f := newNovaIPFixture(t, "")
+			f.status = "ACTIVE"
+			base := f.cloud.Provider.HTTPClient.Transport
+			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+				f.mu.Lock()
+				target := f.target
+				f.mu.Unlock()
+				if r.URL.Path == "/v2.1/servers/server" && target != "" {
+					f.event("late-raw")
+					body := `{"server":{"id":"server","status":"` + status + `","addresses":{"private":[{"version":4,"addr":"` + target + `","OS-EXT-IPS:type":"floating"}]}}}`
+					return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"late-raw"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+				}
+				return base.RoundTrip(r)
+			})
+			cause := errors.New("BUILD target is not ready")
+			progress := 0
+			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgress(func(*compute.Server) error { progress++; return cause })}
+			input := compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}
+			ready := []compute.ServerReadyOption{compute.WithServerReadyAutomaticIPOptions(common...), compute.WithServerReadyWaitOptions(resource.WithPollInterval(time.Millisecond))}
+			var result *compute.AutomaticServerIPResult
+			var err error
+			switch mode {
+			case "Ensure":
+				result, err = f.service.EnsureServerFloatingIP(context.Background(), input, common...)
+			case "Get sync":
+				result, err = f.service.GetActiveServer(context.Background(), input, append(ready, compute.WithActiveServerWait(true))...)
+			case "Wait":
+				result, err = f.service.WaitForServer(context.Background(), input, ready...)
+			case "Create":
+				f.cloud.Mux.HandleFunc("POST /v2.1/servers", func(w http.ResponseWriter, r *http.Request) {
+					f.event("create")
+					testcloud.JSON(w, 202, `{"server":{"id":"server","adminPass":"original"}}`)
+				})
+				created, createErr := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), compute.AutomaticServerCreateOptions{Server: automaticCreateOptions().Server, AutomaticIP: common})
+				err = createErr
+				if created == nil || created.Creation.AdminPass != "original" {
+					t.Fatal(created, err)
+				}
+				result = created.Automatic
+			}
+			if err == nil || result == nil || result.Server.Status != status || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Observed || result.Observed || strings.Contains(strings.Join(f.trace(), ","), "get:2") {
+				t.Fatal(mode, status, result, err, f.trace())
+			}
+			if status == "BUILD" {
+				if !errors.Is(err, cause) || progress != 1 {
+					t.Fatal(mode, err, progress)
+				}
+			} else {
+				var failed *resource.FailedStateError
+				if !errors.As(err, &failed) || failed.Status != "ERROR" || progress != 0 {
+					t.Fatal(mode, err, progress)
+				}
+			}
+		}
+	}
+}
+
+func TestNovaServerIPAutomaticNeutronTopologyDoesNotConsumePoolAsNetwork(t *testing.T) {
+	f := newNovaIPFixture(t, "")
+	policy, err := network.PrepareNetworkRoleOptions(network.WithConfiguredNetworks(network.ConfiguredNetwork{Name: "private", NATDestination: true}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	nw := network.NewWithDependencies(f.cloud.Client("network", "/v2.0"), network.Dependencies{NetworkRoles: policy})
+	f.service = compute.New(f.service.RawClient(), compute.Dependencies{NetworkPolicy: policy, AddressNetworks: func(context.Context) (*network.Service, error) { return nw, nil }})
+	f.cloud.Mux.HandleFunc("GET /v2.0/networks", func(w http.ResponseWriter, r *http.Request) {
+		f.event("topology-networks")
+		testcloud.JSON(w, 200, `{"networks":[{"id":"external","name":"external","router:external":true},{"id":"private","name":"private"}]}`)
+	})
+	f.cloud.Mux.HandleFunc("GET /v2.0/ports", func(w http.ResponseWriter, r *http.Request) {
+		f.event("topology-ports")
+		if r.URL.Query().Get("device_id") != "server" {
+			t.Error(r.URL)
+		}
+		testcloud.JSON(w, 200, `{"ports":[`+autoPort+`]}`)
+	})
+	f.cloud.Mux.HandleFunc("GET /v2.0/routers", func(w http.ResponseWriter, r *http.Request) {
+		f.event("topology-routers")
+		testcloud.JSON(w, 200, `{"routers":[]}`)
+	})
+	server := automaticServer(t, autoFixed)
+	server.Status = "BUILD"
+	result, err := f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server, Network: resource.Name("public")}, novaIPOptions()...)
+	if err != nil || result == nil || result.Decision.Backend != compute.FloatingIPNova || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted || result.NovaAssignment.FloatingIP.Pool != "public" || !strings.Contains(strings.Join(f.trace(), ","), "topology-ports") || !strings.Contains(strings.Join(f.trace(), ","), "topology-networks") {
+		t.Fatal(result, err, f.trace())
+	}
+}
+
+func TestNovaServerIPAlreadyAttachedKeepsRawModelAndSkipsAction(t *testing.T) {
+	for _, wait := range []bool{false, true} {
+		f := newNovaIPFixture(t, "")
+		row := strings.Replace(novaIPRow("9007199254740993", dispatchAddresses["a"], "public", `"server"`), `"fixed_ip":null`, `"fixed_ip":"10.0.0.10"`, 1)
+		f.rows, f.target = row, dispatchAddresses["a"]
+		base := f.cloud.Provider.HTTPClient.Transport
+		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			if r.URL.Path == "/v2.1/os-floating-ips/9007199254740993" {
+				f.event("get:attached")
+				return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"already-bound"}}, Body: io.NopCloser(strings.NewReader(`{"floating_ip":` + row + `}`)), Request: r}, nil
+			}
+			return base.RoundTrip(r)
+		})
+		result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"]}, append(novaIPOptions(), compute.WithServerIPWait(wait))...)
+		if err != nil || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.AlreadyAttached || result.NovaAssignment.ActionAccepted || result.NovaAssignment.ActionResponse != nil || !result.NovaAssignment.Reused || result.NovaAssignment.Allocated || result.NovaAssignment.FloatingIP.Header.Get("X-Proof") != "already-bound" || result.NovaAssignment.FloatingIP.InstanceID == nil || *result.NovaAssignment.FloatingIP.InstanceID != "server" || !result.Attempts[0].Completed || result.Observed != wait {
+			t.Fatal(result, err, f.trace())
+		}
+		want := []string{"list", "get:attached"}
+		if wait {
+			want = append(want, "raw")
+		}
+		if !reflect.DeepEqual(f.trace(), want) {
+			t.Fatal(f.trace(), want)
+		}
+	}
+}
+
+func TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST(t *testing.T) {
+	for _, scenario := range []string{"version", "port", "project"} {
+		f := newNovaIPFixture(t, "")
+		common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova)), compute.WithFloatingIPAddresses(dispatchAddresses["a"])}
+		switch scenario {
+		case "version":
+			f.service.RawClient().Microversion = "2.36"
+		case "port":
+			common = append(common, compute.WithAutomaticEnsureOptions(network.WithEnsurePort(resource.ID("port"))))
+		case "project":
+			common = append(common, compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner")))
+		}
+		result, err := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), compute.AutomaticServerCreateOptions{Server: automaticCreateOptions().Server, AutomaticIP: common})
+		if !errors.Is(err, resource.ErrUnsupported) || result != nil || len(f.trace()) != 0 {
+			t.Fatal(scenario, result, err, f.trace())
+		}
+	}
+}
+
+func TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate(t *testing.T) {
+	for _, mode := range []string{"address", "pool"} {
+		f := newNovaIPFixture(t, "")
+		base := f.cloud.Provider.HTTPClient.Transport
+		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			if r.URL.Path != "/v2.1/os-floating-ips" {
+				return base.RoundTrip(r)
+			}
+			code, proof, body := 200, "first-page", `{"floating_ips":[`+novaIPRow("9007199254740993", dispatchAddresses["a"], "public", "null")+`],"floating_ips_links":[{"rel":"next","href":"/v2.1/os-floating-ips?marker=next"}]}`
+			if r.URL.Query().Get("marker") == "next" {
+				code, proof, body = 403, "late-page-denied", `{"forbidden":"late inventory denied"}`
+			}
+			f.event(proof)
+			return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+		})
+		var result *compute.AutomaticServerIPResult
+		var err error
+		if mode == "address" {
+			result, err = f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"]}, novaIPOptions()...)
+		} else {
+			result, err = f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, "null")}, novaIPOptions(compute.WithFloatingIPPool(resource.Name("public")))...)
+		}
+		var native gophercloud.ErrUnexpectedResponseCode
+		if !errors.As(err, &native) || native.Actual != 403 || native.ResponseHeader.Get("X-Proof") != "late-page-denied" || !strings.Contains(string(native.Body), "late inventory denied") || result == nil || result.NovaAssignment != nil || len(result.Attempts) != 1 || result.Attempts[0].Completed || !reflect.DeepEqual(f.trace(), []string{"first-page", "late-page-denied"}) {
+			t.Fatal(mode, result, err, f.trace())
 		}
 	}
 }
