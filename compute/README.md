@@ -15,6 +15,7 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 | `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
+| `conn.get_server_public_ip(server)` / `get_server_private_ip(server)` | [주소 선택·보충](server-addresses.md): owned view·MAC·IPv6·private 설정과 기존 association 조회 |
 | `conn.create_server(..., ip_pool="public", wait=True)` | [CreateWithFloatingIP](create-with-floating-ip.md): 서버·IP ACTIVE와 공통 timeout·부분 결과 |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=False)` | `service.Servers.Create(ctx, request, compute.WithBootVolume(volumeRef))` |
 | `conn.create_server(..., boot_volume=volume, terminate_volume=True)` | 위 호출에 `compute.WithDeleteBootVolumeOnTermination(true)` 추가 |
@@ -188,3 +189,5 @@ Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사
 서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.
 
 Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. Configured default는 getter 및 floating source/NAT 선택과 같은 성공 snapshot을 사용하며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 명시 `WithDefaultNetwork(resource.Name(...))`은 기존 exact-name 조회를 생성마다 수행합니다.
+
+[서버 주소 가이드](server-addresses.md)는 조회한 Nova 모델의 public/private 주소와 기존 Floating IP 보충, default interface·IPv6·접속 검사 정책을 비교합니다. Connection이 설정과 공유 역할 cache를 제공합니다. 일반 Create/Wait에 자동 할당·주소 수렴을 적용하는 작업은 남아 있습니다.

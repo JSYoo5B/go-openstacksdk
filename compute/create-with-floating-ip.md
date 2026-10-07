@@ -122,6 +122,8 @@ func run(ctx context.Context) error {
 }
 ```
 
+[주소 선택·보충](server-addresses.md)의 `ExpandServerInterfaces`로 이후 사용할 public/private/interface 주소를 별도로 계산할 수 있습니다. 합성 행에는 `Supplemental` 표시가 있으며 Nova가 새 assignment를 관측했다는 증거로 사용하지 않습니다.
+
 성공 시에는 실제 서버와 IP의 ACTIVE를 확인했습니다. 이 시점에 반환된 서버의 `Addresses`에는 floating IP가 아직 없을 수 있습니다. SDK가 주소를 합성하거나 Nova 주소 반영·SSH 접속 가능성까지 기다리지는 않습니다.
 
 ## 기본값과 옵션
