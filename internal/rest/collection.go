@@ -20,7 +20,10 @@ type CollectionSpec[T any] struct {
 	ID, Name, Status                 func(*T) string
 	Metadata                         func(*T) *resource.Metadata
 	Validate                         func(context.Context) error
-	ValidateQuery                    func(context.Context, url.Values) error
+	// SourceGuard checks library-owned source identity on every HTTP attempt,
+	// including retries/authentication and accepted response read/Close.
+	SourceGuard   func(context.Context) error
+	ValidateQuery func(context.Context, url.Values) error
 	// ValidateInitialQuery applies only to caller input, before the first HTTP
 	// request. ValidateQuery also checks server-provided continuation queries.
 	ValidateInitialQuery func(context.Context, url.Values) error
@@ -78,7 +81,7 @@ func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 			if err := spec.validate(ctx); err != nil {
 				return nil, err
 			}
-			response, err := DoJSON(ctx, spec.Client, http.MethodGet, spec.Client.ServiceURL(spec.Path, url.PathEscape(id)), nil, nil, successCodes(spec.GetCodes, http.StatusOK)...)
+			response, err := DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodGet, spec.Client.ServiceURL(spec.Path, url.PathEscape(id)), nil, nil, successCodes(spec.GetCodes, http.StatusOK)...)
 			if err != nil {
 				return nil, err
 			}
@@ -104,7 +107,7 @@ func Collection[T any](spec CollectionSpec[T]) *resource.Collection[T] {
 			if err := spec.validate(ctx); err != nil {
 				return err
 			}
-			_, err := DoJSON(ctx, spec.Client, http.MethodDelete, spec.Client.ServiceURL(spec.Path, url.PathEscape(id)), nil, nil, successCodes(spec.DeleteCodes, http.StatusNoContent)...)
+			_, err := DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodDelete, spec.Client.ServiceURL(spec.Path, url.PathEscape(id)), nil, nil, successCodes(spec.DeleteCodes, http.StatusNoContent)...)
 			return err
 		}
 	}

@@ -200,7 +200,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 					return
 				}
 			}
-			response, err := DoJSON(ctx, spec.Client, http.MethodGet, current.String(), nil, nil, successCodes(spec.ListCodes, http.StatusOK)...)
+			response, err := DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodGet, current.String(), nil, nil, successCodes(spec.ListCodes, http.StatusOK)...)
 			if err != nil {
 				fail(err)
 				return
