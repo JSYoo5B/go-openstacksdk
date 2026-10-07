@@ -250,20 +250,21 @@ func TestConnectionDefaultNetworkOptionValidationAndConcurrentReuse(t *testing.T
 		testcloud.JSON(w, 202, `{"server":{"id":"created"}}`)
 	})
 	option := sdk.WithDefaultNetwork(resource.ID("default-id"))
+	services := make([]*compute.Service, 2)
+	for i := range services {
+		conn, err := sdk.FromProvider(cloud.Provider, sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute"), option)
+		if err != nil {
+			t.Fatal(err)
+		}
+		services[i], err = conn.Compute(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	var wg sync.WaitGroup
-	for range 8 {
+	for i := range 8 {
 		wg.Go(func() {
-			conn, err := sdk.FromProvider(cloud.Provider, sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute"), option)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			service, err := conn.Compute(context.Background())
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			row, err := service.Servers.Create(context.Background(), nicConnectionRequest())
+			row, err := services[i%len(services)].Servers.Create(context.Background(), nicConnectionRequest())
 			if err != nil || row == nil || row.ID != "created" {
 				t.Errorf("row=%v err=%v", row, err)
 			}

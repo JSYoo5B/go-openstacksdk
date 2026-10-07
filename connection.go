@@ -51,14 +51,15 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 	if o.auth != nil {
 		auth = *o.auth
 	} else if cloudName != "" {
-		parseOpts := []clouds.ParseOption{clouds.WithCloudName(cloudName)}
-		if o.cloudFiles != nil {
-			parseOpts = append(parseOpts, clouds.WithLocations(o.cloudFiles...))
+		configuration, loadErr := loadCloudConfiguration(cloudName, o.cloudFiles)
+		if loadErr != nil {
+			return nil, fmt.Errorf("load cloud configuration: %w", loadErr)
 		}
-		auth, eo, o.tlsConfig, err = clouds.Parse(parseOpts...)
+		auth, eo, o.tlsConfig, err = clouds.Parse(configuration.parseOptions...)
 		if err != nil {
 			return nil, fmt.Errorf("load cloud configuration: %w", err)
 		}
+		o.configuredDefaultNetwork = configuration.defaultNetwork
 	} else {
 		auth, err = openstack.AuthOptionsFromEnv()
 		if err != nil {

@@ -21,24 +21,25 @@ const (
 )
 
 type connectionOptions struct {
-	auth                   *gophercloud.AuthOptions
-	cloud                  string
-	cloudFiles             []string
-	region                 *string
-	availability           *gophercloud.Availability
-	httpClient             http.Client
-	httpConfigured         bool
-	tlsConfig              *tls.Config
-	endpoints              map[Service]string
-	microversions          map[Service]string
-	microversionRanges     map[Service]microversionRange
-	microversionSelections map[string]MicroversionSelection
-	versionedEndpoints     map[string]string
-	messagingClientID      string
-	locationFacts          resource.CloudLocation
-	cloudLocation          *resource.CloudLocation
-	defaultNetwork         resource.Ref
-	defaultNetworkSet      bool
+	auth                     *gophercloud.AuthOptions
+	cloud                    string
+	cloudFiles               []string
+	region                   *string
+	availability             *gophercloud.Availability
+	httpClient               http.Client
+	httpConfigured           bool
+	tlsConfig                *tls.Config
+	endpoints                map[Service]string
+	microversions            map[Service]string
+	microversionRanges       map[Service]microversionRange
+	microversionSelections   map[string]MicroversionSelection
+	versionedEndpoints       map[string]string
+	messagingClientID        string
+	locationFacts            resource.CloudLocation
+	cloudLocation            *resource.CloudLocation
+	defaultNetwork           resource.Ref
+	defaultNetworkSet        bool
+	configuredDefaultNetwork string
 }
 
 type ConnectionOption func(*connectionOptions) error
