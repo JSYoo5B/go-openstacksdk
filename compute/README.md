@@ -204,7 +204,7 @@ Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)�
 
 [Legacy Nova floating IP](server-nova-floating-ip.md)는 같은 Service/Connection IP 소비자의 Nova backend를 제공합니다. 명시 pool/IP의 configured Nova·None 또는 정확한 Network endpoint 부재에서 실행하며, 자동 source=None은 skip을 유지합니다. pool은 literal 값이고 `NovaAssignment`로 실제 모델과 action202 증거를 읽습니다. selected Compute2.36 이상과 Neutron 전용 port/NAT/project override는 `ErrUnsupported`입니다. 동기 상위 entry는 실제 서버 ACTIVE·목표 주소를 확인하며 Neutron IP ACTIVE는 Neutron backend에만 적용합니다.
 
-[독립 Floating IP 조회·할당](floating-ip-available.md)은 `service.AvailableFloatingIP`과 `conn.AvailableFloatingIP`으로 제공합니다. 설정과 호출별 source 옵션, 선택적인 Network 옵션, 실제 backend·재사용/할당 증거를 반환하며 서버 action이나 readiness wait를 수행하지 않습니다. free Neutron IP는 optional Server와 무관하게 반환하고 새 Neutron allocation만 Server를 사용합니다.
+[독립 Floating IP 조회·할당](floating-ip-available.md)은 `service.AvailableFloatingIP`과 `conn.AvailableFloatingIP`으로 제공합니다. 설정과 호출별 source 옵션, 선택적인 Network 옵션, 실제 backend·재사용/할당 증거를 반환하며 서버 action이나 readiness wait를 수행하지 않습니다. free Neutron IP는 optional Server와 무관하게 반환하고 새 Neutron allocation만 Server를 사용합니다. 내부 목록 fallback과 외부 Nova availability를 구분하며, `Inventory`·`Creation`에 Neutron 시도와 실제 응답을 보존합니다. 기존 Query/Create 엔진이 필터·정규화·할당을 담당합니다.
 
 [독립 Floating IP 목록·검색·단건·pool 조회](floating-ip-queries.md)는 `ListFloatingIPs`, `SearchFloatingIPs`, `GetFloatingIP`, `GetFloatingIPByID`, `ListFloatingIPPools`, `SearchFloatingIPPools`를 Service와 Connection에 제공합니다. 기본 Get은 목록 검색, UUID direct는 옵션으로 선택합니다. Neutron dict Search는 ID를 무시하며, Nova source 정규화의 합성 ACTIVE는 실제 연결 상태와 별도로 읽습니다.
 
