@@ -142,10 +142,7 @@ func TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC(t *test
 			if _, err := computeService.Servers.Create(context.Background(), nicConnectionRequest()); err != nil || creates.Load() != 1 {
 				t.Fatal(err, creates.Load())
 			}
-			wantLists := int32(2)
-			if wantDefault == "" {
-				wantLists = 1
-			}
+			wantLists := int32(1)
 			if calls.Load() != wantLists {
 				t.Fatal(calls.Load(), wantLists)
 			}

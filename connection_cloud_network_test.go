@@ -80,6 +80,9 @@ func TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages(t *testi
 				w.Header().Set("Content-Type", "application/json")
 				_ = json.NewEncoder(w).Encode(map[string]any{"networks": rows, "networks_links": links})
 			})
+			cloud.Mux.HandleFunc("GET /network/v2.0/subnets", func(w http.ResponseWriter, r *http.Request) {
+				testcloud.JSON(w, 200, `{"subnets":[]}`)
+			})
 			cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 				creates.Add(1)
 				var body struct{ Server map[string]any }

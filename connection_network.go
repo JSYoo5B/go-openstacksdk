@@ -14,38 +14,21 @@ func (c *Connection) defaultServerNetwork(ctx context.Context) (resource.Ref, er
 	if c.options.defaultNetworkSet {
 		return c.options.defaultNetwork, nil
 	}
-	selector := c.options.configuredDefaultNetwork
-	if selector == "" {
+	if c.options.configuredDefaultNetwork == "" {
 		return resource.Ref{}, nil
 	}
-	service, err := c.Network(ctx)
+	roles, err := c.GetNetworkRoles(ctx)
 	if err != nil {
 		return resource.Ref{}, err
 	}
-	// YAML's name field accepts a name OR an ID. Walk every page without
-	// name/id filtering, and detect cross-kind collisions before selecting.
-	var ids []string
-	for value, err := range service.Networks.List(ctx) {
-		if err != nil {
-			return resource.Ref{}, err
-		}
-		if value.Name == selector || value.ID == selector {
-			ids = append(ids, value.ID)
-		}
+	// Disabled discovery and a missing catalog endpoint both yield no default.
+	// Configured selectors and collisions are validated by shared discovery.
+	if roles.DefaultNetwork == nil {
+		return resource.Ref{}, ctx.Err()
 	}
-	if err := ctx.Err(); err != nil {
+	ref := resource.ID(roles.DefaultNetwork.ID)
+	if err := ref.Validate(); err != nil {
 		return resource.Ref{}, err
 	}
-	switch len(ids) {
-	case 0:
-		return resource.Ref{}, &resource.NotFoundError{Resource: "default network", Reference: selector}
-	case 1:
-		ref := resource.ID(ids[0])
-		if err := ref.Validate(); err != nil {
-			return resource.Ref{}, err
-		}
-		return ref, nil
-	default:
-		return resource.Ref{}, &resource.AmbiguousError{Resource: "default network", Name: selector, IDs: ids}
-	}
+	return ref, ctx.Err()
 }
