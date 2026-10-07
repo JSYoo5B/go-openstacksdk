@@ -18,21 +18,23 @@ import (
 )
 
 type automaticIPState struct {
-	service       *Service
-	address       *serverAddressState
-	decision      *ServerFloatingIPDecision
-	options       automaticFloatingIPOptions
-	policy        network.EnsureFloatingIPPolicy
-	input         AutomaticFloatingIPRequest
-	serverID      string
-	computeGuard  func(context.Context) error
-	computeClient *gophercloud.ServiceClient
-	clientGuard   func(context.Context) error
-	networkLoaded bool
-	network       *network.Service
-	planner       *network.FloatingIPPlanner
-	plan          network.FloatingIPPlan
-	last          *Server
+	service              *Service
+	address              *serverAddressState
+	decision             *ServerFloatingIPDecision
+	options              automaticFloatingIPOptions
+	policy               network.EnsureFloatingIPPolicy
+	input                AutomaticFloatingIPRequest
+	serverID             string
+	computeGuard         func(context.Context) error
+	outerGuard           func(context.Context) error
+	computeClient        *gophercloud.ServiceClient
+	clientGuard          func(context.Context) error
+	networkLoaded        bool
+	network              *network.Service
+	planner              *network.FloatingIPPlanner
+	plan                 network.FloatingIPPlan
+	last                 *Server
+	retainAcceptedServer bool
 }
 
 // PlanServerFloatingIP applies lazy automatic need/skip policy and, when
@@ -57,6 +59,10 @@ func (s *Service) EnsureServerFloatingIP(ctx context.Context, input AutomaticFlo
 		return nil, err
 	}
 	defer cancel()
+	return state.ensure(ctx)
+}
+
+func (state *automaticIPState) ensure(ctx context.Context) (*AutomaticServerIPResult, error) {
 	result := &AutomaticServerIPResult{Server: state.last, Decision: state.decision}
 	if err := state.decide(ctx); err != nil {
 		result.Server = state.last
@@ -108,6 +114,7 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 	if s == nil || s.API == nil || s.Servers == nil {
 		return nil, nil, nil, invalid("compute service is required")
 	}
+	baseGuard := s.captureAutomaticComputeSource()
 	o := automaticFloatingIPOptions{enabled: true, timeout: 5 * time.Minute, interval: 2 * time.Second}
 	for _, apply := range options {
 		if apply == nil {
@@ -122,6 +129,9 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 			return nil, nil, nil, err
 		}
 	}
+	if err := baseGuard(ctx); err != nil {
+		return nil, nil, nil, err
+	}
 	policy, err := network.PrepareEnsureFloatingIPOptions(ctx, append(o.ips, network.WithEnsureActive())...)
 	if err != nil {
 		return nil, nil, nil, errors.Join(err, ctx.Err(), context.Cause(ctx))
@@ -132,25 +142,17 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 	}
 	supplied := *input.Server
 	state := &automaticIPState{service: s, address: address, options: o, policy: policy, input: input, last: &supplied, serverID: supplied.ID}
+	state.outerGuard = rest.OperationGuard(ctx)
 	state.decision = &ServerFloatingIPDecision{Reason: AutomaticIPUndetermined, Server: state.last, Addresses: address.view}
-	api, servers, collection, client := s.API, s.Servers, s.Servers.Collection, s.client
-	apiServers := api.Servers
+	client := s.client
 	previous := address.sourceGuard
-	var changed error
-	var mu sync.Mutex
-	// This outer guard is Compute-only. Network's guard invokes it while holding
-	// its own lock, so it must never call planner.Check recursively.
+	// This outer guard is Compute-only; Network may invoke it under its lock.
 	state.computeGuard = func(ctx context.Context) error {
-		mu.Lock()
-		defer mu.Unlock()
-		if changed == nil && (s.API != api || s.Servers != servers || servers.Collection != collection || s.client != client || servers.client != client || api.RawClient() != client || api.Servers != apiServers) {
-			changed = invalid("compute service source changed during automatic IP workflow")
-		}
 		var bound error
 		if state.clientGuard != nil {
 			bound = state.clientGuard(ctx)
 		}
-		return errors.Join(changed, previous(ctx), bound)
+		return errors.Join(baseGuard(ctx), previous(ctx), bound)
 	}
 	if client != nil {
 		state.bindRawClient(client)
@@ -178,8 +180,35 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 	return state, ctx, cancel, nil
 }
 
+func (s *Service) captureAutomaticComputeSource() func(context.Context) error {
+	api, servers, collection, client := s.API, s.Servers, s.Servers.Collection, s.client
+	apiServers, flavors, serverFlavors := api.Servers, s.Flavors, servers.flavors
+	var provider *gophercloud.ProviderClient
+	var endpoint, base, version, kind string
+	if client != nil {
+		provider, endpoint, base, version, kind = client.ProviderClient, client.Endpoint, client.ResourceBase, client.Microversion, client.Type
+	}
+	var changed error
+	var mu sync.Mutex
+	return func(ctx context.Context) error {
+		mu.Lock()
+		defer mu.Unlock()
+		if changed == nil && (s.API != api || s.Servers != servers || servers.Collection != collection || s.client != client || servers.client != client || api.RawClient() != client || api.Servers != apiServers || s.Flavors != flavors || servers.flavors != serverFlavors) {
+			changed = invalid("compute service source changed during automatic IP workflow")
+		}
+		if changed == nil && client != nil && (client.ProviderClient != provider || client.Endpoint != endpoint || client.ResourceBase != base || client.Microversion != version || client.Type != kind) {
+			changed = invalid("compute client source changed during automatic IP workflow")
+		}
+		return errors.Join(changed, ctx.Err(), context.Cause(ctx))
+	}
+}
+
 func (state *automaticIPState) check(ctx context.Context) error {
-	if err := state.computeGuard(ctx); err != nil {
+	var outer error
+	if state.outerGuard != nil {
+		outer = state.outerGuard(ctx)
+	}
+	if err := errors.Join(outer, state.computeGuard(ctx)); err != nil {
 		return err
 	}
 	if state.planner != nil {
@@ -257,25 +286,32 @@ func (state *automaticIPState) rawServer(ctx context.Context) (*ServerAddressVie
 	if err := resource.ID(id).Validate(); err != nil {
 		return nil, err
 	}
-	var view *ServerAddressView
-	spec := rest.CollectionSpec[Server]{Client: client, Kind: "server", Path: "servers", SingleKey: "server", Get: true, GetCodes: []int{200, 203},
-		ID: func(server *Server) string { return server.ID }, Metadata: func(*Server) *resource.Metadata { return &resource.Metadata{} },
-		Validate: state.check, SourceGuard: state.check,
-		ValidateItem: func(server *Server) error {
-			if server.ID != id {
-				return invalid("Nova response does not match server %q", id)
-			}
-			state.last = server
-			if strings.EqualFold(server.Status, "ERROR") {
-				return &resource.FailedStateError{Resource: "server", ID: id, Status: server.Status}
-			}
-			var err error
-			view, err = parseServerAddresses(server, state.address.options.networkOrder)
-			return err
-		},
+	response, requestErr := rest.DoJSONGuarded(ctx, client, state.check, "GET", client.ServiceURL("servers", url.PathEscape(id)), nil, nil, 200, 203)
+	if response == nil {
+		return nil, requestErr
 	}
-	_, err = rest.Collection(spec).Get(ctx, id)
-	return view, errors.Join(err, state.check(ctx))
+	if requestErr != nil && !state.retainAcceptedServer {
+		return nil, requestErr
+	}
+	if response.StatusCode != 200 && response.StatusCode != 203 {
+		return nil, requestErr
+	}
+	server, decodeErr := rest.Decode[Server](response, "server", func(*Server) *resource.Metadata { return &resource.Metadata{} })
+	if decodeErr != nil {
+		return nil, errors.Join(requestErr, decodeErr, state.check(ctx))
+	}
+	if server.ID != id {
+		return nil, errors.Join(requestErr, response.Fail(invalid("Nova response does not match server %q", id)), state.check(ctx))
+	}
+	state.last = server
+	if strings.EqualFold(server.Status, "ERROR") {
+		return nil, errors.Join(requestErr, response.Fail(&resource.FailedStateError{Resource: "server", ID: id, Status: server.Status}), state.check(ctx))
+	}
+	view, err := parseServerAddresses(server, state.address.options.networkOrder)
+	if err != nil {
+		err = response.Fail(err)
+	}
+	return view, errors.Join(requestErr, err, state.check(ctx))
 }
 
 func (state *automaticIPState) skip(ctx context.Context, reason AutomaticIPReason) error {
