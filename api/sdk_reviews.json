@@ -35691,7 +35691,9 @@
         "gophercloudsdk/compute.WithAvailableIPNetworkOptions",
         "gophercloudsdk/compute.WithAvailableIPTimeout",
         "gophercloudsdk/compute.WithUnlimitedAvailableIPTimeout",
-        "gophercloudsdk.Connection.AvailableFloatingIP"
+        "gophercloudsdk.Connection.AvailableFloatingIP",
+        "gophercloudsdk/compute.WithAvailableIPLocation",
+        "gophercloudsdk/compute.WithAvailableIPStrict"
       ],
       "contracts": [
         {
@@ -35964,6 +35966,49 @@
             "connection_floating_ip_available_test.go:TestAvailableIPServiceOptionsCannotReplaceCapturedSource",
             "connection_floating_ip_available_test.go:TestConnectionAvailableIPVersionMultiplePoolsAndContextPreflight"
           ]
+        },
+        {
+          "behavior": "On rows accepted by the existing typed availability lane, the additive FloatingIP record projects the final observed row through the shared cloud view engine without another query, allocation, source capture or deadline. Direct Nova and None sources return a normalized Resource with source-synthetic ACTIVE, canonical-null alias priority, properties and optional strict compatibility aliases; Wire, raw Nova metadata, decimal integer identity, common ID/Address and actual allocation phases remain unchanged. This view status is not an ACTIVE wait or association proof.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPNovaViewPreservesWireAndStrictAliases",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationCanonicalNullPropertiesAndStrictAliases"
+          ]
+        },
+        {
+          "behavior": "The view captures configured Neutron mode after successful service discovery rather than inferring it from the final response Backend. Existing semantic/list404 fallback returns an actual Nova row with Neutron UNKNOWN status and port-based attached truthiness when status is absent; missing Network endpoint instead uses Nova ACTIVE and instance-based attachment. The additive view makes no extra locator, HTTP or association request and does not change the current fallback order.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPViewUsesConfiguredSourceAfterFallback",
+            "compute/floating_ip_query_normalize_test.go:TestFloatingIPQueryNormalizationUsesConfiguredNeutronAfterNovaFallback"
+          ]
+        },
+        {
+          "behavior": "A returned Neutron free candidate gains the shared Resource projection, including name/address and project/tenant aliases, body defaults, revision, tags, removal of self and owned location facts. Strict does not remove Neutron Resource fields. The IPv6 ERROR candidate stays reusable without Compute/server lookup; mutating Resource or Wire does not change the original lower Metadata/header/model. The existing actual native status and no-wait behavior remain intact.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPNeutronViewAndLocationAreOwned",
+            "connection_floating_ip_queries_test.go:TestFloatingIPQueryNeutronProjectionAndWireOwnership"
+          ]
+        },
+        {
+          "behavior": "Available snapshots the outer callback slice and input selection before callbacks, clones source/nested-options/location between application steps and guards each outer and nested callback before and after execution. WithAvailableIPLocation owns factory inputs and overrides the recorded/configured default. The tested caller changes cannot replace the captured strict option, network selector, nested callback or location bytes; factories run once and view construction retains the same tested17second request budget. Source or custom-cancellation failure prevents a later outer callback and HTTP.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPViewOptionsSnapshotAndBudget",
+            "connection_floating_ip_available_test.go:TestConnectionAvailableIPBudgetAndPreparedOptionsOwnInputs",
+            "connection_floating_ip_available_test.go:TestAvailableIPServiceOptionsCannotReplaceCapturedSource"
+          ]
+        },
+        {
+          "behavior": "The view adapter stores an owned Wire-only record before location/projection work. A final Nova location getter error, source replacement or custom cancellation retains the accepted allocation, ID, raw model and receipt with nil Resource, joins the original cause and preserves the actual compatibility GET envelope/header/status rather than constructing a response from serialized row fields. An explicit location override skips the dependency getter and returns a successful view. No later allocation, action or observation follows a view error.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPViewLocationErrorKeepsKnownAllocation"
+          ]
+        },
+        {
+          "behavior": "After accepted Nova200 or Neutron201 allocation followed by Close, source or cancellation failure, the additive record preserves the known raw Wire alongside the existing Backend/Allocated/model/actual envelope receipt and cause. Source/context failure does not create a successful Resource view or allow another request. These fixtures inspect the original allocation envelope key and retain the existing no-compatibility-GET/no-reallocation behavior after accepted processing failure. Direct Neutron view errors preserve the exact accepted allocation receipt and keep free-row metadata without inventing a page response envelope.",
+          "tests": [
+            "connection_floating_ip_available_view_test.go:TestAvailableIPViewAcceptedFailuresPreserveRawReceipts",
+            "connection_floating_ip_available_test.go:TestConnectionAvailableIPAcceptedFailuresKeepBackendAndAllocation",
+            "connection_floating_ip_available_view_test.go:TestAvailableIPNeutronViewErrorsKeepPhysicalReceipts"
+          ]
         }
       ],
       "documentation": [
@@ -35980,24 +36025,23 @@
         "compute/server-ip-helpers.md",
         "compute/server-nova-floating-ip.md",
         "network/floating-ip-available.md",
-        "compute/floating-ip-available.md"
+        "compute/floating-ip-available.md",
+        "compute/floating-ip-queries.md"
       ],
       "differences": [
-        "Pinned available_floating_ip accepts an optional existing Server and returns a free floating-IP Resource/Munch, allocating only when none is free. The separate Network Available and Compute/Connection AvailableFloatingIP now map the bounded free-first optional-server getter. Existing Ensure still requires a safe server Ref, verifies its destination and prefers an already attached IP before a free one; its concrete Assignment is a separate result contract.",
-        "The Network getter performs an unfiltered list and local raw-null port/current-project/network selection without the existing Ensure IPv4/ERROR exclusion or attached-first preference. It treats absent raw project/port fields as null and canonical project_id wins tenant_id. This differs from Ensure owner/alias/revision policy and leaves Python Resource attribute/default/error and full filter policies for further comparison. Native string aliases plus raw Metadata preserve evidence without reproducing Resource/Munch state.",
+        "Pinned available_floating_ip accepts an optional existing Server and returns a free floating-IP Resource/Munch, allocating only when none is free. The Network and Compute/Connection entries provide the typed free-first optional-server getter. Compute/Connection adds an owned cloud FloatingIPRecord view while preserving common identity/address and actual backend models; the two named inventory/fallback branches in remaining are still incomplete. Existing Ensure verifies a server destination and prefers an already attached candidate, so its concrete Assignment remains a separate receiver contract.",
+        "Network Available uses an unfiltered native inventory and local raw-null port/current-project/network selection without Ensure IPv4/ERROR exclusion or attached-first preference. Missing project/port is null and canonical project_id wins tenant_id. Compute/Connection now projects only the returned row through the shared Resource view engine, preserving actual Wire and native Metadata independently. Eager Resource construction across the complete inventory and public-list fallback/filter timing belong to the first named remaining branch rather than a generic inherited Resource/session blocker.",
         "The getter uses explicit ID/Name Refs and a caller-ordered network list against shared floating roles; zero selection uses the existing default-role/router policy. Existing Create/Ensure retain strict unique-destination selection, whereas Available allocation chooses the newest eligible NAT port and first IPv4, permits absent Server/no ports or unmatched explicit fixed address to allocate unattached, and rejects a nonempty selected port inventory without IPv4. Shared successful roles remain cached and candidate inventory remains per call; these fixtures do not establish identical Python mutable cache/pager/session behavior. The additional fixed-address option validates IPv4 before HTTP and empty clears the override; the Python private helper compares literal supplied fixed addresses more permissively.",
-        "Network Available remains Neutron-only. Compute/Connection AvailableFloatingIP now executes legacy Nova directly or after completed pure Neutron NotFound; None selects Nova for this explicit getter while automatic None disables need. Accepted response/source/decode/cancellation/multiple-cause or terminal SDK failures do not select a fallback backend. Existing Ensure/assignment association failures keep their own no-fallback policy. Source normalization can recheck configured backend after fallback and synthesize Nova status/location; Go returns actual backend models, common identity/address and optional FallbackError without synthetic ACTIVE.",
+        "Network Available remains Neutron-only. Compute/Connection executes legacy Nova directly or after the current completed pure Neutron NotFound branch; None selects Nova for this getter while automatic None disables need. Accepted response/source/decode/cancellation/multiple-cause or terminal SDK failures do not select a fallback backend. The additive Resource view uses captured configured Neutron mode after service discovery, so actual Nova data can receive Neutron status/port semantics after fallback; direct Nova/None uses source-synthetic ACTIVE. Actual raw/backend models and Wire remain unsynthesized, and view ACTIVE never means readiness.",
         "The getter resolves nullable recorded current-project ownership per call, and WithAvailableProject changes only its free-candidate filter; new Neutron allocation omits project_id and leaves ownership to authentication. Plain prepared Ensure resolves its reuse owner per call and service-bound PrepareEnsureActive binds that owner before Nova creation. These are different receiver policies, not a Python Resource/Adapter/session/cache or server-interface-refresh emulation.",
-        "The new standalone getter fixtures add bounded source comparison alongside prior Ensure/compound/consumer evidence. Local HTTP assertions do not establish complete available_floating_ip, private helper, full cloud lifecycle or authenticated Python/OpenStack execution. Private helpers are dependency comparisons without separate public catalog operation IDs.",
-        "PrepareEnsure/EnsurePrepared remain an explicit Go two-stage Neutron assignment foundation with immutable selection, late reuse-owner binding, tuple revalidation and actual ACTIVE policy. The new availability entry returns a free or allocated backend model directly, never associates a reused candidate and performs no IP readiness or raw Nova convergence wait. Assignment/automatic consumer integration remains separate.",
-        "Stronger Compute Ensure/ready/create retain their own readiness/observation policy. Independent AddIPsToServer has its async/whole60second policy; the new explicit availability getter instead adds no SDK deadline or wait by default and accepts optional whole-operation timeout/unlimited options. Go preserves known models and HTTP/context evidence after accepted allocation processing failures and performs no implicit cleanup; source exception/Resource/normalization/error ordering remains incomplete.",
-        "Existing typed Neutron/Nova pool consumers continue into concrete association/action and upper observation. The separate getter now returns a raw free Nova candidate or allocates with POST 200/compatibility GET without an action or association recheck. It accepts one typed literal Nova pool and ignores Server; dynamic Python pool/network forms, strict/nonstrict normalized fields, location and full cloud/session policies remain distinct. No automatic consumer is claimed to use this new standalone getter."
+        "The standalone getter fixtures compare concrete source behavior alongside earlier Ensure/compound/consumer history. The additive view unit implements location/strict/configured-mode projection for rows that the existing typed inventory/allocation lane accepts; it does not close the two source branch gaps listed in remaining. Private helpers are dependency comparisons without separate catalog operation IDs, and local HTTP fixtures do not assert authenticated Python/OpenStack execution.",
+        "PrepareEnsure/EnsurePrepared remain a separate Go assignment foundation with immutable selection, late reuse-owner binding, tuple revalidation and actual ACTIVE policy. Available returns a free or allocated backend model plus an owned cloud view, never associates a reused candidate and performs no IP readiness or raw Nova convergence wait. An automatic consumer does not need to call this getter to complete the standalone available_floating_ip operation.",
+        "Stronger Ensure/ready/create keep their existing readiness/observation policy and AddIPsToServer keeps its independent async/whole60second policy. Available adds no SDK deadline or wait by default and accepts optional whole-operation timeout/unlimited controls. The additive view uses the original guarded operation context; accepted model/HTTP evidence and custom context causes survive projection failure without cleanup or replacement allocation. Context/receipt semantics and owned snapshots are explicit Go improvements.",
+        "The getter accepts one typed literal Nova pool, ignores Server on Nova and sends no action or association recheck. Its primary Resource now supports configured-source normalization, location and strict/nonstrict aliases on the rows returned by the existing typed lane, while Wire and raw models preserve actual data. Typed Name/ID, static invalid-Ref preflight, multiple-pool rejection, recorded scope and SDK time/partial-error policy are deliberate Go mappings; raw free-filter/selected-list normalization and fresh permissive Nova lookup behavior remain the second named branch. Dynamic Python object coercion and full inherited session surfaces are separate SDK scope, not blanket completion blockers for this function."
       ],
       "remaining": [
-        "Complete the remaining standalone availability source mapping beyond the bounded typed getter: dynamic network/pool/Server inputs and coercion, Resource/Munch identity/location/strict-nonstrict normalization, Python attribute/default and current_project policies, public list/filter/pagination/error/cache/session behavior and the full optional-server/fixed/NAT combinations. Native models plus owned raw Metadata deliberately do not establish full Resource parity.",
-        "Shared configured floating source/default/NAT roles feed the bounded getter and consumers, with bounded cache invalidation from owned high Network Service mutations. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, mutable Resource/cache/session semantics and source destination/source behavior beyond the tested boundaries; generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset.",
-        "Compare full floating_ip_source/service and Neutron-to-Nova selection/error ordering beyond the tested pure absence cases, including configured-Neutron fallback normalization and private dependency timeout/exception/Resource/Adapter ordering. Public legacy pools/list/get/create/delete/detach/remove are separate declared contracts; bounded getter dependencies do not support-promote those entries. Source private helpers have no separate declared catalog IDs. The source unfiltered-list internal Neutron404-to-normalized-Nova path can precede the outer availability catch and later Neutron allocation; the Go getter currently transitions directly to Nova. Source Nova-list404-to-empty allocation and permissive selected-model decoding also remain deliberate differences.",
-        "The independent availability getter is not yet consumed by typed Plan/Ensure/GetActive/Wait/automatic creation or async 60 second AddIPsToServer; those existing workflows continue with their own concrete assignment policies. Ordinary Create/Get, full add_auto_ip return/expansion, source pool refresh/timing and Resource/cache/interface/error/cleanup ordering remain separate. Preserve receiver-specific waits, exact-target observations and deliberate noDELETE behavior without claiming complete cloud parity."
+        "Connect the Neutron availability helper to the source public unfiltered-list inventory before local port=None, selected-network and nullable-current-project filtering. A Neutron list404 must first produce configured-Neutron-normalized Nova rows, which can be reused by that same Neutron filter; if none matches, allocate freshly on the already selected Neutron network before an outer pre-accept NotFound may select Nova availability. Reuse the closed query Resource/pager/eager-descriptor error engine and fresh Create body/accepted-receipt foundation, retain selected network identity and optional-server/port behavior, and prove inner versus outer fallback plus accepted-failure/no-reallocation ordering. The current getter instead transitions directly to the Nova pool branch.",
+        "Connect direct/outer Nova availability to raw instance_id=None then literal-pool filtering in source order, normalize all matching rows only after that raw filter, and return the first normalized candidate or fresh POST plus mandatory compatibility GET. A clean raw Nova-list404 must be empty inventory and continue to allocation, while pool/POST/compatibility failures remain errors. Replace reuse of the assignment-specific typed decoder/canonical-IPv4/pool/free and compatibility-equality verifier with the closed query/raw-create foundations for this standalone read/allocation function, preserving safe execution target IDs and accepted partial evidence. Verify selection/normalization error timing and passive returned rows without adding action/readiness/cleanup."
       ]
     },
     {
