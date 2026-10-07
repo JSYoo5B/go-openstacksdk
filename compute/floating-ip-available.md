@@ -127,7 +127,9 @@ func run(ctx context.Context, cloud, source, pool, serverID, project string, str
 - Neutron allocation/model/응답이 알려진 결과가 있거나 read/Close·decode·source·취소·여러 cause 또는 terminal SDK 정책 오류이면 fallback하지 않습니다. RetryFunc가404를 성공 코드에 추가해도 SDK의 목록200 정책 실패를 Nova 전환으로 숨기지 않습니다. 403/204/malformed 결과를 free 후보 없음으로 숨기지 않습니다.
 - source=Nova/None이면 Neutron 역할·owner를 선조회하지 않고 Compute legacy 경로를 사용합니다. None은 이 standalone API를 disabled skip로 바꾸지 않습니다.
 
-Nova 경로는 같은 pool의 `instance_id: null` free IP를 재사용하며 없으면 POST200 allocation 뒤 같은 ID의 compat GET200을 수행합니다. 빈 문자열 instance ID는 free가 아니고 선택한 row의 ID·IPv4·pool·association metadata를 확인합니다. server를 생략하거나 지정해도 addFloatingIp/action 및 server GET·주소 관측은 수행하지 않습니다. Nova 목록/allocate/read의 성공 코드는200이고204를 free 후보 부재로 취급하지 않습니다. legacy API404는 알려진 오류이며 Python처럼 목록404를 빈 후보로 바꾸어 allocation을 추가 시도하지 않습니다.
+Nova 경로는 raw 목록에 `instance_id: null` → literal pool 순서로 필터를 적용하고, 모든 matching row를 정규화한 뒤 첫 결과를 반환합니다. 빈 문자열 instance ID는 null과 다르며, 제외된 행의 ID·주소는 정규화하지 않습니다. 첫 행이 정상이어도 뒤 matching row의 정규화가 실패하면 오류와 실제 목록 응답을 반환합니다. 조회 행의 null ID·비 IPv4 주소·확장 값을 연결용 ID/IPv4 verifier로 거부하지 않습니다.
+
+clean Nova 목록404는 빈 후보로 처리하여 fresh POST와 mandatory compatibility GET을 진행합니다. 명시 pool은 lookup 없이 사용하고, default 첫 name은 목록보다 먼저 조회하며 보통 fresh에서 재조회하지 않습니다. default name이 null이면 Python None처럼 Create의 기본 pool 조회를 다시 수행합니다. 목록200의 malformed/accepted 처리 오류와403 등은 빈 후보로 숨기지 않습니다. 생성·호환 조회는 [독립 Create](floating-ip-create.md)의 raw 응답 엔진을 사용하고 접수된 HTTP200..399를 처리합니다. 호환 GET의 실제 반환 ID·주소·pool이 달라도 passive cloud view에 보존하며 이미 접수된 allocation의 증거와 분리합니다. server action·관측·wait·cleanup은 수행하지 않습니다.
 
 selected Compute2.36 이상은 이 legacy IP/pool 경로를 사용할 수 없어 `ErrUnsupported`입니다. 버전 정책과 raw Nova 모델은 [Nova backend 가이드](server-nova-floating-ip.md)의 기반을 사용하지만, 이 Available entry는 association 소비자를 호출하지 않습니다.
 
@@ -140,11 +142,11 @@ Neutron free 선택은 network/current project/port null만 검사합니다. sta
 | 결과 field | 의미 |
 |---|---|
 | `Backend` | 현재 선택한 Neutron/Nova branch. 준비 실패에서 이 값만으로 HTTP 실행을 입증하지 않음 |
-| `ID`, `Address` | 해당 backend의 알려진 실제 모델에서 읽은 공통 값. model 미확인 allocation에서는 비어 있을 수 있음 |
+| `ID`, `Address` | 알려진 실제 모델의 string 편의 값. permissive raw 값이 typed 모델로 표현되지 않으면 비어 있을 수 있으므로 `FloatingIP.Resource/Wire` 확인 |
 | `Reused`, `Allocated` | free 후보 반환 또는 새 POST 접수. 연결·예약·ACTIVE 성공을 뜻하지 않음 |
 | `FloatingIP` | `*compute.FloatingIPRecord`; 공개 Resource view와 실제 Wire를 분리. view 오류에서는 Wire만 남을 수 있음 |
 | `Neutron` | `*network.FloatingIPAvailability`; native 모델, raw Metadata 및 allocation Envelope/header/status |
-| `Nova` | `*compute.NovaFloatingIPAvailability`; actual raw Nova IP와 allocation response |
+| `Nova` | `*compute.NovaFloatingIPAvailability`; optional typed IP와 allocation response, `Inventory`·`PoolQuery`·`Creation` |
 | `FallbackError` | 결과 없이 Neutron pure NotFound에서 Nova를 선택한 원인. 성공 반환과 동시에 남을 수 있음 |
 
 allocation 접수 뒤 응답 검증·read/Close·후속 GET·source·취소 오류가 발생하면 알려진 모델과 실제 receipt를 result 옆에 보존합니다. 성공과 실패에서 실제 backend를 읽고, error가 있어도 `Allocated`와 모델/응답 증거를 확인합니다. 오류가 있는 partial을 유효한 다음 mutation 대상으로 간주하지 않습니다. 이미 할당한 자원을 자동 삭제하거나 다른 backend/network로 재할당하지 않습니다.
@@ -189,10 +191,12 @@ Python public Available의 인자는 network/server뿐이며 자체 wait/reuse/t
 
 Python Neutron 성공은 network FloatingIP Resource를 그대로 반환한다. Go의 `FloatingIP`는 SDK 소유 반환 view로 location·기본값·Nova strict aliases/properties를 제공하고 실제 backend 모델과 Wire를 함께 보존한다. Nova view의 합성 ACTIVE와 configured-Neutron fallback의 정규화 규칙은 실제 접수/연결 증거와 별도로 읽는다. 이 값 모델은 Python mutable Resource의 inherited fetch/commit/session 전체를 제공하지 않는다.
 
-Available의 named 매핑은 다음 두 실제 선택 분기가 남아 미완료다. 첫째, Python은 unfiltered Neutron list404에서 configured-source로 정규화한 Nova 목록을 Neutron network/project/null-port로 필터한 뒤 필요하면 Neutron allocation을 수행하지만, 현재 getter는 외부 Nova 경로로 직접 전환한다. 둘째, Python Nova list404는 빈 후보로 처리해 fresh POST·compat GET을 진행하지만 현재 getter는 오류로 종료한다. 이번 Resource view 추가로 이 두 분기를 완료하지 않는다. Nova getter의 selected IPv4/pool/association 검증도 Python의 passive row 정규화보다 엄격하다.
+Available의 named 매핑에는 Neutron 내부 목록 분기 하나가 남습니다. Python은 unfiltered Neutron list404에서 configured-source로 정규화한 Nova 목록을 Neutron network/project/null-port로 필터한 뒤 필요하면 Neutron allocation을 수행하지만, 현재 getter는 외부 Nova 경로로 직접 전환합니다. 직접/외부 Nova의 raw 필터→전체 matching 정규화와 clean list404 이후 fresh POST·compat GET은 구현·검증했습니다. 전체 API 승격은 남은 Neutron 분기를 완료한 뒤 판정합니다.
 
 cloud has_service/version/config 전체, configured API GET cache와 mutable Resource/session은 별도 전체 SDK 범위다. [기존 Compute IP consumer](server-ip-dispatch.md)의 연결·wait 및 [독립 Create](floating-ip-create.md)·[Delete](floating-ip-delete.md)·[조회](floating-ip-queries.md)의 판정은 각 선언에서 추적하며 이 Available 반환 view의 완료 여부와 합산하지 않는다.
 
 Python 비교는 고정 source 정적 확인이다. 위 Python 예제나 인증된 OpenStack 실행의 확인을 뜻하지 않는다. 실제 HTTP fixture·정확한 독립 main 컴파일·최종 revision gate 결과는 확인된 근거만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록한다.
 
-전체 IP 목록·검색·단건과 pool 조회는 [Floating IP query 가이드](floating-ip-queries.md)의 별도6개 API를 사용합니다. Available은 같은 `FloatingIPRecord`의 Resource·Wire 반환 view를 사용하지만 free-first 선택 또는 allocation과 raw mutation 후보 검증을 수행하는 별도 작업입니다.
+전체 IP 목록·검색·단건과 pool 조회는 [Floating IP query 가이드](floating-ip-queries.md)의 별도6개 API를 사용합니다. Available은 같은 `FloatingIPRecord`의 Resource·Wire와 Query/Create 엔진을 재사용하며 free-first 선택 또는 allocation을 수행합니다. Nova read에 association용 ID·IPv4 verifier를 적용하지 않습니다.
+
+Nova의 `Inventory`는 matching 전체 view와 실제 목록 Pages·Failure·SuppressedNotFound를 보존합니다. `Creation`은 초기 Allocation/AllocationResponse와 mandatory Compatibility의 응답·오류를 분리합니다. 반환 `FloatingIP`를 수정해도 이 증거는 바뀌지 않습니다. `Nova.FloatingIP`은 표현 가능한 행에서만 제공하는 독립된 기존 typed projection이며 null/복합 raw 값의 성공을 막지 않습니다. 새 분기 검증은 [기존 fixture를 재사용한 4개 그룹](../connection_floating_ip_available_nova_test.go)에 있습니다.
