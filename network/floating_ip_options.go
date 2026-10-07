@@ -109,10 +109,11 @@ func WithFloatingIPField(key string, value any) CreateFloatingIPOption {
 func WithWait(options ...resource.WaitOption) CreateFloatingIPOption {
 	options = append([]resource.WaitOption(nil), options...)
 	return func(o *createFloatingIPOptions) error {
-		if err := resource.ValidateWaitOptionsFor[floatingipapi.FloatingIP](options...); err != nil {
+		policy, err := resource.PrepareWaitOptionsFor[floatingipapi.FloatingIP](options...)
+		if err != nil {
 			return err
 		}
-		o.wait, o.waitOptions = true, options
+		o.wait, o.waitOptions = true, []resource.WaitOption{resource.WithWaitPolicy(policy)}
 		return nil
 	}
 }

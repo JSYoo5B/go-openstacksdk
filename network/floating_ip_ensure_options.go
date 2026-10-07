@@ -117,3 +117,9 @@ func WithEnsureWait(options ...resource.WaitOption) EnsureFloatingIPOption {
 func WithEnsureActive() EnsureFloatingIPOption {
 	return func(o *ensureFloatingIPOptions) error { o.destination.wait = true; return nil }
 }
+
+// WithEnsureNoWait returns after association/allocation without polling ACTIVE.
+// It preserves validated wait options for a later policy override.
+func WithEnsureNoWait() EnsureFloatingIPOption {
+	return func(o *ensureFloatingIPOptions) error { o.destination.wait = false; return nil }
+}
