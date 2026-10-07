@@ -3,7 +3,10 @@ package compute
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"gophercloudsdk/internal/nativefind"
+	"gophercloudsdk/internal/rest"
 	"maps"
 	"reflect"
 	"strconv"
@@ -272,22 +275,23 @@ func (s *Servers) prepareCreateServerOptions(request CreateServerRequest, opts .
 
 // Resolve dependencies and POST without waiting, preserving the actual creation
 // response so the caller can validate subsequent observations against its ID.
-func (s *Servers) createServerPrepared(ctx context.Context, request CreateServerRequest, o createServerOptions) (*Server, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
+func (s *Servers) prepareServerCreateBody(ctx context.Context, request CreateServerRequest, o createServerOptions) (serverBody, error) {
+	if err := checkServerCreation(ctx); err != nil {
+		return serverBody{}, err
 	}
 	if o.bootVolume != nil {
 		volumeID := o.bootVolume.String()
 		if o.bootVolume.IsName() {
 			if s.dependencies.Volume == nil {
-				return nil, fmt.Errorf("%w: volume resolver is unavailable", resource.ErrUnsupported)
+				return serverBody{}, fmt.Errorf("%w: volume resolver is unavailable", resource.ErrUnsupported)
 			}
 			id, err := s.dependencies.Volume(ctx, *o.bootVolume)
+			err = errors.Join(err, checkServerCreation(ctx))
 			if err != nil {
-				return nil, s.wrap("resolve boot volume", err)
+				return serverBody{}, s.wrap("resolve boot volume", err)
 			}
 			if err := resource.ID(id).Validate(); err != nil {
-				return nil, s.wrap("resolve boot volume", err)
+				return serverBody{}, s.wrap("resolve boot volume", err)
 			}
 			volumeID = id
 		}
@@ -300,15 +304,16 @@ func (s *Servers) createServerPrepared(ctx context.Context, request CreateServer
 	o.base.ImageRef = request.Image.String()
 	if request.Image.IsName() {
 		if s.dependencies.Image == nil {
-			return nil, fmt.Errorf("%w: image resolver is unavailable", resource.ErrUnsupported)
+			return serverBody{}, fmt.Errorf("%w: image resolver is unavailable", resource.ErrUnsupported)
 		}
 		id, err := s.dependencies.Image(ctx, request.Image)
+		err = errors.Join(err, checkServerCreation(ctx))
 		if err != nil {
-			return nil, s.wrap("resolve image", err)
+			return serverBody{}, s.wrap("resolve image", err)
 		}
-		if o.bootVolumeSize > 0 {
+		if o.bootVolumeSize > 0 || rest.HasOperationGuard(ctx) {
 			if err := resource.ID(id).Validate(); err != nil {
-				return nil, s.wrap("resolve image", err)
+				return serverBody{}, s.wrap("resolve image", err)
 			}
 		}
 		o.base.ImageRef = id
@@ -324,16 +329,40 @@ func (s *Servers) createServerPrepared(ctx context.Context, request CreateServer
 	}
 	o.base.FlavorRef = request.Flavor.String()
 	if request.Flavor.IsName() {
-		flavor, err := s.flavors.Find(ctx, request.Flavor)
-		if err != nil {
-			return nil, s.wrap("resolve flavor", err)
+		if err := checkServerCreation(ctx); err != nil {
+			return serverBody{}, err
 		}
-		o.base.FlavorRef = flavor.ID
+		if rest.HasOperationGuard(ctx) {
+			id, err := nativefind.ResolveName(ctx, s.client, "flavors/detail", "flavor", "flavors", request.Flavor,
+				func(f *Flavor) string { return f.ID }, func(f *Flavor) string { return f.Name }, false, nil)
+			if err != nil {
+				return serverBody{}, s.wrap("resolve flavor", err)
+			}
+			o.base.FlavorRef = id
+		} else {
+			flavor, err := s.flavors.Find(ctx, request.Flavor)
+			if err != nil {
+				return serverBody{}, s.wrap("resolve flavor", err)
+			}
+			o.base.FlavorRef = flavor.ID
+		}
 	}
 	if err := s.prepareServerNetworks(ctx, &o); err != nil {
+		return serverBody{}, err
+	}
+	return serverBody{base: o.base, fields: o.fields}, checkServerCreation(ctx)
+}
+
+func checkServerCreation(ctx context.Context) error {
+	return errors.Join(ctx.Err(), context.Cause(ctx), rest.CheckOperationGuard(ctx))
+}
+
+func (s *Servers) createServerPrepared(ctx context.Context, request CreateServerRequest, o createServerOptions) (*Server, error) {
+	body, err := s.prepareServerCreateBody(ctx, request, o)
+	if err != nil {
 		return nil, err
 	}
-	created, err := servers.Create(ctx, s.client, serverBody{base: o.base, fields: o.fields}, nil).Extract()
+	created, err := servers.Create(ctx, s.client, body, nil).Extract()
 	if err != nil {
 		return nil, s.wrap("create", err)
 	}

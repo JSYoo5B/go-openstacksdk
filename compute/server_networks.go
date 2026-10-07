@@ -2,6 +2,7 @@ package compute
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -99,14 +100,15 @@ func (o *createServerOptions) validateNetworkVersion(version string) error {
 
 func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOptions) error {
 	if len(o.networkInterfaces) == 0 && o.networkMode == "" && s.dependencies.DefaultNetwork != nil {
-		if err := ctx.Err(); err != nil {
+		if err := checkServerCreation(ctx); err != nil {
 			return err
 		}
 		ref, err := s.dependencies.DefaultNetwork(ctx)
+		err = errors.Join(err, checkServerCreation(ctx))
 		if err != nil {
 			return s.wrap("select default network", err)
 		}
-		if err := ctx.Err(); err != nil {
+		if err := checkServerCreation(ctx); err != nil {
 			return err
 		}
 		if ref != (resource.Ref{}) {
@@ -136,7 +138,7 @@ func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOpti
 			if selection.ref == (resource.Ref{}) {
 				continue
 			}
-			if err := ctx.Err(); err != nil {
+			if err := checkServerCreation(ctx); err != nil {
 				return err
 			}
 			id := selection.ref.String()
@@ -146,6 +148,7 @@ func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOpti
 				}
 				var err error
 				id, err = selection.resolve(ctx, selection.ref)
+				err = errors.Join(err, checkServerCreation(ctx))
 				if err != nil {
 					return s.wrap("resolve "+selection.kind, err)
 				}
@@ -166,5 +169,5 @@ func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOpti
 	// The owned overlay preserves empty tags that the native Network string
 	// field would omit, while other server fields keep native serialization.
 	o.fields["networks"] = rows
-	return ctx.Err()
+	return checkServerCreation(ctx)
 }

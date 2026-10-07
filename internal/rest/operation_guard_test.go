@@ -16,3 +16,17 @@ func TestOperationGuardsComposeAndPreserveOuterCauses(t *testing.T) {
 		t.Fatal(err, calls)
 	}
 }
+
+func TestNestedOperationSourcesRetainAncestorsAndIsolateChildBindings(t *testing.T) {
+	outer, inner := errors.New("outer binding"), errors.New("inner binding")
+	parent := WithOperationSources(context.Background())
+	RegisterOperationSource(parent, func(context.Context) error { return outer })
+	child := WithOperationSources(parent)
+	RegisterOperationSource(child, func(context.Context) error { return inner })
+	if err := CheckOperationGuard(child); !errors.Is(err, outer) || !errors.Is(err, inner) {
+		t.Fatal(err)
+	}
+	if err := CheckOperationGuard(parent); !errors.Is(err, outer) || errors.Is(err, inner) {
+		t.Fatal(err)
+	}
+}

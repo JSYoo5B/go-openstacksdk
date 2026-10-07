@@ -10,6 +10,8 @@ import (
 	"gophercloudsdk/blockstorage"
 	"gophercloudsdk/compute"
 	"gophercloudsdk/image"
+	"gophercloudsdk/internal/nativefind"
+	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
 
@@ -174,7 +176,8 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 		c.compute = compute.New(client, compute.Dependencies{
 			NetworkRoles: c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,
 			AddressCompute: c.addressComputeClient, NetworkPolicy: c.options.networkRoles, ServerAddresses: c.options.serverAddresses,
-			DefaultNetwork: c.defaultServerNetwork,
+			DefaultNetwork:          c.defaultServerNetwork,
+			DefaultNetworkUsesRoles: !c.options.defaultNetworkSet && c.options.configuredDefaultNetwork != "",
 			FloatingIPs: func(ctx context.Context) (*network.FloatingIPs, error) {
 				service, err := c.Network(ctx)
 				if err != nil {
@@ -187,6 +190,21 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 				if err != nil {
 					return "", err
 				}
+				if rest.HasOperationGuard(ctx) {
+					if service.API == nil || service.Images == nil || service.RawClient() == nil || service.RawClient().ProviderClient == nil {
+						return "", invalid("image resolver service is required")
+					}
+					api, collection, raw := service.API, service.Images, service.RawClient()
+					child := api.Images
+					return nativefind.ResolveName(ctx, raw, "images", "image", "images", ref,
+						func(value *image.Image) string { return value.ID }, func(value *image.Image) string { return value.Name }, true,
+						func(context.Context) error {
+							if service.API != api || service.Images != collection || service.RawClient() != raw || api.Images != child || api.RawClient() != raw {
+								return invalid("image resolver source changed")
+							}
+							return nil
+						})
+				}
 				value, err := service.Images.Find(ctx, ref)
 				if err != nil {
 					return "", err
@@ -197,6 +215,21 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 				service, err := c.Network(ctx)
 				if err != nil {
 					return "", err
+				}
+				if rest.HasOperationGuard(ctx) {
+					if service.API == nil || service.Networks == nil || service.RawClient() == nil || service.RawClient().ProviderClient == nil {
+						return "", invalid("network resolver service is required")
+					}
+					api, collection, raw := service.API, service.Networks, service.RawClient()
+					child := api.Networks
+					return nativefind.ResolveName(ctx, raw, "networks", "network", "networks", ref,
+						func(value *network.Network) string { return value.ID }, func(value *network.Network) string { return value.Name }, true,
+						func(context.Context) error {
+							if service.API != api || service.Networks != collection || service.RawClient() != raw || api.Networks != child || api.RawClient() != raw {
+								return invalid("network resolver source changed")
+							}
+							return nil
+						})
 				}
 				value, err := service.Networks.Find(ctx, ref)
 				if err != nil {
@@ -209,12 +242,42 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 				if err != nil {
 					return "", err
 				}
+				if rest.HasOperationGuard(ctx) {
+					if service.API == nil || service.Ports == nil || service.RawClient() == nil || service.RawClient().ProviderClient == nil {
+						return "", invalid("port resolver service is required")
+					}
+					api, collection, raw := service.API, service.Ports, service.RawClient()
+					child := api.Ports
+					return nativefind.ResolveName(ctx, raw, "ports", "port", "ports", ref,
+						func(value *network.Port) string { return value.ID }, func(value *network.Port) string { return value.Name }, true,
+						func(context.Context) error {
+							if service.API != api || service.Ports != collection || service.RawClient() != raw || api.Ports != child || api.RawClient() != raw {
+								return invalid("port resolver source changed")
+							}
+							return nil
+						})
+				}
 				return service.Ports.ResolveID(ctx, ref)
 			},
 			Volume: func(ctx context.Context, ref resource.Ref) (string, error) {
 				service, err := c.BlockStorage(ctx)
 				if err != nil {
 					return "", err
+				}
+				if rest.HasOperationGuard(ctx) {
+					if service.API == nil || service.Volumes == nil || service.RawClient() == nil || service.RawClient().ProviderClient == nil {
+						return "", invalid("volume resolver service is required")
+					}
+					api, collection, raw := service.API, service.Volumes, service.RawClient()
+					child := api.Volumes
+					return nativefind.ResolveName(ctx, raw, "volumes/detail", "volume", "volumes", ref,
+						func(value *blockstorage.Volume) string { return value.ID }, func(value *blockstorage.Volume) string { return value.Name }, true,
+						func(context.Context) error {
+							if service.API != api || service.Volumes != collection || service.RawClient() != raw || api.Volumes != child || api.RawClient() != raw {
+								return invalid("volume resolver source changed")
+							}
+							return nil
+						})
 				}
 				return service.Volumes.ResolveID(ctx, ref)
 			},
