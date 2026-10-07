@@ -180,3 +180,5 @@ plan이 직접 실행하는 owned REST 목록·명시 Neutron lookup·port 재�
 [Compute 자동 floating IPv4](../compute/server-automatic-ip.md)는 `FloatingIPs.NewPlanner`의 한 guarded 역할 snapshot을 주소 분류와 대상 선택에 공유하고, 필요할 때 같은 plan을 실행합니다. `NewPlanner` 자체는 조회·owner 확인을 하지 않으며 `NetworkRoles`는 호출자가 소유하는 복사본을 반환합니다. 한 planner가 확보한 snapshot은 Reset 이후에도 유지되고 다음 planner는 새 cache를 읽을 수 있습니다. `WithEnsureActive`는 기존 wait 옵션을 유지하며 actual ACTIVE를 필수로 만들지만 owner를 미리 바인딩하지 않습니다. 원래 직접 Plan API에는 자동 필요성이나 raw Nova 관측 책임이 없습니다.
 
 접수 후 IP 모델·오류 보존의 [후속 검증 기록](../docs/sdk-support-ledger.md#neutron-접수-응답의-ip-모델-보존)은 POST201/202·PUT200의 complete/invalid/truncated body와 서버 Get/Wait/Create/Ensure 부분 결과를 구분합니다.
+
+[Compute legacy Nova backend](../compute/server-nova-floating-ip.md)는 별도의 raw IP 모델·pool/list/allocation/add action을 사용합니다. Nova 진단 Plan은 실행 가능한 Neutron plan을 만들지 않으며, 직접 PrepareEnsure/EnsurePrepared의 책임은 Neutron 선택·실행입니다.

@@ -8,8 +8,8 @@
 
 | 입력 | 선택되는 작업 |
 |---|---|
-| `compute.WithFloatingIPPool(resource.Name("public"))` | 정확한 외부 network 이름의 pool에서 재사용 또는 새 IPv4 할당 |
-| `compute.WithFloatingIPPool(resource.ID("external-id"))` | 명시한 외부 network ID의 pool 사용 |
+| `compute.WithFloatingIPPool(resource.Name("public"))` | Neutron 외부 network 이름; Nova는 literal pool 값으로 재사용/할당 |
+| `compute.WithFloatingIPPool(resource.ID("external-id"))` | Neutron 외부 network ID; Nova는 문자열 자체를 pool 값으로 사용 |
 | `compute.WithFloatingIPAddresses("198.51.100.10", "198.51.100.11")` | 이미 존재하는 두 IP를 제공한 순서대로 연결 |
 | 둘 다 생략 | 기존 자동 needs/skip 정책 적용 |
 
@@ -17,7 +17,7 @@
 
 pool/IP 선택에서는 최종 winning selector만 검증합니다. 공통 address/Ensure/wait 옵션의 유효성 검증은 계속 수행합니다. 유효한 pool이 있으면 무시되는 IP 문자열을 검사하지 않습니다. IP 목록이 이기면 각 원소가 IPv4여야 하며 순서와 중복을 유지합니다. 목록은 옵션 생성·준비 시 복사합니다. IPv4 주소를 floating IP 이름이나 ID로 추측하지 않고, 기존 IP의 `floating_ip_address`를 정확히 조회합니다.
 
-`AutomaticFloatingIPRequest.Network`와 생성 옵션의 `FloatingIPNetwork`는 기존 **automatic 분기의 allocation network**입니다. 명시 pool은 이를 대체하고, 명시 IP 목록은 각 IP에 기록된 floating network를 사용합니다. 이 입력들은 서버 NIC network를 바꾸지 않습니다.
+`AutomaticFloatingIPRequest.Network`와 생성 옵션의 `FloatingIPNetwork`는 기존 **automatic 분기의 allocation network**이며 Nova에서는 literal pool 값입니다. 명시 pool은 이를 대체하고, Neutron 명시 IP 목록은 각 IP에 기록된 floating network를 사용합니다. Nova는 IP ID·주소·pool·instance association을 재검증합니다. 이 입력들은 서버 NIC network를 바꾸지 않습니다.
 
 pool/IP 목록은 `WithAutomaticIPEnabled(false)`, private cloud, 기존 public/floating 주소 등의 **자동 skip 조건을 우회**합니다. 서버 readiness 계약은 계속 적용됩니다. GetActiveServer의 non-ACTIVE는 nil,nil이고 ERROR나 ACTIVE 주소 미준비는 오류입니다. Ensure의 실제 연결은 supplied ACTIVE를 요구하며, Wait/Create는 같은 ID의 raw 현재 상태와 주소 준비를 먼저 기다립니다.
 
@@ -27,16 +27,16 @@ pool/IP 목록은 `WithAutomaticIPEnabled(false)`, private cloud, 기존 public/
 
 | 호출 | 완료 의미와 옵션 위치 |
 |---|---|
-| `conn.PlanServerFloatingIP(ctx, input, opts...)` | 읽기 전용 선택; 명시 IP는 ordered `Decision.AttachmentSelections`, pool은 `Decision.Selection` |
-| `conn.EnsureServerFloatingIP(ctx, input, opts...)` | 각 assignment의 실제 IP ACTIVE와 exact raw Nova floating IPv4 관측까지 순차 완료 |
+| `conn.PlanServerFloatingIP(ctx, input, opts...)` | 읽기 전용 선택; Neutron 명시 IP는 ordered `Decision.AttachmentSelections`, pool은 `Decision.Selection`; Nova는 backend 진단 |
+| `conn.EnsureServerFloatingIP(ctx, input, opts...)` | 각 assignment의 실제 Neutron IP ACTIVE와 exact raw Nova floating IPv4 관측까지 순차 완료 |
 | `conn.GetActiveServer(ctx, input, compute.WithServerReadyAutomaticIPOptions(opts...))` | supplied 상태 판정 후 기본 비동기 접수; IP/raw 관측 대기 없음 |
-| 위 Get에 `compute.WithActiveServerWait(true)` 추가 | 각 IP ACTIVE와 raw Nova 관측도 요구 |
-| `conn.WaitForServer(ctx, input, compute.WithServerReadyAutomaticIPOptions(opts...))` | raw 서버 readiness 후 IP ACTIVE·Nova 관측 필수 |
+| 위 Get에 `compute.WithActiveServerWait(true)` 추가 | Neutron IP ACTIVE와 raw Nova 관측도 요구 |
+| `conn.WaitForServer(ctx, input, compute.WithServerReadyAutomaticIPOptions(opts...))` | raw 서버 readiness 후 Neutron IP ACTIVE·Nova 관측 필수 |
 | `conn.CreateWithAutomaticFloatingIP(ctx, request, compute.AutomaticServerCreateOptions{AutomaticIP: opts, Server: serverOptions})` | 생성·raw readiness·같은 IP 선택과 순차 관측; 기존 부팅/NIC 옵션 사용 |
 
 `service`의 같은 이름 메서드도 동일합니다. `service.Servers.WaitForServer`는 별도 collection 상태 대기로 IP dispatch를 수행하지 않습니다. 기존 `Servers.CreateWithFloatingIP`의 옵션과 반환 타입도 이 새 옵션 그룹으로 바뀌지 않습니다.
 
-대상 선택은 `compute.WithAutomaticEnsureOptions(...)`로 공유합니다. `network.WithEnsurePort`, `WithEnsureNATDestination`, `WithEnsureFixedAddress`, `WithEnsureWait`가 pool/auto 및 명시 IP 목적지·대기에 적용됩니다. `WithEnsureProject`와 `WithEnsureReuse`는 pool/auto 재사용·할당에만 적용되며 명시 기존 IP의 검색을 현재 project/free IP로 제한하지 않습니다. 이미 다른 포트에 연결된 기존 IP도 Neutron 권한 아래 이동할 수 있습니다. 공유 역할과 목적지 정책을 적용한 뒤에도 port/fixed IPv4 후보가 여러 개 남으면 명시 selector가 필요합니다.
+대상 선택은 `compute.WithAutomaticEnsureOptions(...)`로 공유합니다. 다음 port/NAT/project/revision·IP waiter 설명은 Neutron branch의 계약입니다. Nova는 fixed/reuse를 소비하며 port/NAT/project override를 거부합니다. `network.WithEnsurePort`, `WithEnsureNATDestination`, `WithEnsureFixedAddress`, `WithEnsureWait`가 pool/auto 및 명시 IP 목적지·대기에 적용됩니다. `WithEnsureProject`와 `WithEnsureReuse`는 pool/auto 재사용·할당에만 적용되며 명시 기존 IP의 검색을 현재 project/free IP로 제한하지 않습니다. 이미 다른 포트에 연결된 기존 IP도 Neutron 권한 아래 이동할 수 있습니다. 공유 역할과 목적지 정책을 적용한 뒤에도 port/fixed IPv4 후보가 여러 개 남으면 명시 selector가 필요합니다.
 
 Plan은 owner-free로 목적지를 선택하고 mutation을 보내지 않습니다. 이후 Ensure를 새로 호출하면 새 작업으로 다시 조회·준비합니다. 공개 Decision의 selection은 실행 가능한 plan handle이 아닙니다. `Needed=true`와 Nova backend를 반환하는 diagnostic Plan도 가능하므로 Plan 성공이 해당 backend의 실행 지원을 뜻하지 않습니다.
 
@@ -71,9 +71,9 @@ ready = conn.wait_for_server(
 )
 ```
 
-Go pool은 [Ensure](../network/floating-ip-ensure.md)의 current-project/reuse 정책과 같은 고정 tuple 실행을 사용합니다. 같은 목적지에 이미 붙은 IP를 free IP보다 먼저 재사용하며, 모든 후보 페이지를 읽고 revision이 있으면 조건부 PUT을 보냅니다. Python의 [available IP 경로](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L608-L671)는 free IP를 선택하거나 할당하고, pool helper는 별도 attach/Compute refresh 단계를 이어갑니다. 두 정책을 동일하다고 주장하지 않습니다.
+Go Neutron pool은 [Ensure](../network/floating-ip-ensure.md)의 current-project/reuse 정책과 같은 고정 tuple 실행을 사용합니다. 같은 목적지에 이미 붙은 IP를 free IP보다 먼저 재사용하며, 모든 후보 페이지를 읽고 revision이 있으면 조건부 PUT을 보냅니다. Python의 [available IP 경로](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L608-L671)는 free IP를 선택하거나 할당하고, pool helper는 별도 attach/Compute refresh 단계를 이어갑니다. 두 정책을 동일하다고 주장하지 않습니다.
 
-Go 명시 IP 검색·연결은 [Attach](../network/floating-ip-attach.md)를 사용합니다. 목록 조회의 모든 페이지와 exact address를 검사하고 모호한 IP나 목적지는 오류로 반환합니다. project owner를 자동 조회하거나 새 IP를 할당하지 않습니다. 이미 연결된 IP의 안정된 association을 확인하며 준비한 revision 조건과 목적지를 유지하며 unrelated association drift가 있으면 재선택하지 않고 오류를 반환합니다.
+Go Neutron 명시 IP 검색·연결은 [Attach](../network/floating-ip-attach.md)를 사용합니다. 목록 조회의 모든 페이지와 exact address를 검사하고 모호한 IP나 목적지는 오류로 반환합니다. project owner를 자동 조회하거나 새 IP를 할당하지 않습니다. 이미 연결된 IP의 안정된 association을 확인하며 준비한 revision 조건과 목적지를 유지하며 unrelated association drift가 있으면 재선택하지 않고 오류를 반환합니다.
 
 ## 독립 Go 예제
 
@@ -177,27 +177,29 @@ func run(ctx context.Context, cloud, id, pool, ips string, execute bool) error {
 
 ## 순차 완료·부분 결과·시간 예산
 
-동기 실행은 IP #1의 lookup·association·실제 IP ACTIVE·같은 server ID의 raw Nova exact floating IPv4 관측을 끝낸 뒤 #2를 조회합니다. async Get은 각 association 접수를 끝낸 뒤 다음 조회로 진행하며 IP/raw 대기를 하지 않습니다. 어느 경로에서도 #2 실패 뒤 #3를 시작하거나 자동 DELETE·대체 allocation·Nova fallback을 보내지 않습니다.
+동기 실행은 IP #1의 lookup·association·Neutron IP ACTIVE·같은 server ID의 raw Nova exact floating IPv4 관측을 끝낸 뒤 #2를 조회합니다. async Get은 각 association 접수를 끝낸 뒤 다음 조회로 진행하며 IP/raw 대기를 하지 않습니다. 어느 경로에서도 #2 실패 뒤 #3를 시작하거나 자동 DELETE·대체 allocation·Nova fallback을 보내지 않습니다.
 
 | 결과 | 의미 |
 |---|---|
 | `Mode` | `ServerIPAutomatic`, `ServerIPPool`, `ServerIPExplicit` |
 | `Attempts` | 시작한 explicit pool/IP 항목만 기록; Index는 0부터, pool의 RequestedAddress는 빈 문자열 |
-| `Attempts[i].Assignment` | 그 항목의 알려진 IP·reused/allocated evidence; 연결 전 모델이나 접수 후 partial일 수 있음 |
+| `Attempts[i].Assignment` / `NovaAssignment` | 해당 backend의 알려진 IP·reused/allocated evidence; 연결 전 모델이나 접수 후 partial일 수 있음 |
 | `Completed` | 해당 항목 완료; async에서는 접수 완료를 포함 |
 | `Observed` | 해당 항목 완료 당시 actual ACTIVE raw Nova의 exact version4/type=floating/address 관측 |
-| scalar `Assignment` | 가장 최근의 알려진 assignment; #2 lookup 실패면 #1을 유지하고 #2 partial이 있으면 이를 보존 |
+| scalar `Assignment` / `NovaAssignment` | 해당 backend의 가장 최근 알려진 assignment; #2 lookup 실패면 #1을 유지하고 #2 partial이 있으면 이를 보존 |
 | `Server` | supplied 또는 마지막 matching raw Nova 서버; 생성의 최초 응답은 별도 `Creation` |
 | `Attempts[i].Error` | 실패한 시작 항목의 오류; 사전 backend/capability 오류면 Attempts가 비어 있을 수 있음 |
 
-#1 완료 뒤 #2 실패해도 #1의 `Completed/Observed/Assignment`는 유지하며 result와 error를 함께 반환합니다. 전체 `Observed`는 성공한 동기 explicit 흐름에서 true이고, async 또는 오류에서 false입니다. **각 Observed는 처리 당시의 역사적 관측입니다.** 마지막 `Server` snapshot에 모든 이전 IP가 동시에 남아 있다는 추가 검증은 하지 않습니다.
+#1 완료 뒤 #2 실패해도 #1의 `Completed/Observed`와 해당 backend assignment는 유지하며 result와 error를 함께 반환합니다. 전체 `Observed`는 성공한 동기 explicit 흐름에서 true이고, async 또는 오류에서 false입니다. **각 Observed는 처리 당시의 역사적 관측입니다.** 마지막 `Server` snapshot에 모든 이전 IP가 동시에 남아 있다는 추가 검증은 하지 않습니다.
 
-같은 작업의 생성/readiness·선택·여러 IP association·대기·raw 관측은 하나의 overall context budget을 소비합니다. 항목마다 overall timeout을 새로 시작하지 않습니다. `WithAutomaticIPTimeout` 또는 더 이른 parent deadline이 전체 상한이며, 서버/IP waiter의 별도 timeout은 해당 stage를 더 짧게 제한할 수 있습니다. 옵션은 한 번 준비하여 소비하고, callback/source 변경·취소 오류와 접수한 HTTP 증거·부분 리소스를 보존합니다. Plan 이후 새 Ensure 호출은 별도 작업·budget입니다.
+같은 작업의 생성/readiness·선택·여러 IP association·대기·raw 관측은 하나의 overall context budget을 소비합니다. 항목마다 overall timeout을 새로 시작하지 않습니다. `WithAutomaticIPTimeout` 또는 더 이른 parent deadline이 전체 상한이며, 서버/Neutron IP waiter의 별도 timeout은 해당 stage를 더 짧게 제한할 수 있습니다. 옵션은 한 번 준비하여 소비하고, callback/source 변경·취소 오류와 접수한 HTTP 증거·부분 리소스를 보존합니다. Plan 이후 새 Ensure 호출은 별도 작업·budget입니다.
 
-기존 기본값은 유지합니다. Plan/Ensure/Create는 전체5분·raw poll2초, Get/Wait는 전체180초·raw poll5초입니다. Get의 IP wait는 기본 false이고 `WithActiveServerWait(true)`로 켭니다. Ensure/Wait/Create는 IP ACTIVE·raw 관측을 강제하므로 하위 `WithEnsureNoWait`로 끌 수 없습니다. 명시 branch의 configured Nova/None나 clean Network 부재는 실행 시 `resource.ErrUnsupported`입니다. Create에서 이미 알려진 Nova/None explicit은 Nova POST 전에 거부하며, endpoint 부재 발견은 lazy로 유지합니다.
+기존 기본값은 유지합니다. Plan/Ensure/Create는 전체5분·raw poll2초, Get/Wait는 전체180초·raw poll5초입니다. Get의 IP wait는 기본 false이고 `WithActiveServerWait(true)`로 켭니다. Ensure/Wait/Create는 Neutron IP ACTIVE·실제 raw 서버 ACTIVE/목표 관측을 강제하므로 하위 `WithEnsureNoWait`로 끌 수 없습니다. 명시 branch의 configured Nova/None나 정확한 Network endpoint 부재는 [legacy Nova backend](server-nova-floating-ip.md)를 실행합니다. Create는 이미 알려진 selected2.36 이상·Neutron 전용 port/NAT/project override를 서버 POST 전에 거부하며, endpoint 발견은 lazy로 유지합니다. Nova IP에는 ACTIVE 상태를 합성하지 않습니다.
 
 ## 확인 범위와 남은 작업
 
-이 단위는 기존 Service/Connection 소비자에 Neutron pool > ordered IP > auto 분기를 연결합니다. 독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)는 별도 기본60초·wait=false entry를 제공합니다. Python의 dynamic 입력·full returned Resource 계약은 계속 비교합니다. Nova-network mutation/fallback, Python async helper의 선택적 Compute refresh, cloud get_server의 Resource/interface/location/session normalization·lookup retry·fault/extra_data·cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait 전체 연산의 완료를 이 부분 구현만으로 주장하지 않습니다.
+이 단위는 기존 Service/Connection 소비자에 Neutron/Nova pool > ordered IP > auto 분기를 연결합니다. 독립 [AddIPsToServer·AddIPList](server-ip-helpers.md)는 별도 기본60초·wait=false entry를 제공합니다. Python의 dynamic 입력·full returned Resource 계약은 계속 비교합니다. Nova의 별도 공개 CRUD·detach/cleanup·함수별 fallback, Python async helper의 선택적 Compute refresh, cloud get_server의 Resource/interface/location/session normalization·lookup retry·fault/extra_data·cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait 전체 연산의 완료를 이 부분 구현만으로 주장하지 않습니다.
 
 Python 비교는 고정 source의 정적 검토입니다. 로컬 HTTP fixtures는 순서·duplicates·pool priority·read-only Plan·selector 검증·async/sync 차이·옵션1회·고정 ID·공통 deadline 동일성/취소·partial response/source guard를 검증합니다. Python 예제나 인증된 OpenStack cloud 실행을 뜻하지 않습니다. 독립 main의 컴파일과 최종 검증 revision은 실제 실행 결과만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다.
+
+Nova의 pool은 literal 값이며 기본 pool은 `/os-floating-ip-pools`의 첫 name입니다. `NovaAssignment`는 실제 raw IP와 allocation200/action202 증거를 보존합니다. `NovaSelections`는 실행 중 확인한 진단이며 공개 실행 handle이 아닙니다. Plan의 Nova branch는 IP 목록/할당/action 요청을 보내지 않습니다. Neutron HTTP 실패 뒤에 Nova로 전환하거나 실패한 주소 뒤 다음 항목을 시작하지 않습니다.

@@ -29,7 +29,7 @@ server = conn.add_ip_list(
 )
 ```
 
-이 Network API는 **기존 Neutron IP 한 개의 연결 기반**입니다. `FloatingIPAssignment`를 반환하며 기본은 비동기이고 `WithAttachWait`는 실제 Neutron IP ACTIVE를 기다립니다. [Compute의 IP dispatch](../compute/server-ip-dispatch.md)가 이 기반과 Ensure를 pool → 순차 명시 IPv4 → automatic 순서로 소비합니다. 기존 Ensure/Get/Wait/Create의 동기 소비자는 실제 IP ACTIVE와 raw Nova 목표 주소를 확인하고, GetActiveServer 기본 async는 접수 결과를 반환합니다. 직접 Network Attach는 Server 반환·raw Nova 관측·여러 주소 dispatch를 수행하지 않습니다. Nova-network backend와 standalone cloud `add_ip_list`의 full returned Resource/normalization·전체 Resource/session/normalization 계약은 남아 있으므로 전체 `add_ip_list` 지원 완료로 세지 않습니다.
+이 Network API는 **기존 Neutron IP 한 개의 연결 기반**입니다. `FloatingIPAssignment`를 반환하며 기본은 비동기이고 `WithAttachWait`는 실제 Neutron IP ACTIVE를 기다립니다. [Compute의 IP dispatch](../compute/server-ip-dispatch.md)가 이 기반과 Ensure를 pool → 순차 명시 IPv4 → automatic 순서로 소비합니다. 기존 Ensure/Get/Wait/Create의 Neutron 동기 소비자는 실제 IP ACTIVE와 raw Nova 목표 주소를 확인하고, GetActiveServer 기본 async는 접수 결과를 반환합니다. 직접 Network Attach는 Server 반환·raw Nova 관측·여러 주소 dispatch를 수행하지 않습니다. [Compute legacy Nova backend](../compute/server-nova-floating-ip.md)는 별도로 실행하며, standalone cloud `add_ip_list`의 full returned Resource/normalization·전체 Resource/session/normalization 계약은 남아 있으므로 전체 `add_ip_list` 지원 완료로 세지 않습니다.
 
 ## 독립 Go 예제
 

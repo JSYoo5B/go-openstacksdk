@@ -29,7 +29,7 @@ standalone Add는 supplied ACTIVE를 요구하지 않으며 BUILD·SHUTOFF·ERRO
 
 `WithServerIPWait(true)`는 같은 ID의 raw Nova `GET /servers/{id}`에서 exact version4·type=floating·이번 assigned IPv4를 확인합니다. raw 상태가 BUILD나 ERROR여도 해당 주소가 보이면 관측을 완료합니다. 다른 floating 주소·fixed 행·IPv6·AccessIPv4·Neutron ACTIVE만으로 완료하지 않습니다. **서버나 IP의 ACTIVE는 이 entry의 완료 조건이 아닙니다.** `WithEnsureWait`의 옵션은 검증되지만 이 entry에서 IP ACTIVE polling을 켜지 않습니다. raw budget/poll/progress는 `WithAutomaticIPTimeout`, `WithUnlimitedAutomaticIPTimeout`, `WithAutomaticIPPollInterval`, `WithAutomaticIPProgress`로 설정합니다.
 
-기존 `EnsureServerFloatingIP`, `GetActiveServer`의 상태 판정, `WaitForServer`, `CreateWithAutomaticFloatingIP`의 stronger readiness 조건은 바꾸지 않습니다. [기존 서버 readiness](server-ready.md)와 [생성 흐름](create-with-automatic-floating-ip.md)은 실제 서버 ACTIVE·주소 준비 및 각 entry의 IP ACTIVE/관측 조건을 계속 적용합니다.
+기존 `EnsureServerFloatingIP`, `GetActiveServer`의 상태 판정, `WaitForServer`, `CreateWithAutomaticFloatingIP`의 stronger readiness 조건은 바꾸지 않습니다. [기존 서버 readiness](server-ready.md)와 [생성 흐름](create-with-automatic-floating-ip.md)은 실제 서버 ACTIVE·주소 준비 및 각 entry의 Neutron IP ACTIVE/관측 조건을 계속 적용합니다.
 
 ## Python과 비교
 
@@ -158,6 +158,8 @@ server ID/상태의 top-level snapshot과 positional 목록 복사는 옵션 실
 
 ## 확인 범위와 remaining
 
-이 단위는 standalone60초/async entry와 Neutron dispatcher·positional 목록을 제공합니다. 명시 pool/IP의 configured Nova/None나 필요한 Network endpoint 부재, 자동 분기에서 필요한 Nova assignment는 typed `resource.ErrUnsupported`이며 자동 skip나 빈 목록과 구분합니다. Nova mutation/fallback, Python의 async already-attached/pool refresh, reuse=false pool create의 특수 IP ACTIVE 대기, full cloud Resource/interface/location/session normalization·lookup/error/cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait와 해당 Python cloud 연산의 전체 완료를 이 단위만으로 판정하지 않습니다.
+이 entry는 Neutron과 [legacy Nova backend](server-nova-floating-ip.md)의 dispatcher·positional 목록을 제공합니다. 명시 pool/IP의 configured Nova/None 또는 정확한 Network endpoint 부재는 Nova를 선택합니다. automatic None은 skip입니다. Nova는 호환 Compute endpoint가 필요하며 selected2.36 이상·Neutron 전용 port/NAT/project override는 typed `resource.ErrUnsupported`입니다. Nova의 별도 공개 CRUD·detach/cleanup·함수별 fallback, Python의 async already-attached/pool refresh, reuse=false pool create의 특수 IP ACTIVE 대기, full cloud Resource/interface/location/session normalization·lookup/error/cleanup 전체 계약은 계속 남습니다. 서버 Create/Wait와 해당 Python cloud 연산의 전체 완료를 이 단위만으로 판정하지 않습니다.
 
 Python 비교는 고정 source의 정적 검토입니다. 로컬 HTTP fixture는 async/sync·BUILD/ERROR 주소 관측·IP DOWN·60초 공통 budget·positional 권한·empty no-op·옵션1회·부분 응답·source guard를 검증합니다. Python 예제나 인증된 OpenStack cloud 실행을 뜻하지 않습니다. 독립 main의 정확한 컴파일 및 최종 검증 revision은 실제 확인한 결과만 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다.
+
+Nova 결과는 `NovaAssignment`와 각 `Attempts[i].NovaAssignment`를 사용합니다. action202를 접수해도 pre-action 모델의 association이나 합성 IP ACTIVE를 바꾸지 않습니다. IP 접수·already-attached 확인과 raw 관측을 구분하며, allocation/후속 조회/관측 실패의 알려진 모델과 실제 HTTP 증거를 함께 보존합니다.
