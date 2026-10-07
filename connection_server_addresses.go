@@ -58,3 +58,20 @@ func (c *Connection) ExpandServerInterfaces(ctx context.Context, server *compute
 	}
 	return c.addressFacade().ExpandServerInterfaces(ctx, server, options...)
 }
+
+// PlanServerFloatingIP keeps known skips free of endpoint discovery. A nil
+// address refresh or Nova supplementation requires a lazy Compute endpoint;
+// Neutron classification shares Connection's guarded role snapshot.
+func (c *Connection) PlanServerFloatingIP(ctx context.Context, input compute.AutomaticFloatingIPRequest, options ...compute.AutomaticFloatingIPOption) (*compute.ServerFloatingIPDecision, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().PlanServerFloatingIP(ctx, input, options...)
+}
+
+func (c *Connection) EnsureServerFloatingIP(ctx context.Context, input compute.AutomaticFloatingIPRequest, options ...compute.AutomaticFloatingIPOption) (*compute.AutomaticServerIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().EnsureServerFloatingIP(ctx, input, options...)
+}
