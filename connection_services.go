@@ -3,12 +3,26 @@ package gophercloudsdk
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
 )
+
+// Only a single-cause chain ending in catalog absence can select an alternate
+// backend. An errors.Join may also carry HTTP, source or cancellation failures.
+func missingCatalogEndpoint(err error) bool {
+	for err != nil {
+		switch err.(type) {
+		case gophercloud.ErrEndpointNotFound, *gophercloud.ErrEndpointNotFound:
+			return true
+		}
+		err = errors.Unwrap(err)
+	}
+	return false
+}
 
 const (
 	Accelerator            Service = "accelerator"

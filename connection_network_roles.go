@@ -2,9 +2,6 @@ package gophercloudsdk
 
 import (
 	"context"
-	"errors"
-
-	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/network"
 )
 
@@ -23,9 +20,7 @@ func (c *Connection) GetNetworkRoles(ctx context.Context) (*network.NetworkRoleS
 	}
 	service, err := c.Network(ctx)
 	if err != nil {
-		var missing *gophercloud.ErrEndpointNotFound
-		var missingValue gophercloud.ErrEndpointNotFound
-		if errors.As(err, &missing) || errors.As(err, &missingValue) {
+		if missingCatalogEndpoint(err) {
 			return &network.NetworkRoleSnapshot{}, ctx.Err()
 		}
 		return nil, err

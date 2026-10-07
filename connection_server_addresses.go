@@ -2,7 +2,6 @@ package gophercloudsdk
 
 import (
 	"context"
-	"errors"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"gophercloudsdk/compute"
@@ -12,9 +11,7 @@ import (
 
 func (c *Connection) addressNetworkService(ctx context.Context) (*network.Service, error) {
 	service, err := c.Network(ctx)
-	var missing *gophercloud.ErrEndpointNotFound
-	var missingValue gophercloud.ErrEndpointNotFound
-	if errors.As(err, &missing) || errors.As(err, &missingValue) {
+	if missingCatalogEndpoint(err) {
 		return nil, ctx.Err()
 	}
 	return service, err

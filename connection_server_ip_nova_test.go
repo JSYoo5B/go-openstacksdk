@@ -167,3 +167,48 @@ func TestConnectionNovaIPAcceptedCachedSourceFailureRetainsHistory(t *testing.T)
 		t.Fatal(result, err, proof, state)
 	}
 }
+
+func TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend(t *testing.T) {
+	sentinel := errors.New("catalog source failed")
+	for _, scenario := range []struct {
+		name       string
+		err, cause error
+	}{
+		{"value", gophercloud.ErrEndpointNotFound{}, nil},
+		{"pointer", &gophercloud.ErrEndpointNotFound{}, nil},
+		{"single wrapper", fmt.Errorf("catalog: %w", &gophercloud.ErrEndpointNotFound{}), nil},
+		{"mixed failure", errors.Join(gophercloud.ErrEndpointNotFound{}, sentinel), sentinel},
+		{"wrapped mixed failure", fmt.Errorf("catalog: %w", errors.Join(&gophercloud.ErrEndpointNotFound{}, sentinel)), sentinel},
+		{"mixed cancellation", errors.Join(gophercloud.ErrEndpointNotFound{}, context.Canceled), context.Canceled},
+	} {
+		for _, consumer := range []string{"add", "roles"} {
+			t.Run(scenario.name+"/"+consumer, func(t *testing.T) {
+				cloud, conn, state := newConnectionNovaIP(t, compute.FloatingIPNeutron)
+				locate := cloud.Provider.EndpointLocator
+				cloud.Provider.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
+					if opts.Type == "network" {
+						state.locators = append(state.locators, opts.Type)
+						return "", scenario.err
+					}
+					return locate(opts)
+				}
+				var result *compute.AutomaticServerIPResult
+				var err error
+				if consumer == "add" {
+					result, err = conn.AddIPList(context.Background(), connectionAddressServer(), []string{"198.51.100.10"}, connectionNovaIPOptions(false)...)
+				} else {
+					_, err = conn.GetNetworkRoles(context.Background())
+				}
+				if scenario.cause == nil {
+					if err != nil || (consumer == "add" && (result == nil || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted)) {
+						t.Fatal(result, err, state)
+					}
+					return
+				}
+				if !errors.Is(err, scenario.cause) || !reflect.DeepEqual(state.locators, []string{"network"}) || len(state.events) != 0 || len(state.tokens) != 0 || (result != nil && (result.NovaAssignment != nil || result.Assignment != nil || len(result.Attempts) != 0 || result.Decision.Backend != compute.FloatingIPNeutron)) {
+					t.Fatal(result, err, state)
+				}
+			})
+		}
+	}
+}
