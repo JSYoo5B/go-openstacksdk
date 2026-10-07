@@ -14,10 +14,11 @@ import (
 )
 
 func TestAutomaticIPObservationCapabilityAndReuseOwnerPreflight(t *testing.T) {
-	for _, scenario := range []string{"missing Compute", "invalid Compute URL", "unscoped reuse"} {
+	for _, scenario := range []string{"missing Compute", "invalid Compute URL", "unscoped reuse", "BUILD metadata"} {
 		t.Run(scenario, func(t *testing.T) {
 			f := newAutomaticFixture(t)
 			options := automaticOptions()
+			server := automaticServer(t, autoFixed)
 			switch scenario {
 			case "missing Compute":
 				f.service = compute.New(nil, compute.Dependencies{AddressNetworks: func(context.Context) (*network.Service, error) { return f.network, nil }})
@@ -25,12 +26,17 @@ func TestAutomaticIPObservationCapabilityAndReuseOwnerPreflight(t *testing.T) {
 				f.service.RawClient().Endpoint = ""
 			case "unscoped reuse":
 				options = append(options, compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(true)))
+			case "BUILD metadata":
+				server.Status = "BUILD"
 			}
-			result, err := f.service.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, options...)
+			result, err := f.service.EnsureServerFloatingIP(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, options...)
 			if err == nil || result == nil || !result.Decision.Needed || result.Assignment != nil || f.posts.Load() != 0 || f.raw.Load() != 0 {
 				t.Fatal(result, err, f.posts.Load(), f.raw.Load())
 			}
-			if scenario != "invalid Compute URL" && !errors.Is(err, resource.ErrUnsupported) {
+			if scenario != "invalid Compute URL" && scenario != "BUILD metadata" && !errors.Is(err, resource.ErrUnsupported) {
+				t.Fatal(err)
+			}
+			if scenario == "BUILD metadata" && !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(err)
 			}
 		})
