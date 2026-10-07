@@ -1916,3 +1916,16 @@ Source default의 실제 누락도 공통 REST에서 보완했습니다. 첫 adv
 공유 pager `e45094f6`·membership 공통화 `aefd9d60`·Group 구현/테스트 `3fd07d91`·문서 `36e16d08`을 작게 커밋하고 push했습니다. 최신 코드/문서 exact revision `36e16d08dc5f7b3f04802614be593e38f7e1fcb2`를 새 module에서 `GOWORK=off`로 원격 설치해 두 membership main과 설치 main을 빌드했습니다. get/build exit0·Replace 없음·실제 버전 `v0.0.0-20261007231141-36e16d08dc5f`·remote module-cache Go SHA가 위 로컬 gate와 같습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 exact user_groups 한 행만4계약→7계약으로 보강하고 다른512개 review·catalog bytes·3,362개 IDs/fingerprints를 보존했습니다. 전체197→198/3,362·핵심123→124/2,292·Keystone3→4/389, reviews513=go_mapping198/unresolved314/unsupported1, contracts3,243입니다. catalog unresolved3,163에는 미검토2,849개가 포함됩니다. named 목록 완료가 전체 mutable Resource/session·Group CRUD 완료를 뜻하지 않으며 전체 목표는 active입니다. 이후 JSON/prose만 바뀌므로 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt를 확인합니다.
+
+
+## Network 역할 목록7·cloud 삭제1 완료 판정
+
+2026-10-08에 기존 구현8개를 named 함수의 실제 source 계약으로 대조해 `go_mapping`으로 판정했습니다. 대상은 `NetworkCommonCloudMixin.get_external_networks/get_internal_networks/get_external_ipv4_networks/get_internal_ipv4_networks/get_external_ipv6_networks/get_internal_ipv6_networks/get_external_ipv4_floating_networks`와 `NetworkCloudMixin.delete_network`입니다. scalar role getter·Proxy/native get/delete·전체 자동IP 선언이나 관리자 분기를 함께 승격하지 않습니다.
+
+목록은 concrete 설정·family/floating 분류·aggregate 순서/중복과 공유 discovery를 제공합니다. 기존 실제 HTTP는 일곱 공개 getter 각각의 목록을 비교하고 소유권·native slice 존재·성공 cache·Reset을 확인합니다. configured selector·모든 페이지·오류/취소·동시 탐색·YAML/typed 통합은 기존 역할 테스트를 연결합니다. 반환 DTO·clean catalog·명시 flag·success-only copied cache는 Python의 mutable Resource·has_service·raw truthiness·sticky error cache와 구분한 Go 정책입니다. [비교와 사용법](../network/network-roles.md)에 정확히 설명했습니다.
+
+Cloud Delete의 필수 입력은 name_or_id 하나이고 결과는 bool입니다. Go는 명시 ID/Name으로 해석하고 초기 missing=false/no write/noReset, accepted202/204 또는 선행 조회 후 clean DELETE404=true/Reset을 제공합니다. accepted read/Close/context/source 오류는 true+원래 응답 증거를 남깁니다. source Resource의 HTTP<400 허용과 Go의 strict202/204, 문자열 자동 추정과 Ref, 접수 직후 Reset 차이는 [삭제 가이드](../network/network-mutations.md)에 명시했습니다. bool-only 함수에 반환 Network 모델·별도 Proxy if_revision/waiter를 미완료 사유로 추가하지 않습니다.
+
+기존102계약·33고유 test anchor와 모든 API/doc/fingerprint를 보존하고 기존 differences 뒤에 비교를 추가했습니다. 다른505개 review 및 catalog bytes가 같습니다. 두 가이드의 Go fence는 모두 그대로입니다. 새 Go·mock·HTTP harness·테스트 복제 없이 UserGroups 단위에서 방금 통과한 전체41 package `make check`를 재사용합니다. Go source1,949개 SHA256 `1e706afb6b7b1b7baa524ba48a36a752303905baf73b593b01504a946fc331f5`가 그대로이며 새 전체 검사를 실행했다고 주장하지 않습니다. 근거는 `/private/tmp/gophercloudsdk-network-eight-final-receipt.json`와 `/private/tmp/gophercloudsdk-core-network-next-batch-audit.md`, 연결된 기존 fixture입니다. final parity/progress/gofmt만 갱신합니다.
+
+전체198→206/3,362·핵심124→132/2,292, reviews513=go_mapping206/unresolved306/unsupported1, contracts3,243은 그대로입니다. catalog unresolved3,155에는 미검토2,849개가 포함됩니다. 전체 Resource/session·CloudRegion loader·has_service 및 후속/admin 목표는 active입니다. 원격 설치로 검증한 코드의 Go SHA도 동일하고 실제 OpenStack/Python 실행은 포함하지 않습니다. 다음 핵심 user 단위는 console explicit0 bridge와 기존 Compute named 조회의 필요한 직접 증거입니다.
