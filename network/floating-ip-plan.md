@@ -143,7 +143,7 @@ Network가 zero Ref이면 같은 Connection의 [공유 역할 snapshot](network-
 
 이 타입은 완성된 탐색의 대상 부재를 표현합니다. 일반 `errors.Is(err, resource.ErrNotFound)`에는 명시 이름·port의 미존재, HTTP 404 등도 포함되므로 이것만으로 자동 skip을 결정하지 않습니다. typed absence에 context 취소나 source 오류가 함께 있으면 그 오류도 처리해야 합니다. 예제는 reason을 출력하되 전체 오류를 반환합니다.
 
-HTTP/decode/read/Close·뒤 페이지 오류, 설정 오류, source 변경, 취소, 모호한 선택은 absence로 숨기지 않습니다. nonempty IPv6-only inventory나 명시 NAT 범위의 빈 결과도 일반 오류입니다. 잘못 지정한 명시 port/fixed/NAT의 불일치는 자동 skip으로 취급하지 않습니다.
+HTTP/decode/read/Close·뒤 페이지 오류, 설정 오류, source 변경, 취소, 모호한 선택은 absence로 숨기지 않습니다. nonempty IPv6-only inventory나 명시 NAT 범위의 빈 결과도 일반 오류입니다. 명시 port/NAT 조회·소유권·제약의 불일치는 오류입니다. port/NAT 제약 없이 explicit fixed를 찾는 완료된 탐색의 부재만 위 `NoFloatingIPFixedMatch`로 구분합니다.
 
 ## 실행 시 owner와 목적지 재검증
 
@@ -171,6 +171,8 @@ plan이 직접 실행하는 owned REST 목록·명시 Neutron lookup·port 재�
 
 공유 role cache의 성공값·Reset·동시 discovery는 기존 정책을 따릅니다. 이미 일반 role discovery가 진행 중인 경우 그 결과를 기다려 공유할 수 있으며, 모든 기존 public getter/native/raw 요청이 이 plan의 보호 정책으로 바뀌는 것은 아닙니다. 서버 이름 조회는 기존 Connection resolver를 사용합니다. 환경의 외부 변경을 자동 탐지하거나 cache를 매번 강제로 새로 읽는 정책은 아니므로 필요한 topology 변경에는 [Reset 규칙](network-roles.md)을 적용합니다.
 
-고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 다음 범위는 별도입니다: Compute 자동 public/floating/fixed/private/source/service 필요성, conditional dispatch, raw Nova observed-address 수렴과 단계별 부분 결과, pool/명시 IP 우선순위, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
+고정 source `_needs_floating_ip`가 일부 network SDKException을 false로 숨기고 이후 재선택하는 동작과 비교하여, Go는 명확한 완료 탐색 부재와 실패를 구분하고 concrete 선택을 유지합니다. 별도 [Compute 자동 메서드](../compute/server-automatic-ip.md)는 기존 서버의 조건부 Neutron 실행과 raw Nova 관측을 제공합니다. 일반 Create/Get/Wait 통합, pool/명시 IP 우선순위, Nova-network fallback, full has_service/session/Resource 모델 및 timeout cleanup은 계속 남습니다. 이번 plan 기반만으로 전체 cloud 연산을 지원 완료로 세지 않습니다.
 
 [plan HTTP 테스트](floating_ip_plan_test.go)와 [설정·응답 경계 테스트](floating_ip_plan_boundaries_test.go)는 owner 지연·owned 선택·typed absence·목적지 재GET·전체 후보·revision·실제 ACTIVE·접수 후 부분 결과·source guard를 확인하도록 작성되어 있습니다. 테스트 실행 결과와 최종 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md)에 실제 검증 revision과 함께 기록합니다. Python 비교는 고정 소스 정적 검토이며 Python 예제·실클라우드 실행 근거는 별도입니다.
+
+[Compute 자동 floating IPv4](../compute/server-automatic-ip.md)는 `FloatingIPs.NewPlanner`의 한 guarded 역할 snapshot을 주소 분류와 대상 선택에 공유하고, 필요할 때 같은 plan을 실행합니다. `NewPlanner` 자체는 조회·owner 확인을 하지 않으며 `NetworkRoles`는 호출자가 소유하는 복사본을 반환합니다. 한 planner가 확보한 snapshot은 Reset 이후에도 유지되고 다음 planner는 새 cache를 읽을 수 있습니다. `WithEnsureActive`는 기존 wait 옵션을 유지하며 actual ACTIVE를 필수로 만들지만 owner를 미리 바인딩하지 않습니다. 원래 직접 Plan API에는 자동 필요성이나 raw Nova 관측 책임이 없습니다.

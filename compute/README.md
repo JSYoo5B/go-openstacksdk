@@ -191,3 +191,5 @@ Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사
 Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. Configured default는 getter 및 floating source/NAT 선택과 같은 성공 snapshot을 사용하며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 명시 `WithDefaultNetwork(resource.Name(...))`은 기존 exact-name 조회를 생성마다 수행합니다.
 
 [서버 주소 가이드](server-addresses.md)는 조회한 Nova 모델의 public/private 주소와 기존 Floating IP 보충, default interface·IPv6·접속 검사 정책을 비교합니다. Connection이 설정과 공유 역할 cache를 제공합니다. 일반 Create/Wait에 자동 할당·주소 수렴을 적용하는 작업은 남아 있습니다.
+
+[기존 서버의 자동 floating IPv4](server-automatic-ip.md)는 `PlanServerFloatingIP`로 읽기 전용 필요성을 판단하고 `EnsureServerFloatingIP`로 조건부 Neutron assignment와 raw Nova 주소 관측을 수행합니다. Connection이 설정·서비스·공유 역할 snapshot을 제공하고 오류 시 알려진 Server·Assignment를 보존합니다. 일반 Create/Wait 통합과 Nova mutation·pool/명시 IP 전체 우선순위는 별도 remaining입니다.

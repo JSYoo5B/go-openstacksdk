@@ -186,3 +186,5 @@ SDK는 실패한 서버/IP를 자동 DELETE하지 않으며, 재사용 PUT이 40
 Python 비교는 고정 소스를 읽은 결과이며 Python 예제 실행이나 인증된 OpenStack 검증 결과가 아닙니다. 로컬 HTTP 테스트는 옵션 검증과 호출 순서, 공통 deadline/cancellation, 실제 ACTIVE·identity 검사, 재사용/새 allocation, revision 충돌, 실패 후 서버·IP 보존을 확인하는 범위입니다. 독립 Go 예제의 컴파일 확인과 해당 HTTP 테스트 실행 결과는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다. 실환경의 quota·라우터 연결성·Nova 주소 반영·네트워크 도달성은 이 로컬 검증에 포함하지 않습니다.
 
 [공유 네트워크 역할 조회](../network/network-roles.md)는 기본 NIC와 Ensure의 source/NAT 선택에 연결되어 같은 성공 snapshot을 사용합니다. 자동 IP 필요성 판단·생략과 위 나머지 상위 정책은 남은 범위입니다.
+
+기존 서버의 [자동 floating IPv4 판단·조건부 실행](server-automatic-ip.md)은 별도 공개 API로 제공됩니다. 이 문서의 명시 `CreateWithFloatingIP`는 기존 계약을 유지하며 자동 필요성·raw Nova 주소 관측을 수행하지 않습니다. 일반 생성/대기와 새 자동 메서드의 통합은 다음 구현 범위입니다.

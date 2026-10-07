@@ -202,3 +202,5 @@ Python cloud create/wait의 `auto_ip` 필요 여부, pool/명시 ips dispatch, p
 이 문서의 Python 비교는 고정 소스 정적 검토 기준입니다. 주소 선택 local fixture는 [server_address_selection_test.go](server_address_selection_test.go)에 있으며 역할/MAC/fixed fallback, public 우선순위, use flag와 AccessIPv4 short circuit, CPython 3.13 fallback 분류, TCP 후보 선택과 context, 입력 오류의 dependency 호출 선행 방지를 검증하도록 작성되어 있습니다. 주소 보충·부분 결과·Nova source는 [expansion 테스트](server_address_expansion_test.go), 설정·공유 cache와 endpoint 생략은 [Connection 테스트](../connection_server_addresses_test.go)와 [설정 테스트](../connection_server_address_config_test.go)에 있습니다. 실제 실행 근거와 최종 문서 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md)에 별도로 기록합니다.
 
 public cloud getter 두 개에 대한 지원 판정은 기존 native transport 완료나 `meta` 함수 이름으로 자동 승격하지 않습니다. source catalog가 수집하지 않은 module free/private helper는 실제 public getter와 관련 lifecycle의 부분 계약·차이·남은 범위에 기록합니다.
+
+[자동 floating IPv4](server-automatic-ip.md)는 위 주소 기반과 guarded 역할 snapshot을 기존 서버의 조건부 Neutron assignment에 연결합니다. 일반 주소 helper는 allocation을 하지 않으며, 자동 메서드의 최종 완료는 합성 Supplemental 행 대신 raw Nova 응답에서 정확한 tagged IPv4로 확인합니다. 일반 Get/Create/Wait에 자동 통합하는 계약은 계속 남습니다.
