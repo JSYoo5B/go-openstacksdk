@@ -14,7 +14,7 @@
 
 삭제는 `5e7cb7e`·`96b76d4`·`e336575`·`97e205e`, 목록은 `026967a`·`ee67234`·`dfcba00`·`e9670e5`·`a1218bb`, 고정 getter2개 완료 판정은 `c3cf874`로 작은 의미 단위로 커밋하고 push했습니다. 최종 source의 집중4 package race·전체40 package check·문서 main build·기존 preview5흐름/9그룹이 PASS했습니다. 조회 예제의 기존2개 Go 함수도 그대로 추출해 컴파일했습니다. 판정·prose만 바뀐 getter 단계에서는 같은 Go 전체 테스트를 반복하지 않고 final parity/집계만 확인합니다. Source pin·기존 계약/anchors를 유지하며 generic Resource/session과 Go typed/seeded ID·strict status의 차이를 명시합니다.
 
-**다음 단위: Barbican Container/Order/Secret 사용자 생성3개 공통 보완.** 소스 대조에서 ref-only POST 응답 뒤 입력 속성이 결과에서 사라지는 누락과 accepted 응답 원문·header·status/error 증거 부재를 확인했습니다. Python은 입력으로 만든 Resource에 응답 속성을 병합하며 추가 GET/payload GET을 하지 않습니다. 기존 native Create는 호환성을 유지하고, 기존 guarded REST·metadata projection·옵션 snapshot·HTTP fixture를 재사용하는 SDK 소유 경로를 마련합니다. 명시 null/empty·descriptor alias 입력과 결과 병합을 유한 계약으로 검증합니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
+**진행 중: Barbican Container/Order/Secret 사용자 생성3개 공통 보완.** 소스 대조에서 ref-only POST 응답 뒤 입력 속성이 결과에서 사라지는 누락과 accepted 응답 원문·header·status/error 증거 부재를 확인했습니다. Python은 입력으로 만든 Resource에 응답 속성을 병합하며 추가 GET/payload GET을 하지 않습니다. 기존 native Create는 호환성을 유지하고, 기존 guarded REST·metadata projection·옵션 snapshot·HTTP fixture를 재사용하는 세 leaf의 동일한 `CreateRecord` 옵션과 공통 SDK 소유 경로를 구현 중입니다. 기존 shared decoder·source guard·옵션 JSON snapshot·leaf/cached Connection·body fault wrapper를 재사용하며, 새 harness 없이 서비스별 binding과 공통 오류를 나누어 검증합니다. 명시 null/empty·descriptor alias 입력과 결과 병합은 실행 검증 전이므로 아직 완료가 아닙니다. 공통 Go context cause 일관성도 남은 SDK 기반 과제로 추적합니다. 이 후보를 완료 수에 미리 더하지 않습니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서와 외부 설치용 alpha 준비는 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |

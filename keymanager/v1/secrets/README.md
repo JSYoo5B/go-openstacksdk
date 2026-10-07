@@ -13,6 +13,8 @@ lookup with conditional payload on direct success and metadata-only list
 fallback. [Identity lookup comparison](finding/README.md) describes shared
 options, nullable/full-reference matching, duplicate detection, and pagination.
 
+`CreateRecord(ctx, options...)` returns the input-seeded Resource view and the actual POST response separately, without a metadata or payload GET. [Creation comparison](../metadata-create.md) explains the same attribute options used for Containers, Orders, and Secrets.
+
 ```go
 package example
 
