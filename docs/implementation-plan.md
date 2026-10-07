@@ -34,6 +34,9 @@
 | Floating IP 조회 6개·삭제 1개·생성 1개 최종 판정 | 161 → 169 (+8) | 신규 생성 24그룹·조회 회귀 3그룹, 전체 40 package check, 실행 예제 컴파일 | `73bcfba` |
 | 미연결 Floating IP 일괄 정리 | 169 → 170 (+1) | 신규 HTTP 12그룹, 집중 race 169그룹·전체 40 package check, 실행 예제 컴파일 | `9f1cb3d` |
 | Secret getter·Glance schema getter 4개 | 170 → 175 (+5) | 기존 25개 계약·실제 HTTP/raw/옵션 테스트 재검토, 관련 4 package 집중 race·전체 40 package check PASS | `4d89708` push 완료 |
+| AvailableFloatingIP named getter | 175 → 176 (+1) | Query/Create/Allocate 재사용·Neutron 내부/Nova fallback, 집중 race·전체40 package check·smoke5흐름 PASS | `c61acae` push 완료 |
+| Barbican effective quota getter | 176 → 177 (+1) | 기존 strict/error fixture·context guard 재사용, 집중3 package race·전체40 package check·조회 main build PASS | `1546e7d` push 완료 |
+| Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
