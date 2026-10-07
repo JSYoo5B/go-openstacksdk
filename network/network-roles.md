@@ -202,7 +202,91 @@ Cloud 파일의 우선순위는 `secure.yaml` > 선택한 `clouds.yaml` 항목 >
 
 `DefaultInterface`는 서버 생성의 기본 NIC selector로도 전달됩니다. 서버의 명시적 `WithNetworks`·`WithNetworkInterfaces`·`WithNetworkMode`가 가장 우선하며, `sdk.WithDefaultNetwork` 또는 `sdk.WithoutDefaultNetwork`가 이 정책의 default selector보다 우선합니다. 선택할 default가 없으면 Nova의 선택된 microversion 2.37 이상에서 `auto`, 그 이전에는 networks 생략 동작을 사용합니다.
 
-현재 `Servers.Create`의 기본 네트워크 selector는 생성마다 기존 `Networks.List`에서 새로 이름 또는 ID를 찾습니다. **역할 cache를 소비하지 않습니다.** `FloatingIPs.Ensure`의 자동 external network 선택도 기존 별도 조회를 사용하므로, 이 역할 정책의 NAT source나 cache가 Ensure의 선택 동작을 변경하지 않습니다. `WithoutDefaultNetwork`는 서버 기본 NIC 설정만 비활성화하며 role getter의 `DefaultNetwork` 설정을 지우지는 않습니다.
+YAML 또는 typed-role configured default를 사용하는 `Servers.Create`는 getter와 같은 성공 snapshot의 `DefaultNetwork`를 사용합니다. 명시 기본 Ref·NIC·mode와 default selector가 없는 경로는 역할 조회를 우회합니다. `FloatingIPs.Ensure`의 zero external은 공유 floating 후보를 먼저 사용하고, 성공한 후보가 비어 있을 때 router gateway를 찾습니다. `Create`와 `Ensure`의 자동 NAT는 명시 port·fixed address·NAT destination이 없고 요청 서버 소유 port가 여러 개일 때만 공유 `NATDestination`으로 좁힙니다. 명시 destination 옵션은 추론 NAT 조회를 우회하지만 zero external의 source 조회까지 끄지는 않습니다.
+
+`CreateWithFloatingIP`에서도 기본 NIC와 이후 source/NAT 선택이 같은 성공 snapshot을 사용할 수 있습니다. IP 후보·port 조회와 연결·할당은 실제 서버 ACTIVE 이후에 수행합니다. [Connection 소비 테스트](../connection_network_role_consumers_test.go), [Network 소비 테스트](floating_ip_roles_test.go), [복합 workflow 테스트](../connection_server_network_roles_test.go)에 이 경계를 기록했습니다. `WithoutDefaultNetwork`는 서버 기본 NIC만 비활성화하며 getter의 `DefaultNetwork` 설정을 지우지는 않습니다.
+
+## 서버 생성에 같은 설정 사용하기
+
+위 YAML의 private default와 public NAT source를 그대로 사용할 수 있습니다. Python에서는 역할 getter 후 cloud `create_server`가 같은 역할을 사용합니다.
+
+```python
+import openstack
+
+conn = openstack.connect(cloud="dev")
+print(conn.get_default_network())
+server = conn.create_server(
+    name="web", image="ubuntu", flavor="c2", wait=True, auto_ip=True,
+)
+print(server.id)
+```
+
+Go의 아래 독립 예제도 설정에서 기본 NIC와 floating source/NAT를 선택합니다. `CreateWithFloatingIP`는 floating IPv4 연결을 명시적으로 요청하며, Python `auto_ip`의 기존 주소·private cloud 등에 따른 자동 생략을 아직 적용하지 않습니다. 서버와 IP의 실제 ACTIVE는 확인하지만 Nova 주소 수렴은 별도 남은 범위입니다. `ubuntu`·`c2`는 사용할 이미지와 flavor 이름으로 바꿉니다.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "time"
+
+    sdk "gophercloudsdk"
+    "gophercloudsdk/compute"
+    "gophercloudsdk/resource"
+)
+
+func main() {
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+    defer cancel()
+    if err := run(ctx); err != nil {
+        log.Fatal(err)
+    }
+}
+
+func run(ctx context.Context) error {
+    conn, err := sdk.Connect(ctx, sdk.WithCloud("dev"))
+    if err != nil {
+        return err
+    }
+    roles, err := conn.GetNetworkRoles(ctx)
+    if err != nil {
+        return err
+    }
+    if roles.DefaultNetwork != nil {
+        fmt.Printf("default NIC: %s\n", roles.DefaultNetwork.ID)
+    }
+    service, err := conn.Compute(ctx)
+    if err != nil {
+        return err
+    }
+    result, err := service.Servers.CreateWithFloatingIP(ctx,
+        compute.CreateServerWithFloatingIPRequest{
+            Server: compute.CreateServerRequest{
+                Name: "web",
+                Image: resource.Name("ubuntu"),
+                Flavor: resource.Name("c2"),
+            },
+            // FloatingIPNetwork를 생략하면 configured source를 사용합니다.
+        },
+    )
+    if err != nil {
+        if result != nil && result.Server != nil {
+            fmt.Printf("known server: %s\n", result.Server.ID)
+        }
+        if result != nil && result.Assignment != nil && result.Assignment.FloatingIP != nil {
+            fmt.Printf("known floating IP: %s\n", result.Assignment.FloatingIP.ID)
+        }
+        return err
+    }
+    fmt.Printf("server=%s floating IPv4=%s\n",
+        result.Server.ID, result.Assignment.FloatingIP.FloatingIP)
+    return nil
+}
+```
+
+선행 getter는 필수 호출이 아닙니다. 생략하면 configured 기본 NIC 선택이 처음 탐색하고 이후 source/NAT 선택이 그 성공 cache를 재사용합니다. Topology 변경 후 다음 작업에 새 목록을 적용하려면 `conn.ResetNetworkRoles()`를 호출합니다. 이 예제는 실제 리소스를 생성하는 사용법이며, 문서 검증에서는 컴파일과 로컬 HTTP fixture를 확인합니다.
 
 ## cache, 복사, Reset과 오류
 
@@ -218,6 +302,6 @@ Cloud 파일의 우선순위는 `secure.yaml` > 선택한 `clouds.yaml` 항목 >
 
 비교 기준은 openstacksdk revision `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [NetworkCommonCloudMixin 역할 분류와 getter](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L95-L432), [CloudRegion의 역할 설정 selector](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/config/cloud_region.py#L1427-L1495)입니다. Source의 family 분류, aggregate 중복, NAT 선택 순서를 따르면서 오류 전파·호출자 소유 복사·취소·Reset의 동시성 계약을 Go API로 명시합니다.
 
-`has_service` 전체 정책, private/floating-IP-source flag, 서버 주소 extension 계산, 공유 NAT 역할을 사용하는 자동 Floating IP 필요 판단 및 생성 연계는 후속 범위입니다. 기존 명시적 `CreateWithFloatingIP`와 이 역할 조회만으로 cloud `create_server` 전체 동작의 동등성을 주장하지 않습니다. 위 비교는 고정 소스에 대한 확인 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
+`has_service` 전체 정책, private/floating-IP-source flag, 서버 주소 extension 계산, 자동 Floating IP 필요 판단과 생략, cloud network mutation 후 cache 자동 무효화는 후속 범위입니다. 기본 NIC·source/NAT 소비와 명시적 `CreateWithFloatingIP`만으로 cloud `create_server` 전체 동작의 동등성을 주장하지 않습니다. 위 비교는 고정 소스에 대한 확인 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
 
 [Network 계약 테스트](roles_test.go)와 [Connection 통합 테스트](../connection_network_roles_test.go)는 분류·페이지·오류·동시 탐색·cache/Reset·설정과 반환값 소유권을 로컬 HTTP fixture로 검증합니다. 전체 검사와 위 독립 Go 예제의 컴파일 결과는 [지원 판정대장](../docs/sdk-support-ledger.md#공유-네트워크-역할-조회와-설정)에 기록했습니다. 인증된 OpenStack 또는 Python 예제 실행 결과는 포함하지 않습니다.

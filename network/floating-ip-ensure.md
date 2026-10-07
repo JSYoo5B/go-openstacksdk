@@ -109,15 +109,17 @@ manual token을 사용하는 adopted provider, system/domain/unscoped 인증 등
 2. 응답 순서의 첫 번째 unattached IP. 선택한 port/fixed IPv4로 PUT합니다.
 3. 후보가 없을 때 새 IP를 port/fixed IPv4와 함께 POST합니다.
 
-IP 선택의 성공·실패 결과를 cache하지 않습니다. 뒤 페이지 오류가 있으면 앞 페이지에 후보가 있어도 연결이나 새 할당을 진행하지 않습니다. `Reused`는 이미 같은 대상에 연결된 경우도 포함하며 `Allocated`는 새 allocation이 접수된 경우를 나타냅니다.
+IP 선택의 성공·실패 결과를 cache하지 않습니다. 서버 port와 가용 IP 후보는 호출마다 조회하고, 네트워크 역할의 성공 snapshot만 공유합니다. 뒤 페이지 오류가 있으면 앞 페이지에 후보가 있어도 연결이나 새 할당을 진행하지 않습니다. `Reused`는 이미 같은 대상에 연결된 경우도 포함하며 `Allocated`는 새 allocation이 접수된 경우를 나타냅니다.
 
 ## 외부 네트워크와 목적지 포트
 
 `EnsureFloatingIPRequest.Network`를 지정하면 이름은 `router:external=true` 목록의 정확한 이름과 실제 external flag를 확인합니다. ID는 추가 network 조회 없이 전달하며 Neutron이 allocation 시 외부 network 조건을 검사합니다.
 
-Network가 zero Ref이면 external 목록에서 응답 순서의 첫 번째 network를 선택합니다. external 목록이 비어 있으면 admin state가 enabled인 첫 router의 external gateway를 사용합니다. 어느 쪽도 없으면 `ErrNotFound`입니다. 목록 HTTP 오류가 나면 router나 Nova API로 전환하지 않습니다. 이 자동 선택은 Python의 YAML role/NAT/subnet 분류 전체를 구현한 것은 아닙니다.
+Network가 zero Ref이면 [공유 역할 snapshot](network-roles.md)의 `ExternalIPv4Floating`에서 첫 후보를 선택합니다. Configured NAT source가 있으면 그 네트워크가 유일한 floating 후보이며, 없으면 router external 네트워크들이 후보입니다. Provider physical network만 있는 네트워크는 자동 floating source가 아닙니다. **성공한 역할 목록이 비어 있을 때만** enabled router의 첫 external gateway를 찾습니다. 두 discovery flag가 모두 false여서 역할 조회를 건너뛴 경우에도 router fallback은 별도로 실행합니다. 어느 쪽도 없으면 `ErrNotFound`이며, 역할·subnet 오류를 router나 Nova fallback으로 바꾸지 않습니다.
 
-대상 port는 서버의 유효한 fixed IPv4 쌍을 모두 확인합니다. 여러 port가 남거나 한 port에 여러 IPv4가 남으면 `ErrAmbiguous`이며 IP를 할당·연결하지 않습니다. `WithEnsurePort`로 port를 지정하고 `WithEnsureFixedAddress`로 IPv4를 지정하거나, `WithEnsureNATDestination`으로 private network를 좁힐 수 있습니다. 지정한 port도 서버 소유인지 확인합니다. IPv6와 malformed fixed address는 옵션 검증에서 거부합니다.
+`WithEnsurePort`, `WithEnsureFixedAddress`, `WithEnsureNATDestination`을 명시하면 추론 NAT 조회를 우회하고 명시 입력의 제약을 적용합니다. Network가 zero이면 자동 floating source 조회는 여전히 필요합니다. 어느 destination 옵션도 없고 전체 목록에서 요청 서버 소유 port가 여러 개이면 공유 `NATDestination`의 network로 좁힙니다. IPv4 필터링 전에 port 개수를 세므로 IPv6 전용 두 번째 port도 이 분기를 켭니다. NAT 역할이 없으면 `ErrAmbiguous`, 선택된 network에 IPv4 대상이 없으면 `ErrNotFound`이며 할당·연결하지 않습니다. 서버 소유 port가 하나이면 추론 NAT 조회를 하지 않습니다. 다른 서버의 port는 개수와 후보에서 제외합니다.
+
+범위를 좁힌 뒤에도 유효한 `(port, fixed IPv4)` 쌍이 여러 개이면 `ErrAmbiguous`입니다. 명시 port도 서버 소유인지 확인하고, 명시 NAT·fixed·port의 조건은 함께 적용합니다. IPv6와 malformed fixed address 옵션은 검증에서 거부합니다. 같은 자동 NAT 규칙은 `FloatingIPs.Create(..., WithServer(...))`에도 적용됩니다.
 
 Python의 `_nat_destination_port`는 최근 port와 첫 IPv4를 선택하는 분기가 있지만 Go는 모호한 선택을 오류로 반환합니다. network·router·port 선택도 빈 중간 페이지의 next 링크를 따라가며 뒤 페이지 오류가 있으면 mutation 전에 종료합니다. 외부 allocation network와 private NAT destination은 서로 다른 입력이며 서버 생성의 default network와 자동으로 같은 값이 되지 않습니다.
 
@@ -148,8 +150,8 @@ timeout, context 취소, 실패 상태, poll HTTP 오류, 다른 ID/owner/destin
 
 비교 대상은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [project 범위와 available IP 선택](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L608-L671), [auto IP 흐름](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1394-L1487), [포트 선택](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1608-L1709), [서버 주소 대기](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1080-L1163)입니다. Python은 일부 Neutron NotFound에서 Nova fallback을 하고 새 IP의 activation timeout에서 삭제를 시도하지만 Go Ensure는 오류와 알려진 리소스를 보존합니다.
 
-전체 `_network_common`의 YAML role/NAT·subnet 관계, 외부/내부·IPv4/IPv6 분류, `has_service`/cloud flags, shared cache/reset, `_needs_floating_ip`, Nova network, IP 목록 입력과 Resource/session 모델은 남은 범위입니다. `create_server`의 auto IP 조건·전체 wait/response/cleanup 및 다른 생성 옵션까지 동일하게 구현했다고 판정하지 않습니다. Ensure의 부분 계약을 이 메서드들의 전체 지원으로 올리지 않습니다.
+전체 `has_service`/private·floating source flags, `_needs_floating_ip`, Nova network, IP 목록·pool 입력과 Resource/session 모델은 남은 범위입니다. Cloud network mutation의 cache 자동 무효화와 서버 주소 수렴도 남습니다. `create_server`의 auto IP 조건·전체 wait/response/cleanup 및 다른 생성 옵션까지 동일하게 구현했다고 판정하지 않습니다. Ensure의 부분 계약을 이 메서드들의 전체 지원으로 올리지 않습니다.
 
-[역할 getter와 공유 cache](network-roles.md)는 별도로 제공됩니다. 현재 Ensure의 자동 network/NAT 선택은 그 결과를 소비하지 않으므로, 역할 조회 구현과 이 연결 정책의 남은 연계를 구분합니다.
+[역할 getter와 공유 cache](network-roles.md)는 기본 NIC·자동 floating source·조건부 NAT 선택에 함께 쓰입니다. Topology 변경을 반영하려면 `ResetNetworkRoles()` 또는 `service.Roles.Reset()`을 호출합니다. 성공한 역할만 cache하며, IP 후보와 port 선택 결과는 cache하지 않습니다. [역할 소비 테스트](floating_ip_roles_test.go)는 source override·cache/Reset·명시 우회·다중 port/NAT·IPv6 전용 port·오류/취소·빈 역할 router fallback을 실제 요청과 mutation 여부로 검증합니다.
 
 [Ensure HTTP 테스트](floating_ip_ensure_test.go), [선택·대기 테스트](floating_ip_selection_test.go), [Connection 통합 테스트](../connection_floating_ip_ensure_test.go)는 다중·빈 페이지와 반복 링크, owner/local 제약·revision presence, 이미 연결된 IP·새 allocation, 실패 후 보존·fallback 금지·취소·timeout과 현재 인증 scope를 검증합니다. Python 비교는 고정 소스 확인이며 Python 예제나 인증된 OpenStack 실행을 검증한 것은 아닙니다. 실행 근거는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다.

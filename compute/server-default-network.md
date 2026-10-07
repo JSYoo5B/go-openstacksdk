@@ -147,9 +147,11 @@ Connection을 만들 때 clouds/secure/public 내용을 snapshot하며, 인증·
 
 ## 조회, 실패, cache
 
-YAML default가 있으면 Create 때 Neutron의 모든 페이지를 읽고 설정 문자열을 network의 `name` **또는** `id`와 비교합니다. 일치하지 않으면 `ErrNotFound`, 여러 network와 일치하면 `ErrAmbiguous`입니다. ID가 일치하는 리소스와 같은 문자열의 이름을 가진 다른 리소스가 있는 경우에도 임의로 하나를 선택하지 않습니다.
+YAML 또는 `WithNetworkRoles`의 configured default는 [공유 역할 snapshot](../network/network-roles.md)의 `DefaultNetwork`에서 가져옵니다. 첫 탐색에서 Neutron의 모든 network 페이지와 필요한 subnet 페이지를 읽고, 설정 문자열을 network의 `name` **또는** `id`와 비교합니다. 일치하지 않으면 `ErrNotFound`, 여러 network와 일치하면 `ErrAmbiguous`입니다. ID가 일치하는 리소스와 같은 문자열의 이름을 가진 다른 리소스가 있는 경우에도 임의로 하나를 선택하지 않습니다.
 
-목록의 403 같은 HTTP 오류와 context 취소는 호출자에게 전달하며 Nova의 server POST를 실행하지 않습니다. 조회 성공·실패 결과를 cache하지 않으므로 이름이나 YAML default를 사용하는 다음 Create에서는 다시 조회합니다. Connection의 인증과 service proxy/client 공유 cache는 유지합니다.
+성공한 역할 탐색은 getter와 후속 Create가 공유합니다. `ResetNetworkRoles()` 또는 `service.Roles.Reset()` 이후에는 새로 탐색합니다. Network/Subnet의 HTTP·decode·취소 오류와 다른 configured role의 검증 오류도 Nova POST 전에 반환하며, 실패한 탐색은 cache하지 않습니다. 두 discovery flag가 모두 false이거나 network catalog endpoint가 없으면 configured default도 없게 처리하여 Nova의 선택 microversion에 따른 auto/생략 동작을 사용합니다.
+
+`WithDefaultNetwork(resource.ID(...))`는 조회 없이 ID를 전달하고, 명시 `resource.Name(...)`은 기존 exact-name 조회를 생성마다 수행합니다. 이 명시 Name 조회는 역할 cache와 별도입니다. `WithoutDefaultNetwork`, 명시 NIC·mode는 configured default 조회를 우회합니다. Configured default selector 자체가 없을 때도 Go는 탐색을 생략합니다. 이는 default가 없어도 공유 탐색을 실행하는 고정 Python 소스와 다른 조회 정책입니다.
 
 이 선택은 기존 boot volume mapping이나 삭제 정책을 바꾸지 않습니다. 생성 후 `compute.WithWait`가 실패하면 생성한 server와 error를 함께 반환하며 server나 volume을 자동 삭제하지 않습니다.
 
@@ -157,8 +159,8 @@ YAML default가 있으면 Create 때 Neutron의 모든 페이지를 읽고 설�
 
 비교 대상은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [cloud create default 분기](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L1084-L1110), [설정값 선택](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/config/cloud_region.py#L1475-L1481), [runtime name/ID 비교](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L252-L264)입니다.
 
-이번에 다루는 것은 server에 사용할 configured default network입니다. Python의 [shared network discovery](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L110-L365)에 있는 NAT source/destination, 외부/내부·IPv4/IPv6 network 역할 분류, shared cache, `has_service`, `use_external_network`/`use_internal_network` flags, 목록 실패 시 fallback까지 같은 동작을 제공했다고 판정하지 않습니다. Go는 선택한 network의 HTTP 실패를 보존하고 선택 결과를 cache하지 않습니다. Python의 advertised microversion bounds/default microversion 검사와 cloud create 전체의 자동 floating IP 등도 별도 남은 범위입니다. 지원 판정은 계속 부분 구현입니다.
+이번에 다루는 것은 server에 사용할 configured default와 공유 역할 조회의 연결입니다. Python의 [shared network discovery](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L110-L365)와 비교하여 Go는 성공한 탐색만 cache하고 오류를 보존하며, 호출자에게 모델 복사본을 반환합니다. 전체 `has_service`·session 정책, cloud mutation 후 cache 자동 무효화, advertised microversion bounds/default 검사와 cloud create 전체의 자동 IP·주소 처리·cleanup은 남은 범위입니다. 지원 판정은 계속 부분 구현입니다.
 
-[별도 역할 getter와 공유 cache](../network/network-roles.md)는 외부·내부 family 및 NAT/default 역할을 제공합니다. `WithNetworkRoles`의 default selector도 Create로 전달되지만, 현재 이 NIC 선택 경로는 역할 cache를 사용하지 않고 매번 조회합니다.
+[역할 getter와 공유 cache](../network/network-roles.md)는 외부·내부 family 및 NAT/default 역할을 제공합니다. [소비 경로 테스트](../connection_network_role_consumers_test.go)는 getter 결과의 caller 변경에도 기본 NIC가 유지되고, 연속 Create가 cache를 재사용하며 Reset 이후 새 ID를 선택하는지 확인합니다. Subnet 오류와 다른 역할의 누락이 생성 전에 전달되고 실패 후 재시도되는 경계도 포함합니다.
 
 Python의 동작은 고정 소스에서 확인했습니다. Go의 [compute 테스트](default_network_test.go)와 [Connection HTTP 테스트](../connection_default_network_test.go)는 선택·생략·이름 해석·오류·boot mapping·옵션 재사용을 검증하는 local fixture입니다. Python 예제나 인증한 OpenStack 환경의 생성 작업을 실행했다는 근거로 사용하지 않습니다. YAML 파일 상속과 frozen 인증·region·TLS는 [설정 테스트](../connection_cloud_config_test.go), 전체 페이지 매칭·충돌·뒤 페이지 HTTP 오류·취소·명시 선택 우회는 [YAML HTTP 테스트](../connection_cloud_network_test.go)에서 검증합니다. 최종 실행 근거와 예제 컴파일은 [지원 판정대장](../docs/sdk-support-ledger.md#nova-서버-생성의-기본-네트워크)에 기록합니다.

@@ -128,11 +128,11 @@ func run(ctx context.Context) error {
 
 서버 NIC는 기존 Create와 같은 선택 순서를 사용합니다. 명시 `WithNetworks`·`WithNetworkInterfaces`·`WithNetworkMode`가 먼저이고, 없으면 Connection의 `WithDefaultNetwork`/`WithoutDefaultNetwork`, YAML 기본 네트워크, 선택 microversion에 따른 auto/생략 순서입니다. 외부 `FloatingIPNetwork`는 서버 NIC의 기본값을 바꾸지 않습니다. [서버 기본 네트워크](server-default-network.md)와 [NIC 입력](server-network-interfaces.md)에 세부 규칙을 기록했습니다.
 
-외부 floating network를 생략하면 Ensure는 응답 순서상 첫 외부 네트워크를 선택하고, 목록에 없으면 첫 enabled router의 외부 gateway를 사용합니다. 목록 페이지의 오류를 숨기지 않습니다. 명시한 external network ID는 이름 목록 조회를 생략하지만 이 workflow에는 Neutron endpoint와 port/IP 작업이 여전히 필요합니다.
+외부 floating network를 생략하면 Ensure는 [공유 floating 역할](../network/network-roles.md)의 첫 후보를 사용합니다. Configured NAT source가 있으면 그 network가 후보이며, 성공한 목록이 비어 있을 때만 enabled router의 첫 외부 gateway를 사용합니다. 역할·subnet 오류를 숨기지 않습니다. 명시한 external network ID는 이름 목록 조회를 생략하지만 이 workflow에는 Neutron endpoint와 port/IP 작업이 여전히 필요합니다.
 
 floating IP는 기본적으로 현재 project에서 재사용합니다. 같은 destination에 이미 연결된 IP, 첫 free 후보, 새 allocation 순서이며 전체 후보 페이지를 확인한 뒤 mutation합니다. `WithEnsureReuse(false)`는 reuse 목록과 기본 project scope 판정을 생략하고 새 IP를 할당합니다. `WithEnsureProject("project-id")`는 재사용과 할당의 owner를 명시합니다. 일반적인 project-scoped Connection은 owner를 직접 지정할 필요가 없습니다.
 
-선택 조건에 맞는 `(port, fixed IPv4)` 후보가 여러 개이면 임의로 하나를 고르지 않고 `ErrAmbiguous`를 반환합니다. 서버에 연결된 port, NAT destination network, fixed IPv4를 `WithFloatingIPOptions` 안의 `WithEnsurePort`, `WithEnsureNATDestination`, `WithEnsureFixedAddress`로 좁힐 수 있습니다. fixed address 옵션은 연결할 서버 주소를 선택하며 서버 NIC에 새 주소를 할당하는 옵션은 아닙니다. 명시 port가 다른 서버 소유이면 실패합니다.
+명시 destination 옵션 없이 요청 서버 소유 port가 여러 개이면 공유 NAT destination network로 좁힙니다. IPv6 전용 port도 개수에 포함하며 NAT 역할이 없으면 `ErrAmbiguous`입니다. 최종 `(port, fixed IPv4)` 쌍이 여러 개여도 임의로 하나를 고르지 않고 `ErrAmbiguous`를 반환합니다. `WithFloatingIPOptions` 안의 `WithEnsurePort`, `WithEnsureNATDestination`, `WithEnsureFixedAddress`로 명시 조건을 주면 추론 NAT 조회를 우회합니다. fixed address 옵션은 연결할 서버 주소를 선택하며 서버 NIC에 새 주소를 할당하는 옵션은 아닙니다. 명시 port가 다른 서버 소유이면 실패합니다.
 
 `WithServerOptions`와 `WithFloatingIPOptions`는 여러 번 사용하면 해당 옵션들을 순서대로 추가합니다. 같은 service 설정의 마지막 옵션이 우선하고 앞선 invalid option은 뒤 옵션으로 숨기지 않습니다. 전달된 option slice는 snapshot하므로 원래 slice의 원소를 교체해도 준비한 workflow option은 바뀌지 않습니다.
 
@@ -142,7 +142,7 @@ SDK는 server create의 입력·부팅 조합·선택 microversion·wait 옵션,
 
 SDK는 내부적으로 `FloatingIPs.PrepareEnsureActive`를 사용합니다. 이 preparation은 재사용 owner를 정책에 바인딩하고 필수 IP 대기를 켜며, 지정한 IP wait 옵션은 보존합니다. 앱은 이 helper나 builder를 직접 만들 필요가 없습니다. 이미 준비한 일반 Ensure policy로 설정을 교체하더라도 이 workflow의 필수 IP ACTIVE 확인을 끌 수 없습니다.
 
-이미지·flavor·서버 network 등의 이름 조회는 기존 Create처럼 POST 전에 수행합니다. 새 서버의 port/fixed IPv4 선택, 외부 floating network 조회, IP 후보 조회·연결·할당은 서버 ACTIVE 이후에 수행합니다. 이 단계의 403, missing/ambiguous resource, IP quota, revision 충돌, timeout은 서버 생성 이후 실패일 수 있습니다. 생성 전 검증이 모든 cloud 상태를 보장한다고 해석하지 않습니다.
+이미지·flavor·서버 network 등의 이름 조회는 기존 Create처럼 POST 전에 수행합니다. Configured default를 위한 공유 역할 탐색도 이 시점에 실행될 수 있고, 이후 floating source/NAT 선택은 그 성공 snapshot을 재사용합니다. 새 서버의 port/fixed IPv4 선택과 IP 후보 조회·연결·할당은 서버 ACTIVE 이후입니다. 아직 역할 cache가 없으면 IP 단계에서 처음 탐색합니다. 이 단계의 403, missing/ambiguous resource, IP quota, revision 충돌, timeout은 서버 생성 이후 실패일 수 있습니다. [공유 역할 workflow 테스트](../connection_server_network_roles_test.go)는 한 inventory로 NIC·source·NAT를 선택하고, 생성 전 실패와 ACTIVE 이후 실패의 결과 보존을 검증합니다. 생성 전 검증이 모든 cloud 상태를 보장한다고 해석하지 않습니다.
 
 새 서버 ID는 Ensure에 `resource.ID`로 전달하며 서버 이름을 다시 조회하지 않습니다. server Wait 성공 뒤에도 원래 생성 ID와 응답 ID, 실제 `Status == ACTIVE`를 확인합니다. IP도 실제 Status와 ID·owner·external network·port·fixed address를 확인합니다. `resource.WithStatusAttribute`로 다른 필드를 선택해 waiter가 먼저 완료되더라도 실제 서버/IP가 ACTIVE가 아니면 성공으로 반환하지 않습니다.
 
@@ -175,7 +175,7 @@ SDK는 실패한 서버/IP를 자동 DELETE하지 않으며, 재사용 PUT이 40
 다음 차이는 남아 있으므로 cloud `create_server`와 `_network_common` 전체 지원 판정은 계속 partial입니다.
 
 - `_needs_floating_ip`의 기존 public/floating 주소·fixed 주소·private cloud·service/flags에 따른 자동 생략, 외부 network/NAT 가능성 판정. 이 Go 메서드는 연결을 명시적으로 요청하는 흐름입니다.
-- Python shared network role/NAT·subnet 관계, 외부/내부·IPv4/IPv6 분류, `has_service`, cache/reset과 cloud flags의 전체 정책.
+- 전체 `has_service`·private/floating source flags·session 정책과 cloud network mutation 후 cache 자동 무효화. 구현한 공유 역할과 소비 경로는 이 전체 정책의 일부입니다.
 - `ips` 목록, pool/auto 선택 우선순위의 전체 조합, Nova floating IP fallback, cloud의 일부 생성 확장 입력과 추가 볼륨/server group 동작.
 - Python의 일부 activation timeout 이후 신규 IP 삭제, ACTIVE지만 주소가 없을 때 서버 삭제. Go workflow는 부분 결과를 보존합니다.
 - Python `_attach_ip_to_server(wait=True)`의 서버 주소 재조회·수렴 및 `public_v4`/`interface_ip` 같은 반환값 확장. Go는 실제 Nova server와 Neutron IP를 각각 반환합니다.
@@ -183,4 +183,4 @@ SDK는 실패한 서버/IP를 자동 DELETE하지 않으며, 재사용 PUT이 40
 
 Python 비교는 고정 소스를 읽은 결과이며 Python 예제 실행이나 인증된 OpenStack 검증 결과가 아닙니다. 로컬 HTTP 테스트는 옵션 검증과 호출 순서, 공통 deadline/cancellation, 실제 ACTIVE·identity 검사, 재사용/새 allocation, revision 충돌, 실패 후 서버·IP 보존을 확인하는 범위입니다. 독립 Go 예제의 컴파일 확인과 해당 HTTP 테스트 실행 결과는 [지원 판정대장](../docs/sdk-support-ledger.md)에 기록합니다. 실환경의 quota·라우터 연결성·Nova 주소 반영·네트워크 도달성은 이 로컬 검증에 포함하지 않습니다.
 
-[공유 네트워크 역할 조회](../network/network-roles.md)는 별도 getter로 제공됩니다. 현재 이 workflow의 Ensure 선택과 자동 IP 필요성 판단에는 연결되지 않았으므로, 역할 조회 자체와 위 remaining의 상위 정책 연계를 구분합니다.
+[공유 네트워크 역할 조회](../network/network-roles.md)는 기본 NIC와 Ensure의 source/NAT 선택에 연결되어 같은 성공 snapshot을 사용합니다. 자동 IP 필요성 판단·생략과 위 나머지 상위 정책은 남은 범위입니다.

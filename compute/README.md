@@ -187,4 +187,4 @@ Server의 `WaitForServer(ctx, ref)`는 ACTIVE·ERROR·120초를 기본으로 사
 
 서버 생성과 floating IP 재사용·연결을 한 작업으로 수행하려면 [CreateWithFloatingIP](create-with-floating-ip.md)를 사용합니다. 기본으로 실제 서버와 IP의 ACTIVE를 기다리며, Connection이 서비스와 기본 reuse project를 준비합니다. 전체 deadline과 서버/IP 부분 결과를 제공하고 일반 `Create`의 비동기 동작은 유지합니다. Python의 자동 IP 필요 여부·주소 갱신·shared role/cache 전체 정책은 계속 남습니다.
 
-Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. `WithNetworkRoles`의 `DefaultInterface`는 Create의 기본 NIC selector로 전달되며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 기본 NIC는 생성마다 새로 조회하므로 역할 getter의 성공 cache와 별도로 동작합니다.
+Connection의 [네트워크 역할 설정·조회](../network/network-roles.md)는 family·NAT·default 역할을 함께 제공합니다. Configured default는 getter 및 floating source/NAT 선택과 같은 성공 snapshot을 사용하며, 명시 NIC와 기존 `WithDefaultNetwork`/`WithoutDefaultNetwork`가 먼저입니다. 명시 `WithDefaultNetwork(resource.Name(...))`은 기존 exact-name 조회를 생성마다 수행합니다.

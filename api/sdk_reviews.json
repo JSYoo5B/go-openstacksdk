@@ -24894,7 +24894,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -25268,11 +25268,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -25333,11 +25333,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -32454,7 +32454,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -32555,7 +32555,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -32813,7 +32813,7 @@
           ]
         },
         {
-          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status\u2192Backup.reset_status\u2192Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
+          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status→Backup.reset_status→Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
           "tests": [
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsPreserveNativeTypedRestoreAndSelectedVersionReset",
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorLabels",
@@ -34927,7 +34927,7 @@
           ]
         },
         {
-          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. Explicit typed default-name resolution remains fresh; configured defaults share successful role discovery and failed discovery is not cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
           "tests": [
             "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
             "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
@@ -34957,7 +34957,7 @@
           ]
         },
         {
-          "behavior": "After one Nova POST the original server ID is retained. Mandatory server waiting checks the actual ID and ACTIVE status even with a custom status attribute before any IP work. It then reuses or allocates one IPv4 assignment and always verifies actual IP ACTIVE; prepared policy replacement cannot disable this mandatory wait.",
+          "behavior": "After one Nova POST the original server ID is retained. Mandatory server waiting checks the actual ID and ACTIVE status even with a custom status attribute before destination port/available-IP requests or floating-IP mutation. Shared role discovery can already have run for the configured default NIC. It then reuses or allocates one IPv4 assignment and always verifies actual IP ACTIVE; prepared policy replacement cannot disable this mandatory wait.",
           "tests": [
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPOrdersWaitsAndPreservesPartialResults",
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPPollsServerBeforeStartingIP"
@@ -34988,23 +34988,52 @@
           "tests": [
             "network/floating_ip_prepare_test.go:TestFloatingIPPrepareActiveBindsCopyAndPreservesWaitPolicy"
           ]
+        },
+        {
+          "behavior": "A configured default NIC consumes the same successful network/subnet role snapshot as Connection getters. Caller changes to a returned default cannot alter creation; consecutive creates reuse the successful discovery and Reset refreshes the chosen default ID for the next create.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICConsumesRoleCacheAndReset",
+            "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
+          ]
+        },
+        {
+          "behavior": "Configured default discovery validates the shared snapshot, so subnet403 or another configured role missing stops before Nova POST even when the default itself exists. Failed attempts are not cached; a subsequent success is reused. Later network-page errors, name-or-ID collisions, unsafe IDs and cancellation retain their established pre-create errors.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICRoleErrorsStopCreationAndRetry",
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages"
+          ]
+        },
+        {
+          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default and keeps Nova auto at selected2.37 or omits networks when unset. Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
         "compute/README.md",
         "compute/server-default-network.md",
-        "compute/create-with-floating-ip.md"
+        "compute/create-with-floating-ip.md",
+        "network/network-roles.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
-        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results.",
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
         "CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow."
       ],
       "remaining": [
-        "Complete shared default/NAT/external/internal network role discovery, subnet and relation validation, service/flags, cache/reset behavior and advertised min/max plus default microversion checks used by supports/require_microversion; the configured default selection contract recorded here does not cover that entire policy.",
+        "Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles. Complete full has_service/private/source/flags, successful cloud mutation cache-reset hooks, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion; bounded role consumption does not close the complete cloud policy.",
         "Finish full cloud auto_ip need/skip and explicit IP-list/pool/source branching, refreshed server interface/fault/error ordering and cleanup policies beyond the explicit prepared Neutron CreateWithFloatingIP workflow. Preserve remaining server group/scheduler hints, extra volume combinations, count/default/security-group/userdata/metadata and post-create GET/fault/wait contracts.",
         "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
       ]
@@ -35075,7 +35104,7 @@
           ]
         },
         {
-          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. Explicit typed default-name resolution remains fresh; configured defaults share successful role discovery and failed discovery is not cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
           "tests": [
             "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
             "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
@@ -35096,18 +35125,41 @@
             "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
             "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
           ]
+        },
+        {
+          "behavior": "A configured default NIC consumes the same successful network/subnet role snapshot as Connection getters. Caller changes to a returned default cannot alter creation; consecutive creates reuse the successful discovery and Reset refreshes the chosen default ID for the next create.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICConsumesRoleCacheAndReset",
+            "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
+          ]
+        },
+        {
+          "behavior": "Configured default discovery validates the shared snapshot, so subnet403 or another configured role missing stops before Nova POST even when the default itself exists. Failed attempts are not cached; a subsequent success is reused. Later network-page errors, name-or-ID collisions, unsafe IDs and cancellation retain their established pre-create errors.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICRoleErrorsStopCreationAndRetry",
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages"
+          ]
+        },
+        {
+          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default and keeps Nova auto at selected2.37 or omits networks when unset. Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
         "compute/README.md",
-        "compute/server-default-network.md"
+        "compute/server-default-network.md",
+        "network/network-roles.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
-        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results."
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success."
       ],
       "remaining": [
         "Complete the inherited Proxy._create/Server.create input-attribute/descriptor/query/header/URI, defaults, extension handling and full response/error/model/location/session/cache comparison beyond the NIC contracts recorded here.",
@@ -35180,7 +35232,7 @@
           ]
         },
         {
-          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. Explicit typed default-name resolution remains fresh; configured defaults share successful role discovery and failed discovery is not cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
           "tests": [
             "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
             "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
@@ -35201,18 +35253,41 @@
             "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages",
             "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection"
           ]
+        },
+        {
+          "behavior": "A configured default NIC consumes the same successful network/subnet role snapshot as Connection getters. Caller changes to a returned default cannot alter creation; consecutive creates reuse the successful discovery and Reset refreshes the chosen default ID for the next create.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICConsumesRoleCacheAndReset",
+            "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
+          ]
+        },
+        {
+          "behavior": "Configured default discovery validates the shared snapshot, so subnet403 or another configured role missing stops before Nova POST even when the default itself exists. Failed attempts are not cached; a subsequent success is reused. Later network-page errors, name-or-ID collisions, unsafe IDs and cancellation retain their established pre-create errors.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICRoleErrorsStopCreationAndRetry",
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages"
+          ]
+        },
+        {
+          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default and keeps Nova auto at selected2.37 or omits networks when unset. Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
         "compute/README.md",
-        "compute/server-default-network.md"
+        "compute/server-default-network.md",
+        "network/network-roles.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
-        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup; YAML name retains union name/ID matching over all pages. The SDK preserves lookup errors and does not cache network selection results."
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success."
       ],
       "remaining": [
         "Review the complete native CreateOpts/SchedulerHintOpts and generated API.Create contract, including remaining fields/counts, userdata/security groups, extensions, success/response/error and version paths beyond these high-level NIC assertions.",
@@ -35250,7 +35325,7 @@
           ]
         },
         {
-          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. No successful or failed selection is cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
+          "behavior": "Typed default names resolve exactly; missing/ambiguous/403 failures, malformed callback Refs and cancellation stop before server creation. Explicit typed default-name resolution remains fresh; configured defaults share successful role discovery and failed discovery is not cached; callbacks and options are request-local, and wait failure preserves the created server without cleanup.",
           "tests": [
             "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry",
             "compute/default_network_test.go:TestServerDefaultNetworkDependencyFailureCancellationAndValidation",
@@ -35315,7 +35390,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -35335,6 +35410,34 @@
             "connection_network_roles_test.go:TestConnectNetworkRoleBooleanFlagsAndExplicitPolicyReplacement",
             "network/roles_test.go:TestNetworkRoleOptionsValidateBeforeDiscoveryAndSnapshotSlices"
           ]
+        },
+        {
+          "behavior": "A configured default NIC consumes the same successful network/subnet role snapshot as Connection getters. Caller changes to a returned default cannot alter creation; consecutive creates reuse the successful discovery and Reset refreshes the chosen default ID for the next create.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICConsumesRoleCacheAndReset",
+            "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
+          ]
+        },
+        {
+          "behavior": "Configured default discovery validates the shared snapshot, so subnet403 or another configured role missing stops before Nova POST even when the default itself exists. Failed attempts are not cached; a subsequent success is reused. Later network-page errors, name-or-ID collisions, unsafe IDs and cancellation retain their established pre-create errors.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICRoleErrorsStopCreationAndRetry",
+            "connection_cloud_network_test.go:TestConnectConfiguredDefaultNetworkMatchesNamesOrIDsAcrossAllPages"
+          ]
+        },
+        {
+          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default and keeps Nova auto at selected2.37 or omits networks when unset. Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
+          "tests": [
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault",
+            "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
+            "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
@@ -35342,22 +35445,22 @@
         "network/network-roles.md"
       ],
       "differences": [
-        "The SDK now exposes Connection.GetDefaultNetwork as an owned native-plus-extension nullable role model. Existing server NIC defaults remain a separate Ref-based creation policy: typed IDs bypass lookup, typed names resolve exactly and YAML/role selector lookup matches name OR ID over all pages.",
-        "Server-create default selection remains fresh and uncached; the new shared role getters cache successful discovery and return owned snapshots. Network/subnet/catalog failures remain visible and retryable rather than becoming Python sticky empty cache results.",
+        "The SDK exposes Connection.GetDefaultNetwork as an owned native-plus-extension nullable role model. Explicit typed defaults remain a separate Ref-based creation policy: IDs bypass lookup and names resolve exactly. Configured YAML/role defaults match name OR ID through the shared successful discovery.",
+        "Explicit typed default-name resolution remains fresh; configured server defaults now consume the shared successful role snapshot. Network/subnet/catalog failures remain visible and retryable rather than Python sticky empty cache results; disabled discovery or clean missing endpoint yields no configured default and the existing Nova version fallback.",
         "YAML network names are nonblank strings; Python truthy numeric names are stringified and whitespace names can be preserved. List/flag shape failures return ErrInvalidOption instead of Python incidental TypeError/AttributeError. Metadata profile presence follows Python while native zero-profile authentication fallback remains unchanged.",
         "The SDK exposes context-aware Connection getters returning owned native-plus-router/provider models and typed nullable pointers; Python returns mutable Network Resources and cached list/object identities. Ordinary generated Networks model behavior is unchanged. This bounded role model does not emulate all nullable descriptors, unknown properties, location or session state.",
         "Go configured-role validation accepts a matching name OR ID consistently. Pinned classification accepts either, but its subsequent external/internal family validation checks only selected names and can reject ID-only selectors. Go also rejects unsafe IDs and preserves missing/ambiguous and decoding errors rather than incidental dynamic-input behavior.",
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -35375,7 +35478,10 @@
         "gophercloudsdk/network.WithEnsureFixedAddress",
         "gophercloudsdk/network.WithEnsureWait",
         "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive",
-        "gophercloudsdk/compute.Servers.CreateWithFloatingIP"
+        "gophercloudsdk/compute.Servers.CreateWithFloatingIP",
+        "gophercloudsdk/network.FloatingIPs.Create",
+        "gophercloudsdk/network.NetworkRoles.Discover",
+        "gophercloudsdk/network.NetworkRoles.Reset"
       ],
       "contracts": [
         {
@@ -35394,7 +35500,7 @@
           ]
         },
         {
-          "behavior": "A zero external-network Ref selects the first router:external network, then an enabled router gateway if no external network is available. Selection consumes later pages before destination lookup/mutation, including linked empty JSON pages. Later network/router errors, invalid/no gateways and cancellation stop before port/IP selection or mutation; port and available-IP selection also follow linked empty pages.",
+          "behavior": "A zero external-network Ref consumes the first shared ExternalIPv4Floating role candidate, then an enabled router gateway only when the successfully discovered role list is empty. Selection consumes later/linked-empty pages before mutation. Network/subnet/router errors, invalid/no gateways and cancellation stop before port/IP mutation; port and available-IP selection also follow linked empty pages.",
           "tests": [
             "network/floating_ip_selection_test.go:TestFloatingIPEnsureAutomaticNetworkConsumesEmptyAndLaterPages"
           ]
@@ -35437,24 +35543,63 @@
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPOrdersWaitsAndPreservesPartialResults",
             "connection_server_floating_ip_test.go:TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits"
           ]
+        },
+        {
+          "behavior": "Ensure zero external Ref consumes the shared floating-role candidates rather than the old router-external filtered collection. Configured NAT source may select a non-router-external network and ordinary physical-provider external IPv4 is not automatically a floating source. Consecutive calls reuse the owned successful role snapshot, still allocate per call, and Reset refreshes the chosen external ID; PrepareEnsureActive itself does not perform role discovery.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureSharedSourceCacheAndReset"
+          ]
+        },
+        {
+          "behavior": "Failed shared network/subnet discovery, including later-page403 or a configured floating source missing, prevents port/IP mutation and router fallback and remains retryable. Only a successful empty floating-role list proceeds to enabled-router gateway fallback; linked empty/later router pages and their errors are consumed before mutation. Both family flags disabled also produce an empty role snapshot and allow router fallback without a role inventory request, despite a configured source missing.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureRoleErrorsStopRouterFallbackAndRetry",
+            "network/floating_ip_selection_test.go:TestFloatingIPEnsureAutomaticNetworkConsumesEmptyAndLaterPages",
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureDisabledRolesStillUseRouterFallback"
+          ]
+        },
+        {
+          "behavior": "High-level FloatingIPs.Create and Ensure consume shared configured or inferred NAT destination only without explicit port/fixed/NAT selection and with multiple ports owned by the requested server. All port pages are consumed first and foreign ports are excluded. Successful NAT discovery is reused but ports are listed on each call; Reset changes the chosen destination while preserving the actual allocation body.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATUsesSharedDestinationAndReset"
+          ]
+        },
+        {
+          "behavior": "Owned port count precedes IPv4 filtering, so an IPv6-only second port requires a NAT role. No NAT role returns ErrAmbiguous with sorted owned port IDs; a selected network absent from ports returns ErrNotFound; multiple selected IPv4 pairs remain ErrAmbiguous. Role403, later port403 and subnet cancellation prevent allocation without fallback or cleanup.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATFailuresStopAllocation"
+          ]
+        },
+        {
+          "behavior": "A single owned port or explicit fixed address, port or NAT destination bypasses automatic NAT role discovery despite an invalid configured policy elsewhere. Explicit port performs its GET rather than port listing; explicit NAT retains network_id filtering. An external Name retains the router:external/exact-name lane, while an explicit external ID needs no network-role inventory.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPExplicitAndSinglePortSelectionBypassRoles"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
         "network/README.md",
         "network/floating-ip-ensure.md",
-        "compute/create-with-floating-ip.md"
+        "compute/create-with-floating-ip.md",
+        "network/network-roles.md"
       ],
       "differences": [
         "Pinned available_floating_ip accepts an optional existing Server and returns the first free floating-IP Resource/Munch, allocating only when none is free. Ensure requires a safe explicit server Ref and always selects/verifies its unique IPv4 destination, associates a free IP, and deliberately prefers an IP already attached there. It returns a FloatingIPAssignment with Reused/Allocated phases; this is an idiomatic standalone workflow foundation rather than an equivalent availability getter.",
         "Pinned Neutron selection filters port_id=None, network and current project over list_floating_ips. Go constrains the list query, rechecks owner/network locally, accepts native empty/null port strings, excludes IPv6/ERROR/inconsistent-owner rows and adds presence-aware revision guarding. Explicit Go ID/Name Refs and unique destination IPv4 policy narrow Python dynamic/list/name-or-ID inputs.",
-        "Go automatic allocation networks come from fresh router:external network pages with enabled-router gateway fallback. Pinned external IPv4 floating roles come from shared configured NAT/source/role discovery and cached state. Go consumes all selection pages before mutation, including advertised continuation after empty JSON pages; this is not proof of identical Python request counts or pager/session behavior.",
+        "Go automatic allocation first consumes shared configured ExternalIPv4Floating roles, with enabled-router gateway fallback only for a successful empty role list. Without explicit port/fixed/NAT settings and with multiple server-owned ports, Create/Ensure use the shared NAT destination; IPv6-only ports count and unique fixed IPv4-pair validation remains strict. Shared successful roles are cached, while candidate IP/port selection remains per call. These assertions do not establish identical Python mutable cache, pager/session or automatic-need policies.",
         "Python chooses Neutron versus Nova from service/configured floating_ip_source and falls back to Nova on selected NotFound failures. Go is Neutron-only and preserves selection/association errors without fallback, retry-to-allocate or implicit cleanup. Pinned creation wait timeout can delete a newly allocated IP; Go returns the allocated assignment for explicit cleanup.",
         "Standalone plain PrepareEnsureFloatingIPOptions resolves the recorded owner per Ensure call; service-bound PrepareEnsureActive intentionally holds the owner resolved before Nova creation. Reuse=false without explicit owner continues to leave scope to Neutron. Native alias results do not emulate Python Resource/normalization/location/session/cache state or server interface refresh.",
         "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution."
       ],
       "remaining": [
         "Provide or deliberately map the full public availability getter: optional/absent Server, network/pool dynamic inputs, unattached result behavior and return Resource/Munch identity/normalization. Compare list_floating_ips filtering/defaults/pagination/error/cache and current_project_id policies beyond the bounded Go selection path.",
-        "Complete shared configured external IPv4 floating/NAT source and destination role discovery, subnet inference, service availability, use_external_network/use_internal_network flags, configuration overlays/vendor profiles, locking and cached-result/reset behavior. router:external filtering alone is not that complete policy.",
+        "Shared configured floating source/default/NAT roles now feed the bounded Go consumers. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, successful cloud mutation cache invalidation, mutable Resource/cache/session semantics and source destination/source behavior beyond the explicit or multiple-owned-port boundaries. The source optional-server availability getter remains partial.",
         "Compare floating_ip_source/service selection, Nova-network pool listing/allocation/normalization and Neutron NotFound fallback. Finish private _neutron_create_floating_ip optional server/port/fixed-address semantics, destination heuristics, timeout/cleanup/exception ordering and Resource/Adapter behavior; private helpers are dependencies and have no separate declared catalog IDs.",
         "The explicit CreateWithFloatingIP workflow now connects prepared Ensure to Nova creation and mandatory server/IP ACTIVE waits under one overall deadline. Ordinary Create remains separate. Complete full cloud create_server/add_auto_ip/wait_for_server automatic/reused/explicit IP branching, source/role/cache policies, refreshed server interfaces and cleanup/error ordering."
       ]
@@ -35489,15 +35634,41 @@
             "network/floating_ip_ensure_test.go:TestFloatingIPEnsureErrorsPreserveSelectionAndNeverFallback",
             "network/floating_ip_selection_test.go:TestFloatingIPEnsureWaitCancellationAndTimeoutPreserveAssignment"
           ]
+        },
+        {
+          "behavior": "High-level FloatingIPs.Create and Ensure consume shared configured or inferred NAT destination only without explicit port/fixed/NAT selection and with multiple ports owned by the requested server. All port pages are consumed first and foreign ports are excluded. Successful NAT discovery is reused but ports are listed on each call; Reset changes the chosen destination while preserving the actual allocation body.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATUsesSharedDestinationAndReset"
+          ]
+        },
+        {
+          "behavior": "Owned port count precedes IPv4 filtering, so an IPv6-only second port requires a NAT role. No NAT role returns ErrAmbiguous with sorted owned port IDs; a selected network absent from ports returns ErrNotFound; multiple selected IPv4 pairs remain ErrAmbiguous. Role403, later port403 and subnet cancellation prevent allocation without fallback or cleanup.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATFailuresStopAllocation"
+          ]
+        },
+        {
+          "behavior": "A single owned port or explicit fixed address, port or NAT destination bypasses automatic NAT role discovery despite an invalid configured policy elsewhere. Explicit port performs its GET rather than port listing; explicit NAT retains network_id filtering. An external Name retains the router:external/exact-name lane, while an explicit external ID needs no network-role inventory.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPExplicitAndSinglePortSelectionBypassRoles"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
         "network/README.md",
-        "network/floating-ip-ensure.md"
+        "network/floating-ip-ensure.md",
+        "network/network-roles.md"
       ],
       "differences": [
         "The generated facade owns concrete options/builders and extracts a native typed value. Higher-level Create/Ensure add safe Ref/name selection, unique IPv4 destination policy, optional wait and partial allocation results around that native call; these workflow differences do not characterize all native CreateOptsBuilder inputs.",
-        "Ensure adds reuse and presence-aware native Update revision handling without changing the separately reviewed native Update declaration. No unconditional conflict fallback, new allocation after association failure, or automatic cleanup is introduced."
+        "Ensure adds reuse and presence-aware native Update revision handling without changing the separately reviewed native Update declaration. No unconditional conflict fallback, new allocation after association failure, or automatic cleanup is introduced.",
+        "Selected high-level Create/Ensure allocation fixtures now use the shared NAT role for the bounded automatic multi-owned-port case and preserve explicit/single-port lanes. The generated native API.Create still accepts supplied concrete options; these role-consuming fixtures do not establish its complete input/body/accepted-status/decoder/session contract."
       ],
       "remaining": [
         "Audit the complete native Create declaration and facade rather than promote it from allocation fixtures: required/body defaults and validation, Description/FloatingIP/SubnetID/TenantID/ProjectID combinations, permitted extensions, final option replacement and all request/error/accepted-status paths.",
@@ -35618,7 +35789,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -35638,6 +35809,30 @@
             "connection_network_roles_test.go:TestConnectNetworkRoleBooleanFlagsAndExplicitPolicyReplacement",
             "network/roles_test.go:TestNetworkRoleOptionsValidateBeforeDiscoveryAndSnapshotSlices"
           ]
+        },
+        {
+          "behavior": "High-level FloatingIPs.Create and Ensure consume shared configured or inferred NAT destination only without explicit port/fixed/NAT selection and with multiple ports owned by the requested server. All port pages are consumed first and foreign ports are excluded. Successful NAT discovery is reused but ports are listed on each call; Reset changes the chosen destination while preserving the actual allocation body.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATUsesSharedDestinationAndReset"
+          ]
+        },
+        {
+          "behavior": "Owned port count precedes IPv4 filtering, so an IPv6-only second port requires a NAT role. No NAT role returns ErrAmbiguous with sorted owned port IDs; a selected network absent from ports returns ErrNotFound; multiple selected IPv4 pairs remain ErrAmbiguous. Role403, later port403 and subnet cancellation prevent allocation without fallback or cleanup.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPAutomaticNATFailuresStopAllocation"
+          ]
+        },
+        {
+          "behavior": "A single owned port or explicit fixed address, port or NAT destination bypasses automatic NAT role discovery despite an invalid configured policy elsewhere. Explicit port performs its GET rather than port listing; explicit NAT retains network_id filtering. An external Name retains the router:external/exact-name lane, while an explicit external ID needs no network-role inventory.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPExplicitAndSinglePortSelectionBypassRoles"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
@@ -35649,14 +35844,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -35719,7 +35914,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -35750,14 +35945,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -35820,7 +36015,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -35851,14 +36046,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -35921,7 +36116,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -35952,14 +36147,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36022,7 +36217,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36053,14 +36248,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36123,7 +36318,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36143,6 +36338,26 @@
             "connection_network_roles_test.go:TestConnectNetworkRoleBooleanFlagsAndExplicitPolicyReplacement",
             "network/roles_test.go:TestNetworkRoleOptionsValidateBeforeDiscoveryAndSnapshotSlices"
           ]
+        },
+        {
+          "behavior": "Ensure zero external Ref consumes the shared floating-role candidates rather than the old router-external filtered collection. Configured NAT source may select a non-router-external network and ordinary physical-provider external IPv4 is not automatically a floating source. Consecutive calls reuse the owned successful role snapshot, still allocate per call, and Reset refreshes the chosen external ID; PrepareEnsureActive itself does not perform role discovery.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureSharedSourceCacheAndReset"
+          ]
+        },
+        {
+          "behavior": "Failed shared network/subnet discovery, including later-page403 or a configured floating source missing, prevents port/IP mutation and router fallback and remains retryable. Only a successful empty floating-role list proceeds to enabled-router gateway fallback; linked empty/later router pages and their errors are consumed before mutation. Both family flags disabled also produce an empty role snapshot and allow router fallback without a role inventory request, despite a configured source missing.",
+          "tests": [
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureRoleErrorsStopRouterFallbackAndRetry",
+            "network/floating_ip_selection_test.go:TestFloatingIPEnsureAutomaticNetworkConsumesEmptyAndLaterPages",
+            "network/floating_ip_roles_test.go:TestFloatingIPEnsureDisabledRolesStillUseRouterFallback"
+          ]
+        },
+        {
+          "behavior": "Connection CreateWithFloatingIP uses a single successful configured role inventory for its default NIC, floating source and NAT destination, including a configured source without router:external. Role lookup finishes before Nova POST; actual server ACTIVE precedes port and floating-IP requests, and actual floating-IP ACTIVE remains mandatory. A role403 returns no created resource; a later port403 preserves the known ACTIVE Server with nil assignment and the original HTTP cause, without allocation or cleanup.",
+          "tests": [
+            "connection_server_network_roles_test.go:TestConnectionCreateWithFloatingIPSharesDefaultSourceAndNATRoles"
+          ]
         }
       ],
       "documentation": [
@@ -36154,14 +36369,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36224,7 +36439,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36255,14 +36470,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36325,7 +36540,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36356,14 +36571,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36426,7 +36641,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36457,14 +36672,14 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Add or deliberately map successful cloud network create/update/delete automatic role-cache invalidation; explicit Reset and cache generation tests do not close those mutation hooks. Compare remaining Resource cache/locking/session and native pagination/response boundaries beyond the inspected discovery fixtures.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36495,7 +36710,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36515,12 +36730,12 @@
       "differences": [
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
     {
@@ -36551,7 +36766,7 @@
           ]
         },
         {
-          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. The selector feeds the existing separate Create NIC lookup rather than consuming the shared discovery cache.",
+          "behavior": "Role selectors are frozen with the same cloud/secure/public snapshot as native authentication. YAML family flags inherit routes_externally unless overridden; a typed WithNetworkRoles policy replaces the YAML role configuration and its default selector, and an empty typed replacement clears configured roles/default. Configured default NIC selection now consumes the same successful role snapshot; explicit typed default names retain their separate exact-name lookup.",
           "tests": [
             "connection_cloud_config_test.go:TestCloudNetworkConfigurationInheritanceAndFrozenNativeSettings",
             "connection_network_roles_test.go:TestConnectNetworkRoleConfigurationAndTypedOverrideSupplyDefaultNIC"
@@ -36571,12 +36786,12 @@
       "differences": [
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
-        "The Connection only maps clean native missing-endpoint detection here. It does not implement the full Python has_service configuration-disable/official-service/version/session-endpoint policy. Typed/YAML default selectors reach the existing fresh server NIC selection; shared role discovery is not yet consumed automatically by default NIC, Ensure or automatic-IP need decisions."
+        "The Connection only maps clean native missing-endpoint detection here and not the full Python has_service configuration-disable/official-service/version/session policy. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions."
       ],
       "remaining": [
         "Map full cloud has_service configuration-disable and official-service defaults, optional version range/session-endpoint discovery, warning and SDKException policies. Compare raw use_external_network/use_internal_network truthiness against the documented typed/YAML policy across remaining configuration inputs.",
         "Complete configuration-loader region/argument/vendor/builtin-profile overlays and full response/nullable boundaries. The frozen standard-file role configuration is not the entire Python CloudRegion loader.",
-        "Integrate shared roles with the existing default NIC and Ensure consumers where appropriate, and complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, NAT destination selection, server interface/address normalization, waits/fault/error ordering and cleanup. Publishing role getters does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configured default NIC and automatic floating source/NAT consumers now use the bounded shared role snapshot. Complete automatic floating-IP need/skip, private/source/service flags, pool/explicit-IP/Nova branching, source newest-port/first-IPv4 destination heuristics, server interface/address normalization, waits/fault/error ordering and cleanup. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     }
   ]
