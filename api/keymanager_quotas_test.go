@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/testhelper"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/keymanager/v1/quotas"
 	"gophercloudsdk/request"
@@ -290,32 +291,47 @@ type quotaErrorReader struct{ err error }
 func (r quotaErrorReader) Read([]byte) (int, error) { return 0, r.err }
 
 func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
-	for _, mode := range []string{"effective-wrong", "project-wrong", "missing", "null", "array", "broken", "status"} {
+	for _, mode := range []string{"effective-wrong", "project-wrong", "missing", "null", "array", "broken", "status", "not-found", "forbidden"} {
 		t.Run(mode, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
+			code := 200
+			body := `{"orders":1}`
+			wantPath := quotaPrefix + "/quotas"
+			switch mode {
+			case "effective-wrong":
+				body = `{"project_quotas":{"orders":1}}`
+			case "project-wrong":
+				body = `{"quotas":{"orders":1}}`
+				wantPath = quotaPrefix + "/project-quotas/project"
+			case "missing":
+				body = `{}`
+			case "null":
+				body = `{"quotas":null}`
+			case "array":
+				body = `{"quotas":[]}`
+			case "broken":
+				body = `{"quotas":`
+			case "status":
+				code = 203
+				body = `{"quotas":{}}`
+			case "not-found":
+				code = 404
+				body = `{"message":"effective quota not found"}`
+			case "forbidden":
+				code = 403
+				body = `{"message":"effective quota denied"}`
+			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				w.Header().Set("X-Request-ID", mode)
-				code := 200
-				body := `{"orders":1}`
-				switch mode {
-				case "effective-wrong":
-					body = `{"project_quotas":{"orders":1}}`
-				case "project-wrong":
-					body = `{"quotas":{"orders":1}}`
-				case "missing":
-					body = `{}`
-				case "null":
-					body = `{"quotas":null}`
-				case "array":
-					body = `{"quotas":[]}`
-				case "broken":
-					body = `{"quotas":`
-				case "status":
-					code = 203
-					body = `{"quotas":{}}`
+				testhelper.TestMethod(t, r, http.MethodGet)
+				if r.URL.Path != wantPath || r.URL.RawQuery != "" {
+					t.Error("quota GET resolved another path or sent a query", r.Method, r.URL)
 				}
+				if data, err := io.ReadAll(r.Body); err != nil || len(data) != 0 {
+					t.Error("quota GET sent a body", string(data), err)
+				}
+				w.Header().Set("X-Request-ID", mode)
 				testcloud.JSON(w, code, body)
 			})
 			client := cloud.Client("key-manager", quotaPrefix)
@@ -329,13 +345,26 @@ func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
 			if value != nil || err == nil || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
 			}
-			if mode == "status" {
-				if !gophercloud.ResponseCodeIs(err, 203) {
-					t.Fatal(err)
+			var operation *resource.OperationError
+			wantKind := "quotas"
+			if mode == "project-wrong" {
+				wantKind = "project_quotas"
+			}
+			if !errors.As(err, &operation) || operation.Operation != "Get" || operation.Resource != wantKind || operation.Cause == nil {
+				t.Fatal("quota GET operation/cause was discarded", err, operation)
+			}
+			if mode == "status" || mode == "not-found" || mode == "forbidden" {
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(operation.Cause, &native) || native.Actual != code || !reflect.DeepEqual(native.Expected, []int{200}) || native.Method != http.MethodGet || native.URL != cloud.Server.URL+wantPath || string(native.Body) != body || native.ResponseHeader.Get("X-Request-ID") != mode || !gophercloud.ResponseCodeIs(err, code) {
+					t.Fatal("native quota GET status/body/header/cause was discarded", err, native)
+				}
+				var accepted *resource.ResponseError
+				if errors.As(err, &accepted) {
+					t.Fatal("native rejection became accepted response evidence", err, accepted)
 				}
 			} else {
 				var evidence *resource.ResponseError
-				if !errors.As(err, &evidence) || evidence.StatusCode != 200 || evidence.Header.Get("X-Request-ID") != mode || len(evidence.Body) == 0 {
+				if !errors.As(err, &evidence) || evidence.StatusCode != 200 || evidence.Header.Get("X-Request-ID") != mode || string(evidence.Body) != body {
 					t.Fatal("accepted evidence lost", err, evidence)
 				}
 			}
@@ -351,13 +380,48 @@ func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
 		t.Fatal(value, err)
 	} else {
 		var evidence *resource.ResponseError
-		if !errors.As(err, &evidence) || string(evidence.Body) != `{"quotas":` || evidence.StatusCode != 200 {
+		if !errors.As(err, &evidence) || string(evidence.Body) != `{"quotas":` || evidence.StatusCode != 200 || evidence.Header.Get("X-Request-ID") != "partial" {
 			t.Fatal(evidence, err)
 		}
 	}
 	if reads.Load() != 1 {
 		t.Fatal("read failure resent", reads.Load())
 	}
+	t.Run("accepted Close keeps complete response and cause", func(t *testing.T) {
+		cloud := testcloud.New(t)
+		closeCause := errors.New("effective quota accepted Close failed")
+		track := payloadContractTrack(cloud, nil, closeCause)
+		var calls, retries atomic.Int32
+		cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
+			retries.Add(1)
+			return err
+		}
+		const wantBody = `{"quotas":{"secrets":9007199254740993,"orders":null}}`
+		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			calls.Add(1)
+			testhelper.TestMethod(t, r, http.MethodGet)
+			if r.URL.Path != quotaPrefix+"/quotas" || r.URL.RawQuery != "" {
+				t.Error("accepted Close changed effective quota route", r.Method, r.URL)
+			}
+			if data, err := io.ReadAll(r.Body); err != nil || len(data) != 0 {
+				t.Error("quota GET sent a body", string(data), err)
+			}
+			w.Header().Set("X-Request-ID", "accepted-close")
+			testcloud.JSON(w, 200, wantBody)
+		})
+		client := cloud.Client("key-manager", "/catalog/v1")
+		client.ResourceBase = cloud.Server.URL + quotaPrefix + "/"
+		value, err := quotas.New(client).Get(context.Background())
+		var operation *resource.OperationError
+		var evidence *resource.ResponseError
+		if value != nil || !errors.Is(err, closeCause) || !errors.As(err, &operation) || operation.Operation != "Get" || operation.Resource != "quotas" || !errors.Is(operation.Cause, closeCause) || !errors.As(err, &evidence) || evidence.StatusCode != 200 || evidence.Header.Get("X-Request-ID") != "accepted-close" || string(evidence.Body) != wantBody {
+			t.Fatal("accepted quota GET Close evidence/cause was discarded", value, err, operation, evidence)
+		}
+		body := track.last(t)
+		if calls.Load() != 1 || track.calls.Load() != 1 || retries.Load() != 0 || body.reads.Load() == 0 || body.closes.Load() != 1 {
+			t.Fatal("accepted quota GET Close failure was retried or closed twice", calls.Load(), track.calls.Load(), retries.Load(), body.reads.Load(), body.closes.Load())
+		}
+	})
 }
 
 func TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures(t *testing.T) {
