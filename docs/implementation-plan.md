@@ -4,19 +4,23 @@
 
 이 문서는 **앞으로 할 작업의 순서와 진행 단계**, [SDK 지원 판정대장](sdk-support-ledger.md)은 **검증한 계약과 실행 근거**, [판정 JSON](../api/sdk_reviews.json)은 **연산별 지원 여부**를 관리합니다. 세 자료의 상태는 서로 다른 의미를 갖습니다.
 
+[단계별 사용·릴리즈 기준](release-milestones.md)은 `make smoke`로 확인하는 핵심 user 개발 preview와 외부 설치용 alpha의 완료 조건을 관리합니다. 현재 5개 흐름·9개 기존 테스트 그룹이 로컬 HTTP race 검증을 통과했고, 공개 모듈 경로와 외부 소비자 설치 검증은 다음 배포 준비 항목입니다.
+
 ## 현재 집계와 진행 중인 작업
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 작업 (2026-10-08 02:59 KST): 핵심 user API · `AvailableFloatingIP` 보완.** 필수 누락 3개 중 **반환 view·location·strict 연결을 구현하고 신규 HTTP 7그룹을 통과**했습니다. 구현 `4897448`·테스트 `cf2c5e1`을 작은 커밋으로 저장했습니다. Python 비교 문서·정확한 독립 main 컴파일과 revision `239eb9e`의 전체 40 package `make check`를 완료했습니다. **남은 필수 2개:** Neutron 목록 404 이후의 필터·할당 순서, Nova raw 필터 이후의 정규화·생성 순서. 이 2개를 닫기 전에는 해당 API의 완료 수를 올리지 않습니다. 마지막 전체 API 완료는 미연결 IP 정리입니다.
+**현재 작업 (2026-10-08): 핵심 user 개발 preview·테스트 재사용·기존 named 계약 완료.** 공통 서버 셋업은 Gophercloud 공개 `testhelper.SetupHTTP()`로 전환했고 Cinder의 공통 method/header assertion도 재사용합니다. 기존 핵심 5개 흐름·9그룹을 `make smoke`로 실행해 PASS/FAIL 보고서를 남깁니다. Secret getter 1개와 Glance schema getter 4개는 고정 소스의 입력·기본값·결과·오류와 기존 계약 테스트를 재검토하고 Go 차이를 명시해 **170→175개**로 반영했습니다. 관련 4개 패키지 집중 race와 공유 fixture 변경의 전체 40개 테스트 package `make check`가 PASS했습니다. 외부 설치용 alpha는 [릴리즈 기준](release-milestones.md)에 모듈 경로·소비자 설치 검증을 남겼습니다.
+
+**다음 구현: `AvailableFloatingIP`의 남은 필수 2개.** 반환 view·location·strict는 구현·검증을 마쳤고, Neutron 목록404 이후의 필터·할당 순서와 Nova raw 필터 이후의 정규화·생성 순서를 보완합니다. 이 2개를 닫기 전에는 해당 API를 완료로 올리지 않습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 170 (5.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 175 (5.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,191 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,186 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 505 | 아직 개별 기록 없는 선언 2,857 |
 | 기록한 부분·전체 계약 | 3,185 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
@@ -27,6 +31,7 @@
 |---|---:|---|---|
 | Floating IP 조회 6개·삭제 1개·생성 1개 최종 판정 | 161 → 169 (+8) | 신규 생성 24그룹·조회 회귀 3그룹, 전체 40 package check, 실행 예제 컴파일 | `73bcfba` |
 | 미연결 Floating IP 일괄 정리 | 169 → 170 (+1) | 신규 HTTP 12그룹, 집중 race 169그룹·전체 40 package check, 실행 예제 컴파일 | `9f1cb3d` |
+| Secret getter·Glance schema getter 4개 | 170 → 175 (+5) | 기존 25개 계약·실제 HTTP/raw/옵션 테스트 재검토, 관련 4 package 집중 race·전체 40 package check PASS | `4d89708` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -39,12 +44,12 @@
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 96 / 2,292 | 4.2% | 235 | 1,960 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 101 / 2,292 | 4.4% | 230 | 1,960 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 170 / 3,362 | 5.1% | 334 | 2,857 | 1 |
+| 전체 | 175 / 3,362 | 5.2% | 329 | 2,857 | 1 |
 
 **핵심 서비스**
 
@@ -54,9 +59,9 @@
 | Compute / Nova | 6 / 333 | 23 | 304 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 22 / 758 | 53 | 683 | 0 |
-| Image / Glance | 0 / 120 | 79 | 41 | 0 |
+| Image / Glance | 4 / 120 | 75 | 41 | 0 |
 | Block Storage / Cinder | 65 / 480 | 29 | 386 | 0 |
-| Key Manager / Barbican | 1 / 67 | 15 | 51 | 0 |
+| Key Manager / Barbican | 2 / 67 | 14 | 51 | 0 |
 | Object Storage / Swift | 0 / 74 | 29 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**

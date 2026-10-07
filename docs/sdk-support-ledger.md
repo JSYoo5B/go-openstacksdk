@@ -4,12 +4,13 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [미연결 Floating IP 정리](#미연결-floating-ip-일괄-정리)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Secret·schema named getter](#secret와-schema-named-getter-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| Secret·schema named getter | 기존 Secret 8그룹·Glance schema HTTP5/core6/옵션3과 Connection 근거 재검토. 관련 4 package 집중 race·전체 40 package check PASS. | Secret getter 1개·schema getter 4개 go_mapping, 기존 25개 계약 보존. [최종 근거](#secret와-schema-named-getter-완료). 다른 선언·전체 Resource/session은 별도. |
 | Available 반환 view (`4897448`, `cf2c5e1`, `239eb9e`) | [신규 HTTP7그룹](../connection_floating_ip_available_view_test.go): Resource/Wire·strict/location·configured fallback mode·옵션 snapshot·guard·원본 receipt와 부분 결과. 정확한 독립 main 컴파일·`239eb9e` 전체40 package check PASS. | 기존 named Available은 unresolved 유지. Neutron 내부 목록404 후 필터·할당과 Nova raw 필터·정규화·list404 생성 순서의 2항목이 남음. [사용법](../compute/floating-ip-available.md), [이번 보완](#available-반환-view와-진척-집계-동기화). |
 | 미연결 Floating IP 일괄 정리 (`14ed0f6`, `27da548`, `b75fc9c`) | [기본9](../connection_floating_ip_unattached_delete_test.go)·[경계3](../connection_floating_ip_unattached_delete_boundaries_test.go): 전체 목록 후 순차 삭제·false 계속/error 중단·truthiness·fallback backend·partial/owned Count·한 budget/cache. 신규12·집중169그룹 race·전체40 package check·정확한 main 컴파일 통과. | Cloud named1개 go_mapping·14계약. [사용법](../compute/floating-ip-unattached-delete.md)·[최종 근거](#미연결-floating-ip-일괄-정리). 전체 Resource/session·다른 native/Proxy CRUD는 별도 목표. |
 | 독립 Floating IP Create (`bf3024a`)와 조회 수정 (`e4dfabe`, `f839131`) | 신규 Create24·조회 회귀3그룹, 관련157그룹 집중 race·전체40 package check·정확한 Create main 컴파일 통과. accepted/fallback·wait/cleanup과 Neutron eager descriptor/local filter·physical cap/marker를 확인. | Cloud 생성1개·조회6개 go_mapping. [사용법](../compute/floating-ip-create.md)·[조회](../compute/floating-ip-queries.md)·[최종 근거](#독립-floating-ip-생성과-조회-완료). [DeleteUnattached](../compute/floating-ip-unattached-delete.md)는 위 완료 행에서 검증; 별도 Resource/session은 전체 목표에서 계속 추적. |
@@ -1717,3 +1718,24 @@ API 완료 수와 부분 구현 단계를 함께 표시합니다. `make progress
 구현 `4897448`·기본 HTTP 검증 `cf2c5e1`·Neutron 응답 경계 `239eb9e`를 작게 커밋하고 push했습니다. 신규 HTTP7그룹과 기존 availability 회귀가 통과했고, [갱신한 가이드](../compute/floating-ip-available.md)의 정확한 독립 main도 컴파일했습니다. revision `239eb9e`의 전체 `make check`가 통과했습니다(vet·race·고정 parity·진척 집계 동기화·gofmt, 테스트 package40개). 실행 전후 Go 소스1,917개의 SHA256 `230d069fc4a5cfe77fe32c26680179445c66e0b8b3e5fe189b4eba54c07fb04e`가 같으며, 문서의 독립 main SHA256은 `9af134d9d61a6c7b4cb40434707282434896afc397df197a3a29c3d8b8dc3b80`입니다. 인증된 OpenStack 실행과 Python 예제 실행은 이 검증에 포함하지 않습니다.
 
 기존 Available review 1행에 검증한 계약6개를 추가하고 다른504행·source pin·fingerprint는 보존했습니다. review505개·계약3,185개이며 `go_mapping`170개는 유지합니다. 이 named 연산의 실제 remaining은 Neutron 내부 목록404 이후의 필터·선택한 Neutron network 할당 순서와 Nova raw 필터→선택된 모든 row 정규화→첫 후보 또는 list404 이후 fresh POST/compat GET의 두 항목입니다. 다른 선언의 mutable Resource/session이나 IP 소비자 전체를 이 단위의 포괄적인 승격 조건으로 추가하지 않습니다.
+
+
+## Secret와 schema named getter 완료
+
+2026-10-08. 기존 구현의 입력·기본값·결과·오류를 고정 소스와 다시 대조해 `python:key_manager/v1/get_secret`, `python:image/v2/get_image_schema`, `get_images_schema`, `get_member_schema`, `get_members_schema` 5개 기존 행을 `go_mapping`으로 완료했습니다. 새 transport를 생성해 개수를 올린 작업이 아닙니다. 기존 25개 계약, operation ID·fingerprint·공개 API·테스트·문서를 보존했고, 다른 500개 review는 변경하지 않았습니다.
+
+Secret의 원본 `get_secret(secret)`는 custom `Secret.fetch`의 metadata→조건부 payload를 실행합니다. 기존 owned `Fetch`가 명시 ContentType/기본 metadata 선택·null/빈 문자열·정확한 text/plain UTF-8·원래 고정 payload URI·최신 token·독립 원문·늦은 오류의 metadata 보존을 검증합니다. arbitrary supplied mutable Resource·seeded Body와 cache/descriptor/dirty/session 정책은 문서에 적힌 Go 차이이며, 다른 Find/List/Resource 선언의 완료를 대신하지 않습니다. [8개 HTTP 계약 그룹](../api/keymanager_secret_fetch_test.go), [Connection 검증](../connection_keymanager_secret_fetch_test.go), [Python/Go 비교](../keymanager/v1/secrets/README.md)에 근거를 연결합니다.
+
+Glance의 네 getter는 인자 없이 각 fixed path의 schema document 하나를 fetch합니다. plural도 목록·paging을 의미하지 않습니다. 기존 16-route 표 기반 테스트가 네 정확한 method/path·빈 query/body·한 요청·독립 raw 응답을 각각 확인합니다. 일반 `Schema`의 additionalProperties/properties dict descriptor와 별도 `MetadefSchema`의 definitions/required/bool descriptor 설명도 교정했습니다. strict actual200·canonical/UTF-8 decode와 immutable raw return은 명시한 Go 차이입니다. URL/template 추적·CRUD·Name lookup·cache/session 전체는 이 noarg getter의 누락으로 붙이지 않습니다. [HTTP5](../image/schemas_contracts_test.go)·[core6](../image/schemas_core_test.go)·[옵션3](../image/schemas_options_test.go)·[Connection](../connection_image_schemas_test.go)와 [Python/Go 비교](../image/schemas.md)를 유지합니다. 다른 12개 schema getter는 이번 판정으로 자동 승격하지 않았습니다.
+
+관련 root/API/Image/Block Storage 4개 패키지의 집중 race와 전체 `make check`가 통과했습니다. 전체 검증은 vet·race 40개 테스트 package·pinned parity·자동 집계 정합성·gofmt이며, Go 소스 1,917개의 검증 전후 SHA256은 `65e9eac948c82374d0b47d12d43cf7779bc5fe3305f2e491fd969c0316bf070b`로 같습니다. 로그/receipt는 `/private/tmp/gophercloudsdk-core-reuse-focused.log`, `/private/tmp/gophercloudsdk-test-reuse-check.log`, `/private/tmp/gophercloudsdk-test-reuse-gate-receipt.json`입니다. 새 Go 사용 예제는 추가하지 않았고, 기존 예제 전체의 독립 main 컴파일이나 인증된 OpenStack 실행을 주장하지 않습니다.
+
+완료 수는 170→175, 핵심은 96→101/2,292입니다. review505=go_mapping175/unresolved329/unsupported1, 전체3,362=go_mapping175/unresolved3,186/unsupported1, 계약3,185개를 유지합니다. 서비스별 수는 user/admin 합산이며 개별 권한 분류와 4단계 완료율은 별도입니다. 다음 실제 구현은 Available의 Neutron 내부 fallback과 Nova raw 필터/생성 순서 2항목입니다.
+
+## 공개 테스트 도구와 핵심 개발 preview
+
+공통 `internal/testcloud.New`는 Gophercloud v2.15.0 공개 `testhelper.SetupHTTP()`·Teardown을 재사용하고, SDK는 공유 Provider/토큰·서비스 endpoint만 구성합니다(`f76d9cf`). Cinder 공통 요청 검증은 공개 TestMethod/TestHeader를 사용합니다(`49f9ad0`). JSON 큰 정수·정확한 slice 길이/순서·Read/Close/취소·retry 같은 목적에는 upstream helper의 표현 범위를 확인하고 기존 검사를 유지합니다. [재사용 기준](testing.md#공개-테스트-도구-재사용)에 고정 버전의 제약도 기록했습니다.
+
+`make smoke` 실행기(`61aae2a`)는 기존 테스트 9개 그룹을 선택해 핵심 user 흐름 5개의 실제 PASS/FAIL을 `.reports/core-smoke.json`에 저장합니다. 별도 mock이나 같은 계약의 신규 테스트를 만들지 않았습니다. [개발 preview와 첫 외부 설치용 alpha](release-milestones.md)에 검증된 사용 흐름, 접수와 완료의 범위, 공개 module 경로와 외부 소비자 설치 검증의 남은 조건을 분리해 기록합니다. 실제 tag 배포와 실클라우드 acceptance는 아직 수행하지 않았습니다.
+
+공개 helper 셋업 `f76d9cf`·smoke 실행기 `61aae2a`·Cinder assertion `49f9ad0`·테스트/릴리즈 문서 `15fd40e`·5개 named 판정 `4d89708`를 작은 의미 단위로 커밋하고 원격 main에 push했습니다. 최종 smoke는 동일한 Go 소스 SHA256으로 5개 흐름·9개 그룹 PASS를 기록했습니다. 구현 계획의 전체·서비스별 자동 집계도 완료175개와 일치합니다.
