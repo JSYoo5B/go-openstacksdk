@@ -31,8 +31,10 @@ func WithServerReadyWaitOptions(options ...resource.WaitOption) ServerReadyOptio
 	return func(o *serverReadyOptions) error { o.waitOptions = append(o.waitOptions, options...); return nil }
 }
 
-// WithActiveServerWait enables IP ACTIVE and raw Nova address convergence in
-// GetActiveServer. Its default is false. WaitForServer always requires both.
+// WithActiveServerWait enables raw Nova address convergence in GetActiveServer
+// and actual IP ACTIVE for Neutron assignments. Its default is false.
+// WaitForServer always requires raw server ACTIVE and address convergence;
+// legacy Nova IPs have no ACTIVE status to wait for.
 func WithActiveServerWait(enabled bool) ServerReadyOption {
 	return func(o *serverReadyOptions) error { o.waitIP = enabled; return nil }
 }
@@ -74,8 +76,8 @@ func (s *Service) GetActiveServer(ctx context.Context, input AutomaticFloatingIP
 
 // WaitForServer fixes the supplied server ID and fetches current raw metadata
 // even when the supplied model says ACTIVE or ERROR. One 180-second budget
-// covers polling, conditional assignment, IP ACTIVE and Nova convergence.
-// Known raw Server/Assignment and original causes survive failures.
+// covers polling, conditional assignment, Neutron IP ACTIVE and Nova convergence.
+// Known raw Server, backend assignment and original causes survive failures.
 func (s *Service) WaitForServer(ctx context.Context, input AutomaticFloatingIPRequest, options ...ServerReadyOption) (*AutomaticServerIPResult, error) {
 	state, ctx, cancel, policy, err := s.prepareServerReady(ctx, input, options, true)
 	if err != nil {

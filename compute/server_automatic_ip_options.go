@@ -135,9 +135,10 @@ func WithAutomaticAddressOptions(options ...ServerAddressOption) AutomaticFloati
 
 // WithAutomaticEnsureOptions shares destination/wait selectors across all
 // branches. Owner/reuse affect pool/automatic allocation, not explicit IPs.
-// EnsureServerFloatingIP, creation and WaitForServer
-// require actual IP ACTIVE readiness. GetActiveServer's default async mode
-// returns after accepted assignment without an IP readiness wait.
+// EnsureServerFloatingIP, creation and WaitForServer require actual Neutron IP
+// ACTIVE readiness and raw server ACTIVE/address convergence. Legacy Nova uses
+// raw convergence without a synthetic IP status; port/NAT/project overrides are
+// unsupported. GetActiveServer's default async mode returns after assignment.
 func WithAutomaticEnsureOptions(options ...network.EnsureFloatingIPOption) AutomaticFloatingIPOption {
 	options = append([]network.EnsureFloatingIPOption(nil), options...)
 	return func(o *automaticFloatingIPOptions) error { o.ips = append(o.ips, options...); return nil }

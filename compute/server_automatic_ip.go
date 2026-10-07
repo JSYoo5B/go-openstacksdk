@@ -61,7 +61,8 @@ func (s *Service) PlanServerFloatingIP(ctx context.Context, input AutomaticFloat
 
 // EnsureServerFloatingIP executes an explicit pool/list or conditional automatic
 // assignment and observes each exact IPv4 in raw Nova. Ordered attempts, known
-// Server/Assignment survive later errors. No fallback or cleanup is sent.
+// Server and Neutron Assignment or NovaAssignment survive later errors.
+// No fallback or cleanup is sent.
 func (s *Service) EnsureServerFloatingIP(ctx context.Context, input AutomaticFloatingIPRequest, options ...AutomaticFloatingIPOption) (*AutomaticServerIPResult, error) {
 	state, ctx, cancel, err := s.prepareAutomaticIP(ctx, input, options)
 	if err != nil {
