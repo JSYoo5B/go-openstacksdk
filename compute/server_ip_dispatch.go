@@ -94,13 +94,17 @@ func (state *automaticIPState) finishExplicit(ctx context.Context, result *Autom
 
 func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticServerIPResult, error) {
 	result := state.newResult()
+	if state.options.dispatchMode() == ServerIPExplicit && len(state.options.requestedIPs) == 0 {
+		state.decision.Reason = AutomaticIPEmptyAddressList
+		return result, state.check(ctx)
+	}
 	if err := state.explicitBackend(ctx); err != nil {
 		return state.finishExplicit(ctx, result, -1, err)
 	}
 	if state.decision.Backend != FloatingIPNeutron {
 		return state.finishExplicit(ctx, result, -1, explicitIPUnsupported())
 	}
-	if !strings.EqualFold(state.last.Status, "ACTIVE") {
+	if state.requireServerActive && !strings.EqualFold(state.last.Status, "ACTIVE") {
 		return state.finishExplicit(ctx, result, -1, invalid("explicit floating IP assignment requires an ACTIVE server"))
 	}
 	owned, err := cloneAutomaticProgressServer(state.last)

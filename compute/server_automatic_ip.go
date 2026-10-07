@@ -37,6 +37,13 @@ type automaticIPState struct {
 	last                 *Server
 	retainAcceptedServer bool
 	observeAssignment    bool
+	requireServerActive  bool
+}
+
+type serverIPReadiness struct {
+	ipActive, observe, requireServerActive bool
+	explicitList                           bool
+	addresses                              []string
 }
 
 // PlanServerFloatingIP selects pool, ordered addresses, then lazy automatic
@@ -88,7 +95,7 @@ func (state *automaticIPState) ensureAutomatic(ctx context.Context) (*AutomaticS
 	if state.decision.Backend != FloatingIPNeutron {
 		return result, fmt.Errorf("%w: automatic Nova floating IP assignment is not implemented", resource.ErrUnsupported)
 	}
-	if !strings.EqualFold(state.last.Status, "ACTIVE") {
+	if state.requireServerActive && !strings.EqualFold(state.last.Status, "ACTIVE") {
 		return result, invalid("automatic floating IP assignment requires an ACTIVE server")
 	}
 	// A synchronous workflow verifies mandatory observation before side effects.
@@ -127,6 +134,10 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 }
 
 func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input AutomaticFloatingIPRequest, options []AutomaticFloatingIPOption, ready bool) (*automaticIPState, context.Context, context.CancelFunc, error) {
+	return s.prepareServerIPWorkflow(ctx, input, options, serverIPReadiness{ipActive: ready, observe: ready, requireServerActive: true})
+}
+
+func (s *Service) prepareServerIPWorkflow(ctx context.Context, input AutomaticFloatingIPRequest, options []AutomaticFloatingIPOption, readiness serverIPReadiness) (*automaticIPState, context.Context, context.CancelFunc, error) {
 	if ctx == nil {
 		return nil, nil, nil, invalid("context is required")
 	}
@@ -148,6 +159,13 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 		if err := apply(&o); err != nil {
 			return nil, nil, nil, err
 		}
+	}
+	// A positional AddIPList owns its selection, including an empty no-op list.
+	// Options still prepare once but cannot replace it with a pool/automatic lane.
+	if readiness.explicitList {
+		o.pool = resource.Ref{}
+		o.requestedIPs = append([]string(nil), readiness.addresses...)
+		o.forceExplicit = true
 	}
 	mode := o.dispatchMode()
 	if mode == ServerIPPool {
@@ -173,7 +191,7 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 		return nil, nil, nil, err
 	}
 	final := network.WithEnsureNoWait()
-	if ready {
+	if readiness.ipActive {
 		final = network.WithEnsureActive()
 	}
 	policy, err := network.PrepareEnsureFloatingIPOptions(ctx, append(o.ips, final)...)
@@ -184,7 +202,7 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	state := &automaticIPState{service: s, address: address, options: o, policy: policy, input: input, last: &supplied, serverID: supplied.ID}
+	state := &automaticIPState{service: s, address: address, options: o, policy: policy, input: input, last: &supplied, serverID: supplied.ID, requireServerActive: readiness.requireServerActive}
 	if mode != ServerIPAutomatic {
 		if err := resource.ID(state.serverID).Validate(); err != nil {
 			return nil, nil, nil, err
@@ -192,7 +210,7 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 	}
 	if mode == ServerIPExplicit {
 		finalAttach := network.WithAttachNoWait()
-		if ready {
+		if readiness.ipActive {
 			finalAttach = network.WithAttachActive()
 		}
 		state.attachPolicy, err = network.PrepareAttachFloatingIPOptions(ctx, network.WithAttachDestinationPolicy(policy), finalAttach)
@@ -200,7 +218,7 @@ func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input Automat
 			return nil, nil, nil, err
 		}
 	}
-	state.observeAssignment = ready
+	state.observeAssignment = readiness.observe
 	state.retainAcceptedServer = mode != ServerIPAutomatic
 	state.outerGuard = rest.OperationGuard(ctx)
 	state.decision = &ServerFloatingIPDecision{Reason: AutomaticIPUndetermined, Server: state.last, Addresses: address.view, Mode: mode}
@@ -364,7 +382,7 @@ func (state *automaticIPState) rawServer(ctx context.Context) (*ServerAddressVie
 		return nil, errors.Join(requestErr, response.Fail(invalid("Nova response does not match server %q", id)), state.check(ctx))
 	}
 	state.last = server
-	if strings.EqualFold(server.Status, "ERROR") {
+	if state.requireServerActive && strings.EqualFold(server.Status, "ERROR") {
 		return nil, errors.Join(requestErr, response.Fail(&resource.FailedStateError{Resource: "server", ID: id, Status: server.Status}), state.check(ctx))
 	}
 	view, err := parseServerAddresses(server, state.address.options.networkOrder)
@@ -513,7 +531,7 @@ func (state *automaticIPState) observe(ctx context.Context, target string) error
 		if err != nil {
 			return err
 		}
-		if strings.EqualFold(state.last.Status, "ACTIVE") {
+		if !state.requireServerActive || strings.EqualFold(state.last.Status, "ACTIVE") {
 			for _, rows := range view.Addresses {
 				for _, row := range rows {
 					if row.Version == 4 && row.Type == "floating" && row.Address == target {

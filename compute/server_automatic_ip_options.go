@@ -27,6 +27,7 @@ const (
 	AutomaticIPNoFixedMatch       AutomaticIPReason = AutomaticIPReason(network.NoFloatingIPFixedMatch)
 	AutomaticIPPoolRequested      AutomaticIPReason = "explicit_pool_requested"
 	AutomaticIPAddressesRequested AutomaticIPReason = "explicit_addresses_requested"
+	AutomaticIPEmptyAddressList   AutomaticIPReason = "empty_explicit_addresses"
 )
 
 type ServerIPDispatchMode string
@@ -65,7 +66,9 @@ type ServerFloatingIPAttempt struct {
 }
 
 // AutomaticServerIPResult retains resources across assignment/observation
-// failure. Observed requires the exact tagged IPv4 in an actual ACTIVE Nova GET.
+// failure. Observed requires the exact tagged IPv4 in raw Nova. Ensure and the
+// ready/create workflows additionally require actual ACTIVE; standalone Add
+// helpers observe the address without imposing a server-state requirement.
 type AutomaticServerIPResult struct {
 	Server     *Server
 	Decision   *ServerFloatingIPDecision
@@ -83,6 +86,7 @@ type automaticFloatingIPOptions struct {
 	progress          func(*Server) error
 	pool              resource.Ref
 	requestedIPs      []string
+	forceExplicit     bool
 }
 
 type AutomaticFloatingIPOption func(*automaticFloatingIPOptions) error
@@ -109,7 +113,7 @@ func (o automaticFloatingIPOptions) dispatchMode() ServerIPDispatchMode {
 	if o.pool != (resource.Ref{}) {
 		return ServerIPPool
 	}
-	if len(o.requestedIPs) != 0 {
+	if o.forceExplicit || len(o.requestedIPs) != 0 {
 		return ServerIPExplicit
 	}
 	return ServerIPAutomatic
