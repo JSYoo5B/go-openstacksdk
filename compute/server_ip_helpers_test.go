@@ -93,7 +93,7 @@ func TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget(t *testing.T) {
 			f := newDispatchFixture(t, "")
 			base := f.cloud.Provider.HTTPClient.Transport
 			parentLength := 3 * time.Minute
-			if mode == "parent" || mode == "unlimited" {
+			if mode == "parent" {
 				parentLength = 30 * time.Second
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), parentLength)
@@ -129,6 +129,9 @@ func TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget(t *testing.T) {
 			if mode == "parent" || mode == "unlimited" {
 				if !first.Equal(parent) {
 					t.Fatal(first, parent)
+				}
+				if mode == "unlimited" && !first.After(start.Add(time.Minute)) {
+					t.Fatal("unlimited retained the default 60-second cap", first, start)
 				}
 			} else {
 				want := 60 * time.Second
@@ -337,5 +340,40 @@ func TestStandaloneServerIPExpiredObservationKeepsAssignmentAndStopsNextItem(t *
 	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, options...)
 	if !errors.Is(err, context.DeadlineExceeded) || result == nil || result.Assignment == nil || result.Assignment.FloatingIP.ID != "ip-a" || result.Observed || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Error == nil || rawCalls != 1 || strings.Contains(strings.Join(f.trace(), ","), "list:b") {
 		t.Fatal(result, err, rawCalls, f.trace())
+	}
+}
+
+func TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy(t *testing.T) {
+	for _, pool := range []bool{false, true} {
+		t.Run(fmt.Sprint(pool), func(t *testing.T) {
+			f := newDispatchFixture(t, "")
+			key := "a"
+			if pool {
+				key = "pool"
+			}
+			f.bound[key] = true
+			rawClients := 0
+			f.service = compute.New(nil, compute.Dependencies{AddressNetworks: func(context.Context) (*network.Service, error) { return f.network, nil }, AddressCompute: func(context.Context) (*gophercloud.ServiceClient, error) {
+				rawClients++
+				return nil, errors.New("already attached async must stay lazy")
+			}})
+			server := automaticServer(t, "null")
+			server.Status = "BUILD"
+			var result *compute.AutomaticServerIPResult
+			var err error
+			if pool {
+				result, err = f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, standaloneIPOptions(compute.WithFloatingIPPool(resource.ID("pool-network")), compute.WithAutomaticEnsureOptions(network.WithEnsureProject("owner")))...)
+			} else {
+				result, err = f.service.AddIPList(context.Background(), server, []string{dispatchAddresses["a"]})
+			}
+			trace := strings.Join(f.trace(), ",")
+			wantGets := 1
+			if pool {
+				wantGets = 0
+			}
+			if err != nil || result == nil || result.Assignment == nil || result.Assignment.FloatingIP.ID != "ip-"+key || !result.Assignment.Reused || result.Assignment.Allocated || result.Observed || len(result.Attempts) != 1 || !result.Attempts[0].Completed || result.Server.Addresses != nil || rawClients != 0 || f.raw.Load() != 0 || f.posts.Load() != 0 || strings.Contains(trace, "put:") || strings.Contains(trace, "allocate:") || strings.Count(trace, "get:"+key) != wantGets {
+				t.Fatal(result, err, trace, rawClients)
+			}
+		})
 	}
 }

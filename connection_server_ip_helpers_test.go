@@ -7,7 +7,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/v2"
+	sdk "gophercloudsdk"
 	"gophercloudsdk/compute"
+	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/resource"
 )
 
@@ -46,11 +49,20 @@ func TestConnectionStandaloneIPHelpersShareLazyAsyncAndRawWait(t *testing.T) {
 }
 
 func TestConnectionStandaloneEmptyIPListAvoidsEveryServiceLookup(t *testing.T) {
-	_, conn, state, raw := connectionDispatchFixture(t)
+	cloud := testcloud.New(t)
+	locates := 0
+	cloud.Provider.EndpointLocator = func(gophercloud.EndpointOpts) (string, error) {
+		locates++
+		return "", errors.New("every endpoint must stay lazy")
+	}
+	conn, err := sdk.FromProvider(cloud.Provider)
+	if err != nil {
+		t.Fatal(err)
+	}
 	options := []compute.ServerIPOption{compute.WithServerIPWait(true), compute.WithServerIPAutomaticOptions(compute.WithFloatingIPPool(resource.ID("ignored/pool")), compute.WithFloatingIPAddresses("ignored"))}
 	result, err := conn.AddIPList(context.Background(), connectionAddressServer(), nil, options...)
-	if err != nil || result == nil || result.Mode != compute.ServerIPExplicit || result.Decision.Reason != compute.AutomaticIPEmptyAddressList || result.Observed || state.locates != 0 || state.puts != 0 || len(state.lists) != 0 || raw() != 0 {
-		t.Fatal(result, err, state, raw())
+	if err != nil || result == nil || result.Mode != compute.ServerIPExplicit || result.Decision.Reason != compute.AutomaticIPEmptyAddressList || result.Observed || locates != 0 || result.Assignment != nil || len(result.Attempts) != 0 {
+		t.Fatal(result, err, locates)
 	}
 }
 
