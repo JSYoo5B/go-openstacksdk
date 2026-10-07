@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+
 	"gophercloudsdk/internal/rest"
 	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
@@ -25,6 +26,8 @@ type AvailableFloatingIPResult struct {
 	Neutron           *network.FloatingIPAvailability
 	Nova              *NovaFloatingIPAvailability
 	FallbackError     error
+	Inventory         *FloatingIPQueryResult
+	Creation          *CreateFloatingIPResult
 }
 
 type NovaFloatingIPAvailability struct {
@@ -172,16 +175,10 @@ func (s *Service) AvailableFloatingIP(ctx context.Context, input AvailableFloati
 		}
 		if service != nil {
 			view.neutronMode = true
-			value, err := service.FloatingIPs.Available(ctx, input, network.WithAvailableFloatingIPPolicy(policy))
-			result.Neutron = value
-			if value != nil {
-				result.Reused, result.Allocated = value.Reused, value.Allocated
-				if value.FloatingIP != nil {
-					result.ID, result.Address = value.FloatingIP.ID, value.FloatingIP.FloatingIP
-				}
-			}
-			if err = errors.Join(err, state.check(ctx)); err == nil || value != nil || !availableIPNotFound(err) {
-				return view.finishAvailable(result, service.RawClient(), err)
+			_, err := view.availableNeutron(result, input, policy)
+			err = errors.Join(err, state.check(ctx))
+			if err == nil || result.Reused || result.Allocated || !availableIPNotFound(err) {
+				return result, err
 			}
 			result.FallbackError = err
 		}
@@ -221,36 +218,6 @@ func guardAvailableIPOption[T any](apply func(*T) error, guard func() error) fun
 		}
 		return errors.Join(apply(value), guard())
 	}
-}
-
-// Adapt the already observed row without another lookup, allocation, source
-// capture or deadline. Known Wire remains available when view conversion fails.
-func (p *floatingIPQueryState) finishAvailable(result *AvailableFloatingIPResult, client *gophercloud.ServiceClient, prior error) (*AvailableFloatingIPResult, error) {
-	var wire *resource.RawResource
-	if value := result.Neutron; result.Backend == FloatingIPNeutron && value != nil && value.FloatingIP != nil {
-		wire = (&resource.RawResource{Metadata: value.Metadata}).Clone()
-	} else if value := result.Nova; result.Backend == FloatingIPNova && value != nil && value.FloatingIP != nil {
-		wire = (&resource.RawResource{Metadata: value.FloatingIP.Metadata}).Clone()
-	}
-	if wire == nil {
-		return result, errors.Join(prior, p.state.check(p.ctx))
-	}
-	result.FloatingIP = &FloatingIPRecord{Backend: result.Backend, Wire: wire.Clone()}
-	if err := p.state.check(p.ctx); err != nil {
-		return result, errors.Join(prior, err)
-	}
-	record, err := p.record(result.Backend, client, wire, false)
-	if record != nil {
-		result.FloatingIP = record
-	}
-	if err != nil {
-		if result.Backend == FloatingIPNova {
-			err = result.Nova.FloatingIP.fail(err)
-		} else if receipt := result.Neutron.AllocationResponse; receipt != nil {
-			err = (&rest.Response{StatusCode: receipt.StatusCode, Header: receipt.Header.Clone(), Body: slices.Clone(receipt.Envelope)}).Fail(err)
-		}
-	}
-	return result, errors.Join(prior, err, p.state.check(p.ctx))
 }
 
 // Only a pure NotFound chain may select another backend. Accepted response,
