@@ -4,7 +4,7 @@
 
 이 문서는 **앞으로 할 작업의 순서와 진행 단계**, [SDK 지원 판정대장](sdk-support-ledger.md)은 **검증한 계약과 실행 근거**, [판정 JSON](../api/sdk_reviews.json)은 **연산별 지원 여부**를 관리합니다. 세 자료의 상태는 서로 다른 의미를 갖습니다.
 
-[단계별 사용·릴리즈 기준](release-milestones.md)은 `make smoke`로 확인하는 핵심 user 개발 preview와 외부 설치용 alpha의 완료 조건을 관리합니다. 현재 5개 흐름·9개 기존 테스트 그룹이 로컬 HTTP race 검증을 통과했고, 공개 모듈 경로와 외부 소비자의 local-replace 빌드를 확인했고, push한 정확한 커밋의 원격 설치를 검증 중입니다. [설치 안내](install.md)에 실제 결과를 기록합니다.
+[단계별 사용·릴리즈 기준](release-milestones.md)은 `make smoke`로 확인하는 핵심 user 개발 preview와 외부 설치용 alpha의 완료 조건을 관리합니다. 현재 5개 흐름·9개 기존 테스트 그룹이 로컬 HTTP race 검증을 통과했고, 공개 모듈 경로와 외부 소비자의 local-replace 빌드를 확인했고, push한 정확한 커밋의 replace 없는 원격 설치·빌드도 확인했습니다. [설치 안내](install.md)에 실제 결과를 기록합니다.
 
 ## 현재 집계와 진행 중인 작업
 
@@ -14,7 +14,7 @@
 
 공통 구현·세 leaf는 `1eae268`, Python 비교·정확한 main·재생성 hook은 `9c14ed4`, 기존 fixture 재사용6 HTTP그룹은 `8b8c67f`로 작게 커밋·push했습니다. 집중3 package race와 최종40 package `make check`가 PASS했고, 공통 package는 컴파일 확인이며 자체 테스트가 있다고 세지 않습니다. 당시 Go source1,939개 SHA256 `9ff54c8fe59d0d282cb5671ef88f186717eec6179ed684f3390538776fa1f826`이 gate 전후 같습니다. 같은 최종 소스의 기존 핵심 preview5흐름/9그룹과 최종 metadata parity/188개 집계도 PASS했습니다. 완료 판정과 문서 갱신은 `af7102f`로 커밋·push했습니다. 원문/json/formatter/native 정책과 Python의 차이는 [생성 가이드](../keymanager/v1/metadata-create.md)에 명시합니다.
 
-**진행 중: 외부 설치 가능한 alpha의 모듈 경로·소비자 빌드.** 모듈과 imports·generator identity·Python candidates/filter manifests·review API anchors를 실제 원격 저장소의 `github.com/JSYoo5B/gophercloudsdk`로 옮겼습니다. source IDs/fingerprint·기존513개 판정은 보존했고 API 완료 수는188개입니다. 생성기 집중 race·재생성 drift0·전체40 package `make check`·기존 핵심 smoke5흐름/9그룹·외부 module의 local-replace 빌드·Barbican 정확한 main 빌드가 PASS했습니다. Go source1,939개 SHA256 `49b6f49124fa367735a5e869ba664ff656ad83267282f0a6a43b208ff4b3f275`이 gate 전후 같고, Python inventory 추출도 namespace 치환 전후 결과가 같습니다. push한 정확한 commit의 replace 없는 설치는 별도 단계로 확인합니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서를 유지하며 전체 Resource/session·공통 context cause 일관성과 남은 API/workflow는 원래 SDK 목표로 계속 추적합니다.
+**현재 작업 (2026-10-08): 외부 설치 기반 완료, 핵심 user 조회8개 감사.** 모듈과 imports·generator identity·Python candidates/filter manifests·review API anchors를 실제 원격 저장소의 `github.com/JSYoo5B/gophercloudsdk`로 옮겼습니다. source IDs/fingerprint·기존513개 판정은 보존했고 API 완료 수는188개입니다. 생성기 집중 race·재생성 drift0·전체40 package `make check`·기존 핵심 smoke5흐름/9그룹·외부 module의 local-replace 빌드·Barbican 정확한 main 빌드가 PASS했습니다. Go source1,939개 SHA256 `49b6f49124fa367735a5e869ba664ff656ad83267282f0a6a43b208ff4b3f275`이 gate 전후 같고, Python inventory 추출도 namespace 치환 전후 결과가 같습니다. namespace 단위는 `3f02405`로 커밋·push했고, 같은 main을 새 소비자에서 정확한 commit으로 설치해 replace 없이 빌드했습니다. 설치 버전 `v0.0.0-20261007215549-3f0240534253`은 실제 원격 module cache를 사용하며 Go get/build exit0입니다. [설치 안내](install.md)에 실행 명령·예제·검증 상태를 기록했습니다. 다음 단위는 이미 구현된 Nova/Cinder limits·password, Swift metadata, Glance fixed getter8개의 source·실제 assertion·문서 감사입니다. 새 완료 판정 전까지188개를 유지합니다. 핵심 user→핵심 admin→후속 user→후속 admin 순서를 유지하며 전체 Resource/session·공통 context cause 일관성과 남은 API/workflow는 원래 SDK 목표로 계속 추적합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
@@ -99,7 +99,7 @@
 
 | 구현 순서 | 현재 상태 | 단계별 API 개수 |
 |---|---|---|
-| 1. 핵심 서비스 user API | 진행 중 · Barbican 생성3개 완료, 외부 alpha 설치 검증 | user/admin 분리 집계 대기 |
+| 1. 핵심 서비스 user API | 진행 중 · 외부 설치 기반 완료, 핵심 user 조회8개 감사 | user/admin 분리 집계 대기 |
 | 2. 핵심 서비스 admin API | 추가 작업 대기 · 기존 구현·판정 유지 | user/admin 분리 집계 대기 |
 | 3. 매니지드·후속 서비스 user API | 추가 작업 대기 · 네트워크 → 베어메탈 → 나머지 | user/admin 분리 집계 대기 |
 | 4. 매니지드·후속 서비스 admin API | 추가 작업 대기 · 같은 내부 순서 | user/admin 분리 집계 대기 |

@@ -1862,4 +1862,4 @@ Owned final200..399·strict non-null UTF-8 JSON·accepted 실패 record/Response
 
 [외부 소비자 main](install.md)을 checkout 밖에서 컴파일했습니다. consumer의 `go.mod`에만 local replace가 있으며 SDK 의존성에는 replace가 없습니다. 정확한 main SHA256 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`로 공개 root·Compute/Network·Barbican3종·public `request.Config` alias가 빌드됩니다. canonical imports로 갱신한 Barbican 생성 가이드의 정확한 main도 SHA256 `015754160c4352f6bea65f41262e7cb0f49f5a7ddb97e3f5fa83fce018701c91`에서 빌드 PASS했습니다. 인증·OpenStack 호출은 실행하지 않았습니다.
 
-namespace 단위를 push한 후 같은 외부 main으로 정확한 커밋의 replace 없는 원격 설치를 별도 확인합니다. 이 기반 작업은 완료 API 수를 늘리지 않습니다.
+namespace 단위 `3f02405`를 push한 후 같은 main을 새 소비자 module에서 `GOWORK=off`로 설치·빌드했습니다. `go get`과 `go build -mod=readonly` exit0, `go list -m -json`의 canonical Path·실제 버전 `v0.0.0-20261007215549-3f0240534253`·원격 module-cache Dir을 확인했고 Replace가 없습니다. local checkout과 다른 cache 소스에서 빌드했으며 remote source에도 인증/HTTP 요청을 실행하지 않았습니다. 이 기반 작업은 완료 API 수를 늘리지 않습니다.

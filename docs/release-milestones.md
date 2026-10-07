@@ -23,7 +23,7 @@
 | 단계 | 상태 | 완료 조건 |
 |---|---|---|
 | 로컬 개발 preview | 위 5개 흐름 PASS | `make smoke`가 실제 테스트 실행 결과를 저장 |
-| `v0.1.0-alpha.1` 핵심 user preview | 준비 중, 미배포 | 공개 module·generator·문서·판정 참조 변경, 외부 local-replace 빌드, smoke·전체 check PASS. push한 정확한 커밋의 replace 없는 설치를 다음으로 확인한 뒤 tag 배포 |
+| `v0.1.0-alpha.1` 핵심 user preview | 준비 중, 미배포 | 공개 module·generator·문서·판정 참조, 외부 local-replace·정확한 커밋 원격 설치/빌드, smoke·전체 check PASS. [검증한 revision 사용](install.md) 가능; 예정 alpha tag 배포는 남음 |
 | 핵심 user 후속 alpha | 진행 중 | 남은 named API를 작은 기능 묶음으로 완성하고, 기능·테스트·Python 비교 문서·지원 판정·변경 기록을 함께 제공 |
 | 핵심 admin 후속 배포 | 대기 | user 단계 이후 관리자 계약·옵션·권한 차이 검증 |
 | 후속 user 배포 | 대기 | Octavia·Designate → Ironic·Introspection → 나머지 서비스 순서 |
