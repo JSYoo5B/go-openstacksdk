@@ -226,3 +226,44 @@ func TestConnectionNetworkRolesFlagsMissingEndpointAndPreflight(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestConnectNetworkRoleBooleanFlagsAndExplicitPolicyReplacement(t *testing.T) {
+	for _, scenario := range []string{"boolean false", "string false", "typed restore", "numeric invalid"} {
+		t.Run(scenario, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			calls := connectionRoleFixture(t, cloud)
+			flag := "false"
+			if scenario == "string false" {
+				flag = "'FaLsE'"
+			}
+			if scenario == "numeric invalid" {
+				flag = "1"
+			}
+			opts := defaultNetworkCloudOptions(t, cloud, "    use_external_network: "+flag+"\n    use_internal_network: false\n    networks: [{name: private, nat_destination: true}]\n")
+			if scenario == "typed restore" {
+				opts = append(opts, sdk.WithNetworkRoles(network.WithExternalNetworkDiscovery(true), network.WithInternalNetworkDiscovery(false), network.WithConfiguredNetworks(network.ConfiguredNetwork{Name: "private", NATDestination: true})))
+			}
+			conn, err := sdk.Connect(context.Background(), opts...)
+			if scenario == "numeric invalid" {
+				if !errors.Is(err, resource.ErrInvalidOption) || conn != nil || calls.Load() != 0 {
+					t.Fatal(conn, err, calls.Load())
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			roles, err := conn.GetNetworkRoles(context.Background())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if scenario == "typed restore" {
+				if !conn.UseExternalNetwork() || conn.UseInternalNetwork() || calls.Load() != 1 || len(roles.ExternalIPv4) != 2 {
+					t.Fatal(roles, calls.Load())
+				}
+			} else if conn.UseExternalNetwork() || conn.UseInternalNetwork() || calls.Load() != 0 || len(roles.ExternalIPv4) != 0 {
+				t.Fatal(roles, calls.Load())
+			}
+		})
+	}
+}

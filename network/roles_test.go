@@ -336,6 +336,11 @@ func TestNetworkRoleCacheFlightCancellationAndReset(t *testing.T) {
 }
 
 func TestNetworkRoleOptionsValidateBeforeDiscoveryAndSnapshotSlices(t *testing.T) {
+	for _, client := range []*gophercloud.ServiceClient{nil, {}} {
+		if _, err := network.New(client).Roles.Discover(context.Background()); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
+	}
 	for _, options := range [][]network.NetworkRoleOption{
 		{nil}, {network.WithConfiguredNetworks(network.ConfiguredNetwork{})},
 		{network.WithConfiguredNetworks(network.ConfiguredNetwork{Name: "a", DefaultInterface: true}, network.ConfiguredNetwork{Name: "b", DefaultInterface: true})},

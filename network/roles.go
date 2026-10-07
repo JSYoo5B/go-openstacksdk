@@ -119,8 +119,8 @@ func (r *NetworkRoles) discover(ctx context.Context) (*NetworkRoleSnapshot, erro
 	if !r.policy.UseExternalNetwork() && !r.policy.UseInternalNetwork() {
 		return &NetworkRoleSnapshot{}, nil
 	}
-	if r.client == nil {
-		return nil, floatingIPInvalid("network client is required")
+	if r.client == nil || r.client.ProviderClient == nil {
+		return nil, floatingIPInvalid("authenticated network client is required")
 	}
 	pager := floatingIPSelectionPager(networks.List(r.client, networks.ListOpts{}), func(p pagination.PageResult) pagination.Page {
 		return networks.NetworkPage{LinkedPageBase: pagination.LinkedPageBase{PageResult: p}}
