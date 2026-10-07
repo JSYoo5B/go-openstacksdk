@@ -68,7 +68,9 @@ func WithAutomaticAddressOptions(options ...ServerAddressOption) AutomaticFloati
 }
 
 // WithAutomaticEnsureOptions preserves supplied Neutron selectors, owner,
-// reuse and wait options. Actual IP ACTIVE readiness is always required.
+// reuse and wait options. EnsureServerFloatingIP, creation and WaitForServer
+// require actual IP ACTIVE readiness. GetActiveServer's default async mode
+// returns after accepted assignment without an IP readiness wait.
 func WithAutomaticEnsureOptions(options ...network.EnsureFloatingIPOption) AutomaticFloatingIPOption {
 	options = append([]network.EnsureFloatingIPOption(nil), options...)
 	return func(o *automaticFloatingIPOptions) error { o.ips = append(o.ips, options...); return nil }

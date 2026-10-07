@@ -124,7 +124,7 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	state.address.view.ServerID = created.ID
 	state.address.accessIPv4, state.address.accessIPv6 = created.AccessIPv4, created.AccessIPv6
 	state.decision.Server = created
-	err = state.waitCreatedServer(ctx, *policy)
+	err = state.waitReadyServer(ctx, *policy)
 	result.Server = state.last
 	if err != nil {
 		return result, errors.Join(err, state.check(ctx))
@@ -135,7 +135,7 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	return result, errors.Join(err, state.check(ctx))
 }
 
-func (state *automaticIPState) waitCreatedServer(ctx context.Context, policy resource.WaitPolicy) error {
+func (state *automaticIPState) waitReadyServer(ctx context.Context, policy resource.WaitPolicy) error {
 	collection := resource.NewCollection(resource.Adapter[Server]{Kind: "server", FixedWaitStatus: true, WaitGuard: state.check,
 		ID: func(server *Server) string { return server.ID },
 		Get: func(ctx context.Context, id string) (*Server, error) {

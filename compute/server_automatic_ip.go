@@ -35,6 +35,7 @@ type automaticIPState struct {
 	plan                 network.FloatingIPPlan
 	last                 *Server
 	retainAcceptedServer bool
+	observeAssignment    bool
 }
 
 // PlanServerFloatingIP applies lazy automatic need/skip policy and, when
@@ -78,13 +79,15 @@ func (state *automaticIPState) ensure(ctx context.Context) (*AutomaticServerIPRe
 	if !strings.EqualFold(state.last.Status, "ACTIVE") {
 		return result, invalid("automatic floating IP assignment requires an ACTIVE server")
 	}
-	// Mandatory raw observation must be available before any Neutron side effect.
-	client, err := state.rawClient(ctx)
-	if err != nil {
-		return result, err
-	}
-	if err := rest.ValidateTarget(client, client.ServiceURL("servers", url.PathEscape(state.serverID))); err != nil {
-		return result, err
+	// A synchronous workflow verifies mandatory observation before side effects.
+	if state.observeAssignment {
+		client, err := state.rawClient(ctx)
+		if err != nil {
+			return result, err
+		}
+		if err := rest.ValidateTarget(client, client.ServiceURL("servers", url.PathEscape(state.serverID))); err != nil {
+			return result, err
+		}
 	}
 	assignment, err := state.network.FloatingIPs.EnsurePrepared(ctx, state.plan)
 	result.Assignment = assignment
@@ -98,6 +101,9 @@ func (state *automaticIPState) ensure(ctx context.Context) (*AutomaticServerIPRe
 	if ip, err := netip.ParseAddr(target); err != nil || !ip.Is4() {
 		return result, invalid("assigned floating IP is not IPv4")
 	}
+	if !state.observeAssignment {
+		return result, state.check(ctx)
+	}
 	err = state.observe(ctx, target)
 	result.Server = state.last
 	result.Observed = err == nil
@@ -105,6 +111,10 @@ func (state *automaticIPState) ensure(ctx context.Context) (*AutomaticServerIPRe
 }
 
 func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatingIPRequest, options []AutomaticFloatingIPOption) (*automaticIPState, context.Context, context.CancelFunc, error) {
+	return s.prepareAutomaticIPReadiness(ctx, input, options, true)
+}
+
+func (s *Service) prepareAutomaticIPReadiness(ctx context.Context, input AutomaticFloatingIPRequest, options []AutomaticFloatingIPOption, ready bool) (*automaticIPState, context.Context, context.CancelFunc, error) {
 	if ctx == nil {
 		return nil, nil, nil, invalid("context is required")
 	}
@@ -132,7 +142,11 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 	if err := baseGuard(ctx); err != nil {
 		return nil, nil, nil, err
 	}
-	policy, err := network.PrepareEnsureFloatingIPOptions(ctx, append(o.ips, network.WithEnsureActive())...)
+	final := network.WithEnsureNoWait()
+	if ready {
+		final = network.WithEnsureActive()
+	}
+	policy, err := network.PrepareEnsureFloatingIPOptions(ctx, append(o.ips, final)...)
 	if err != nil {
 		return nil, nil, nil, errors.Join(err, ctx.Err(), context.Cause(ctx))
 	}
@@ -142,6 +156,7 @@ func (s *Service) prepareAutomaticIP(ctx context.Context, input AutomaticFloatin
 	}
 	supplied := *input.Server
 	state := &automaticIPState{service: s, address: address, options: o, policy: policy, input: input, last: &supplied, serverID: supplied.ID}
+	state.observeAssignment = ready
 	state.outerGuard = rest.OperationGuard(ctx)
 	state.decision = &ServerFloatingIPDecision{Reason: AutomaticIPUndetermined, Server: state.last, Addresses: address.view}
 	client := s.client
