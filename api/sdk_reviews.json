@@ -35881,7 +35881,16 @@
         "gophercloudsdk/compute.WithUnlimitedWorkflowTimeout",
         "gophercloudsdk/network.FloatingIPs.PrepareEnsureActive",
         "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
-        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk/compute.Service.WaitForServer",
+        "gophercloudsdk.Connection.WaitForServer",
+        "gophercloudsdk/compute.WithServerReadyAutomaticIPOptions",
+        "gophercloudsdk/compute.WithServerReadyWaitOptions",
+        "gophercloudsdk/compute.WithActiveServerWait",
+        "gophercloudsdk/network.WithEnsureNoWait",
+        "gophercloudsdk/resource.PrepareWaitOptionsFor",
+        "gophercloudsdk/resource.WaitPolicy.ValidateFixedStatus",
+        "gophercloudsdk/resource.WithWaitPolicy"
       ],
       "contracts": [
         {
@@ -35944,23 +35953,79 @@
             "resource/prepared_wait_policy_test.go:TestPreparedWaitPolicyDoesNotReapplyApplicationOptions",
             "resource/prepared_wait_policy_test.go:TestWaitGuardStopsAfterProgressBeforeAnotherFetch"
           ]
+        },
+        {
+          "behavior": "Standalone WaitForServer always refreshes the entry-captured supplied ID for supplied ACTIVE,ERROR,BUILD or empty status without reading malformed supplied addresses. Raw200 BUILD and203 ACTIVE/null are progress states; a subsequent matching ACTIVE floating row yields a clean existing-floating skip. Integer readiness progress is25 then0, caller ID edits do not redirect fetches, and no assignment is made.",
+          "tests": [
+            "compute/server_ready_test.go:TestWaitForServerAlwaysRefreshesAndWaitsForRawAddressRows"
+          ]
+        },
+        {
+          "behavior": "WaitForServer final synchronous policy overrides WithActiveServerWait(false) and EnsureNoWait. The fixture performs raw readiness, one allocation, actual IP ACTIVE GET and a second matching raw Nova response with the exact target floating IPv4, then returns Observed=true.",
+          "tests": [
+            "compute/server_ready_test.go:TestWaitForServerForcesIPActiveAndRawConvergence"
+          ]
+        },
+        {
+          "behavior": "Standalone raw readiness retains supplied Server on first404, malformed or wrong-ID responses and the last matching raw model on later403, explicit zero-row error, nil-metadata timeout, actual203 ERROR/fault, progress source replacement or custom cancellation. ERROR remains failed with empty user failure states; custom cause and native HTTP status proofs are preserved, without allocation or cleanup.",
+          "tests": [
+            "compute/server_ready_boundaries_test.go:TestWaitForServerRawFailuresKeepLastMatchingModelAndCauses"
+          ]
+        },
+        {
+          "behavior": "Accepted raw203 valid matching Server survives Close error, custom cancellation, Compute API replacement or ancestor guard failure with actual ResponseError status/header proof. The fixture performs one raw request, no assignment, and zero RetryFunc calls for accepted-response processing errors.",
+          "tests": [
+            "compute/server_ready_boundaries_test.go:TestWaitForServerAcceptedGETCloseKeepsRawModelAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "The default standalone Wait wire context carries a deadline179–181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
+          "tests": [
+            "compute/server_ready_boundaries_test.go:TestWaitForServerDefaultWholeBudgetIs180Seconds",
+            "compute/server_ready_boundaries_test.go:TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel"
+          ]
+        },
+        {
+          "behavior": "Shared readiness preflight rejects nil ready/automatic/wait options, zero automatic timeout, nil Server and unsafe server/network references before raw, role, port or mutation requests. Even an explicit valid Status override in server wait options is ErrUnsupported before I/O. In the Wait fixture, ready/automatic/address callbacks run once, the supplied ID captured before callbacks remains the GET target, and ready API, automatic endpoint or address collection replacement stops before the first fetch.",
+          "tests": [
+            "compute/server_ready_test.go:TestServerReadyInvalidPolicyFailsBeforeIOForBothEntrypoints",
+            "compute/server_ready_preflight_test.go:TestServerReadyPreparesOptionsOnceAndCapturesIdentityAndSource"
+          ]
+        },
+        {
+          "behavior": "Prepared floating-IP policies retain their validated wait settings when the final NoWait toggle is applied. The same policy executes async DOWN, later final Active waits to actual ACTIVE, then async DOWN again; the HTTP fixture sees three allocations, two wait GETs and one progress callback. Async does not hide nil or invalid-duration wait options, which fail before HTTP.",
+          "tests": [
+            "network/floating_ip_wait_toggle_test.go:TestEnsureNoWaitPreservesPreparedPolicyForLaterActiveOverride",
+            "network/floating_ip_wait_toggle_test.go:TestEnsureNoWaitDoesNotHideInvalidWaitPolicy"
+          ]
+        },
+        {
+          "behavior": "Connection validates a fixed server status policy before any endpoint lookup and lazily locates Compute once when raw work begins. The actual cached Compute API source remains bound through readiness progress, accepted response Close, native503 retry callback and later automatic convergence progress. Source replacement stops further raw/mutation attempts; accepted raw proof or previously allocated Assignment is retained at the tested stage.",
+          "tests": [
+            "connection_server_ready_test.go:TestConnectionReadyStaticBranchesAndInvalidPolicyKeepEndpointsLazy",
+            "connection_server_ready_test.go:TestConnectionReadyLazyComputeGuardSurvivesReadinessAndIPStages"
+          ]
         }
       ],
       "documentation": [
         "compute/create-with-floating-ip.md",
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-automatic-ip.md"
+        "compute/server-automatic-ip.md",
+        "compute/server-ready.md"
       ],
       "differences": [
-        "The Go evidence is an explicit CreateWithFloatingIP workflow for a newly created server, not a public equivalent accepting an existing dynamic Python Server. It waits typed Nova ID/actual ACTIVE and Neutron assignment/actual ACTIVE, returns Server plus Assignment, preserves observable errors/resources and omits implicit cleanup.",
-        "Go defaults to one five-minute deadline covering service preparation and creation; pinned cloud wait defaults to180s and subtracts integer elapsed server-wait time for subsequent IP work. Go context, polling, typed error and partial-result contracts differ from source broad lookup retry, Resource/interface normalization and Nova address convergence.",
-        "The new creation compound adds owned raw server readiness with mandatory actual ACTIVE, nil-address polling and typed empty-row failure, then conditionally consumes the bounded Neutron automatic lane. It retains resources and does not delete ACTIVE servers with no addresses. This is not the existing-server cloud wait surface or its broad lookup retry/default180/5/integer remaining budget policy.",
-        "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
+        "The review now includes typed existing-server Service/Connection.WaitForServer plus earlier explicit and automatic creation workflows. New standalone Wait fixes the supplied ID and fetches current raw Nova metadata even when the supplied model says ACTIVE or ERROR; supplied status/addresses/fault are not readiness evidence. This differs from the existing Servers/leaf WaitForServer collection surface, which only waits for status with120-second/two-second defaults.",
+        "Standalone Wait defaults to one 180-second overall context and five-second server/raw polls, with an unlimited server-local stage inside that context unless overridden. The actual default wire deadline is tested; earlier explicit/automatic creation workflows retain their five-minute budgets. Go propagates one continuous deadline across readiness, Neutron and observation instead of subtracting source integer elapsed time and restarting a forwarded remaining-time wait.",
+        "Go raw200/203 failures retain typed matching Server/response proof and original causes. First404 and later403 are terminal in the tested standalone lane; malformed/wrong-ID responses are not adopted, and accepted203 Close/source/cancel/ancestor errors retain a decoded matching model without decode retry. This is not pinned cloud get_server lookup/Resource expansion or its broad Exception/None retry policy.",
+        "Raw actual ERROR remains failed even when application failure states are disabled. ACTIVE nil metadata polls; explicit zero rows return ServerAddressesUnavailableError with the last matching model and no DELETE. Pinned get_active_server deletes a falsy-address ACTIVE server and may accept a truthy empty-row map. Go case-insensitive state matching, typed Fault/errors and no-cleanup partial results differ from source literal states and exception/extra_data/model semantics.",
+        "Needed Neutron assignments always require actual IP ACTIVE and exact assigned IPv4 floating-row observation in matching raw ACTIVE Nova responses, even if WithActiveServerWait(false) or EnsureNoWait was supplied. A clean automatic skip succeeds with nil Assignment and Observed=false. Full pool > ips > auto dispatch, Nova mutation/fallback and service/config/Resource behavior remain separate.",
+        "Earlier guarded named-creation evidence retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Standalone Wait takes the supplied ID rather than completing ordinary cloud get_server name/filter/defaultquery/interface expansion; flavor-name creation keeps its existing defaults."
       ],
       "remaining": [
-        "Provide or map the existing-server cloud wait surface with its complete dynamic Server/Resource inputs, 180-second/5-second defaults, lookup exception/missing-resource retry, exact status and fault/extra_data taxonomy, and ACTIVE-without-addresses policy.",
-        "Complete IP pool > explicit ips > auto_ip branching, full shared configured network/NAT/service/flags/cache/source policy and Nova-network fallback. A separate new creation compound now connects the bounded automatic Neutron need/skip/assignment/raw-observation lane after mandatory readiness; standalone cloud Wait and ordinary Create have not become the full source dispatch surface.",
-        "Compare refreshed Nova address/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout cleanup/error ordering beyond the new creation compound. Its raw observed-address lane and no-cleanup partial results do not close the full source cloud Wait contracts."
+        "Complete dynamic Server/Resource inputs, full cloud get_server lookup/defaultquery/interface expansion and broad lookup-Exception/None retry beyond the new typed supplied-ID raw waiter. Compare the complete fault/extra_data taxonomy and all state/address/nullable inputs. Standalone180-second/five-second defaults now exist, but Go raw terminal-error, noDELETE and zero-row policies remain deliberate differences.",
+        "Complete IP pool > explicit ips > auto_ip branching, full shared configured network/NAT/service/flags/cache/source policy and Nova-network fallback. New standalone Wait and automatic creation consume the bounded conditional Neutron lane; ordinary Servers.Create and the new typed waiter have not become the complete source dispatch/model surface.",
+        "Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts.",
+        "Preserve decoded known FloatingIP models after accepted Neutron201/202 allocation read/Close/source errors: the current lower layer can retain Allocated=true and actual ResponseError proof while FloatingIP is nil. This existing model-retention gap is separate from the newly tested accepted raw Nova partials and has no new dedicated fixture in this readiness unit."
       ]
     },
     {
@@ -37875,23 +37940,32 @@
         "gophercloudsdk/compute.WithUnlimitedAutomaticIPTimeout",
         "gophercloudsdk/resource.PrepareWaitOptionsFor",
         "gophercloudsdk/resource.WaitPolicy.ValidateFixedStatus",
-        "gophercloudsdk/resource.WithWaitPolicy"
+        "gophercloudsdk/resource.WithWaitPolicy",
+        "gophercloudsdk/compute.Service.GetActiveServer",
+        "gophercloudsdk.Connection.GetActiveServer",
+        "gophercloudsdk/compute.WithServerReadyAutomaticIPOptions",
+        "gophercloudsdk/compute.WithServerReadyWaitOptions",
+        "gophercloudsdk/compute.WithActiveServerWait",
+        "gophercloudsdk/network.WithEnsureNoWait"
       ],
       "documentation": [
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-automatic-ip.md"
+        "compute/server-automatic-ip.md",
+        "compute/server-ready.md"
       ],
       "differences": [
-        "This review maps bounded actual-state/address readiness plus conditional IP behavior inside an explicit Go creation compound. It does not expose the complete existing-server get_active_server surface or its None return for non-ACTIVE status; the Go operation waits and returns separate Creation/last Server/Automatic results.",
-        "Go requires actual ACTIVE, a matching raw server identity and at least one real address row; nil metadata polls, while explicit empty/null-row inventories return a typed ServerAddressesUnavailableError and keep the server. The pinned helper deletes ACTIVE servers with a falsy addresses map and may accept a truthy map containing only empty rows. Go performs no implicit DELETE.",
-        "ERROR is a mandatory failure despite a user-disabled generic failure-state policy. Go preserves the known fault in the returned Server and uses typed SDK errors instead of claiming the full Python SDKException/extra_data/model taxonomy.",
-        "The Go compound always performs mandatory raw readiness and, only when needed, the bounded Neutron automatic lane. It uses a five-minute automatic overall deadline/two-second server/raw poll defaults with concrete overrides rather than the complete source get_active_server/wait default180/5/dynamic dispatch policy. Connection resolves Compute before the Service automatic timer begins; caller context covers that earlier discovery.",
-        "The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults."
+        "The review now includes typed supplied-server Service/Connection.GetActiveServer in addition to earlier automatic creation evidence. The new entry inspects supplied status: non-ACTIVE returns nil,nil, ERROR retains the known Server with ErrFailedState, and ACTIVE enters bounded conditional IP work. It returns AutomaticServerIPResult rather than a dynamic mutable Python Resource. Go compares status case-insensitively; pinned source uses literal ERROR/ACTIVE.",
+        "Standalone GetActiveServer defaults to auto/reuse true, asynchronous accepted assignment and a 180-second overall context with five-second raw-poll configuration; WithActiveServerWait(true) adds actual IP ACTIVE and exact raw Nova convergence only when assignment is needed. Earlier automatic/create helpers retain their synchronous five-minute/two-second defaults. The overall Go context bounds classification and HTTP work even in the async lane rather than merely passing a timeout into source wait branches.",
+        "Go ACTIVE nil metadata and explicit empty/null-row inventories return ServerAddressesUnavailableError with the known supplied Server and no refresh or DELETE, including when auto is disabled. Wait and creation instead poll raw ACTIVE nil metadata, but still fail explicit zero rows. The pinned helper deletes ACTIVE servers with a falsy address map and may accept a truthy map containing only empty rows; its cleanup/error ordering is intentionally different.",
+        "The bounded Neutron async entry can return an accepted DOWN FloatingIP with Assignment and Observed=false without a Compute endpoint or IP/raw wait. Pinned _attach_ip_to_server may still refresh Compute once even wait=False when the supplied floating address is absent and the selected floating IP has port_id; Go omits that refresh. Nova-source address supplementation may require lazy Compute separately, and Nova mutation remains unsupported.",
+        "Go preserves native typed Server/Fault and known resources with typed SDK errors rather than the complete Python fault-key-presence/message/extra_data/Resource taxonomy. Valid ACTIVE input is detached in production before dependency callbacks or association; non-ACTIVE/ERROR do not inspect unrelated model/address fields. Complete mutable Resource, model/location/interface expansion and ownership cases remain distinct.",
+        "Earlier creation-only guarded name resolution retains native typed models and200/204/300 list codes while owning page continuation and accepted Read/Close/source errors. It is separate from standalone supplied-model status checking and ordinary native lookup; flavor-name creation keeps its existing no-name-query/no-is_public-default behavior."
       ],
       "remaining": [
-        "Provide or deliberately map the complete public existing-server get_active_server API with its dynamic Server inputs, non-ACTIVE None behavior, auto_ip/ips/ip_pool/reuse/wait/timeout/nat_destination defaults and returned Server Resource/location/interface normalization. This row is only the bounded readiness dependency of a new creation compound.",
-        "Compare the complete ERROR/fault message/extra_data exception taxonomy, source ACTIVE-without-addresses deletion and deletion-failure error ordering, mutable Resource/descriptor/adapter/session/cache semantics and every status/address/nullable input case beyond the current fixtures.",
-        "Finish pool > explicit ips > automatic dispatch, Nova-network mutation/fallback, full service/config availability and source/destination policies beyond the independently reviewed bounded Neutron lane. Preserve the full standalone cloud Wait lookup exception/missing retry,180-second/5-second/integer remaining-budget and cleanup contracts."
+        "Complete dynamic Server/Resource inputs, alias/default/coercion behavior for ips/ip_pool/nat_destination and returned Server Resource/location/public-private/interface normalization beyond the new typed supplied-server GetActiveServer. The bounded static ERROR/non-ACTIVE/ACTIVE surface and async/sync Neutron controls now exist, but do not complete the full source IP dispatcher.",
+        "Compare the complete ERROR/fault key-presence/message/extra_data exception taxonomy, all nullable/status/address/model and detached ownership cases beyond the current fixtures, source ACTIVE-without-addresses deletion and deletion-failure ordering, and mutable Resource/descriptor/adapter/session/cache semantics. The noDELETE, zero-row and case-insensitive policies are explicit Go differences.",
+        "Finish pool > explicit ips > automatic dispatch, Nova-network mutation/fallback, full service/config availability and source/destination policy beyond the independently reviewed bounded Neutron lane. Complete source async attached-IP refresh/model semantics, timeout/unlimited/parent/HTTP/default edge cases and full cloud Wait lookup/expansion/broad-exception/missing retry plus integer remaining-budget contracts.",
+        "Preserve decoded known FloatingIP models after accepted Neutron201/202 allocation read/Close/source errors: the current lower layer can retain Allocated=true and actual ResponseError proof while FloatingIP is nil. This existing model-retention gap is separate from the newly tested accepted raw Nova partials and has no new dedicated fixture in this readiness unit."
       ],
       "contracts": [
         {
@@ -37939,6 +38013,51 @@
             "compute/server_automatic_create_preflight_test.go:TestAutomaticCreatePreparesClosuresOnceAndCapturesSourceBeforeOptions",
             "resource/prepared_wait_policy_test.go:TestPreparedWaitPolicyDoesNotReapplyApplicationOptions",
             "resource/prepared_wait_policy_test.go:TestWaitGuardStopsAfterProgressBeforeAnotherFetch"
+          ]
+        },
+        {
+          "behavior": "Supplied BUILD/SHUTOFF/PAUSED/empty/unknown GetActiveServer status returns nil,nil without reading malformed unrelated addresses or obtaining Compute/Network dependencies. Supplied ERROR retains its Fault.Message and Server with ErrFailedState even when user failure states are empty, without assignment or discovery.",
+          "tests": [
+            "compute/server_ready_test.go:TestGetActiveServerStatusBranchesNeverReadAddressesOrDiscoverServices"
+          ]
+        },
+        {
+          "behavior": "Supplied ACTIVE nil,empty map,null rows,empty rows or mixed all-empty inventories return ErrServerAddressesUnavailable and known Server with nil Assignment without refresh, role/port/mutation requests or implicit deletion, including when automatic IP is disabled.",
+          "tests": [
+            "compute/server_ready_test.go:TestGetActiveServerEmptyAddressRowsFailWithoutRefreshOrDelete"
+          ]
+        },
+        {
+          "behavior": "Default bounded Neutron GetActiveServer async returns a newly allocated accepted DOWN IP with Needed=true and Observed=false. Final NoWait overrides even a supplied Active option; the service and Connection fixtures see one allocation, no IP readiness GET or raw observation, and no Compute discovery. Connection records zero endpoint locates.",
+          "tests": [
+            "compute/server_ready_test.go:TestGetActiveServerAsyncReturnsAcceptedDownIPWithoutCompute",
+            "connection_server_ready_test.go:TestConnectionGetActiveAsyncNeutronDoesNotLocateCompute"
+          ]
+        },
+        {
+          "behavior": "Explicit synchronous GetActiveServer checks raw Compute observation capability before Neutron mutation. Missing Compute returns ErrUnsupported with no assignment/allocation. A successful fixture verifies actual IP ACTIVE and exact target floating IPv4 among multiple rows in a matching raw203 ACTIVE response, returning the native latest Server and Observed=true.",
+          "tests": [
+            "compute/server_ready_test.go:TestGetActiveServerSyncRequiresComputeBeforeMutationAndObservesTarget"
+          ]
+        },
+        {
+          "behavior": "Shared readiness preflight rejects nil ready/automatic/wait options, zero automatic timeout, nil Server and unsafe server/network references before raw, role, port or mutation requests. Even an explicit valid Status override in server wait options is ErrUnsupported before I/O. In the Wait fixture, ready/automatic/address callbacks run once, the supplied ID captured before callbacks remains the GET target, and ready API, automatic endpoint or address collection replacement stops before the first fetch.",
+          "tests": [
+            "compute/server_ready_test.go:TestServerReadyInvalidPolicyFailsBeforeIOForBothEntrypoints",
+            "compute/server_ready_preflight_test.go:TestServerReadyPreparesOptionsOnceAndCapturesIdentityAndSource"
+          ]
+        },
+        {
+          "behavior": "Prepared floating-IP policies retain their validated wait settings when the final NoWait toggle is applied. The same policy executes async DOWN, later final Active waits to actual ACTIVE, then async DOWN again; the HTTP fixture sees three allocations, two wait GETs and one progress callback. Async does not hide nil or invalid-duration wait options, which fail before HTTP.",
+          "tests": [
+            "network/floating_ip_wait_toggle_test.go:TestEnsureNoWaitPreservesPreparedPolicyForLaterActiveOverride",
+            "network/floating_ip_wait_toggle_test.go:TestEnsureNoWaitDoesNotHideInvalidWaitPolicy"
+          ]
+        },
+        {
+          "behavior": "Connection supplied BUILD,ERROR,empty-address and disabled branches and an invalid standalone Wait status policy keep endpoint location at zero. Static errors retain the known Server, disabled Get retains its automatic reason, and invalid policy returns before lazy Compute discovery.",
+          "tests": [
+            "connection_server_ready_test.go:TestConnectionReadyStaticBranchesAndInvalidPolicyKeepEndpointsLazy"
           ]
         }
       ]
