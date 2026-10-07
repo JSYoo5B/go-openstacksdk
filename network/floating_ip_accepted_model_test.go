@@ -2,6 +2,7 @@ package network_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -35,7 +36,7 @@ func (r *acceptedIPReader) Read(dst []byte) (int, error) {
 
 func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *testing.T) {
 	for _, code := range []int{201, 202} {
-		for _, scenario := range []string{"close", "read", "source", "cancel"} {
+		for _, scenario := range []string{"close", "read", "source", "cancel", "owner close"} {
 			t.Run(fmt.Sprintf("%d/%s", code, scenario), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				ensurePortFixture(t, cloud)
@@ -47,6 +48,9 @@ func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *tes
 				cause := errors.New("accepted allocation processing failed")
 				var writes atomic.Int32
 				body := `{"floatingip":{"id":"fip","project_id":"owner","floating_network_id":"external","floating_ip_address":"198.51.100.10","port_id":"port","fixed_ip_address":"10.0.0.10","status":"DOWN"}}`
+				if scenario == "owner close" {
+					body = strings.Replace(body, `"project_id":"owner"`, `"project_id":"foreign"`, 1)
+				}
 				base := client.ProviderClient.HTTPClient.Transport
 				client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
 					if r.Method != "POST" {
@@ -59,7 +63,7 @@ func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *tes
 					}
 					closer := planCloseBody{Reader: reader, close: func() error {
 						switch scenario {
-						case "close":
+						case "close", "owner close":
 							return cause
 						case "source":
 							service.API = nil
@@ -97,6 +101,9 @@ func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *tes
 				}
 				if scenario == "cancel" && !errors.Is(err, context.Canceled) {
 					t.Fatal(err)
+				}
+				if scenario == "owner close" && (result.FloatingIP.ProjectID != "foreign" || !strings.Contains(err.Error(), "different or inconsistent project")) {
+					t.Fatal("lost decoded allocation evidence or joined owner validation", result, err)
 				}
 			})
 		}
@@ -155,6 +162,9 @@ func TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError(t *tes
 			if result.FloatingIP.PortID != want {
 				t.Fatal("adopted invalid response or lost matching body", result, err)
 			}
+			if scenario == "wrong ID" && !strings.Contains(err.Error(), "does not match floating IP") || scenario == "wrong fixed" && !strings.Contains(err.Error(), "destination is") {
+				t.Fatal("lost joined assignment validation", err)
+			}
 		})
 	}
 }
@@ -185,7 +195,8 @@ func TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined(t *testing.T) {
 	}
 	result, err := ips.EnsurePrepared(context.Background(), plan)
 	var proof *resource.ResponseError
-	if result == nil || !result.Allocated || result.FloatingIP != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != `{"floatingip":` || writes.Load() != 1 {
+	var decode *json.SyntaxError
+	if result == nil || !result.Allocated || result.FloatingIP != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &decode) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != `{"floatingip":` || writes.Load() != 1 {
 		t.Fatal(result, err, proof, writes.Load())
 	}
 }
