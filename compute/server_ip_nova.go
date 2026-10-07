@@ -23,6 +23,10 @@ type novaIPBackend struct {
 }
 
 func (state *automaticIPState) novaBackend(ctx context.Context) (*novaIPBackend, error) {
+	return state.novaBackendFor(ctx, true)
+}
+
+func (state *automaticIPState) novaBackendFor(ctx context.Context, attachment bool) (*novaIPBackend, error) {
 	settings, err := state.policy.Settings()
 	if err != nil {
 		return nil, err
@@ -54,7 +58,11 @@ func (state *automaticIPState) novaBackend(ctx context.Context) (*novaIPBackend,
 			return nil, fmt.Errorf("%w: legacy Nova floating IP endpoints require Compute microversion below 2.36", resource.ErrUnsupported)
 		}
 	}
-	for _, target := range []string{client.ServiceURL("os-floating-ips"), client.ServiceURL("servers", url.PathEscape(state.serverID), "action")} {
+	targets := []string{client.ServiceURL("os-floating-ips")}
+	if attachment {
+		targets = append(targets, client.ServiceURL("servers", url.PathEscape(state.serverID), "action"))
+	}
+	for _, target := range targets {
 		if err := rest.ValidateTarget(client, target); err != nil {
 			return nil, err
 		}
