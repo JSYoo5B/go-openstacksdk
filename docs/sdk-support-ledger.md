@@ -8,6 +8,7 @@
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |
 |---|---|---|
+| 독립 서버 IP helper (`b5b4174`, `4d2ae19`, `f4fa8a9`) | [Compute11](../compute/server_ip_helpers_test.go)·[Connection3](../connection_server_ip_helpers_test.go): 기본60초·async, raw BUILD/ERROR 관측·IP DOWN, positional empty no-op, 동일 deadline·무제한 제거·실제 만료, partial/source·모든 endpoint 생략. 전체40 package check·독립 main 컴파일 통과. | [Python/Go 사용법](../compute/server-ip-helpers.md), [검증 기록](#독립-서버-ip-helper). Nova mutation, source pool/async refresh와 full Resource/session은 남습니다. |
 | 명시 IP 목록·pool의 상위 소비자 (`71e8962`, `b2ee2af`, `7028370`, `bc8d096`) | [Compute 선택·부분 오류](../compute/server_ip_dispatch_test.go)·[상위 소비자](../compute/server_ip_dispatch_workflow_test.go)·[Connection](../connection_server_ip_dispatch_test.go)·[lazy source](../connection_server_automatic_sources_test.go): pool > ips > auto, 순서·중복·부분 Attempts, Get 비동기/Wait·Create 동기, 동일 deadline·옵션1회. 신규16그룹·전체40 package check 통과. | [Python/Go 사용법](../compute/server-ip-dispatch.md), [검증 기록](#명시-ip-목록과-pool의-상위-연결-흐름). 독립60초·비동기 entry, Nova mutation, source pool availability·Resource/session/model 계약은 남습니다. |
 | 상위 Network CRUD와 역할 cache (`fd863f3`, `2d95f3e`, `69aa03d`, `8d0477d`, `f71e838`, `5bfea18`) | [CRUD](../network/network_mutations_test.go)·[경계](../network/network_mutation_boundaries_test.go)·[Connection](../connection_network_mutations_test.go): 기본값·owned JSON/lookup/source·AZ·접수 증거·공유 cache Reset. 신규 27그룹, 전체 40 package check·독립 예제 컴파일 통과. | [Python/Go 사용법](../network/network-mutations.md), [검증 기록](#상위-network-crud와-공유-cache-hook). cloud 3개 부분 판정이며 mutable Resource·전체 session·응답 확장·다른 cache hook은 별도입니다. |
 | Nova·Cinder 데이터 볼륨 연결 (`2a64e79`, `19ea138`, `6d4ecab`, `f7dfdff`, `6bf3012`, `a51f8fa`, `504fe1d`) | [HTTP](../blockstorage/attach_volume_contracts_test.go)·[전송/대기](../blockstorage/attach_volume_transport_test.go)·[모델](../blockstorage/attach_volume_models_test.go)·[옵션](../blockstorage/attach_volume_options_test.go)·[Connection](../connection_attach_volume_test.go): fresh available 확인, Nova POST200, 기본 in-use 대기와 독립된 부분 응답. 신규27그룹·전체34 package race/vet·예제 컴파일 통과. | [Python/Go 사용법](../blockstorage/attach-volume.md). 실제 cloud attach_volume 한 선언을 의도적인 Go 입력·응답·timeout 정책으로 매핑합니다. 별도 Compute/Cinder API와 상속 Resource 범위는 각 판정을 유지합니다. |
@@ -1488,4 +1489,31 @@ PATH=/opt/homebrew/bin:$PATH make check
 
 새 가이드의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-example-l6ijwx5c/main.go`, SHA256 `589a21c96cda647ce7ad92f7cf9097368477bbd2052b53b506d0ecdda99aa5c4`). 기존11개 문서의 Go fence는 동일하고 새 예제만 추가했습니다. 변경한12개 문서의 상대 파일 링크 1084개에서 누락이 없고 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-doc-receipt.json`, `gophercloudsdk-ip-dispatch-example-receipt.json`). 기존6행 갱신 뒤 최종 고정 parity도 통과했습니다(`/private/tmp/gophercloudsdk-ip-dispatch-final-parity.log`). Python 예제·인증된 cloud 실행은 하지 않았습니다.
 
-기존 add_ip_list/add_ips/available/create/get_active/wait6행에 이번 typed 소비자의 근거를 추가하고 남은 범위를 좁혔습니다. 신규 review나 지원 승격은 없으며496개 review의 go_mapping161/unresolved334/unsupported1, 전체3362개 선언의 supported0/go_mapping161/unsupported1/unresolved3200을 유지합니다. 별도 public60초·비동기 AddIPsToServer/AddIPList, Nova mutation·service fallback, source pool availability·ordinary Create/Get, full Resource/config/session/normalization/cleanup은 남습니다. 전체 SDK 목표와 서비스/user/admin 우선순위는 유지하며 다음 핵심 user 단위부터 이 남은 계약을 계속 처리합니다.
+기존 add_ip_list/add_ips/available/create/get_active/wait6행에 이번 typed 소비자의 근거를 추가하고 남은 범위를 좁혔습니다. 신규 review나 지원 승격은 없으며496개 review의 go_mapping161/unresolved334/unsupported1, 전체3362개 선언의 supported0/go_mapping161/unsupported1/unresolved3200을 유지합니다. 당시 남았던 별도 public60초·비동기 AddIPsToServer/AddIPList는 아래 독립 helper 단위에서 처리했습니다. Nova mutation·service fallback, source pool availability·ordinary Create/Get, full Resource/config/session/normalization/cleanup은 남습니다. 전체 SDK 목표와 서비스/user/admin 우선순위는 유지하며 다음 핵심 user 단위부터 이 남은 계약을 계속 처리합니다.
+
+
+## 독립 서버 IP helper
+
+2026-10-07 핵심 user 단계에서 Service·Connection의 `AddIPsToServer`·`AddIPList`와 `ServerIPOption`을 추가했습니다. `WithServerIPAutomaticOptions`로 기존 concrete selector·destination·reuse·budget·progress를 공유하고 `WithServerIPWait`로 raw 관측을 선택합니다. 기본은60초·5초 poll·async입니다. 기존 Ensure/ready/create의 강한 ACTIVE 준비 조건과 독립 helper를 분리했으며 builder나 resolver 구현을 애플리케이션에 요구하지 않습니다. [사용법과 Python 비교](../compute/server-ip-helpers.md)를 참고하세요.
+
+AddIPsToServer는 pool > optional ips > auto를 소비합니다. AddIPList는 옵션 전에 복사한 positional 목록만 연결하며 옵션의 pool/list로 대체되지 않습니다. 빈 positional 목록은 공통 context/Server ID/옵션 검증 뒤 Mode=explicit·Needed=false·empty reason으로 반환하고 backend·서비스 탐색·HTTP·자동 allocation을 하지 않습니다. optional dispatcher의 빈 selector가 auto로 돌아가는 동작과 구별합니다. 주소 순서·중복과 이전 완료/현재 partial Assignment·Attempts·마지막 matching Server는 공통 실행기로 보존합니다.
+
+독립 Add는 supplied ACTIVE를 요구하지 않습니다. wait=true도 IP ACTIVE를 기다리지 않고 같은 server ID의 exact tagged IPv4를 raw Nova에서 관측합니다. raw BUILD/ERROR에 목표 주소가 있어도 완료하며 Neutron DOWN은 알려진 association 결과로 남습니다. Observed는 각 처리 시점의 주소 증거이고 서버 준비나 마지막 응답에서 모든 이전 IP의 동시 잔존을 뜻하지 않습니다. 기본 async는 raw 관측을 하지 않으며 automatic nil 주소의 분류 refresh는 별도입니다. 새 독립 profile에서만 이 조건을 적용하고 기존 Get/Wait/Create·Ensure의 ACTIVE 및 오류 판정은 유지합니다.
+
+신규 **14그룹**은 Compute11·Connection3입니다. 두 entry의 BUILD/nil supplied async 연결, raw BUILD/ERROR 주소 관측·IP DOWN/개별 recheck GET1, 실제 HTTP의60초/17초/earlier parent/무제한 공통 deadline, 빈 목록의 None/Nova 및 waittrue no-op, positional 목록·ID/status snapshot과 옵션별1회, pool free reuse PUT·nonreuse attached POST, 두 번째 lookup/accepted Close의 history/partial, automatic BUILD allocation과 accepted203 nil-address refresh Close 모델을 확인합니다. 실제1초 deadline 만료는 첫 관측 transport를 context 종료까지 기다리게 하여 알려진 첫 IP·미완료 attempt·DeadlineExceeded·두 번째 미착수를 증명합니다.60초 만료를 기다린 테스트는 아닙니다.
+
+최종 검토에서 무제한 case의 parent를3분으로 바꾸어 기본60초 제거 여부를 구분했고, 빈 Connection 목록은 endpoint override 없는 provider의 모든 종류 locator에 실패·호출 수를 넣어 Network와 Compute 발견0을 확인했습니다. 이미 연결된 exact address와 pool은 nil/stale BUILD supplied 및 nil Compute에서 추가 PUT·POST·raw0으로 반환합니다. explicit address는 singular recheck GET1, 이미 붙은 pool 후보는 기존 Ensure의 목록 결과를 사용해 singular GET0인 실제 경로를 기록합니다. 이 검증은 source async attached-IP Compute refresh를 생략하는 Go 차이를 닫은 증거가 아니라 명시한 차이의 실행 근거입니다.
+
+```sh
+go test -race -timeout 60s . ./compute ./network \
+  -run 'TestStandaloneServerIP|TestConnectionStandaloneIP|TestConnectionStandaloneEmptyIP|TestConnectionStandaloneAutomaticIP|TestServerIPDispatch|TestAutomaticIP|TestServerReady|TestFloatingIPAttach' -count=1
+OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs \
+GOPHERCLOUD_METADATA=/private/tmp/gophercloudsdk-upstream-packages.json \
+PATH=/opt/homebrew/bin:$PATH make check
+```
+
+초기 집중3 package race와 전체 check가 통과한 뒤 강화한 최종14그룹의 집중2 package race 및 code/tests `f4fa8a9`의 전체 check가 통과했습니다. 최종 vet·race·고정 parity·gofmt와 테스트 package40개, Go 파일1,869개를 확인했습니다. source SHA256 `82afcad9508d25b1ecf3acb24934f5e51c29a399a90a1ec77cef8a761ad52467`은 검증 전후 동일합니다(`/private/tmp/gophercloudsdk-standalone-ip-check.log`, `gophercloudsdk-standalone-ip-gate-receipt.json`). 구현 `b5b4174`·기본 테스트 `4d2ae19`·강화 `f4fa8a9`·사용 문서 `c3feb51`를 각각 중간에 커밋·push했습니다. 최종 정적 문서 검토에서 독립 helper와 기존 readiness의 조건을 분리한 설명에 추가 수정 사항이 없었습니다.
+
+새 가이드의 Go fence를 그대로 독립 main으로 추출해 컴파일했습니다(`/private/tmp/gophercloudsdk-standalone-ip-example-9rzvds2i/main.go`, SHA256 `befc5539fd57697ddf3e49bcbfd23a4215eccc41f8c8a3a47db7dd1279c7475b`). 변경한13개 Markdown의 상대 파일 링크1,109개에 누락이 없으며 anchor 자동 검증은 제외했습니다(`/private/tmp/gophercloudsdk-standalone-ip-doc-receipt.json`). 기존12개 문서의 Go fence는 동일합니다. 기존3행 갱신 뒤 최종 고정 parity도 통과했습니다(`/private/tmp/gophercloudsdk-standalone-ip-final-parity.log`). Python 예제와 인증된 OpenStack 실행은 하지 않았습니다.
+
+새 source declaration이나 review·지원 승격은 없습니다. 기존 add_ip_list/add_ips 및 available3행에 직접 검증한 독립 entry·기본값·pool 소비와 partial 근거를 추가하고, 전체 source 연산은 unresolved로 유지합니다. review496=go_mapping161/unresolved334/unsupported1, 전체3362=supported0/go_mapping161/unsupported1/unresolved3200입니다. source의 per-item wait budget·mutable Resource·dynamic 입력/반환 normalization, already-attached async/pool Compute refresh, nonreuse create 특수 IP ACTIVE·cleanup과 Nova backend/service fallback은 남습니다. 다음은 핵심 user의 Nova 및 남은 cloud/Resource 계약이며 전체 SDK 목표와 서비스/user/admin 순서를 유지합니다.

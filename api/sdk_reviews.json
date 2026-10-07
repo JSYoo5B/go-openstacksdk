@@ -35641,7 +35641,11 @@
         "gophercloudsdk/network.FloatingIPPlanner.PrepareEnsure",
         "gophercloudsdk/network.FloatingIPPlanner.Check",
         "gophercloudsdk/compute.WithFloatingIPPool",
-        "gophercloudsdk/compute.WithFloatingIPAddresses"
+        "gophercloudsdk/compute.WithFloatingIPAddresses",
+        "gophercloudsdk/compute.Service.AddIPsToServer",
+        "gophercloudsdk.Connection.AddIPsToServer",
+        "gophercloudsdk/compute.WithServerIPAutomaticOptions",
+        "gophercloudsdk/compute.WithServerIPWait"
       ],
       "contracts": [
         {
@@ -35813,6 +35817,13 @@
           "tests": [
             "connection_server_automatic_sources_test.go:TestConnectionStandaloneAutomaticIPRetainsLazyComputeSourceGuard"
           ]
+        },
+        {
+          "behavior": "Standalone AddIPsToServer uses the same winning pool priority with ignored malformed address syntax even for supplied BUILD/nil metadata and auto disabled. The async reuse=true fixture binds a free candidate with zero allocation POST; reuse=false sends one attached pool allocation. It returns one completed DOWN assignment/Observed=false and no raw observation. A separate already-associated pool fixture preserves supplied BUILD/nil metadata and returns Reused=true/Allocated=false without Compute resolution, raw fetch, association PUT, allocation POST or singular selected-IP GET. These bounded consumers do not implement source unattached-first optional-server availability or its nonreuse refresh/timing path.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPoolUsesSamePriorityAndAsyncAllocationPolicy",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
+          ]
         }
       ],
       "documentation": [
@@ -35825,7 +35836,8 @@
         "compute/server-automatic-ip.md",
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-ip-helpers.md"
       ],
       "differences": [
         "Pinned available_floating_ip accepts an optional existing Server and returns the first free floating-IP Resource/Munch, allocating only when none is free. Ensure requires a safe explicit server Ref and always selects/verifies its unique IPv4 destination, associates a free IP, and deliberately prefers an IP already attached there. It returns a FloatingIPAssignment with Reused/Allocated phases; this is an idiomatic standalone workflow foundation rather than an equivalent availability getter.",
@@ -35835,14 +35847,14 @@
         "Standalone plain PrepareEnsureFloatingIPOptions resolves the recorded owner per Ensure call; service-bound PrepareEnsureActive intentionally holds the owner resolved before Nova creation. Reuse=false without explicit owner continues to leave scope to Neutron. Native alias results do not emulate Python Resource/normalization/location/session/cache state or server interface refresh.",
         "The inspected standalone Ensure and explicit compound creation HTTP fixtures record partial source comparison. They do not complete available_floating_ip, private dependency helpers, cloud create_server/add_auto_ip/wait_for_server or authenticated Python/OpenStack execution.",
         "PrepareEnsure/EnsurePrepared are an explicit Go-only two-stage Neutron foundation holding an immutable selection, late owner binding and port revalidation. They do not implement the optional-server availability getter, automatic need/skip or raw Nova address convergence; shared cache/in-flight and existing public/native paths retain their own policies.",
-        "A separate existing-server Compute automatic lane now conditionally consumes the immutable Neutron target and requires raw Nova observation; metadata supplementation only informs need/skip. The public availability getter remains partial, and general Create/Wait plus Nova/pool/explicit-IP dispatch keep their separate remaining contracts.",
+        "Existing stronger Compute Ensure/ready/create lanes require raw observation according to their own policy, while the independent AddIPsToServer pool consumer defaults to async/60seconds and may return a DOWN assignment. The optional-server availability getter is still partial; ordinary/full cloud lifecycle, source pool unattached-first semantics and legacy Nova/model contracts remain separate.",
         "The typed pool selector uses the same prepared Ensure allocation/reuse policy and wins over ignored explicit address strings. This is not a standalone source availability getter: source reuse requests available_floating_ip(network=pool) without Server, while Go verifies a concrete destination, prefers an already-attached candidate and may allocate attached directly. Ordered upper workflow results and observation are separate from the source Resource/Munch return."
       ],
       "remaining": [
         "Provide or deliberately map the full public availability getter: optional/absent Server, network/pool dynamic inputs, unattached result behavior and Resource/Munch identity/normalization. The new typed pool consumer still executes prepared Ensure rather than returning an unattached available IP. Compare list_floating_ips filtering/defaults/pagination/error/cache and current_project_id policies beyond the bounded selection path.",
         "Shared configured floating source/default/NAT roles now feed the bounded Go consumers, with verified bounded cache invalidation from owned high Network Service mutations. Complete full has_service/private/floating-source flags, configuration overlays/vendor profiles, mutable Resource/cache/session semantics and source destination/source behavior beyond the explicit or multiple-owned-port boundaries; generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset. The source optional-server availability getter remains partial.",
         "Compare floating_ip_source/service selection, Nova-network pool listing/allocation/normalization and Neutron NotFound fallback. Finish private _neutron_create_floating_ip optional server/port/fixed-address semantics, destination heuristics, timeout/cleanup/exception ordering and Resource/Adapter behavior; private helpers are dependencies and have no separate declared catalog IDs.",
-        "Prepared Ensure now feeds bounded typed explicit CreateWithFloatingIP and selected automatic/pool/list Plan/Ensure/GetActive/Wait/automatic creation paths, with partial assignments and sequential exact raw observation where required. Ordinary Create/Get and the complete cloud create_server/add_auto_ip/wait_for_server dispatch/default/model surface remain separate. Complete source optional-server pool reuse/unattached allocation, Nova/service/Resource/cache/returned-interface policy and cleanup/error ordering beyond these typed consumers."
+        "Prepared Ensure now feeds bounded typed explicit creation and selected automatic/pool/list Plan/Ensure/GetActive/Wait/automatic creation, plus independent AddIPsToServer with async/60second defaults. This is concrete destination attachment/assignment, not source optional-server unattached availability. Ordinary Create/Get and full cloud create_server/add_auto_ip/wait_for_server defaults/dispatch/model surface remain separate, along with source optional-server pool reuse/unattached allocation, Nova/service/Resource/cache/returned-interface and cleanup/error ordering."
       ]
     },
     {
@@ -37940,7 +37952,13 @@
         "gophercloudsdk/compute.Service.CreateWithAutomaticFloatingIP",
         "gophercloudsdk.Connection.GetActiveServer",
         "gophercloudsdk.Connection.WaitForServer",
-        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk/compute.Service.AddIPsToServer",
+        "gophercloudsdk/compute.Service.AddIPList",
+        "gophercloudsdk.Connection.AddIPsToServer",
+        "gophercloudsdk.Connection.AddIPList",
+        "gophercloudsdk/compute.WithServerIPAutomaticOptions",
+        "gophercloudsdk/compute.WithServerIPWait"
       ],
       "documentation": [
         "compute/server-automatic-ip.md",
@@ -37948,18 +37966,19 @@
         "network/floating-ip-plan.md",
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-ip-helpers.md"
       ],
       "differences": [
-        "The pinned public add_ips_to_server returns a mutable Server Resource and dispatches pool > truthy explicit ips > auto_ip/needs. Existing concrete typed Go workflows now consume selected Neutron pool, ordered explicit IPv4 and bounded automatic modes with structured Decision/Attempts/Assignment/Server/Observed partial results. There is still no separate standalone AddIPsToServer with source timeout60/wait=false defaults. Plan remains diagnostic; a separate Ensure call replans, and one executing call retains its chosen targets.",
+        "The pinned public add_ips_to_server returns a mutable Server Resource and dispatches pool > truthy explicit ips > auto/needs. New independent Service/Connection AddIPsToServer provides typed Neutron pool/list/automatic modes with async/60second defaults and structured Decision/Attempts/Assignment/Server/Observed partials. Existing Plan/Ensure/ready/create consumers keep separate default/readiness policy; Plan is diagnostic and a later independent Ensure replans.",
         "Disabled/private/AccessIPv4/floating/empty skips apply to automatic mode only. Pool/list requests bypass automatic needs, and only the final winning selector is validated; pool does not inspect ignored address strings. Empty list/zero pool clears selection. Concrete IPv4/Ref inputs, owned snapshots and option preparation replace Python dynamic coercion; full Resource/session/normalization and has_service configuration/version behavior remain partial.",
         "Unlike the source needs helper swallowing some floating-network SDKException as false, only a clean completed semantic plan absence becomes a skip. HTTP/decode/read/Close/source/cancellation/ambiguous or other explicit-selector failures remain errors. Strict destination tuple selection, revision protection and re-GET behavior follow the separately reviewed Go Neutron plan.",
-        "Raw Nova observation requires an actual ACTIVE matching server and exact assigned version4 floating-tagged row anywhere in the raw address inventory, rather than selecting only the first floating IPv4. Supplemental metadata, AccessIPv4, fixed/IPv6 rows and Neutron ACTIVE alone cannot prove observation. Go retains known resources and does not automatically clean up or fall back on failures.",
-        "The Go operation defaults to a five-minute overall deadline and two-second raw observation poll with concrete overrides; the pinned add_ips_to_server defaults to timeout60 and wait=false. Ensure always requires actual Neutron ACTIVE and raw Nova observation when it assigns. Supplied-model skips remain lazy, while nil refresh, Nova-source supplementation and observation can require Compute.",
+        "Existing stronger Ensure, synchronous GetActive, Wait and creation require matching actual ACTIVE server and exact assigned version4 floating-tagged raw row. Independent WithServerIPWait instead observes that exact row under any server status and does not wait for Neutron ACTIVE; supplemental/AccessIPv4/fixed/IPv6 metadata cannot prove raw observation in either family. Both retain known resources without automatic cleanup/backend fallback; per-item observations do not prove simultaneous final presence.",
+        "Independent AddIPsToServer defaults to one60-second overall context, async and five-second raw poll, with explicit helper wait/timeout overrides. Existing Ensure/automatic creation retain five-minute/two-second synchronous defaults; GetActive/Wait retain their180second/five-second and readiness policies. Go also bounds selection/HTTP work and shares one budget across items, whereas source forwards timeout60 into wait branches and repeated list attachments. Source async pre-attached-IP Compute refresh remains a separate difference.",
         "The selected pool lane deliberately reuses Ensure: an already-attached candidate is preferred over a free one and a new allocation can be attached in its POST. Source reuse calls available_floating_ip(network=pool) without Server and first obtains an unattached IP, while source nonreuse creates, subtracts elapsed time, refreshes Compute and attaches again. Typed ordered Observed records each target when reached, not all prior targets in the final raw Server at once."
       ],
       "remaining": [
-        "Provide the standalone public AddIPsToServer surface with source timeout60/wait=false and dynamic inputs or an explicit documented mapping. Existing typed Plan/Ensure/GetActive/Wait/automatic creation now consume bounded pool > explicit list > automatic Neutron policy, but all source aliases/coercions, fixed/NAT forwarding, returned Resource/interface/location normalization and uncovered defaults remain.",
+        "Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.",
         "Implement or compare Nova-network allocation/association/pool normalization and source backend/fallback/error ordering. Explicit None/Nova or absent Network can be Needed with Nova Plan diagnostics, but mutation remains ErrUnsupported; precise endpoint classification does not close full service settings, API-version/discovery/session or catalog-error policy.",
         "Complete source pool unattached-first availability, nonreuse post-create refresh/timing, broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.",
         "Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability."
@@ -38056,7 +38075,7 @@
           ]
         },
         {
-          "behavior": "The bounded typed explicit-address lane owns the supplied address slice and preserves order and duplicate entries. Each item completes attachment, actual Neutron ACTIVE and exact raw Nova target observation before the next item starts; a duplicate creates another attempt but skips an already-matching association PUT. Explicit addresses bypass disabled/private automatic policy. Attempts retain index, requested address, assignment, Completed and Observed. Aggregate Observed records successful sequential observations, not simultaneous survival of every prior address in the final Server: the final fixture raw response contains only the last target.",
+          "behavior": "The existing stronger EnsureServerFloatingIP explicit-address lane owns the supplied address slice and preserves order and duplicate entries. Each item completes attachment, actual Neutron ACTIVE and exact raw Nova target observation before the next item starts; a duplicate creates another attempt but skips an already-matching association PUT. Explicit addresses bypass disabled/private automatic policy. Attempts retain index, requested address, assignment, Completed and Observed. Aggregate Observed records successful sequential observations, not simultaneous survival of every prior address in the final Server: the final fixture raw response contains only the last target.",
           "tests": [
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchPreservesOrderedDuplicateInputAndOneCompletedStepAtATime"
           ]
@@ -38124,6 +38143,71 @@
           "behavior": "The standalone Connection Ensure automatic lane retains its lazily resolved Compute source registry across raw observation. A progress callback that clears cached Compute API, Servers or Flavors returns ErrInvalidOption with the known matching raw Server and allocated assignment, Observed=false, one allocation, one raw fetch and one callback; no subsequent fetch is allowed. This is a concrete source-ownership regression, not complete source configuration/session parity.",
           "tests": [
             "connection_server_automatic_sources_test.go:TestConnectionStandaloneAutomaticIPRetainsLazyComputeSourceGuard"
+          ]
+        },
+        {
+          "behavior": "Standalone Service AddIPsToServer and positional AddIPList attach two exact existing IPv4 addresses in caller order from a supplied BUILD server with nil metadata. The default async lane keeps Compute discovery and raw observation absent, returns completed DOWN assignments with Observed=false, performs one singular selected-IP recheck per item, and starts the next lookup after accepted association. No allocation or server/IP readiness is required. Existing stronger Ensure/ready/create consumers retain their own ACTIVE contracts.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAsyncPreservesOrderedAttachmentsWithoutReadiness"
+          ]
+        },
+        {
+          "behavior": "Standalone WithServerIPWait(true) waits only for each exact version4 floating-tagged target in the matching raw server ID. In the direct-list fixture supplied SHUTOFF and raw BUILD or ERROR do not block successful observation; Neutron assignments remain DOWN with only the single association recheck, not an IP ACTIVE waiter. All attempts complete/observe in sequence. This is the independent helper policy, not the actual server/IP ACTIVE policy of Ensure, synchronous GetActive, Wait or creation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPWaitObservesExactAddressWithoutServerOrIPActive"
+          ]
+        },
+        {
+          "behavior": "The direct-list wire fixture observes one identical HTTP deadline across two items under the shared standalone helper budget: default near60seconds,17second override, earlier30second parent, and explicit unlimited retaining a three-minute parent deadline equal to every request deadline and later than60seconds. The unlimited assertion demonstrates removal of the default60second cap. This validates deadlines rather than waiting60seconds. A separate actual one-second observation expiry preserves the first assignment/incomplete attempt with DeadlineExceeded and stops before the second address lookup; no allocation/fallback/cleanup follows.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPExpiredObservationKeepsAssignmentAndStopsNextItem"
+          ]
+        },
+        {
+          "behavior": "Positional AddIPList snapshots its server and owned address list before callbacks and remains authoritative over malformed optional list/pool selectors; source Neutron/None/Nova plus nil positional list is a clean explicit empty-list result with no dependencies/mutation/observation. The optional-list AddIPs dispatcher instead clears an empty selector and can reach the disabled automatic reason. Outer helper, nested automatic, destination and wait factories execute once even after the caller mutates original slices/server ID/status. Common nil/canceled/unsafe/IPv6/invalid-option inputs fail before HTTP, and missing mandatory raw capability fails before lookup/mutation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPositionalEmptyListNeverFallsThroughToAutomatic",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPositionalSelectionAndOptionsArePreparedOnce",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPreflightStopsBeforeAnyRequest"
+          ]
+        },
+        {
+          "behavior": "In independent async and raw-wait list calls, a missing second IP or accepted second PUT Close failure retains the completed first item with its historical Observed state, latest known assignment and the failing second attempt; no third lookup starts. Missing retains the first assignment, while a complete accepted second body retains that bound IP beside the original Close cause and actual200 accepted-b header proof. Async raw count stays0 and wait mode retains only the first completed raw observation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPSecondFailurePreservesAsyncAndObservedHistory"
+          ]
+        },
+        {
+          "behavior": "Standalone AddIPsToServer uses the same winning pool priority with ignored malformed address syntax even for supplied BUILD/nil metadata and auto disabled. The async reuse=true fixture binds a free candidate with zero allocation POST; reuse=false sends one attached pool allocation. It returns one completed DOWN assignment/Observed=false and no raw observation. A separate already-associated pool fixture preserves supplied BUILD/nil metadata and returns Reused=true/Allocated=false without Compute resolution, raw fetch, association PUT, allocation POST or singular selected-IP GET. These bounded consumers do not implement source unattached-first optional-server availability or its nonreuse refresh/timing path.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPoolUsesSamePriorityAndAsyncAllocationPolicy",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
+          ]
+        },
+        {
+          "behavior": "Standalone automatic AddIPsToServer can allocate one DOWN assignment asynchronously from supplied BUILD/fixed metadata with no raw observation. When nil metadata requires refresh and an accepted203 matching BUILD body closes with an error, it retains the decoded refreshed Server and original response/Close evidence, sends one raw fetch and no allocation, and does not treat the processing error as a clean skip.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAutomaticAsyncAndAcceptedRefreshModels"
+          ]
+        },
+        {
+          "behavior": "Connection AddIPsToServer and AddIPList share ordered async/raw-wait behavior with supplied BUILD/nil metadata: async locates no Compute and performs no raw GET; raw wait resolves Compute once and observes two targets without IP readiness GETs, returning completed DOWN assignments. Empty positional AddIPList remains a clean no-op with no service discovery, assignment or attempts even with wait=true and ignored optional selectors. The empty fixture constructs FromProvider without endpoint overrides and installs an EndpointLocator that would fail for any service; its locator count remains0.",
+          "tests": [
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneIPHelpersShareLazyAsyncAndRawWait",
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneEmptyIPListAvoidsEveryServiceLookup"
+          ]
+        },
+        {
+          "behavior": "In Connection standalone list raw-wait, replacing cached Compute.API during the accepted second association Close retains the first completed/observed attempt, last first-target Server and decoded second bound IP with ErrInvalidOption and actual200 accepted-b proof. The second remains incomplete, no third lookup or further raw fetch starts, and the original single first-target observation remains recorded.",
+          "tests": [
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneIPSourceFailureRetainsFirstObservationAndSecondIP"
+          ]
+        },
+        {
+          "behavior": "Standalone async direct-list and pool calls reuse an already-associated IP with the exact selected port/fixed tuple from supplied BUILD/nil metadata without resolving Compute, raw observation, allocation POST or association PUT. Each returns one completed Reused=true/Allocated=false assignment with Observed=false and preserves nil Server.Addresses. Direct-list performs one singular selected-IP GET; the already-attached pool path performs none. This is bounded reuse behavior, not source preattached Compute refresh or full availability parity.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
           ]
         }
       ]
@@ -38322,7 +38406,13 @@
         "gophercloudsdk.Connection.EnsureServerFloatingIP",
         "gophercloudsdk.Connection.GetActiveServer",
         "gophercloudsdk.Connection.WaitForServer",
-        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP"
+        "gophercloudsdk.Connection.CreateWithAutomaticFloatingIP",
+        "gophercloudsdk/compute.Service.AddIPsToServer",
+        "gophercloudsdk/compute.Service.AddIPList",
+        "gophercloudsdk.Connection.AddIPsToServer",
+        "gophercloudsdk.Connection.AddIPList",
+        "gophercloudsdk/compute.WithServerIPAutomaticOptions",
+        "gophercloudsdk/compute.WithServerIPWait"
       ],
       "documentation": [
         "network/floating-ip-attach.md",
@@ -38330,16 +38420,17 @@
         "compute/server-automatic-ip.md",
         "compute/server-ready.md",
         "compute/create-with-automatic-floating-ip.md",
-        "compute/server-ip-dispatch.md"
+        "compute/server-ip-dispatch.md",
+        "compute/server-ip-helpers.md"
       ],
       "differences": [
-        "The Network Attach APIs remain a one-existing-IP Neutron foundation with explicit safe ID or Name(IPv4), stable existing association movement and no allocation/current-token owner policy. Existing typed Compute/Connection Plan, Ensure, GetActive, Wait and automatic creation now consume an ordered Neutron list with structured Decision/Attempts/Assignment/Server results; no separate standalone AddIPList matching the source signature/defaults has been added.",
+        "The Network Attach APIs remain a one-existing-IP Neutron foundation with explicit safe ID or Name(IPv4), stable existing association movement and no allocation/current-token owner policy. Typed upper workflows consume ordered Neutron lists; new independent Service/Connection AddIPList accepts an authoritative positional IPv4 slice, preserves its order/duplicates and makes empty a no-op. It defaults to async with one60-second context and returns structured Server/Attempts/Assignment, not a mutable Python Server Resource or dynamic str/list coercion.",
         "Go consumes all address pages including empty linked pages, performs local exact address matching, and rejects ambiguity, late failures and inconsistent response identity. An opaque service-bound plan pins IP address, destination and original optional revision and rechecks port/IP; concurrent unrelated association drift fails rather than silently changing targets.",
-        "Network Attach defaults to async and returns FloatingIPAssignment(Reused=true,Allocated=false); optional Neutron ACTIVE uses the common five-minute/two-second waiter. The typed upper consumers add sequential raw Nova observation under their existing budgets, except default GetActive async. Each Observed attempt is historical evidence for that item; the final Server is not rechecked for all prior targets together. Source add_ip_list returns a mutable Server and forwards timeout60 separately per item; Go retains one continuous operation context, ordered partial results and no automatic cleanup."
+        "Network Attach remains async with an optional common five-minute/two-second Neutron ACTIVE waiter. Independent AddIPList defaults to async/60second whole context/five-second raw poll; WithServerIPWait observes each exact raw IPv4 without requiring server/IP ACTIVE. Existing Ensure/sync ready/create consumers keep stronger ACTIVE checks. Each Observed attempt is historical, not simultaneous final presence of all targets. Source list passes timeout60 independently to each attach; Go uses one shared operation context and preserves partial evidence without cleanup."
       ],
       "remaining": [
-        "Provide a separate standalone public ordered AddIPList surface with source wait=false/timeout60 defaults or a deliberate documented mapping. The existing typed workflow consumers now preserve Neutron address order and duplicates, prior completions/current partial assignments under one operation context, but full dynamic single-string/list/Server Resource inputs and returned normalization/interface/location semantics remain.",
-        "Compare all fixed/NAT/port and readiness/default/timeout/unlimited combinations beyond the current two-item/duplicate and partial-error fixtures. Selected pool/list integration exists in typed Plan/Ensure/GetActive/Wait/automatic creation; ordinary Servers.Create and complete cloud lifecycle behavior remain separate. Sequential Observed evidence does not establish every prior address simultaneously in the final Server.",
+        "Compare full dynamic single-string/list/Server Resource inputs and returned mutable Resource/interface/location/normalization against the new typed positional AddIPList. Independent wait=false/timeout60 and required empty-list semantics now have bounded fixtures, but Go common validation, one whole context and structured attempt results remain deliberate differences.",
+        "Compare all fixed/NAT/port, raw-poll/progress, parent/unlimited/default and repeated-input combinations beyond the current standalone and stronger typed consumer fixtures. Ordinary Servers.Create and full cloud lifecycle/returned-interface behavior remain separate. Sequential Observed evidence does not prove all prior IPs remain simultaneously in the final Server.",
         "Implement or deliberately map Nova-network attachment and source backend/fallback/error ordering. Explicit Nova/None and absent-Network diagnostic/mutation policy is bounded and does not close full has_service/discovery/session or source async attached-IP refresh semantics.",
         "Complete inherited Resource/descriptor/configuration/location/normalization/cache and authenticated Python/cloud interoperability contracts beyond local HTTP fixtures and example compilation."
       ],
@@ -38385,7 +38476,7 @@
           ]
         },
         {
-          "behavior": "The bounded typed explicit-address lane owns the supplied address slice and preserves order and duplicate entries. Each item completes attachment, actual Neutron ACTIVE and exact raw Nova target observation before the next item starts; a duplicate creates another attempt but skips an already-matching association PUT. Explicit addresses bypass disabled/private automatic policy. Attempts retain index, requested address, assignment, Completed and Observed. Aggregate Observed records successful sequential observations, not simultaneous survival of every prior address in the final Server: the final fixture raw response contains only the last target.",
+          "behavior": "The existing stronger EnsureServerFloatingIP explicit-address lane owns the supplied address slice and preserves order and duplicate entries. Each item completes attachment, actual Neutron ACTIVE and exact raw Nova target observation before the next item starts; a duplicate creates another attempt but skips an already-matching association PUT. Explicit addresses bypass disabled/private automatic policy. Attempts retain index, requested address, assignment, Completed and Observed. Aggregate Observed records successful sequential observations, not simultaneous survival of every prior address in the final Server: the final fixture raw response contains only the last target.",
           "tests": [
             "compute/server_ip_dispatch_test.go:TestServerIPDispatchPreservesOrderedDuplicateInputAndOneCompletedStepAtATime"
           ]
@@ -38440,6 +38531,58 @@
           "behavior": "In Connection standalone Wait, changing the cached Compute.API during the accepted second association body Close retains the first completed/observed attempt, latest first-target Server and decoded second bound IP beside ErrInvalidOption and actual200 header proof. The second attempt remains incomplete/unobserved, no third lookup or second-item readiness/observation starts, and raw count remains readiness plus the first observation. This fixture guards a late source failure, not legacy backend fallback or full Resource policy.",
           "tests": [
             "connection_server_ip_dispatch_test.go:TestConnectionOrderedIPSourceFailureKeepsFirstObservationAndAcceptedSecondIP"
+          ]
+        },
+        {
+          "behavior": "Standalone Service AddIPsToServer and positional AddIPList attach two exact existing IPv4 addresses in caller order from a supplied BUILD server with nil metadata. The default async lane keeps Compute discovery and raw observation absent, returns completed DOWN assignments with Observed=false, performs one singular selected-IP recheck per item, and starts the next lookup after accepted association. No allocation or server/IP readiness is required. Existing stronger Ensure/ready/create consumers retain their own ACTIVE contracts.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAsyncPreservesOrderedAttachmentsWithoutReadiness"
+          ]
+        },
+        {
+          "behavior": "Standalone WithServerIPWait(true) waits only for each exact version4 floating-tagged target in the matching raw server ID. In the direct-list fixture supplied SHUTOFF and raw BUILD or ERROR do not block successful observation; Neutron assignments remain DOWN with only the single association recheck, not an IP ACTIVE waiter. All attempts complete/observe in sequence. This is the independent helper policy, not the actual server/IP ACTIVE policy of Ensure, synchronous GetActive, Wait or creation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPWaitObservesExactAddressWithoutServerOrIPActive"
+          ]
+        },
+        {
+          "behavior": "The direct-list wire fixture observes one identical HTTP deadline across two items under the shared standalone helper budget: default near60seconds,17second override, earlier30second parent, and explicit unlimited retaining a three-minute parent deadline equal to every request deadline and later than60seconds. The unlimited assertion demonstrates removal of the default60second cap. This validates deadlines rather than waiting60seconds. A separate actual one-second observation expiry preserves the first assignment/incomplete attempt with DeadlineExceeded and stops before the second address lookup; no allocation/fallback/cleanup follows.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPExpiredObservationKeepsAssignmentAndStopsNextItem"
+          ]
+        },
+        {
+          "behavior": "Positional AddIPList snapshots its server and owned address list before callbacks and remains authoritative over malformed optional list/pool selectors; source Neutron/None/Nova plus nil positional list is a clean explicit empty-list result with no dependencies/mutation/observation. The optional-list AddIPs dispatcher instead clears an empty selector and can reach the disabled automatic reason. Outer helper, nested automatic, destination and wait factories execute once even after the caller mutates original slices/server ID/status. Common nil/canceled/unsafe/IPv6/invalid-option inputs fail before HTTP, and missing mandatory raw capability fails before lookup/mutation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPositionalEmptyListNeverFallsThroughToAutomatic",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPositionalSelectionAndOptionsArePreparedOnce",
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPPreflightStopsBeforeAnyRequest"
+          ]
+        },
+        {
+          "behavior": "In independent async and raw-wait list calls, a missing second IP or accepted second PUT Close failure retains the completed first item with its historical Observed state, latest known assignment and the failing second attempt; no third lookup starts. Missing retains the first assignment, while a complete accepted second body retains that bound IP beside the original Close cause and actual200 accepted-b header proof. Async raw count stays0 and wait mode retains only the first completed raw observation.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPSecondFailurePreservesAsyncAndObservedHistory"
+          ]
+        },
+        {
+          "behavior": "Connection AddIPsToServer and AddIPList share ordered async/raw-wait behavior with supplied BUILD/nil metadata: async locates no Compute and performs no raw GET; raw wait resolves Compute once and observes two targets without IP readiness GETs, returning completed DOWN assignments. Empty positional AddIPList remains a clean no-op with no service discovery, assignment or attempts even with wait=true and ignored optional selectors. The empty fixture constructs FromProvider without endpoint overrides and installs an EndpointLocator that would fail for any service; its locator count remains0.",
+          "tests": [
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneIPHelpersShareLazyAsyncAndRawWait",
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneEmptyIPListAvoidsEveryServiceLookup"
+          ]
+        },
+        {
+          "behavior": "In Connection standalone list raw-wait, replacing cached Compute.API during the accepted second association Close retains the first completed/observed attempt, last first-target Server and decoded second bound IP with ErrInvalidOption and actual200 accepted-b proof. The second remains incomplete, no third lookup or further raw fetch starts, and the original single first-target observation remains recorded.",
+          "tests": [
+            "connection_server_ip_helpers_test.go:TestConnectionStandaloneIPSourceFailureRetainsFirstObservationAndSecondIP"
+          ]
+        },
+        {
+          "behavior": "Standalone async direct-list and pool calls reuse an already-associated IP with the exact selected port/fixed tuple from supplied BUILD/nil metadata without resolving Compute, raw observation, allocation POST or association PUT. Each returns one completed Reused=true/Allocated=false assignment with Observed=false and preserves nil Server.Addresses. Direct-list performs one singular selected-IP GET; the already-attached pool path performs none. This is bounded reuse behavior, not source preattached Compute refresh or full availability parity.",
+          "tests": [
+            "compute/server_ip_helpers_test.go:TestStandaloneServerIPAlreadyAttachedAddressesAndPoolKeepComputeLazy"
           ]
         }
       ]
