@@ -37,6 +37,10 @@ type PagePolicy[T any] struct {
 	// AllowFirstLimitReduction permits only the first continuation to reduce
 	// the requested limit. That reduced limit is fixed for all later pages.
 	AllowFirstLimitReduction bool
+	// AllowFirstServerLimit permits the first continuation to introduce one
+	// positive limit when the initial query had none. Later pages retain that
+	// limit, and a server-only limit does not enable marker fallback.
+	AllowFirstServerLimit bool
 	// MaxItemsLimitHint allows a controlled Collection iteration to supply its
 	// max-items cap as a wire limit when the caller did not specify one.
 	MaxItemsLimitHint bool
@@ -52,6 +56,7 @@ type PagePolicy[T any] struct {
 
 type continuationRules struct {
 	reduceLimit, offsetPagination, firstPage bool
+	allowFirstServerLimit                    bool
 }
 
 // ListControl limits raw, successfully decoded and validated rows before any
@@ -159,6 +164,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			fail(err)
 			return
 		}
+		markerFallback := spec.Paging.MarkerFallback && (!spec.Paging.AllowFirstServerLimit || limit > 0)
 		if spec.Paging.MarkerFallback && spec.Paging.Marker == nil {
 			fail(fmt.Errorf("%w: marker fallback requires a wire marker callback", resource.ErrInvalidOption))
 			return
@@ -262,13 +268,14 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 				return
 			}
 			rules := continuationRules{reduceLimit: pageNumber == 0 && spec.Paging.AllowFirstLimitReduction,
-				offsetPagination: spec.Paging.OffsetPagination, firstPage: pageNumber == 0}
+				offsetPagination: spec.Paging.OffsetPagination, firstPage: pageNumber == 0,
+				allowFirstServerLimit: spec.Paging.AllowFirstServerLimit}
 			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, rules)
 			if err != nil {
 				fail(response.Fail(err))
 				return
 			}
-			if next == nil && spec.Paging.MarkerFallback && limit > 0 && len(items) > 0 && (spec.Paging.MarkerOnShortPage || len(items) >= limit) {
+			if next == nil && markerFallback && limit > 0 && len(items) > 0 && (spec.Paging.MarkerOnShortPage || len(items) >= limit) {
 				// Derive the marker from retained wire data. The consumer owns
 				// yielded models and may have changed their fields or metadata.
 				last, err := decodeListItem(items[len(items)-1], response, spec.Metadata)
@@ -434,7 +441,7 @@ func lockContinuation(base, current, next *url.URL, rules continuationRules) err
 			continue
 		}
 		old, exists := previous[key]
-		if key == "limit" && rules.offsetPagination && rules.firstPage && !exists {
+		if key == "limit" && rules.firstPage && !exists && (rules.offsetPagination || rules.allowFirstServerLimit) {
 			if _, err := paginationInput(url.Values{"limit": values}); err == nil {
 				continue
 			}

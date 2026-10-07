@@ -191,6 +191,75 @@ func TestListContinuationCannotWidenCollectionFiltersOrMarkers(t *testing.T) {
 	}
 }
 
+func TestListFirstServerLimitIsOptInAndFixedAcrossContinuations(t *testing.T) {
+	for _, check := range []struct {
+		name, firstNext, secondNext string
+		enabled, wantError          bool
+		wantCalls, wantRows         int
+	}{
+		{"first positive", "?marker=one&limit=25", "", true, false, 2, 2},
+		{"fixed later", "?marker=one&limit=25", "?marker=two&limit=25", true, false, 3, 3},
+		{"omitted limit retains", "?marker=one&limit=25", "?marker=two", true, false, 3, 3},
+		{"opt out", "?marker=one&limit=25", "", false, true, 1, 1},
+		{"negative", "?marker=one&limit=-1", "", true, true, 1, 1},
+		{"zero", "?marker=one&limit=0", "", true, true, 1, 1},
+		{"duplicate", "?marker=one&limit=25&limit=25", "", true, true, 1, 1},
+		{"later introduced", "?marker=one", "?marker=two&limit=25", true, true, 2, 2},
+		{"later changed", "?marker=one&limit=25", "?marker=two&limit=24", true, true, 2, 2},
+		{"nonpagination filter", "?marker=one&limit=25&name=injected", "", true, true, 1, 1},
+	} {
+		t.Run(check.name, func(t *testing.T) {
+			var calls atomic.Int32
+			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
+				call := int(calls.Add(1))
+				testhelper.TestMethod(t, r, http.MethodGet)
+				testhelper.TestHeader(t, r, "X-Auth-Token", "shared-token")
+				want := url.Values{}
+				if call > 1 {
+					want.Set("marker", "one")
+					if call == 3 {
+						want.Set("marker", "two")
+					}
+					if strings.Contains(check.firstNext, "limit=25") {
+						want.Set("limit", "25")
+					}
+				}
+				if r.URL.Path != "/v1/items" || r.URL.RawQuery != want.Encode() || call > check.wantCalls {
+					t.Errorf("continuation changed captured limit/filter: call=%d URL=%s want=%s", call, r.URL, want.Encode())
+				}
+				next := ""
+				if call == 1 {
+					next = check.firstNext
+				} else if call == 2 {
+					next = check.secondNext
+				}
+				writeList(w, fmt.Sprintf(`{"items":[{"id":"row%d"}],"next":%q}`, call, next))
+			})
+			spec.Paging.AllowFirstServerLimit = check.enabled
+			rows, err := collectList(context.Background(), spec, nil)
+			if (err != nil) != check.wantError || int(calls.Load()) != check.wantCalls || len(rows) != check.wantRows {
+				t.Fatal("rows/calls/error", len(rows), calls.Load(), err, check.wantRows, check.wantCalls)
+			}
+			for index, row := range rows {
+				if row.ID != fmt.Sprintf("row%d", index+1) || row.StatusCode != 200 || row.Header.Get("X-Page") != "kept" {
+					t.Fatal("earlier row/receipt lost", index, row)
+				}
+			}
+			if check.wantError {
+				var proof *resource.ResponseError
+				next := check.firstNext
+				if check.wantCalls == 2 {
+					next = check.secondNext
+				}
+				wantBody := fmt.Sprintf(`{"items":[{"id":"row%d"}],"next":%q}`, check.wantCalls, next)
+				if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Page") != "kept" || string(proof.Body) != wantBody {
+					t.Fatal("rejected continuation lost actual page proof", err, proof)
+				}
+			}
+		})
+	}
+}
+
 func TestListCyclesRejectRepeatedMarkerBeforeHTTP(t *testing.T) {
 	var calls atomic.Int32
 	spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
