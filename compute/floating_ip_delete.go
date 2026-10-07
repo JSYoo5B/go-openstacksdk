@@ -44,10 +44,13 @@ func (s *Service) DeleteFloatingIP(ctx context.Context, input DeleteFloatingIPRe
 		return nil, err
 	}
 	defer p.cancel()
-	result := &DeleteFloatingIPResult{ID: input.ID}
-	retries := max(0, policy.Retries)
+	return p.deleteWithRetries(input.ID, policy.Retries)
+}
+func (p *floatingIPQueryState) deleteWithRetries(id string, retry int) (*DeleteFloatingIPResult, error) {
+	result := &DeleteFloatingIPResult{ID: id}
+	retries := max(0, retry)
 	for count := 0; ; count++ {
-		attempt, err := p.delete(input.ID)
+		attempt, err := p.delete(id)
 		if attempt != nil {
 			result.Attempts = append(result.Attempts, attempt)
 			result.Backend = attempt.Backend
@@ -59,14 +62,14 @@ func (s *Service) DeleteFloatingIP(ctx context.Context, input DeleteFloatingIPRe
 		if attempt.NotFound != nil {
 			return result, p.state.check(p.ctx)
 		}
-		if policy.Retries == 0 {
+		if retry == 0 {
 			if err := p.state.check(p.ctx); err != nil {
 				return result, err
 			}
 			result.Deleted = true
 			return result, nil
 		}
-		verification, err := p.get(input.ID)
+		verification, err := p.get(id)
 		attempt.Verification = verification
 		result.LastVerification = verification
 		if err != nil {
@@ -94,7 +97,7 @@ func (s *Service) DeleteFloatingIP(ctx context.Context, input DeleteFloatingIPRe
 			return result, nil
 		}
 		if count == retries {
-			return result, errors.Join(&FloatingIPDeleteVerificationError{ID: input.ID, Attempts: len(result.Attempts), FloatingIP: verification.FloatingIP}, p.state.check(p.ctx))
+			return result, errors.Join(&FloatingIPDeleteVerificationError{ID: id, Attempts: len(result.Attempts), FloatingIP: verification.FloatingIP}, p.state.check(p.ctx))
 		}
 	}
 }
