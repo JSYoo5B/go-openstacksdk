@@ -807,6 +807,30 @@ func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing
 			}
 		})
 	}
+	for _, mode := range []string{"pre-cancel", "option-cancel-with-error"} {
+		t.Run(mode, func(t *testing.T) {
+			cause := errors.New("custom secret-store cancellation")
+			optionError := errors.New("option preparation stopped")
+			ctx, cancel := context.WithCancelCause(context.Background())
+			defer cancel(nil)
+			options := []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep")}
+			if mode == "pre-cancel" {
+				cancel(cause)
+			} else {
+				options = append(options, func(config *request.Config[secretstores.ListOpts]) error {
+					cancel(cause)
+					return optionError
+				})
+			}
+			values, err := a.All(ctx, options...)
+			if values != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Load() != 0 {
+				t.Fatal("custom cancellation cause lost or HTTP started", values, err, calls.Load())
+			}
+			if mode == "option-cancel-with-error" && !errors.Is(err, optionError) {
+				t.Fatal("option error was replaced by cancellation", err)
+			}
+		})
+	}
 	for _, options := range [][]secretstores.ListOption{
 		{secretstores.WithListFilters(map[string]any{"created_at": "keep", "location": func() {}, "vendor": json.RawMessage(`{]`)})},
 		{secretstores.WithListFilter("created_at", func() {}), secretstores.WithListFilter("session", true), secretstores.WithListFilters(map[string]any{"created_at": "keep"})},

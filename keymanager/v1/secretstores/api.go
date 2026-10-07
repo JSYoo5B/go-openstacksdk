@@ -109,19 +109,25 @@ func spec(client *gophercloud.ServiceClient) rest.CollectionSpec[SecretStore] {
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*SecretStore, error] {
 	owned := append([]ListOption(nil), options...)
 	return func(yield func(*SecretStore, error) bool) {
+		wrap := func(err error) error {
+			if err != nil {
+				err = cloudread.ContextError(ctx, err)
+			}
+			return request.Wrap("List", kind, err)
+		}
 		client := a.RawClient()
 		if err := validate(ctx, client); err != nil {
-			yield(nil, request.Wrap("List", kind, err))
+			yield(nil, wrap(err))
 			return
 		}
 		source, err := cloudread.Capture(ctx, client, "key-manager")
 		if err != nil {
-			yield(nil, request.Wrap("List", kind, err))
+			yield(nil, wrap(err))
 			return
 		}
 		guard := func(ctx context.Context) error {
 			if err := validate(ctx, client); err != nil {
-				return err
+				return cloudread.ContextError(ctx, err)
 			}
 			return source.Guard(ctx)
 		}
@@ -132,13 +138,13 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Secret
 			err = guard(ctx)
 		}
 		if err != nil {
-			yield(nil, request.Wrap("List", kind, err))
+			yield(nil, wrap(err))
 			return
 		}
 		selected := spec(&source.Client)
 		selected.SourceGuard = guard
 		for value, err := range listWithFilters(ctx, selected, query, control, filters) {
-			if !yield(value, request.Wrap("List", kind, err)) {
+			if !yield(value, wrap(err)) {
 				return
 			}
 		}
