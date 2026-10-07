@@ -60,8 +60,11 @@ func (s *Service) DeleteFloatingIP(ctx context.Context, input DeleteFloatingIPRe
 			return result, p.state.check(p.ctx)
 		}
 		if policy.Retries == 0 {
+			if err := p.state.check(p.ctx); err != nil {
+				return result, err
+			}
 			result.Deleted = true
-			return result, p.state.check(p.ctx)
+			return result, nil
 		}
 		verification, err := p.get(input.ID)
 		attempt.Verification = verification
@@ -82,10 +85,13 @@ func (s *Service) DeleteFloatingIP(ctx context.Context, input DeleteFloatingIPRe
 			}
 		}
 		if attempt.Absent || attempt.Down {
+			if err := p.state.check(p.ctx); err != nil {
+				return result, err
+			}
 			result.Deleted = true
 			result.Absent = attempt.Absent
 			result.Down = attempt.Down
-			return result, p.state.check(p.ctx)
+			return result, nil
 		}
 		if count == retries {
 			return result, errors.Join(&FloatingIPDeleteVerificationError{ID: input.ID, Attempts: len(result.Attempts), FloatingIP: verification.FloatingIP}, p.state.check(p.ctx))

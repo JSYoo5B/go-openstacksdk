@@ -411,3 +411,20 @@ func TestFloatingIPDeleteAcceptedReadErrorPreservesBodyAndCause(t *testing.T) {
 		t.Fatal(result, err, state)
 	}
 }
+
+func TestFloatingIPDeleteServiceUsesCachedConnectionDependencies(t *testing.T) {
+	_, conn, state := floatingDeleteFixture(t, compute.FloatingIPNeutron)
+	service, err := conn.Compute(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	state.reply = func(*http.Request) (int, string) { return 204, "" }
+	result, err := service.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(0))
+	if err != nil || !result.Deleted || result.Backend != compute.FloatingIPNeutron || !reflect.DeepEqual(state.locators, []string{"compute", "network"}) || len(state.events) != 1 {
+		t.Fatal(result, err, state)
+	}
+	result, err = conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(0))
+	if err != nil || !result.Deleted || len(state.locators) != 2 || len(state.events) != 2 {
+		t.Fatal(result, err, state)
+	}
+}
