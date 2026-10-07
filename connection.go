@@ -152,6 +152,13 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 		}
 		c.compute = compute.New(client, compute.Dependencies{
 			DefaultNetwork: c.defaultServerNetwork,
+			FloatingIPs: func(ctx context.Context) (*network.FloatingIPs, error) {
+				service, err := c.Network(ctx)
+				if err != nil {
+					return nil, err
+				}
+				return service.FloatingIPs, nil
+			},
 			Image: func(ctx context.Context, ref resource.Ref) (string, error) {
 				service, err := c.Image(ctx)
 				if err != nil {

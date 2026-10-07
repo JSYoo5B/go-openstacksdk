@@ -10,6 +10,7 @@ import (
 
 	"gophercloudsdk/internal/nativefind"
 	"gophercloudsdk/internal/query"
+	"gophercloudsdk/network"
 	"gophercloudsdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -44,6 +45,9 @@ type Dependencies struct {
 	// A zero Ref means no default; a nonzero Ref is validated and resolved like
 	// an explicit network. Connection supplies its configured policy lazily.
 	DefaultNetwork func(context.Context) (resource.Ref, error)
+	// FloatingIPs is installed lazily by Connection for CreateWithFloatingIP.
+	// Applications using Connection need no service builder or resolver.
+	FloatingIPs func(context.Context) (*network.FloatingIPs, error)
 }
 
 type Servers struct {

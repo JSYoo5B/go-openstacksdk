@@ -32,14 +32,12 @@ func (f *FloatingIPs) Ensure(ctx context.Context, input EnsureFloatingIPRequest,
 			return nil, fmt.Errorf("external network: %w", err)
 		}
 	}
+	policy, err = f.bindEnsureProject(ctx, policy)
+	if err != nil {
+		return nil, err
+	}
 	o := policy.options
 	owner := o.projectID
-	if o.reuse && owner == "" {
-		owner, err = project.Current(ctx, f.api.RawClient())
-		if err != nil {
-			return nil, floatingIPWrap("resolve reuse project", err)
-		}
-	}
 	serverID := input.Server.String()
 	if input.Server.IsName() {
 		if f.dependencies.Server == nil {
@@ -99,6 +97,42 @@ func (f *FloatingIPs) Ensure(ctx context.Context, input EnsureFloatingIPRequest,
 		return result, floatingIPWrap("verify allocation", fmt.Errorf("Neutron returned no floating IP"))
 	}
 	return f.finishFloatingIPAssignment(ctx, result, value.ID, expected, o.destination)
+}
+
+// PrepareEnsureActive validates and snapshots a compound workflow's options,
+// binds its explicit or reusable recorded project and requires ACTIVE waiting.
+// Existing wait options are preserved. It makes no HTTP request or mutation.
+// Ordinary PrepareEnsureFloatingIPOptions leaves scope resolution per call;
+// this service-bound policy intentionally holds the owner resolved here.
+// With reuse=false and no explicit owner, Neutron chooses its default scope.
+func (f *FloatingIPs) PrepareEnsureActive(ctx context.Context, options ...EnsureFloatingIPOption) (EnsureFloatingIPPolicy, error) {
+	policy, err := PrepareEnsureFloatingIPOptions(ctx, options...)
+	if err != nil {
+		return EnsureFloatingIPPolicy{}, err
+	}
+	if f == nil || f.api == nil {
+		return EnsureFloatingIPPolicy{}, floatingIPInvalid("floating IP service is required")
+	}
+	if err := project.ValidateClient(ctx, f.api.RawClient()); err != nil {
+		return EnsureFloatingIPPolicy{}, err
+	}
+	policy, err = f.bindEnsureProject(ctx, policy)
+	if err != nil {
+		return EnsureFloatingIPPolicy{}, err
+	}
+	policy.options.destination.wait = true
+	return policy, nil
+}
+
+func (f *FloatingIPs) bindEnsureProject(ctx context.Context, policy EnsureFloatingIPPolicy) (EnsureFloatingIPPolicy, error) {
+	if policy.options.reuse && policy.options.projectID == "" {
+		owner, err := project.Current(ctx, f.api.RawClient())
+		if err != nil {
+			return EnsureFloatingIPPolicy{}, floatingIPWrap("resolve reuse project", err)
+		}
+		policy.options.projectID = owner
+	}
+	return policy, ctx.Err()
 }
 
 func (f *FloatingIPs) ensureExternalNetwork(ctx context.Context, ref resource.Ref) (string, error) {
