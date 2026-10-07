@@ -47,7 +47,7 @@ func (s *Service) GetActiveServer(ctx context.Context, input AutomaticFloatingIP
 		return nil, err
 	}
 	defer cancel()
-	result := &AutomaticServerIPResult{Server: state.last, Decision: state.decision}
+	result := state.newResult()
 	if strings.EqualFold(state.last.Status, "ERROR") {
 		return result, errors.Join(&resource.FailedStateError{Resource: "server", ID: state.serverID, Status: state.last.Status}, state.check(ctx))
 	}
@@ -82,7 +82,7 @@ func (s *Service) WaitForServer(ctx context.Context, input AutomaticFloatingIPRe
 		return nil, err
 	}
 	defer cancel()
-	result := &AutomaticServerIPResult{Server: state.last, Decision: state.decision}
+	result := state.newResult()
 	if err := state.waitReadyServer(ctx, policy); err != nil {
 		result.Server = state.last
 		result.Decision.Server = state.last

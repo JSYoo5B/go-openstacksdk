@@ -25,6 +25,16 @@ const (
 	AutomaticIPNoExternalNetwork  AutomaticIPReason = AutomaticIPReason(network.NoFloatingIPExternalNetwork)
 	AutomaticIPNoServerPorts      AutomaticIPReason = AutomaticIPReason(network.NoFloatingIPServerPorts)
 	AutomaticIPNoFixedMatch       AutomaticIPReason = AutomaticIPReason(network.NoFloatingIPFixedMatch)
+	AutomaticIPPoolRequested      AutomaticIPReason = "explicit_pool_requested"
+	AutomaticIPAddressesRequested AutomaticIPReason = "explicit_addresses_requested"
+)
+
+type ServerIPDispatchMode string
+
+const (
+	ServerIPAutomatic ServerIPDispatchMode = "automatic"
+	ServerIPPool      ServerIPDispatchMode = "pool"
+	ServerIPExplicit  ServerIPDispatchMode = "explicit_ips"
 )
 
 // ServerFloatingIPDecision retains classification evidence. Needed=false is a
@@ -37,6 +47,21 @@ type ServerFloatingIPDecision struct {
 	Server    *Server
 	Addresses *ServerAddressView
 	Selection network.FloatingIPSelection
+	Mode      ServerIPDispatchMode
+	// AttachmentSelections records ordered read-only or executed explicit-IP
+	// selections. These values cannot be used to execute the private plans.
+	AttachmentSelections []network.FloatingIPAttachSelection
+}
+
+// ServerFloatingIPAttempt records each started explicit pool/IP item. Completed
+// includes async accepted attachment; Observed additionally requires raw Nova.
+type ServerFloatingIPAttempt struct {
+	Index            int
+	RequestedAddress string
+	Assignment       *network.FloatingIPAssignment
+	Completed        bool
+	Observed         bool
+	Error            error
 }
 
 // AutomaticServerIPResult retains resources across assignment/observation
@@ -46,6 +71,8 @@ type AutomaticServerIPResult struct {
 	Decision   *ServerFloatingIPDecision
 	Assignment *network.FloatingIPAssignment
 	Observed   bool
+	Mode       ServerIPDispatchMode
+	Attempts   []ServerFloatingIPAttempt
 }
 
 type automaticFloatingIPOptions struct {
@@ -54,9 +81,39 @@ type automaticFloatingIPOptions struct {
 	ips               []network.EnsureFloatingIPOption
 	timeout, interval time.Duration
 	progress          func(*Server) error
+	pool              resource.Ref
+	requestedIPs      []string
 }
 
 type AutomaticFloatingIPOption func(*automaticFloatingIPOptions) error
+
+// WithFloatingIPPool forces pool assignment ahead of explicit addresses and
+// automatic policy, independently of option order. A zero Ref clears the pool.
+// The final winning selector is validated before any request.
+func WithFloatingIPPool(pool resource.Ref) AutomaticFloatingIPOption {
+	return func(o *automaticFloatingIPOptions) error { o.pool = pool; return nil }
+}
+
+// WithFloatingIPAddresses replaces the explicit IPv4 list with an owned copy.
+// Order and duplicates are retained. Empty clears the list. A selected pool
+// takes precedence and does not inspect ignored address strings.
+func WithFloatingIPAddresses(addresses ...string) AutomaticFloatingIPOption {
+	addresses = append([]string(nil), addresses...)
+	return func(o *automaticFloatingIPOptions) error {
+		o.requestedIPs = append([]string(nil), addresses...)
+		return nil
+	}
+}
+
+func (o automaticFloatingIPOptions) dispatchMode() ServerIPDispatchMode {
+	if o.pool != (resource.Ref{}) {
+		return ServerIPPool
+	}
+	if len(o.requestedIPs) != 0 {
+		return ServerIPExplicit
+	}
+	return ServerIPAutomatic
+}
 
 func WithAutomaticIPEnabled(enabled bool) AutomaticFloatingIPOption {
 	return func(o *automaticFloatingIPOptions) error { o.enabled = enabled; return nil }
@@ -67,8 +124,9 @@ func WithAutomaticAddressOptions(options ...ServerAddressOption) AutomaticFloati
 	return func(o *automaticFloatingIPOptions) error { o.addresses = append(o.addresses, options...); return nil }
 }
 
-// WithAutomaticEnsureOptions preserves supplied Neutron selectors, owner,
-// reuse and wait options. EnsureServerFloatingIP, creation and WaitForServer
+// WithAutomaticEnsureOptions shares destination/wait selectors across all
+// branches. Owner/reuse affect pool/automatic allocation, not explicit IPs.
+// EnsureServerFloatingIP, creation and WaitForServer
 // require actual IP ACTIVE readiness. GetActiveServer's default async mode
 // returns after accepted assignment without an IP readiness wait.
 func WithAutomaticEnsureOptions(options ...network.EnsureFloatingIPOption) AutomaticFloatingIPOption {

@@ -56,6 +56,12 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 		return nil, err
 	}
 	defer cancel()
+	// A configured legacy backend is already known to be unsupported for an
+	// explicit request. Reject that capability before creating the server;
+	// unknown endpoint availability remains lazy until the assignment stage.
+	if state.options.dispatchMode() != ServerIPAutomatic && state.address.options.source != FloatingIPNeutron {
+		return nil, explicitIPUnsupported()
+	}
 	state.retainAcceptedServer = true
 	reader := *s.Servers
 	serverOptions, err := reader.prepareCreateServerOptions(request, options.Server...)
