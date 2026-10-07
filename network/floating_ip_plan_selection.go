@@ -22,6 +22,7 @@ func (f *FloatingIPs) planPortSpec(guard func(context.Context) error) rest.Colle
 	return rest.CollectionSpec[Port]{Client: f.api.RawClient(), Path: "ports", Kind: "port",
 		SingleKey: "port", PluralKey: "ports", Get: true, SourceGuard: guard, Validate: guard,
 		ID: func(p *Port) string { return p.ID }, Name: func(p *Port) string { return p.Name }, Metadata: planMetadata[Port],
+		NameQuery: func(name string) string { return name },
 		ListCodes: []int{200, 204}, Paging: rest.PagePolicy[Port]{HTTPLink: true}}
 }
 
@@ -87,7 +88,7 @@ func (f *FloatingIPs) planDestination(ctx context.Context, serverID string, opti
 	if options.destination != nil {
 		collection := rest.Collection(rest.CollectionSpec[Network]{Client: f.api.RawClient(), Path: "networks", Kind: "network",
 			PluralKey: "networks", SourceGuard: guard, Validate: guard, Metadata: planMetadata[Network], ListCodes: []int{200, 204},
-			ID: func(n *Network) string { return n.ID }, Name: func(n *Network) string { return n.Name }, Paging: rest.PagePolicy[Network]{HTTPLink: true}})
+			ID: func(n *Network) string { return n.ID }, Name: func(n *Network) string { return n.Name }, NameQuery: func(name string) string { return name }, Paging: rest.PagePolicy[Network]{HTTPLink: true}})
 		var err error
 		networkID, err = collection.ResolveID(ctx, *options.destination)
 		if err != nil {

@@ -193,7 +193,8 @@ func TestFloatingIPPlanReusesAfterAllPagesAndWaitsForActualACTIVE(t *testing.T) 
 			cloud.Mux.HandleFunc("GET /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
 				lists.Add(1)
 				if r.URL.Query().Get("marker") == "" {
-					testcloud.JSON(w, 200, fmt.Sprintf(`{"floatingips":[],"floatingips_links":[{"rel":"next","href":%q}]}`, cloud.Server.URL+"/v2.0/floatingips?marker=next"))
+					w.Header().Set("Link", "<"+cloud.Server.URL+"/v2.0/floatingips?marker=next>; rel=\"next\"")
+					testcloud.JSON(w, 200, `{"floatingips":[]}`)
 					return
 				}
 				if scenario == "late list403" {
