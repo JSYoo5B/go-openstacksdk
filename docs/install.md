@@ -6,7 +6,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@74545abcb4f3e0412d42a7dd0696a15a9f403a29
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@f32680a5cb51cf01e01f0d4cc01a33bc4e4c6246
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -55,7 +55,9 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
-2026-10-08에 push한 `36e16d08dc5f`를 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Keystone native/owned 두 main](../identity/v3/users/memberships.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261007231141-36e16d08dc5f`입니다. module-cache Go source1,949개 SHA256 `1e706afb6b7b1b7baa524ba48a36a752303905baf73b593b01504a946fc331f5`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 이 설치 검증 이후 Go 소스 변경 없이 기존 Network 조회·삭제8개 판정을 마무리하여 현재 API 완료 수는206개입니다.
+2026-10-08에 push한 `f32680a5cb51`을 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Compute 조회 main](../compute/user-read-apis.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261007234227-f32680a5cb51`입니다. module-cache Go source1,952개 SHA256 `3c99df8dd9159ce9411c3ecca9ad4c6337bddb9a264085b8ede453d1c4a1b6aa`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 같은 Go 소스에서 Compute 조회5개를 판정하여 현재 API 완료 수는211개입니다.
+
+앞선 `36e16d08dc5f`에서도 설치 main과 [Keystone native/owned 두 main](../identity/v3/users/memberships.md)의 원격 빌드가 PASS했습니다. 당시 버전은 `v0.0.0-20261007231141-36e16d08dc5f`이며 로컬 전체 gate와 원격 Go SHA가 같았습니다.
 
 아래는 namespace 도입 당시의 검증 이력입니다. checkout 밖의 독립 소비자 2개로 위 main을 빌드했습니다. local-replace 검증과 원격 설치 검증을 구분하며, 원격 소비자는 `GOWORK=off`이고 replace가 없습니다. 실제 설치 버전은 `v0.0.0-20261007215549-3f0240534253`이며 module cache에서 빌드했습니다. source SHA256은 `137a479b9613464c549cfe734a66b91a32a99bcb201ea886d3a068a183128d9d`입니다. 이 설치 단위 검증 당시 API 완료 수는188개였으며, 해당 직전 판정 구간에서196개까지 증가했습니다. 최신 개수는 [구현 현황](implementation-plan.md)에서 확인합니다.
 
@@ -66,5 +68,5 @@ GOWORK=off go build -mod=readonly ./...
 | 기존 전체 계약 검사·핵심 smoke | PASS:40개 test package·5흐름/9그룹; Go source SHA 보존 |
 | 외부 module의 local-replace 빌드 | PASS:위 main 그대로 별도 module에서 빌드; consumer에만 replace |
 | push된 정확한 커밋의 replace 없는 설치·빌드 | PASS:`3f0240534253`; `go get`·`go build -mod=readonly` exit0, Replace 없음 |
-
 | Keystone 두 owned 목록 추가 후 외부 설치·빌드 | PASS:`36e16d08dc5f`, no replace; 설치 main+native/owned membership main3개와 원격/로컬 Go SHA 일치 |
+| Compute 조회 추가 후 외부 설치·빌드 | PASS:`f32680a5cb51`, no replace; 설치 main+조회 main2개와 원격/로컬 Go SHA 일치 |

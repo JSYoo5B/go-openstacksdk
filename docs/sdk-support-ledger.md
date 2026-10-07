@@ -1929,3 +1929,18 @@ Cloud Delete의 필수 입력은 name_or_id 하나이고 결과는 bool입니다
 기존102계약·33고유 test anchor와 모든 API/doc/fingerprint를 보존하고 기존 differences 뒤에 비교를 추가했습니다. 다른505개 review 및 catalog bytes가 같습니다. 두 가이드의 Go fence는 모두 그대로입니다. 새 Go·mock·HTTP harness·테스트 복제 없이 UserGroups 단위에서 방금 통과한 전체41 package `make check`를 재사용합니다. Go source1,949개 SHA256 `1e706afb6b7b1b7baa524ba48a36a752303905baf73b593b01504a946fc331f5`가 그대로이며 새 전체 검사를 실행했다고 주장하지 않습니다. 근거는 `/private/tmp/gophercloudsdk-network-eight-final-receipt.json`와 `/private/tmp/gophercloudsdk-core-network-next-batch-audit.md`, 연결된 기존 fixture입니다. final parity/progress/gofmt만 갱신합니다.
 
 전체198→206/3,362·핵심124→132/2,292, reviews513=go_mapping206/unresolved306/unsupported1, contracts3,243은 그대로입니다. catalog unresolved3,155에는 미검토2,849개가 포함됩니다. 전체 Resource/session·CloudRegion loader·has_service 및 후속/admin 목표는 active입니다. 원격 설치로 검증한 코드의 Go SHA도 동일하고 실제 OpenStack/Python 실행은 포함하지 않습니다. 다음 핵심 user 단위는 console explicit0 bridge와 기존 Compute named 조회의 필요한 직접 증거입니다.
+
+
+## Compute user 조회5개 완료
+
+2026-10-08에 `get_flavor`, `fetch_server_metadata`, deprecated `get_server_metadata`, `get_keypair`, `get_server_console_output`를 고정 source와 대조하여5개 named Go 매핑을 추가했습니다. metadata의 두 선언은 하나의 실제 Go Metadata GET과 같은 테스트 근거를 공유합니다. [Python 비교·독립 main](../compute/user-read-apis.md)은 GET-only flavor 옵션, optional keypair owner, typed/null/부분 decoding 결과와 선택된 version, Python mutable Resource/session 차이를 설명합니다. `find_flavor`의 inherited pager·query 계약은 별도 미해결로 남깁니다.
+
+실제 구현 누락인 console length=0은 additive `ConsoleOutput`·concrete pointer 옵션으로 보완했습니다. 기본 생략·0·양수·음수를 문자 그대로 보내며 caller builder는 필요하지 않습니다. 공유 request/cloudread/REST로 snapshot·source/context·응답 소유권을 처리합니다. source action의200–399와 owned UTF-8 object/string 검증을 사용하고 기존 ShowConsoleOutput의 native int/omitempty·strict200 ABI는 유지합니다. primitive projection과 Python dict 반환 차이도 판정에 기록했습니다.
+
+새 콘솔3 HTTP 그룹은 기존 `flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`, metadata/keypair2테이블24사례는 기존 `testcloud.New`·공개 Gophercloud TestMethod/TestHeader를 재사용합니다. flavor의 GET-only·엄격 missing·optional specs·terminal 오류는 기존 실제 HTTP 그룹을 연결합니다. 서비스마다 공통 알고리즘의 fault 표나 서버 harness를 복제하지 않았습니다.
+
+집중 race15그룹과 최종 전체 `make check`의41개 실제 test package가 PASS했습니다. Go source1,952개 SHA256 `3c99df8dd9159ce9411c3ecca9ad4c6337bddb9a264085b8ede453d1c4a1b6aa`가 gate 전후 같습니다. 로그·receipt는 `/private/tmp/gophercloudsdk-compute-user-reads-focused.log`, `...-focused-receipt.json`, `...-check.log`, `...-gate-receipt.json`입니다. 고정 generator build/run exit0·기존 Go drift0·Compute V2 README 동기화1입니다. guide main의 정확한 fence SHA256 `ec02de9217a028c1ac1bee856753775ea17e03b53f18caccd26fb45f83472f73`를 외부 consumer-only replace로 컴파일 PASS했습니다. 초기 consumer의 자동 binary 이름이 예제 디렉토리와 충돌한 뒤 private 출력 경로만 지정해 성공했으며 공개 main은 수정하지 않았습니다.
+
+구현/콘솔 테스트 `e53d34fe`·metadata/keypair 테스트 `bfac16ad`·문서 `f32680a5`를 나누어 push했습니다. exact revision `f32680a5cb51cf01e01f0d4cc01a33bc4e4c6246`을 새 module에서 `GOWORK=off`로 원격 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·Replace 없음·버전 `v0.0.0-20261007234227-f32680a5cb51`이며 원격 Go SHA도 위 최종 gate와 같습니다. `/private/tmp/gophercloudsdk-compute-user-reads-remote-consumer-receipt.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+기존513 reviews·catalog bytes·3,362개 source IDs/fingerprints를 모두 보존하고5행17계약만 추가했습니다. 전체206→211/3,362·핵심132→137/2,292·Nova8→13/333, reviews518=go_mapping211/unresolved306/unsupported1, contracts3,260입니다. catalog unresolved3,150에는 미검토2,844개가 포함됩니다. 이후 JSON/prose만 바뀌므로 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt를 확인합니다. 전체 목표는 active이며 다음 핵심 user 단위는 remote console과 keypair 삭제의 실제 기본값·버전·owner/missing 계약입니다.

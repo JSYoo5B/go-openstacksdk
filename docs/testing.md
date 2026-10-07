@@ -30,6 +30,8 @@ JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 
 
 공통 알고리즘의 계약은 공통 패키지 테스트에서 검증하고, 서비스 테스트에는 경로·envelope·서비스 고유 분기와 binding 연결만 추가합니다. 기존 테스트 표에 사례를 넣을 수 있으면 별도 테스트 서버나 harness를 만들지 않습니다. 새로운 transport가 필요할 때도 기존 fault/body wrapper를 먼저 재사용합니다. 검증한 동일 소스의 전체 테스트는 문서·지원 판정 갱신 때문에 반복하지 않습니다.
 
+Compute 조회5개도 이 방식을 적용했습니다. metadata·keypair의2테이블24사례는 기존 `testcloud.New`와 공개 method/header helper를 사용하고, 콘솔3그룹은 기존 `flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`를 재사용합니다. flavor의 GET-only/extra-specs는 기존 HTTP 그룹을 지원 근거로 연결했습니다. 집중15그룹과 최종41 test package 전체 gate가 PASS했으며, 문서/JSON 갱신 뒤에는 같은 Go 전체 검사를 반복하지 않습니다. [비교·실행 예제](../compute/user-read-apis.md), [소스 SHA와 결과](sdk-support-ledger.md#compute-user-조회5개-완료)를 확인할 수 있습니다.
+
 Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위
