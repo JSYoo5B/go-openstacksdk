@@ -27,6 +27,8 @@ type connectionAvailableState struct {
 	novaFree, neutronFree bool
 	neutronCode           int
 	neutronBody           string
+	neutronPort           string // Optional fixture seam for fresh server allocation.
+	neutronMarker         string // Only the pagination cases permit this query.
 	catalogError          error
 	afterPost             func(string) error
 }
@@ -62,7 +64,7 @@ func connectionAvailableFixture(t *testing.T, source compute.FloatingIPSource) (
 		case "GET /network/v2.0/subnets":
 			body = `{"subnets":[{"id":"sub","network_id":"external","ip_version":4}]}`
 		case "GET /network/v2.0/floatingips":
-			if r.URL.RawQuery != "" {
+			if r.URL.RawQuery != "" && (state.neutronMarker == "" || r.URL.Query().Get("marker") != state.neutronMarker || len(r.URL.Query()) != 1) {
 				t.Error("pushed down availability filters", r.URL)
 			}
 			code, body = state.neutronCode, state.neutronBody
@@ -72,13 +74,26 @@ func connectionAvailableFixture(t *testing.T, source compute.FloatingIPSource) (
 					body = `{"floatingips":[{"id":"neutron","floating_network_id":"external","project_id":"owner","port_id":null,"floating_ip_address":"198.51.100.20","status":"ERROR"}]}`
 				}
 			}
+		case "GET /network/v2.0/ports":
+			if state.neutronPort == "" || r.URL.Query().Get("device_id") != "server" || len(r.URL.Query()) != 1 {
+				t.Error("unexpected availability server port lookup", r.URL)
+			}
+			body = fmt.Sprintf(`{"ports":[{"id":%q,"device_id":"server","network_id":"private","fixed_ips":[{"ip_address":"10.0.0.8"}]}]}`, state.neutronPort)
 		case "POST /network/v2.0/floatingips":
 			var request map[string]map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 				t.Fatal(err)
 			}
-			if len(request["floatingip"]) != 1 || request["floatingip"]["floating_network_id"] != "external" {
-				t.Error(request)
+			fields := request["floatingip"]
+			wantFields := 1
+			if state.neutronPort != "" {
+				wantFields = 3
+				if fields["port_id"] != state.neutronPort || fields["fixed_ip_address"] != "10.0.0.8" {
+					t.Error("fresh availability lost selected port/fixed address", fields)
+				}
+			}
+			if len(request) != 1 || len(fields) != wantFields || fields["floating_network_id"] != "external" {
+				t.Error("fresh availability must not send project or reuse filters", request)
 			}
 			code, body = 201, `{"floatingip":{"id":"allocated-neutron","floating_network_id":"external","project_id":"auth","port_id":null,"floating_ip_address":"198.51.100.21","status":"DOWN"}}`
 		case "GET /compute/os-floating-ip-pools":
@@ -198,7 +213,14 @@ func TestConnectionAvailableIPNotFoundFallbackAndOtherFailuresStayDistinct(t *te
 				}
 			}
 			result, err := conn.AvailableFloatingIP(context.Background(), input, compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
-			fallback := scenario == "semantic" || scenario == "list404" || scenario == "catalog absent"
+			if scenario == "list404" {
+				want := []string{"GET /network/v2.0/networks", "GET /network/v2.0/subnets", "GET /network/v2.0/floatingips", "GET /compute/os-floating-ips", "POST /network/v2.0/floatingips"}
+				if err != nil || result == nil || result.Backend != compute.FloatingIPNeutron || !result.Allocated || result.Reused || result.Nova != nil || result.FallbackError != nil || result.Inventory == nil || result.Inventory.Backend != compute.FloatingIPNova || result.Inventory.FallbackError == nil || result.Creation == nil || !result.Creation.Allocated || !reflect.DeepEqual(state.events, want) || !reflect.DeepEqual(state.locators, []string{"network", "compute"}) {
+					t.Fatal("inner List404 must return to Neutron allocation", result, err, state)
+				}
+				return
+			}
+			fallback := scenario == "semantic" || scenario == "catalog absent"
 			if fallback {
 				if err != nil || result == nil || result.Backend != compute.FloatingIPNova || !result.Reused || result.Neutron != nil || result.Nova == nil || (scenario != "catalog absent" && result.FallbackError == nil) || !reflect.DeepEqual(state.locators, []string{"network", "compute"}) {
 					t.Fatal(result, err, state)

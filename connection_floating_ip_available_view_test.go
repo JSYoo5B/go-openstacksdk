@@ -157,6 +157,15 @@ func TestAvailableIPViewUsesConfiguredSourceAfterFallback(t *testing.T) {
 				return "", false
 			})
 			result, err := conn.AvailableFloatingIP(context.Background(), input, compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
+			if scenario == "list404" {
+				want := []string{"GET /network/v2.0/networks", "GET /network/v2.0/subnets", "GET /network/v2.0/floatingips", "GET /compute/os-floating-ips", "POST /network/v2.0/floatingips"}
+				if err != nil || result == nil || result.FloatingIP == nil || result.Backend != compute.FloatingIPNeutron || !result.Allocated || result.Reused || result.FloatingIP.Normalized || result.FloatingIP.NormalizationSource != compute.FloatingIPNeutron || result.Inventory == nil || result.Inventory.FallbackError == nil || result.FallbackError != nil || result.Creation == nil || result.Creation.Selection.NetworkID != "external" || !reflect.DeepEqual(state.events, want) {
+					t.Fatal("internal fallback inventory must not become outer Nova reuse", result, err, state)
+				}
+				queryRaw(t, result.FloatingIP.Resource, "status", `"DOWN"`)
+				queryRaw(t, result.FloatingIP.Wire, "status", `"DOWN"`)
+				return
+			}
 			if err != nil || result == nil || result.FloatingIP == nil || result.Backend != compute.FloatingIPNova || !result.Reused || result.Allocated || !result.FloatingIP.Normalized || result.FloatingIP.Backend != compute.FloatingIPNova {
 				t.Fatal(result, err)
 			}
@@ -437,17 +446,23 @@ func TestAvailableIPNeutronViewErrorsKeepPhysicalReceipts(t *testing.T) {
 			result, err := conn.AvailableFloatingIP(context.Background(), connectionAvailableRequest(),
 				compute.WithAvailableIPLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage("invalid")}}),
 				compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
-			if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Backend != compute.FloatingIPNeutron || result.Allocated != allocated || result.Reused == allocated || result.FloatingIP == nil || result.FloatingIP.Wire == nil || result.FloatingIP.Resource != nil || result.Neutron == nil || result.Neutron.FloatingIP == nil {
+			if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Backend != compute.FloatingIPNeutron || result.Allocated != allocated || result.Reused {
 				t.Fatal(result, err)
 			}
 			var proof *resource.ResponseError
 			if allocated {
+				if result.FloatingIP == nil || result.FloatingIP.Wire == nil || result.FloatingIP.Resource != nil || result.Neutron == nil || result.Neutron.FloatingIP == nil {
+					t.Fatal(result, err)
+				}
 				receipt := result.Neutron.AllocationResponse
 				if !errors.As(err, &proof) || receipt == nil || proof.StatusCode != receipt.StatusCode || string(proof.Body) != string(receipt.Envelope) || !reflect.DeepEqual(proof.Header, receipt.Header) || result.ID != "allocated-neutron" || len(state.events) != 4 {
 					t.Fatal(result, err, proof, state)
 				}
-			} else if errors.As(err, &proof) || result.Neutron.AllocationResponse != nil || result.ID != "neutron" || len(state.events) != 3 {
-				t.Fatal("invented receipt for free row", result, err, proof, state)
+			} else {
+				inventory := result.Inventory
+				if !errors.As(err, &proof) || proof.StatusCode != 200 || inventory == nil || inventory.Failure == nil || len(inventory.Pages) != 1 || string(proof.Body) != string(inventory.Pages[0].Envelope) || !reflect.DeepEqual(proof.Header, inventory.Pages[0].Header) || result.FloatingIP != nil || result.Neutron != nil || result.Creation != nil || len(state.events) != 3 {
+					t.Fatal("list view error lost physical page or returned a free candidate", result, err, proof, state)
+				}
 			}
 			if !reflect.DeepEqual(state.locators, []string{"network"}) {
 				t.Fatal("view failure selected another backend", state)
