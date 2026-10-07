@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/v2"
+	"github.com/gophercloud/gophercloud/v2/testhelper"
 	"gophercloudsdk/blockstorage"
 	"gophercloudsdk/internal/testcloud"
 	"gophercloudsdk/resource"
@@ -42,8 +43,11 @@ func createVolumeContractWire(t *testing.T, r *http.Request, method, path, token
 	if strings.HasPrefix(path, createVolumeContractGlanceBase) {
 		source = "glance-entry"
 	}
-	if r.Method != method || r.URL.Path != path || r.Header.Get("X-Source") != source || r.Header.Get("X-Auth-Token") != token {
-		t.Errorf("method=%s URL=%s headers=%v", r.Method, r.URL, r.Header)
+	testhelper.TestMethod(t, r, method)
+	testhelper.TestHeader(t, r, "X-Source", source)
+	testhelper.TestHeader(t, r, "X-Auth-Token", token)
+	if r.URL.Path != path {
+		t.Errorf("URL=%s, expected path=%s", r.URL, path)
 	}
 	if source == "cinder-entry" && (r.URL.RawQuery != "" || r.Header.Get("OpenStack-API-Version") != "volume 3.60") {
 		t.Error(r.URL, r.Header)
