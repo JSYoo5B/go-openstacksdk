@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"sync/atomic"
 	"testing"
 
@@ -318,6 +319,12 @@ func TestFloatingIPAutomaticNATFailuresStopAllocation(t *testing.T) {
 					if !errors.Is(err, resource.ErrAmbiguous) {
 						t.Fatal(err)
 					}
+					if scenario == "no NAT IPv6 second" {
+						var ambiguous *resource.AmbiguousError
+						if !errors.As(err, &ambiguous) || !reflect.DeepEqual(ambiguous.IDs, []string{"port-a", "port-b"}) {
+							t.Fatal(err)
+						}
+					}
 				case "selected network absent from ports":
 					if !errors.Is(err, resource.ErrNotFound) {
 						t.Fatal(err)
@@ -341,6 +348,36 @@ func TestFloatingIPAutomaticNATFailuresStopAllocation(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestFloatingIPEnsureDisabledRolesStillUseRouterFallback(t *testing.T) {
+	cloud := testcloud.New(t)
+	var routers, posts atomic.Int32
+	cloud.Mux.HandleFunc("GET /v2.0/routers", func(w http.ResponseWriter, r *http.Request) {
+		routers.Add(1)
+		testcloud.JSON(w, 200, `{"routers":[{"id":"router","admin_state_up":true,"external_gateway_info":{"network_id":"external"}}]}`)
+	})
+	ensurePortFixture(t, cloud)
+	cloud.Mux.HandleFunc("POST /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
+		posts.Add(1)
+		if got := floatingIPBody(t, r); got["floating_network_id"] != "external" || got["port_id"] != "port" {
+			t.Error(got)
+		}
+		respondEnsuredFloatingIP(w, 201, "port", "10.0.0.10", "DOWN")
+	})
+	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("unexpected role inventory/reuse/cleanup %s %s", r.Method, r.URL)
+		http.Error(w, "unexpected", 500)
+	})
+	policy, err := network.PrepareNetworkRoleOptions(network.WithExternalNetworkDiscovery(false), network.WithInternalNetworkDiscovery(false), network.WithConfiguredNetworks(network.ConfiguredNetwork{Name: "missing", NATSource: true}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := network.NewWithDependencies(cloud.Client("network", "/v2.0"), network.Dependencies{NetworkRoles: policy})
+	row, err := roleFloatingIPCall(context.Background(), s, "Ensure", resource.Ref{}, nil, nil)
+	if err != nil || row == nil || routers.Load() != 1 || posts.Load() != 1 {
+		t.Fatal(row, err, routers.Load(), posts.Load())
 	}
 }
 
