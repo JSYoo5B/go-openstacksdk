@@ -98,6 +98,12 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	details := config.Details == nil || *config.Details
 	ignoreMissing := config.IgnoreMissing == nil || *config.IgnoreMissing
 	safeRoute := safeIdentityFindRoute(identity) && c.validateID(identity) == nil
+	if c.binding.IdentityDirectGet != nil {
+		if err := c.binding.IdentityDirectGet(identity); err != nil {
+			return fail(err)
+		}
+		safeRoute = true
+	}
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}

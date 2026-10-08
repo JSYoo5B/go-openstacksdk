@@ -54,6 +54,10 @@ type Adapter[T any] struct {
 	// never become request targets. Other operations retain ID and ValidateID.
 	// Nil models and callback errors remain terminal lookup errors.
 	IdentityResponseID func(*T) (string, error)
+	// IdentityDirectGet validates an audited binding's escaped member identity
+	// and always attempts GET first. Nil keeps the ordinary safe-ID/name policy.
+	// The binding's Get and ValidateID still own the actual fixed member route.
+	IdentityDirectGet func(string) error
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]

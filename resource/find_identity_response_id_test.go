@@ -96,15 +96,22 @@ func passiveIdentityAdapter(rows []*passiveIdentityValue) resource.Adapter[passi
 
 func TestCollectionFindIdentityPassiveIDsAreOnlyCompared(t *testing.T) {
 	full := "https://different.test/secrets/shared-component"
-	rows := []*passiveIdentityValue{{id: "https://first.test/secrets/shared-component", name: "other"}, {id: full, name: "chosen"}, {id: "", name: "anonymous"}}
+	opaque := "one key/%?#"
+	rows := []*passiveIdentityValue{{id: "https://first.test/secrets/shared-component", name: "other"}, {id: full, name: "chosen"}, {id: "", name: "anonymous"}, {name: opaque}}
 	for _, test := range []struct {
 		identity string
 		index    int
 		gets     int
+		escaped  bool
 	}{
-		{full, 1, 0}, {"chosen", 1, 1}, {"anonymous", 2, 1},
+		{full, 1, 0, false}, {"chosen", 1, 1, false}, {"anonymous", 2, 1, false},
+		{opaque, 3, 0, false}, {opaque, 3, 1, true},
 	} {
 		adapter := passiveIdentityAdapter(rows)
+		if test.escaped {
+			adapter.IdentityDirectGet = func(string) error { return nil }
+			adapter.ValidateID = func(string) error { return nil }
+		}
 		var gets, lists, comparisons int
 		adapter.Get = func(context.Context, string) (*passiveIdentityValue, error) {
 			gets++
@@ -130,6 +137,20 @@ func TestCollectionFindIdentityPassiveIDsAreOnlyCompared(t *testing.T) {
 	returned := &passiveIdentityValue{name: "actual"}
 	adapter.Get = func(context.Context, string) (*passiveIdentityValue, error) { return returned, nil }
 	if value, err := resource.NewCollection(adapter).FindIdentity(context.Background(), "requested"); err != nil || value != returned {
+		t.Fatal(value, err)
+	}
+	// An audited route validator can reject before either GET or list fallback.
+	cause := errors.New("escaped member validation failed")
+	adapter.IdentityDirectGet = func(string) error { return cause }
+	adapter.Get = func(context.Context, string) (*passiveIdentityValue, error) {
+		t.Fatal("rejected member reached GET")
+		return nil, nil
+	}
+	adapter.Iterate = func(context.Context, url.Values) iter.Seq2[*passiveIdentityValue, error] {
+		t.Fatal("rejected member reached list")
+		return nil
+	}
+	if value, err := resource.NewCollection(adapter).FindIdentity(context.Background(), "requested"); value != nil || !errors.Is(err, cause) {
 		t.Fatal(value, err)
 	}
 }
