@@ -16,6 +16,8 @@
 
 진행 단계 `a4614dc0`·공통 처리 `0093f8fc`·API `d0177a45`·leaf 테스트 `7502bd37`·Connection `6ab931b3`를 각각 commit/push했습니다. catalog/source pins·다른548 reviews·기존12계약을 보존하고12계약을 추가해 reviews550·계약3,460입니다. Source에는 두 property write의 admin 전용 지정이 없으므로 핵심 user 순서를 유지합니다. 실제 cloud/서버 정책 검증과 전체 Python Resource/session 목표는 계속 추적합니다.
 
+정확한 구현·문서 revision `7b07fe93e433b3694852c685d979d4fbffa4cb35`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008171128-7b07fe93e433`·get/build exit0이며 생성수정/조회/목록/설치 main4개를 빌드했습니다. 원격 Go source2,029개 SHA가 최종 gate와 같고 라이선스·고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-property-write-remote-receipt.json`과 [설치 안내](install.md)에 기록합니다. 같은 Go의 최종 prose/JSON 검토에서는 전체 Go gate를 재사용합니다.
+
 **다음 구현:** 같은 핵심 user Glance resource type association의 owned 생성·삭제2개입니다. 완료한 owned 목록 옆에 raw dirty Body·기본값/location·Resource identity와 opaque ACK를 연결합니다. 전체 API 목표와 서비스 우선순위는 active입니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance property owned 목록·삭제3개, 전체258→261(+3)·핵심184→187/2,292·Glance22→25/120.** `ListRecords/AllRecords`가 key→name seed·공통21필드 Resource·canonical19 Body 로컬 필터·partial 결과를 제공하고, `DeleteRecord/DeleteAllRecords`는 immutable identity와 실제 opaque ACK를 제공합니다. 목록은 Source의 명시적 JSON Accept를 상속 헤더와 native retry에서도 유지합니다. [Python/Go 비교·독립 main](../image/metadef-property-record-list.md), [삭제 예제](../image/v2/metadefproperties/README.md#owned-목록과-삭제), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료)을 갱신했습니다.
@@ -181,6 +183,10 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Cloud Flavor 목록·검색·단건 조회 | 238 → 241 (+3) | 기존56그룹 재사용·새 API51사례·집중60그룹·전체43 package gate·독립/원격 main build PASS | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료 |
 | Availability Zone ordinary·Cloud names | 241 → 243 (+2) | 기존38그룹 재사용·API48사례·집중41그룹·전체43 package gate·독립/원격 main build PASS | `46225a97`·`bdb4acb4`·`60ffec77`·`2488a769` push 완료; Proxy details 미완료 |
 | Glance class별 schema12개 | 243 → 255 (+12) | 기존31그룹 재사용·새4그룹65사례·집중35그룹·전체43 package gate·반복 생성 drift0·독립/원격 main2개 build PASS | `c119403a`·`9e84d06e`·`b4f0f482`·`3729f70c` push 완료 |
+| Glance resource type·association owned 목록 | 255 → 257 (+2) | 새20그룹228사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `9aba6303`·`08517200`·`454d9756`·`b4a0f6ab` push 완료 |
+| Glance property owned 조회 | 257 → 258 (+1) | 새13그룹92사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `e480edcc`·`ea80c826`·`86d9781f`·`1662a674` push 완료 |
+| Glance property owned 목록·삭제 | 258 → 261 (+3) | 기존13그룹 재사용·새20그룹182사례·집중33그룹·전체43 package gate·main3/example1 build PASS | 공통/목록/Connection/Accept/삭제/테스트/문서7개 commit push 완료 |
+| Glance property owned 생성·수정 | 261 → 263 (+2) | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate·반복 생성 drift0·외부 main4개 build PASS | `0093f8fc`·`d0177a45`·`7502bd37`·`6ab931b3` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -313,11 +319,6 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 - **완료·검증 결과:** 실제로 구현한 범위와 실행한 검증 결과. 실행 중인 테스트와 아직 실행하지 않은 검증은 구분.
 - **커밋·push 상태:** 새 커밋과 원격 반영 여부. 의미 있는 변경이 쌓이면 작업 단위 전체가 끝나기 전에도 커밋·push.
 - **남은 작업·다음 행동:** 현재 단위의 미완료 계약과 다음 검증 또는 구현. API 개수를 보고할 때는 전체 연산 판정과 부분 계약 완료를 구분하고, 변화가 있으면 판정 JSON에서 다시 집계.
-| Glance resource type·association owned 목록 | 255 → 257 (+2) | 새20그룹228사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `9aba6303`·`08517200`·`454d9756`·`b4a0f6ab` push 완료 |
-| Glance property owned 조회 | 257 → 258 (+1) | 새13그룹92사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `e480edcc`·`ea80c826`·`86d9781f`·`1662a674` push 완료 |
-| Glance property owned 목록·삭제 | 258 → 261 (+3) | 기존13그룹 재사용·새20그룹182사례·집중33그룹·전체43 package gate·main3/example1 build PASS | 공통/목록/Connection/Accept/삭제/테스트/문서7개 commit push 완료 |
-
-| Glance property owned 생성·수정 | 261 → 263 (+2) | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate·반복 생성 drift0·외부 main4개 build PASS | `0093f8fc`·`d0177a45`·`7502bd37`·`6ab931b3` push 완료 |
 
 
 단계는 일부 겹칠 수 있습니다. 예를 들어 계약 테스트와 문서는 구현과 함께 작성하고, 커밋·push도 단위가 완전히 끝날 때까지 미루지 않습니다. 코드가 바뀌면 영향받는 단계의 검증을 다시 확인하며, 이전 revision의 성공을 변경 후 성공으로 옮겨 적지 않습니다.
@@ -330,7 +331,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 |---|---|---|---|---|---|---|
 | Glance resource type association owned 생성·삭제 | 고정 Source의 Body·공개 delete 초기 검토 완료 | 구현 전 | 기존 list/source/REST fixture 재사용 예정 | owned 비교·예제 추가 예정 | 두 선언 unresolved 유지 | 다음 핵심 user 단위 |
 | Glance property owned 목록·삭제 | pinned finite list·두 deletion·identity·has_body=False 검토 완료 | **ListRecords/AllRecords·DeleteRecord/DeleteAllRecords·공통 guard 완료** | 기존13그룹 재사용·새20그룹182사례·집중33그룹274·전체43 package race/vet·최종261 metadata PASS | Python 비교·정확한 main3개/example1개 local/remote build PASS | **go_mapping3행·전체261/3,362** | 구현·검증·문서7개 commit push 완료. [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료) |
-| Glance property owned 생성·수정 | pinned constructor·raw dirty body·POST/PUT·no-op·공개 identity 선택 검토 완료 | **공통 response/location·CreateRecord/UpdateRecord 완료** | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate PASS | Python 비교·독립 main4개 외부 build PASS | **go_mapping2행·전체263/3,362** | 공통/API/leaf/Connection을 별도 commit push. 원격 설치 검증 예정 |
+| Glance property owned 생성·수정 | pinned constructor·raw dirty body·POST/PUT·no-op·공개 identity 선택 검토 완료 | **공통 response/location·CreateRecord/UpdateRecord 완료** | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate PASS | Python 비교·정확한 main4개 local/remote build PASS | **go_mapping2행·전체263/3,362** | 공통/API/leaf/Connection을 별도 commit push. `7b07fe93` 원격 설치·main4개 build·Go SHA/라이선스13개 일치 확인 |
 | Glance property owned 조회 | pinned getter·descriptor·fetch 검토 완료 | **seed/overlay·21필드 view·GetRecord·Connection 완료** | 집중13그룹92·전체43 package race/vet·metadata gate PASS | Python 비교·정확한 독립 main3개 build PASS | **go_mapping1행·전체258/3,362** | `e480edcc`·`ea80c826`·`86d9781f` push 완료. 당시 다음 owned 목록은 위 단위에서 완료 |
 | Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
 | Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |

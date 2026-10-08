@@ -2,7 +2,9 @@
 
 Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사용합니다. 전체 SDK는 개발 중이며, 지원 범위는 [구현 현황](implementation-plan.md)에서 확인합니다. `v0.1.0-alpha.1` tag는 아직 배포하지 않았습니다.
 
-2026-10-09 최신 Glance property owned 목록·삭제 revision `50b4302520ee2d05a1ced1119e40f919e857bc01`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008163807-50b4302520ee`이며 [목록 main](../image/metadef-property-record-list.md)·[조회 main](../image/metadef-property-records.md)·설치 main3개와 [삭제 package example](../image/v2/metadefproperties/README.md#owned-목록과-삭제)1개가 get/build exit0입니다. 원격 Go source2,024개 SHA256 `76ad963e062c1d685aba025872b49ec057391d3748931458ee27080cfc93d21a`가 집중33그룹274사례·전체43 package race/vet·최종261 metadata gate·반복 생성 drift0와 같습니다. 라이선스·고지13개 파일도 로컬과 byte-identical이며 완료 집계는261/3,362입니다. 검증 근거는 `/private/tmp/go-openstacksdk-property-list-remote-receipt.json`입니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+2026-10-09 최신 Glance property owned 생성·수정 revision `7b07fe93e433b3694852c685d979d4fbffa4cb35`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008171128-7b07fe93e433`이며 [생성수정 main](../image/metadef-property-record-write.md)·[조회 main](../image/metadef-property-records.md)·[목록 main](../image/metadef-property-record-list.md)·설치 main **4개**의 get/build exit0입니다. 원격 Go source2,029개 SHA256 `71d742e983a57a99a6fdba10b86318c7b7ac87bb1e3e29e298fd0eed07ef03e0`가 집중42그룹477사례·전체43 package race/vet·최종263 metadata gate·반복 생성 drift0와 같습니다. 라이선스·고지13개 파일도 로컬과 byte-identical이고 완료 집계는263/3,362입니다. `/private/tmp/go-openstacksdk-property-write-remote-receipt.json`에 기록합니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+앞선 2026-10-09 Glance property owned 목록·삭제 revision `50b4302520ee2d05a1ced1119e40f919e857bc01`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008163807-50b4302520ee`이며 [목록 main](../image/metadef-property-record-list.md)·[조회 main](../image/metadef-property-records.md)·당시 설치 main3개와 [삭제 package example](../image/v2/metadefproperties/README.md#owned-목록과-삭제)1개가 get/build exit0입니다. 원격 Go source2,024개 SHA256 `76ad963e062c1d685aba025872b49ec057391d3748931458ee27080cfc93d21a`가 집중33그룹274사례·전체43 package race/vet·최종261 metadata gate·반복 생성 drift0와 같습니다. 라이선스·고지13개 파일도 로컬과 byte-identical이며 당시 완료 집계는261/3,362입니다. 검증 근거는 `/private/tmp/go-openstacksdk-property-list-remote-receipt.json`입니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 앞선 2026-10-09 Glance owned property 조회 revision `1662a6743e2543bbb76ba3f15ed30511d1a4632a`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008160331-1662a6743e25`이며 [owned property main](../image/metadef-property-records.md)·[기존 raw 조회 main](../image/metadef-property.md)·당시 설치 안내 main **3개**의 get/build exit0입니다. 원격 Go source2,018개 SHA256 `bb6e1a27ce2cb84e913fdc425eb7c3d34bc143447c4ff7fa144ef013da581894`가 집중13그룹92사례·전체43 package race/vet·최종 metadata gate·반복 생성 drift0와 같습니다. 라이선스/고지13개 파일은 원격 module cache와 로컬에서 byte-identical입니다. 당시 완료 집계는258/3,362이며 owned property 유한 목록은 위 최신 단위에서 완료했습니다. 실제 인증·OpenStack/Python 호출·alpha tag 배포는 수행하지 않았습니다.
 
@@ -14,7 +16,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@50b4302520ee2d05a1ced1119e40f919e857bc01
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@7b07fe93e433b3694852c685d979d4fbffa4cb35
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.

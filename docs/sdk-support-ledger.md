@@ -21,6 +21,8 @@ catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6
 
 단계 `a4614dc0`·공통 `0093f8fc`·API `d0177a45`·leaf 테스트 `7502bd37`·Connection `6ab931b3`를 작은 commit으로 push했습니다. `/private/tmp/go-openstacksdk-property-write-{focused.jsonl,check.log,check-receipt.json,review-receipt.json,generation-repeat.log,consumer.json}`에 실제 실행 근거를 기록합니다.
 
+정확한 구현·문서 revision `7b07fe93e433b3694852c685d979d4fbffa4cb35`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008171128-7b07fe93e433`·get/build exit0이며 생성수정/조회/목록/설치 main4개가 빌드됐습니다. 원격 Go source2,029개 SHA256 `71d742e983a57a99a6fdba10b86318c7b7ac87bb1e3e29e298fd0eed07ef03e0`가 전체/집중/반복 생성의 최종 소스와 같고 라이선스·고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-property-write-remote-receipt.json`과 [설치 안내](install.md)에 기록합니다. 같은 Go의 JSON/prose 변경에는 전체 vet/race 근거를 재사용하고 최종 metadata gate를 확인합니다.
+
 ## Glance metadef property owned 목록·삭제 완료
 
 2026-10-09 핵심 user `metadef_properties`·`delete_metadef_property`·`delete_all_metadef_properties` 세 선언을 owned Go mapping으로 닫았습니다. **258→261(+3)**이며 핵심184→187/2,292·Glance22→25/120입니다. [목록 비교·독립 main](../image/metadef-property-record-list.md)과 [삭제 예제](../image/v2/metadefproperties/README.md#owned-목록과-삭제)에 Source와 Go의 입력·필터·응답 차이를 기록합니다.
