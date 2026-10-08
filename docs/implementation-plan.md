@@ -10,13 +10,19 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**진행 중 (2026-10-08): 핵심 user flavor property·strict ID convenience와 native 조회3개.** 공유 extra-specs reader 분리 `b3e55994`, property/직접 native 검증 `74c97ec4`, SDK 기본 ID 조회 `88f008e5`를 작게 commit/push했습니다. 새7그룹74사례와 기존28개 그룹을 합친 집중 race35그룹, 전체42 test package `make check`·정확한 문서 main의 외부 빌드가 PASS했습니다. property는 raw 값·actual receipt를 반환하고 Cloud GetFlavorByID는 Never/strict·extra-specs 기본false를 SDK가 소유합니다. 재생성 Go drift0이며 원격 설치와 최종 판정을 진행합니다. 현재 완료 집계231에는 이5개 source 후보를 아직 넣지 않았습니다.
+**최신 완료 (2026-10-08): 핵심 user flavor 단일 property·Cloud ID 조회와 native3개, 전체231→236(+5)·핵심157→162/2,292·Nova33→38/333.** 새 `GetExtraSpecsProperty`는 raw 값·missing/null·실제 응답을 보존하며 기존 Fetch reader를 공유합니다. `Service.GetFlavorByID`는 기존 strict GET/enrichment를 연결해 기본 false를 SDK가 소유합니다. 기존 native Get/GetExtraSpec/ListDetail3개도 DTO·string-map·linked page의 별도 계약을 검토했습니다. [Python/Go 비교·독립 main](../compute/flavor-property-and-native.md), [검증 기록](sdk-support-ledger.md#flavor-property와-cloud-id-조회-및-native3개-완료)에 반환·버전·입력·오류와 Go 차이를 기록합니다.
 
-**최신 완료 (2026-10-08): 핵심 user flavor 명시 extra-specs 조회·Cloud keypair5개와 native1개, 전체224→231(+7)·핵심150→157/2,292·Nova26→33/333.** 항상 직접 GET하는 FetchExtraSpecs와 Cloud List/Search/Get/Create/Delete6개 Go 메서드를 구현하고 기존 native ListExtraSpecs1개를 별도로 검토했습니다. 원문 specs/source dict 변환·filters presence·두 단계 필터·current Connection location·strict bool 삭제를 기존 reader/projector/CloudFilter/First/guard와 연결했습니다. [Flavor 비교·main](../compute/flavor-extra-specs.md), [Cloud keypair 비교·main](../compute/keypairs-cloud.md), [검증 기록](sdk-support-ledger.md#flavor-extra-specs와-cloud-keypair-완료)에 API별 계약과 Go 차이를 설명합니다.
+기존 public testhelper/testcloud·fault fixture·Fetch/nativefind/guard/version28개 그룹을 재사용하고 새7그룹74사례만 추가했습니다. 집중 race35그룹·전체42 test package `make check`·재생성 Go drift0·정확한 독립 main의 외부 빌드가 PASS했습니다. 최종 Go source1,983개 SHA256 `bccbeed5b2b97484735d5d6f5d90532313c2f6d1379c3f4c6d844ed1f7f9ce9d`는 집중·전체 gate와 원격 module cache에서 같습니다. 공통 reader `b3e55994`·property/native검증 `74c97ec4`·ID기본값 `88f008e5`·문서 `3d446f60`를 작게 commit/push했습니다.
+
+정확한 revision `3d446f604fb57fefe5be31595679c24ff9ffd796`을 새 외부 module에서 replace 없이 설치하여 같은 main과 설치 main을 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008031535-3d446f604fb5`이며 catalog/source pins·기존538 reviews를 보존하고5행15계약만 추가했습니다. 이후 JSON/prose에는 동일 Go의 전체 gate를 재사용하고 parity/progress/gofmt를 확인합니다.
+
+완료236개는 고정 source 선언의 Go 매핑이며 핵심162개는 user/admin 합산입니다. 이번5개는 새 Go 메서드2개와 native binding3개의 판정으로, 새 HTTP endpoint5개를 뜻하지 않습니다. 실제 OpenStack/Python 실행·alpha tag 배포는 포함하지 않으며 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다.
+
+**앞선 완료 (2026-10-08): 핵심 user flavor 명시 extra-specs 조회·Cloud keypair5개와 native1개, 전체224→231(+7)·핵심150→157/2,292·Nova26→33/333.** 항상 직접 GET하는 FetchExtraSpecs와 Cloud List/Search/Get/Create/Delete6개 Go 메서드를 구현하고 기존 native ListExtraSpecs1개를 별도로 검토했습니다. 원문 specs/source dict 변환·filters presence·두 단계 필터·current Connection location·strict bool 삭제를 기존 reader/projector/CloudFilter/First/guard와 연결했습니다. [Flavor 비교·main](../compute/flavor-extra-specs.md), [Cloud keypair 비교·main](../compute/keypairs-cloud.md), [검증 기록](sdk-support-ledger.md#flavor-extra-specs와-cloud-keypair-완료)에 API별 계약과 Go 차이를 설명합니다.
 
 공개 testhelper.SetupHTTP·TestMethod/TestHeader와 기존 testcloud/physical fault wrapper를 재사용했습니다. 새6그룹85사례와 기존40개 공통 그룹의 집중 race46그룹, 전체42 test package make check·재생성 Go drift0·정확한 독립 main2개 빌드가 PASS했습니다. Go source1,979개 SHA256 `47121553d380a5b4b7ed6e34b1dcbfc1fa5a7144a92910e43773c034959d1774`는 최종 집중·전체 gate와 원격 module cache에서 같습니다. 구현 `58662346`·Cloud 연결 `cb3f7866`·문서 `df3afaea`를 작게 commit/push했고 정확한 revision `df3afaea603f3eb627f9948be30948a87ec29991`의 replace 없는 원격 get/build와 설치 main도 PASS했습니다. 실제 버전은 `v0.0.0-20261008024734-df3afaea603f`입니다. catalog/source pins·기존531 reviews를 그대로 보존하고 새7행24계약만 추가했습니다.
 
-완료231개는 고정 source 선언의 Go 매핑이며 핵심157개는 user/admin 합산입니다. 새 endpoint7개나 전체 Resource/session 완성을 뜻하지 않습니다. 실제 OpenStack/Python 실행·alpha tag 배포는 포함하지 않으며 전체 목표와 우선순위는 active로 유지합니다.
+이 구간의 완료231개는 고정 source 선언의 Go 매핑이며 핵심157개는 user/admin 합산입니다. 새 endpoint7개나 전체 Resource/session 완성을 뜻하지 않습니다. 실제 OpenStack/Python 실행·alpha tag 배포는 포함하지 않으며 전체 목표와 우선순위는 active로 유지합니다.
 
 **앞선 완료 (2026-10-08): 핵심 user keypair 목록·검색과 native List, 전체221→224(+3)·핵심147→150/2,292·Nova23→26/333.** `KeyPairs.ListRecords`는9필드 Resource와 실제 행·semantic 필터·전체 페이지를 제공하고 `FindKeypair`는 직접 GET 이후 clean400/403/404에서 owner를 유지해 전체 목록을 검색합니다. native List의6string·SinglePageBase·200/204/300 계약은 별도로 검토했습니다. 새 HTTP 동작2개와 native 선언1개의 완료이며 기존 Create/Get/Delete를 재집계하지 않습니다. [Python 비교·전체 main](../compute/keypairs-list-find.md), [검증 기록](sdk-support-ledger.md#compute-keypair-목록검색과-native-list-완료)을 함께 갱신했습니다.
 
@@ -68,17 +74,17 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**다음 핵심 user 단위:** 기존 flavor 조회·목록·검색의 inherited pager/query와 native 선언별 직접 계약을 기존 테스트로 대조합니다. 완료된 이번7개는 다시 세지 않으며, 누락된 binding 검증만 보완합니다. 전체 Resource/session과 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
+**다음 핵심 user 단위:** source `flavors`·`find_flavor`에 공통 semantic classifier/REST pager/FindIdentity와 현재 Connection location을 연결합니다. summary/detail·is_public absent/null 기본값·13 Body 필드 view·조건부 specs·모든 continuation을 실제 source와 대조한 설계를 준비했습니다. 이미 검증한 native 조회·공통 오류 표는 재사용하며, 완료된 이번5개는 다시 세지 않습니다. 전체 Resource/session과 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 231 (6.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 236 (7.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,130 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 538 | 아직 개별 기록 없는 선언 2,824 |
-| 기록한 부분·전체 계약 | 3,336 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,125 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 543 | 아직 개별 기록 없는 선언 2,819 |
+| 기록한 부분·전체 계약 | 3,351 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -106,6 +112,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute console auth-token 조회 | 220 → 221 (+1) | 공통 member GET·public fixture·기존9그룹 재사용, 집중12그룹·전체42 package gate·독립/원격 main build·생성 Go drift0 | `e742005c`·`8e9a7827`·`40dbb0ea` push 완료; 기본 정책상 핵심 admin 분류 |
 | Compute keypair 목록·검색 및 native List | 221 → 224 (+3) | 공통 reader/projector·public fixture·기존91그룹 재사용, 집중98그룹·전체42 package gate·독립/원격 main build·Go drift0 | `c50e9ce8`·`a28c3e92`·`48355084`·`e78609f7`·`2490e481` push 완료 |
 | Flavor always-fetch·Cloud keypair5·native1 | 224 → 231 (+7) | 공통40그룹 재사용·새6그룹85사례·집중46그룹·전체42 package gate·main2개/원격 main3개 build PASS | `58662346`·`cb3f7866`·`df3afaea` push 완료 |
+| Flavor property·Cloud ID 조회·native3 | 231 → 236 (+5) | 기존28그룹 재사용·새7그룹74사례·집중35그룹·전체42 package gate·독립/원격 main build PASS | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -118,19 +125,19 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 157 / 2,292 | 6.8% | 207 | 1,927 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 162 / 2,292 | 7.1% | 207 | 1,922 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 231 / 3,362 | 6.9% | 306 | 2,824 | 1 |
+| 전체 | 236 / 3,362 | 7.0% | 306 | 2,819 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
-| Compute / Nova | 33 / 333 | 21 | 279 | 0 |
+| Compute / Nova | 38 / 333 | 21 | 274 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 7 / 120 | 72 | 41 | 0 |
@@ -282,6 +289,9 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | Compute create_console의 modern/legacy 자동 선택 | endpoint 범위·selected tuple·기본 null·dict·status/self-link 조사·감사 완료 | **Service.CreateConsole·공통 discovery 완료** | public fixture 재사용·기존12그룹·집중16그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체220/3,362** | `537b6531`·`963fb1bc`·`2ff3f866` push 완료. catalog/기존524행 보존·direct 설명2행 교정·새6계약 |
 | Compute console auth-token 조회 | 고정 Resource.fetch·selected/max·location 순서·Nova 기본 권한 확인 완료 | **SDK 소유 조회·Cinder MemberGet 공통화 완료** | 기존9그룹·새3그룹42사례·집중12그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체221/3,362** | **2단계핵심 admin으로 user 분류 교정.** 공통 `e742005c`·구현/테스트 `8e9a7827`·문서 `40dbb0ea` push 완료; 다음은 핵심 user |
 | Compute keypair 목록·찾기 및 native List | 고정 source·own-user/foreign-owner·native 계약 검토 완료 | **SDK 소유 ListRecords·FindKeypair·공통 reader/GET binding 완료** | 기존91그룹 재사용·집중98그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping3행·전체224/3,362** | 공통 `c50e9ce8`·`a28c3e92`·목록 `48355084`·검색 `e78609f7`·문서 `2490e481` push 완료. 기존528 reviews/catalog 보존·새12계약; [가이드](../compute/keypairs-list-find.md) |
+| Flavor extra-specs 명시 조회·Cloud keypair5개·native1 | 고정 source·dict view·필터 presence·location·삭제 기본값 검토 완료 | **FetchExtraSpecs·Cloud keypair5개 완료** | 공통40그룹·집중46그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping7행·전체231/3,362** | `58662346`·`cb3f7866`·`df3afaea` push 완료. 기존531 reviews/catalog 보존·새24계약 |
+| Flavor property·Cloud ID 조회 및 native3개 | 고정 source와 native DTO/string-map/linked-page 차이 검토 완료 | **공통 reader·GetExtraSpecsProperty·GetFlavorByID 완료** | 기존28그룹·집중35그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping5행·전체236/3,362** | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료. 기존538 reviews/catalog 보존·새15계약 |
+| Flavor owned 목록·검색 | source2개·13 Body/현재 location·query/continuation 설계 감사 완료 | 다음 구현 | 기존 공통 fixture/표 재사용 예정 | native/owned 차이 문서화 예정 | `flavors` 미검토·`find_flavor` 기존8계약/4remaining 보존 | 1단계. 새 framework/harness 없이 classifier/pager/find/read 조합; 아직 완료 집계에 포함하지 않음 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
