@@ -1067,6 +1067,11 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				pageAlias := e.use(upstreamModule + "/pagination")
 				stream := "Stream"
 				control := ""
+				// This pinned native page inherits an array-only IsEmpty despite
+				// its object envelope. Preserve native AllPages' single-page seam.
+				if e.pkg.Path() == upstreamModule+"/openstack/compute/v2/availabilityzones" && op == "List" {
+					stream = "SinglePageStream"
+				}
 				if controlled {
 					stream, control = "StreamWithControl", ",control"
 				}

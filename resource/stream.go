@@ -13,6 +13,45 @@ func Stream[T any](ctx context.Context, pager pagination.Pager, extract func(pag
 	return StreamWithControl(ctx, pager, extract, ListControl{})
 }
 
+// SinglePageStream preserves native AllPages handling of a SinglePageBase.
+// Some object-envelope pages inherit its array-only IsEmpty; AllPages bypasses
+// that check for a single page. Extraction still validates the whole response
+// before publishing a row, and consumer cancellation/break stops publication.
+func SinglePageStream[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) ([]T, error)) iter.Seq2[*T, error] {
+	return func(yield func(*T, error) bool) {
+		if ctx == nil {
+			yield(nil, invalid("context is required"))
+			return
+		}
+		if err := ctx.Err(); err != nil {
+			yield(nil, err)
+			return
+		}
+		page, err := pager.AllPages(ctx)
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		values, err := extract(page)
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		for i := range values {
+			if err := ctx.Err(); err != nil {
+				yield(nil, err)
+				return
+			}
+			if !yield(&values[i], nil) {
+				return
+			}
+		}
+		if err := ctx.Err(); err != nil {
+			yield(nil, err)
+		}
+	}
+}
+
 // StreamWithControl applies a local row cap and first-page policy before any
 // outer filters. It leaves the pager's wire query unchanged. Native page
 // emptiness checks and extractors may decode the entire page, including rows
