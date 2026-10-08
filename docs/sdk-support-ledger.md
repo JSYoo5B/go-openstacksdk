@@ -1944,3 +1944,20 @@ Cloud Delete의 필수 입력은 name_or_id 하나이고 결과는 bool입니다
 구현/콘솔 테스트 `e53d34fe`·metadata/keypair 테스트 `bfac16ad`·문서 `f32680a5`를 나누어 push했습니다. exact revision `f32680a5cb51cf01e01f0d4cc01a33bc4e4c6246`을 새 module에서 `GOWORK=off`로 원격 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·Replace 없음·버전 `v0.0.0-20261007234227-f32680a5cb51`이며 원격 Go SHA도 위 최종 gate와 같습니다. `/private/tmp/gophercloudsdk-compute-user-reads-remote-consumer-receipt.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 기존513 reviews·catalog bytes·3,362개 source IDs/fingerprints를 모두 보존하고5행17계약만 추가했습니다. 전체206→211/3,362·핵심132→137/2,292·Nova8→13/333, reviews518=go_mapping211/unresolved306/unsupported1, contracts3,260입니다. catalog unresolved3,150에는 미검토2,844개가 포함됩니다. 이후 JSON/prose만 바뀌므로 같은 전체 Go 검사를 반복하지 않고 final parity·집계·gofmt를 확인합니다. 전체 목표는 active이며 다음 핵심 user 단위는 remote console과 keypair 삭제의 실제 기본값·버전·owner/missing 계약입니다.
+
+
+## Compute console 생성과 keypair 삭제 및 native 3개 완료
+
+2026-10-08에 Python `create_server_remote_console`·`delete_keypair`를 SDK 소유 API로 구현하고, native `remoteconsoles.Create`·`keypairs.Get/Delete`도 직접 선언별 계약을 검토해5개 Go 매핑을 추가했습니다. 새 HTTP 작업은2개이며 catalog의 두 소스 선언을 별도로 세는 집계입니다. [Python 비교·독립 main](../compute/user-actions.md)에 default/null·seed·selected version·owner/missing과 native ABI 차이를 설명합니다. native Get은 앞선13사례를 그대로 재사용합니다.
+
+CreateConsole은7개 type→protocol mapping과 webmks2.8/spice-direct2.99 선택 버전 검사를 SDK가 처리합니다. 공개 native ParseMicroversion을 재사용하며 caller builder나 선행 GET/LIST·legacy 전환은 없습니다. source dirty map이 복사본임을 확인해 추론 protocol은 전송 body에만 넣고 original protocol/type/url seed를 유지합니다. 응답이 제공한 known 값과 null은 seed를 덮고 생략은 유지합니다. view의 생략 필드는 null·parent server_id는 caller URI이며 Wire의 unknown/큰 수와 actual Envelope/Header/Status는 독립 복사입니다. accepted 빈·비JSON은 seed/Wire nil 성공이지만 physical read/Close/source/context 오류는 실제 receipt를 남긴 terminal 실패입니다. Go의 UTF-8 처리·finite raw view·선택 버전 검사는 Python charset/discovery/mutable Resource와 구분합니다.
+
+DeleteKeypair는 직접 이름 경로에 optional owner를 보내고 정상404를 기본적으로 무시합니다. explicit false·403·accepted/nested404/read/Close/source/context 오류는 그대로 오류입니다. 공유 Collection의 clean-missing classifier·cloudread/request/REST를 재사용하고 body를 해석하거나 완료 대기하지 않습니다. native Delete/Remove의 기존 lookup·strict202/204 정책은 유지합니다. 다른 owner의 로컬 fixture 성공은 실제 cloud 권한 승인을 뜻하지 않습니다.
+
+새 서비스별6그룹은 기존 testcloud/public TestMethod/TestHeader/TestHeaderUnset와 flavorIdentityClient·payloadContractTrack·secretFetchRoundTripFunc를 재사용합니다. 공통 삭제 classifier2그룹도 기존 그대로 사용합니다. native Create의 필수 각각·WithCreateField binding·typed partial/null·unexpected203 원래 증거, native Delete의 owner/vendor query·202/204 및 원래 HTTP 오류는 기존 호환성 표 안에서 검증했습니다. 첫 focused 실행의 실패는 미선택 버전을 빈 헤더 값으로 검사한 assertion이었고 public TestHeaderUnset으로 교정했습니다. 구현은 그 교정 때문에 바뀌지 않았습니다.
+
+최종 집중 race8그룹·전체 make check41개 실제 test package가 PASS했습니다. Go source1,956개 SHA256 `d9bcc2db5bc20cecaeb9c11610ed0835d876bb36aab017f0499a83f1205660ed`는 gate 전후 같습니다. private compute-user-actions focused/gate receipt와 check log에 결과가 있고, 고정 generator build/run exit0·기존 Go drift0·Compute V2 README 동기화1입니다. exact guide main SHA256 `bb119093a3ae9633786303b08011ccd901b05df44d12e2d0c7682d9fdeff81b1`은 consumer-only replace build PASS입니다. Source metadata와 Python 실행 자료는 pinned 자료를 재사용하고 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+keypair 구현/테스트 `bdab3a84`·console 구현/테스트 `a6f44ea2`·문서 `1d159655`를 작은 단위로 push했습니다. exact revision `1d159655cb11ac93f14da8a883fbbea9dca1913b`을 새 외부 module에서 GOWORK=off로 원격 설치하여 동일 action main과 설치 main을 빌드했습니다. get/build exit0·Replace 없음·버전 `v0.0.0-20261008001048-1d159655cb11`·원격 Go SHA가 위 최종 로컬 gate와 같습니다. 근거는 `/private/tmp/gophercloudsdk-compute-user-actions-remote-consumer-receipt.json`입니다.
+
+기존518 reviews·catalog bytes·3,362개 IDs/fingerprints를 모두 보존하고5행17계약만 추가했습니다. 전체211→216/3,362·핵심137→142/2,292·Nova13→18/333, reviews523=go_mapping216/unresolved306/unsupported1, contracts3,277입니다. catalog unresolved3,145에는 미검토2,839개가 포함됩니다. JSON/prose 갱신 뒤 같은 전체 Go 검사는 반복하지 않고 final parity·progress·gofmt를 확인합니다. 전체 목표는 active입니다. 다음 핵심 user 단위는 keypair nullable 생성·ID/name 별칭과6개 legacy console URL action이며, `create_console`의 modern/legacy 선택은 별도 named 계약입니다.

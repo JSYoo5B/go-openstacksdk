@@ -6,7 +6,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@f32680a5cb51cf01e01f0d4cc01a33bc4e4c6246
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@1d159655cb11ac93f14da8a883fbbea9dca1913b
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -55,7 +55,9 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
-2026-10-08에 push한 `f32680a5cb51`을 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Compute 조회 main](../compute/user-read-apis.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261007234227-f32680a5cb51`입니다. module-cache Go source1,952개 SHA256 `3c99df8dd9159ce9411c3ecca9ad4c6337bddb9a264085b8ede453d1c4a1b6aa`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 같은 Go 소스에서 Compute 조회5개를 판정하여 현재 API 완료 수는211개입니다.
+2026-10-08에 push한 `1d159655cb11`을 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Compute user 작업 main](../compute/user-actions.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261008001048-1d159655cb11`입니다. module-cache Go source1,956개 SHA256 `d9bcc2db5bc20cecaeb9c11610ed0835d876bb36aab017f0499a83f1205660ed`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 같은 Go 소스에서 user 작업2개와 native3개를 개별 판정하여 현재 API 완료 수는216개입니다.
+
+앞선 `f32680a5cb51`에서도 설치 main과 [Compute 조회 main](../compute/user-read-apis.md)의 원격 빌드가 PASS했습니다. 당시 버전은 `v0.0.0-20261007234227-f32680a5cb51`이며 로컬 전체 gate와 원격 Go SHA가 같았습니다.
 
 앞선 `36e16d08dc5f`에서도 설치 main과 [Keystone native/owned 두 main](../identity/v3/users/memberships.md)의 원격 빌드가 PASS했습니다. 당시 버전은 `v0.0.0-20261007231141-36e16d08dc5f`이며 로컬 전체 gate와 원격 Go SHA가 같았습니다.
 
@@ -70,3 +72,4 @@ GOWORK=off go build -mod=readonly ./...
 | push된 정확한 커밋의 replace 없는 설치·빌드 | PASS:`3f0240534253`; `go get`·`go build -mod=readonly` exit0, Replace 없음 |
 | Keystone 두 owned 목록 추가 후 외부 설치·빌드 | PASS:`36e16d08dc5f`, no replace; 설치 main+native/owned membership main3개와 원격/로컬 Go SHA 일치 |
 | Compute 조회 추가 후 외부 설치·빌드 | PASS:`f32680a5cb51`, no replace; 설치 main+조회 main2개와 원격/로컬 Go SHA 일치 |
+| Compute user 작업 추가 후 외부 설치·빌드 | PASS:`1d159655cb11`, no replace; 설치 main+action main2개와 원격/로컬 Go SHA 일치 |

@@ -40913,6 +40913,224 @@
         "Owned ConsoleOutput accepts final200..399 like the source action and adds strict object/string decoding with accepted response evidence and no SDK processing-error replay. Native ShowConsoleOutput remains strict200 with its int omitempty and signature unchanged. Provider native retry/reauthentication remains distinct from SDK composition and the general mutable Resource/session/cache goal. No remote-console creation, server lifecycle or unrelated native operation is promoted by this row."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_server_remote_console",
+      "source_fingerprint": "a3f066a5b3e9db9f373ea5f2b97983381379041e9f6748920e845cfd9371216f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.API.CreateConsole",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateProtocol",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateProtocolValue",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateType",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateTypeValue",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateURL",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateURLValue",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateField",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithConsoleCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateConsole posts directly to the selected ResourceBase servers/{serverID}/remote-consoles route without GET, LIST, query, discovery or a legacy action request. Omitted attributes produce an empty remote_console object. Omitted/null/empty protocol with a truthy type derives all seven pinned protocol mappings, unknown type derives null, and an explicit nonempty protocol is retained even when inconsistent. Nullable Type/URL, URL values and explicit empty values remain concrete inputs; an unset Optional clears an earlier choice.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership"
+          ]
+        },
+        {
+          "behavior": "The winning type is checked after options: webmks requires selected numeric Compute2.8 and spice-direct2.99, including explicit protocol. Below-boundary, unselected, malformed and symbolic latest selections fail with ErrUnsupported and zero HTTP; numeric2.100 is accepted. Last-wins, bulk clear and null clear remove an earlier gate. No unrelated2.6 prerequisite or automatic version upgrade is introduced.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleWinningTypeSelectedVersionGates"
+          ]
+        },
+        {
+          "behavior": "Resource contains the original three declared protocol/type/url seeds, omitted defaults as null and the fixed caller server_id; inferred protocol changes only the transmitted body. Actual known response fields overlay seeds, including explicit null/untyped values, while unknown fields and a response server_id remain only in independently owned Wire. Actual Envelope/Header/StatusCode are retained; nested and flat object responses are supported. Empty, opaque, malformed or invalid-UTF8 accepted bodies retain the seeded Resource and nil Wire rather than manufacturing a response row.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership",
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Owned final200..399 responses are accepted, including actual201/203, bodyless204 and flat300 without Location. Parsed nonobject roots and null/array remote_console envelopes fail with accepted ResponseError and the physical receipt. HTTP403/404 preserve native method/URL/body/header/status evidence; accepted read, nested404 Close and source failures retain receipt/cause with no SDK resend and cannot become ignored missing.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility",
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleWinningTypeSelectedVersionGates"
+          ]
+        },
+        {
+          "behavior": "Concrete bulk/field inputs and callback-added raw fields are snapshotted; bulk replaces declared options while retaining extensions, reusable options execute once per call, and core protocol/type/url/server_id overrides and unsupported query fail before HTTP. The captured client keeps selected token/header/version policy. Option source drift, nil options and custom-cause cancellation stop later callbacks and HTTP while preserving the original option/context causes. Native Create remains a separate required-protocol/type strict200 API.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership",
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/user-actions.md",
+        "compute/v2/remoteconsoles/README.md"
+      ],
+      "differences": [
+        "Python accepts a server Resource and dynamic **attrs; Go requires an explicit validated single path-segment server ID and nullable string options for protocol/type/url, with protected field/header extensions. Resource is a stateless declared-field raw view, Wire is the precise actual row, and independently owned receipts replace a connected mutable Python Resource. Body descriptors remain untyped on response; omitted known view fields default to null and the caller URI parent is fixed.",
+        "Go checks the selected numeric Nova microversion with native ParseMicroversion for webmks/spice-direct, including2.100, and does not perform Python endpoint-bound discovery or select a discovered maximum capped at2.99. Symbolic latest cannot prove those local gates. The original all-service Resource/session/discovery scope remains in the SDK goal; it is separate from this named create operation.",
+        "Accepted JSON-decoding ValueError-like bodies are tolerated with seeded Resource and nil Wire, while parseable nonobject roots/envelopes are explicit Go errors with receipts. Physical read/Close/source/context failures remain errors rather than tolerated JSON failures. Native remoteconsoles.Create retains its required inputs, typed alias and strict200 response policy; the separate Python get_server_console_url legacy action and create_console modern/legacy dispatch are not part of this operation.",
+        "Go treats non-UTF-8 accepted bodies as unparseable and preserves the original envelope with seeded Resource/nil Wire; it does not reproduce Python response charset detection or replacement-character decoding."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/delete_keypair",
+      "source_fingerprint": "42c4d98089a128e16bbac69c0a5c557b95c2fec87eea567ef5a02aee8fad87aa",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.DeleteKeypair",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairDeleteOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairDeleteUserID",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairDeleteIgnoreMissing",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairDeleteQuery",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairDeleteHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeypair treats the supplied name as the logical keypair ID and makes one bodyless DELETE at the selected prefixed member route without GET, LIST or wait. Empty/default owner is omitted, an explicit Unicode/special-character owner and vendor query are URL-escaped, and selected live token/configured headers/both Compute2.1 version headers are retained without adding an owner-version gate or changing the client.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "IgnoreMissing defaults to true; explicit true ignores ordinary404 and explicit false preserves the native404 cause plus ErrNotFound. Owned final200..399 is success with passive non-JSON response bytes and no extraction or follow-up request; HTTP403 is preserved with actual/expected status, exact DELETE URL, body/header and operation context. Native Delete202/204 and strict404, and Remove's default/strict missing policy, remain separate unchanged APIs.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Concrete typed options are snapshotted; last option wins, bulk resets typed owner/missing selections while retaining extensions, and caller query/header aliases cannot alter the prepared request. Nil API/client/context/options, unsafe name, null missing policy, protected owner/ignore_missing queries, unsupported body fields and spoofed authentication headers fail without HTTP. Pre-canceled or option-canceled contexts preserve context.Canceled, custom cause and the original option error; captured-source failures stop later callbacks.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close, nested404, cancellation and source failures remain terminal ResponseErrors with physical202 body/header and original cause, do not become ErrNotFound or ignored-missing success, and do not invoke native retry after acceptance. A native503 retry callback that changes the captured source is stopped before a second DELETE while retaining original HTTP evidence; options are not replayed.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteAcceptedFailuresAndNativeRetryGuards"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/user-actions.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "Python accepts a keypair Resource or its logical name ID and returns None. Go accepts a validated single-segment/text name and returns error only; nil represents accepted deletion or deliberately ignored ordinary missing, with no completion wait. UserID is a concrete string so empty is omitted, and nullable IgnoreMissing distinguishes unset/default true from false while rejecting JSON null rather than applying Python dynamic truthiness.",
+        "Go retains the caller's selected microversion and sends explicit owner query literally; it does not perform Python session discovery, change the version or add a new local2.10 owner gate. Nova policy determines foreign-owner permissions, with403 preserved. Full connected Resource/session lifecycle remains separate SDK scope.",
+        "Owned DeleteKeypair accepts final200..399 and reads passive body bytes while retaining physical read/Close/source/context evidence. Native Delete remains strict202/204 and404; native Remove retains its existing lookup/missing policy. The separate Cloud ComputeCloudMixin/delete_keypair operation and arbitrary Resource name resolution are not promoted by this direct Proxy mapping."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/keypairs.Get",
+      "source_fingerprint": "7340a16f81059d74c8fa16e0d33dd0dc866b60123146190392f5399345487833",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.Get",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithGetOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "The direct keypair-name GET uses the selected ResourceBase and makes no LIST or unrelated request. Default and explicit-empty UserID omit the owner query; a supplied owner is escaped as user_id. The library-owned concrete GetOpts builder retains live provider authentication, configured headers and both selected Compute2.55 version headers without changing the selected client.",
+          "tests": [
+            "api/compute_metadata_keypair_reads_test.go:TestComputeKeypairGetNativeContract"
+          ]
+        },
+        {
+          "behavior": "Native Extract preserves the six string fields Name/Fingerprint/PublicKey/PrivateKey/UserID/Type and ignores unknown wire fields. Missing/null type remains empty, missing name is not seeded from the requested name, and missing/null keypair wrappers return nil,nil. Malformed JSON remains an error; a nonstring known field preserves the native partial KeyPair and json.UnmarshalTypeError.",
+          "tests": [
+            "api/compute_metadata_keypair_reads_test.go:TestComputeKeypairGetNativeContract"
+          ]
+        },
+        {
+          "behavior": "Only native GET200 is accepted. Actual403/404/unexpected203 preserve ErrUnexpectedResponseCode with actual/expected status, method, exact owner-bearing URL, response body and header, and do not trigger a fallback request or convert missing to success.",
+          "tests": [
+            "api/compute_metadata_keypair_reads_test.go:TestComputeKeypairGetNativeContract"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/user-read-apis.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "The upstream optional GetOptsBuilder interface is replaced by concrete GetOption/WithGetOptions and a library-owned serializer; API.Get returns the extracted native KeyPair and wraps failures with operation context. Native aliases, owner omission, strict200 status and partial-result extraction are preserved. The documented Python get_keypair mapping is a separate catalog operation."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/keypairs.Delete",
+      "source_fingerprint": "2ba279537cad4f164de8921009c98d9b41216af71bea6125e9565e236aa3110a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.Delete",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithDeleteOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithDeleteQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Native Delete issues one bodyless DELETE directly at the selected prefixed os-keypairs/{name} route. Omitted options send no query; the library-owned concrete DeleteOpts builder escapes an explicit owner as user_id and binds an escaped vendor query extension alongside it. Live token, configured source headers and both selected Compute2.55 version headers reach the actual request.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Native202/204 succeeds without JSON extraction while200/404 remains strict ErrUnexpectedResponseCode. Failure preserves expected202/204, actual status, DELETE method, exact URL and original passive response body/header. Default/strict Remove404 compatibility remains unchanged and does not alter direct native Delete's missing policy.",
+          "tests": [
+            "api/compute_keypair_delete_test.go:TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/user-actions.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "The upstream DeleteOptsBuilder interface is replaced by concrete DeleteOption/WithDeleteOptions and a library-owned query serializer with WithDeleteQuery extensions. API.Delete returns ExtractErr with operation context; native direct-name route, owner omission, strict202/204 and strict404 behavior are preserved. New DeleteKeypair's default-ignore/broad-status policy is an independent Python operation mapping and is not applied to this native function."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/remoteconsoles.Create",
+      "source_fingerprint": "226dbf6a40e472833814ec0780cf8be4f94b8d4af9dd131e5a9663dc81898a90",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.API.Create",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Native Create rejects omitted protocol or type before HTTP, retaining both required concrete inputs. The library-owned builder binds a URL field extension with the exact remote_console body and sends one authenticated POST to the selected prefixed servers/{serverID}/remote-consoles route without query or lookup.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Native Extract returns the typed protocol/type/url fields and ignores unknown response fields. A nonstring URL preserves the otherwise decoded protocol/type in a partial RemoteConsole with json.UnmarshalTypeError; a null remote_console envelope returns nil,nil. No owned seed or actual Wire model is substituted for native extraction.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Only native POST200 succeeds; actual203 remains ErrUnexpectedResponseCode with expected200, original POST method, exact member URL and response body/header. The additive CreateConsole200..399 policy does not widen native Create's status contract.",
+          "tests": [
+            "api/compute_remote_console_test.go:TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/user-actions.md",
+        "compute/v2/remoteconsoles/README.md"
+      ],
+      "differences": [
+        "The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with WithCreateField extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping."
+      ],
+      "remaining": []
     }
   ]
 }

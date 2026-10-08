@@ -32,6 +32,8 @@ JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 
 
 Compute 조회5개도 이 방식을 적용했습니다. metadata·keypair의2테이블24사례는 기존 `testcloud.New`와 공개 method/header helper를 사용하고, 콘솔3그룹은 기존 `flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`를 재사용합니다. flavor의 GET-only/extra-specs는 기존 HTTP 그룹을 지원 근거로 연결했습니다. 집중15그룹과 최종41 test package 전체 gate가 PASS했으며, 문서/JSON 갱신 뒤에는 같은 Go 전체 검사를 반복하지 않습니다. [비교·실행 예제](../compute/user-read-apis.md), [소스 SHA와 결과](sdk-support-ledger.md#compute-user-조회5개-완료)를 확인할 수 있습니다.
 
+Remote console·keypair 삭제는 같은 fixture의6그룹으로 서비스별 기본값·경로·응답과 native ABI를 확인하고 기존 공통 삭제 classifier2그룹을 재사용했습니다. 헤더 생략은 공개 `TestHeaderUnset`으로 검사합니다. native Get은 앞선13사례를 그대로 연결하고, Create/Delete의 owner·extension binding은 기존 호환성 표 안에서 보강했습니다. 집중8그룹·전체41 package gate·외부 main build가 PASS했습니다. [사용법](../compute/user-actions.md), [단위별 근거](sdk-support-ledger.md#compute-console-생성과-keypair-삭제-및-native-3개-완료)에 API 수와 실제 HTTP 작업 수를 구분했습니다.
+
 Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위
