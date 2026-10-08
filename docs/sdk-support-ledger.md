@@ -2089,3 +2089,20 @@ catalog bytes·3,362개 IDs/fingerprints·source pins와 기존544 reviews를 �
 수정 `46225a97`·owned reader `bdb4acb4`·Cloud/테스트 `60ffec77`·문서 `2488a769`를 작게 commit/push했습니다. 정확한 revision `2488a769b27401fab85115e989cf511c01a86cfa`을 별도 외부 module에서 GOWORK=off·replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008045149-2488a769b274`·remote Go SHA가 최종 gate와 같습니다. `/private/tmp/gophercloudsdk-availability-zones-remote-consumer-receipt.json`에 근거를 남겼으며 실제 인증/OpenStack/Python 실행·alpha tag 배포는 수행하지 않았습니다.
 
 catalog bytes·3,362개 IDs/fingerprints·source pins와 기존547 reviews/text를 보존하고 새3행12계약을 추가했습니다. 전체241→243/3,362·핵심167→169/2,292·Nova43→45/333, reviews550=go_mapping243/unresolved306/unsupported1·contracts3,382입니다. catalog unresolved3,118에는 미검토2,812개가 포함됩니다. 완료2개는 새 endpoint2개를 뜻하지 않으며 Proxy details=True·native ListDetail은 핵심 admin 단계에 남습니다. full Resource/session/cache/discovery 및 다른 Source 선언은 전체 목표에서 별도로 유지합니다. 동일 Go의 JSON/prose에는 전체 gate를 재사용하고 final parity/progress/gofmt를 확인합니다. 다음은 Glance Task2개/Metadef10개 schema getter의 기존 reader 재사용과 class별 response view입니다.
+
+
+## Glance schema class records 완료
+
+2026-10-08, 핵심 user named schema12개를 검토·구현·검증하여 전체243→255/3,362, 핵심169→181/2,292, Glance7→19/120으로 갱신했습니다. Task schema2개와 Metadef schema10개가 대상이며 기존 ordinary schema4개 판정은 그대로입니다. [클래스별 사용법·정확한 standalone main](../image/schema-records.md)은 16개 Python getter와 concrete SchemaKind를 대응합니다.
+
+`image.Service.GetSchemaRecord`는 기존 `captureTaskSource`·`prepareSchema`·guarded REST를 조합합니다. ordinary5필드/metadef7필드의 null·raw id/name·dict·bool·list를 제공하고 ordered alias와 duplicate dictionary 위치를 보존합니다. Connection current location을 options 전에 한번 캡처하고, Source에 없는 응답 location/project/zone으로 덮어쓰지 않습니다. actual200..399와 Content-Type 무관 object 파싱, 빈/비JSON의 bare default 성공, parsed nonobject·invalidUTF8·physical/source/context의 오류를 구분합니다. 실제 Wire/Envelope/Header/Status는 owned 증거입니다. 기존16 typed strict getter는 그대로입니다.
+
+집중 race **35그룹=기존31+새4, 새 direct65사례**가 PASS했습니다. [class/경로/옵션/receipt](../image/schema_records_test.go)63사례와 [cached Connection/location](../connection_image_schema_records_test.go)2사례는 기존 taskCore transport/body/error wrapper·serviceInfoTransport·공개 Gophercloud testhelper를 재사용합니다. 기존 schema core6·HTTP5·옵션4·Connection1·공통 guarded REST7·CloudLocation3·RawResource4·generator1그룹을 함께 검증했습니다. 새 HTTP harness·fault engine은0개입니다.
+
+전체 `OPENSTACKSDK_SOURCE=/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs make check`의 **43개 실제 test package**, pinned parity/progress/format 및 반복 생성 drift0가 PASS했습니다. 첫 실행의 default 임시 checkout에는 resource.py가 있지만 필수 subnet.py가 없어 Source 검증이 실패했습니다. 실제 SHA `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe` checkout 경로를 지정해 해결했고 Go를 수정하거나 Source 검증을 생략하지 않았습니다. 최종 Go2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`는 집중·전체 검사와 원격 module cache에서 같습니다.
+
+기반 `c119403a`·reader/model `9e84d06e`·테스트 `b4f0f482`·서비스/전체 문서 `3729f70c`를 작게 commit/push했습니다. 문서 main과 설치 main을 checkout 밖 local-consumer로 빌드한 뒤, 정확한 원격 `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새로운 module에서 **replace 없이** 설치해 같은 main2개를 `go build -mod=readonly`로 빌드했습니다. get/build exit0, 실제 버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 인증·OpenStack/Python 실행은 이 컴파일 증거에 포함하지 않습니다.
+
+기존12행의5계약씩60개를 원문까지 보존하고 실제 test anchors36계약을 추가했습니다. 다른538 reviews의 원문, 전체550행, source fingerprints/catalog/pins/module 선언은 보존했습니다. 총 contracts3,382→3,418이며 SDK 완료 수와 계약 수를 섞지 않습니다. JSON/prose만 바뀐 후에는 같은 Go SHA의 전체 gate를 재사용하고 최종 parity/progress/format을 확인합니다.
+
+Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이고, Python JSON backend의 binary underflow와 다를 수 있습니다. invalidUTF8/nonfinite JSON parser corner, physical Close 오류, explicit WithCloudLocation.Zone override는 Go 차이로 기록합니다. Resource/session/cache/lifecycle 전체 범위는 원래 SDK 목표에 계속 남기며 finite 무인자 getter의 별도 blocker로 추가하지 않습니다. 이12개는 source 그대로 supported 판정이 아니라 명시적 go_mapping 완료입니다.

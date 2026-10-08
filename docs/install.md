@@ -2,11 +2,13 @@
 
 Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용합니다. 전체 SDK는 개발 중이며, 지원 범위는 [구현 현황](implementation-plan.md)에서 확인합니다. `v0.1.0-alpha.1` tag는 아직 배포하지 않았습니다.
 
+2026-10-08 최신 schema Source revision `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새 외부 module에 replace 없이 설치해 아래 설치 main과 [Glance schema main](../image/schema-records.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 원격 Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 최종 전체43 package gate와 같으며 SDK와 소비자에 replace가 없습니다. 이번 단위의 완료 집계는255/3,362입니다. 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
 새 프로젝트에서 아래처럼 설치합니다. 기존 Go 프로젝트에서는 `go mod init`을 생략합니다. 이 커밋은 원격 설치·빌드를 확인한 revision입니다.
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@2488a769b27401fab85115e989cf511c01a86cfa
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@3729f70c2b150d19a719d6c8abf2a1eae8a4f666
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.

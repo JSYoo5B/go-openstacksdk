@@ -10,9 +10,13 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**진행 중 (2026-10-08): 핵심 user Glance schema12개.** Source 검토·class별 `GetSchemaRecord`·Connection location·Python/Go 가이드를 구현했습니다. 집중 race35그룹 중31개를 재사용하고 새4그룹65사례가 PASS했으며, 정확한 독립 main과 설치 main의 외부 local-consumer 빌드도 PASS했습니다. 기반 `c119403a`·구현 `9e84d06e`·테스트 `b4f0f482`를 작게 commit/push했습니다. 전체 검사와 최종 판정 전에는 완료 집계243개를 올리지 않습니다. 기존16 strict getter API는 유지합니다.
+**최신 완료 (2026-10-08): 핵심 user Glance schema12개, 전체243→255(+12)·핵심169→181/2,292·Glance7→19/120.** `GetSchemaRecord`는 같은16고정 경로를 ordinary Schema·MetadefSchema class로 투영하고 nullable raw·dict·bool·list, ordered aliases와 Connection location을 처리합니다. 실제 Wire·Envelope·receipt는 분리하며 빈/비JSON 성공과 parsed nonobject 오류를 구분합니다. 기존16 strict getter의 API·200 정책은 유지합니다. [Python/Go 비교·독립 main](../image/schema-records.md), [검증 기록](sdk-support-ledger.md#glance-schema-class-records-완료)에 사용법과 숫자/encoding·명시 zone의 Go 차이를 설명합니다.
 
-**최신 완료 (2026-10-08): 핵심 user Availability Zone 일반 목록·Cloud 이름 조회, 전체241→243(+2)·핵심167→169/2,292·Nova43→45/333.** owned `ListRecords`/`Service.ListAvailabilityZones`는 raw5필드·alias 순서·모든 advertised 페이지·location을 처리합니다. `ListAvailabilityZoneNames`는 unavailable 기본 false·state 선평가·순서/중복·SDK HTTP/loop 실패의 빈 배열을 조합하고 partial Inventory·SuppressedError를 보존합니다. native `List`의 정상 객체 envelope를 읽지 못하던 문제는 native AllPages 단일 페이지 경로로 수정했습니다. [Python/Go 비교·독립 main](../compute/availability-zones.md), [검증 기록](sdk-support-ledger.md#availability-zone-일반-목록cloud-이름-조회-완료)에 차이와 예외 범위를 설명합니다.
+집중 race35그룹 중31개를 재사용했고 새4그룹65사례가 PASS했습니다. 공개 Gophercloud helper·기존 SDK transport/body fault fixture를 사용하며 새 서버·fault engine은0개입니다. 실제 고정 Python checkout을 지정한 전체 `make check`43개 test package·반복 생성 drift0·정확한 독립/설치 main의 local-consumer 빌드가 PASS했습니다. 기본 임시 checkout의 일부 Source 파일 누락으로 실패한 첫 전체 검사는 환경 경로를 교정해 해결했고 Go 코드는 바꾸지 않았습니다. Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 집중·전체·원격 module cache에서 같습니다.
+
+기반 `c119403a`·구현 `9e84d06e`·테스트 `b4f0f482`·문서 `3729f70c`를 작게 commit/push했습니다. 정확한 revision `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새 외부 module에서 replace 없이 설치해 같은 main2개를 빌드했고, get/build exit0·버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 기존12행의60계약과 나머지538행의 원문·catalog/pins를 보존하고36계약을 추가했습니다. Task schema2개·Metadef schema10개를 go_mapping으로 갱신하며 이미 완료한 ordinary schema4개는 다시 세지 않습니다. 핵심181개는 user/admin 합산이고, 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다.
+
+**앞선 완료 (2026-10-08): 핵심 user Availability Zone 일반 목록·Cloud 이름 조회, 전체241→243(+2)·핵심167→169/2,292·Nova43→45/333.** owned `ListRecords`/`Service.ListAvailabilityZones`는 raw5필드·alias 순서·모든 advertised 페이지·location을 처리합니다. `ListAvailabilityZoneNames`는 unavailable 기본 false·state 선평가·순서/중복·SDK HTTP/loop 실패의 빈 배열을 조합하고 partial Inventory·SuppressedError를 보존합니다. native `List`의 정상 객체 envelope를 읽지 못하던 문제는 native AllPages 단일 페이지 경로로 수정했습니다. [Python/Go 비교·독립 main](../compute/availability-zones.md), [검증 기록](sdk-support-ledger.md#availability-zone-일반-목록cloud-이름-조회-완료)에 차이와 예외 범위를 설명합니다.
 
 집중 race41그룹 중38그룹을 재사용하고 고유 API3그룹48사례만 추가했습니다. 기존 생성기 검증 그룹에도 native AZ 사례를 연결했습니다. 공개 Gophercloud helper·기존 SDK 서버/오류 fixture를 사용하며 새 HTTP harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·의도한 generated List1개 교정 이후 반복 생성 drift0·정확한 독립 main build가 PASS했습니다. 최종 Go source2,001개 SHA256 `915a3a9d4f67131b4aaba489232d613643347134ff634b51fc43d670bb9d294d`는 집중·전체 gate 및 원격 module cache에서 같습니다. 수정 `46225a97`·owned reader `bdb4acb4`·Cloud/테스트 `60ffec77`·문서 `2488a769`를 작게 commit/push했습니다.
 
@@ -94,17 +98,17 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**다음 핵심 user 단위:** Glance의 남은 schema getter12개를 검토합니다. Task schema2개는 기존 ordinary schema4개와 같은 모델·공통 reader 및 실제16경로 테스트를 재사용할 후보이며, Metadef schema10개는 Source class별 bool/dict/list descriptor를 제공할 owned view가 추가로 필요합니다. Source 계약과 현재 strict DTO 차이를 확인하며 완료한 기존 getter를 다시 세지 않습니다. Availability Zone 상세 host/service 조회는 2단계 핵심 admin에 유지합니다.
+**다음 핵심 user 단위:** Glance metadata definition property getter·관련 목록의 실제 Source/DTO 차이와 기존 테스트를 검토합니다. 이미 완료한 namespace/object getter와 schema16개는 다시 세지 않습니다. Source가 관리자용으로 명시한 task Get/List와 Availability Zone 상세 host/service 조회는 2단계 핵심 admin에 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 243 (7.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 255 (7.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,118 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,106 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 550 | 아직 개별 기록 없는 선언 2,812 |
-| 기록한 부분·전체 계약 | 3,382 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,418 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -136,6 +140,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Flavor owned 목록·검색 | 236 → 238 (+2) | 기존41그룹 재사용·새 API84사례·집중53그룹·전체43 package gate·독립/원격 main build PASS | 구현6커밋·문서 `037bd153` push 완료 |
 | Cloud Flavor 목록·검색·단건 조회 | 238 → 241 (+3) | 기존56그룹 재사용·새 API51사례·집중60그룹·전체43 package gate·독립/원격 main build PASS | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료 |
 | Availability Zone ordinary·Cloud names | 241 → 243 (+2) | 기존38그룹 재사용·API48사례·집중41그룹·전체43 package gate·독립/원격 main build PASS | `46225a97`·`bdb4acb4`·`60ffec77`·`2488a769` push 완료; Proxy details 미완료 |
+| Glance class별 schema12개 | 243 → 255 (+12) | 기존31그룹 재사용·새4그룹65사례·집중35그룹·전체43 package gate·반복 생성 drift0·독립/원격 main2개 build PASS | `c119403a`·`9e84d06e`·`b4f0f482`·`3729f70c` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -148,12 +153,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 169 / 2,292 | 7.4% | 207 | 1,915 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 181 / 2,292 | 7.9% | 195 | 1,915 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 243 / 3,362 | 7.2% | 306 | 2,812 | 1 |
+| 전체 | 255 / 3,362 | 7.6% | 294 | 2,812 | 1 |
 
 **핵심 서비스**
 
@@ -163,7 +168,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 7 / 120 | 72 | 41 | 0 |
+| Image / Glance | 19 / 120 | 60 | 41 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |

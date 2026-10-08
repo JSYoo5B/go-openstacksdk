@@ -19278,12 +19278,14 @@
     {
       "operation": "python:image/v2/get_tasks_schema",
       "source_fingerprint": "7aee6f2fe5ff5e4bc0035278d1cbb3ecc69db62a2b133e03c7c31a60311d9955",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetTasksSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19344,34 +19346,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaTasks, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. Schema five-field view has passive id/name, nullable additional_properties/properties/location; nonnull dict fields keep objects or become {}, while undeclared definitions/required stay Wire-only. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetTasksSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_tasks_schema() creates a bare Schema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaTasks is the source-shaped owned mapping; existing GetTasksSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_task_schema",
       "source_fingerprint": "b1159504ed7439e76085daff46f6b835288fa93880f9f86bc4043d4a729708a2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetTaskSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19432,34 +19455,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaTask, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. Schema five-field view has passive id/name, nullable additional_properties/properties/location; nonnull dict fields keep objects or become {}, while undeclared definitions/required stay Wire-only. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.schema.Schema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetTaskSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_task_schema() creates a bare Schema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaTask is the source-shaped owned mapping; existing GetTaskSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_namespace_schema",
       "source_fingerprint": "c269621186701aec5218d017f3e456a1087b8fdf8ed8ad15a87c398d5055dbd8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefNamespaceSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19520,34 +19564,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefNamespace, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefNamespaceSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_namespace_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefNamespace is the source-shaped owned mapping; existing GetMetadefNamespaceSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_namespaces_schema",
       "source_fingerprint": "19c03295d7362d8c52bcd495e708bbbff49a2b345cf5c93b81cd50a6fd5fcb72",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefNamespacesSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19608,34 +19673,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefNamespaces, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefNamespacesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_namespaces_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefNamespaces is the source-shaped owned mapping; existing GetMetadefNamespacesSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_resource_type_schema",
       "source_fingerprint": "49257d961f2715deecf91f731283a44ca1d3fdeda832b4b07b217a286990b70d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefResourceTypeSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19696,34 +19782,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefResourceType, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefResourceTypeSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_resource_type_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefResourceType is the source-shaped owned mapping; existing GetMetadefResourceTypeSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_resource_types_schema",
       "source_fingerprint": "06c2e496727955c9b3a38e5556d6bce1dd59b39982a246a575a96318d1adea01",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefResourceTypesSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19784,34 +19891,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefResourceTypes, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefResourceTypesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_resource_types_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefResourceTypes is the source-shaped owned mapping; existing GetMetadefResourceTypesSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_object_schema",
       "source_fingerprint": "8486c856973fcaa0d9df9f075657ad82819ab0be99837d2ae96447b29a956c1e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefObjectSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19872,34 +20000,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefObject, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefObjectSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_object_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefObject is the source-shaped owned mapping; existing GetMetadefObjectSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_objects_schema",
       "source_fingerprint": "4243b6a539a7637add93eae50e411bed1da7924fc6d2c5fe6e2b0347f9703504",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefObjectsSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -19960,34 +20109,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefObjects, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefObjectsSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_objects_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefObjects is the source-shaped owned mapping; existing GetMetadefObjectsSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_property_schema",
       "source_fingerprint": "9177fd2bcd45ec0ca17ed2d2068c6c109fe75607ab3bc11750188213b4773acb",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefPropertySchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -20048,34 +20218,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefProperty, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefPropertySchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_property_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefProperty is the source-shaped owned mapping; existing GetMetadefPropertySchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_properties_schema",
       "source_fingerprint": "2724d2ea8de6bfed8d762d3327621b61f59f0e1dc62e48c3773068599838a7db",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefPropertiesSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -20136,34 +20327,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefProperties, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefPropertiesSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_properties_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefProperties is the source-shaped owned mapping; existing GetMetadefPropertiesSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_tag_schema",
       "source_fingerprint": "cc9bb78089572bcaa1147617ed352a98cb3874fb339aa74e277bac454b3b4f01",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefTagSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -20224,34 +20436,55 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefTag, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefTagSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_tag_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefTag is the source-shaped owned mapping; existing GetMetadefTagSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
       "operation": "python:image/v2/get_metadef_tags_schema",
       "source_fingerprint": "0e708b98235a3f2d66964fd926d3f2888670980268d745c3c6884251bf6926df",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/image.Service.GetMetadefTagsSchema",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaOpts",
         "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeader",
-        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders"
+        "github.com/JSYoo5B/gophercloudsdk/image.WithGetSchemaHeaders",
+        "github.com/JSYoo5B/gophercloudsdk/image.Service.GetSchemaRecord",
+        "github.com/JSYoo5B/gophercloudsdk/image.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -20312,23 +20545,42 @@
             "image/schemas_core_test.go:TestImageSchemasCoreMalformedAcceptedResponsesKeepProof",
             "image/schemas_core_test.go:TestImageSchemasCoreAcceptedBodyFailuresAndCauses"
           ]
+        },
+        {
+          "behavior": "The additive GetSchemaRecord(ctx, SchemaMetadefTags, ...) maps this named getter to its fixed bodyless/query-free route without identity lookup or link following. MetadefSchema seven-field view has passive id/name, nullable additional_properties/definitions/required/properties/location; nonnull additional_properties uses audited JSON truthiness, dict fields keep objects or become {}, and required preserves arbitrary-item arrays or wraps a nonarray once. Missing and explicit null remain null. Canonical/wire aliases follow dictionary insertion order; duplicate keys retain first position with last value. Actual Wire/Envelope retain original fields and numeric bytes separately from the declared Resource view and independent response headers.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation"
+          ]
+        },
+        {
+          "behavior": "The additive Record profile accepts actual200..399 and parses an object independently of Content-Type. Empty, opaque or malformed JSON leaves bare nullable defaults with nil Wire and actual Envelope/Header/Status; parsed null/array/string/number/bool root and invalidUTF8 fail visibly. Representative accepted read/Close-with-nested404/source/cancellation failures return nil record plus actual receipt and original causes, close once and never accepted replay or alternate schema path. Rejected HTTP403 retains native method/URL/body/header evidence rather than becoming an empty resource.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsAcceptedToleranceAndTerminalReceipts"
+          ]
+        },
+        {
+          "behavior": "Connection supplies one owned current-location snapshot before options/HTTP; response location/project/zone cannot replace it. Explicit Go zone overrides and standalone null remain separate from Source defaults. Configured headers and callback carriers stay owned, callback applies once with live provider token, captured image/native client bindings and selected microversion remain shared, and invalid context/service/kind/source/dependency/location or callback source/binding/cancellation/outer-guard failures stop before HTTP with their causes. Resource, Wire, Envelope and headers do not alias each other or current Connection facts.",
+          "tests": [
+            "image/schema_records_test.go:TestSchemaRecordsLocationOptionsAndPreflightBindings",
+            "connection_image_schema_records_test.go:TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation",
+            "image/schema_records_test.go:TestSchemaRecordsFixedKindsClassViewsAndOwnedWire"
+          ]
         }
       ],
       "documentation": [
         "image/schemas.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/schema-records.md"
       ],
       "differences": [
-        "Pinned Python openstack.image.v2.metadef_schema.MetadefSchema uses mutable inherited Resource fetch/descriptor/default/dirty/cache/adapter/session behavior with requires_id=False. Go exposes the fixed singleton method GetMetadefTagsSchema, concrete ordinary headers and a passive owned Schema response; complete Resource/cache/exception lifecycle remains broader.",
-        "Python Schema.additional_properties is a dict descriptor and MetadefSchema.additional_properties uses bool conversion. Properties/definitions/required also use descriptor conversion. Go explicitly rejects wrong nonnull canonical types and preserves arbitrary additionalProperties JSON, explicit null and exact lexical numeric data without reproducing those coercions.",
-        "Go intentionally does not alias-unmarshal embedded Metadata links/timestamps; all schema links/templates/date/identity/URL/dialect values remain raw Body data. Root schema document validation is limited to UTF8/object/canonical field shapes, not JSON Schema draft validity or recursive enforcement.",
-        "Server raw/minimal/CollectionSchema/DictCollectionSchema represent different payloads. Custom image properties/required and optional truthy definitions/links change server documents; the client does not synthesize absent fields, flatten nested item/dictionary schemas or automatically enforce the discovered policies."
-      ],
-      "remaining": [
-        "Full Python mutable supplied Resource/subclass/default/coercion/descriptor/dirty/cache/session/header and adapter response-translation/exception behavior remains unresolved. Native transport and deployment authentication policies are preserved rather than recreated.",
-        "No schema URL/$ref/template following, list pagination, resource CRUD, selector/Name resolution, arbitrary endpoint, request query/body, cache mutation, capability gate, wait, cleanup or automatic quota/permission/schema enforcement is added.",
-        "Deployment authentication/custom image schema configuration, server JSONSchema validation and future resource operations are server/application policy. Local HTTP and compile proofs do not establish real-cloud support or full Python Resource parity."
+        "The pinned public get_metadef_tags_schema() creates a bare MetadefSchema and fetches one fixed discovery document without public inputs. GetSchemaRecord with SchemaMetadefTags is the source-shaped owned mapping; existing GetMetadefTagsSchema remains the compatible strict typed alternative with its original actual200 policy and five preserved contracts.",
+        "Resource exposes only the declared class fields under canonical names, including inherited untyped id/name and nullable defaults. Wire is the actual root object; Envelope/Header/StatusCode are additive independent HTTP evidence. self, location from the response, links/templates/$ref/unknown keywords remain passive Wire data; no envelope unwrapping, schema enforcement or follow-up HTTP is inferred.",
+        "Nonnull response dict/list/bool descriptors are projected without narrowing arbitrary JSON items to native string maps/lists. Go retains exact JSON-number spelling and its common bool conversion tests exact decimal zero, so 1e-400 is true instead of false when a Python JSON backend would underflow to binary zero. requests encoding/nonfinite-number behavior is not reproduced; valid UTF8/JSON is the Go lossless domain and invalidUTF8 remains an error.",
+        "The Record profile follows Source HTTP<400/JSON-ValueError tolerance within ordinary final200..399 responses, but parsed nonobject roots remain errors. Success returns an owned record; physical/model/source/context failures return nil record with actual receipt in the error chain. Python exception class spelling, silently ignored physical Close behavior and nonstandard JSON parser corners are deliberate Go error-policy differences.",
+        "Connection current location is captured once for the newly created schema resource; the response has no declared project/zone fields. Python current_location uses zone=None. Go additionally preserves explicit WithCloudLocation or dependency Zone overrides; direct image.New(client) has null location and NewWithDependencies can provide known current facts without application builders.",
+        "Concrete ordinary header options, protected representation/auth/routing policy, immutable captured targets and source checks reuse existing SDK transport. Supplied Resource/subclass, arbitrary URI/query/body, mutable Resource/session/cache and operations on resources are independent original whole-SDK surfaces, not required public inputs or blanket remaining blockers for this finite no-argument getter."
       ]
     },
     {
