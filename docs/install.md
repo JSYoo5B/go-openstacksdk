@@ -63,6 +63,18 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).GetImageMemberRecord
+    _ = (*sdk.Connection).AddImageMemberRecord
+    _ = (*sdk.Connection).UpdateImageMemberRecord
+    _ = (*sdk.Connection).RemoveImageMemberRecord
+    _ = (*image.Service).GetImageMemberRecord
+    _ = (*image.Service).AddImageMemberRecord
+    _ = (*image.Service).UpdateImageMemberRecord
+    _ = (*image.Service).RemoveImageMemberRecord
+    _ = image.ImageMemberRecordRequest{ID: "literal-member-id"}
+    _ = image.ImageMemberRecordWriteOpts{Attributes: []resource.ListOption{resource.WithFilter("status", "accepted")}}
+    _ = image.WithImageMemberRecordMemberID("recipient-project-id")
+    _ = image.WithImageMemberRecordStatus("accepted")
     _ = (*sdk.Connection).UpdateImageRecord
     _ = (*image.Service).UpdateImageRecord
     _ = image.ImageRecordUpdateRequest{ID: "literal-image-id", Attributes: map[string]any{"name": "new"}}
