@@ -9,7 +9,8 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// Record separates a declared Resource view from the actual row and page.
+// Record separates a declared Resource view from the actual response or row.
+// CreateRecord leaves Wire nil when an accepted response cannot be parsed as JSON.
 // Namespace is fixed request provenance, nil for a global resource type.
 // Every channel owns its bytes and response headers.
 type Record struct {

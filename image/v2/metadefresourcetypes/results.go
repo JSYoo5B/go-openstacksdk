@@ -6,8 +6,9 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
-// Acknowledgement records only an actual DELETE 204 independently of response
-// handling errors. A handled 404 never creates an acknowledgement.
+// Acknowledgement owns an actual deletion response independently of handling
+// errors. Bounded Delete acknowledges only204; its handled404 has no receipt.
+// DeleteRecord acknowledges all accepted200..399 and default physical404.
 type Acknowledgement struct {
 	Namespace  string
 	Name       *string
