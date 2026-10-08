@@ -22,6 +22,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 
 ## 공개 테스트 도구 재사용
 
+Flavor owned List/Find는 기존 REST ListWithControl·공통 FilterSelection/Body matcher·Collection.FindIdentity·microversions.MemberGet·FetchExtraSpecs reader를 조합합니다. 고유 HTTP binding 표는 `api/compute_flavor_records_test.go`·`api/compute_flavor_find_test.go`에서 공개 Gophercloud method/header helper와 기존 `internal/testcloud`·flavor fixture·response fault wrapper로 검증하고, 공통 float 변환은 jsonfilter 표에서 다룹니다. 새 서버 harness나 서비스별 pagination/fault 엔진을 만들지 않습니다. 기존 Fetch/nativefind/identity/discovery/REST 회귀를 재사용하고 서비스 wrapper에서는 Connection location·binding·partial evidence 연결만 확인합니다. 동일 소스의 집중 race53그룹(신규12·재사용41), 고유 API84사례가 PASS했습니다. HTTP 서버 harness·fault helper를 새로 추가하지 않았습니다. 전체 `make check`의43개 실제 test package·vet·parity·progress·gofmt도 PASS했습니다. 소스 SHA와 외부 예제 빌드 결과는 [판정대장](sdk-support-ledger.md)에 남깁니다.
+
 Flavor 단일 property와 Cloud ID 조회는 기존 Fetch의 입력·옵션·버전·응답 reader, strict identity/enrichment를 공유합니다. 고유 API binding은 공개 testhelper·기존 fixture로 검증하고 기존 Fetch/nativefind/identity/guard/version28개 그룹을 그대로 선택했습니다. 최종 집중 race35그룹에서 새7그룹74사례가 함께 PASS했으며, 공통 옵션/physical fault matrix를 다시 작성하지 않았습니다. [Python/Go 가이드](../compute/flavor-property-and-native.md)와 [판정대장](sdk-support-ledger.md)에 native DTO/string-map/linked page와 owned raw property의 서로 다른 계약을 기록합니다.
 
 공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다. 공통 REST 목록 테스트의 기존 `listSpec`도 같은 공개 `SetupHTTP`를 사용합니다. 서비스별로 서버 구성 코드를 복제하지 않습니다.

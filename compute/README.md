@@ -16,6 +16,8 @@ remote console 생성과 optional owner·기본 미존재 무시를 결합한 �
 
 nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console action은 [Keypair·console 비교](keypairs-console.md)의 전체 main을 참고하세요. 생성의 `ssh` view 기본값과 legacy 조회의 raw 반환을 SDK가 처리합니다.
 
+Flavor의 SDK 소유 목록·이름 조회는 `service.ListFlavors`·`service.FindFlavor`를 사용합니다. [Flavor 목록·find 가이드](flavor-records.md)에 summary/detail 기본값, semantic query·Body 필터, raw cap, 조건부 extra specs 및 Connection location과 실제 응답의 구분을 설명합니다. 옵션은 leaf의 `flavors.FlavorListOption`·`FlavorFindOption`을 그대로 사용하며 기존 typed collection도 유지합니다.
+
 ## openstacksdk 대응
 
 | openstacksdk | gophercloudsdk |
@@ -25,10 +27,10 @@ nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console
 | `conn.compute.servers(status="ACTIVE")` | `service.Servers.List(ctx, resource.WithStatus("ACTIVE"))` |
 | `conn.compute.delete_server(id)` | `service.Servers.Delete(ctx, resource.ID(id))` |
 | `conn.compute.wait_for_server(server, status="ACTIVE", wait=300)` | `service.Servers.Wait(ctx, resource.ID(server.ID), "ACTIVE", resource.WithTimeout(5*time.Minute))` |
-| `conn.compute.find_flavor(name_or_id, ignore_missing=False)` | `service.Flavors.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
-| `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
+| `conn.compute.find_flavor(name_or_id, ignore_missing=False)` | `service.FindFlavor(ctx, nameOrID, flavors.WithFlavorFindIgnoreMissing(false))` |
+| `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 owned 조회에 `flavors.WithFlavorFindExtraSpecs(true)` 추가 |
 | `conn.compute.fetch_flavor_extra_specs(flavor)` | `service.API.Flavors.FetchExtraSpecs(ctx, request)`: [명시 extra-specs 조회](flavor-extra-specs.md) |
-| `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
+| `conn.compute.flavors()` | `service.ListFlavors(ctx)` |
 | `conn.list_keypairs(filters=filters)` / `search_keypairs(name, filters)` | `service.ListKeypairs(ctx, options...)` / `SearchKeypairs(ctx, name, options...)`: [Cloud keypair](keypairs-cloud.md) |
 | `conn.get_keypair(name, user_id=owner)` | `service.GetKeypair(ctx, name, compute.WithKeypairQueryUserID(owner))` |
 | `conn.create_keypair(name, public_key=public_key)` / `delete_keypair(name)` | `service.CreateKeypair(ctx, name, options...)` / `DeleteKeypair(ctx, name)` |
