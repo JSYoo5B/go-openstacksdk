@@ -515,4 +515,4 @@ Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션�
 
 프로젝트 코드는 [Apache-2.0](LICENSE)을 적용합니다. 제3자 코드와 데이터에는 원래 라이선스가 함께 적용되며, [NOTICE](NOTICE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [라이선스·출처 안내](docs/licensing.md)에 범위와 고지를 기록합니다.
 
-`MetadefResourceTypes.ListRecords/AllRecords`와 namespace scope의 같은 메서드는 declared Resource·실제 Wire/receipt, semantic 필터와 공통 paging을 제공합니다. [Python/Go 비교·독립 main](image/metadef-resource-types-records.md)에서 두 Connection 경로와 옵션을 설명합니다. [Property 조회 경계](image/metadef-property.md)는 기존 raw Get과 아직 남은 Python seed/default/fetch 동작을 구분합니다.
+`MetadefResourceTypes.ListRecords/AllRecords`와 namespace scope의 같은 메서드는 declared Resource·실제 Wire/receipt, semantic 필터와 공통 paging을 제공합니다. [Python/Go 비교·독립 main](image/metadef-resource-types-records.md)에서 두 Connection 경로와 옵션을 설명합니다. `MetadefProperties` scope의 `GetRecord`는 초기 Resource 속성·descriptor 기본값과 변환·현재 location을 SDK가 처리하고 실제 응답과 구분합니다. [Property 레코드 조회·독립 main](image/metadef-property-records.md)과 [기존 raw 조회](image/metadef-property.md)에 두 API의 사용법을 설명합니다.

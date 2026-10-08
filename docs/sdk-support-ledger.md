@@ -4,7 +4,22 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef resource type·association owned 목록](#glance-metadef-resource-typeassociation-owned-목록-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef property owned 조회](#glance-metadef-property-owned-조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+
+## Glance metadef property owned 조회 완료
+
+2026-10-09 핵심 user `get_metadef_property`의 초기 Resource·descriptor·fetch translation 공백을 additive `NamespaceScope.GetRecord`로 닫았습니다. **257→258(+1)**이며 핵심183→184/2,292·Glance21→22/120입니다. [Python/Go 비교·독립 main](../image/metadef-property-records.md)에 fixed route·fresh immutable input·runtime/encoding·cache/session 차이를 명시합니다. 기존 strict raw `Get`의 실제200·server resource_type query를 유지합니다.
+
+- 구현: concrete ID/Resource snapshot, recognized seed·옵션 attrs·present response overlay, inherited identity·18 Body descriptor 기본값/변환·현재 location·fixed namespace의21필드 view.
+- 응답: actual200..399·whole UTF8·object projection·빈/opaque/문법상 invalid JSON 성공; valid parsed nonobject·descriptor/read/Close/source/context 실패는 실제 receipt와 원인을 유지. Resource/Wire/Envelope/Header는 독립 소유하며 반환 identity는 passive입니다.
+- 경계: 문자열+id attrs 충돌·reserved controls·nil/error callback·source-first preflight·native retry/reauth·physical/read/Close/outer/sticky guards. canonical map 값이 있으면 superseded wire alias의 encoding 오류를 노출하지 않습니다. 두 Connection 진입점은 같은 client와 current location을 전달합니다.
+- 재사용: public Gophercloud helper·기존 Property/Connection HTTP/body fixture·REST/fixedrequest·공통 JSON descriptor와 semantic attribute capture. 새 서버/fault engine0개·Close callback용 adapter1개.
+
+[leaf12그룹91사례](../image/v2/metadefproperties/record_get_test.go)와 [Connection1그룹1사례](../connection_image_metadef_property_record_test.go)의 **집중 race13그룹92개 최종 사례**가 PASS했습니다. 전체 vet·race43개 실제 test package, 최종 고정 parity·progress·gofmt가 PASS했습니다. 첫 통합 gate의 지원 JSON이 타입 이름을 function-only API index에 넣어 parity에서 실패했으며 타입 참조만 교정했습니다. Go source가 같으므로 `make -o vet -o test check`로 최종 metadata 검사를 통과하고 이미 통과한 전체 Go 근거를 재사용했습니다.
+
+Go source2,018개 SHA256 `bb6e1a27ce2cb84e913fdc425eb7c3d34bc143447c4ff7fa144ef013da581894`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 반복 생성 drift0·새 owned 조회 main/기존 raw 조회 main/설치 main의 별도 module local-replace build3개 exit0입니다. 인증/API/Python을 실행하지 않았습니다. `/private/tmp/go-openstacksdk-property-record-{focused.jsonl,check.log,metadata-check.log,check-receipt.json,generation-repeat.log,consumer.json}`에 실제 실행 근거를 기록합니다.
+
+모델 `e480edcc`·조회 `ea80c826`·Connection `86d9781f`를 별도 commit/push했습니다. **다른549 reviews·catalog/source pins·원래6개 raw 계약을 보존**했습니다. 기존7번째 boundary audit의 테스트는 유지하고 formerly unresolved 설명을 새 getter와 맞췄으며6개 계약을 추가해 reviews550·계약3,435입니다. named getter1개만 승격했고 metadata의 다른 CRUD/list·전체 Python Resource/session은 별도입니다. 다음 핵심 user 단위는 같은 property의 owned finite dictionary 목록입니다.
 
 ## Glance metadef resource type·association owned 목록 완료
 

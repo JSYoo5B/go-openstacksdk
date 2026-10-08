@@ -1,6 +1,6 @@
 # Glance Metadef property 조회
 
-`get_metadef_property(property, namespace)`에 대응하는 기존 typed Go API는 `service.API.MetadefProperties.InNamespace(ctx, namespace)`로 parent를 고정한 뒤 `scope.Get(ctx, property)`를 호출하는 방식입니다. namespace와 property는 이름 그대로 사용하며 namespace 조회·이름 검색·schema 조회를 선행하지 않습니다. 생성·교체·삭제·dictionary 목록은 [leaf 가이드](v2/metadefproperties/README.md)를 참고합니다.
+`get_metadef_property(property, namespace)`에 대응하는 기존 typed Go API는 `service.API.MetadefProperties.InNamespace(ctx, namespace)`로 parent를 고정한 뒤 `scope.Get(ctx, property)`를 호출하는 방식입니다. namespace와 property는 이름 그대로 사용하며 namespace 조회·이름 검색·schema 조회를 선행하지 않습니다. 생성·교체·삭제·dictionary 목록은 [leaf 가이드](v2/metadefproperties/README.md)를 참고합니다. 초기 속성·descriptor 기본값과 변환이 필요한 새 `GetRecord`는 [레코드 조회 가이드](metadef-property-records.md)에 설명합니다. 아래 비교는 기존 raw typed Get의 경계를 유지합니다.
 
 ## Python과 Go
 
@@ -31,15 +31,16 @@ if err != nil { return err }
 
 고정 openstacksdk의 공개 getter는 `**query`를 `Proxy._get`에 전달합니다. `_get`은 `requires_id=True`, `base_path=None`, `skip_cache=False`를 별도 제어값으로 소비하고 나머지는 `_get_resource`의 초기 속성으로 전달합니다. 생성된 Resource의 `fetch`에는 이 초기 속성을 `**params`로 다시 넘기지 않습니다.
 
-예를 들어 다음 Python 호출의 `resource_type`은 이 getter 경로에서 HTTP의 `resource_type` query로 전달되지 않습니다.
+다음 Python 호출의 `resource_type`은 공개 getter가 이미 positional로 바인딩한 `Proxy._get`의 resource_type 인자와 중복됩니다. 따라서 **HTTP 전에 TypeError**이며, 일반 unknown 속성으로 무시하거나 HTTP query로 전달하지 않습니다.
 
 ```python
+# TypeError before HTTP: Proxy._get already binds resource_type.
 value = conn.image.get_metadef_property(
     "hw_cpu_policy", "OS::Compute::Libvirt", resource_type="OS::Nova::Server"
 )
 ```
 
-MetadefProperty는 `resource_type`을 URI·Body·Header 속성으로 선언하지 않습니다. 이 호출을 아래 Go 호출과 같은 wire 동작이라고 설명하면 안 됩니다.
+공개 `**query`의 `value`·`namespace_name`도 이미 바인딩한 인자와 충돌합니다. 반면 requires_id·base_path·skip_cache는 `_get`의 실제 제어값입니다. Python의 실패하는 호출을 아래 Go 호출과 같은 wire 동작이라고 설명하면 안 됩니다.
 
 ```go
 value, err := scope.Get(ctx, "hw_cpu_policy",

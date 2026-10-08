@@ -22764,14 +22764,21 @@
     {
       "operation": "python:image/v2/get_metadef_property",
       "source_fingerprint": "c66c8890c93ce20653bd51d1aa3700847adba5ea23bc422cea5092cd1689f94e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithGetResourceType",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.GetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordGetAttributes"
       ],
       "contracts": [
         {
@@ -22830,28 +22837,72 @@
           ]
         },
         {
-          "behavior": "Named getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. WithGetResourceType remains a deliberate Go server-query extension; owned Resource seeding/default/coercion/fetch translation is still missing and this declaration remains unresolved.",
+          "behavior": "Named strict getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. WithGetResourceType remains a deliberate Go server-query extension; this raw getter itself does not implement Resource seeding/default/coercion/fetch translation. The additive owned GetRecord contracts below close that formerly unresolved named getter gap.",
           "tests": [
             "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDescriptorKeywordsRemainRaw",
             "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDoesNotReuseCachedOrSeededResults"
+          ]
+        },
+        {
+          "behavior": "GetRecord snapshots concrete ID-or-Resource input before dependency/options callbacks, retains recognized initial attributes, applies option attrs before selecting final ID or alternate name and never mutates the input. String+id attribute is a preflight collision; Resource id attr may retarget before HTTP. Required fixed literal parent/child and zero query/body GET reject unsafe or null/nonstring identity; response fields cannot retarget. Known seed descriptor errors and reserved route/cache/session/class/version controls fail preflight, while unknown ordinary attrs and superseded alias encoding failures are ignored.",
+          "tests": [
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSeedAttributesAndResponseOverlay",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordInputAndAttributesPreflight",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSupersededAliasDoesNotExposeEncodingFailure"
+          ]
+        },
+        {
+          "behavior": "Owned Resource projects eighteen declared Body descriptors plus inherited id, current Connection location and fixed Go namespace_name provenance. Missing min_length/min_items default0 and require_unique_items false; explicit null is retained. Raw untyped JSON, list singleton wrapping and dict object-or-empty fallback, shared integer descriptor and Python truthiness are applied after seed/response overlay. Omitted response fields preserve seeds. Maps prefer canonical presence including null; parsed response aliases follow dictionary member order with duplicate first slot/last value.",
+          "tests": [
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordFixedRouteDefaultsAndOwnedReceipts",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSeedAttributesAndResponseOverlay",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordDescriptorsAliasesAndExplicitNull"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 successful fetch always reads/closes once and verifies whole UTF8. Parsed nonnull object overlays declared Body only and retains complete independent Wire; empty/opaque/syntax-invalid JSON returns seeded/default Resource with nil Wire and actual Envelope/Header/status. Valid parsed null/array/scalar and descriptor/read/Close/context/source failures are atomic accepted ResponseErrors preserving receipt and causes. Native400+ errors retain native ownership; no accepted-body replay.",
+          "tests": [
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordStatusParsingAndMissingPolicy",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordAcceptedBodyErrorsPreserveAllCauses",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordDescriptorsAliasesAndExplicitNull"
+          ]
+        },
+        {
+          "behavior": "RecordGet FullOpts replace configuration, headers and recognized semantic attribute capture with factory/callback ownership before and after. Bulk attrs replace and singular attrs overlay; callbacks run once, latest source ordinary headers are captured and live Provider auth is preserved. Connection location is captured before options and fixed namespace URI means seed/response computed location never replaces it. Resource/Wire/Envelope/headers own independent bytes and only actual response metadata is attached.",
+          "tests": [
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordOptionFactoriesAndRetainedStorage",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordPreflightOrderAndCallbackCauses",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordFixedRouteDefaultsAndOwnedReceipts"
+          ]
+        },
+        {
+          "behavior": "Getter reuses REST/fixedrequest native prebody retry/reauth/backoff policies with fixed method/target/body/framing/representation/status ownership. Source/namespace/outer/context guards cover callbacks, physical attempts, read/Close and final projection; observed failure stays sticky after target restoration. Retry mutation cannot expand actual accepted range or replay an accepted-body failure.",
+          "tests": [
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordNativeRetryPoliciesAndOwnership",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordSourceAndOuterGuardAtPhysicalBoundaries",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordPreflightOrderAndCallbackCauses"
+          ]
+        },
+        {
+          "behavior": "Both high-level Connection.Image API and versioned Connection.ImageV2 inject CurrentLocation and share the original service client/provider. Owned configured facts survive caller mutation and option-updated authentication is live; view preserves seeds/default conversion with actual203 receipt and passive response fields. Original typed Get retains strict200 raw Body and additive resource_type query independently.",
+          "tests": [
+            "connection_image_metadef_property_record_test.go:TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordLegacyGetRemainsRawAndStrict"
           ]
         }
       ],
       "documentation": [
         "image/v2/metadefproperties/README.md",
-        "image/metadef-property.md"
+        "image/metadef-property.md",
+        "image/metadef-property-records.md"
       ],
       "differences": [
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
-        "Pinned public **query seeds _get_resource or binds requires_id/base_path/skip_cache controls; it is not arbitrary fetch query. Go ResourceType currently deliberately sends the Glance server query and is not identical to Python resource_type keyword forwarding."
-      ],
-      "remaining": [
-        "Implement an owned property getter retaining recognized seed attrs/identity/namespace, missing descriptor defaults and coercion, Connection location and actual200..399 fetch translation (including invalid-JSON success) independently of existing strict200 raw DTO.",
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+        "Go mapping uses an immutable owned concrete RecordRequest and fresh GET; Python mutates existing Resource/cache/dirty/session state and accepts broader dict/Munch/None parent inputs. Go requires fixed literal namespace and selected string child, explicitly rejects route/cache/class/session/version overrides, and does not add finder/discovery or conditional cached returns.",
+        "Resource view has21 fields: pinned Python default to_dict20 plus fixed namespace_name provenance. Unknown/self/schema/date fields remain only in actual Wire/Envelope; Source Body descriptor names, null/defaults, list/dict/bool/int projection and response overlay are owned. Response identity is passive, and canonical map aliases have deterministic precedence while Python kwargs use dictionary order.",
+        "Shared JSON integer projection preserves arbitrary integer JSON and bool, truncates IEEE754 float values, uses Unicode16 digit properties and omits CPython configurable digit-string limits. Bool numeric truthiness compares exact decimal zero, so underflow/JSON backend and nonfinite runtime behavior may differ. Arbitrary Go attributes use encoding/json snapshots, with deferred failures only for finally selected declared attrs.",
+        "Always-on fixed query-free owned fetch accepts actual200..399 and tolerates successful syntax-invalid JSON, but requires wholeUTF8 and parsed nonnull objects. Original strict200 raw typed Get remains a separate API, with WithGetResourceType as a deliberate Go server-query extension. Python public resource_type/value/namespace_name kwargs cause duplicate-binding TypeError beforeHTTP.",
+        "Connection current location including explicitly configured Zone is preserved; pinned Python current_location normally has zone=None. Direct New has null location, while NewWithDependencies supplies a concrete callback. Fixed namespace URI causes seed/response location to remain passive in Wire.",
+        "Local transport fixtures and compile/install builds establish the named getter Go contract; server schema/policy/DB defaults, authenticated side effects and live Python execution are not proven. This mapping does not claim whole Python Resource/session lifecycle parity or change the remaining metadata CRUD/list inventory."
       ]
     },
     {

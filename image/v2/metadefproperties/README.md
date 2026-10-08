@@ -5,7 +5,8 @@
 | Go 호출 | 고정 Python proxy | 요청·정상 응답 |
 | --- | --- | --- |
 | `scope.Create` | `create_metadef_property` | collection POST, 201 |
-| `scope.Get` | `get_metadef_property` | child GET, 200 |
+| `scope.Get` | raw 조회 API | child GET, 200 |
+| `scope.GetRecord` | `get_metadef_property`의 owned Go mapping | query 없는 child GET, 200..399 |
 | `scope.Update` | `update_metadef_property` | 현재 child PUT, 200 |
 | `scope.Delete` | `delete_metadef_property` | child DELETE, 204 |
 | `scope.DeleteAll` | `delete_all_metadef_properties` | collection DELETE, 204 |
@@ -105,14 +106,14 @@ func manageProperties(ctx context.Context, service *image.Service, namespace, na
 
 `List`와 `All`은 각각 새 GET을 실행하고 cache를 공유하지 않습니다. 예제는 Get에 explicit empty `resource_type=`를 보내며 개별 Delete에는 strict missing을 선택했습니다. Type·Title은 Create와 Update 모두 필수 pointer이므로 zero/full opts만으로 호출하면 HTTP 전에 오류입니다.
 
-고정 openstacksdk의 실제 6개 proxy 호출은 다음과 같습니다.
+고정 openstacksdk의 실제 6개 proxy 호출은 다음과 같습니다. Python getter의 `resource_type` keyword는 이미 바인딩한 인자와 충돌하여 HTTP 전에 TypeError입니다. 위 Go raw Get의 explicit empty server query는 별도 확장 기능입니다. 초기 속성·descriptor view가 필요한 경우 [GetRecord 사용법과 독립 main](../../metadef-property-records.md)을 사용합니다.
 
 ```python
 def manage_properties(conn, namespace, name, replacement_name, clear_namespace=False):
     created = conn.image.create_metadef_property(
         namespace, name=name, type="string", title="Hypervisor Type",
         description="First line\nSecond line", enum=["kvm", "qemu"], default="kvm", readonly=False)
-    fetched = conn.image.get_metadef_property(name, namespace, resource_type="")
+    fetched = conn.image.get_metadef_property(name, namespace)
     rows = list(conn.image.metadef_properties(namespace))
     updated = conn.image.update_metadef_property(
         name, namespace, name=replacement_name, type="string", title="Hypervisor Type",

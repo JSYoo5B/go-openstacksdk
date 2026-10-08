@@ -10,7 +10,15 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance resource type·association owned 목록, 전체255→257(+2)·핵심181→183/2,292·Glance19→21/120.** `ListRecords/AllRecords`가 declared Resource·실제 Wire/page/receipt, semantic query와 local Body 필터·raw row cap·공통 paging을 제공합니다. 두 Connection 진입점이 current location을 전달하며 고정 Source collector의 Body/URI별 location 규칙을 반영했습니다. [Python/Go 비교·독립 main](../image/metadef-resource-types-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-resource-typeassociation-owned-목록-완료)을 함께 갱신했습니다.
+**최신 API 완료 (2026-10-09): 핵심 user Glance owned property 조회, 전체257→258(+1)·핵심183→184/2,292·Glance21→22/120.** `NamespaceScope.GetRecord`가 concrete ID/Resource 입력과 초기 속성, 응답 overlay·nullable descriptor 기본값/변환, 양쪽 Connection current location을 제공합니다. Resource·실제 Wire·Envelope·receipt를 분리하고 actual200..399의 빈/비JSON 성공을 처리합니다. 기존 strict200 raw Get은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-property-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-조회-완료)을 갱신했습니다.
+
+새 집중 race **13그룹·92개 최종 사례**(leaf12그룹91·Connection1그룹1), 전체 race **43개 실제 test package**·vet, 최종 고정 parity·progress·gofmt가 PASS했습니다. 기존 public Gophercloud helper·Property/Connection fixture·REST guard·공통 JSON descriptor를 재사용하며 새 서버/fault engine0개·Close callback adapter1개입니다. 지원 JSON의 타입 참조를 함수·메서드로 교정했고 Go 변경 없이 최종 metadata gate를 확인했습니다. 반복 생성 drift0·정확한 새/기존 조회/설치 main3개의 외부 local-replace 빌드가 PASS했습니다. Go source2,018개·SHA256 `bb6e1a27ce2cb84e913fdc425eb7c3d34bc143447c4ff7fa144ef013da581894`이며 `/private/tmp/go-openstacksdk-property-record-check-receipt.json`에 실제 근거를 기록했습니다.
+
+모델 `e480edcc`·조회 `ea80c826`·Connection `86d9781f`를 각각 commit/push했습니다. catalog3,362개 fingerprint/source pins·다른549 reviews·기존6개 raw 계약과7번째 audit 테스트를 보존했습니다. 예전 audit의 미해결 문구를 additive getter 구현에 맞게 교정하고6계약을 추가해 reviews550·계약3,435입니다. 이번 증가는 named getter1개이며 전체 Python Resource/session이나 실제 cloud 검증을 뜻하지 않습니다. 원격 설치는 정확한 구현 revision을 push한 뒤 별도 module에서 확인하여 설치 안내에 기록합니다.
+
+**다음 구현:** 같은 핵심 user `metadef_properties` owned 유한 dictionary 목록입니다. key→name seed·같은 Resource projector·descriptor 이후 canonical Body 로컬 필터·mandatory properties JSON·partial collection을 처리합니다. 이 Source의 `max_items`는 property descriptor 조건이고 pagination cap이 아닙니다. 완료한 getter나 schema를 다시 세지 않습니다.
+
+**앞선 API 완료 (2026-10-09): 핵심 user Glance resource type·association owned 목록, 전체255→257(+2)·핵심181→183/2,292·Glance19→21/120.** `ListRecords/AllRecords`가 declared Resource·실제 Wire/page/receipt, semantic query와 local Body 필터·raw row cap·공통 paging을 제공합니다. 두 Connection 진입점이 current location을 전달하며 고정 Source collector의 Body/URI별 location 규칙을 반영했습니다. [Python/Go 비교·독립 main](../image/metadef-resource-types-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-resource-typeassociation-owned-목록-완료)을 함께 갱신했습니다.
 
 새 집중 race **20그룹·228개 최종 사례**(목록17그룹224·property2그룹3·Connection1그룹1)가 PASS했습니다. 기존 public testhelper·rtCore/Property/Connection fixture·REST paging·JSON filter를 재사용했고 새 HTTP 서버/fault engine은0개, Close callback용 작은 adapter만1개입니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt, 반복 생성 Go drift0와 정확한 독립 main3개의 외부 local-replace 빌드가 PASS했습니다. Go source **2,013개**, SHA256 `19e37601b49bd38dc5a4a60a24c3a1d43e85747c9e7b96c576f1f3922bd9401a`이며 실제 근거는 `/private/tmp/go-openstacksdk-metadef-records-check-receipt.json`에 기록했습니다.
 
@@ -18,7 +26,7 @@
 
 정확한 revision `b4a0f6ab71ec34b698cf12ab670f0516112411dd`을 별도 외부 module에서 replace 없이 설치하여 동일한 main3개를 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008153156-b4a0f6ab71ec`이며 원격 Go source2,013개 SHA가 위 최종 gate와 같습니다. LICENSE·NOTICE·통합 고지·제3자 라이선스/고지 13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadef-records-remote-receipt.json`과 [설치 안내](install.md)에 결과를 기록합니다. 이후 JSON/prose 갱신에는 같은 Go의 전체 검사를 반복하지 않습니다.
 
-**다음 구현:** `get_metadef_property`는 초기 Resource 속성·descriptor default/coercion·fetch translation의 실제 구현 공백을 확인해 **미해결 유지**입니다. 기존 strict200 getter와 additive resource_type query를 완료로 재집계하지 않았습니다. [조회 비교·실행 main](../image/metadef-property.md)에 seed/default·200..399/invalid-JSON·mutable cache 차이를 기록했고 owned getter부터 이어갑니다.
+**당시 다음 구현:** `get_metadef_property`는 초기 Resource 속성·descriptor default/coercion·fetch translation의 실제 구현 공백을 확인해 **미해결 유지**입니다. 기존 strict200 getter와 additive resource_type query를 완료로 재집계하지 않았습니다. [조회 비교·실행 main](../image/metadef-property.md)에 seed/default·200..399/invalid-JSON·mutable cache 차이를 기록했고 owned getter부터 이어갑니다.
 
 **앞선 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
 
@@ -114,17 +122,17 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**다음 핵심 user 단위:** Glance metadata definition property getter·관련 목록의 실제 Source/DTO 차이와 기존 테스트를 검토합니다. 이미 완료한 namespace/object getter와 schema16개는 다시 세지 않습니다. Source가 관리자용으로 명시한 task Get/List와 Availability Zone 상세 host/service 조회는 2단계 핵심 admin에 유지합니다.
+**다음 핵심 user 단위:** Glance metadata definition property의 owned 유한 목록을 구현합니다. named getter는 위 최신 단위에서 닫았고 목록의 실제 Source/DTO 차이를 별도 판정합니다. 이미 완료한 namespace/object getter와 schema16개는 다시 세지 않습니다. Source가 관리자용으로 명시한 task Get/List와 Availability Zone 상세 host/service 조회는 2단계 핵심 admin에 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 257 (7.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 258 (7.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,104 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,103 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 550 | 아직 개별 기록 없는 선언 2,812 |
-| 기록한 부분·전체 계약 | 3,429 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,435 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -169,12 +177,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 183 / 2,292 | 8.0% | 193 | 1,915 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 184 / 2,292 | 8.0% | 192 | 1,915 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 257 / 3,362 | 7.6% | 292 | 2,812 | 1 |
+| 전체 | 258 / 3,362 | 7.7% | 291 | 2,812 | 1 |
 
 **핵심 서비스**
 
@@ -184,7 +192,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 21 / 120 | 58 | 41 | 0 |
+| Image / Glance | 22 / 120 | 57 | 41 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -294,10 +302,11 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-08의 최근 완료 단위와 다음 작업입니다. Create·조회6개·삭제1개는 해당 선언의 필수 계약·실제 테스트·문서·검증을 완료해 `go_mapping`으로 판정했습니다. List/Search/Get에서 발견한 실제 오류2개는 수정과 신규 HTTP 회귀3그룹·최종 전체 check로 닫았습니다. 전체 mutable Resource/session 등 다른 선언의 목표는 계속 추적합니다. 착수와 단계 전환 때 이 표·집계·검증 기록을 함께 갱신합니다.
+아래는 2026-10-09까지의 완료 단위와 다음 작업입니다. 각 행의 판정은 해당 선언의 구현·테스트·문서 근거이며, 전체 Resource/session 등 다른 선언의 목표는 계속 추적합니다. 착수와 단계 전환 때 이 표·집계·검증 기록을 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance property owned 조회 | pinned getter·descriptor·fetch 검토 완료 | **seed/overlay·21필드 view·GetRecord·Connection 완료** | 집중13그룹92·전체43 package race/vet·metadata gate PASS | Python 비교·정확한 독립 main3개 build PASS | **go_mapping1행·전체258/3,362** | `e480edcc`·`ea80c826`·`86d9781f` push 완료. 다음은 owned finite dictionary 목록 |
 | Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
 | Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |
 | Identity 사용자별 프로젝트·그룹 목록 | native page와 Python 모델·상속 비교 완료 | 반환 모델·추출기 교정 완료 | 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | native 2개 `go_mapping`, Python 2개 부분 판정·정합성 검증 완료 | 코드·테스트 `ff685e9` push 완료. 문서·판정 `4ba94ab` push 완료. [검증 기록](sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록), [사용법](../identity/v3/users/memberships.md). NIC 선택으로 연결 완료 |
