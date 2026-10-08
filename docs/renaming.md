@@ -60,3 +60,11 @@ SDK가 새 segmented upload용으로 만드는 prefix는 `.gophercloudsdk-upload
 Gophercloud generator-test에 포함한 고정 source 발췌·변형과 Unicode full lowercase/context 데이터의 고지 범위를 `fea9a547`에서 보완했습니다. 모듈·import·생성기·Git remote의 실제 참조는 `go-openstacksdk`이며, 이전 이름은 변경 이력과 reference 출처에서만 보존합니다. 원본 라이선스 표10개의 hash와 internal JMESPath LICENSE 사본도 확인했습니다.
 
 정확한 문서·판정 revision `72cf240b6a9508cbbbf4404ae882ef9576a306ce`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008214624-72cf240b6a95`·get/build exit0이며 태그/설치 main **2개**를 빌드했습니다. 원격 Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-tags-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+## 파일별 변경 고지와 최종 배포 확인 (2026-10-09)
+
+tracked 파일을 전수 검색해 실제 module·import·package·생성기·manifest·Git remote에서 옛 이름 참조가 없음을 확인했습니다. GitHub 저장소도 `JSYoo5B/go-openstacksdk`이며 Apache-2.0으로 표시됩니다. 옛 이름은 변경 이력과 과거 reference 출처에서만 보존합니다.
+
+Gophercloud source fixture를 포함하거나 결합·변형하는 테스트 파일 **18개**에 원저작권·Apache-2.0·원본 범위·로컬 변경 고지를 추가했습니다. fixture 문자열과 실행 코드는 변경하지 않았습니다. 보존한 라이선스 표의 SHA-256 **10개**와 내부 JMESPath 원문 사본도 일치합니다. 최종 `make check`의 **44개 테스트 package**·race·vet·API 판정·포맷 검사가 통과했습니다.
+
+보완 커밋 `1ec3b909bd3588df74f2e84ed38baa96d99cc577`을 원격 main에 반영하고 별도 외부 Go module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008222501-1ec3b909bd35`에서 문서 예제 main **2개**가 빌드되며, 배포된 Go source2,089개 SHA256 `fdd94cb1618b66c86fd59ee79bde0c27120f68d61c0a0634f47f643431db5659`가 최종 검증 소스와 같습니다. 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. [기본 설치 명령](install.md)은 이 revision을 사용합니다. 실제 인증·OpenStack 호출 및 별도 상표 사용 허가는 이 검증에 포함하지 않습니다.
