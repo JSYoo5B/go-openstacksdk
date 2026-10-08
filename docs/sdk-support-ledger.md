@@ -21,7 +21,9 @@
 
 다른547 reviews·catalog bytes/pins/fingerprints와 선택한 세 선언의 기존23계약·API를 보존하고18계약을 추가했습니다. reviews550·go_mapping273·unresolved276·unsupported1·contracts3,526이며 catalog unresolved3,088개에는 미검토2,812개도 포함합니다. 기존 `get_import_info`·`get_metadef_property`·`metadef_namespaces`와 같은 named immutable Go 기본 profile 판정 기준을 적용했습니다. pinned `images(**query)`에서 JMESPath가 도달 가능한 사실은 숨기지 않으며 새 ImageRecord Filter는 `jmespath_filters`를 명시적으로 거부합니다. mutable Resource·dirty/same-instance lifecycle, 선택적 cache/conditional GET, 임의 JMESPath 결과 shape와 동적 per-call session/base_path/microversion은 [SDK-R1/C1/J1/S1](implementation-plan.md#공통-sdk의-남은-계약)에 별도로 남깁니다. 이 판정은 전체 Python runtime 동등성이나 전체 목표 완료를 뜻하지 않습니다.
 
-공통 helper `7a3da054`·조회 `03c9d8e1`·목록 `497defd5`·검색/Connection `24e3b273`·가이드 `5545c5e6`을 작은 단위로 commit/push했습니다. 기존 strict typed/native 프로필을 유지하며 정확한 최종 문서·판정 revision의 원격 소비자 설치 검증을 이어갑니다. 다음 핵심 user 후보는 ImageRecord 기반 status/delete 대기의 유한 계약입니다.
+공통 helper `7a3da054`·조회 `03c9d8e1`·목록 `497defd5`·검색/Connection `24e3b273`·가이드 `5545c5e6`을 작은 단위로 commit/push했습니다. 기존 strict typed/native 프로필을 유지하며 판정 `16b2873a`도 commit/push하고 정확한 revision의 원격 소비자 검증을 완료했습니다. 다음 핵심 user 단위는 ImageRecord 기반 status/delete 대기의 유한 계약입니다.
+
+정확한 문서·판정 revision `16b2873a9ef203b5f07162bba277df84b5a26a16`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008202819-16b2873a9ef2`·get/build exit0이며 Image/설치 main **2개**를 빌드했습니다. 원격 Go source2,074개 SHA256 `3cc9702bc1924492bbb534fb6d94640aa739e90543a5268c488b0249fd4c9b91`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance import 정보·기본 store owned records
 

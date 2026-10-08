@@ -2,7 +2,9 @@
 
 Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사용합니다. 전체 SDK는 개발 중이며, 지원 범위는 [구현 현황](implementation-plan.md)에서 확인합니다. `v0.1.0-alpha.1` tag는 아직 배포하지 않았습니다.
 
-2026-10-09 최신 Glance import·기본 store records: 정확한 문서·판정 revision `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008193028-95a7c6de03b2`·get/build exit0이며 discovery/설치 main **2개**를 빌드했습니다. 원격 Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는270/3,362이며 상세 store는 아직 unresolved입니다.
+2026-10-09 최신 Glance Image owned 조회·목록·검색: 정확한 문서·판정 revision `16b2873a9ef203b5f07162bba277df84b5a26a16`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008202819-16b2873a9ef2`·get/build exit0이며 Image/설치 main **2개**를 빌드했습니다. 원격 Go source2,074개 SHA256 `3cc9702bc1924492bbb534fb6d94640aa739e90543a5268c488b0249fd4c9b91`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는273/3,362이며 공통 mutable Resource·캐시·JMESPath/session 계약은 계속 추적합니다.
+
+2026-10-09 앞선 Glance import·기본 store records: 정확한 문서·판정 revision `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008193028-95a7c6de03b2`·get/build exit0이며 discovery/설치 main **2개**를 빌드했습니다. 원격 Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는270/3,362이며 상세 store는 아직 unresolved입니다.
 
 2026-10-09 앞선 Glance member owned 목록·검색: 정확한 문서·판정 revision `0647ce86adc0e5f0cdbfbe8f3dc7c100c7655433`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008190535-0647ce86adc0`·get/build exit0이며 member/설치 main **2개**를 빌드했습니다. 원격 Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`가 최종 집중/전체 gate의 소스와 같고, 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는269/3,362입니다.
 
@@ -26,7 +28,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@95a7c6de03b24b76ffbe49fa6f17efdad553abc6
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@16b2873a9ef203b5f07162bba277df84b5a26a16
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -37,6 +39,7 @@ package main
 import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/image"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
@@ -50,6 +53,15 @@ import (
 )
 
 func main() {
+    _ = (*image.Service).GetImageRecord
+    _ = (*image.Service).ListImageRecords
+    _ = (*image.Service).AllImageRecords
+    _ = (*image.Service).FindImageRecord
+    _ = image.ImageRecordRequest{ID: "image-id"}
+    _ = image.WithImageRecordAttribute("properties", map[string]any{"owner_hint": "project"})
+    _ = image.WithImageRecordListLimit(0)
+    _ = image.WithImageRecordListFilter("is_hidden", true)
+    _ = image.WithFindImageRecordIgnoreMissing(false)
     _ = (*metadefnamespaces.API).ListRecords
     _ = (*metadefnamespaces.API).AllRecords
     _ = metadefnamespaces.WithRecordListLimit(0)
