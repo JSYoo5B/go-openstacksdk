@@ -25,6 +25,10 @@ type ImageRecord struct {
 	Header         http.Header
 	StatusCode     int
 	ImportMethods  []string
+
+	// Raw component presence is retained before descriptor/default projection.
+	// It is private so projected view/receipt edits cannot forge a commit baseline.
+	bodyState *imageRecordBodyState
 }
 
 type imageRecordKind uint8
@@ -352,6 +356,7 @@ func imageRecordFromResponse(ctx context.Context, check func(context.Context) er
 	if err = errors.Join(err, check(ctx)); err != nil {
 		return nil, response.Fail(err)
 	}
+	record.bodyState = newImageRecordBodyState(fields)
 	return record, nil
 }
 
@@ -399,6 +404,7 @@ func prepareImageRecordRow(value *imageRecordRow, location json.RawMessage, enve
 	value.ImportMethods = methods
 	value.Envelope = bytes.Clone(envelope)
 	value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
+	value.bodyState = newImageRecordBodyState(fields)
 	return nil
 }
 func imageRecordMarker(value *imageRecordRow) (string, error) {

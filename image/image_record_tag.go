@@ -74,7 +74,8 @@ func (s *Service) prepareImageRecordTag(ctx context.Context, input ImageRecordTa
 		if err != nil {
 			return nil, err
 		}
-		seed = &ImageRecord{Resource: view, ImportMethods: make([]string, 0)}
+		seed = &ImageRecord{Resource: view, ImportMethods: make([]string, 0),
+			bodyState: newImageRecordBodyState(map[string]json.RawMessage{"id": rawID})}
 	}
 	if err := p.check(p.ctx); err != nil {
 		return nil, err
@@ -210,6 +211,11 @@ func mutateImageRecordTags(record *ImageRecord, tag string, removing bool) error
 	}
 	updated = append(updated, ']')
 	record.Resource.Body["tags"] = updated
+	if record.bodyState != nil {
+		// TagMixin updates raw attributes directly; it does not reset the original
+		// commit baseline or create a Resource dirty flag.
+		record.bodyState.current["tags"] = bytes.Clone(updated)
+	}
 	return nil
 }
 
