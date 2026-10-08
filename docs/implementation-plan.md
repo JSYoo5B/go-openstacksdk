@@ -10,6 +10,8 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
+**진행 중 (2026-10-09): 핵심 user Glance resource type association owned 생성·삭제2개.** 고정 Source의 여섯 raw Body 필드·빈 POST·리소스 입력·기본 ignore_missing·실제 응답과 오류 증거를 검토했고, 구현·fixture 재사용 테스트·Python/Go 비교 문서를 병렬로 작성합니다. 두 선언은 검증 완료 전까지 unresolved이며 현재 완료 수263/3,362는 유지합니다.
+
 **최신 API 완료 (2026-10-09): 핵심 user Glance property owned 생성·수정2개, 전체261→263(+2)·핵심187→189/2,292·Glance25→27/120.** `CreateRecord`는 명시한19개 Body 속성의 raw 값만 POST하고 `UpdateRecord`는 선택한 ID와 fresh18개 non-id 속성만 PUT합니다. 반환 view에는 같은 descriptor 기본값·변환을 적용하며 요청 기본값을 합성하지 않습니다. 빈 생성은 POST `{}`, 빈 수정은 property HTTP 없이 receipt가 없는 local snapshot을 반환합니다. [Python/Go 비교·독립 main](../image/metadef-property-record-write.md), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-생성수정-완료)을 추가했습니다.
 
 집중 race **42그룹·477개 최종 사례**가 PASS했습니다. 기존 조회·목록·삭제33그룹274사례를 재사용하고 새 leaf8그룹201사례·Connection1그룹2사례만 추가했습니다. public Gophercloud helper·기존 Property/Connection HTTP/fault fixture·descriptor projector·semantic capture·REST guard를 재사용하며 새 서버/fault engine은0개입니다. Get/Create/Update의 응답 overlay와 Get/List/Create/Update의 location capture를 공통화했습니다. 전체 vet·race **43개 실제 test package**,263개 parity·progress·gofmt·반복 생성 Go drift0·정확한 생성수정/조회/목록/설치 main4개의 외부 local-replace build가 PASS했습니다. Go source2,029개 SHA256 `71d742e983a57a99a6fdba10b86318c7b7ac87bb1e3e29e298fd0eed07ef03e0`이며 실제 근거는 `/private/tmp/go-openstacksdk-property-write-check-receipt.json`입니다.
@@ -329,7 +331,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance resource type association owned 생성·삭제 | 고정 Source의 Body·공개 delete 초기 검토 완료 | 구현 전 | 기존 list/source/REST fixture 재사용 예정 | owned 비교·예제 추가 예정 | 두 선언 unresolved 유지 | 다음 핵심 user 단위 |
+| Glance resource type association owned 생성·삭제 | pinned6 Body·constructor·public Resource reuse·delete/404 검토 완료 | CreateRecord/DeleteRecord 작성 중 | 기존 list/core/REST fixture 재사용 사례 작성 중 | Python 비교·독립 main 작성 중 | 두 선언 unresolved 유지 | 현재 핵심 user 단위; 검증 뒤 집계 갱신 |
 | Glance property owned 목록·삭제 | pinned finite list·두 deletion·identity·has_body=False 검토 완료 | **ListRecords/AllRecords·DeleteRecord/DeleteAllRecords·공통 guard 완료** | 기존13그룹 재사용·새20그룹182사례·집중33그룹274·전체43 package race/vet·최종261 metadata PASS | Python 비교·정확한 main3개/example1개 local/remote build PASS | **go_mapping3행·전체261/3,362** | 구현·검증·문서7개 commit push 완료. [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료) |
 | Glance property owned 생성·수정 | pinned constructor·raw dirty body·POST/PUT·no-op·공개 identity 선택 검토 완료 | **공통 response/location·CreateRecord/UpdateRecord 완료** | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate PASS | Python 비교·정확한 main4개 local/remote build PASS | **go_mapping2행·전체263/3,362** | 공통/API/leaf/Connection을 별도 commit push. `7b07fe93` 원격 설치·main4개 build·Go SHA/라이선스13개 일치 확인 |
 | Glance property owned 조회 | pinned getter·descriptor·fetch 검토 완료 | **seed/overlay·21필드 view·GetRecord·Connection 완료** | 집중13그룹92·전체43 package race/vet·metadata gate PASS | Python 비교·정확한 독립 main3개 build PASS | **go_mapping1행·전체258/3,362** | `e480edcc`·`ea80c826`·`86d9781f` push 완료. 당시 다음 owned 목록은 위 단위에서 완료 |
