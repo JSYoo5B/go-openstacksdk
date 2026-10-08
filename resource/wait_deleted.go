@@ -41,9 +41,23 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		if err := ctx.Err(); err != nil {
 			return c.wrap("wait deleted", err)
 		}
+		if c.binding.WaitGuard != nil {
+			if err := c.binding.WaitGuard(ctx); err != nil {
+				return c.wrap("wait deleted", err)
+			}
+		}
 		value, err := c.Get(ctx, id)
 		if ctx.Err() != nil {
-			return c.wrap("wait deleted", ctx.Err())
+			// Keep the physical read failure and its receipt when cancellation
+			// arrives during Get. Cancellation still prevents completion.
+			return c.wrap("wait deleted", errors.Join(err, ctx.Err()))
+		}
+		// A completed read cannot establish absence or completion if an
+		// audited binding lost its source while performing that observation.
+		if c.binding.WaitGuard != nil {
+			if guardErr := c.binding.WaitGuard(ctx); guardErr != nil {
+				return c.wrap("wait deleted", errors.Join(err, guardErr))
+			}
 		}
 		if !terminalReadError(err) && errors.Is(err, ErrNotFound) {
 			return nil
@@ -65,6 +79,11 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		}
 		if err := reportWaitProgress(o, value, progressField); err != nil {
 			return c.wrap("wait deleted", err)
+		}
+		if c.binding.WaitGuard != nil {
+			if err := c.binding.WaitGuard(ctx); err != nil {
+				return c.wrap("wait deleted", err)
+			}
 		}
 		if err := o.pause(ctx); err != nil {
 			return c.wrap("wait deleted", err)
