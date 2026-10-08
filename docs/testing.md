@@ -34,6 +34,8 @@ Compute 조회5개도 이 방식을 적용했습니다. metadata·keypair의2테
 
 Remote console·keypair 삭제는 같은 fixture의6그룹으로 서비스별 기본값·경로·응답과 native ABI를 확인하고 기존 공통 삭제 classifier2그룹을 재사용했습니다. 헤더 생략은 공개 `TestHeaderUnset`으로 검사합니다. native Get은 앞선13사례를 그대로 연결하고, Create/Delete의 owner·extension binding은 기존 호환성 표 안에서 보강했습니다. 집중8그룹·전체41 package gate·외부 main build가 PASS했습니다. [사용법](../compute/user-actions.md), [단위별 근거](sdk-support-ledger.md#compute-console-생성과-keypair-삭제-및-native-3개-완료)에 API 수와 실제 HTTP 작업 수를 구분했습니다.
 
+Keypair 생성·legacy console 조회는 기존 public HTTP fixture의6그룹과 공통 BodyFieldBoolean/RawResource clone2그룹을 재사용합니다. Keypair 고유43사례와 legacy의6개 action·raw scalar/array/null·strict JSON 오류를 검증하고, native Create의 실제 concrete 필드/extension·partial/null·200/201 계약은 같은 표에 넣었습니다. 집중8그룹·전체41 package gate·정확한 독립/원격 main 빌드가 PASS했습니다. 새 harness나 공통 오류 표 복제 없이 검증 근거를 [가이드](../compute/keypairs-console.md)와 [판정대장](sdk-support-ledger.md#keypair-생성과-legacy-console-url-완료)에 연결합니다.
+
 Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위

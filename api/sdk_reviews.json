@@ -41131,6 +41131,154 @@
         "The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned body serializer with WithCreateField extensions. API.Create returns extracted native RemoteConsole and wraps failures with operation context; native protocol/type requirements, strict200 status and partial/null extraction remain unchanged. Protocol derivation, selected-version gates and seeded Resource/Wire belong to the independent Python CreateConsole mapping."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_keypair",
+      "source_fingerprint": "176098a29f44e2a0e35fe5438cf85ac191a20842c7706e2f1cf261d4d8a91ff8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.CreateKeypair",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateAttribute",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateName",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreatePublicKey",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateType",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateUserID",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateField",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateKeypair performs one fixed selected-ResourceBase collection POST at os-keypairs with keypair envelope and no query, preliminary GET/LIST, completion wait or cleanup. No attributes produce an empty keypair object. All eight declared body fields plus id/is_deleted aliases accept explicit null, empty, scalar, array or object JSON values; name is body data without member-path ID validation. Unknown semantic attributes are discarded before serialization. Selected live token, source headers and both Compute2.1 version headers are retained without a new local type or owner gate.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures"
+          ]
+        },
+        {
+          "behavior": "Original dirty attributes form the Resource seed; no type=ssh field is synthesized into the POST. Omitted final type projects as ssh only in the view, while null and empty remain literal. Input and response numeric id become name only when canonical name is absent; present name including null wins. Resource id independently mirrors name. Raw deleted values are transmitted unchanged and shared BodyFieldBoolean projects is_deleted only in the view; response null stays null, nonempty false-string is true and empty array/zero is false. Bulk and response deleted win over is_deleted; individual semantic options use the last canonical value.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateResponseSeedWireAndPassiveErrors",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures"
+          ]
+        },
+        {
+          "behavior": "Actual wrapped keypair or flat object fields overlay recognized seed fields, with response omission preserving input and present null replacing it. The independently owned nine-field Resource excludes unknown attributes; independently owned Wire preserves only actual response fields, literal id/deleted aliases, unknown/vendor fields and large JSON numbers. View defaults and input are not inserted into Wire. Envelope, record/resource/wire headers and status preserve the physical response, and mutations do not cross these records.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateResponseSeedWireAndPassiveErrors",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Accepted final200..399 includes actual200/201/202/203, bodyless204 and flat300. Empty, opaque and malformed JSON leave the seeded Resource and nil Wire; parseable nonobject roots or null/array keypair envelopes fail with accepted ResponseError and body/header/status receipt. HTTP403/404 retain the native actual/expected status, POST method, exact collection URL and original body/header; create404 is not ignored. Physical read/Close nested404 and post-response source failure retain accepted201 evidence and original cause rather than tolerated JSON failure, with zero SDK resend.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateResponseSeedWireAndPassiveErrors",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures"
+          ]
+        },
+        {
+          "behavior": "Bulk/individual semantic inputs, vendor values and callback-added attrs/raw fields are snapshotted before later mutations. Bulk replaces semantic choices while retaining extensions; callbacks execute once per call. Core name/id/type/user_id/deleted/is_deleted extensions and unsupported query fail before HTTP. Captured API/source changes and callback cancellation stop later callbacks and HTTP, preserving the original callback error, context.Canceled and custom cancellation cause. A native503 retry hook that changes the source cannot issue a second allocation and retains the original HTTP evidence; allowed token refresh reaches the fixed request.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures",
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-console.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "Python returns a connected mutable Keypair and accepts dynamic attrs. Go returns a finite stateless source-shaped Resource view plus independently owned actual Wire and response receipt; all nine declared view attributes and eight body fields are represented by raw JSON. String convenience options coexist with concrete map/bulk attributes for nullable or untyped values. Unknown semantic attrs are discarded and explicit vendor fields use protected library-owned extensions. Full Resource/session/location/discovery remains separate shared SDK scope, without blocking this finite named create contract.",
+        "Canonical name over id, including present null, matches Keypair._consume_attrs for input and response. For deleted/is_deleted collisions Python generic mapping follows input or response insertion order; Go deterministically favors canonical deleted in bulk and response maps. Individual Go options apply sequentially with the last canonical choice winning. These documented map/option choices are not insertion-order emulation.",
+        "Go uses the caller-selected client microversion unchanged rather than performing Python discovery and selecting the discovered maximum capped at Keypair2.10 when no session default exists. Name/type/owner semantics and permissions are left to Nova; an owner fixture is not a real cloud authorization result. The separate Cloud ComputeCloudMixin/create_keypair wrapper is not promoted by this direct Proxy operation.",
+        "Go tolerates invalid-UTF8 accepted bodies as unparseable with seeded Resource and nil Wire, preserving the envelope; Python response charset detection and replacement-character decoding are not reproduced. Valid nonobject JSON and physical read/Close/source/context failures remain explicit receipt errors. Native Create retains its required string Name, typed model and strict200/201 policy as a separately reviewed source declaration."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/keypairs.Create",
+      "source_fingerprint": "96f32506c16559234d0e6f9097c861d7c5636f6762d221581db4a14f0e80c224",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.Create",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithCreateOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Native Create preserves required Name preflight and sends one authenticated POST to the selected prefixed os-keypairs collection without query or lookup. Concrete CreateOpts binds Name, UserID, Type and PublicKey together with a vendor object extension in the actual keypair body. A protected user_id extension and omitted required Name fail before HTTP; the application need not implement CreateOptsBuilder.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Native Extract preserves all six typed string fields Name/Fingerprint/PublicKey/PrivateKey/UserID/Type and ignores unknown vendor fields. A nonstring name preserves the decoded fingerprint in a partial KeyPair and json.UnmarshalTypeError; a null keypair envelope returns nil,nil. SDK-owned seed/default/alias/RawResource handling is not substituted for native extraction.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Only native POST200/201 is accepted, with actual fixtures for both. Actual202 remains ErrUnexpectedResponseCode with expected200/201, original POST method, exact collection URL, original response body and header. The additive CreateKeypair200..399 policy does not widen native Create.",
+          "tests": [
+            "api/compute_keypair_create_test.go:TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-console.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "The upstream CreateOptsBuilder interface is replaced by concrete CreateOpts/CreateOption and a library-owned serializer with WithCreateOptions/WithCreateField. API.Create returns the extracted native KeyPair and wraps failures with operation context. Native required Name, optional string fields, strict200/201 and partial/null extraction remain intact; source-shaped nullable attributes, view-only ssh and Resource/Wire belong to the independent Python CreateKeypair mapping."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/get_server_console_url",
+      "source_fingerprint": "de96bd773dde44eda01b1a17e80dc41733b57f2971bfa74748ce9a18038319d9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers.API.ConsoleURL"
+      ],
+      "contracts": [
+        {
+          "behavior": "ConsoleURL preserves mandatory exact console type and all six legacy action mappings: novnc/xvpvnc to os-getVNCConsole, spice-html5/spice-direct to os-getSPICEConsole, rdp-html5 to os-getRDPConsole and serial to os-getSerialConsole. It performs one fixed selected-ResourceBase POST at servers/{serverID}/action with the exact type body, no query and empty Accept, retaining live token/source headers and selected version. Selected2.100, absent version and spice-direct2.5 remain legacy without discovery, modern fallback or a new local gate. Empty/webmks/unknown/case or whitespace variants fail before HTTP.",
+          "tests": [
+            "api/compute_console_url_test.go:TestComputeConsoleURLLegacyActionsSelectedSourceAndUnsupportedTypes"
+          ]
+        },
+        {
+          "behavior": "The actual root object must contain the exact console key. Its object/empty object/null/array/string/false/zero value is returned as independently copied json.RawMessage without a type/url model, input seed, coercion or unknown/large-number loss. Actual response type may differ from the requested type; literal Unicode, escaped controls and URL text remain raw. Owned final200..399 accepts actual200/201/203 and300 without Location.",
+          "tests": [
+            "api/compute_console_url_test.go:TestComputeConsoleURLRawValueAndResponseEvidence",
+            "api/compute_console_url_test.go:TestComputeConsoleURLLegacyActionsSelectedSourceAndUnsupportedTypes"
+          ]
+        },
+        {
+          "behavior": "Missing console or wrong-case key, null/array/string root, empty204, opaque/malformed accepted JSON and invalid UTF8 remain receipt errors rather than nil console success. Accepted errors retain original body/header/status and do not invoke native retry; this legacy getter does not borrow creation JSON tolerance. HTTP400/403/404 preserve native actual/expected200..399 status, POST method, exact URL and original body/header, with no lookup or modern fallback.",
+          "tests": [
+            "api/compute_console_url_test.go:TestComputeConsoleURLRawValueAndResponseEvidence"
+          ]
+        },
+        {
+          "behavior": "Nil API/client/context, unsafe server ID, pre-canceled custom-cause context and an outer operation guard fail with zero HTTP. Accepted read, nested404 Close, source drift and cancellation retain physical203 receipt and original causes; nested404 is not ErrNotFound. Accepted processing failures cause no SDK rePOST and the shared fault wrappers confirm one physical request/read/Close where applicable.",
+          "tests": [
+            "api/compute_console_url_test.go:TestComputeConsoleURLSourceContextAndAcceptedFailures"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-console.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "Python accepts a Server Resource or ID and returns the actual dynamically shaped console value. Go requires a validated explicit single-path-segment/text server ID and mandatory type, returning an independently owned json.RawMessage; Python None is represented by raw JSON null. Missing console is an operation-scoped ResponseError rather than Python KeyError, while null/scalar/array values remain successful exact values.",
+        "Go preserves the selected client microversion without Python endpoint-bound discovery and Server2.100 maximum selection. It uses the legacy action directly and does not implement the separate Proxy.create_console modern/legacy discovery branch, validate_console_auth_token, cloud console wrappers or Resource/session lifecycle under this row.",
+        "Go rejects invalid-UTF8 response bodies with a receipt and does not reproduce Python response charset detection or replacement-character decoding. JSON shape/selection/read/Close/source/context failures preserve actual evidence through Go errors; accepted processing errors are not retried. This strict getter policy is independent from the tolerant accepted-nonJSON policy of CreateConsole/CreateKeypair."
+      ],
+      "remaining": []
     }
   ]
 }
