@@ -119,23 +119,28 @@ func snapshotFlavorExtraSpecsInput(input FlavorExtraSpecsRequest) (string, *reso
 	return identity, seed, nil
 }
 
-// FetchExtraSpecs always reads /flavors/{id}/os-extra_specs, even when the
-// supplied flavor already has inline specs. The existing input and selected
-// client are never mutated. Native ListExtraSpecs retains its typed ABI.
-func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest, options ...FlavorExtraSpecsOption) (*FlavorExtraSpecsRecord, error) {
-	fail := func(value *FlavorExtraSpecsRecord, err error) (*FlavorExtraSpecsRecord, error) {
-		return value, request.Wrap("FetchExtraSpecs", "flavors", cloudread.ContextError(ctx, err))
-	}
+type flavorExtraSpecsRead struct {
+	ctx      context.Context
+	source   *cloudread.Source
+	check    func(context.Context) error
+	identity string
+	seed     *resource.RawResource
+	version  string
+}
+
+// prepareFlavorExtraSpecsRead snapshots the same input and read policy for the
+// full dictionary and single-property endpoints before any option callback.
+func (a *API) prepareFlavorExtraSpecsRead(ctx context.Context, input FlavorExtraSpecsRequest, options ...FlavorExtraSpecsOption) (*flavorExtraSpecsRead, error) {
 	if err := cloudread.Context(ctx); err != nil {
-		return fail(nil, err)
+		return nil, err
 	}
 	if a == nil {
-		return fail(nil, fmt.Errorf("%w: flavor API is required", resource.ErrInvalidOption))
+		return nil, fmt.Errorf("%w: flavor API is required", resource.ErrInvalidOption)
 	}
 	original := a.client
 	source, err := cloudread.Capture(ctx, original, "compute")
 	if err != nil {
-		return fail(nil, err)
+		return nil, err
 	}
 	var changed error
 	guard := func(checkCtx context.Context) error {
@@ -150,7 +155,7 @@ func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest
 	}
 	identity, seed, err := snapshotFlavorExtraSpecsInput(input)
 	if err = errors.Join(err, check(operationCtx)); err != nil {
-		return fail(nil, err)
+		return nil, err
 	}
 	owned := slices.Clone(options)
 	guarded := make([]FlavorExtraSpecsOption, len(owned))
@@ -174,29 +179,57 @@ func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest
 		err = request.ValidateCapabilities(config, false, false, true)
 	}
 	if err = errors.Join(err, check(operationCtx)); err != nil {
-		return fail(nil, err)
+		return nil, err
 	}
 	if !hasFlavorExtraSpecsHeader(config.Headers, "Accept") && !hasFlavorExtraSpecsHeader(source.Client.MoreHeaders, "Accept") {
 		config.Headers["Accept"] = "application/json"
 	}
 	chosen, err := selectFlavorExtraSpecsVersion(operationCtx, source, config.Options.Microversion, config.Headers)
 	if err = errors.Join(err, check(operationCtx)); err != nil {
-		return fail(nil, err)
+		return nil, err
 	}
-	target := source.Client.ServiceURL("flavors", url.PathEscape(identity), "os-extra_specs")
+	return &flavorExtraSpecsRead{ctx: operationCtx, source: source, check: check, identity: identity, seed: seed, version: chosen}, nil
+}
+
+// read uses the shared versioned, guarded bodyless transport and strict object
+// decoder. It preserves the physical receipt for any accepted processing error.
+func (read *flavorExtraSpecsRead) read(property ...string) (*resource.RawResource, *rest.Response, error) {
+	parts := []string{"flavors", url.PathEscape(read.identity), "os-extra_specs"}
+	for _, value := range property {
+		parts = append(parts, url.PathEscape(value))
+	}
+	target := read.source.Client.ServiceURL(parts...)
 	codes := make([]int, 200)
 	for index := range codes {
 		codes[index] = index + 200
 	}
-	response, prior := microversions.MemberGet(operationCtx, source, target, chosen, microversions.NovaProfile, codes...)
+	response, prior := microversions.MemberGet(read.ctx, read.source, target, read.version, microversions.NovaProfile, codes...)
 	if response == nil {
-		return fail(nil, errors.Join(prior, check(operationCtx)))
+		return nil, nil, errors.Join(prior, read.check(read.ctx))
 	}
-	result := &FlavorExtraSpecsRecord{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
-	if err := errors.Join(prior, check(operationCtx)); err != nil {
-		return fail(result, response.Fail(cloudread.ContextError(operationCtx, err)))
+	if err := errors.Join(prior, read.check(read.ctx)); err != nil {
+		return nil, response, response.Fail(cloudread.ContextError(read.ctx, err))
 	}
 	wire, err := rest.Decode(response, "", func(value *resource.RawResource) *resource.Metadata { return &value.Metadata })
+	return wire, response, err
+}
+
+// FetchExtraSpecs always reads /flavors/{id}/os-extra_specs, even when the
+// supplied flavor already has inline specs. The existing input and selected
+// client are never mutated. Native ListExtraSpecs retains its typed ABI.
+func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest, options ...FlavorExtraSpecsOption) (*FlavorExtraSpecsRecord, error) {
+	fail := func(value *FlavorExtraSpecsRecord, err error) (*FlavorExtraSpecsRecord, error) {
+		return value, request.Wrap("FetchExtraSpecs", "flavors", cloudread.ContextError(ctx, err))
+	}
+	read, err := a.prepareFlavorExtraSpecsRead(ctx, input, options...)
+	if err != nil {
+		return fail(nil, err)
+	}
+	wire, response, err := read.read()
+	if response == nil {
+		return fail(nil, err)
+	}
+	result := &FlavorExtraSpecsRecord{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
 	if err != nil {
 		return fail(result, err)
 	}
@@ -212,11 +245,11 @@ func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest
 	if len(projected) == 0 || projected[0] != '{' && !bytes.Equal(projected, []byte("null")) {
 		projected = json.RawMessage(`{}`)
 	}
-	seed.Body["extra_specs"] = bytes.Clone(projected)
-	if err := check(operationCtx); err != nil {
-		return fail(result, response.Fail(cloudread.ContextError(operationCtx, err)))
+	read.seed.Body["extra_specs"] = bytes.Clone(projected)
+	if err := read.check(read.ctx); err != nil {
+		return fail(result, response.Fail(cloudread.ContextError(read.ctx, err)))
 	}
-	result.Resource = seed
+	result.Resource = read.seed
 	return result, nil
 }
 
