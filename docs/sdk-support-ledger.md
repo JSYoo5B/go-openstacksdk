@@ -4,7 +4,7 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Flavor property·Cloud ID 조회 및 native3개](#flavor-property와-cloud-id-조회-및-native3개-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Flavor owned 목록·검색](#flavor-owned-목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
@@ -2052,3 +2052,16 @@ public testhelper.SetupHTTP/TestMethod/TestHeader/TestHeaderUnset와 기존 test
 공통 reader `b3e55994`·property/native검증 `74c97ec4`·Cloud ID `88f008e5`·문서 `3d446f60`를 작은 단위로 commit/push했습니다. exact revision `3d446f604fb57fefe5be31595679c24ff9ffd796`을 새 module에 GOWORK=off·replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008031535-3d446f604fb5`·remote Go SHA는 위 최종 gate와 같습니다. 근거는 `/private/tmp/gophercloudsdk-flavor-property-remote-consumer-receipt.json`입니다. 실제 인증·OpenStack/Python 호출·alpha tag 배포는 수행하지 않았습니다.
 
 catalog bytes·3,362개 IDs/fingerprints·source pins·기존538 reviews를 보존하고5행15계약만 추가했습니다. 전체231→236/3,362·핵심157→162/2,292·Nova33→38/333, reviews543=go_mapping236/unresolved306/unsupported1·contracts3,351입니다. catalog unresolved3,125에는 미검토2,819개가 포함됩니다. 핵심 완료 수는 user/admin 합산이며1단계 완료 수로 표시하지 않습니다. 동일 Go의 이후 JSON/prose 변경에는 전체 gate를 재사용하고 final parity/progress/gofmt를 확인합니다. 전체 목표는 active이며 다음 핵심 user 단위는 owned Flavor 목록·검색의 실제 query/default/descriptor/current-location/enrichment/pager 계약입니다. 현재 find의 기존8계약과4remaining은 이 단위에서 변경하지 않았습니다.
+
+
+## Flavor owned 목록·검색 완료
+
+2026-10-08에 고정 Python Proxy `flavors`·`find_flavor`2개를 개별 검토했습니다. 목록은 detail/summary·서버 query7/accepted9·로컬 Body12·13 Body+location view·raw cap·모든 shared continuation과 조건부 extra specs를 처리합니다. 검색은 original member query·input seed·response overlay를 유지하고 실제 clean400/403/404에만 상세 목록으로 넘어갑니다. raw id/name/original_name identity·defaults·integer/bool/float/dict 변환을 owned view에 적용하며 actual Wire·Envelope·HTTP receipt와 분리합니다. 첫 match 뒤 늦은 오류를 확인하고 두 번째 match는 즉시 중복 오류입니다. Service는 options/discovery 전에 한 current location을 capture하여 view에만 추가합니다. [Python 비교·정확한 main](../compute/flavor-records.md)에 입력·페이지·버전·부분 결과·Go 차이를 기록합니다.
+
+공통 옵션 carrier 소유권·semantic FilterSelection·REST pager/Body matcher·Collection.FindIdentity·prepared extra-specs reader·finite version selector를 공유했습니다. 공개 Gophercloud TestMethod/TestHeader·SetupHTTP 기반 기존 internal/testcloud와 flavorIdentityClient·payloadContractTrack·secretFetchRoundTripFunc를 재사용했습니다. 신규 HTTP server harness/fault helper는0개이며 API5그룹84사례와 공통 순수7그룹만 추가했습니다. 기존41그룹을 포함한 최종 집중 race53그룹이 PASS했습니다. 초기 short-page marker 실패는 pager가 보관한 raw 행에 projected view가 없기 때문이었습니다. marker를 retained Wire/Envelope의 id/name/original_name에서 구하도록 수정하고 기존 fixture의 필터 제외·caller view mutation 사례로 재검증했습니다. 실패 run은 지원 근거로 사용하지 않습니다.
+
+전체 make check43개 실제 test package·vet/race·pinned parity/progress/gofmt PASS입니다. generator build/run exit0·기존 Go drift0·generated Compute README1개 동기화입니다. Go source1,996개 SHA256 `cc3404ffe583ef697d0eb7040d71e3d7bf177b738f150ae529bbbce1493d2350`가 최종 집중/전체 gate 전후와 원격 module cache에서 같습니다. receipt는 `/private/tmp/gophercloudsdk-flavor-records-focused-receipt.json`, gate-receipt/check log·generation-receipt입니다. 정확한 main fence SHA256 `4010163bc221e71f0486bd029da01a289d69ab3f1332e943746391fa5d835d20`는 외부 consumer-only local replace tidy/build PASS입니다. main의 실행 조건·duplicate-key alias 순서·public helper/internal adapter 구분도 정적 검토했습니다.
+
+공통 carrier `fa7ae04c`·float `54a9a67a`·모델 `178dda79`·목록 `acde2302`·검색 `7cc0a463`·테스트 `2a4bf60d`·문서 `037bd153`를 작게 commit/push했습니다. exact revision `037bd1535f699c20d09aedef6dea11e963f022a4`을 새 외부 module에서 GOWORK=off·replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008035547-037bd1535f69`·remote Go SHA가 위 최종 gate와 같습니다. 근거는 `/private/tmp/gophercloudsdk-flavor-records-remote-consumer-receipt.json`입니다. 인증/OpenStack/Python 실행·alpha tag 배포는 수행하지 않았습니다.
+
+catalog bytes·3,362개 IDs/fingerprints·source pins와 다른542 reviews를 보존했습니다. 기존 Find8계약을 그대로 두고 새5계약을 추가하여4remaining을 닫았으며 native-shaped FindIdentity의 차이는 호환 경로로 명시했습니다. 신규 List5계약과 합계10계약을 추가했습니다. 전체236→238/3,362·핵심162→164/2,292·Nova38→40/333, reviews544=go_mapping238/unresolved305/unsupported1·contracts3,361입니다. catalog unresolved3,123에는 미검토2,818개가 포함됩니다. 핵심 완료 수는 user/admin 합산입니다. full mutable Resource/session/cache/discovery·arbitrary controls 및 다른 Cloud/native 선언은 전체 목표의 별도 작업으로 유지합니다. 동일 Go의 JSON/prose에는 최종 전체 gate를 재사용하고 final parity/progress/gofmt만 확인합니다. 다음은 기존 List/Find를 재사용하는 Cloud Flavor3개의 고정 default·eager inventory·필터·직접 Find 위임입니다.

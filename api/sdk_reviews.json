@@ -11111,14 +11111,28 @@
     {
       "operation": "python:compute/v2/find_flavor",
       "source_fingerprint": "2899de1ae5a47757a5c2418c095691c28bcb38e5cdec88c6fabc7fb5831296c4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.API.FindIdentity",
         "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindOptions",
         "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindFallback",
         "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindQuery",
-        "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindExtraSpecs"
+        "github.com/JSYoo5B/gophercloudsdk/resource.WithIdentityFindExtraSpecs",
+        "github.com/JSYoo5B/gophercloudsdk/compute.Service.FindFlavor",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.API.FindFlavor",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindExtraSpecs",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindIgnoreMissing",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindLimit",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindMarker",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindMaxItems",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindPaginated",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindMicroversion",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindHeader",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindQuery",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindFilter",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorFindFilters"
       ],
       "contracts": [
         {
@@ -11190,24 +11204,65 @@
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
+        },
+        {
+          "behavior": "The primary owned FindFlavor always attempts one escaped literal member GET, including names with spaces or reserved URL characters, without a name hint or list-only is_public default. Semantic attributes retain their original member query spellings and vendor parameters while known attributes seed the Resource view; semantic id conflicts fail before discovery or member HTTP.",
+          "tests": [
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes",
+            "resource/filters_test.go:TestSemanticFilterSelectionKeepsMemberSpellingSeedAndDeferredUnknownErrors"
+          ]
+        },
+        {
+          "behavior": "Accepted member 200..399 retains its whole HTTP envelope, headers and status. A flavor envelope selects only the actual member object, otherwise the flat root is used; known response attributes overlay the input seed in parsed JSON alias order. Omission preserves seed, explicit null overrides it, and raw id/name/original_name truthiness plus response descriptors produce the owned view independently of Wire. Accepted empty, opaque or malformed JSON returns the seed with nil Wire; parsed null or array representations return a receipt error.",
+          "tests": [
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordDeclaredDefaultsDescriptorsAndRawIdentity",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordResponseAliasOrderAndIndependentReceipts",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordDescriptorErrorsAndPassiveStringIdentity"
+          ]
+        },
+        {
+          "behavior": "Only clean member 400/403/404 uses the prepared detailed fallback with transposed server queries, list-only is_public=None and local Body filters. Passive JSON string ID or name is compared exactly; numeric values are not stringified. A unique match requires successful consumption of the selected list, a second matching row immediately returns Ambiguous, a late list failure remains terminal, and zero matches returns nil by default or NotFound with IgnoreMissing(false).",
+          "tests": [
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsQueryProjectionAndOwnedViews",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership"
+          ]
+        },
+        {
+          "behavior": "GetExtraSpecs defaults false. Owned true conditionally enriches only the successfully resolved unique result whose projected extra_specs is falsey; inline nonempty dictionaries, absence, duplicates and late list failures do not fetch. The separate read uses the logical string identity and the same prepared version without caller query, exposes independent Enrichment receipts, and preserves the original row or member Wire.",
+          "tests": [
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment"
+          ]
+        },
+        {
+          "behavior": "The owned find prepares options, source and effective version once across member, fallback and enrichment. Nil version retains the selected client or discovers at most 2.61, explicit empty stays versionless, and the original client remains unchanged. Service.FindFlavor captures Connection location before options and adds it only to the view. Live tokens continue across reads; accepted read/Close or source errors preserve partial receipts and never fall back, become missing, or invoke an SDK response resend.",
+          "tests": [
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorMemberSeedAliasesAndLiteralRoutes",
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment"
+          ]
         }
       ],
       "documentation": [
         "docs/finding-identities.md",
         "compute/README.md",
-        "compute/v2/README.md"
+        "compute/v2/README.md",
+        "compute/flavor-records.md"
       ],
       "differences": [
-        "Go exposes SDK-owned typed GetExtraSpecs options and explicit raw wire query. Python list transposes min_ram/min_disk aliases and automatically classifies declared Body fields; Go uses minRam/minDisk and preserves explicit wire extensions instead. Raw get_extra_specs is an SDK control, not a service query.",
-        "Go explicit nil/empty query slices retain key presence, suppress list defaults and omit the wire value; pinned Flavor.list instead converts missing or Python None is_public to the string None. Native missing/null fetched extra_specs remains a nil map, whereas Python fetch_extra_specs defaults a missing wrapper to an empty dict.",
-        "The lookup keeps strict safe nonblank result-ID validation, native Flavor/Swap extraction and native full-page pagination. Details/AllProjects options are unsupported on Flavor; its actual list override has no details parameter, and its default base_path is /flavors/detail. Ordinary Get/List/explicit Ref lookup do not gain identity list defaults or enrichment. The generated Flavor Resources list bridge also fixes whole-map forwarding: ordinary List/All now preserve raw status instead of dropping it."
+        "Retained native-shaped API.FindIdentity path: Go exposes SDK-owned typed GetExtraSpecs options and explicit raw wire query. Python list transposes min_ram/min_disk aliases and automatically classifies declared Body fields; Go uses minRam/minDisk and preserves explicit wire extensions instead. Raw get_extra_specs is an SDK control, not a service query.",
+        "Retained native-shaped API.FindIdentity path: Go explicit nil/empty query slices retain key presence, suppress list defaults and omit the wire value; pinned Flavor.list instead converts missing or Python None is_public to the string None. Native missing/null fetched extra_specs remains a nil map, whereas Python fetch_extra_specs defaults a missing wrapper to an empty dict.",
+        "Retained native-shaped API.FindIdentity path: The lookup keeps strict safe nonblank result-ID validation, native Flavor/Swap extraction and native full-page pagination. Details/AllProjects options are unsupported on Flavor; its actual list override has no details parameter, and its default base_path is /flavors/detail. Ordinary Get/List/explicit Ref lookup do not gain identity list defaults or enrichment. The generated Flavor Resources list bridge also fixes whole-map forwarding: ordinary List/All now preserve raw status instead of dropping it.",
+        "The primary Python named-operation mapping is Service.FindFlavor or API.FindFlavor returning owned Resource/Wire/receipts; the retained native-shaped FindIdentity contracts above continue to document the independent typed ABI and its explicit fallback/enrichment policies. The owned leaf view has location=null; the Service wrapper adds one captured Connection CloudLocation to Resource and Enrichment.Resource without changing actual response evidence.",
+        "Owned semantic filters transpose only on list fallback; original spellings and vendor attributes reach member GET. The common Go member query encoder accepts scalar, null and scalar-array values, so object-valued or nested-array semantic inputs fail before HTTP, including local Body predicates that Python may encode as arbitrary iterables. Source controls such as arbitrary session/path/resource_type, deprecated JMESPath and cache-bypass controls remain outside this fixed-route typed API and the broader SDK lifecycle goal.",
+        "Go query booleans use lowercase true/false. The shared local matcher distinguishes JSON booleans from numbers and treats nested object-subset matching against a scalar as false; it does not reproduce Python empty-dict truthiness or nested scalar attribute errors. Source input dictionary order is unavailable in a Go map, so canonical seed spellings win over body wire aliases; actual selected response alias order is preserved.",
+        "Executable input identities and markers must be nonblank UTF-8 literal strings without routing controls; passive numeric/container response identities are retained as JSON values and are never converted into string comparisons or specs request paths. The shared extra-specs target validator retains its stricter safe-ID policy.",
+        "Owned reads accept 200..399 and validate nonnull UTF-8 object representations; member unavailable JSON including invalid UTF-8 is tolerated as a seed-only fetch, while physical read/Close and source/context failures remain terminal. Python charset replacement and mutable Resource/session/conditional-cache behavior are separate lifecycle scope. Raw and descriptor views own their bytes; nonfinite float/overflow cannot be represented in a finite JSON view, and the audited numeric conversions use explicit IEEE-754 and Unicode 16 rules.",
+        "Dictionary next links are a deliberate Go compatibility extension. Initial positive limits enable logical last-raw-row marker fallback; the first advertised server limit may be accepted and fixed without enabling an absent initial fallback. Explicit row caps and first-page controls scope the uniqueness observation to the selected inventory."
       ],
-      "remaining": [
-        "Pinned Flavor.__getattribute__ (openstack/compute/v2/flavor.py:81-98) falls back from id to name to original_name. The native Flavor alias and strict safe-ID validation do not provide that entire Resource identity/alias response behavior.",
-        "Pinned Flavor._max_microversion=2.61 (openstack/compute/v2/flavor.py:48) participates in Resource._get_microversion and fetch_extra_specs automatic selection unless a session default is selected. Native lookup/enrichment preserves configured microversion and does not implement this automatic discovery.",
-        "Pinned Proxy.request and Resource.fetch/_translate_response (openstack/proxy.py:209-268; openstack/resource.py:1780-1828,1338-1394) provide conditional GET cache, seeded Resource merge and descriptor/default/unknown-field conversion that are not fully mapped to this stateless native result lifecycle.",
-        "Pinned Resource.list/_get_next_link (openstack/resource.py:2217-2234,2359-2436) includes query alias/Body local classification, RFC Link-header and limit/marker continuation and per-call session/path controls. Native FlavorPage and fixed detailed-list policy do not implement all of those inherited paths."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_router",
@@ -42071,6 +42126,89 @@
         "Go returns the native Flavor DTO and requires a safe explicit input/returned ID. Native missing/null ExtraSpecs stays nil and missing IsPublic stays false, with no seeded mutable Python Resource identity/location/default reconstruction.",
         "The existing native GET/specs calls retain the configured microversion and native strict200 policy without automatic source Resource version discovery. Cloud binding checks do not replace the native provider's physical retry/reauth machine with owned MemberGet; the single-property API has its separate owned transport.",
         "Other Cloud/proxy flavor list/find/search and generic Resource/session/cache APIs remain in the original SDK goal independently of this ID-only alias."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/flavors",
+      "source_fingerprint": "d6a1de15d5f1cc8851aba7b5413cdf8c1477470346e8dac4985749b55fedc28f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute.Service.ListFlavors",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.API.ListRecords",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListDetails",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListExtraSpecs",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListLimit",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListMarker",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListMaxItems",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListPaginated",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListMicroversion",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListHeader",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListQuery",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListFilter",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors.WithFlavorListFilters"
+      ],
+      "contracts": [
+        {
+          "behavior": "The owned flavor iterator defaults to /flavors/detail with Details=true and GetExtraSpecs=false; Details(false) selects /flavors. Semantic classification supports seven server-query attributes, min_disk/min_ram aliases, twelve local Body attributes and ignored unknown list attributes. Absent or semantic-null is_public sends literal None, while empty string and false remain distinct; canonical query spelling wins aliases in one bulk map, and conflicting semantic versus typed/raw query channels fail before HTTP.",
+          "tests": [
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsQueryProjectionAndOwnedViews",
+            "resource/filters_test.go:TestSemanticFilterSelectionKeepsMemberSpellingSeedAndDeferredUnknownErrors",
+            "resource/filters_test.go:TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding",
+            "resource/filters_test.go:TestSemanticFiltersNamespaceCollisionsAndIndependentClear"
+          ]
+        },
+        {
+          "behavior": "Flat list rows project the thirteen declared Body values plus location into an owned view: raw id/name/original_name truthy fallback, omission-only name alias, absent defaults, explicit null, integer/boolean/float/dictionary response conversions and parsed response alias order. Nested flavor and vendor values remain actual Wire fields. Wire, row envelope, page headers and status stay independent; Service.ListFlavors captures current location once before options and adds it only to view copies.",
+          "tests": [
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsQueryProjectionAndOwnedViews",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordDeclaredDefaultsDescriptorsAndRawIdentity",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordResponseAliasOrderAndIndependentReceipts",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordDescriptorErrorsAndPassiveStringIdentity",
+            "internal/jsonfilter/descriptor_float_test.go:TestDescriptorFloatJSONSourceConversionsAndOwnership",
+            "internal/jsonfilter/descriptor_float_test.go:TestDescriptorFloatJSONRejectsInvalidStringsAndNonfiniteWithCauses",
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation"
+          ]
+        },
+        {
+          "behavior": "Each iterator consumption prepares options lazily once and follows rel/href links, flavors_links, top-level next and HTTP Link. Initial effective positive limits allow last-consumed-raw-row logical markers even for filtered rows and caller-mutated views; the first advertised server limit is fixed without creating an initial-limit fallback. Raw row caps precede filters and avoid decoding unconsumed bad rows; first-page, empty-page and break stop later reads, while consumed malformed rows and late HTTP errors remain observable with actual receipts.",
+          "tests": [
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership",
+            "internal/rest/list_test.go:TestListFirstServerLimitIsOptInAndFixedAcrossContinuations",
+            "internal/rest/list_test.go:TestListHTTPLinksAreOptInAndConflictingNextLinksFail",
+            "internal/rest/list_test.go:TestListContinuationCannotWidenCollectionFiltersOrMarkers"
+          ]
+        },
+        {
+          "behavior": "GetExtraSpecs(true) enriches only yielded, locally matched rows whose projected dictionary is falsey. Nonempty inline dictionaries skip GET; missing, null, empty or normalized nonobject dictionaries fetch through the existing prepared extra-specs reader. Filtering, cap and break precede enrichment. The child has independent actual response evidence and Resource copies, uses the logical string identity without list query, and actual HTTP404 or accepted Close404 remains terminal with the original row retained.",
+          "tests": [
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment"
+          ]
+        },
+        {
+          "behavior": "Owned list/version policy preserves a selected client version, discovers at most 2.61 only when unselected, and supports explicit empty versionless override. One prepared policy and option application is shared with per-row enrichment; the original client is unchanged and live provider tokens remain in use. Model conversion, accepted-body failures, source/context failures and invalid controls retain their causes rather than fabricating successful rows or SDK resends.",
+          "tests": [
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsConditionalExtraSpecsEnrichment",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsQueryProjectionAndOwnedViews",
+            "api/compute_flavor_records_test.go:TestComputeFlavorRecordsPagingRawCapsAndLazyOwnership",
+            "compute/v2/flavors/flavor_record_test.go:TestFlavorRecordDescriptorErrorsAndPassiveStringIdentity",
+            "api/compute_flavor_find_test.go:TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/flavor-records.md",
+        "compute/README.md",
+        "compute/v2/flavors/README.md"
+      ],
+      "differences": [
+        "Service.ListFlavors supplies Connection location; direct leaf API.ListRecords has location=null. FlavorRecord separates the computed owned response view from actual Wire, row envelope, page metadata and optional child receipt rather than exposing a mutable Python Resource/session.",
+        "Go query booleans use lowercase true/false and the shared query encoder supports scalar/null/scalar-array values. The common local matcher preserves JSON type distinctions and scalar-versus-object subset policy instead of Python bool-number equivalence, empty-dict truthiness and nested scalar attribute failures.",
+        "Typed Limit/MaxItems zero means omission/unlimited and negatives are rejected; an effective wire limit is one positive integer and a marker is one nonblank string. Semantic and typed/raw wire query collisions are errors even for equal values; raw wire query can replace the matching typed limit or marker independently. Arbitrary session/path/resource_type, cache-bypass and deprecated Resource/JMESPath controls remain separate SDK goal scope.",
+        "Owned list reads accept 200..399 but require complete nonnull UTF-8 JSON objects and flavors arrays or singleton objects. Accepted empty204 is an error rather than native empty-page compatibility. Invalid representations and descriptors retain actual response receipts; nonfinite float/overflow fails the finite JSON view, with audited IEEE-754/Unicode 16 conversions and independent actual raw values.",
+        "Dictionary next links are an explicit Go compatibility extension; safe continuation checks prevent origin/route/filter widening and cycles while preserving reverse proxy prefixes. Logical markers and executable specs targets require string identities; numeric/container identities remain raw descriptor values and are never stringified into request paths.",
+        "The named flavor list/conditional-enrichment workflow is mapped; global mutable Resource, session/cache/discovery lifecycle and unrelated native/Cloud flavor operations are not claimed complete by this row."
       ],
       "remaining": []
     }

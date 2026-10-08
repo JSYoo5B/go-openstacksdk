@@ -26,7 +26,7 @@ if found is not None:
 
 ## 독립 Go main
 
-인증 환경 또는 `clouds.yaml`의 cloud를 준비합니다. 기본 호출은 raw 행 최대20개를 처리하는 목록이며 `-flavor ID_OR_NAME`을 추가하면 find도 수행합니다. `-extra`는 두 호출의 조건부 extra specs 보충을 켭니다. 선택 버전2.55는 서버가 지원해야 하며 SDK가 이 값을 자동 변경하지 않습니다. 이 예제의 검증 범위는 컴파일이고 실제 OpenStack 호출은 별도입니다.
+`clouds.yaml`에 `dev` 또는 `-cloud`로 지정할 cloud 항목을 준비합니다. 예제가 항상 `WithCloud`를 사용하므로 인증 환경변수만 있는 설정으로는 실행하지 않습니다. 기본 호출은 raw 행 최대20개를 처리하는 목록이며 `-flavor ID_OR_NAME`을 추가하면 find도 수행합니다. `-extra`는 두 호출의 조건부 extra specs 보충을 켭니다. 선택 버전2.55는 서버가 지원해야 하며 SDK가 이 값을 자동 변경하지 않습니다. 이 예제의 검증 범위는 컴파일이고 실제 OpenStack 호출은 별도입니다.
 
 ```go
 package main
@@ -130,7 +130,7 @@ ExtraSpecs 옵션이 true일 때 **projected extra_specs가 falsey인 일치 행
 
 integer·bool·float·dict response descriptor는 view에 적용합니다. `rxtx_factor`의 유효 숫자 문자열은 float로 변환하고 invalid/empty 문자열은 오류입니다. bool은 숫자1/0, 컨테이너는0으로 변환합니다. 비유한 float/overflow는 유효 JSON view로 표현할 수 없어 Go에서 명시적 오류이며 Wire의 실제 값과 원래 응답 증거를 유지합니다. 정수·실수의 정밀도 변환, 공유 Unicode16 숫자 표와 Python runtime에 따른 숫자 차이는 response view에만 적용합니다. caller 필터를 이 타입으로 강제 변환하지 않습니다.
 
-응답의 canonical/wire Body alias가 함께 있으면 **선택한 JSON 객체에서 마지막으로 나온 인식된 값**이 view를 결정합니다. wire alias는 `os-flavor-access:is_public`, `OS-FLV-EXT-DATA:ephemeral`, `OS-FLV-DISABLED:disabled`입니다. bulk query canonical 우선 정책과 구별합니다. List row는 flat이며 nested `flavor`가 있어도 outer 행을 대체하지 않습니다.
+응답의 canonical/wire Body alias가 함께 있으면 **파싱한 dictionary의 삽입 순서에서 마지막으로 처리한 인식된 alias**가 view를 결정합니다. 동일 key가 반복되면 값만 마지막 값으로 바꾸고 첫 삽입 위치를 유지하므로, 마지막 JSON 토큰이 항상 이기는 것은 아닙니다. wire alias는 `os-flavor-access:is_public`, `OS-FLV-EXT-DATA:ephemeral`, `OS-FLV-DISABLED:disabled`입니다. bulk query canonical 우선 정책과 구별합니다. List row는 flat이며 nested `flavor`가 있어도 outer 행을 대체하지 않습니다.
 
 | 반환 필드 | 의미 |
 |---|---|
