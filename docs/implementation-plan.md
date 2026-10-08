@@ -10,6 +10,8 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
+**진행 중 (2026-10-08): 핵심 user Glance schema12개.** Source 검토·class별 `GetSchemaRecord`·Connection location·Python/Go 가이드를 구현했습니다. 집중 race35그룹 중31개를 재사용하고 새4그룹65사례가 PASS했으며, 정확한 독립 main과 설치 main의 외부 local-consumer 빌드도 PASS했습니다. 기반 `c119403a`·구현 `9e84d06e`·테스트 `b4f0f482`를 작게 commit/push했습니다. 전체 검사와 최종 판정 전에는 완료 집계243개를 올리지 않습니다. 기존16 strict getter API는 유지합니다.
+
 **최신 완료 (2026-10-08): 핵심 user Availability Zone 일반 목록·Cloud 이름 조회, 전체241→243(+2)·핵심167→169/2,292·Nova43→45/333.** owned `ListRecords`/`Service.ListAvailabilityZones`는 raw5필드·alias 순서·모든 advertised 페이지·location을 처리합니다. `ListAvailabilityZoneNames`는 unavailable 기본 false·state 선평가·순서/중복·SDK HTTP/loop 실패의 빈 배열을 조합하고 partial Inventory·SuppressedError를 보존합니다. native `List`의 정상 객체 envelope를 읽지 못하던 문제는 native AllPages 단일 페이지 경로로 수정했습니다. [Python/Go 비교·독립 main](../compute/availability-zones.md), [검증 기록](sdk-support-ledger.md#availability-zone-일반-목록cloud-이름-조회-완료)에 차이와 예외 범위를 설명합니다.
 
 집중 race41그룹 중38그룹을 재사용하고 고유 API3그룹48사례만 추가했습니다. 기존 생성기 검증 그룹에도 native AZ 사례를 연결했습니다. 공개 Gophercloud helper·기존 SDK 서버/오류 fixture를 사용하며 새 HTTP harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·의도한 generated List1개 교정 이후 반복 생성 drift0·정확한 독립 main build가 PASS했습니다. 최종 Go source2,001개 SHA256 `915a3a9d4f67131b4aaba489232d613643347134ff634b51fc43d670bb9d294d`는 집중·전체 gate 및 원격 module cache에서 같습니다. 수정 `46225a97`·owned reader `bdb4acb4`·Cloud/테스트 `60ffec77`·문서 `2488a769`를 작게 commit/push했습니다.

@@ -31,6 +31,8 @@ Gophercloud v2.15.0의 image/v2 API를 하나의 인증된 서비스 객체에�
 
 상위 `image.Service.Get*Schema`의 16개 메서드는 고정 schema 경로를 body/query 없는 GET으로 조회합니다. 공통 concrete `GetSchemaOption`과 SDK 소유 `image.Schema`는 canonical 필드·생략/null·정확한 raw JSON을 보존하며 `additionalProperties`의 bool/object 등 다양한 값을 변환하지 않습니다. [Schema의 Python/Go 비교](../schemas.md)는 실제200·서버 raw/minimal 선택·중첩 collection 구조와 header 옵션을 설명합니다. schema의 이름·links·URL은 수동 데이터이며 ID·pagination·자동 검증이나 Resource cache를 만들지 않습니다.
 
+`image.Service.GetSchemaRecord`는 같은 16개 고정 경로를 `SchemaKind`로 선택하고 ordinary Schema와 MetadefSchema의 nullable raw·dict·bool·list 변환을 적용합니다. Connection location을 보충한 `Resource`와 실제 `Wire`·`Envelope`·응답 증거를 분리하며, HTTP200..399의 빈/비JSON 응답은 bare 기본값을 유지합니다. [클래스별 schema 조회와 Python 비교](../schema-records.md)에 alias 순서·오류·독립 실행 예제와 기존 strict getter의 차이를 설명합니다.
+
 상위 `image.Service.AddImageLocation`은 URL과 선택 validation hash를 고정 POST로 제출하고 실제202 acknowledgement를 보존합니다. `GetImageLocations`는 body/query 없는 GET200의 유한 배열을 한 번 조회하며 URL·metadata·원문 응답을 반환합니다. [Location의 Python/Go 비교](../locations.md)는 concrete 옵션·기본 validation_data 빈 객체·서버 비동기 검증·공식 문서와 pinned serializer의 성공 코드 차이를 설명합니다. 기존 native location set PATCH는 유지하며 location ID·pagination·hash 검증 완료를 합성하지 않습니다.
 
 상위 `image.Service.AddTag/RemoveTag`는 단일 태그를 고정된 PUT/DELETE 경로로 변경하고, `DeactivateImage/ReactivateImage`는 body 없는 POST action을 제출합니다. ID는 조회 없이 사용하며 Name은 정확한 이름을 해석합니다. 미존재는 오류이고 실제204 acknowledgement의 원문·헤더·상태를 보존합니다. [태그·상태 변경의 Python/Go 비교](../mutations.md)는 concrete header 옵션·태그 escaping·부분 응답과 Resource/cache 차이를 설명합니다. 전체 tag set을 교체하는 기존 native `ReplaceImageTags`와 metadata Update는 유지하며 이 작업이 자동으로 상태를 조회하거나 기다리지는 않습니다.
