@@ -10,6 +10,8 @@ Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md
 
 remote console 생성과 optional owner·기본 미존재 무시를 결합한 키페어 삭제는 [Compute 작업 비교](user-actions.md)를 참고하세요. 원래 native 생성·삭제 signature는 별도로 유지합니다.
 
+[Keypair 목록·검색](keypairs-list-find.md)은 `service.API.KeyPairs`의 concrete 옵션으로 local 필터·전체 페이지 순회·owner를 유지하는 검색 fallback을 제공합니다.
+
 nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console action은 [Keypair·console 비교](keypairs-console.md)의 전체 main을 참고하세요. 생성의 `ssh` view 기본값과 legacy 조회의 raw 반환을 SDK가 처리합니다.
 
 ## openstacksdk 대응

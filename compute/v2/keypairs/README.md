@@ -7,3 +7,5 @@
 `DeleteKeypair(ctx, name, options...)`는 직접 이름 삭제의 optional owner와 기본 미존재 무시를 함께 제공합니다. [Compute 작업 가이드](../../user-actions.md)에 strict 선택·접수 후 오류와 native `Delete`·`Remove`의 차이를 설명합니다.
 
 `CreateKeypair(ctx, options...)`는 nullable 전체 속성·ID/name 별칭·입력/응답 병합과 `ssh` 반환 기본값을 처리합니다. [생성·legacy console 가이드](../../keypairs-console.md)에 public key import·concrete 옵션·Resource/Wire·native Create 비교와 전체 main을 제공합니다.
+
+`ListRecords(ctx, options...)`와 `FindKeypair(ctx, nameOrID, options...)`는 SDK가 필터·페이지네이션·owner를 유지하는 fallback을 처리합니다. [목록·검색 가이드](../../keypairs-list-find.md)에 concrete `With` 옵션, 기본값, nullable Resource/실제 Wire·오류와 native SinglePage 목록 비교, 전체 실행 main을 제공합니다.

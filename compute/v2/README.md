@@ -19,6 +19,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.
 
+`KeyPairs.ListRecords`는 raw keypair 목록·로컬 필터·페이지 제어를 제공하고, `KeyPairs.FindKeypair`는 직접 이름 GET 뒤 실제400/403/404에만 같은 owner의 목록을 검색합니다. default ssh·nullable 필드·기본 미존재 허용과 버전 선택, 기존 native List/Find의 차이는 [Keypair 목록·찾기의 Python/Go 비교](../keypairs-list-find.md)에 설명합니다.
+
 `conn.Compute(ctx)`의 `ValidateConsoleAuthToken(ctx, token)`은 console token의 연결 정보를 직접 조회하고 seeded Resource·actual Wire·HTTP receipt를 제공합니다. 필수 token은 provider 인증 token과 별개이며, 미선택 버전의2.99 ceiling과 nullable 반환은 [Console auth-token의 Python/Go 비교](../console-auth-token.md)에 설명합니다.
 
 `conn.Compute(ctx)`의 상위 `CreateConsole(ctx, serverID, type, options...)`은 광고 범위와 선택 버전으로 modern/legacy console을 자동 선택합니다. protocol None 기본값·작업별 version ceiling·computed location·실패 시 다른 API 재시도 금지는 [Console 자동 선택의 Python/Go 비교](../console-selection.md)에 설명합니다.

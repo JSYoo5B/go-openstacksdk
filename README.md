@@ -10,6 +10,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
+[Keypair 목록·검색](compute/keypairs-list-find.md)은 SDK가 필터·페이지 순회·owner를 유지하는 검색 fallback과 nullable Resource·실제 응답을 처리합니다.
+
 [Console auth-token 조회](compute/console-auth-token.md)는 명시 token으로 연결 정보를 GET하고 source-shaped Resource·actual Wire·receipt를 반환합니다.
 
 [Compute console 자동 선택](compute/console-selection.md)은 `conn.Compute(ctx)`에서 서버가 광고한 범위에 따라 modern/legacy API를 선택합니다.
