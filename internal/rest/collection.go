@@ -24,6 +24,9 @@ type CollectionSpec[T any] struct {
 	// including retries/authentication and accepted response read/Close.
 	SourceGuard   func(context.Context) error
 	ValidateQuery func(context.Context, url.Values) error
+	// ReadPage optionally uses an existing library-owned guarded GET reader for
+	// list pages. Nil retains the standard reader; schemas and paging stay here.
+	ReadPage func(context.Context, string, ...int) (*Response, error)
 	// ValidateInitialQuery applies only to caller input, before the first HTTP
 	// request. ValidateQuery also checks server-provided continuation queries.
 	ValidateInitialQuery func(context.Context, url.Values) error

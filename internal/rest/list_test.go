@@ -67,6 +67,77 @@ func collectList(ctx context.Context, spec CollectionSpec[listItem], query url.V
 	return values, nil
 }
 
+func TestListOptionalReaderAndRepresentationsKeepDefaultPolicy(t *testing.T) {
+	readerCause := errors.New("owned page reader stopped")
+	for _, check := range []struct {
+		name, body                     string
+		status, count                  int
+		singleton, decode204, reader   bool
+		wantError, stopBeforeTransport bool
+	}{
+		{name: "default array", body: `{"items":[{"id":"one","value":9007199254740993}]}`, status: 200, count: 1},
+		{name: "default rejects singleton", body: `{"items":{"id":"one"}}`, status: 200, wantError: true},
+		{name: "owned reader singleton", body: `{"items":{"id":"one","value":9007199254740993}}`, status: 201, count: 1, singleton: true, reader: true},
+		{name: "owned reader array", body: `{"items":[{"id":"one"}]}`, status: 203, count: 1, singleton: true, reader: true},
+		{name: "singleton null rejected", body: `{"items":null}`, status: 200, singleton: true, wantError: true},
+		{name: "singleton scalar rejected", body: `{"items":false}`, status: 200, singleton: true, wantError: true},
+		{name: "singleton missing rejected", body: `{}`, status: 200, singleton: true, wantError: true},
+		{name: "default 204 empty", status: 204},
+		{name: "representation required 204", status: 204, decode204: true, reader: true, wantError: true},
+		{name: "reader cause before transport", status: 200, reader: true, wantError: true, stopBeforeTransport: true},
+	} {
+		t.Run(check.name, func(t *testing.T) {
+			var calls, reads atomic.Int32
+			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
+				testhelper.TestMethod(t, r, http.MethodGet)
+				testhelper.TestHeader(t, r, "X-Auth-Token", "shared-token")
+				if r.URL.Path != "/v1/items" || r.URL.Query().Get("owner") != "fixed" {
+					t.Error(r.URL)
+				}
+				w.Header().Set("X-Page", "kept")
+				w.WriteHeader(check.status)
+				_, _ = fmt.Fprint(w, check.body)
+			})
+			spec.ListCodes = []int{check.status}
+			spec.Paging.SingletonObject, spec.Paging.DecodeNoContent = check.singleton, check.decode204
+			if check.reader {
+				spec.ReadPage = func(ctx context.Context, target string, codes ...int) (*Response, error) {
+					reads.Add(1)
+					if check.stopBeforeTransport {
+						return nil, readerCause
+					}
+					return DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodGet, target, nil, nil, codes...)
+				}
+			}
+			values, err := collectControlledList(context.Background(), spec, url.Values{"owner": {"fixed"}}, ListControl{SinglePage: true})
+			if check.stopBeforeTransport {
+				if !errors.Is(err, readerCause) || calls.Load() != 0 || reads.Load() != 1 || len(values) != 0 {
+					t.Fatal(values, err, calls.Load(), reads.Load())
+				}
+				return
+			}
+			if check.wantError {
+				var proof *resource.ResponseError
+				if !errors.As(err, &proof) || proof.StatusCode != check.status || string(proof.Body) != check.body || proof.Header.Get("X-Page") != "kept" {
+					t.Fatal(values, err, proof)
+				}
+			} else if err != nil || len(values) != check.count {
+				t.Fatal(values, err)
+			}
+			if check.count == 1 && (values[0].ID != "one" || values[0].Header.Get("X-Page") != "kept" || values[0].StatusCode != check.status) {
+				t.Fatal(values[0])
+			}
+			if check.body != "" && strings.Contains(check.body, "9007199254740993") && values[0].Value != 9007199254740993 {
+				t.Fatal("reader lost precise integer", values[0].Value)
+			}
+			if calls.Load() != 1 || (check.reader && reads.Load() != 1) || (!check.reader && reads.Load() != 0) {
+				t.Fatal(calls.Load(), reads.Load())
+			}
+		})
+	}
+}
+
 func TestListLazyExactObjectsAndFiltersSurviveEmptyContinuation(t *testing.T) {
 	var calls, validates, queryValidates atomic.Int32
 	spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {

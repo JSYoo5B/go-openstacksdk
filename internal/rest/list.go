@@ -47,6 +47,12 @@ type PagePolicy[T any] struct {
 	// StopOnEmptyPage ignores continuations on an empty page. The default keeps
 	// supporting services which advertise a next link from an empty page.
 	StopOnEmptyPage bool
+	// SingletonObject permits a plural envelope containing one object instead
+	// of an array. Scalars and null still fail with the original page receipt.
+	SingletonObject bool
+	// DecodeNoContent requires a representation even for an accepted 204. The
+	// default preserves collections which treat 204 as an empty result.
+	DecodeNoContent bool
 	// OffsetPagination permits advertised, strictly increasing offset cursors
 	// instead of markers. An omitted initial offset means zero. The first next
 	// link may introduce a positive server limit when none was requested; that
@@ -209,7 +215,14 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 					return
 				}
 			}
-			response, err := DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodGet, current.String(), nil, nil, successCodes(spec.ListCodes, http.StatusOK)...)
+			codes := successCodes(spec.ListCodes, http.StatusOK)
+			var response *Response
+			var err error
+			if spec.ReadPage != nil {
+				response, err = spec.ReadPage(ctx, current.String(), codes...)
+			} else {
+				response, err = DoJSONGuarded(ctx, spec.Client, spec.SourceGuard, http.MethodGet, current.String(), nil, nil, codes...)
+			}
 			if err != nil {
 				fail(err)
 				return
@@ -222,13 +235,13 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			}
 			// An explicitly accepted 204 has no collection representation.
 			// Read/Close/source failures are already retained by DoJSONGuarded.
-			if response.StatusCode == http.StatusNoContent {
+			if response.StatusCode == http.StatusNoContent && !spec.Paging.DecodeNoContent {
 				if err := ctx.Err(); err != nil {
 					fail(response.Fail(err))
 				}
 				return
 			}
-			fields, items, err := pageItems(response, spec.PluralKey)
+			fields, items, err := pageItems(response, spec.PluralKey, spec.Paging.SingletonObject)
 			if err != nil {
 				fail(response.Fail(err))
 				return
@@ -333,7 +346,7 @@ func decodeListItem[T any](item json.RawMessage, response *Response, metadata fu
 	return &value, nil
 }
 
-func pageItems(response *Response, plural string) (map[string]json.RawMessage, []json.RawMessage, error) {
+func pageItems(response *Response, plural string, singleton bool) (map[string]json.RawMessage, []json.RawMessage, error) {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(response.Body, &fields); err != nil {
 		return nil, nil, err
@@ -342,6 +355,9 @@ func pageItems(response *Response, plural string) (map[string]json.RawMessage, [
 		return nil, nil, fmt.Errorf("list response must be a JSON object")
 	}
 	raw := bytes.TrimSpace(fields[plural])
+	if singleton && len(raw) != 0 && raw[0] == '{' {
+		return fields, []json.RawMessage{bytes.Clone(raw)}, nil
+	}
 	if len(raw) == 0 || raw[0] != '[' {
 		return nil, nil, fmt.Errorf("list response requires %q array", plural)
 	}
