@@ -22828,17 +22828,27 @@
             "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesFixedScopedRoutesAndPayloads",
             "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource"
           ]
+        },
+        {
+          "behavior": "Named getter boundary audit distinguishes Python **query as _get controls or Resource seed attributes from an HTTP query. Existing strict200 fresh DTO retains actual descriptor keywords/default omission/aliases raw, rejects304 without cache reuse and independently decodes later success. WithGetResourceType remains a deliberate Go server-query extension; owned Resource seeding/default/coercion/fetch translation is still missing and this declaration remains unresolved.",
+          "tests": [
+            "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDescriptorKeywordsRemainRaw",
+            "image/v2/metadefproperties/get_mapping_test.go:TestMetadefPropertyGetMappingDoesNotReuseCachedOrSeededResults"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefproperties/README.md"
+        "image/v2/metadefproperties/README.md",
+        "image/metadef-property.md"
       ],
       "differences": [
         "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
         "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
+        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
+        "Pinned public **query seeds _get_resource or binds requires_id/base_path/skip_cache controls; it is not arbitrary fetch query. Go ResourceType currently deliberately sends the Glance server query and is not identical to Python resource_type keyword forwarding."
       ],
       "remaining": [
+        "Implement an owned property getter retaining recognized seed attrs/identity/namespace, missing descriptor defaults and coercion, Connection location and actual200..399 fetch translation (including invalid-JSON success) independently of existing strict200 raw DTO.",
         "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
         "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
         "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim."
@@ -23396,14 +23406,26 @@
     {
       "operation": "python:image/v2/metadef_resource_types",
       "source_fingerprint": "fa112aabf69caa4db7ceb902dda6b875183f6095746a03d11d716bd38f61e424",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.List",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.All",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters"
       ],
       "contracts": [
         {
@@ -23456,20 +23478,61 @@
             "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
             "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "Declared untyped nullable fields, explicit id versus alternate name, collector-dependent computed location and fixed namespace URI are projected independently of complete Wire/page/headers/status. Connection Image and ImageV2 share client and captured current location; URI parent is an explicit additional Go view field, not default Python to_dict serialization.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsFixedRoutesProjectionAndReceipts",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsIdentityPresenceAndLocation",
+            "connection_image_metadef_records_test.go:TestConnectionImageMetadefRecordsShareClientAndCurrentLocation"
+          ]
+        },
+        {
+          "behavior": "Concrete options own callbacks/header/filter/pointer/slice snapshots and full replacement. Only limit/marker are server queries; declared Body filters are local, unknown captured encoding errors are ignored, path/session/version controls and typed/semantic collisions fail before HTTP. Raw MaxItems cap and wire limit hint precede filters and unconsumed rows.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsLazyRepeatAndOptionSnapshots",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsSemanticFilters",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsCompletePreflight",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsPreflightOrderAndLocationFailures",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRawCapAndEarlyStop",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsFullOptionsAndRetainedCallbacksOwnStorage"
+          ]
+        },
+        {
+          "behavior": "Shared pager accepts body links/plural links/next/HTTP Link and singleton rows. Explicit-limit marker fallback follows short nonempty pages from retained wire identity, while cap/single-page/empty-page/early-break avoid unused continuation work. Same-origin/collection/filters, conflicting links and marker/cycle rules are explicit guarded Go choices; partial AllRecords survive later failure.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsMarkerFallbackUsesWireIdentity",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsContinuationRepresentations",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRejectedContinuationKeepsPartialReceipt",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRawCapAndEarlyStop"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 requires whole-page UTF8 and mandatory plural JSON representation; empty204 and consumed malformed rows fail with actual page receipt. Accepted read/Close/cancellation causes and rejected native status evidence are preserved; no accepted-body replay or invented response.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsStatusEnvelopeAndEmptyPolicy",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsAcceptedReadCloseAndCancelCauses"
+          ]
+        },
+        {
+          "behavior": "Native retries retain the logical query/source/status policy. Sticky observed source and outer guards cover callbacks, physical roundtrip/read/Close/retry and post-yield boundaries even if a changed source is later restored; existing finite typed List/All stay strict200 and query-free.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsNativeRetryAndOwnership",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsSourceAndOuterGuardAcrossPhysicalBoundaries",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsObservedGuardFailureSurvivesRestoration",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsLegacyFiniteListRemainsSeparate"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefresourcetypes/README.md"
+        "image/v2/metadefresourcetypes/README.md",
+        "image/metadef-resource-types-records.md"
       ],
       "differences": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
-      ],
-      "remaining": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+        "Named list declarations map to owned records, semantic query/body filtering and paging; Python mutable Resource lifecycle/cache/adapter overrides remain separate common SDK goals. Go uses fixed literal namespace and a selected service version, guarded headers and a copied declared view with namespace_name URI provenance beyond default Python to_dict.",
+        "Go deliberately requires whole-page UTF8/object/plural JSON, one positive query limit and a nonempty string marker; local JSON filtering distinguishes bool from number and compares exact decimal numbers. Unknown row fields remain complete only in Wire, separately from declared Resource.",
+        "Shared Go paging restricts origin/collection/filter changes, conflicting continuation links and repeated markers, and accepts links.next dictionaries as an additional representation. Source prioritizes links and permits broader URL/query changes including /v-prefix handling. The actual pinned Glance controller lists finite rows and ignores limit/marker; callers can choose Paginated=false.",
+        "No live authenticated cloud, Python execution, server policy/DB/collation/transaction effects or dynamic session/cache lifecycle equivalence is claimed. Existing typed strict200 finite APIs and create/delete contracts are preserved; record lists accept actual200..399 with mandatory representation."
       ]
     },
     {
@@ -23629,7 +23692,7 @@
     {
       "operation": "python:image/v2/metadef_resource_type_associations",
       "source_fingerprint": "77e75428836273c746bdd53714944fe1e2154168c53684d193b617bef6e7786d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.List",
@@ -23637,7 +23700,19 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordListFilters"
       ],
       "contracts": [
         {
@@ -23690,20 +23765,61 @@
             "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
             "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "Declared untyped nullable fields, explicit id versus alternate name, collector-dependent computed location and fixed namespace URI are projected independently of complete Wire/page/headers/status. Connection Image and ImageV2 share client and captured current location; URI parent is an explicit additional Go view field, not default Python to_dict serialization.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsFixedRoutesProjectionAndReceipts",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsIdentityPresenceAndLocation",
+            "connection_image_metadef_records_test.go:TestConnectionImageMetadefRecordsShareClientAndCurrentLocation"
+          ]
+        },
+        {
+          "behavior": "Concrete options own callbacks/header/filter/pointer/slice snapshots and full replacement. Only limit/marker are server queries; declared Body filters are local, unknown captured encoding errors are ignored, path/session/version controls and typed/semantic collisions fail before HTTP. Raw MaxItems cap and wire limit hint precede filters and unconsumed rows.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsLazyRepeatAndOptionSnapshots",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsSemanticFilters",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsCompletePreflight",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsPreflightOrderAndLocationFailures",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRawCapAndEarlyStop",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsFullOptionsAndRetainedCallbacksOwnStorage"
+          ]
+        },
+        {
+          "behavior": "Shared pager accepts body links/plural links/next/HTTP Link and singleton rows. Explicit-limit marker fallback follows short nonempty pages from retained wire identity, while cap/single-page/empty-page/early-break avoid unused continuation work. Same-origin/collection/filters, conflicting links and marker/cycle rules are explicit guarded Go choices; partial AllRecords survive later failure.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsMarkerFallbackUsesWireIdentity",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsContinuationRepresentations",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRejectedContinuationKeepsPartialReceipt",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsRawCapAndEarlyStop"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 requires whole-page UTF8 and mandatory plural JSON representation; empty204 and consumed malformed rows fail with actual page receipt. Accepted read/Close/cancellation causes and rejected native status evidence are preserved; no accepted-body replay or invented response.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsStatusEnvelopeAndEmptyPolicy",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsAcceptedReadCloseAndCancelCauses"
+          ]
+        },
+        {
+          "behavior": "Native retries retain the logical query/source/status policy. Sticky observed source and outer guards cover callbacks, physical roundtrip/read/Close/retry and post-yield boundaries even if a changed source is later restored; existing finite typed List/All stay strict200 and query-free.",
+          "tests": [
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsNativeRetryAndOwnership",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsSourceAndOuterGuardAcrossPhysicalBoundaries",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsObservedGuardFailureSurvivesRestoration",
+            "image/v2/metadefresourcetypes/list_records_test.go:TestMetadefResourceTypeRecordsLegacyFiniteListRemainsSeparate"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefresourcetypes/README.md"
+        "image/v2/metadefresourcetypes/README.md",
+        "image/metadef-resource-types-records.md"
       ],
       "differences": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
-      ],
-      "remaining": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+        "Named list declarations map to owned records, semantic query/body filtering and paging; Python mutable Resource lifecycle/cache/adapter overrides remain separate common SDK goals. Go uses fixed literal namespace and a selected service version, guarded headers and a copied declared view with namespace_name URI provenance beyond default Python to_dict.",
+        "Go deliberately requires whole-page UTF8/object/plural JSON, one positive query limit and a nonempty string marker; local JSON filtering distinguishes bool from number and compares exact decimal numbers. Unknown row fields remain complete only in Wire, separately from declared Resource.",
+        "Shared Go paging restricts origin/collection/filter changes, conflicting continuation links and repeated markers, and accepts links.next dictionaries as an additional representation. Source prioritizes links and permits broader URL/query changes including /v-prefix handling. The actual pinned Glance controller lists finite rows and ignores limit/marker; callers can choose Paginated=false.",
+        "No live authenticated cloud, Python execution, server policy/DB/collation/transaction effects or dynamic session/cache lifecycle equivalence is claimed. Existing typed strict200 finite APIs and create/delete contracts are preserved; record lists accept actual200..399 with mandatory representation."
       ]
     },
     {

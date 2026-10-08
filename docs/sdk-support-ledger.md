@@ -4,7 +4,22 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Availability Zone 일반 목록·Cloud 이름 조회](#availability-zone-일반-목록cloud-이름-조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef resource type·association owned 목록](#glance-metadef-resource-typeassociation-owned-목록-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+
+## Glance metadef resource type·association owned 목록 완료
+
+2026-10-09 핵심 user의 고정 Python `metadef_resource_types`·`metadef_resource_type_associations` 두 선언을 Go mapping으로 닫았습니다. **255→257(+2)**이며 핵심181→183/2,292·Glance19→21/120입니다. 새 endpoint나 Python 전체 Resource/session 완성을 의미하지 않습니다. 기존 생성·삭제·finite typed API를 유지하며 [사용 비교·독립 main](../image/metadef-resource-types-records.md)에 Go 차이를 기록했습니다.
+
+- 구현: global/namespace `ListRecords/AllRecords`, concrete With 옵션과 semantic query/Body 필터, filter 전 원본 row cap, 공통 guarded pagination·wire marker·partial collection.
+- 응답: nullable untyped declared view·alternate name identity·Body/URI collector location, fixed namespace URI provenance, 실제 Wire·whole-page Envelope·header/status의 독립 소유권. namespace_name은 Python 기본 to_dict보다 추가한 Go view 정보입니다.
+- 경계: lazy iteration·중도 break·재순회·callback snapshot, actual200..399 mandatory plural JSON·whole UTF8, accepted read/Close/취소 원인과 실제 receipt, retry/outer/source guard·관찰한 실패의 sticky 유지. Connection Image/ImageV2는 같은 client와 current location을 전달합니다.
+- 재사용: 기존 public Gophercloud testhelper·rtCore/Property/Connection fixture, REST/fixedrequest 오류·paging과 resource FilterSelection/jsonfilter. 새 서버/fault engine0개·작은 Close callback adapter1개.
+
+실제 새 집중 race는 **20그룹·228개 최종 사례**입니다. [목록17그룹224사례](../image/v2/metadefresourcetypes/list_records_test.go), [property2그룹3사례](../image/v2/metadefproperties/get_mapping_test.go), [Connection1그룹1사례](../connection_image_metadef_records_test.go)의 합입니다. 전체 `make check` **43개 실제 test package**·vet·고정 parity·progress·gofmt가 exit0이며 모든 기존 관련 그룹도 포함합니다. 재생성 반복 Go drift0, 정확한 가이드 두 main과 설치 main **3개**의 별도 module local-replace build exit0를 확인했습니다. 인증/API/Python은 실행하지 않았습니다.
+
+최종 Go source2,013개·SHA256 `19e37601b49bd38dc5a4a60a24c3a1d43e85747c9e7b96c576f1f3922bd9401a`이고 catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`는 그대로입니다. 같은 Go의 JSON/prose에는 전체 vet/race 결과를 재사용하고 parity/progress/gofmt만 확인합니다. 재현은 고정 source checkout을 `OPENSTACKSDK_SOURCE`로 지정한 `make check`와 가이드의 main을 사용하는 외부 build입니다. 임시 실행 파일은 `/private/tmp/go-openstacksdk-metadef-records-{focused.jsonl,check.log,check-receipt.json,generation-repeat.log}`입니다.
+
+작은 구현 `9aba6303`, Connection 전달 `08517200`, property 경계 `454d9756`를 commit/push했습니다. **기존547개 다른 review와 세 review의 원래6계약·API·fingerprint를 모두 보존**했습니다. 두 list에 각각5개 계약을 추가하고 named mapping으로 판정했으며 property에1개 경계 계약을 추가해 reviews550·계약3,429입니다. property getter의 recognized seed/default/coercion/location/fetch translation은 아직 구현되지 않았으므로 [조회 가이드](../image/metadef-property.md)와 remaining에 명시하고 미해결을 유지합니다.
 
 ## 초기 조사 이후 검증한 계약
 

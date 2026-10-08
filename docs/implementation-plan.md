@@ -10,7 +10,15 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**최신 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
+**최신 API 완료 (2026-10-09): 핵심 user Glance resource type·association owned 목록, 전체255→257(+2)·핵심181→183/2,292·Glance19→21/120.** `ListRecords/AllRecords`가 declared Resource·실제 Wire/page/receipt, semantic query와 local Body 필터·raw row cap·공통 paging을 제공합니다. 두 Connection 진입점이 current location을 전달하며 고정 Source collector의 Body/URI별 location 규칙을 반영했습니다. [Python/Go 비교·독립 main](../image/metadef-resource-types-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-resource-typeassociation-owned-목록-완료)을 함께 갱신했습니다.
+
+새 집중 race **20그룹·228개 최종 사례**(목록17그룹224·property2그룹3·Connection1그룹1)가 PASS했습니다. 기존 public testhelper·rtCore/Property/Connection fixture·REST paging·JSON filter를 재사용했고 새 HTTP 서버/fault engine은0개, Close callback용 작은 adapter만1개입니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt, 반복 생성 Go drift0와 정확한 독립 main3개의 외부 local-replace 빌드가 PASS했습니다. Go source **2,013개**, SHA256 `19e37601b49bd38dc5a4a60a24c3a1d43e85747c9e7b96c576f1f3922bd9401a`이며 실제 근거는 `/private/tmp/go-openstacksdk-metadef-records-check-receipt.json`에 기록했습니다.
+
+구현 `9aba6303`·두 Connection 경로 `08517200`·property 경계 `454d9756`를 작은 단위로 commit/push했습니다. catalog3,362개 fingerprint·source pins와 다른547 reviews·기존 계약을 그대로 보존했습니다. 새 선언을 추가하지 않고 기존 두 list의 미해결을 닫았으며 reviews550·계약3,429입니다. 서비스별 핵심183개는 user/admin 합산이고 새 HTTP endpoint2개를 뜻하지 않습니다. Python 전체 Resource/session lifecycle·실제 cloud·alpha tag 배포는 별도이며 전체 목표와 서비스 우선순위는 active입니다.
+
+**다음 구현:** `get_metadef_property`는 초기 Resource 속성·descriptor default/coercion·fetch translation의 실제 구현 공백을 확인해 **미해결 유지**입니다. 기존 strict200 getter와 additive resource_type query를 완료로 재집계하지 않았습니다. [조회 비교·실행 main](../image/metadef-property.md)에 seed/default·200..399/invalid-JSON·mutable cache 차이를 기록했고 owned getter부터 이어갑니다.
+
+**앞선 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
 
 2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
 
@@ -110,11 +118,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 255 (7.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 257 (7.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,106 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,104 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 550 | 아직 개별 기록 없는 선언 2,812 |
-| 기록한 부분·전체 계약 | 3,418 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,429 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -159,12 +167,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 181 / 2,292 | 7.9% | 195 | 1,915 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 183 / 2,292 | 8.0% | 193 | 1,915 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 255 / 3,362 | 7.6% | 294 | 2,812 | 1 |
+| 전체 | 257 / 3,362 | 7.6% | 292 | 2,812 | 1 |
 
 **핵심 서비스**
 
@@ -174,7 +182,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 19 / 120 | 60 | 41 | 0 |
+| Image / Glance | 21 / 120 | 58 | 41 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |

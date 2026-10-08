@@ -192,3 +192,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.API.MetadefObjects.InNamespace(ctx, namespace)`는 HTTP 없이 namespace와 서비스 대상을 고정합니다. 범위의 `Create/Get/Update/Delete/DeleteAll/List/All`과 [Object 사용법](v2/metadefobjects/README.md)에 nested raw property·생략/빈 값·PUT 교체·유한 목록·삭제 기본값을 설명합니다.
 
 `service.API.MetadefProperties.InNamespace(ctx, namespace)`는 고정 namespace의 `Create/Get/Update/Delete/DeleteAll/List/All`을 제공합니다. [Property 사용법](v2/metadefproperties/README.md)에 flat JSONSchema 입력·필수 Type/Title·raw와 any 옵션의 차이·dictionary key provenance·삭제 기본값을 설명합니다.
+
+`MetadefResourceTypes.ListRecords/AllRecords`와 namespace scope의 같은 메서드는 declared Resource·실제 Wire/receipt, semantic 필터와 공통 paging을 제공합니다. [Python/Go 비교·독립 main](metadef-resource-types-records.md)에서 두 Connection 경로와 옵션을 설명합니다. [Property 조회 경계](metadef-property.md)는 기존 raw Get과 아직 남은 Python seed/default/fetch 동작을 구분합니다.

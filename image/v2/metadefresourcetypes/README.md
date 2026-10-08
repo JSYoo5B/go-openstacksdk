@@ -139,3 +139,7 @@ configured native pre-body retry·reauth·backoff·동일 target redirect는 유
 비교 기준은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, Gophercloud `v2.15.0`입니다. native image resource-type CRUD는 없으며 SDK 소유 leaf입니다. Python 전체 Resource/cache/session/query parity나 실제 schema·WSME·DB·Unicode·권한·cloud side effect 검증을 주장하지 않습니다.
 
 실제 검증은 [core 테스트](core_test.go), [option 테스트](options_test.go), [외부 HTTP 계약](contracts_test.go), [Connection scope 계약](../../../connection_image_metadef_resource_types_test.go), [generator registry 계약](../../../internal/cmd/sdkgen/glance_metadef_resource_types_test.go)에 연결됩니다. 새 Go 예제 한 개를 컴파일하고 기존270 source를 그대로 보존했습니다. 누적271개 전체를 다시 실행했다는 의미는 아닙니다.
+
+## 페이지·필터·raw record 목록
+
+`ListRecords`·`AllRecords`는 두 고정 목록 경로에 서버 limit/marker·declared Body 필터·generic pagination과 owned Resource/Wire/receipt를 제공합니다. Source의 조건부 location 규칙·Connection의 두 진입 경로·Python 대비 사용법은 [레코드 목록 가이드](../../metadef-resource-types-records.md)를 참고합니다. 기존 typed `List`·`All`의 strict200·finite 동작은 위 설명대로 유지합니다.
