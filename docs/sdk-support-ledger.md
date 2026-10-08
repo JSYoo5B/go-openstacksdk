@@ -21,7 +21,9 @@
 
 다른547 reviews·선택한 기존28계약의 테스트와 API·source pins/fingerprints·catalog bytes를 보존하고 설명만 legacy typed 범위로 한정했습니다. 새26계약으로 reviews551·contracts3,588·go_mapping282·review unresolved268·unsupported1이며 catalog unresolved3,079에는 미검토2,811개가 포함됩니다. `/private/tmp/go-openstacksdk-member-record-{source-audit,policy-audit,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 보존·실행 근거가 있습니다. 고정 Glance policy는 guide에 연결한 pin의 static 검토이며 실제 Python/cloud/server policy 호출은 실행하지 않았습니다.
 
-공통 옵션 `a993b5cf`·공개 API `48086df6`·계약 테스트 `abf27b47`·사용 가이드 `36cea3b1`을 각각 commit/push했습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하며 최종 parity/progress/gofmt를 별도 확인합니다. 전체 SDK 목표는 active입니다.
+공통 옵션 `a993b5cf`·공개 API `48086df6`·계약 테스트 `abf27b47`·사용 가이드 `36cea3b1`을 각각 commit/push했습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하며 최종282 parity/progress/gofmt도 PASS했습니다. 전체 SDK 목표는 active입니다.
+
+정확한 문서·판정 revision `4aa85ff43194756fcbe31c6beffe5d1c6707cc2a`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008232408-4aa85ff43194`·get/build exit0이며 멤버 CRUD/설치 main **2개**를 빌드했습니다. 원격 Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-record-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance owned ImageRecord 수정 완료
 

@@ -70,3 +70,8 @@ Gophercloud source fixture를 포함하거나 결합·변형하는 테스트 파
 보완 커밋 `1ec3b909bd3588df74f2e84ed38baa96d99cc577`을 원격 main에 반영하고 별도 외부 Go module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008222501-1ec3b909bd35`에서 문서 예제 main **2개**가 빌드되며, 배포된 Go source2,089개 SHA256 `fdd94cb1618b66c86fd59ee79bde0c27120f68d61c0a0634f47f643431db5659`가 최종 검증 소스와 같습니다. 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. 당시 [기본 설치 명령](install.md)은 이 revision을 사용했습니다. 실제 인증·OpenStack 호출 및 별도 상표 사용 허가는 이 검증에 포함하지 않습니다.
 
 현재 [기본 설치 명령](install.md)은 이후 owned 이미지 수정까지 포함한 검증 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 사용합니다. 원격 get/build·문서 main2개·최종 Go source2,095개 일치와 기존 라이선스·고지14개 파일의 배포를 다시 확인했습니다. 이름·라이선스 적용 범위는 위와 같으며 새 자동 JSON Patch engine은 독립 작성한 프로젝트 코드입니다.
+
+
+## 현재 배포 확인 (MemberRecord 완료 후)
+
+정확한 문서·판정 revision `4aa85ff43194756fcbe31c6beffe5d1c6707cc2a`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008232408-4aa85ff43194`·get/build exit0이며 멤버 CRUD/설치 main **2개**를 빌드했습니다. 원격 Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-record-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 모듈·root package·서비스·문서 예제의 현재 이름은 `go-openstacksdk`/`openstack`이며 라이선스·고지 원문은 그대로 보존합니다. 현재 기본 설치 revision은 [설치 안내](install.md)를 따릅니다.

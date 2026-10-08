@@ -1,8 +1,10 @@
 # 외부 Go 프로젝트에서 사용하기
 
+2026-10-09 최신 Glance owned MemberRecord 조회·추가·수정·삭제: 정확한 문서·판정 revision `4aa85ff43194756fcbe31c6beffe5d1c6707cc2a`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008232408-4aa85ff43194`·get/build exit0이며 멤버 CRUD/설치 main **2개**를 빌드했습니다. 원격 Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-record-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는282/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 기본 설치 명령은 이 revision을 사용합니다.
+
 Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사용합니다. 전체 SDK는 개발 중이며, 지원 범위는 [구현 현황](implementation-plan.md)에서 확인합니다. `v0.1.0-alpha.1` tag는 아직 배포하지 않았습니다.
 
-2026-10-09 최신 owned ImageRecord 수정: 정확한 문서·판정 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008225520-c068cacecf76`·get/build exit0이며 owned 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`가 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-owned-update-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다. 완료 집계는279/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 기본 설치 명령은 이 revision을 사용합니다.
+2026-10-09 앞선 owned ImageRecord 수정: 정확한 문서·판정 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008225520-c068cacecf76`·get/build exit0이며 owned 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`가 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-owned-update-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다. 완료 집계는279/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다.
 
 2026-10-09 이름·라이선스 최종 확인: Gophercloud fixture를 포함·결합하는 테스트 파일 18개에 원저작권·원본 범위·로컬 변경 고지를 보완한 revision `1ec3b909bd3588df74f2e84ed38baa96d99cc577`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008222501-1ec3b909bd35`이며 get/build exit0·문서 main **2개** 빌드를 확인했습니다. 원격 Go source2,089개 SHA256 `fdd94cb1618b66c86fd59ee79bde0c27120f68d61c0a0634f47f643431db5659`가 최종 `make check`의 **44개 테스트 package**·race·vet·판정·포맷 검사를 통과한 소스와 같고, 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. 당시 기본 설치 명령은 이 revision을 사용했습니다. 근거는 `/private/tmp/go-openstacksdk-renaming-licensing-final-remote-consumer.json`이며 실제 인증·OpenStack 호출은 실행하지 않았습니다. [이름 변경 안내](renaming.md)와 [라이선스 적용 범위](licensing.md)를 참고하세요.
 
@@ -38,7 +40,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@c068cacecf76dc4ab40254b4324233aa4cfcc86e
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@4aa85ff43194756fcbe31c6beffe5d1c6707cc2a
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
