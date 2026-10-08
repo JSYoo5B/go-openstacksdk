@@ -241,16 +241,22 @@ func (a *API) FetchExtraSpecs(ctx context.Context, input FlavorExtraSpecsRequest
 	result.ExtraSpecs = bytes.Clone(specs)
 	// Flavor.extra_specs uses Body(type=dict): object and null are retained;
 	// any other nonnull value reads as {}. Keep the raw value independently.
-	projected := bytes.TrimSpace(specs)
-	if len(projected) == 0 || projected[0] != '{' && !bytes.Equal(projected, []byte("null")) {
-		projected = json.RawMessage(`{}`)
-	}
-	read.seed.Body["extra_specs"] = bytes.Clone(projected)
+	read.seed.Body["extra_specs"] = flavorExtraSpecsView(specs)
 	if err := read.check(read.ctx); err != nil {
 		return fail(result, response.Fail(cloudread.ContextError(read.ctx, err)))
 	}
 	result.Resource = read.seed
 	return result, nil
+}
+
+// The source dict descriptor is shared by full reads, declared flavor views
+// and conditional enrichment. Actual response values remain separate.
+func flavorExtraSpecsView(raw json.RawMessage) json.RawMessage {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || trimmed[0] != '{' && !bytes.Equal(trimmed, []byte("null")) {
+		return json.RawMessage(`{}`)
+	}
+	return bytes.Clone(trimmed)
 }
 
 func hasFlavorExtraSpecsHeader(headers map[string]string, name string) bool {
