@@ -4,9 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Image owned 조회·목록·검색](#glance-image-owned-조회목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance ImageRecord 상태·삭제 대기](#glance-imagerecord-상태삭제-대기-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는273입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는275입니다.
+
+## Glance ImageRecord 상태·삭제 대기 완료
+
+2026-10-09 핵심 user `wait_for_status`·`wait_for_delete`의 named immutable ImageRecord profile을 닫아 **273→275(+2)**, 핵심199→201/2,292·Glance37→39/120입니다. [Python/Go 비교·독립 main](../image/image-record-waits.md)은 전체 Connection·서비스 사용, defaults·concrete options, nullable/Unicode 상태, 시간 예산·partial 결과와 기존 native/typed 차이를 설명합니다. polling은 기존 reader `GET /images/{id}`만 사용하고 DELETE·List를 추가하지 않습니다.
+
+- 상태: 초기 selected descriptor가 목표와 같으면 독립 seed clone을 HTTP/callback 없이 반환합니다. 그 외 첫 GET을 즉시 수행하며 target 우선·nil failures=ERROR·empty failures=검사 없음·null pending·nonnull nonstring 오류를 제공합니다. Unicode16 full lowercase는 `İ` 확장과 contextual Greek Final_Sigma를 처리하며 임의 runtime Unicode 표는 주장하지 않습니다.
+- 삭제: 입력이 이미 deleted여도 fresh GET부터 시작합니다. fetched deleted 또는 clean final native404만 완료이며 fetched null/nonstring과 physical/source/context/retry-hook 원인은 오류입니다. 첫404는 seed clone, 성공 GET 뒤404는 최신 private overlay record를 반환하고404를 성공 receipt로 합성하지 않습니다.
+- 시간·반환: state unlimited/delete120초·interval2초, timeout0·interval0 coercion·concrete last-option-wins와 하나의 parent/SDK budget을 처리합니다. 비종료 GET만 callback0을 보고합니다. 첫 projected GET 전 오류는 nil record, 그 이후 오류는 마지막 owned record와 오류를 함께 반환합니다. 더 최신의 physical 실패 증거를 이전 receipt로 덮지 않습니다.
+- 재사용·소유권: ImageRecord projector·Body64 overlay·captured source/location/header·literal inputID·공통 Collection/WaitPolicy·public Gophercloud helper와 기존 taskCore/Connection/fault fixture를 사용했습니다. 새 HTTP 서버/fault engine/timer engine은0개입니다. 공통 WaitDeleted의 opt-in guard와 canceled-read physical evidence를 보완하며 기존 nil-guard 정책을 유지했습니다. Unicode 자료의 source URL/hash와 기존 Unicode-3.0 고지를 보완했습니다.
+
+새 **17그룹132사례** + 기존32그룹240사례 = **집중 race49그룹372개 최종 leaf 사례**가 PASS했습니다. 전체 `make check` **43개 실제 test package**·vet/race, 최종275 parity/progress/gofmt, 반복 생성 Go drift0와 대기/설치 main2개의 외부 local-replace build도 PASS했습니다. Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. `/private/tmp/go-openstacksdk-image-record-waits-{focused-unicode-final.jsonl,focused-receipt.json,check.log,check-receipt.json,review-receipt.json,metadata.log,generation-repeat.log,local-consumer.json}`에 실행 근거가 있습니다. 초기 실패 run은 지원 근거에 포함하지 않고, 같은 Go 소스의 전체 gate를 최종 JSON/prose 검증에 재사용했습니다.
+
+다른548 reviews·catalog bytes/pins/fingerprints와 선택한 두 선언의 기존18계약·API를 보존하고12계약을 추가했습니다. reviews550·go_mapping275·unresolved274·unsupported1·contracts3,538이며 catalog unresolved3,086개에는 미검토2,812개도 포함합니다. 기존 named immutable profile과 같은 판정 기준입니다. Python Resource same-instance/dirty/component lifecycle은 SDK-R1, configured Adapter cache는 SDK-C1, dynamic session/base_path/microversion은 SDK-S1에 남습니다. nullable targetNone·arbitrary attribute/progress·surrogate/parser/runtime 전체, 음수 duration·wall-clock timeout·seed/fresh location·response-driven route는 문서의 Go 경계입니다. 이 완료는 전체 Python runtime 동등성·실제 cloud 검증·전체 목표 완료를 뜻하지 않습니다.
+
+공통 guard `ab694cae`·Unicode 비교/출처 `40cf0780`·API/leaf 테스트 `6ffc3931`·Connection `0786265b`·문서 `85e9020e`를 각각 commit/push했습니다. 새 판정·문서의 정확한 remote revision을 replace 없는 외부 module에 설치하고 main2개·Go SHA·라이선스14개 일치를 확인하는 단계가 남아 있습니다. 전체 SDK 목표는 active이며 다음 핵심 user 계약을 선별 중입니다.
 
 ## Glance Image owned 조회·목록·검색 완료
 

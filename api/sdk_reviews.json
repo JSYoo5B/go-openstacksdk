@@ -17078,10 +17078,20 @@
     {
       "operation": "python:image/v2/wait_for_status",
       "source_fingerprint": "86e408b241acc86147bd605a8f54c73c42167a7fbafeea0b129c9db2d24ac0dc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.WaitForState",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.WaitForState"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.WaitForState",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForImageRecordStatus",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitUnlimited",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
       "contracts": [
         {
@@ -17154,11 +17164,60 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "Owned WaitForImageRecordStatus compares the supplied canonical descriptor before polling and returns an independent seed clone without HTTP or progress when the target already matches. Initial target comparison precedes duration and failure-list validation; structural seed/source/options validation still runs.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitStatusInitialTargetReturnsIndependentSeed"
+          ]
+        },
+        {
+          "behavior": "The owned profile uses locale-independent Unicode16 full lowercase for initial, fetched target and failure comparisons, including dotted-I expansion and contextual Final_Sigma. Target success precedes failure, nil failures means ERROR, empty failures disables failure checks, null state remains pending and nonstring selected state is an explicit processing error.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitStatusFreshSelectionFailureAndPending",
+            "image/image_record_wait_test.go:TestImageRecordWaitUnicodeStatusComparison",
+            "internal/cloudfilter/python_lower_test.go:TestPythonLowerFullUnicode16AndOriginalContext"
+          ]
+        },
+        {
+          "behavior": "Owned status waiting defaults to no SDK timeout and two-second polling. Explicit timeout0 stops without a GET after a nonmatching initial state; interval0 becomes100ms or the shorter positive timeout. A single budget covers GET, callback and pause while preserving the parent context; concrete timeout/unlimited helpers apply in caller order.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget",
+            "image/image_record_wait_test.go:TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID",
+            "internal/servicewait/wait_test.go:TestServiceWaitDefaultTwoSecondIntervalAndCallerShortening"
+          ]
+        },
+        {
+          "behavior": "Owned preparation captures source/location once and independently snapshots seed channels, ordinary headers, duration pointers, failure lists and option slice before callbacks. Each option runs once; escaped input ID remains the route despite response-ID drift and Provider authentication remains live. Concrete replacement and invalid source/seed/attribute/header/config inputs fail before HTTP.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID",
+            "image/image_record_wait_test.go:TestImageRecordWaitCompletePreflightAndConcreteReplacement",
+            "connection_image_record_waits_test.go:TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation"
+          ]
+        },
+        {
+          "behavior": "Fresh owned GET accepts actual200..399 and reuses the declared Image projector with previous private Body64 as overlay seed. Invalid JSON syntax retains seed Body, valid object packing can reset properties, import-method headers are read afresh, and actual Wire/Envelope/Header/status remain independent from Resource. Nonobject/descriptor/physical processing failures retain their response evidence.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitAcceptedJSONToleranceAndBodyStateErrors",
+            "image/image_record_get_test.go:TestImageRecordGetPackingAliasesAndSeedOverlay",
+            "connection_image_record_waits_test.go:TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation"
+          ]
+        },
+        {
+          "behavior": "Only nonterminal owned observations invoke synchronous progress0, because Image has no declared progress descriptor. Cancellation, source changes and physical/processing errors stop before another poll; after a successful projection later errors return that latest owned record with the error. Newer physical failures keep their own receipt instead of being replaced by an earlier successful receipt; state404 is an error.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET",
+            "image/image_record_wait_test.go:TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal",
+            "image/image_record_wait_test.go:TestImageRecordWaitAcceptedAndRejectedStickyPhysicalGuards"
+          ]
         }
       ],
       "documentation": [
         "docs/service-waits.md",
-        "image/v2/images/README.md"
+        "image/v2/images/README.md",
+        "image/image-record-waits.md",
+        "docs/implementation-plan.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
         "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
@@ -17166,21 +17225,32 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Earlier contracts/differences above describe the preserved Ref/native-model service policies. The additional named immutable ImageRecord profile implements cached initial-target selection, nullable declared status, fresh projection, Python-style zero controls and record-return behavior in the new contracts; the earlier typed limitations do not describe the new record methods.",
+        "Owned ImageRecord waits preserve caller snapshots rather than mutating a supplied Resource instance. Arbitrary Resource subclasses, dirty/component lifecycle and same-instance identity remain SDK-R1; configured Adapter cache/conditional GET remains SDK-C1; dynamic session/adapter/base_path/microversion replacement remains SDK-S1 in docs/implementation-plan.md. These shared SDK objectives remain active and this named mapping does not imply full Python runtime or cloud equivalence.",
+        "Go keeps the escaped nonblank input ID fixed rather than following response-ID mutation into a later route. Initial-target/first404 return preserves seed location; each fresh poll projects the location captured for this operation, whereas Source Image fetch without project_id/availability_zone can retain its previous computed location. Options/source/descriptor preflight runs even for an initial-target shortcut.",
+        "The owned profile takes valid UTF-8 string targets and canonical declared Body64/location/image_import_methods attribute selectors; nullable targetNone, arbitrary Python attribute/progress objects, lone-surrogate JSON/string behavior and other parser/runtime domains are outside this finite profile. Comparisons pin Unicode16 full lowercase; other Python runtime Unicode databases are a documented boundary. Go rejects negative durations, uses monotonic context budgets and explicit unlimited helpers, and cannot interrupt a blocked synchronous callback.",
+        "Image-v1, wait_for_task and Cloud wait_for_image/wait_for_server are separate declarations and are not incidentally promoted by this operation. The existing legacy Ref name-resolution/typed decoder boundary remains preserved alongside literal owned ImageRecord input."
       ],
-      "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/wait_for_delete",
       "source_fingerprint": "5c42df677e6638138685553f9d86bb114a401a0033e82c43b24c4673e240f95c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.WaitForDelete",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.WaitForDelete"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForImageRecordDelete",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitUnlimited",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitCallback",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordWaitHeaders"
       ],
       "contracts": [
         {
@@ -17257,11 +17327,60 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "Owned WaitForImageRecordDelete always begins with fresh fixed-ID GET, including an initially deleted seed, and never sends DELETE or List. Defaults remain120-second SDK timeout and two-second polling; this additive record-return API preserves existing typed/error-only/native policies.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering"
+          ]
+        },
+        {
+          "behavior": "A freshly fetched string deleted completes owned deletion waiting under Unicode16 full lowercase comparison. A fetched null/nonstring status is a processing error. Ordinary failure states do not complete or fail deletion; actual200..399 fetches retain declared projection and receipt policy.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitAcceptedJSONToleranceAndBodyStateErrors",
+            "image/image_record_wait_test.go:TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn",
+            "internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation"
+          ]
+        },
+        {
+          "behavior": "First clean final native404 returns an independent initial seed clone;404 after successful GETs returns the latest private overlay record. No404 response body/header/status is synthesized into a successful Image receipt, matching the visible latest-data effect of Python orig_resource being the same mutable fetched object without mutating the Go caller.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn"
+          ]
+        },
+        {
+          "behavior": "Read/Close, context, sticky-source, transport and retry-hook failures associated with404 are terminal rather than deletion completion. Native reauthentication/retry remains active, unchanged plain native RetryFunc errors remain clean, and canceled GETs preserve physical response evidence alongside the context cause. Other rejected statuses keep native HTTP failure policy.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal",
+            "image/image_record_wait_test.go:TestImageRecordWaitAcceptedAndRejectedStickyPhysicalGuards",
+            "resource/wait_deleted_guard_test.go:TestWaitDeletedCanceledReadRetainsPhysicalResponseEvidence"
+          ]
+        },
+        {
+          "behavior": "Owned deletion uses one captured source/location/header preparation and live Provider authentication through every poll. The escaped input ID stays fixed even when a response id changes or becomes null. Computed location and receipt metadata are excluded from the Body64 polling seed, and all returned channels remain independently owned.",
+          "tests": [
+            "connection_image_record_waits_test.go:TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation",
+            "image/image_record_wait_test.go:TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn",
+            "image/image_record_wait_test.go:TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID"
+          ]
+        },
+        {
+          "behavior": "One owned deletion budget covers GET, progress and pause, supports timeout0, interval0 and explicit unlimited selection, and retains parent cancellation/deadline. Completion/errors omit progress. Opt-in common deletion guards check before GET, after read before completion and after progress, preserving fetch evidence and existing nil-guard behavior; later errors return the last successfully projected owned record.",
+          "tests": [
+            "image/image_record_wait_test.go:TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget",
+            "image/image_record_wait_test.go:TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET",
+            "resource/wait_deleted_guard_test.go:TestWaitDeletedOptInGuardProtectsEveryCompletionBoundary",
+            "resource/wait_deleted_guard_test.go:TestWaitDeletedGuardPreservesFetchFailureAndLegacyNilGuard"
+          ]
         }
       ],
       "documentation": [
         "docs/service-waits.md",
-        "image/v2/images/README.md"
+        "image/v2/images/README.md",
+        "image/image-record-waits.md",
+        "docs/implementation-plan.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
         "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
@@ -17269,13 +17388,14 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Earlier contracts/differences above describe the preserved Ref/native-model service policies. The additional named immutable ImageRecord profile implements cached initial-target selection, nullable declared status, fresh projection, Python-style zero controls and record-return behavior in the new contracts; the earlier typed limitations do not describe the new record methods.",
+        "Owned ImageRecord waits preserve caller snapshots rather than mutating a supplied Resource instance. Arbitrary Resource subclasses, dirty/component lifecycle and same-instance identity remain SDK-R1; configured Adapter cache/conditional GET remains SDK-C1; dynamic session/adapter/base_path/microversion replacement remains SDK-S1 in docs/implementation-plan.md. These shared SDK objectives remain active and this named mapping does not imply full Python runtime or cloud equivalence.",
+        "Go keeps the escaped nonblank input ID fixed rather than following response-ID mutation into a later route. Initial-target/first404 return preserves seed location; each fresh poll projects the location captured for this operation, whereas Source Image fetch without project_id/availability_zone can retain its previous computed location. Options/source/descriptor preflight runs even for an initial-target shortcut.",
+        "The owned profile takes valid UTF-8 string targets and canonical declared Body64/location/image_import_methods attribute selectors; nullable targetNone, arbitrary Python attribute/progress objects, lone-surrogate JSON/string behavior and other parser/runtime domains are outside this finite profile. Comparisons pin Unicode16 full lowercase; other Python runtime Unicode databases are a documented boundary. Go rejects negative durations, uses monotonic context budgets and explicit unlimited helpers, and cannot interrupt a blocked synchronous callback.",
+        "Image-v1, wait_for_task and Cloud wait_for_image/wait_for_server are separate declarations and are not incidentally promoted by this operation. The existing legacy Ref name-resolution/typed decoder boundary remains preserved alongside literal owned ImageRecord input."
       ],
-      "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/wait_for_task",
