@@ -173,6 +173,8 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 
 `service.API.ServiceInfo.ListStores/AllStores(ctx, options...)`는 기본 저장소 목록과 선택적 상세 목록을 읽고, `GetImportInfo(ctx)`는 현재 서버의 import 방식을 조회합니다. [ServiceInfo 사용법](v2/serviceinfo/README.md)은 Python 대응·concrete 옵션·실제 응답 증거·목록 제어를 설명합니다. discovery 결과로 import 실행을 자동 제한하거나 캐시하지 않습니다.
 
+`ServiceInfo.GetImportInfoRecord/ListStoreRecords/AllStoreRecords`는 import와 기본 stores의 declared Resource·Wire·응답 증거를 구분하고 descriptor 변환·현재 location·공통 페이지·로컬 Body 조건을 처리합니다. [레코드 사용법과 독립 main](v2/serviceinfo/records.md)은 concrete 옵션·explicit zero limit·부분 결과와 후속 admin 상세 목록의 범위를 설명합니다.
+
 `service.API.ServiceInfo.GetUsageInfo(ctx, options...)`는 인증된 프로젝트의 limit·사용량을 조회합니다. [사용량 사용법](v2/serviceinfo/usage.md)은 nullable int64·unknown resource·빈 응답과 concrete header 옵션을 설명합니다.
 
 `service.AddTag/RemoveTag(ctx, ref, tag, options...)`는 태그 한 개를 변경하며 `DeactivateImage/ReactivateImage(ctx, ref, options...)`는 고정 action을 제출합니다. [태그·상태 변경 사용법](mutations.md)은 공통 concrete header 옵션·literal escaping·미존재 오류·actual204 acknowledgement와 Python cache 차이를 설명합니다.

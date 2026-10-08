@@ -1,5 +1,7 @@
 # Glance store와 import 정보 조회
 
+Declared Resource의 기본값·descriptor 변환·현재 location과 generic 목록 순회는 별도 `GetImportInfoRecord/ListStoreRecords/AllStoreRecords`로 제공합니다. [Import·기본 stores 레코드 비교와 독립 main](records.md)에4/6필드 view·Wire·concrete 옵션·부분 결과·핵심 user/admin 범위를 설명합니다. 아래 기존 typed 조회와 detail 옵션의 계약은 유지합니다.
+
 `ServiceInfo`는 배포된 Glance의 store 목록과 import method 정보를 읽습니다. `conn.ImageV2(ctx)`의 `ServiceInfo`, 상위 `image.Service.API.ServiceInfo`, 직접 생성한 `serviceinfo.New(client)`에서 같은 API를 사용합니다. 조회 결과로 다른 이미지 연산을 자동 허용하거나 차단하지 않습니다.
 
 ## Store 목록과 detail

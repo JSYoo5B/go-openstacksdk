@@ -403,6 +403,8 @@ Senlin의 이름·UUID·짧은 ID 자동 조회는 `Profiles/Policies/Clusters/N
 
 Glance 저장소 목록·상세 목록과 import 정보는 `conn.ImageV2(ctx).ServiceInfo`와 상위 `conn.Image(ctx)`의 `API.ServiceInfo`에서 조회합니다. [서비스 정보 비교](image/v2/serviceinfo/README.md)는 concrete 옵션·생략/null·raw 응답·목록 소비 제어와 openstacksdk 사용법을 설명합니다.
 
+`ServiceInfo.GetImportInfoRecord/ListStoreRecords/AllStoreRecords`는4/6필드 declared Resource·실제 Wire, dict/bool descriptor 변환과 기본 stores의 로컬 필터·공통 paging을 제공합니다. [레코드의 Python/Go 비교와 독립 main](image/v2/serviceinfo/records.md)에 explicit zero limit·부분 결과·현재 location과 후속 admin detail 범위를 설명합니다.
+
 Glance 인증 프로젝트의 limit·사용량은 `ServiceInfo.GetUsageInfo(ctx)`로 조회합니다. [사용량 조회](image/v2/serviceinfo/usage.md)는 동적 resource·정확한 int64·생략/null·빈 결과와 Python SDK의 지원 경계를 설명합니다.
 
 Glance의 단일 태그 추가·삭제와 이미지 비활성화·재활성화는 상위 `image.Service.AddTag/RemoveTag/DeactivateImage/ReactivateImage`로 사용합니다. [태그·상태 변경 비교](image/mutations.md)는 concrete header 옵션·ID/Name 해석·실제204 접수와 부분 응답을 설명합니다.
