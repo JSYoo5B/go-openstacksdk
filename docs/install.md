@@ -23,6 +23,7 @@ package main
 import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
@@ -34,6 +35,11 @@ import (
 func main() {
     _ = sdk.Connect
     _ = (*sdk.Connection).AttachVolume
+    _ = (*metadefproperties.NamespaceScope).ListRecords
+    _ = (*metadefproperties.NamespaceScope).DeleteRecord
+    _ = (*metadefproperties.NamespaceScope).DeleteAllRecords
+    _ = metadefproperties.WithRecordListFilter("max_items", 3)
+    _ = metadefproperties.WithRecordListMaxItems(20)
     var _ *compute.Service
     var _ *network.FloatingIPs
     _ = resource.ID("server-id")

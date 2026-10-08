@@ -8,10 +8,13 @@
 | `scope.Get` | raw 조회 API | child GET, 200 |
 | `scope.GetRecord` | `get_metadef_property`의 owned Go mapping | query 없는 child GET, 200..399 |
 | `scope.Update` | `update_metadef_property` | 현재 child PUT, 200 |
-| `scope.Delete` | `delete_metadef_property` | child DELETE, 204 |
-| `scope.DeleteAll` | `delete_all_metadef_properties` | collection DELETE, 204 |
-| `scope.List` | `metadef_properties` | lazy한 단일 collection GET, 200 |
+| `scope.Delete` | raw 삭제 API | child DELETE, 204 |
+| `scope.DeleteAll` | raw 전체 삭제 API | collection DELETE, 204 |
+| `scope.List` | raw 목록 API | lazy한 단일 collection GET, 200 |
 | `scope.All` | 같은 generator의 수집 | 단일 collection GET, 200 |
+| `scope.ListRecords/AllRecords` | `metadef_properties`의 owned Go mapping | 유한 dictionary GET, 200..399·descriptor·로컬 필터 |
+| `scope.DeleteRecord` | `delete_metadef_property`의 owned Go mapping | child DELETE, 200..399·기본 physical404 처리 |
+| `scope.DeleteAllRecords` | `delete_all_metadef_properties`의 owned Go mapping | collection DELETE, 200..399·missing 오류 |
 
 ## 생성·조회·목록·교체·삭제
 
@@ -148,7 +151,7 @@ raw keyword를 전송할 수 있다는 사실은 서버의 저장·round trip을
 
 dictionary는 wire encounter order로 소비하며 같은 key가 반복되면 첫 slot을 유지하고 마지막 value를 사용합니다. lexical sort를 추가하지 않습니다. `Property.Key *string`은 List에서만 제공하는 literal dictionary key provenance이며 CRUD에서는 nil입니다. canonical Name은 별도 optional field로 유지하고 raw Body에 이름을 seed하거나 덮어쓰지 않습니다. Key·Name·self·schema 어느 것도 다음 route를 자동 결정하지 않습니다.
 
-고정 [MetadefProperty.list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_property.py#L86-L185)는 `params={}`로 한 번 GET하고 dictionary key를 name으로 seed한 뒤 value attribute가 이를 덮어쓸 수 있습니다. recognized Body/dict filter는 Python에서 로컬 적용합니다. Go는 이런 filter와 descriptor coercion·minLength/minItems 0·uniqueItems false 기본값을 추가하지 않습니다. [실제 server index](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_properties.py#L64-L96)와 [공식 List Properties](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-properties)는 dictionary 응답이며 Go가 next·Link·schema·marker·wire limit·sort·filter·fallback을 해석하거나 합성하지 않습니다.
+고정 [MetadefProperty.list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_property.py#L86-L185)는 `params={}`로 한 번 GET하고 dictionary key를 name으로 seed한 뒤 value attribute가 이를 덮어쓸 수 있습니다. recognized Body/dict filter는 Python에서 로컬 적용합니다. 기존 raw `List/All`은 이런 filter와 descriptor coercion·minLength/minItems 0·uniqueItems false 기본값을 추가하지 않습니다. 새 owned `ListRecords/AllRecords`는 아래의 별도 API로 이를 제공합니다. [실제 server index](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_properties.py#L64-L96)와 [공식 List Properties](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-properties)는 dictionary 응답이며 Go가 next·Link·schema·marker·wire limit·sort·filter·fallback을 해석하거나 합성하지 않습니다.
 
 ## 모델·scope·옵션·오류 증거
 
@@ -165,3 +168,46 @@ configured native pre-body retry·reauth·backoff·동일 target redirect 정책
 비교 기준은 openstacksdk commit `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, native Gophercloud `v2.15.0`입니다. native에는 property CRUD/list API가 없어 이 leaf를 SDK에서 소유합니다. Python 전체 Resource·client filter·adapter/session parity나 실제 서버 schema·권한·DB·cloud side effect를 검증했다고 주장하지 않습니다.
 
 소스·요청·응답 경계는 [core tests](core_test.go), [option tests](options_test.go), [외부 HTTP contracts](contracts_test.go)에서 검증합니다. Connection 경로와 생성 registry는 [Connection contract](../../../connection_image_metadef_properties_test.go)와 [generator contract](../../../internal/cmd/sdkgen/glance_metadef_properties_test.go)가 별도로 확인합니다. 이 테스트는 로컬 transport 증거이며 Python 실행이나 실제 cloud parity 검증은 아닙니다.
+
+## Owned 목록과 삭제
+
+[ListRecords/AllRecords 비교·독립 main](../../metadef-property-record-list.md)은 dictionary key를 name으로 seed한21필드 Resource, 실제 Wire·전체 page·receipt, canonical19 Body 로컬 필터와 부분 결과를 설명합니다. `WithRecordListFilter("max_items", 3)`은 property descriptor 조건이며 `WithRecordListMaxItems(3)`은 필터 전 원본 entry cap입니다. 목록은 한 번의 query/body 없는 GET이며 `Accept: application/json`을 source 상속·native retry에서도 유지합니다.
+
+`DeleteRecord`는 기존 `RecordRequest`의 ID 또는 Resource로 child를 선택합니다. Resource는 callback 전에 복사하고 id 키가 있으면 null을 포함해 그 키를 선택하며, id가 없을 때만 name을 사용합니다. 최종 identity는 GetRecord와 같은 안전한 literal string이어야 합니다. 다른 property 정의·namespace·location은 삭제 경로나 body에 넣지 않습니다. `DeleteAllRecords`는 고정 namespace collection에 DELETE 한 번을 실행하고 children을 조회하거나 삭제 수를 추정하지 않습니다.
+
+```go
+package example
+
+import (
+    "context"
+
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
+)
+
+func deleteOwnedProperties(ctx context.Context, scope *metadefproperties.NamespaceScope, id string, clearNamespace bool) (member, collection *metadefproperties.Acknowledgement, err error) {
+    member, err = scope.DeleteRecord(ctx, metadefproperties.RecordRequest{ID: id},
+        metadefproperties.WithDeleteIgnoreMissing(false),
+        metadefproperties.WithDeleteHeader("X-Request-Source", "owned-delete-example"),
+    )
+    if err != nil || !clearNamespace { return member, nil, err }
+    collection, err = scope.DeleteAllRecords(ctx,
+        metadefproperties.WithDeleteAllHeader("X-Request-Source", "owned-delete-example"),
+    )
+    return member, collection, err
+}
+```
+
+대응하는 Python 공개 API는 다음과 같습니다. 이 예제는 실행한 인증·cloud 검증이 아니라 사용법 비교입니다.
+
+```python
+def delete_owned_properties(conn, namespace, id, clear_namespace=False):
+    conn.image.delete_metadef_property(id, namespace, ignore_missing=False)
+    if clear_namespace:
+        conn.image.delete_all_metadef_properties(namespace)
+```
+
+두 owned 삭제는 actual200..399의 opaque bytes·Header·StatusCode를 `Acknowledgement`로 보존하며 body가 JSON이나 UTF-8일 필요는 없습니다. `Name`은 member의 선택한 child이고 collection이면 nil입니다. Source의 `has_body=False`처럼 응답 정의를 decode하거나 후속 요청을 만들지 않습니다. read/Close/context/source 처리 실패에도 실제 ACK와 오류를 함께 반환하고 accepted body를 재전송하지 않습니다.
+
+개별 삭제의 기본 `ignore_missing=true`는 clean physical404를 native retry callback 없이 처리하며 **actual404 ACK**를 반환합니다. 이 상태는 부재를 처리한 응답 증거이며 삭제 접수의 성공을 주장하지 않습니다. handled404의 read/Close/source 오류는 ACK와 `*resource.ResponseError`를 함께 반환합니다. `WithDeleteIgnoreMissing(false)`와 전체 삭제의404는 native 오류이고, transport가 주장하는404는 physical missing으로 바꾸지 않습니다.
+
+Source의 공개 삭제는 반환값 None이고 Go는 실제 receipt를 추가합니다. immutable concrete identity·고정 scope/client·header 옵션·callback snapshot·sticky guards는 라이브러리가 소유합니다. Python Resource/cache/dirty/session 재사용을 주장하지 않습니다. 기존 raw `Delete/DeleteAll`은 strict204이며 handled404에는 nil 결과를 유지합니다. 기존 WithDelete/WithDeleteAll 옵션을 재사용하므로 builder 구현이나 새 중복 옵션 체계를 요구하지 않습니다.
