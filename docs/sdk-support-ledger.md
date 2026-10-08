@@ -20,9 +20,11 @@
 
 새15그룹146사례 + 기존78그룹410사례 = **집중 race93그룹556개 최종 leaf 사례**가 PASS했습니다. 전체 `make check` **43개 실제 test package**·vet/race 및 최종270 parity/progress/gofmt, 반복 생성 Go drift0, 가이드/설치 main2개 외부 local-consumer build가 통과했습니다. Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-{focused-initial.jsonl,focused-receipt.json,check.log,check-receipt.json,metadata.log,generation-repeat.log,local-consumer.json}`에 실행 근거가 있습니다. 실제 인증·OpenStack/Python runtime은 실행하지 않았습니다.
 
-다른548 reviews·catalog/pins/fingerprints 및 선택한 두 선언의17기존 계약·Go API를 원문까지 보존하고12계약을 추가했습니다. reviews550·go_mapping270·unresolved279·unsupported1·contracts3,508입니다. catalog unresolved3,091개에는 미검토2,812개가 포함합니다. Import의 no-argument named getter만 완료 판정했고 stores 상세·full mutable Resource/session/cache/discovery는 전체 목표에 남아 있습니다.
+다른548 reviews·catalog/pins/fingerprints 및 선택한 두 선언의17기존 계약·Go API를 원문까지 보존하고12계약을 추가했습니다. reviews550·go_mapping270·unresolved279·unsupported1·contracts3,508입니다. catalog unresolved3,091개에는 미검토2,812개가 포함됩니다. Import의 no-argument named getter만 완료 판정했고 stores 상세·full mutable Resource/session/cache/discovery는 전체 목표에 남아 있습니다.
 
-`99cd9850`·`2545b808`·`a00b5144`를 작은 단위로 commit/push했습니다. 정확한 문서·판정 revision의 원격 설치·같은 main2개·Go SHA와 라이선스14개 byte equality를 이어서 검증합니다. 다음 핵심 user 후보는 실제 unresolved Image get/list/find3개와 common projector입니다. 고정 Proxy에 없는 tag get/list/find와 이미 완료한 namespace getter/list는 재집계하지 않습니다.
+`99cd9850`·`2545b808`·`a00b5144`를 작은 단위로 commit/push했습니다. 문서 `9832ed03`·판정 `95a7c6de`도 별도로 commit/push하여 정확한 원격 설치·main2개·Go SHA·라이선스14개 일치를 확인했습니다. 다음 핵심 user 후보는 실제 unresolved Image get/list/find3개와 common projector입니다. 고정 Proxy에 없는 tag get/list/find와 이미 완료한 namespace getter/list는 재집계하지 않습니다.
+
+정확한 문서·판정 revision `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008193028-95a7c6de03b2`·get/build exit0이며 discovery/설치 main **2개**를 빌드했습니다. 원격 Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance member owned 목록·검색 완료
 
