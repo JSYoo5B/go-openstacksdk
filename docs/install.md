@@ -28,6 +28,7 @@ import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
@@ -38,6 +39,10 @@ import (
 
 func main() {
     _ = sdk.Connect
+    _ = (*metadefresourcetypes.NamespaceScope).CreateRecord
+    _ = (*metadefresourcetypes.NamespaceScope).DeleteRecord
+    _ = metadefresourcetypes.WithRecordCreateAttributes(map[string]any{"name": "OS::Nova::Server"})
+    _ = metadefresourcetypes.RecordRequest{ID: "OS::Nova::Server"}
     _ = (*sdk.Connection).AttachVolume
     _ = (*metadefproperties.NamespaceScope).CreateRecord
     _ = (*metadefproperties.NamespaceScope).UpdateRecord

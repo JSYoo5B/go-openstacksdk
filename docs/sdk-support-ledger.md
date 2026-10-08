@@ -4,7 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef property owned 생성·수정](#glance-metadef-property-owned-생성수정-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance resource type association owned 생성·삭제](#glance-resource-type-association-owned-생성삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+
+## Glance resource type association owned 생성·삭제 완료
+
+2026-10-09 핵심 user `create_metadef_resource_type_association`·`delete_metadef_resource_type_association` 두 선언을 owned Go mapping으로 닫았습니다. **263→265(+2)**이며 핵심189→191/2,292·Glance27→29/120입니다. [Python/Go 비교와 독립 main](../image/metadef-resource-type-association-mutations.md)은 raw6개 Body·8필드 Resource·기본값/location·immutable identity·실제 opaque ACK의 사용법과 Source 차이를 설명합니다.
+
+`CreateRecord`는 새 dirty Body의 명시한 값만 POST하고 name/id 필수 조건을 합성하지 않습니다. 빈 입력도 POST `{}`이며 반환 view는 기존 association 목록 projector를 재사용합니다. response의 known6개 값만 seed에 overlay하고 unknown/self·Wire·Envelope·receipt는 독립 보존합니다. whole UTF-8과 actual200..399를 검증하며 empty/invalid JSON은 seeded view와 Wire nil을 남깁니다. `DeleteRecord`는 기존 DeleteOption을 재사용하고 옵션 전 Resource identity를 복사해 parent/child를 고정합니다. opaque200..399와 기본 physical404의 ACK를 handling 오류와 함께 보존합니다. Python은 child Resource를 재사용해 namespace URI를 변경할 수 있지만 Go는 caller 객체를 바꾸지 않습니다. 기존 strict201 Create·strict204 Delete의 clean404 nil 계약은 유지합니다.
+
+집중 race **45그룹753사례 = 기존34그룹620 재사용 + 새11그룹133**입니다. [leaf10그룹131](../image/v2/metadefresourcetypes/record_mutations_test.go)과 [양쪽 Connection1그룹2](../connection_image_metadef_association_mutations_test.go)를 추가했습니다. 기존 ResourceType/Connection fixture·public Gophercloud helper·공통 projection/semantic capture/REST guard를 재사용하며 새 서버/fault engine은0개입니다. 전체 `make check` vet·race **43개 실제 test package**가 exit0이고, 동일 Go의 최종265개 JSON/prose는 metadata gate를 통과했습니다. 정확한 생성삭제/목록/설치 main3개를 외부 local-replace module에서 빌드했고 반복 생성 Go drift0입니다.
+
+Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`·catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`를 기록합니다. 다른548 reviews·기존11계약·source pins와 fingerprint를 보존하고 새11계약을 추가해 reviews550·계약3,471입니다. Go 함수·메서드와 실행한 test anchor만 판정에 연결했습니다. 두 SDK Source 메서드에 admin 전용 지정은 없으며 서버 permission/protection/DB·실제 cloud 검증을 뜻하지 않습니다. 전체 mutable Resource/session 목표는 계속 남아 있습니다.
+
+단계 `01d5df58`·API `2467fdce`·leaf `ee2514c5`·Connection `fbc88b37`를 작은 commit으로 각각 push했습니다. `/private/tmp/go-openstacksdk-association-{focused.jsonl,check.log,check-receipt.json,generation-repeat.log,local-consumer.json}`에 실제 실행 근거를 기록합니다. 정확한 구현·문서 commit의 원격 설치 검증은 push 후 별도로 기록합니다.
 
 ## Glance metadef property owned 생성·수정 완료
 

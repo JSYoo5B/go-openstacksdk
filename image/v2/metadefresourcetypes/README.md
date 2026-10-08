@@ -2,6 +2,8 @@
 
 `image.Service.API.MetadefResourceTypes`는 global resource type 목록과 namespace에 연결된 association을 구분합니다. 고정 Python의 네 proxy와 같은 네 서버 경로를 다루며 개별 Get·Update·Find·global Delete를 추가하지 않습니다.
 
+아래의 기존 typed `List/All/Create/Delete` 설명은 strict200/201/204·유한 목록·안전한 literal 입력 계약입니다. owned 목록과 생성·삭제는 끝의 별도 가이드에 연결하며 동일한 서버 경로를 사용합니다.
+
 | 사용 범위 | 실제 요청 | 성공 응답 |
 |---|---|---|
 | global List/All | GET `/metadefs/resource_types` | 200, `resource_types` array |
@@ -92,7 +94,7 @@ func manageResourceTypeAssociation(
 }
 ```
 
-고정 Python의 실제 네 proxy를 비교하면 다음과 같습니다. 서버가 finite response를 반환하므로 비교 예제는 두 list에 `paginated=False`를 명시합니다. Go는 서버 query·client filter·generic pagination을 합성하지 않습니다.
+고정 Python의 실제 네 proxy를 비교하면 다음과 같습니다. 서버가 finite response를 반환하므로 비교 예제는 두 list에 `paginated=False`를 명시합니다. 위 Go 예제의 typed `List/All`은 서버 query·client filter·generic pagination을 합성하지 않습니다. owned `ListRecords/AllRecords`는 뒤의 별도 목록 가이드에서 설명합니다.
 
 ```python
 def resource_type_association(conn, namespace, resource_type, prefix, target):
@@ -112,7 +114,7 @@ def resource_type_association(conn, namespace, resource_type, prefix, target):
     return global_types, created, associations
 ```
 
-[실제 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1696-L1786)의 parent 인자는 `Resource._get_id`로 처리하며 parent Name 검색을 하지 않습니다. [두 Resource class](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_resource_type.py)는 같은 파일에 있고 name을 alternate ID로 사용합니다. Create는 mutable Resource를 반환하고 Delete proxy는 결과를 버려 None을 반환합니다. Resource 재사용·dirty fields·adapter/session·microversion·generic list query와 Body filter는 Go의 passive DTO·literal scope와 별도 계약입니다.
+[실제 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1696-L1786)의 parent 인자는 `Resource._get_id`로 처리하며 parent Name 검색을 하지 않습니다. [두 Resource class](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_resource_type.py)는 같은 파일에 있고 name을 alternate ID로 사용합니다. Create는 mutable Resource를 반환하고 Delete proxy는 결과를 버려 None을 반환합니다. 위의 raw typed API는 passive DTO와 literal scope를 제공합니다. owned 목록과 생성·삭제는 Source의 declared Resource·dirty Body·alternate ID·location을 추가하며, mutable Resource/session 전체 동작과는 구분합니다.
 
 ## 입력과 concrete 옵션
 
@@ -143,3 +145,11 @@ configured native pre-body retry·reauth·backoff·동일 target redirect는 유
 ## 페이지·필터·raw record 목록
 
 `ListRecords`·`AllRecords`는 두 고정 목록 경로에 서버 limit/marker·declared Body 필터·generic pagination과 owned Resource/Wire/receipt를 제공합니다. Source의 조건부 location 규칙·Connection의 두 진입 경로·Python 대비 사용법은 [레코드 목록 가이드](../../metadef-resource-types-records.md)를 참고합니다. 기존 typed `List`·`All`의 strict200·finite 동작은 위 설명대로 유지합니다.
+
+## raw 속성 생성과 실제 삭제 receipt
+
+namespace scope의 `CreateRecord(ctx, options...)`는 id·name·created_at·updated_at·prefix·properties_target의 명시한 raw JSON 값만 flat POST에 넣습니다. name/id의 SDK 필수 조건은 없으며 빈 입력도 `{}`를 보냅니다. nullable declared Resource는 고정 namespace와 현재 location을 더한8필드이고, 실제 Wire·Envelope·Header·StatusCode와 독립 소유입니다. actual200..399에서 빈/invalid JSON은 seed/default Resource와 Wire nil을 유지하고, valid parsed nonobject와 whole UTF-8·handling 실패는 실제 receipt가 있는 오류입니다.
+
+`DeleteRecord(ctx, RecordRequest, options...)`는 ID 또는 옵션 전에 복사한 RawResource의 id/name으로 고정 child를 선택합니다. Source는 association Resource를 재사용해 namespace를 변경할 수 있지만 Go는 caller를 변경하지 않고 안전한 literal identity를 사용합니다. 기존 DeleteOption을 재사용하며 actual200..399의 opaque ACK와 handling 오류를 함께 남깁니다. default nil/true physical404도 StatusCode404 ACK를 남기며 이는 missing 처리의 증거입니다. explicit false는 native404 오류 정책을 유지합니다. 기존 strict204 Delete의 clean404 `(nil,nil)` 계약은 유지합니다.
+
+[Python/Go 비교·독립 main·입력과 response 차이](../../metadef-resource-type-association-mutations.md)에서 concrete 생성 옵션, immutable 삭제 identity와 오류 receipt 사용법을 설명합니다. 개별 Get·Update·Find·global Delete나 global type 조회·생성·삭제 요청을 추가하지 않습니다.

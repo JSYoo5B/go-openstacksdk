@@ -23800,7 +23800,7 @@
     {
       "operation": "python:image/v2/create_metadef_resource_type_association",
       "source_fingerprint": "aa2e39ac1488f044cd98bf9279ff7fd83bbdc46e3e4b0e147663a8e4d734aedf",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Create",
@@ -23808,7 +23808,13 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreateHeaders",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePrefix",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithCreatePropertiesTarget",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithRecordCreateAttributes"
       ],
       "contracts": [
         {
@@ -23862,33 +23868,79 @@
             "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
             "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "Owned CreateRecord constructs a fresh Source-style dirty Body from exactly id/name/created_at/updated_at/prefix/properties_target, all untyped raw JSON including null/complex/large values. No SDK-required name/id; empty attributes POST {}. Only explicitly supplied six Body keys are transmitted, no missing default synthesis or child-path validation of passive create values, no parent/global lookup/precreate/cache/RMW/rollback or extra endpoint.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateSixRawFieldsAndEmptyBody",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationCompletePreflight",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "New concrete RecordCreateOpts and named Header(s)/Attribute(s)/Opts capture independent maps/slices/raw JSON and callback configs, whole replacement plus individual last-wins and bulk semantic-set replacement. Only resource.WithFilter/WithFilters carriers accepted; unknown attributes and their captured encoding errors discarded before encoding. Known selected errors, nil/nonsemantic options, owned Accept/auth/header conflicts and 17 fixed route/client controls reject preHTTP; callback once and retained/caller changes cannot alter captured input.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateFactoriesSelectionAndLocationSnapshot",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Owned created Resource eagerly materializes six nullable raw Body descriptors plus fixed namespace_name and current location, eight fields versus Source default to_dict seven excluding URI. Present id including null authoritative, absent id falls back to name. Present recognized response fields overlay explicit seed, missing values preserve seed/default null; self/unknown/response namespace/location remain passive only in actual Wire. Location captured before options, direct New null, supplied dependency cloned; both Connection Image and ImageV2 inject the same current location, Source fixed-URI collector ignores response location.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateSixRawFieldsAndEmptyBody",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateActualStatusesSeedOverlayAndOwnedChannels",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateFactoriesSelectionAndLocationSnapshot",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Owned CreateRecord accepts only actual 200..399; complete response UTF8 required. Empty/opaque/invalid JSON syntax succeeds with seed/default Resource and Wire nil, while valid parsed nonobject fails with actual ResponseError. Valid object yields independently owned declared Resource, actual Wire and whole Envelope/Header/status; no request seed or defaults injected into Wire and no returned field changes parent or route.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateActualStatusesSeedOverlayAndOwnedChannels",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordCreateToleratedDecodeAndStrictWholeBody",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Owned mutation guard checks source/scope/outer Connection/context before location/options and after every callback, physical/read/Close boundary; observed failure is sticky even if later restored. Create location failure blocks options/HTTP. Callback source/namespace changes and cancellation causes reject without request or preserve actual accepted receipt; no retained context or caller binding mutation.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationStickySourceAndOuterPreflight",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationAcceptedFaultReceiptsAndFrozenTargets"
+          ]
+        },
+        {
+          "behavior": "Owned CreateRecord keeps original accepted status/body/header and joined read/Close/contextErr/customCause/source evidence on failure, onceClose and no accepted replay. Native configured prebody retry/reauth ownership remains bounded by serialized raw body, method/target and original 200..399 status policy; equivalent retry body allowed, changed body/expanded status rejected with native proof. Existing strict201 typed Create and raw CRUD behavior retained.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationAcceptedFaultReceiptsAndFrozenTargets",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationNativeRetryOwnershipAndLegacyPolicies"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefresourcetypes/README.md"
+        "image/v2/metadefresourcetypes/README.md",
+        "image/metadef-resource-type-association-mutations.md",
+        "image/metadef-resource-types-records.md"
       ],
       "differences": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
-      ],
-      "remaining": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+        "Owned CreateRecord provides fixed immutable declared Resource/Wire/receipt views and an eight-field Resource including namespace_name; Source returns a mutable association whose default to_dict has seven fields excluding URI. General Resource cache/commit/session/dirty reuse parity is outside this named create contract.",
+        "Source resource_type/namespace_name/connection/_synchronized constructor bindings can collide, base_path is a legitimate dynamic route override, and __conflicting_attrs/microversion have constructor behavior. Go explicitly rejects all 17 reserved route/client controls and keeps its captured client/parent/session/version/header ownership; these controls are not all Python keyword collisions.",
+        "Parent is a safe nonempty UTF8<=80rune literal with route/control/dot rejection and exact-once escaping, without Python Resource/Ref/name lookup. This local route policy does not constrain passive create Body id/name, which remain raw JSON; server schema and readonly/date constraints are not emulated.",
+        "Whole UTF8 and complete parsed object boundaries are explicit Go choices. Both new owned creation and Source tolerate empty or invalid JSON syntax; malformed valid nonobjects fail. Existing raw Create remains strict201 and typed, while owned CreateRecord uses actual200..399.",
+        "Pinned SDK public create/class has no admin-only branch, but server permission/protection/schema/WSME/DB/collation/transaction and authenticated cloud effects are unexecuted. No full Python Resource or server-policy parity is claimed."
       ]
     },
     {
       "operation": "python:image/v2/delete_metadef_resource_type_association",
       "source_fingerprint": "3b7356d5bc90251f7cc69f7d475b875bda34d30c3016c736632a0f161386545a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes.NamespaceScope.DeleteRecord"
       ],
       "contracts": [
         {
@@ -23935,20 +23987,60 @@
             "image/v2/metadefresourcetypes/core_test.go:TestMetadefResourceTypesCoreSourceLifetimeAndNativePolicies",
             "image/v2/metadefresourcetypes/contracts_test.go:TestMetadefResourceTypesResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "Owned DeleteRecord chooses ID string or a private pre-option RawResource clone, never both; reads present id including null before fallback name, discards all other input Body/namespace/location/receipt, never mutates caller Resource. Selected safe literal UTF8<=80rune identity and captured parent determine one query/body-free child DELETE with no parent/child/global lookup, follow-self, unprotect or cleanup. Delete does not call CloudLocation.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordDeleteOpaqueStatusesAndFixedIdentitySnapshot",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationCompletePreflight",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationStickySourceAndOuterPreflight",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Owned DeleteRecord reuses existing concrete DeleteOpts/Header(s)/IgnoreMissing with full replacement, independently copied header/ignore pointer/config/options before and after callbacks and once/request execution. Literal identity validates before callbacks; missing/both/null/nonstring/unsafe input, nil options and owned header conflicts reject preHTTP. Retained callback pointers and source header changes cannot retarget identity or captured policy.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordDeleteOpaqueStatusesAndFixedIdentitySnapshot",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordDeletePhysicalMissingAndOptionOwnership",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationCompletePreflight"
+          ]
+        },
+        {
+          "behavior": "Owned DeleteRecord accepts actual200..399 as opaque arbitrary bytes without JSON or UTF8 decoding and returns independently owned Acknowledgement selected Namespace/Name plus whole actual Body/Header/status. Read/Close/cancel/source/outer handling faults still return frozen ACK together with actual ResponseError and original causes, onceClose/no accepted replay; response fields never select another target.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordDeleteOpaqueStatusesAndFixedIdentitySnapshot",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationAcceptedFaultReceiptsAndFrozenTargets",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Owned DeleteRecord IgnoreMissing nil/defaulttrue or explicittrue privately handles directly received physical404 without native404 retry and retains actual404 ACK, including ACK+ResponseError on handling failure. This evidence means handled missing, not successful deletion or proven absence. Explicitfalse preserves native404 Body/Header/status/retry handling without ACK; transport-claimed404 is never converted to physical missing. Source public proxy returns None and old raw Delete clean404 remains nil,nil.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordDeletePhysicalMissingAndOptionOwnership",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationNativeRetryOwnershipAndLegacyPolicies",
+            "connection_image_metadef_association_mutations_test.go:TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity"
+          ]
+        },
+        {
+          "behavior": "Owned DeleteRecord source/scope/context/outer guard is sticky before/after options and physical/read/Close, even after restored observed state. Native configured prebody retry/reauth retains exact body-free method/target and original accepted status policy, forbids injected request body or expanded status acceptance, and preserves native/read/Close/context/custom causes. Existing raw strict204-only Delete ACK and clean404 semantics remain separate and unchanged.",
+          "tests": [
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationStickySourceAndOuterPreflight",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationAcceptedFaultReceiptsAndFrozenTargets",
+            "image/v2/metadefresourcetypes/record_mutations_test.go:TestMetadefResourceTypeRecordMutationNativeRetryOwnershipAndLegacyPolicies"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefresourcetypes/README.md"
+        "image/v2/metadefresourcetypes/README.md",
+        "image/metadef-resource-type-association-mutations.md",
+        "image/metadef-resource-types-records.md"
       ],
       "differences": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
-      ],
-      "remaining": [
-        "Python mutable Resource identity/alternate-ID/dirty request handling, URI parent reuse, adapter/session/microversion/status exception rules remain broader than fixed literal source/raw Go DTO.",
-        "Python generic Resource.list query translation/client Body filters/max_items limit synthesis/generic pagination are not implemented for these actual finite query-free server endpoints.",
-        "Source schema/WSME/DB Unicode/collation/transaction/permission/protection and authenticated cloud effects remain unexecuted; strictUTF8/local80/original200201204/physical404 evidence are bounded Go choices, not full Python parity."
+        "Source association delete passes the supplied Resource into Proxy._get_resource, which can reuse and mutate its namespace URI; unlike property deletion it does not first normalize the child to ID. Go privately snapshots only identity before options, never mutates input, and keeps a safe nonempty UTF8<=80rune fixed literal parent/child without Resource/Ref/name lookup.",
+        "Source public delete returns None. Go owned DeleteRecord retains opaque actual200..399 acknowledgements and default physical404 receipts, including ACK with accepted handling failure. Old strict204 raw Delete still returns no ACK for clean handled404. Actual404 handling is bounded evidence, not server deletion success or absence proof.",
+        "Defaulttrue directly owned physical404 bypasses native404 retry as explicit Go missing policy; explicitfalse keeps native404 response/retry errors. Transport claims and general Python NotFound hierarchy are not treated as proof of received physical404.",
+        "Captured route/client/version/header ownership, local UTF8/literal route validation and immutable identity are explicit Go choices. General mutable Resource URI/session/cache/request-control behavior is outside this named deletion contract.",
+        "Pinned SDK public delete/class has no admin-only branch, but server permission/protection/schema/DB/global-type effects and authenticated cloud behavior are unexecuted. No full Python Resource or server-policy parity is claimed."
       ]
     },
     {
