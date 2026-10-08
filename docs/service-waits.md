@@ -2,6 +2,8 @@
 
 서비스 대기 API는 openstacksdk의 서비스별 기본 상태, 실패 상태, 시간 제한을 SDK가 적용합니다. 호출자는 `resource.Ref`와 구체적인 `resource.WaitOption`만 전달합니다. 별도의 상태 adapter나 polling loop를 구현할 필요가 없습니다. 대기는 조회만 수행하며 생성·삭제 요청을 보내지 않습니다.
 
+Glance의 supplied ImageRecord·초기 상태·반환 record·부분 결과까지 다루는 [owned 상태·삭제 대기](../image/image-record-waits.md)는 별도 concrete API로 제공합니다.
+
 아래 표는 collection과 버전별 leaf의 조회 전용 대기입니다. [Service·Connection의 기존 서버 readiness](../compute/server-ready.md)는 `AutomaticFloatingIPRequest`를 받는 별도 상위 작업이며, `WaitForServer` 기본180초·5초 안에 조건부 IP assignment도 포함합니다. 같은 이름의 `service.Servers.WaitForServer` 기본120초·2초와 receiver·입력·완료 조건을 구분합니다.
 
 | API | 기본 대상 | 기본 실패 상태 | SDK 시간 제한 | 조회 간격 |

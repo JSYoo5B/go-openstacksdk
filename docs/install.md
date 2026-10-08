@@ -53,6 +53,10 @@ import (
 )
 
 func main() {
+    _ = (*image.Service).WaitForImageRecordStatus
+    _ = (*image.Service).WaitForImageRecordDelete
+    _ = image.WithImageRecordWaitUnlimited()
+    _ = image.WithImageRecordWaitAttribute("status")
     _ = (*image.Service).GetImageRecord
     _ = (*image.Service).ListImageRecords
     _ = (*image.Service).AllImageRecords
