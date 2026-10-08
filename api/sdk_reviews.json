@@ -40938,7 +40938,7 @@
           ]
         },
         {
-          "behavior": "The winning type is checked after options: webmks requires selected numeric Compute2.8 and spice-direct2.99, including explicit protocol. Below-boundary, unselected, malformed and symbolic latest selections fail with ErrUnsupported and zero HTTP; numeric2.100 is accepted. Last-wins, bulk clear and null clear remove an earlier gate. No unrelated2.6 prerequisite or automatic version upgrade is introduced.",
+          "behavior": "The winning type is checked after options using shared source tuple matching: webmks requires selected same-finite-major Compute2.8 and spice-direct2.99, including explicit protocol. Below-boundary, unselected, malformed and global latest selections fail with ErrUnsupported and zero HTTP; numeric2.100 and finite2.latest are accepted. Last-wins, bulk clear and null clear remove an earlier gate. No unrelated2.6 prerequisite or automatic version upgrade is introduced.",
           "tests": [
             "api/compute_remote_console_test.go:TestComputeRemoteConsoleWinningTypeSelectedVersionGates"
           ]
@@ -40971,8 +40971,8 @@
       ],
       "differences": [
         "Python accepts a server Resource and dynamic **attrs; Go requires an explicit validated single path-segment server ID and nullable string options for protocol/type/url, with protected field/header extensions. Resource is a stateless declared-field raw view, Wire is the precise actual row, and independently owned receipts replace a connected mutable Python Resource. Body descriptors remain untyped on response; omitted known view fields default to null and the caller URI parent is fixed.",
-        "Go checks the selected numeric Nova microversion with native ParseMicroversion for webmks/spice-direct, including2.100, and does not perform Python endpoint-bound discovery or select a discovered maximum capped at2.99. Symbolic latest cannot prove those local gates. The original all-service Resource/session/discovery scope remains in the SDK goal; it is separate from this named create operation.",
-        "Accepted JSON-decoding ValueError-like bodies are tolerated with seeded Resource and nil Wire, while parseable nonobject roots/envelopes are explicit Go errors with receipts. Physical read/Close/source/context failures remain errors rather than tolerated JSON failures. Native remoteconsoles.Create retains its required inputs, typed alias and strict200 response policy; the separate Python get_server_console_url legacy action and create_console modern/legacy dispatch are not part of this operation.",
+        "This direct modern API checks selected Nova microversion with shared source tuple matching for webmks/spice-direct, including2.100 and finite2.latest; global latest cannot prove a finite major2 gate. It performs no advertised endpoint discovery or discovered maximum selection. The separate compute.Service.CreateConsole provides advertised/selected checks and modern/legacy dispatch and is reviewed under python:compute/v2/create_console. General all-service Resource/session/discovery scope remains in the SDK goal.",
+        "Accepted JSON-decoding ValueError-like bodies are tolerated with seeded Resource and nil Wire, while parseable nonobject roots/envelopes are explicit Go errors with receipts. Physical read/Close/source/context failures remain errors rather than tolerated JSON failures. Native remoteconsoles.Create retains its required inputs, typed alias and strict200 response policy; the separately reviewed Servers.ConsoleURL legacy action and Service.CreateConsole modern/legacy composition are not part of this direct operation.",
         "Go treats non-UTF-8 accepted bodies as unparseable and preserves the original envelope with seeded Resource/nil Wire; it does not reproduce Python response charset detection or replacement-character decoding."
       ],
       "remaining": []
@@ -41275,8 +41275,68 @@
       ],
       "differences": [
         "Python accepts a Server Resource or ID and returns the actual dynamically shaped console value. Go requires a validated explicit single-path-segment/text server ID and mandatory type, returning an independently owned json.RawMessage; Python None is represented by raw JSON null. Missing console is an operation-scoped ResponseError rather than Python KeyError, while null/scalar/array values remain successful exact values.",
-        "Go preserves the selected client microversion without Python endpoint-bound discovery and Server2.100 maximum selection. It uses the legacy action directly and does not implement the separate Proxy.create_console modern/legacy discovery branch, validate_console_auth_token, cloud console wrappers or Resource/session lifecycle under this row.",
+        "This legacy getter itself preserves the selected client microversion without advertised discovery or Server2.100 maximum selection. The separate compute.Service.CreateConsole provides advertised/selected modern-versus-legacy dispatch and is reviewed under python:compute/v2/create_console. validate_console_auth_token, cloud console wrappers and general Resource/session lifecycle are not promoted by this getter row.",
         "Go rejects invalid-UTF8 response bodies with a receipt and does not reproduce Python response charset detection or replacement-character decoding. JSON shape/selection/read/Close/source/context failures preserve actual evidence through Go errors; accepted processing errors are not retried. This strict getter policy is independent from the tolerant accepted-nonJSON policy of CreateConsole/CreateKeypair."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_console",
+      "source_fingerprint": "77532deed00b0033a48970f6f498d71c3a38f228eab5ae9c6434fdd40d639489",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute.Service.CreateConsole",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithConsoleProtocol",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithConsoleProtocolValue"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateConsole first reads the captured endpoint version path without body/query/microversion headers, preserving the selected live token, source header and reverse-proxy prefix. Nova row eligibility requires a permitted status and usable self-link; missing ID/status, unknown or experimental status (even with malformed ID), or no self-link is excluded without following the link. Catalog v2.1 selects an exact eligible v2.1 API row rather than v2.0; flat/version/versions/versions.values documents use the common engine. Clean404/405 allows only the finite root attempt and valid accepted201/300 discovery is parsed.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionAdvertisedAndSelectedBranches"
+          ]
+        },
+        {
+          "behavior": "Modern dispatch requires both advertised min/max and2.6 inside that range, plus same-major selected support when present. Unselected old max, a minimum above2.6, missing bounds, selected2.5 and global latest use legacy. Explicit selected2.100 above advertised2.90 remains unchanged; finite2.latest supports modern. Absent selected version is privately capped at modern2.99 or legacy2.100; original client binding, endpoint, ResourceBase, version and headers are preserved and only one winning console POST occurs.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionAdvertisedAndSelectedBranches"
+          ]
+        },
+        {
+          "behavior": "Protocol defaults to explicit null, explicit nonempty/empty values are preserved as response seeds, and a cleared Optional restores the null facade default. Modern known-type protocol inference affects only the transmitted body; unknown modern type sends null for server validation. Webmks2.8 and spice-direct2.99 each require both advertised and selected support before POST, including explicit selected values above cloud max. Legacy ignores protocol and imposes no modern spice-direct gate.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionProtocolTypeAndLocationProjection"
+          ]
+        },
+        {
+          "behavior": "Modern result has exactly protocol/type/url/id/name/computed location; URI server_id and unknown/response location fields are excluded. Actual known untyped/null/large-number id values overlay seeds, missing id/name become null, and configured scoped location is independently captured once before POST with zone null. Direct no-dependency location is null. Legacy console scalar/array/null and vendor/large-number object values remain precise independently owned JSON.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionProtocolTypeAndLocationProjection",
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionAdvertisedAndSelectedBranches"
+          ]
+        },
+        {
+          "behavior": "Option source/context failures and replacement of API, Servers or RemoteConsoles binding stop later callbacks and discovery; location errors/source drift after successful discovery stop console POST. Original option error and custom cancellation causes are preserved. Accepted discovery read/nested404 Close/source/cancellation/empty204 faults remain terminal with only physical discovery receipt and no root/action retry; shared fault wrappers check actual request/read/Close counts.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback"
+          ]
+        },
+        {
+          "behavior": "Discovery HTTP403 preserves actual GET URL/body/header/status and prevents root/action fallback. Modern403/404 never invokes legacy and legacy404 never invokes modern. Modern accepted opaque202 retains seeded dictionary, while legacy opaque202 is an accepted response processing error; no failed console action is resent through the other executor.",
+          "tests": [
+            "api/compute_console_composition_test.go:TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/console-selection.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "Python accepts a Server Resource or ID and dynamic console protocol; Go takes a validated explicit single path-segment text server ID, mandatory string type and optional nullable string protocol. The independently owned json.RawMessage is the modern six-field source dictionary or the exact legacy console value, rather than a mutable connected Resource. The example supplies its own novnc type default.",
+        "Go reuses guarded finite operation-owned endpoint/version-root discovery and tuple support/selection from the Cinder engine. Discovery is versionless and accepted final200..399 is parsed; actual native clean404/405 or a valid unmatched API row alone allows the root attempt. Advertised links do not grant routing/authentication authority, and source/context/physical faults are terminal. This operation does not reproduce the complete cached Keystoneauth session/discovery lifecycle or response charset detection; invalid UTF8/JSON is a receipt error. The fixed-route Go reader uses the first matching eligible API row instead of Python version-data sorting and normalization of all unrelated rows. Go uses the captured authenticated token rather than Python anonymous discovery and401 authenticated fallback; Go terminal errors and clean404/405-only unavailable fallback are deliberate operation-scoped error semantics, while Keystoneauth can try later URLs after broader discovery/HTTP/connection failures.",
+        "An explicit selected microversion is preserved even above advertised max, with finite2.latest matching and global latest failing finite-major support. Absent selection uses a private action client capped at modern2.99 or legacy2.100; Connection client/version policy remains owned and unchanged. Direct compute.New with no CloudLocation dependency returns location null, while conn.Compute supplies the configured scoped computed location. Discovery may run once per operation rather than through Python global discovery cache.",
+        "Branch-specific decoding policy is inherited from the owned executors: modern accepted opaque/empty JSON bodies retain original type/protocol seed with null missing fields, while legacy requires an actual console key and returns its raw JSON value. Go physical read/Close/source/context failures retain actual evidence and do not become tolerated JSON failure. This single composed declaration does not add a new HTTP endpoint or count existing executors again."
       ],
       "remaining": []
     }
