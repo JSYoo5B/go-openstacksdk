@@ -12,6 +12,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -111,6 +112,14 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 				return responseContextError(ctx, joinResponseErrors(original, callbackErr, ownershipErr, sourceErr))
 			}
 			if callbackErr != nil || ctx.Err() != nil {
+				// Returning the native input error stops retrying without
+				// adding another cause. Duplicate copies must not make a
+				// clean final HTTP rejection look like a handling failure.
+				if native, ok := original.(gophercloud.ErrUnexpectedResponseCode); ok {
+					if returned, ok := callbackErr.(gophercloud.ErrUnexpectedResponseCode); ok && reflect.DeepEqual(native, returned) {
+						return responseContextError(ctx, callbackErr)
+					}
+				}
 				return responseContextError(ctx, joinResponseErrors(original, callbackErr))
 			}
 			return nil
