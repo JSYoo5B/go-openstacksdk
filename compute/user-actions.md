@@ -118,7 +118,7 @@ protocol이 생략/null/빈 문자열이고 type이 비어 있지 않으면 아�
 | `webmks` | `mks` | 2.8 이상 |
 | `spice-direct` | `spice` | 2.99 이상 |
 
-두 버전 조건은 명시 protocol이 있어도 적용합니다. Go는 선택된 숫자 microversion으로 검사하고 부족하면 HTTP 전에 오류를 반환합니다. Python의 서버 범위 discovery·session default 검사·최대 2.99 선택을 수행하거나 버전을 자동 올리지 않습니다. named 함수에는 전체 console의 2.6 local gate나 legacy action fallback을 추가하지 않습니다. 실제 API 경로의 지원과 권한은 Nova가 검사합니다.
+두 버전 조건은 명시 protocol이 있어도 적용합니다. Go는 공통 source tuple 비교로 선택된 같은 major2의 microversion을 검사하고 부족하면 HTTP 전에 오류를 반환합니다. `2.latest`는 통과하고 global `latest`는 유한 major2를 증명하지 못합니다. 이 direct 함수는 서버 범위 discovery·최대2.99 선택을 수행하거나 버전을 자동 올리지 않습니다. advertised/selected 비교와 modern/legacy 자동 선택은 별도 [상위 CreateConsole](console-selection.md)이 제공합니다. 실제 API 경로의 지원과 권한은 Nova가 검사합니다.
 
 `WithConsoleCreateOptions`는 typed 속성을 교체하고 개별 Protocol·Type·URL 옵션은 마지막 값을 사용합니다. 각 `...Value` helper로 생략/null/빈 문자열을 구분합니다. `WithConsoleCreateField`는 추가 JSON 값을, `WithConsoleCreateHeader`는 이 작업의 추가 헤더를 받습니다. core protocol/type/url과 고정 부모 server_id는 extension으로 덮어쓰지 않습니다. 입력은 SDK가 복사하고 선택된 client·provider·경로·microversion을 유지합니다.
 
