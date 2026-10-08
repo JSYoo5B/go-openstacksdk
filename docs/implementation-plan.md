@@ -12,9 +12,11 @@
 
 **최신 API 완료 (2026-10-09): 핵심 user owned ImageRecord 수정1개, 전체278→279(+1)·핵심204→205/2,292·Glance42→43/120.** `Service.UpdateImageRecord`·`Connection.UpdateImageRecord`가 ID/SDK Record와 concrete 속성 옵션을 받아 sparse raw baseline·same-value/no-op·sticky dirty·properties 교체·wire alias·공통 자동 JSON Patch·응답 overlay/clean을 처리합니다. invalid JSON은 pending 상태를 유지하고 accepted 처리 실패는 actual receipt와 제출 Record를 보존합니다. [Python/Go 비교·독립 main](../image/image-record-update.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-수정-완료)에 immutable JSON-domain profile과 Source 전체 path 정렬·수치·control 입력 차이를 기록했습니다. 공통 SDK-R1/C1/S1 목표는 계속 추적합니다.
 
-새 **25그룹165사례** + 기존48그룹375 = **집중 race73그룹540사례**, 전체 vet·race **45개 실제 test package**, 문서 main2개의 외부 local-replace build·재생성 Go drift0가 PASS했습니다. Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`입니다. 다른550 reviews·기존7계약/API·pins/catalog/fingerprint를 보존하고6계약을 추가해 reviews551·contracts3,562입니다. 최종279 metadata·정확한 원격 설치를 확인하고 있습니다.
+새 **25그룹165사례** + 기존48그룹375 = **집중 race73그룹540사례**, 전체 vet·race **45개 실제 test package**, 문서 main2개의 외부 local-replace build·재생성 Go drift0가 PASS했습니다. Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`입니다. 다른550 reviews·기존7계약/API·pins/catalog/fingerprint를 보존하고6계약을 추가해 reviews551·contracts3,562입니다. 최종279 parity/progress/gofmt와 정확한 원격 설치·main2개·Go SHA/라이선스14개 일치도 PASS했습니다.
 
-공통 엔진 `dc837814`·공개 API `c7a79ea0`·계약 테스트 `8178fb38`·사용 가이드 `f768f498`을 각각 commit/push했습니다. 전체 SDK 목표는 active이며 다음 핵심 user 단위의 Source를 검토합니다.
+공통 엔진 `dc837814`·공개 API `c7a79ea0`·계약 테스트 `8178fb38`·사용 가이드 `f768f498`·완료 판정 `c068cace`를 각각 commit/push했습니다. 전체 SDK 목표는 active이며 다음 핵심 user 단위의 Source를 검토합니다.
+
+정확한 문서·판정 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008225520-c068cacecf76`·get/build exit0이며 owned 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`가 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-owned-update-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다.
 
 **앞선 API 완료 (2026-10-09): Glance native `images.Update`1개와 owned 수정용 raw Body 기반, 전체277→278(+1)·핵심203→204/2,292·Glance41→42/120.** native9종 concrete Patch·property3op·nil/empty·option 교체·기본200·native context/retry/partial Extract를 검증했습니다. GET/Find/List·literal tag constructor는 descriptor/default 전 sparse raw current/original을 독립 보존하며, local tags는 current만 바꾸고 원본 fetch baseline은 유지합니다. 이 snapshot은 mutable dirty/header state machine이 아니며 owned `update_image` 완료 수를 올리지 않습니다. [Python/Go 비교·독립 main](../image/v2/images/update.md), [검증 기록](sdk-support-ledger.md#glance-native-update와-owned-수정용-raw-body-기반)에 입력·API·서버 권한·현재 pending 경계를 설명합니다.
 
@@ -383,7 +385,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 추적 ID | 남은 구현·검증 | 현재 상태·순서 |
 |---|---|---|
-| SDK-R1 | mutable Resource의 같은 객체 fetch/update, Body/Header/URI component·dirty state·변경 추적과 저장·기본값의 공통 lifecycle | owned immutable view·descriptor·snapshot 기반만 구현. 핵심 user의 필수 Resource 동작부터 유한 단위로 구현하고 쓰기 권한은 핵심 admin 순서에 연결 |
+| SDK-R1 | mutable Resource의 같은 객체 fetch/update, Body/Header/URI component·dirty state·변경 추적과 저장·기본값의 공통 lifecycle | owned immutable view·descriptor·snapshot와 Image 수정의 original/current·sticky dirty·no-op·자동 patch·응답 후 baseline 갱신 구현. Body/Header/URI 전체와 서비스 공통 mutable lifecycle은 미완료; 필수 동작부터 유한 단위로 구현하고 쓰기 권한은 핵심 admin 순서에 연결 |
 | SDK-C1 | 선택적 Adapter cache, conditional GET·ETag/Last-Modified·304 reuse와 invalidation·개별/동시 호출 소유권 | 구현 대기. 현재 GET은 fresh HTTP이며 캐시 동등성 없음. 핵심 user 공통 조회 단계 |
 | SDK-J1 | pinned Proxy._list의 deprecated JMESPath 필터·임의 결과 shape·오류·paging/소유권 계약을 명시적 Go 선택으로 제공 | 공통 JMESPath 기반은 있으나 ImageRecord 목록 binding 미구현; `jmespath_filters`는 ErrUnsupported. 핵심 user 목록 공통 단계 |
 | SDK-S1 | 동적 per-call session·base_path·microversion, adapter와 Resource override의 일관된 우선순위·지원 범위 | 고정 source capture/guard와 concrete 옵션만 구현. 공통 사용자 설정 계약부터 구현; 외부 Python 객체 재현과 Go 타입의 차이를 문서화 |
@@ -419,7 +421,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance owned ImageRecord update | pinned Proxy·raw component·commit·response 8개 Source 검토 완료 | **ID/Record·sticky dirty·no-op·wire/properties·공통 diff·baseline 갱신 완료** | 새25그룹165·집중73그룹540·전체45 package·재생성 drift0 PASS | Python 비교·독립 main2개 외부 local build PASS | **go_mapping1행·전체279/3,362**; R1/C1/S1 별도 추적 | 엔진 dc837814·API c7a79ea0·테스트8178fb38·가이드f768f498 push 완료; 최종 metadata·원격 설치 검증 |
+| Glance owned ImageRecord update | pinned Proxy·raw component·commit·response 8개 Source 검토 완료 | **ID/Record·sticky dirty·no-op·wire/properties·공통 diff·baseline 갱신 완료** | 새25그룹165·집중73그룹540·전체45 package·재생성 drift0 PASS | Python 비교·독립 main2개 외부 local build PASS | **go_mapping1행·전체279/3,362**; R1/C1/S1 별도 추적 | 엔진 dc837814·API c7a79ea0·테스트8178fb38·가이드f768f498 push 완료; 판정 c068cace push 완료; 최종 metadata·원격 main2개·Go SHA/라이선스14개 일치 PASS |
 | Glance raw Body snapshot / native Update | pinned Source raw/dirty/alias/response·9종 patch·server 정책 검토 완료 | **raw current/original 기반 완료**; owned commit/diff는 위 최신 단위에서 완료 | native6그룹47+raw2그룹4·집중75그룹626·전체44 package·생성 drift0 PASS | Python 비교·native/설치 main2개 외부 local build PASS | **native go_mapping1행·당시 전체278/3,362**; 당시 Python update unresolved | 기반2f5b87a2·native b55ed8aa·문서3d901393·판정862eef0b push 완료; 원격 main2개·Go SHA/라이선스14개 일치; owned dirty/commit는 위 최신 단위에서 완료 |
 | Glance ImageRecord 태그 add/remove | pinned Proxy·TagMixin·Resource 준비·default alias·project-member 정책 검토 완료 | **owned Add/Remove·private local tags와 별도 ACK 완료** | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0 PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체277/3,362**; 공통 Resource/cache/session은 별도 추적 | snapshot/API/leaf/Connection/가이드5개·판정72cf240b push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |
 | Glance ImageRecord status/delete 대기 | pinned defaults·initial shortcut·fresh GET/overlay·404·Unicode16 비교 검토 완료 | **owned 상태/삭제 대기·공통 guard 완료** | 새17그룹132·집중49그룹372·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체275/3,362** | 공통/API/Connection/문서5개·판정180b672b push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 확인 |

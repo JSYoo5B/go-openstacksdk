@@ -67,4 +67,6 @@ tracked 파일을 전수 검색해 실제 module·import·package·생성기·ma
 
 Gophercloud source fixture를 포함하거나 결합·변형하는 테스트 파일 **18개**에 원저작권·Apache-2.0·원본 범위·로컬 변경 고지를 추가했습니다. fixture 문자열과 실행 코드는 변경하지 않았습니다. 보존한 라이선스 표의 SHA-256 **10개**와 내부 JMESPath 원문 사본도 일치합니다. 최종 `make check`의 **44개 테스트 package**·race·vet·API 판정·포맷 검사가 통과했습니다.
 
-보완 커밋 `1ec3b909bd3588df74f2e84ed38baa96d99cc577`을 원격 main에 반영하고 별도 외부 Go module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008222501-1ec3b909bd35`에서 문서 예제 main **2개**가 빌드되며, 배포된 Go source2,089개 SHA256 `fdd94cb1618b66c86fd59ee79bde0c27120f68d61c0a0634f47f643431db5659`가 최종 검증 소스와 같습니다. 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. [기본 설치 명령](install.md)은 이 revision을 사용합니다. 실제 인증·OpenStack 호출 및 별도 상표 사용 허가는 이 검증에 포함하지 않습니다.
+보완 커밋 `1ec3b909bd3588df74f2e84ed38baa96d99cc577`을 원격 main에 반영하고 별도 외부 Go module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008222501-1ec3b909bd35`에서 문서 예제 main **2개**가 빌드되며, 배포된 Go source2,089개 SHA256 `fdd94cb1618b66c86fd59ee79bde0c27120f68d61c0a0634f47f643431db5659`가 최종 검증 소스와 같습니다. 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. 당시 [기본 설치 명령](install.md)은 이 revision을 사용했습니다. 실제 인증·OpenStack 호출 및 별도 상표 사용 허가는 이 검증에 포함하지 않습니다.
+
+현재 [기본 설치 명령](install.md)은 이후 owned 이미지 수정까지 포함한 검증 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 사용합니다. 원격 get/build·문서 main2개·최종 Go source2,095개 일치와 기존 라이선스·고지14개 파일의 배포를 다시 확인했습니다. 이름·라이선스 적용 범위는 위와 같으며 새 자동 JSON Patch engine은 독립 작성한 프로젝트 코드입니다.

@@ -10,7 +10,7 @@
 
 ## Glance owned ImageRecord 수정 완료
 
-2026-10-09 핵심 user `python:image/v2/update_image`의 named immutable JSON-domain profile을 닫아 **278→279(+1)**, 핵심204→205/2,292·Glance42→43/120입니다. [Python/Go 비교·독립 main](../image/image-record-update.md)은 전체 Connection·서비스에서 ID/SDK Record·concrete 옵션을 사용하는 방법과 반환 Record 재사용을 설명합니다. 기존 명시적 PATCH API는 유지하며 Source의 전체 path 정렬·수치·입력 제어 차이를 별도로 명시합니다. 아래 실행 근거는 현재 Go 소스의 완료한 검증이며 정확한 revision의 원격 소비자 검증을 이어갑니다.
+2026-10-09 핵심 user `python:image/v2/update_image`의 named immutable JSON-domain profile을 닫아 **278→279(+1)**, 핵심204→205/2,292·Glance42→43/120입니다. [Python/Go 비교·독립 main](../image/image-record-update.md)은 전체 Connection·서비스에서 ID/SDK Record·concrete 옵션을 사용하는 방법과 반환 Record 재사용을 설명합니다. 기존 명시적 PATCH API는 유지하며 Source의 전체 path 정렬·수치·입력 제어 차이를 별도로 명시합니다. 아래 실행 근거는 현재 Go 소스의 완료한 검증이며 정확한 revision의 원격 소비자 빌드도 확인했습니다.
 
 - SDK가 private sparse raw original/current와 sticky dirty를 관리합니다. ID와 supplied Record·raw same-value·missing/null/default 구분·ID retarget·properties component 교체·wire alias·import header reset·no-op을 검증했습니다. invalid GET의 unsynchronized raw seed를 추가 GET 없이 commit할 수 있습니다.
 - 공통 `internal/jsonpatch`는 escaped object token·exact JSON number·nested object/array와 결정적인 add/remove/replace를 제공합니다. array index의 실행 순서를 유지하며 Source 전체 path 정렬·move/copy·최소 operation 수나 특정 Python jsonpatch bytes를 재현하지 않습니다. 생성 코드와 독립인 patch 적용기로 30×30 문서 행렬도 확인했습니다. dirty 비교의 bool/number Python 동등성과 diff의 RFC JSON 동등성은 서로 다른 단계입니다.
@@ -21,7 +21,9 @@
 
 다른550 reviews·catalog bytes/pins/fingerprints와 선택한 선언의 기존7계약/API를 보존하고6계약을 추가했습니다. reviews551·go_mapping279·unresolved271·unsupported1·contracts3,562이며 catalog unresolved3,082에는 미검토2,811개가 포함됩니다. 기존 Get/tag와 같은 named immutable Go profile 판정이며 arbitrary Python runtime parity를 의미하지 않습니다. `/private/tmp/go-openstacksdk-image-owned-update-review-receipt.json`에 보존·증가 근거가 있습니다.
 
-공통 엔진 `dc837814`·공개 API/REST/Get state `c7a79ea0`·계약/Connection 테스트 `8178fb38`을 작은 단위로 commit/push했습니다. 사용 가이드 `f768f498`도 별도 commit/push했습니다. Python same-instance/arbitrary Resource/Munch/subclass·공유 descriptor history는 SDK-R1, cache는 SDK-C1, dynamic Adapter/session/base_path/microversion은 SDK-S1에 남습니다. 실제 Python/jsonpatch/runtime·cloud 인증은 실행하지 않았고 전체 SDK 목표는 active입니다.
+공통 엔진 `dc837814`·공개 API/REST/Get state `c7a79ea0`·계약/Connection 테스트 `8178fb38`을 작은 단위로 commit/push했습니다. 사용 가이드 `f768f498`도 별도 commit/push했습니다. 완료 판정 `c068cace`도 commit/push했고 최종279 parity/progress/gofmt가 PASS했습니다. Python same-instance/arbitrary Resource/Munch/subclass·공유 descriptor history는 SDK-R1, cache는 SDK-C1, dynamic Adapter/session/base_path/microversion은 SDK-S1에 남습니다. 실제 Python/jsonpatch/runtime·cloud 인증은 실행하지 않았고 전체 SDK 목표는 active입니다.
+
+정확한 문서·판정 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008225520-c068cacecf76`·get/build exit0이며 owned 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`가 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-owned-update-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다.
 
 ## Glance native Update와 owned 수정용 raw Body 기반
 
