@@ -18,7 +18,7 @@
 
 정확한 문서·판정 revision `73f54853810614b582e2e5513a4812e6cd8a97e2`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008181840-73f548538106`·get/build exit0이며 목록/설치 main **2개**를 빌드했습니다. 원격 Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d40386936934d29`가 집중 race·전체43 package gate·반복 생성 drift0의 source와 같고 라이선스/고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadata-lists-remote-consumer.json`에 기록했습니다.
 
-**다음 구현:** 핵심 user Glance `members`·`find_member`의 owned 목록·GET 실패 뒤 목록 검색2개입니다. 고정 [서버 기본 조회 정책](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L251-L278)이 project/shared member reader를 허용함을 확인했습니다. public `members(**query)`가 query를 실제로 버리는 동작과 `find_member`의400/403/404 fallback·중복 판정을 비교하며 이미 완료한 getter/schema는 다시 세지 않습니다. metadata 쓰기는 핵심 admin에 유지합니다.
+**진행 중:** 핵심 user Glance `members`·`find_member`의 owned 목록·GET 실패 뒤 목록 검색2개입니다. 고정 [서버 기본 조회 정책](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L251-L278)이 project/shared member reader를 허용함을 확인했습니다. public `members(**query)`가 query를 실제로 버리는 동작과 `find_member`의400/403/404 fallback·중복 판정을 비교하며 이미 완료한 getter/schema는 다시 세지 않습니다. metadata 쓰기는 핵심 admin에 유지합니다.
 
 **직전 API 완료 (2026-10-09): 핵심 admin Glance resource type association owned 생성·삭제2개, 전체263→265(+2)·핵심189→191/2,292·Glance27→29/120.** `CreateRecord`는 명시한6개 raw Body 값만 flat POST하고 빈 입력도 `{}`를 보냅니다. 같은8필드 Resource projector에 고정 namespace·현재 location·응답 overlay를 연결했습니다. `DeleteRecord`는 옵션 전 identity를 복사하고 실제 opaque ACK와 기본 physical404 receipt를 반환합니다. 기존 typed strict201/204 API는 유지합니다. [Python/Go 비교·독립 main](../image/metadef-resource-type-association-mutations.md), [검증 기록](sdk-support-ledger.md#glance-resource-type-association-owned-생성삭제-완료)을 추가했습니다.
 
@@ -351,7 +351,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance member owned 목록·검색 | 고정 Source·reader 기본 정책 확인; query 폐기·GET 실패 fallback 검토 | 구현 전 | 기존 member/REST/Connection fixture 재사용 예정 | Python 비교·예제 추가 예정 | 두 선언 unresolved 유지; 기존 getter/schema 보존 | 다음 핵심 user 단위 |
+| Glance member owned 목록·검색 | 고정 Source·reader 기본 정책·alias/seed/GET fallback 확인 | owned 9필드 projector·공통 pager·기존 FindIdentity 재사용으로 구현 중 | 기존 member/REST/Connection fixture로 목록·검색 계약 테스트 작성 중 | Python 비교·독립 main 작성 중 | 검증 전 두 선언 unresolved 유지; 완료267/3,362 | 핵심 user 단위 진행 중; 기존 getter/schema 보존 |
 | Glance object·namespace owned 목록 | pinned descriptor·public kwargs·generic pagination 검토 완료 | **두 leaf의 owned Record/ListRecords 완료** | 새34그룹272사례·집중176그룹2,194·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체267/3,362** | 코드/테스트7개 commit 49869890~760f546a·문서/판정73f54853 push 완료; 원격 main2개 build·Go SHA/라이선스13개 일치 |
 | Glance object owned 생성·수정·개별/전체 삭제 | 고정 Source7 Body·fresh update·Resource reuse·bulk delete 초기 검토; 기본 정책 admin | 핵심 admin 순서 대기 | 기존 property/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 네 선언 unresolved 유지 | 핵심 user 완료 뒤 구현 |
 | Glance resource type association owned 생성·삭제 | pinned6 Body·constructor·public Resource reuse·delete/404 검토 완료 | **CreateRecord/DeleteRecord 완료** | 기존34그룹 재사용·새11그룹133사례·집중45그룹753·전체43 package gate PASS | Python 비교·정확한 main3개 외부 build PASS | **go_mapping2행·전체265/3,362** | API2467fdce·leafee2514c5·Connectionfbc88b37 push 완료; 문서1f9c1d7a 원격 main3개 build·Go SHA/라이선스13개 일치 확인 |
