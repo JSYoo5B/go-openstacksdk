@@ -4,7 +4,7 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Flavor owned 목록·검색](#flavor-owned-목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cloud Flavor 목록·검색·단건 조회](#cloud-flavor-목록검색단건-조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 ## 초기 조사 이후 검증한 계약
 
@@ -2065,3 +2065,15 @@ catalog bytes·3,362개 IDs/fingerprints·source pins·기존538 reviews를 보�
 공통 carrier `fa7ae04c`·float `54a9a67a`·모델 `178dda79`·목록 `acde2302`·검색 `7cc0a463`·테스트 `2a4bf60d`·문서 `037bd153`를 작게 commit/push했습니다. exact revision `037bd1535f699c20d09aedef6dea11e963f022a4`을 새 외부 module에서 GOWORK=off·replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008035547-037bd1535f69`·remote Go SHA가 위 최종 gate와 같습니다. 근거는 `/private/tmp/gophercloudsdk-flavor-records-remote-consumer-receipt.json`입니다. 인증/OpenStack/Python 실행·alpha tag 배포는 수행하지 않았습니다.
 
 catalog bytes·3,362개 IDs/fingerprints·source pins와 다른542 reviews를 보존했습니다. 기존 Find8계약을 그대로 두고 새5계약을 추가하여4remaining을 닫았으며 native-shaped FindIdentity의 차이는 호환 경로로 명시했습니다. 신규 List5계약과 합계10계약을 추가했습니다. 전체236→238/3,362·핵심162→164/2,292·Nova38→40/333, reviews544=go_mapping238/unresolved305/unsupported1·contracts3,361입니다. catalog unresolved3,123에는 미검토2,818개가 포함됩니다. 핵심 완료 수는 user/admin 합산입니다. full mutable Resource/session/cache/discovery·arbitrary controls 및 다른 Cloud/native 선언은 전체 목표의 별도 작업으로 유지합니다. 동일 Go의 JSON/prose에는 최종 전체 gate를 재사용하고 final parity/progress/gofmt만 확인합니다. 다음은 기존 List/Find를 재사용하는 Cloud Flavor3개의 고정 default·eager inventory·필터·직접 Find 위임입니다.
+
+## Cloud Flavor 목록·검색·단건 조회 완료
+
+2026-10-08에 고정 `ComputeCloudMixin.list_flavors`·`search_flavors`·`get_flavor`3개를 개별 검토했습니다. `AllFlavors`는 get_extra 실제 기본 false로 모든 detail 페이지를 eager 수집합니다. `SearchFlavors`는 기본 true로 전체 inventory와 조건부 specs 읽기를 완료한 뒤 이름/ID/glob·ordered dictionary·JMESPath를 적용합니다. `GetFlavor`는 기본 true·falsey filters 정리 뒤 직접 Find에 위임하며 Search/First를 호출하지 않습니다. truthy nonobject·명시 인자와 중복 kwargs는 HTTP0 오류로 처리합니다. partial Inventory와 실제 row/child receipt를 보존하고 성공한 Value/Flavors와 구분합니다. [Python 비교·정확한 main](../compute/flavor-cloud.md)에 입력·기본값·필터·원문·Go 차이를 설명합니다.
+
+기존 owned ListRecords/FindFlavor·조건부 specs reader·CloudFilter·Service location/guard를 조합했습니다. concrete 옵션 경계만 `cloudread.ApplyReadOptions`로 공유하여 pointer/raw/header 소유권과 callback 사이 guard/context를 보존합니다. 공개 Gophercloud SetupHTTP·TestMethod/TestHeader 기반 기존 internal/testcloud·flavorIdentityClient·payloadContractTrack·secretFetchRoundTripFunc를 재사용했습니다. 새 API3그룹51사례와 공통 순수 검증1그룹만 추가하고 기존56그룹을 재사용한 집중 race60그룹이 PASS했습니다. 신규 HTTP 서버 harness·fault helper는0개입니다.
+
+전체 make check43개 실제 test package·vet/race·pinned parity/progress/gofmt PASS입니다. generator build/run exit0·기존 Go drift0·generated Compute README1개 동기화를 확인했습니다. 최종 Go source1,998개 SHA256 `c6b80797734918b28faaca111130f30d9dd2a154a8f16f91d0c4ca3eede1dc08`가 집중/전체 gate 전후와 원격 module cache에서 같습니다. 근거는 `/private/tmp/gophercloudsdk-flavor-cloud-focused-receipt.json`, gate-receipt/check log·generation-receipt입니다. 정확한 main fence SHA256 `0d58a6c05234f34d690efa7a81a3c27747edc0e84aac93f2bb88fa175487a5d8`는 외부 consumer-only local replace tidy/build PASS이며 최종 static audit는 API51사례와 재사용 테스트 anchor를 대조했습니다.
+
+공통 옵션 `d4fe3202`·구현 `5c400b22`·테스트 `60ab3f30`·문서 `f22a803d`를 작게 commit/push했습니다. 정확한 revision `f22a803d095233c151a4d47206b49e8a74d8b92d`을 별도 외부 module에서 GOWORK=off·replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008042836-f22a803d0952`·remote Go SHA가 최종 gate와 같습니다. 근거는 `/private/tmp/gophercloudsdk-flavor-cloud-remote-consumer-receipt.json`입니다. 인증/OpenStack/Python 실행·alpha tag 배포는 수행하지 않았습니다.
+
+catalog bytes·3,362개 IDs/fingerprints·source pins와 기존544 reviews를 보존하고 새3행9계약만 추가했습니다. 전체238→241/3,362·핵심164→167/2,292·Nova40→43/333, reviews547=go_mapping241/unresolved305/unsupported1·contracts3,370입니다. catalog unresolved3,120에는 미검토2,815개가 포함됩니다. 핵심 완료 수는 user/admin 합산이며 full mutable Resource/session/cache/discovery와 다른 Source 선언은 전체 목표에 유지합니다. 동일 Go의 JSON/prose에는 최종 전체 gate를 재사용하고 final parity/progress/gofmt를 확인합니다. 다음 핵심 user 후보는 AZ 일반/Cloud 이름 목록과 Glance 남은 schema getter이며 AZ 상세 host admin 분기는 2단계에 둡니다.

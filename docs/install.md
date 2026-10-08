@@ -6,7 +6,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@3d446f604fb57fefe5be31595679c24ff9ffd796
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@f22a803d095233c151a4d47206b49e8a74d8b92d
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -54,6 +54,8 @@ GOWORK=off go build -mod=readonly ./...
 실제 호출 예제와 Python 비교는 [전체 README](../README.md), [Compute](../compute/README.md), [Network](../network/README.md), [Barbican 생성](../keymanager/v1/metadata-create.md)에 있습니다. HTTP 동작은 기존 Gophercloud fixture 기반 계약 테스트와 `make smoke`로 검증합니다.
 
 ## 검증 상태
+
+2026-10-08에 source revision `f22a803d095233c151a4d47206b49e8a74d8b92d`을 별도 외부 module에 replace 없이 설치하고 위 설치 main과 [Cloud Flavor main](../compute/flavor-cloud.md)을 빌드했습니다. GOWORK=off·get/build exit0·실제 버전 `v0.0.0-20261008042836-f22a803d0952`이며 module-cache Go source1,998개 SHA256 `c6b80797734918b28faaca111130f30d9dd2a154a8f16f91d0c4ca3eede1dc08`가 집중60그룹(기존56재사용)·전체43 package gate와 같습니다. 새 Source3행9계약 판정으로 완료241/3,362이며 catalog/source pins와 기존544 reviews를 보존했습니다. 같은 최종 Go의 JSON/prose에는 전체 Go gate를 재실행하지 않습니다. 인증/OpenStack/Python 실행·alpha tag 배포는 포함하지 않습니다.
 
 2026-10-08에 source revision `037bd1535f699c20d09aedef6dea11e963f022a4`을 별도 외부 module에 replace 없이 설치하고 위 설치 main과 [Flavor 목록·검색 main](../compute/flavor-records.md)을 빌드했습니다. GOWORK=off·get/build exit0·실제 버전 `v0.0.0-20261008035547-037bd1535f69`이며 module-cache Go source1,996개 SHA256 `cc3404ffe583ef697d0eb7040d71e3d7bf177b738f150ae529bbbce1493d2350`가 집중53그룹(기존41재사용)·전체43 package gate와 같습니다. Source2개 판정으로 현재 완료 수는238/3,362이고 catalog/source pins·다른542 reviews·기존 Find8계약을 보존했습니다. 같은 최종 Go의 JSON/prose에는 전체 Go gate를 재실행하지 않습니다. 인증/OpenStack/Python 실행·alpha tag 배포는 포함하지 않습니다.
 

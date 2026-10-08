@@ -10,7 +10,13 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**최신 완료 (2026-10-08): 핵심 user Flavor owned 목록·검색, 전체236→238(+2)·핵심162→164/2,292·Nova38→40/333.** `Service.ListFlavors`/`FindFlavor`와 leaf `ListRecords`/`FindFlavor`가 Source의 detail·is_public=None·query 별칭·Body 필터·descriptor 기본값·조건부 specs·페이지·현재 location을 처리합니다. 실제 Wire/Envelope와 독립 view를 구분하고 Find의 seed·실제400/403/404 fallback·중복·늦은 오류를 연결했습니다. [Python/Go 비교·독립 main](../compute/flavor-records.md), [검증 기록](sdk-support-ledger.md#flavor-owned-목록검색-완료)에 API와 명시한 Go 차이를 기록합니다.
+**최신 완료 (2026-10-08): 핵심 user Cloud Flavor 목록·검색·단건 조회, 전체238→241(+3)·핵심164→167/2,292·Nova40→43/333.** `AllFlavors`는 extra-specs 기본 false인 eager 상세 목록, `SearchFlavors`는 기본 true인 전체 inventory 보충 후 Cloud 필터, `GetFlavor`는 기본 true인 Find 직접 위임을 제공합니다. 기존 owned List/Find·extra-specs reader·CloudFilter·location/guard를 조합하고 옵션 callback의 소유권 경계를 공통화했습니다. [Python/Go 비교·독립 main](../compute/flavor-cloud.md), [검증 기록](sdk-support-ledger.md#cloud-flavor-목록검색단건-조회-완료)에 서로 다른 기본값·필터·partial Inventory와 Go 차이를 기록합니다.
+
+집중 race60그룹 중56그룹을 재사용하고 새4그룹(고유 API51사례·공통 옵션 순수 검증1그룹)을 추가했습니다. 공개 Gophercloud helper·기존 SDK 서버/오류 fixture를 사용해 새 HTTP harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·재생성 Go drift0·정확한 독립 main build가 PASS했습니다. 최종 Go source1,998개 SHA256 `c6b80797734918b28faaca111130f30d9dd2a154a8f16f91d0c4ca3eede1dc08`가 집중·전체 gate 및 원격 module cache에서 같습니다. 공통화 `d4fe3202`·구현 `5c400b22`·테스트 `60ab3f30`·문서 `f22a803d`를 작은 단위로 commit/push했습니다.
+
+정확한 revision `f22a803d095233c151a4d47206b49e8a74d8b92d`을 외부 module에서 replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008042836-f22a803d0952`입니다. catalog/source pins와 기존544 reviews를 보존하고 새3행9계약만 추가했습니다. 완료241개는 고정 source 선언의 Go 매핑이며 핵심167개는 user/admin 합산입니다. 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다. 동일 Go의 JSON/prose에는 전체 gate를 재사용하고 parity/progress/gofmt를 확인합니다.
+
+**앞선 완료 (2026-10-08): 핵심 user Flavor owned 목록·검색, 전체236→238(+2)·핵심162→164/2,292·Nova38→40/333.** `Service.ListFlavors`/`FindFlavor`와 leaf `ListRecords`/`FindFlavor`가 Source의 detail·is_public=None·query 별칭·Body 필터·descriptor 기본값·조건부 specs·페이지·현재 location을 처리합니다. 실제 Wire/Envelope와 독립 view를 구분하고 Find의 seed·실제400/403/404 fallback·중복·늦은 오류를 연결했습니다. [Python/Go 비교·독립 main](../compute/flavor-records.md), [검증 기록](sdk-support-ledger.md#flavor-owned-목록검색-완료)에 API와 명시한 Go 차이를 기록합니다.
 
 집중 race53그룹 중41그룹을 재사용하고 새12그룹에 서비스 고유 API84사례와 공통 순수 검증을 추가했습니다. 공개 Gophercloud helper·기존 SDK fixture/오류 wrapper를 쓰며 새 서버 harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·재생성 Go drift0·정확한 외부 main build가 PASS했습니다. 최종 Go source1,996개 SHA256 `cc3404ffe583ef697d0eb7040d71e3d7bf177b738f150ae529bbbce1493d2350`가 집중·전체 gate 및 원격 module cache에서 같습니다. 구현6커밋과 문서 `037bd153`를 작은 단위로 commit/push했습니다.
 
@@ -80,17 +86,17 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**다음 핵심 user 단위:** Cloud Flavor list/search/get3개의 Source 분기를 새 owned List/Find와 공유합니다. List의 get_extra 기본 false와 Search/Get의 true, Search의 전체 수집·보충 후 필터, Get의 Find 직접 위임을 대조했습니다. 기존 cloudfilter.Select·current location·Find를 재사용하며 새 서버/오류 framework를 만들지 않습니다. 아직 이3개를 완료 수에 포함하지 않습니다.
+**다음 핵심 user 단위:** Compute Availability Zone 일반 목록·Cloud 이름 목록과 Glance의 남은 schema getter를 조사했습니다. 기존 일반/상세 facade와 raw reader·schema projector를 재사용하고 고정 Source의 응답 변환·필터·실패 정책을 확인합니다. AZ 상세 host 목록의 admin 분기는 2단계로 유지합니다. 조사 후보는 구현·검증·판정을 마칠 때까지 완료 집계에 포함하지 않습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 238 (7.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 241 (7.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,123 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 544 | 아직 개별 기록 없는 선언 2,818 |
-| 기록한 부분·전체 계약 | 3,361 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,120 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 547 | 아직 개별 기록 없는 선언 2,815 |
+| 기록한 부분·전체 계약 | 3,370 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -120,6 +126,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Flavor always-fetch·Cloud keypair5·native1 | 224 → 231 (+7) | 공통40그룹 재사용·새6그룹85사례·집중46그룹·전체42 package gate·main2개/원격 main3개 build PASS | `58662346`·`cb3f7866`·`df3afaea` push 완료 |
 | Flavor property·Cloud ID 조회·native3 | 231 → 236 (+5) | 기존28그룹 재사용·새7그룹74사례·집중35그룹·전체42 package gate·독립/원격 main build PASS | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료 |
 | Flavor owned 목록·검색 | 236 → 238 (+2) | 기존41그룹 재사용·새 API84사례·집중53그룹·전체43 package gate·독립/원격 main build PASS | 구현6커밋·문서 `037bd153` push 완료 |
+| Cloud Flavor 목록·검색·단건 조회 | 238 → 241 (+3) | 기존56그룹 재사용·새 API51사례·집중60그룹·전체43 package gate·독립/원격 main build PASS | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -132,19 +139,19 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 164 / 2,292 | 7.2% | 206 | 1,921 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 167 / 2,292 | 7.3% | 206 | 1,918 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 238 / 3,362 | 7.1% | 305 | 2,818 | 1 |
+| 전체 | 241 / 3,362 | 7.2% | 305 | 2,815 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
-| Compute / Nova | 40 / 333 | 20 | 273 | 0 |
+| Compute / Nova | 43 / 333 | 20 | 270 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 7 / 120 | 72 | 41 | 0 |
@@ -299,6 +306,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | Flavor extra-specs 명시 조회·Cloud keypair5개·native1 | 고정 source·dict view·필터 presence·location·삭제 기본값 검토 완료 | **FetchExtraSpecs·Cloud keypair5개 완료** | 공통40그룹·집중46그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping7행·전체231/3,362** | `58662346`·`cb3f7866`·`df3afaea` push 완료. 기존531 reviews/catalog 보존·새24계약 |
 | Flavor property·Cloud ID 조회 및 native3개 | 고정 source와 native DTO/string-map/linked-page 차이 검토 완료 | **공통 reader·GetExtraSpecsProperty·GetFlavorByID 완료** | 기존28그룹·집중35그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping5행·전체236/3,362** | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료. 기존538 reviews/catalog 보존·새15계약 |
 | Flavor owned 목록·검색 | source2개·descriptor/default/query/continuation·location 대조 완료 | **ListRecords/FindFlavor·Service 연결 완료** | 기존41그룹·집중53그룹·새 API84사례·전체43 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping2개·전체238/3,362** | 구현6커밋·문서 `037bd153` push 완료. 다른542 reviews/catalog 보존·Find8계약 유지·새10계약 |
+| Cloud Flavor 목록·검색·단건 조회 | 고정 defaults/eager-order/직접 Find 분기 대조 완료 | **공통 옵션 경계·Cloud3개 연결 완료** | 기존56그룹·집중60그룹·새 API51사례·전체43 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping3개·전체241/3,362** | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료. 기존544 reviews/catalog 보존·새9계약 |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
