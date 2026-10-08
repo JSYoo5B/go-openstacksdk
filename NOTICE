@@ -9,7 +9,8 @@ This distribution includes an adapted go-jmespath v0.4.0 source fork:
 Copyright 2015 James Saryerwinnie
 Licensed under the Apache License, Version 2.0.
 
-Generated API declarations and wrappers use Gophercloud v2.15.0:
+Generated API declarations/wrappers and pinned generator-test source excerpts
+use Gophercloud v2.15.0. Test fixtures may combine or alter source excerpts:
 Copyright 2012-2013 Rackspace, Inc.
 Copyright Gophercloud authors
 Licensed under the Apache License, Version 2.0.
@@ -32,7 +33,8 @@ Glob bracket parsing is adapted from CPython 3.14.8 Lib/fnmatch.py:
 Copyright (c) 2001 Python Software Foundation; All Rights Reserved
 The Python license agreements and change summary are retained separately.
 
-Unicode 16.0.0 digit-property data is used in compact rune ranges:
+Unicode 16.0.0 digit-property, full lowercase and context-property data
+are used in compact generated tables:
 Copyright 2024 Unicode, Inc.
 The Unicode License V3 is retained in licenses/unicode-LICENSE.
 

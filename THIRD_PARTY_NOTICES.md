@@ -12,13 +12,14 @@ endorsed by the OpenInfra Foundation, OpenStackSDK, or Gophercloud projects.
 Upstream names are used to identify dependencies and compatibility references;
 the included software licenses do not grant trademark approval for this name.
 
-## Gophercloud v2.15.0: dependency and generated declarations
+## Gophercloud v2.15.0: dependency, generated declarations and test source fixtures
 
 - Source: [github.com/gophercloud/gophercloud v2.15.0](https://github.com/gophercloud/gophercloud/tree/v2.15.0).
 - License: Apache-2.0; [exact upstream LICENSE](licenses/gophercloud-v2.15.0-LICENSE).
 - Copyright: 2012–2013 Rackspace, Inc.; Gophercloud authors.
 - Scope: the direct `github.com/gophercloud/gophercloud/v2` dependency,
-  generated service type aliases and API wrappers, and imported public test helpers.
+  generated service type aliases and API wrappers, imported public test helpers,
+  and pinned source excerpts in generator tests.
 
 `internal/cmd/sdkgen` reads public Go declarations to generate this SDK's
 facades and concrete option adapters. Gophercloud implementations are called
@@ -26,6 +27,14 @@ through the dependency rather than copied wholesale into those facades.
 Generated headers identify the source version. `internal/testcloud` imports
 the public Gophercloud `testhelper` package; it does not vendor that helper's
 implementation.
+
+Generator tests under `internal/cmd/sdkgen` also include Gophercloud source
+excerpts as fixture strings, including result extraction implementations and
+service declarations in `qos_policy_filters_test.go`, `network_filters_test.go`
+and `subnet_pool_filters_test.go`. These excerpts retain the Gophercloud
+Apache-2.0 attribution above. The tests may combine or alter the excerpts and
+add local declarations/stubs to exercise generator behavior; they are test
+fixtures rather than a replacement runtime implementation.
 
 ## yaml.v2 v2.4.0: dependency
 
