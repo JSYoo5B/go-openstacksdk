@@ -15,8 +15,9 @@ import (
 // Record separates the Source-shaped property from the actual response.
 // Namespace is captured request provenance. Resource, Wire, Envelope and
 // Header own their bytes. Key is list-only dictionary provenance, never route
-// identity; it is nil on GetRecord. Wire can be nil when successful JSON decoding was
-// tolerated and the declared Resource is based on the request seed.
+// identity; it is nil on single-record operations. Wire can be nil when JSON
+// decoding was tolerated. A local UpdateRecord no-op has no HTTP receipt:
+// Wire, Envelope and Header are nil and StatusCode is zero.
 type Record struct {
 	Key            *string `json:"-"`
 	Namespace      string

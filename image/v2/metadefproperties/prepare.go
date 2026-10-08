@@ -51,7 +51,7 @@ func (s *NamespaceScope) capture(ctx context.Context, name *string) (*preparedSo
 }
 
 // operationGuard freezes the namespace and keeps any observed source or outer
-// guard failure sticky across owned record fetch/list physical boundaries.
+// guard failure sticky across owned record operation boundaries.
 func (p *preparedSource) operationGuard(ctx context.Context) func(context.Context) error {
 	namespace := p.scope.namespace
 	outer := rest.OperationGuard(ctx)

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"slices"
-	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -49,15 +48,8 @@ func (s *NamespaceScope) GetRecord(ctx context.Context, input RecordRequest, opt
 	if err != nil {
 		return fail(err)
 	}
-	location := json.RawMessage("null")
-	if s.api.dependencies.CloudLocation != nil {
-		facts, readErr := s.api.dependencies.CloudLocation()
-		err = readErr
-		if err == nil {
-			location, err = facts.ForResource(nil, facts.Zone)
-		}
-	}
-	if err = errors.Join(err, check(opctx)); err != nil {
+	location, err := p.recordLocation(opctx, check)
+	if err != nil {
 		return fail(err)
 	}
 	attrs, headers, err := prepareRecordGet(opctx, check, slices.Clone(options))
@@ -101,27 +93,9 @@ func (s *NamespaceScope) GetRecord(ctx context.Context, input RecordRequest, opt
 	if err != nil {
 		return fail(err)
 	}
-	if !utf8.Valid(response.Body) {
-		return fail(response.Fail(invalid("property response must be UTF-8")))
-	}
-	record := &Record{Namespace: namespace, Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
-	if json.Valid(response.Body) {
-		wire := &resource.RawResource{Metadata: resource.Metadata{Header: response.Header.Clone(), StatusCode: response.StatusCode}}
-		if err := json.Unmarshal(response.Body, wire); err != nil {
-			return fail(response.Fail(err))
-		}
-		fields, err := normalizePropertyRecord(wire.Body, response.Body)
-		if err != nil {
-			return fail(response.Fail(err))
-		}
-		for key, raw := range fields {
-			seed[key] = bytes.Clone(raw)
-		}
-		record.Wire = wire
-	}
-	record.Resource, err = projectPropertyRecord(seed, namespace, location, resource.Metadata{Header: response.Header.Clone(), StatusCode: response.StatusCode})
-	if err = errors.Join(err, check(opctx)); err != nil {
-		return fail(response.Fail(err))
+	record, err := propertyRecordFromResponse(opctx, check, seed, namespace, location, response)
+	if err != nil {
+		return fail(err)
 	}
 	return record, nil
 }

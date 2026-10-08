@@ -10,7 +10,8 @@ import (
 )
 
 // RecordRequest selects either a literal ID or an owned snapshot of a Resource.
-// GetRecord uses declared seed attributes; DeleteRecord uses only id/name.
+// GetRecord uses declared seed attributes; DeleteRecord and UpdateRecord use
+// only id/name. UpdateRecord discards other input Resource fields.
 // Response fields never retarget an in-progress request.
 type RecordRequest struct {
 	ID       string

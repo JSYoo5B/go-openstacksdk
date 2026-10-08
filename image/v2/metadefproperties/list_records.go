@@ -33,15 +33,8 @@ func (s *NamespaceScope) ListRecords(ctx context.Context, options ...RecordListO
 			fail(err)
 			return
 		}
-		location := json.RawMessage("null")
-		if s.api.dependencies.CloudLocation != nil {
-			facts, readErr := s.api.dependencies.CloudLocation()
-			err = readErr
-			if err == nil {
-				location, err = facts.ForResource(nil, facts.Zone)
-			}
-		}
-		if err = errors.Join(err, check(opctx)); err != nil {
+		location, err := p.recordLocation(opctx, check)
+		if err != nil {
 			fail(err)
 			return
 		}
