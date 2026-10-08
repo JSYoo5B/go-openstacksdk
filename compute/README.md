@@ -20,6 +20,8 @@ Flavor의 SDK 소유 목록·이름 조회는 `service.ListFlavors`·`service.Fi
 
 Cloud flavor의 eager 목록은 `service.AllFlavors`, 이름·dictionary/JMES 검색은 `service.SearchFlavors`, 단건은 `service.GetFlavor`를 사용합니다. [Cloud Flavor 비교](flavor-cloud.md)에 List defaultfalse와 Search/Get defaulttrue, 전체 inventory 보충 후 검색, Get의 직접 Find·부분 결과를 설명합니다. Proxy의 lazy `ListFlavors`는 계속 별도로 사용합니다.
 
+일반 availability zone은 `service.ListAvailabilityZones(ctx)`로 raw Resource·Wire와 실제 응답을 순회하고, `service.ListAvailabilityZoneNames(ctx)`로 기본 available 이름 목록을 수집합니다. `compute.WithUnavailableZones(true)`는 unavailable 이름도 포함합니다. [Python/Go 비교·독립 main](availability-zones.md)에 nullable state/hosts·source 순서·빈 목록과 suppressed 오류의 구분을 설명합니다. 상세 host 목록의 native `ListDetail`은 관리자 후속 순서이며, 이를 포함하는 전체 Proxy 선언의 판정은 별도로 유지합니다.
+
 ## openstacksdk 대응
 
 | openstacksdk | gophercloudsdk |
