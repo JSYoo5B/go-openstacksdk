@@ -22,8 +22,12 @@ import (
 // explicit limit and derives the wire marker with Marker, never a generic
 // model identifier. Unbounded requests rely on server continuation links.
 type PagePolicy[T any] struct {
-	LinkKeys       []string
-	NextKey        string
+	LinkKeys []string
+	NextKey  string
+	// VersionedPath accepts one exact escaped relative version-prefixed path
+	// as an alias of the fixed collection, including behind reverse proxies.
+	// Other origins and paths retain the normal continuation checks.
+	VersionedPath  string
 	HTTPLink       bool
 	MarkerFallback bool
 	Marker         func(*T) (string, error)
@@ -41,6 +45,10 @@ type PagePolicy[T any] struct {
 	// positive limit when the initial query had none. Later pages retain that
 	// limit, and a server-only limit does not enable marker fallback.
 	AllowFirstServerLimit bool
+	// AllowZeroLimit accepts an explicit zero wire limit. Zero does not enable
+	// marker fallback; a positive MaxItems hint may replace this falsey limit.
+	// Services retain positive-only limits unless they opt in.
+	AllowZeroLimit bool
 	// MaxItemsLimitHint allows a controlled Collection iteration to supply its
 	// max-items cap as a wire limit when the caller did not specify one.
 	MaxItemsLimitHint bool
@@ -62,7 +70,7 @@ type PagePolicy[T any] struct {
 
 type continuationRules struct {
 	reduceLimit, offsetPagination, firstPage bool
-	allowFirstServerLimit                    bool
+	allowFirstServerLimit, allowZeroLimit    bool
 }
 
 // ListControl limits raw, successfully decoded and validated rows before any
@@ -89,7 +97,7 @@ func pageKey(u *url.URL) string {
 	return copy.String()
 }
 
-func paginationInput(query url.Values) (int, error) {
+func paginationInput(query url.Values, allowZero ...bool) (int, error) {
 	if values, exists := query["marker"]; exists && (len(values) != 1 || strings.TrimSpace(values[0]) == "") {
 		return 0, fmt.Errorf("%w: pagination requires one nonempty marker", resource.ErrInvalidOption)
 	}
@@ -101,8 +109,8 @@ func paginationInput(query url.Values) (int, error) {
 		return 0, fmt.Errorf("%w: pagination requires one limit", resource.ErrInvalidOption)
 	}
 	limit, err := strconv.Atoi(values[0])
-	if err != nil || limit < 1 {
-		return 0, fmt.Errorf("%w: pagination limit must be positive", resource.ErrInvalidOption)
+	if err != nil || limit < 0 || (limit == 0 && (len(allowZero) == 0 || !allowZero[0])) {
+		return 0, fmt.Errorf("%w: invalid pagination limit", resource.ErrInvalidOption)
 	}
 	return limit, nil
 }
@@ -142,7 +150,8 @@ func List[T any](ctx context.Context, spec CollectionSpec[T], query url.Values) 
 // Each iteration owns its count, query snapshot and continuation guards.
 func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query url.Values, control ListControl) iter.Seq2[*T, error] {
 	initial := queryCopy(query)
-	if control.LimitHint && control.MaxItems > 0 && !initial.Has("limit") {
+	zeroLimit := spec.Paging.AllowZeroLimit && len(initial["limit"]) == 1 && initial.Get("limit") == "0"
+	if control.LimitHint && control.MaxItems > 0 && (!initial.Has("limit") || zeroLimit) {
 		initial.Set("limit", strconv.Itoa(control.MaxItems))
 	}
 	return func(yield func(*T, error) bool) {
@@ -165,7 +174,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			fail(fmt.Errorf("%w: list envelope and metadata are required", resource.ErrInvalidOption))
 			return
 		}
-		limit, err := paginationInput(initial)
+		limit, err := paginationInput(initial, spec.Paging.AllowZeroLimit)
 		if err != nil {
 			fail(err)
 			return
@@ -282,7 +291,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			}
 			rules := continuationRules{reduceLimit: pageNumber == 0 && spec.Paging.AllowFirstLimitReduction,
 				offsetPagination: spec.Paging.OffsetPagination, firstPage: pageNumber == 0,
-				allowFirstServerLimit: spec.Paging.AllowFirstServerLimit}
+				allowFirstServerLimit: spec.Paging.AllowFirstServerLimit, allowZeroLimit: spec.Paging.AllowZeroLimit}
 			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, rules)
 			if err != nil {
 				fail(response.Fail(err))
@@ -327,7 +336,7 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			if marker != "" {
 				markers[marker] = true
 			}
-			limit, _ = paginationInput(next.Query())
+			limit, _ = paginationInput(next.Query(), spec.Paging.AllowZeroLimit)
 			current = next
 		}
 	}
@@ -431,6 +440,9 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 		if err != nil {
 			return nil, err
 		}
+		if policy.VersionedPath != "" && parsed.Scheme == "" && parsed.Host == "" && parsed.EscapedPath() == policy.VersionedPath {
+			parsed.Path, parsed.RawPath = base.Path, base.RawPath
+		}
 		next := current.ResolveReference(parsed)
 		if err := lockContinuation(base, current, next, rules); err != nil {
 			return nil, err
@@ -458,13 +470,13 @@ func lockContinuation(base, current, next *url.URL, rules continuationRules) err
 		}
 		old, exists := previous[key]
 		if key == "limit" && rules.firstPage && !exists && (rules.offsetPagination || rules.allowFirstServerLimit) {
-			if _, err := paginationInput(url.Values{"limit": values}); err == nil {
+			if _, err := paginationInput(url.Values{"limit": values}, rules.allowZeroLimit); err == nil {
 				continue
 			}
 		}
 		if key == "limit" && rules.reduceLimit && exists {
-			newLimit, err := paginationInput(url.Values{"limit": values})
-			oldLimit, oldErr := paginationInput(url.Values{"limit": old})
+			newLimit, err := paginationInput(url.Values{"limit": values}, rules.allowZeroLimit)
+			oldLimit, oldErr := paginationInput(url.Values{"limit": old}, rules.allowZeroLimit)
 			if err == nil && oldErr == nil && newLimit <= oldLimit {
 				continue
 			}
@@ -483,7 +495,7 @@ func lockContinuation(base, current, next *url.URL, rules continuationRules) err
 	if !query.Has("marker") && previous.Has("marker") {
 		query["marker"] = append([]string(nil), previous["marker"]...)
 	}
-	if _, err := paginationInput(query); err != nil {
+	if _, err := paginationInput(query, rules.allowZeroLimit); err != nil {
 		return err
 	}
 	if rules.offsetPagination {
