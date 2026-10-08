@@ -652,3 +652,40 @@ func TestMetadefPropertyListRecordsLegacyFiniteDTOIsSeparate(t *testing.T) {
 		t.Fatal(rows, err, calls)
 	}
 }
+
+func TestMetadefPropertyListRecordsOwnExplicitJSONAcceptAcrossSourceAndRetry(t *testing.T) {
+	for _, mode := range []string{"source inherited representation", "retry cannot change representation"} {
+		t.Run(mode, func(t *testing.T) {
+			calls, retries := 0, 0
+			client := propertyCoreClient(func(req *http.Request) (*http.Response, error) {
+				calls++
+				if req.Header.Get("Accept") != "application/json" {
+					t.Fatal("explicit list representation lost", req.Header)
+				}
+				if mode == "retry cannot change representation" {
+					return propertyCoreJSON(req, 503, "retry trigger"), nil
+				}
+				return propertyCoreJSON(req, 200, `{"properties":{}}`), nil
+			})
+			client.MoreHeaders = map[string]string{"Accept": "text/plain"}
+			if mode == "retry cannot change representation" {
+				client.ProviderClient.RetryFunc = func(_ context.Context, _, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
+					retries++
+					opts.MoreHeaders["Accept"] = "text/plain"
+					return nil
+				}
+			}
+			rows, err := propertyRecordScope(t, client, Dependencies{}).AllRecords(context.Background())
+			if calls != 1 || len(rows) != 0 || client.MoreHeaders["Accept"] != "text/plain" {
+				t.Fatal("representation ownership changed caller source or replayed", rows, err, calls)
+			}
+			if mode == "retry cannot change representation" {
+				if err == nil || retries != 1 {
+					t.Fatal("native retry changed owned Accept", err, retries)
+				}
+			} else if err != nil || retries != 0 || rows == nil {
+				t.Fatal(rows, err, retries)
+			}
+		})
+	}
+}

@@ -50,14 +50,12 @@ func (s *NamespaceScope) ListRecords(ctx context.Context, options ...RecordListO
 			fail(err)
 			return
 		}
-		if _, present := p.client.MoreHeaders["Accept"]; !present {
-			p.client.MoreHeaders["Accept"] = "application/json"
-		}
+		p.client.MoreHeaders["Accept"] = "application/json"
 		codes := make([]int, 200)
 		for index := range codes {
 			codes[index] = 200 + index
 		}
-		response, err := rest.DoJSONGuarded(opctx, p.client, check, http.MethodGet, p.url(nil), nil, nil, codes...)
+		response, err := rest.DoJSONGuardedHeaders(opctx, p.client, check, http.MethodGet, p.url(nil), nil, map[string]string{"Accept": "application/json"}, codes...)
 		if err != nil {
 			fail(err)
 			return
