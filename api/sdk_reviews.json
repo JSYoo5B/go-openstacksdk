@@ -42366,6 +42366,159 @@
         "Go returns an owned FlavorRecord and can retain a known partial record/child receipt with error, rather than returning a connected mutable Python Resource or silently losing physical evidence. Computed current location changes only Resource views, with Wire/Envelope/Header/Status kept actual. Generic mutable Resource/session/cache facilities and other native/Proxy/Cloud declarations remain separate portions of the original SDK goal."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_availability_zone_names",
+      "source_fingerprint": "7e0962c570348726a4982ca80c30a8a66d2d27726729cc96688a8c6b7a6cddd6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute.Service.ListAvailabilityZoneNames",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithAvailabilityZoneNamesOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithUnavailableZones",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithAvailabilityZoneNamesMicroversion",
+        "github.com/JSYoo5B/gophercloudsdk/compute.WithAvailabilityZoneNamesHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "The Cloud name method always consumes the ordinary os-availability-zone inventory. Unavailable defaults false; true includes unavailable rows without requesting the admin detail route. Name values remain passive JSON, including numeric/bool/object/array/null and omitted-as-null, preserving source order and duplicates; a normal empty inventory completes Names and Value as an empty array.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "The state available key is read before the unavailable option is considered. JSON-domain Python truthiness controls ordinary inclusion; missing/null/scalar/array state and a missing available key remain errors even with unavailable true, returning known Inventory without fabricated completed Names or Value.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "A clean actual HTTP 403/500, late actual404, or isolated repeated pagination marker cycle produces the source-compatible completed empty array, discards the collected name prefix, retains Inventory diagnostics, and exposes the original status/body/header/URL or cycle through SuppressedError. Duplicate re-return of the same original retry error does not invent another independent terminal cause.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "Accepted malformed JSON and accepted Close failures with a nested native404 remain visible response errors with actual200 receipt and no accepted replay. A different retry callback cause beside actual HTTP500 retains both causes, source failure beside HTTP500 and cancellation with custom cause beside HTTP403 remain visible, and an option callback returning a native404 does not become a suppressed fetched SDK failure or completed names.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "Concrete typed option/version/header inputs are owned, full replacement and individual helpers apply at most once, and current location is captured before option callbacks once per logical call. Header/version overrides reach the fixed GET while the original selected native client and actual wire location remain unchanged; response Names/Value/Resource/Envelope own independent bytes.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory",
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/availability-zones.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "Pinned _compute.py:255-276 catches openstack.exceptions.SDKException, not arbitrary Python failures. Go explicitly classifies a clean actual native HTTP4xx/5xx rejection and an isolated pagination cycle; accepted IO/decode/source/context/URL-transport/local safety and different joined error causes remain visible. SuppressedError and retained Inventory are additive diagnostic results; Source returns only [].",
+        "The Python list[str] annotation does not coerce the untyped zone name descriptor. Names uses []json.RawMessage and Value uses an owned JSON array to preserve the actual JSON values instead of synthesizing strings. Malformed state/key errors use Go errors with a known partial result rather than Python TypeError/KeyError classes.",
+        "Public Source takes only unavailable=False. Go adds concrete header and microversion options; blank selected source performs no version discovery, nil preserves selection, explicit empty suppresses version headers for this call, and no detail/query/body controls are introduced.",
+        "Service supplies an owned snapshot of existing Connection location to declared Resource only; standalone service without that dependency uses null. Wire/Envelope remain the actual row and header/status evidence is additive. This finite name-list mapping does not implement a general mutable Resource/cache/Session surface.",
+        "The shared guarded pager accepts compatible advertised continuation but requires safe fixed collection scope and consistent continuation candidates. Python chooses a precedence channel instead; dictionary links.next is additional Go compatibility. Completing this Cloud row does not close Proxy details=True or native ListDetail."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/availabilityzones.List",
+      "source_fingerprint": "51673c1152f38961bf3885150a8620d52355a5857dac27713adcda7a81914bfe",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones.API.List",
+        "github.com/JSYoo5B/gophercloudsdk/resource.SinglePageStream"
+      ],
+      "contracts": [
+        {
+          "behavior": "Native ordinary List remains lazy and uses the original fixed os-availability-zone GET with selected client/version/token and native AvailabilityZone DTO. One physical page decodes the complete availabilityZoneInfo array before any row is published; embedded next links do not cause another request or a detail lookup.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNativeListTypedSinglePageABI"
+          ]
+        },
+        {
+          "behavior": "Actual200 and300 object envelopes preserve ZoneName string, ZoneState.Available bool, Hosts and nested ServiceState booleans plus the native millisecond no-zone timestamp decoder. Missing/null DTO fields retain native zero values, and null or missing plural data yields no rows.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNativeListTypedSinglePageABI"
+          ]
+        },
+        {
+          "behavior": "Native success codes remain200/204/300: empty application/json204 exposes EOF, unexpected201 and403 retain original method/URL/body/header/status evidence, and syntax or a wrong known field type fails without publishing an earlier row from the same page.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNativeListTypedSinglePageABI"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/availability-zones.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "Pinned v2.15.0 AvailabilityZonePage inherits array-only SinglePageBase.IsEmpty, so native EachPage cannot handle the normal object envelope. The audited SDK generator selects SinglePageStream only for ordinary AvailabilityZones.List; it uses native Pager.AllPages, whose SinglePageBase shortcut bypasses that emptiness check, then the unchanged native extractor. ListDetail keeps its original generated path and is not promoted.",
+        "The SDK exposes context-aware iter.Seq2 rather than returning pagination.Pager. It retains original AllPages single-page semantics and complete native decode, with local cancellation and consumer break ending publication; native DTO fields are separate from the new untyped owned Resource/Wire view.",
+        "Native pagination accepts200/204/300 but does not define a successful empty JSON representation for204. Native PageResultFrom/ExtractInto/null/default behavior and configured prebody provider policies remain native; the SDK does not retrofit owned accepted-response IO evidence or Python descriptor values into this native row."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/availability_zones",
+      "source_fingerprint": "d1932218202ce62c11d084cf431916a9fcf4ada2d59e79e02ae364ab0e46f148",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones.API.ListRecords",
+        "github.com/JSYoo5B/gophercloudsdk/compute.Service.ListAvailabilityZones",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones.WithAvailabilityZoneListOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones.WithAvailabilityZoneMicroversion",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones.WithAvailabilityZoneHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "The details=False branch is available through ListRecords and Service.ListAvailabilityZones at the ordinary fixed path. id/name/state/hosts are passive raw descriptors with missing or null represented by JSON null; zoneName/name and zoneState/state aliases follow original dictionary order, unknown fields remain Wire-only, and a name never fabricates inherited id.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership",
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "A logical iteration owns options lazily, captures source and Service binding before callbacks, snapshots current location once before the callbacks, and keeps location confined to independent Resource views. Actual row Envelope/Wire and header/status remain independent. Selected version is retained, explicit empty is versionless, and source mutation stops later callbacks before HTTP.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership",
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+          ]
+        },
+        {
+          "behavior": "Owned ordinary rows accept the Source-facing200..399 success range through the shared bodyless guarded reader, preserving reverse endpoint prefixes and actual metadata. Advertised linked pages retain duplicate records, an empty raw page stops before its next link, consumer break stops continuation, and late HTTP403 is visible with its original receipt after prior rows.",
+          "tests": [
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership"
+          ]
+        },
+        {
+          "behavior": "The actual collection implementation composes the existing optional page reader, singleton-object representation and decode-no-content policies, plus an opt-in first advertised server limit that remains fixed without enabling initial-limit marker fallback. This shared behavior is separate from native SinglePageBase DTO listing.",
+          "tests": [
+            "internal/rest/list_test.go:TestListOptionalReaderAndRepresentationsKeepDefaultPolicy",
+            "internal/rest/list_test.go:TestListFirstServerLimitIsOptInAndFixedAcrossContinuations",
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/availability-zones.md",
+        "compute/README.md"
+      ],
+      "differences": [
+        "The pinned public signature is availability_zones(details=False), with no public **query. This Go lane intentionally fixes ordinary user listing and offers only concrete headers/microversion options; it does not invent reachable Source body filters, limit/marker/max-items arguments, arbitrary base_path, or supplied Resource parameters.",
+        "AvailabilityZone declares id/name/state/hosts without typed conversion, with default None and no alternate ID. Resource is the declared owned view; Wire is actual JSON including unknown/vendor fields, Envelope is the actual row, and physical Header/StatusCode are additive Go evidence. Service maps existing Connection current_location while standalone leaf location is null.",
+        "Blank source version causes no discovery because the Source class has no _max_microversion. Explicit per-call empty is a Go versionless override; the original native client and live authentication remain unchanged under the existing guarded read policy.",
+        "Go requires valid UTF8 object/page representations, supports one object in the plural envelope, and decodes an accepted204 representation rather than treating an empty204 as a successful empty list. Shared reader errors remain visible; Python JSON/shape exception class spelling is not reproduced.",
+        "Python selects body links, then top-level next, then HTTP Link according to source precedence. Go validates all advertised candidates consistently, restricts origin/prefix/route/query changes, and supports dictionary links.next as extra compatibility. An advertised first positive limit may be adopted but does not create the absent initial limit or enable marker fallback.",
+        "Ordinary owned records and Cloud names do not imply detailed host/service inventory completion or full generic mutable Resource/session/cache behavior. Those general surfaces remain the original SDK goal rather than blanket blockers added to this finite ordinary branch."
+      ],
+      "remaining": [
+        "The public details=True branch selects /os-availability-zone/detail and remains queued for the core-admin stage. Its source-shaped owned result, privileged host/service behavior and meaningful HTTP assertions are not implemented/reviewed by this ordinary user unit; native AvailabilityZones.ListDetail is not promoted."
+      ]
     }
   ]
 }
