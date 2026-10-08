@@ -29,19 +29,26 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 		name, selected, discovery, version string
 		modern                             bool
 		firstRejection, discoveryStatus    int
+		noMatchingRow                      bool
 	}{
-		{"unselected modern ceiling", "", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.110"}}`, "2.99", true, 0, 300},
-		{"explicit selected exceeds advertised max", "2.100", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.90"}}`, "2.100", true, 0, 300},
-		{"explicit selected below branch", "2.5", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`, "2.5", false, 0, 300},
-		{"unselected old server", "", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.5"}}`, "2.5", false, 0, 300},
-		{"minimum above required uses legacy ceiling", "", `{"version":{"id":"v2.1","min_version":"2.7","version":"2.110"}}`, "2.100", false, 0, 300},
-		{"matched version without bounds", "", `{"version":{"id":"v2.1"}}`, "", false, 0, 300},
-		{"global latest does not prove modern", "latest", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.110"}}`, "latest", false, 0, 300},
-		{"major latest proves modern", "2.latest", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.110"}}`, "2.latest", true, 0, 300},
-		{"v2.0 row ignored for catalog v2.1", "", `{"versions":{"values":[{"id":"v2.0","min_version":"2.1","version":"2.5"},{"id":"v2.1","status":"CURRENT","min_version":"2.1","max_version":"2.8"}]}}`, "2.8", true, 0, 300},
-		{"clean404 root fallback", "", `{"versions":[{"id":"v2.0","min_version":"2.1","version":"2.5"},{"id":"v2.1","min_version":"2.1","version":"2.100"}]}`, "2.99", true, 404, 300},
-		{"clean405 root fallback", "2.6", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`, "2.6", true, 405, 300},
-		{"valid accepted201 discovery", "2.6", `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`, "2.6", true, 0, 201},
+		{"unselected modern ceiling", "", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.110"}}`, "2.99", true, 0, 300, false},
+		{"explicit selected exceeds advertised max", "2.100", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.90"}}`, "2.100", true, 0, 300, false},
+		{"explicit selected below branch", "2.5", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, "2.5", false, 0, 300, false},
+		{"unselected old server", "", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.5"}}`, "2.5", false, 0, 300, false},
+		{"minimum above required uses legacy ceiling", "", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.7","version":"2.110"}}`, "2.100", false, 0, 300, false},
+		{"matched version without bounds", "", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}]}}`, "", false, 0, 300, false},
+		{"global latest does not prove modern", "latest", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.110"}}`, "latest", false, 0, 300, false},
+		{"major latest proves modern", "2.latest", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.110"}}`, "2.latest", true, 0, 300, false},
+		{"v2.0 row ignored for catalog v2.1", "", `{"versions":{"values":[{"id":"v2.0","min_version":"2.1","version":"2.5"},{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","max_version":"2.8"}]}}`, "2.8", true, 0, 300, false},
+		{"clean404 root fallback", "", `{"versions":[{"id":"v2.0","min_version":"2.1","version":"2.5"},{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}]}`, "2.99", true, 404, 300, false},
+		{"clean405 root fallback", "2.6", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, "2.6", true, 405, 300, false},
+		{"valid accepted201 discovery", "2.6", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, "2.6", true, 0, 201, false},
+		{"missing status is ineligible", "", `{"version":{"id":"v2.1","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, "", false, 0, 200, true},
+		{"missing self link is ineligible", "", `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"collection","href":"/reverse/nova/"}],"min_version":"2.1","version":"2.100"}}`, "", false, 0, 200, true},
+		{"unknown status is ineligible", "", `{"version":{"id":"v2.1","status":"vendor","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, "", false, 0, 200, true},
+		{"relative self link and deprecated status eligible", "2.6", `{"version":{"id":"v2.1","status":"deprecated","links":[{"rel":"self","href":""}],"min_version":"2.1","version":"2.100"}}`, "2.6", true, 0, 200, false},
+		{"missing ID row skipped", "2.6", `{"versions":[{"status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.5"},{"id":"v2.1","status":"SUPPORTED","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}]}`, "2.6", true, 0, 200, false},
+		{"ineligible malformed ID row skipped", "2.6", `{"versions":[{"id":false,"status":"EXPERIMENTAL","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.5"},{"id":"v2.1","status":"SUPPORTED","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}]}`, "2.6", true, 0, 200, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -64,7 +71,7 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
 					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
 					wantPath := computeConsoleDiscoveryPath
-					if index == 2 && tc.firstRejection != 0 {
+					if index == 2 && (tc.firstRejection != 0 || tc.noMatchingRow) {
 						wantPath = computeConsoleDiscoveryRoot
 					}
 					if r.URL.Path != wantPath || len(body) != 0 || r.ContentLength != 0 {
@@ -101,7 +108,7 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 			service := compute.New(client, compute.Dependencies{})
 			value, err := service.CreateConsole(context.Background(), "server-id", "novnc")
 			wantGets := int32(1)
-			if tc.firstRejection != 0 {
+			if tc.firstRejection != 0 || tc.noMatchingRow {
 				wantGets = 2
 			}
 			if err != nil || gets.Load() != wantGets || posts.Load() != 1 || client.Microversion != tc.selected || client.Endpoint != cloud.Server.URL+"/reverse/nova/v2.1/project/" || client.ResourceBase != cloud.Server.URL+"/reverse/nova/v2.1/project/" || service.RawClient() != client || service.API.RawClient() != client || !reflect.DeepEqual(client.MoreHeaders, map[string]string{"X-Console-Source": "selected"}) {
@@ -153,7 +160,7 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 						t.Error(r.URL, r.ContentLength)
 					}
 					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","min_version":"2.1","version":"`+tc.maximum+`"}}`)
+					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"`+tc.maximum+`"}}`)
 					return
 				}
 				posts.Add(1)
@@ -202,7 +209,7 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
 				gets.Add(1)
-				testcloud.JSON(w, 200, `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`)
+				testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`)
 				return
 			}
 			posts.Add(1)
@@ -265,7 +272,7 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				if r.Method == http.MethodGet {
 					gets.Add(1)
-					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`)
+					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`)
 					return
 				}
 				posts.Add(1)
@@ -331,7 +338,7 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("discovery canceled")
-			body, code := `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`, 300
+			body, code := `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`, 300
 			if mode == "empty204" {
 				body, code = "", 204
 			}
@@ -426,7 +433,7 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				if r.Method == http.MethodGet {
 					gets.Add(1)
-					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","min_version":"2.1","version":"2.100"}}`)
+					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.100"}}`)
 					return
 				}
 				posts.Add(1)

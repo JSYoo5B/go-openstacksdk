@@ -24,11 +24,12 @@ import (
 type Profile struct {
 	Major                string
 	MatchEndpointVersion bool
+	RequireSelfLink      bool
 	LegacyVersionHeader  string
 	OkCodes              []int
 }
 
-var NovaProfile = Profile{Major: "2", MatchEndpointVersion: true, LegacyVersionHeader: "X-OpenStack-Nova-API-Version", OkCodes: novaCodes()}
+var NovaProfile = Profile{Major: "2", MatchEndpointVersion: true, RequireSelfLink: true, LegacyVersionHeader: "X-OpenStack-Nova-API-Version", OkCodes: novaCodes()}
 var CinderProfile = Profile{Major: "3", LegacyVersionHeader: "X-OpenStack-Volume-API-Version", OkCodes: []int{200, 300}}
 
 func novaCodes() []int {
@@ -136,11 +137,12 @@ func discoveryURLs(endpoint string, matchEndpoint bool) ([]string, Version, erro
 }
 
 type advertisement struct {
-	ID      string `json:"id"`
-	Status  string `json:"status"`
-	Maximum string `json:"max_version"`
-	Version string `json:"version"`
-	Minimum string `json:"min_version"`
+	Links   json.RawMessage `json:"links"`
+	ID      json.RawMessage `json:"id"`
+	Status  string          `json:"status"`
+	Maximum string          `json:"max_version"`
+	Version string          `json:"version"`
+	Minimum string          `json:"min_version"`
 }
 
 // Flat, version, versions and versions.values documents share one decoder.
@@ -190,7 +192,20 @@ func bounds(body json.RawMessage, profile Profile, endpointVersion Version) (str
 		}
 	}
 	for _, row := range rows {
-		id, err := ParseVersion(row.ID)
+		if profile.RequireSelfLink {
+			eligible, err := advertisedEndpoint(row)
+			if err != nil {
+				return "", "", false, err
+			}
+			if !eligible {
+				continue
+			}
+		}
+		var idText string
+		if err := json.Unmarshal(row.ID, &idText); err != nil {
+			return "", "", false, err
+		}
+		id, err := ParseVersion(idText)
 		if err != nil {
 			return "", "", false, err
 		}
@@ -212,6 +227,41 @@ func bounds(body json.RawMessage, profile Profile, endpointVersion Version) (str
 		return maximum, row.Minimum, true, nil
 	}
 	return "", "", false, nil
+}
+
+// Keystoneauth skips Nova advertisements without a permitted status or a
+// self link. The link proves row eligibility but cannot override our route.
+func advertisedEndpoint(row advertisement) (bool, error) {
+	switch strings.ToLower(row.Status) {
+	case "stable", "current", "supported", "deprecated":
+	default:
+		return false, nil
+	}
+	if len(row.ID) == 0 || len(row.Links) == 0 {
+		return false, nil
+	}
+	var links []map[string]json.RawMessage
+	if err := json.Unmarshal(row.Links, &links); err != nil {
+		return false, err
+	}
+	if links == nil {
+		return false, fmt.Errorf("discovery links must be an array")
+	}
+	for _, link := range links {
+		var rel, href string
+		if json.Unmarshal(link["rel"], &rel) != nil || strings.ToLower(rel) != "self" {
+			continue
+		}
+		raw, present := link["href"]
+		if !present || len(raw) == 0 || raw[0] != '"' || json.Unmarshal(raw, &href) != nil {
+			continue
+		}
+		if _, err := url.Parse(href); err != nil {
+			continue
+		}
+		return true, nil
+	}
+	return false, nil
 }
 
 func discoveryGet(ctx context.Context, source *cloudread.Source, target string, profile Profile) (*rest.Response, error) {
