@@ -34,7 +34,9 @@ service declarations in `qos_policy_filters_test.go`, `network_filters_test.go`
 and `subnet_pool_filters_test.go`. These excerpts retain the Gophercloud
 Apache-2.0 attribution above. The tests may combine or alter the excerpts and
 add local declarations/stubs to exercise generator behavior; they are test
-fixtures rather than a replacement runtime implementation.
+fixtures rather than a replacement runtime implementation. Each test file
+containing or assembling adapted source fixtures carries its upstream scope,
+original copyright attribution, and a prominent notice of these local changes.
 
 ## yaml.v2 v2.4.0: dependency
 

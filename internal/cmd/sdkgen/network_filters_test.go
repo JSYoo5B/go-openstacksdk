@@ -1,3 +1,15 @@
+// These tests use source fixtures adapted from Gophercloud v2.15.0.
+// Copyright 2012-2013 Rackspace, Inc.
+// Copyright Gophercloud authors
+// SPDX-License-Identifier: Apache-2.0
+//
+// Local modifications select and combine upstream declarations, add test stubs,
+// and create altered source variants to check generator behavior.
+// Upstream scope (github.com/gophercloud/gophercloud/v2):
+//   openstack/networking/v2/networks
+//   results.go
+// See the root THIRD_PARTY_NOTICES.md and licenses/gophercloud-v2.15.0-LICENSE.
+
 package main
 
 import (
