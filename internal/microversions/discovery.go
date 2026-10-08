@@ -26,11 +26,12 @@ type Profile struct {
 	MatchEndpointVersion bool
 	RequireSelfLink      bool
 	LegacyVersionHeader  string
+	HeaderService        string
 	OkCodes              []int
 }
 
-var NovaProfile = Profile{Major: "2", MatchEndpointVersion: true, RequireSelfLink: true, LegacyVersionHeader: "X-OpenStack-Nova-API-Version", OkCodes: novaCodes()}
-var CinderProfile = Profile{Major: "3", LegacyVersionHeader: "X-OpenStack-Volume-API-Version", OkCodes: []int{200, 300}}
+var NovaProfile = Profile{Major: "2", HeaderService: "compute", MatchEndpointVersion: true, RequireSelfLink: true, LegacyVersionHeader: "X-OpenStack-Nova-API-Version", OkCodes: novaCodes()}
+var CinderProfile = Profile{Major: "3", HeaderService: "volume", LegacyVersionHeader: "X-OpenStack-Volume-API-Version", OkCodes: []int{200, 300}}
 
 func novaCodes() []int {
 	codes := make([]int, 200)
