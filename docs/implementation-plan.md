@@ -16,7 +16,7 @@
 
 공통 guard `c834f9ef`·목록 `ebd363d6`·Connection `404000d7`·Accept 수정 `0f35bef3`·삭제 `4e1388ba`·삭제 테스트 `cf0652dc`·비교 문서 `50b43025`를 각각 commit/push했습니다. catalog/source pins·다른547 reviews·기존16계약을 보존하고13계약을 추가해 reviews550·계약3,448입니다. 정확한 구현·문서 revision `50b4302520ee2d05a1ced1119e40f919e857bc01`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008163807-50b4302520ee`·get/build exit0이며 목록/조회/설치 main3개와 삭제 package example1개가 빌드됐습니다. 원격 Go SHA와 라이선스·고지13개 파일도 로컬과 같습니다. [설치 안내](install.md)와 `/private/tmp/go-openstacksdk-property-list-remote-receipt.json`에 기록합니다.
 
-**다음 구현:** 같은 핵심 user property의 owned 생성·수정2개입니다. 고정 Source의 dirty 필드 전송·ID 선택·변경이 없을 때 PUT 생략·응답 overlay를 공통 projector와 연결합니다. 기존 required Type/Title·strict status raw CRUD를 완료로 다시 세지 않습니다. 전체 API 목표와 서비스 우선순위는 active입니다.
+**현재 구현 중:** 같은 핵심 user property의 owned 생성·수정2개입니다. 고정 Source의 dirty 필드 전송·ID 선택·변경이 없을 때 PUT 생략·응답 overlay를 공통 projector와 연결합니다. 기존 required Type/Title·strict status raw CRUD를 완료로 다시 세지 않습니다. 전체 API 목표와 서비스 우선순위는 active입니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance owned property 조회, 전체257→258(+1)·핵심183→184/2,292·Glance21→22/120.** `NamespaceScope.GetRecord`가 concrete ID/Resource 입력과 초기 속성, 응답 overlay·nullable descriptor 기본값/변환, 양쪽 Connection current location을 제공합니다. Resource·실제 Wire·Envelope·receipt를 분리하고 actual200..399의 빈/비JSON 성공을 처리합니다. 기존 strict200 raw Get은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-property-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-조회-완료)을 갱신했습니다.
 
@@ -319,7 +319,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
 | Glance property owned 목록·삭제 | pinned finite list·두 deletion·identity·has_body=False 검토 완료 | **ListRecords/AllRecords·DeleteRecord/DeleteAllRecords·공통 guard 완료** | 기존13그룹 재사용·새20그룹182사례·집중33그룹274·전체43 package race/vet·최종261 metadata PASS | Python 비교·정확한 main3개/example1개 local/remote build PASS | **go_mapping3행·전체261/3,362** | 구현·검증·문서7개 commit push 완료. [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료) |
-| Glance property owned 생성·수정 | pinned create/commit·dirty-only·no-op 초기 검토 완료 | 구현 전 | 구현 후 기존 projector/fixture를 재사용해 검증 예정 | owned 비교·예제 추가 예정 | 두 선언 unresolved 유지 | 다음 핵심 user 단위 |
+| Glance property owned 생성·수정 | pinned constructor·raw dirty body·POST/PUT·no-op·공개 identity 선택 검토 완료 | 공통 response/location 추출·concrete write 옵션/API 구현 중 | 기존 fixture 재사용하는 raw payload/descriptor·no-op·receipt 테스트 작성 중 | Python/Go 비교·독립 main 작성 중 | 두 선언 unresolved 유지·완료 집계261 보존 | 현재 핵심 user 단위: 구현·검증 후 두 판정 승격 |
 | Glance property owned 조회 | pinned getter·descriptor·fetch 검토 완료 | **seed/overlay·21필드 view·GetRecord·Connection 완료** | 집중13그룹92·전체43 package race/vet·metadata gate PASS | Python 비교·정확한 독립 main3개 build PASS | **go_mapping1행·전체258/3,362** | `e480edcc`·`ea80c826`·`86d9781f` push 완료. 당시 다음 owned 목록은 위 단위에서 완료 |
 | Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
 | Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |
