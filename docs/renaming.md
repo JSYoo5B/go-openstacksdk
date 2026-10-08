@@ -52,3 +52,5 @@ SDK가 새 segmented upload용으로 만드는 prefix는 `.gophercloudsdk-upload
 라이선스 재검토에서 yaml.v2에 포함된 libyaml 포팅 코드 여덟 파일의 MIT 고지를 보완했습니다. upstream `LICENSE.libyaml` 원문과 Kirill Simonov의 저작권을 보존하며, 프로젝트의 Apache-2.0 조건과 적용 범위를 구분합니다. 라이선스 표의 SHA-256 10개를 확인했고, 실제 SDK와 테스트의 외부 Go 의존성은 고정된 Gophercloud·yaml.v2 두 모듈입니다.
 
 전체 `make check`는 43개 테스트 package·vet·API 판정·포맷 검사 모두 통과했습니다. 푸시한 `478f9b4feff6ea5b71a036a5db0c83aae45e8cbc`을 별도 Go 프로젝트에서 `GOWORK=off`·replace 없이 설치하고 문서의 설치·목록 main 2개를 빌드했습니다. 원격 Go source 2,044개가 검증한 로컬 소스와 같으며, 라이선스·고지 14개 파일도 byte-identical입니다. 원격 설치 버전은 `v0.0.0-20261008183000-478f9b4feff6`입니다.
+
+추가 재점검에서 기본 설치 명령이 libyaml MIT 고지 보완 전 revision을 가리키는 것을 확인해 `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`으로 갱신했습니다. 새 외부 프로젝트에서 [설치 안내](install.md)의 `go mod init`, `GOWORK=off go get`, `GOWORK=off go build -mod=readonly ./...` 명령과 정확한 main을 그대로 사용해 세 명령 모두 exit0을 확인했습니다. 소비자와 SDK에 replace가 없으며 라이선스·고지 14개 파일이 현재 트리와 byte-identical입니다. 원격 Go source 2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`도 기존 전체 43개 테스트 package 검사에 통과한 소스와 같습니다. 근거는 `/private/tmp/go-openstacksdk-naming-install-final-consumer.json`입니다. 인증·OpenStack 호출은 실행하지 않았습니다.
