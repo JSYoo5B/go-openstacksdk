@@ -4,9 +4,25 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance member owned 목록·검색](#glance-member-owned-목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance import 정보·기본 store owned records](#glance-import-정보기본-store-owned-records)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는269입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는270입니다.
+
+## Glance import 정보·기본 store owned records
+
+2026-10-09 핵심 user `get_import_info`를 owned Go mapping으로 닫아 **269→270(+1)**, 핵심195→196/2,292·Glance33→34/120입니다. 기본 `stores`도 구현했지만 같은 선언의 상세 admin/service 분기를 아직 닫지 않았으므로 unresolved를 유지합니다. [Python/Go 비교·정확한 독립 main](../image/v2/serviceinfo/records.md)은 legacy typed API와 새 모델·옵션의 사용 차이를 설명합니다.
+
+- Import: ID/query 없는 `/info/import` GET, 4필드 declared view, arbitrary nested dictionary와 nullable untyped id/name, ordered alias를 제공합니다. actual200..399의 빈/invalid JSON은 bare default Resource·Wire nil을 남기고 parsed nonobject·whole UTF-8 오류는 actual receipt를 보존합니다. 서버 computed location은 ignored Wire로 남습니다.
+- Store: 기본 `/info/stores`의 6필드 view와 canonical5개 Body 로컬 필터, unknown/remote default 입력의 encoding 전 무시, raw cap/limit hint·공통 generic pager·partial collector를 제공합니다. 명시 `"false"` default 문자열은 Python truthiness에 따라 true이고 properties 비object는 `{}`로 변환합니다. Store에는 alternate ID가 없으므로 name에서 id를 합성하지 않습니다.
+- Location/ownership: 모든 응답 channel은 독립 소유입니다. operation 시작 때 current location과 header/source/옵션을 캡처하고 endpoint/raw ResourceBase/provider/microversion/type/outer guard를 sticky하게 확인합니다. Store의 recognized Body 없는 row는 explicit wire location을 유지하고, Body가 하나라도 있으면 current location을 재계산합니다.
+- Paging/compatibility: nil/explicit0 limit, marker와 max-items hint, Source-falsey next와 versioned exact collection links·원본 row marker를 공통 처리합니다. 실제 discovery가 query를 무시해 같은 행을 반복하면 cycle guard가 partial 결과와 오류를 반환합니다. 기존 typed strict200 getter/list/detail과 native ImageImport API는 유지합니다. admin 상세 경로는 아직 owned API에 추가하지 않았습니다.
+- Test reuse: 기존 infoClient/infoTransport/infoBody/infoReader·Connection fixture, public Gophercloud testhelper·REST/fixedrequest·JSON descriptor/filter·CloudLocation을 사용했습니다. 새 HTTP 서버/fault engine0개이며 Close callback adapter만 추가했습니다.
+
+새15그룹146사례 + 기존78그룹410사례 = **집중 race93그룹556개 최종 leaf 사례**가 PASS했습니다. 전체 `make check` **43개 실제 test package**·vet/race 및 최종270 parity/progress/gofmt, 반복 생성 Go drift0, 가이드/설치 main2개 외부 local-consumer build가 통과했습니다. Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-{focused-initial.jsonl,focused-receipt.json,check.log,check-receipt.json,metadata.log,generation-repeat.log,local-consumer.json}`에 실행 근거가 있습니다. 실제 인증·OpenStack/Python runtime은 실행하지 않았습니다.
+
+다른548 reviews·catalog/pins/fingerprints 및 선택한 두 선언의17기존 계약·Go API를 원문까지 보존하고12계약을 추가했습니다. reviews550·go_mapping270·unresolved279·unsupported1·contracts3,508입니다. catalog unresolved3,091개에는 미검토2,812개가 포함합니다. Import의 no-argument named getter만 완료 판정했고 stores 상세·full mutable Resource/session/cache/discovery는 전체 목표에 남아 있습니다.
+
+`99cd9850`·`2545b808`·`a00b5144`를 작은 단위로 commit/push했습니다. 정확한 문서·판정 revision의 원격 설치·같은 main2개·Go SHA와 라이선스14개 byte equality를 이어서 검증합니다. 다음 핵심 user 후보는 실제 unresolved Image get/list/find3개와 common projector입니다. 고정 Proxy에 없는 tag get/list/find와 이미 완료한 namespace getter/list는 재집계하지 않습니다.
 
 ## Glance member owned 목록·검색 완료
 

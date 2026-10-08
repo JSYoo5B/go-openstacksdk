@@ -18000,7 +18000,19 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresPaginated",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresQuery",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithListStoresHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.ListStoreRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.AllStoreRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters"
       ],
       "contracts": [
         {
@@ -18080,35 +18092,80 @@
             "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRegistryAndNativeCompatibility",
             "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRejectsNativeGetAndCanonicalModelDrift"
           ]
+        },
+        {
+          "behavior": "Owned basic StoreRecord adds the six-field declared view. Body id/name/description are nullable untyped values, is_default uses nullable Python truthiness including nonempty false string, properties is a dict descriptor and name never synthesizes absent id. Ordered aliases/duplicate keys and raw precision are preserved beside independent Wire/Envelope/Header/status.",
+          "tests": [
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsProjectionAndOwnedReceipts",
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsDescriptorsAliasesAndLocations"
+          ]
+        },
+        {
+          "behavior": "Basic /info/stores forwards limit/marker and applies canonical id/name/description/is_default/properties filters locally after descriptor conversion. Unknown and remote default filter keys are ignored before encoding; recursive dictionary subset and exact JSON semantic comparisons reuse the shared selector.",
+          "tests": [
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsCanonicalFiltersAndUnknownQueryPolicy"
+          ]
+        },
+        {
+          "behavior": "Nil limit is omitted, explicit zero is preserved, positive raw cap can supply a limit hint and raw rows are capped before filtering. Shared guarded pagination supports collection links, Source-falsey next, exact /v2/info/stores alias, initial-limit marker fallback and partial All. Repeated full discovery pages stop at a cycle error rather than looping indefinitely.",
+          "tests": [
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsSourcePagingAndRawCaps"
+          ]
+        },
+        {
+          "behavior": "Lazy/reusable options capture maps/pointers/bytes and Source before callbacks/current location. Without recognized Body attributes explicit row computed location survives; any recognized Body recomputes current location. Captured client/target/outer guard faults stay sticky through read/Close and yields.",
+          "tests": [
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsLazyRepeatedCapturedOptions",
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsDescriptorsAliasesAndLocations",
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsBodyFailuresAndStickySourceGuards"
+          ]
+        },
+        {
+          "behavior": "Actual 200..399 pages require whole UTF-8 JSON and mandatory stores envelopes with object/array rows. Consumed constructor binding collisions, malformed rows and accepted IO/shape/continuation faults remain errors with full original page evidence; unused rows are skipped by early break/cap.",
+          "tests": [
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsEnvelopeStatusesAndConstructorFailures",
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsBodyFailuresAndStickySourceGuards"
+          ]
+        },
+        {
+          "behavior": "Both Connection entries share the native service client/live auth/current location. The owned basic method does not select detail routes or implement local role gates; existing typed strict200 list/detail APIs remain unchanged and fully callable while owned detail is pending the admin stage.",
+          "tests": [
+            "connection_image_serviceinfo_records_test.go:TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient",
+            "image/v2/serviceinfo/store_records_test.go:TestStoreRecordsPreflightAndLegacyDetailCompatibility"
+          ]
         }
       ],
       "documentation": [
         "image/v2/serviceinfo/README.md",
         "image/v2/README.md",
-        "image/README.md"
+        "image/README.md",
+        "image/v2/serviceinfo/records.md"
       ],
       "differences": [
-        "Go uses canonical default/read-only optional flags with lexical true/false strings; Python bool(\"false\") isTrue. Detail type/read-only/weight are official-wire convenience fields absent from pinned Python Store descriptors. Store envelope must be array, unlike Python singleton coercion.",
-        "Go wire-query extension sends exact raw query and rejects localcontrol aliases. Pinned Python only transposes limit/marker, applies recognized Body attribute/properties subset filters locally and discards unknown keys; these filters/classification are not implemented.",
-        "Go continues only advertised links bounded to captured prefix/selected collection and unchanged initial nonpagination query; MaxItems is local with no wire limit hint or synthetic next marker. Pinned Python genericResource list emits a limit hint and performs limit-based marker fallback even though actual Glance discovery ignores limit/marker. Go deliberately avoids repeated stores and false cycles; Python broader version-relative link normalization also remains different.",
-        "Go returns owned Metadata raw JSON/Header/actualstatus and uses exact canonical UTF8/schema decoding. Pinned Python mutable Resource descriptors may discard unknown fields and apply broader bool/dict coercion; Python response translation accepts status<400 and Import fetch swallows some ValueError instead of returning accepted decode proof.",
-        "Go freezes source origin/prefix/header/provider with live original auth, guarded native retry body ownership and original200 status. Configured same-scope redirect and native rejected/reauth policies remain; native reauth fields must be inspected through the wrapper because it has no Unwrap. These bounded policies do not reproduce arbitrary Python session/adapter semantics."
+        "The existing ten strict typed ListStores/AllStores contracts above remain unchanged. ListStoreRecords/AllStoreRecords add only the pinned basic declared view, local filters and inherited pagination; partial All results are retained.",
+        "Pinned Proxy.stores forwards query kwargs and details=True selects /info/stores/detail. The owned basic method currently has no Details option, so this declaration remains unresolved until the admin/service detail branch is implemented.",
+        "Go exact JSON comparisons distinguish bool/number and avoid Python binary float rounding. Whole UTF-8/protected headers/safe query text/fixed route links/cycle checks are explicit bounds; whitespace-only markers and control characters are rejected.",
+        "Mutable cached Resource/session/discovery lifecycle remains a separate whole-SDK objective. Actual Glance can ignore pagination query and deployment permissions depend on server policy; local HTTP proof does not establish live cloud support."
       ],
       "remaining": [
-        "Python local Body/properties filters, unknown query classification, arbitrary base_path override and broader version-root continuation normalization remain partial. Optional Go wire limit does not guarantee server-side pagination.",
-        "Mutable Python Resource/descriptor/default/dirty/cache/adapter/session behavior, object overloads, base_path/microversion overrides and complete response/exception/coercion parity remain unresolved.",
-        "No automatic discovery gate/cache, Store Resources/Find/CRUD/Wait, info/usage, image mutation wiring or capability inference. Local fixtures establish request/model/error contracts, not real cloud feature support or server permissions."
+        "Owned StoreRecord list for stores(details=True) at /info/stores/detail is pending core admin/service stage. Basic records are implemented and tested but the entire named stores declaration is not complete.",
+        "Full mutable Resource/cache/adapter/session and arbitrary controls remain tracked by the whole-SDK objective; authenticated deployment/controller/permission behavior was not executed."
       ]
     },
     {
       "operation": "python:image/v2/get_import_info",
       "source_fingerprint": "50c8388297968f76e73638e180bacefdf57accd8f06b4bb7f7ea5ce4863bf372",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.New",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfo",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithGetImportInfoHeader"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithGetImportInfoHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.API.GetImportInfoRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithImportRecordHeaders"
       ],
       "contracts": [
         {
@@ -18166,24 +18223,61 @@
             "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRegistryAndNativeCompatibility",
             "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRejectsNativeGetAndCanonicalModelDrift"
           ]
+        },
+        {
+          "behavior": "Owned ImportRecord adds the declared four-field view id/name/import_methods/location. Inherited id/name are nullable untyped JSON with no alternate ID; the dict descriptor preserves arbitrary nested objects and raw precision, maps nonnull nonobjects to {}, and retains null defaults. Ordered canonical/remote aliases and duplicate first-position/last-value handling match the pinned collector.",
+          "tests": [
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordDictionaryAliasesAndDefaults"
+          ]
+        },
+        {
+          "behavior": "ID-free query-free GET /info/import accepts actual 200..399. Empty or invalid JSON syntax yields bare declared defaults and Wire nil; valid parsed nonobjects and invalid whole UTF-8 fail with actual proof. Unknown/self/response computed location remain passive Wire and do not enter Body projection.",
+          "tests": [
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordAcceptedToleranceAndRejectedNative",
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordProjectionAndOwnedReceipts"
+          ]
+        },
+        {
+          "behavior": "Resource, Wire, Envelope, Header and status are independently owned. Location is captured before option callbacks, ignores response computed location and remains fixed; header helper inputs and callback configurations snapshot independently with whole-options replacement and last-wins merges.",
+          "tests": [
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordProjectionAndOwnedReceipts",
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordLocationAndConcreteOptionSnapshots"
+          ]
+        },
+        {
+          "behavior": "Original API/client/provider/endpoint/raw ResourceBase/microversion/type and outer operation guards stay sticky through options and read/Close. Accepted body faults retain actual receipt and original causes without replay; rejected native errors preserve native policy and do not fabricate a successful record.",
+          "tests": [
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordBodyFailuresAndStickySourceGuards",
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordAcceptedToleranceAndRejectedNative"
+          ]
+        },
+        {
+          "behavior": "Invalid context/source/header/option input fails before HTTP and Source is validated before callbacks. Legacy strict200 GetImportInfo and the native ImageImport callable/model stay unchanged beside the new owned dictionary projection.",
+          "tests": [
+            "image/v2/serviceinfo/import_record_test.go:TestImportInfoRecordPreflightAndLegacyABI",
+            "internal/cmd/sdkgen/glance_serviceinfo_test.go:TestGlanceServiceInfoRegistryAndNativeCompatibility"
+          ]
+        },
+        {
+          "behavior": "Both Connection Image and ImageV2 supply the same native service client, live provider authentication and captured current location to ServiceInfo. Owned import and basic stores preserve separate response proof channels across calls and pages without an extra discovery gate.",
+          "tests": [
+            "connection_image_serviceinfo_records_test.go:TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient"
+          ]
         }
       ],
       "documentation": [
         "image/v2/serviceinfo/README.md",
         "image/v2/README.md",
-        "image/README.md"
+        "image/README.md",
+        "image/v2/serviceinfo/records.md"
       ],
       "differences": [
-        "Go optional ImportMethods and exact string Value distinguish missing/null/empty and retain unknown raw root/nested values. Pinned Python dictionary descriptor coercion/mutable fetchedResource and cache/session semantics differ; alternate envelopes are never automatically unwrapped.",
-        "Native ImageImport.Get already implements /info/import. ServiceInfo adds owned actualstatus/header/raw/optional evidence without replacing that native API or adding a new upstream operation.",
-        "Go returns owned Metadata raw JSON/Header/actualstatus and uses exact canonical UTF8/schema decoding. Pinned Python mutable Resource descriptors may discard unknown fields and apply broader bool/dict coercion; Python response translation accepts status<400 and Import fetch swallows some ValueError instead of returning accepted decode proof.",
-        "Go freezes source origin/prefix/header/provider with live original auth, guarded native retry body ownership and original200 status. Configured same-scope redirect and native rejected/reauth policies remain; native reauth fields must be inspected through the wrapper because it has no Unwrap. These bounded policies do not reproduce arbitrary Python session/adapter semantics."
+        "The existing seven strict typed GetImportInfo contracts above remain unchanged; GetImportInfoRecord provides the pinned dictionary/default/fetch translation without replacing native ImageImport.Get.",
+        "Go returns an independent read-only ImportRecord and concrete header helpers rather than mutable Python cached Resource identity. These helpers and explicit CloudLocation injection are Go extensions; no ID/Name/Resource/query/body is required by the pinned no-argument singleton proxy.",
+        "Actual 200..399, whole UTF-8, protected headers, exact JSON precision and fixed-route sticky guards are Go bounds; Python JSON parser/nonfinite and binary float corner behavior may differ. Physical Close faults are errors and native rejected IO policy remains unchanged.",
+        "Full Resource/session/cache/discovery lifecycle remains a separate whole-SDK objective. Source inspection and local HTTP tests do not establish authenticated cloud availability or deployment permission."
       ],
-      "remaining": [
-        "Python cached mutable Import Resource, negotiated microversion/session policy and broader fetch translation/coercion remain unresolved. Query/body/ID/Name/Resource overload are not added to this read-only singleton.",
-        "Mutable Python Resource/descriptor/default/dirty/cache/adapter/session behavior, object overloads, base_path/microversion overrides and complete response/exception/coercion parity remain unresolved.",
-        "No automatic discovery gate/cache, Store Resources/Find/CRUD/Wait, info/usage, image mutation wiring or capability inference. Local fixtures establish request/model/error contracts, not real cloud feature support or server permissions."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/add_tag",

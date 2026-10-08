@@ -10,7 +10,15 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance member owned 목록·검색2개, 전체267→269(+2)·핵심193→195/2,292·Glance31→33/120.** `ListImageMemberRecords/AllImageMemberRecords`가 9필드 declared Resource·실제 Wire·현재 location·공통 페이지 순회와 부분 수집을 제공합니다. `FindImageMemberRecord`는 seeded GET 후 clean native400/403/404에서 같은 목록을 사용해 정확한 ID/name과 중복을 검사합니다. 기존 finite typed 목록·literal Find·native scope는 유지합니다. [Python/Go 비교·독립 main](../image/member-records.md), [검증 기록](sdk-support-ledger.md#glance-member-owned-목록검색-완료)을 추가했습니다.
+**최신 API 완료 (2026-10-09): 핵심 user Glance import 정보1개, 전체269→270(+1)·핵심195→196/2,292·Glance33→34/120.** `GetImportInfoRecord`가 id/name/import_methods/location의 4필드 declared Resource·임의 dictionary 변환·actual200..399 fetch를 제공합니다. 기본 `ListStoreRecords/AllStoreRecords`도 6필드 view·로컬 필터·공통 페이지 순회·부분 결과까지 구현했습니다. 상세 `stores(details=True)`가 admin 단계에 남아 있으므로 stores 전체 선언은 unresolved로 유지하고 다시 세지 않습니다. [Python/Go 비교·독립 main](../image/v2/serviceinfo/records.md), [검증 기록](sdk-support-ledger.md#glance-import-정보기본-store-owned-records)을 추가했습니다.
+
+새 **15그룹146사례**와 기존78그룹410사례를 합친 **집중 race93그룹556사례**, 전체 vet·race **43개 실제 test package**, 최종270 parity·progress·gofmt와 반복 생성 Go drift0가 PASS했습니다. discovery/설치 main **2개**도 별도 외부 module local-replace build가 통과했습니다. 기존 serviceinfo·Connection fixture와 공개 Gophercloud helper를 재사용했으며 새 서버/fault engine은0개입니다. Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews와 선택한 두 선언의 기존17계약·API를 보존하고12계약을 추가했습니다.
+
+모델/getter `99cd9850`·기본 목록 `2545b808`·Connection `a00b5144`를 별도 commit/push했습니다. 실제 Glance는 paging query를 무시할 수 있어 무옵션 목록은 보통 한 번 읽으며, 명시한 positive limit의 Source marker fallback이 같은 목록을 반복하면 Go는 cycle 오류와 partial 결과로 종료합니다. legacy typed strict200 getter/list/detail은 유지합니다. `/private/tmp/go-openstacksdk-serviceinfo-records-check-receipt.json`에 최종 근거를 기록했으며 정확한 문서·판정 revision의 원격 설치를 이어서 확인합니다.
+
+**다음 작업:** 핵심 user의 실제 unresolved `get_image`·`images`·`find_image`3개를 공통 Image projector 위에서 검토·구현합니다. 고정 Source의 Body62개·inherited id/tags·unknown properties packing·formatter 변환을 기존 source capture/REST/FindIdentity/fixture와 연결합니다. 존재하지 않는 tag getter/find 선언을 새 완료로 세거나 이미 완료한 namespace getter/list를 재집계하지 않습니다. Store 상세와 metadata 쓰기는 핵심 admin에 유지하며 전체 SDK 목표는 active입니다.
+
+**직전 API 완료 (2026-10-09): 핵심 user Glance member owned 목록·검색2개, 전체267→269(+2)·핵심193→195/2,292·Glance31→33/120.** `ListImageMemberRecords/AllImageMemberRecords`가 9필드 declared Resource·실제 Wire·현재 location·공통 페이지 순회와 부분 수집을 제공합니다. `FindImageMemberRecord`는 seeded GET 후 clean native400/403/404에서 같은 목록을 사용해 정확한 ID/name과 중복을 검사합니다. 기존 finite typed 목록·literal Find·native scope는 유지합니다. [Python/Go 비교·독립 main](../image/member-records.md), [검증 기록](sdk-support-ledger.md#glance-member-owned-목록검색-완료)을 추가했습니다.
 
 새 **16그룹180사례**와 기존190그룹713사례(Cinder 공통 수정 회귀2사례 추가)를 검증한 **집중 race206그룹893사례**가 PASS했습니다. 전체 vet·race **43개 실제 test package**, 최종269 parity·progress·gofmt, 반복 생성 Go drift0와 정확한 member/설치 main **2개**의 외부 local-replace build가 통과했습니다. Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews와 두 선언의 기존14계약을 보존하고12계약을 추가했습니다. 실제 인증·OpenStack/Python runtime 및 전체 mutable Resource/session 완료는 주장하지 않습니다.
 
@@ -18,7 +26,7 @@
 
 정확한 문서·판정 revision `0647ce86adc0e5f0cdbfbe8f3dc7c100c7655433`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008190535-0647ce86adc0`·get/build exit0이며 member/설치 main **2개**를 빌드했습니다. 원격 Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`가 최종 집중/전체 gate의 소스와 같고, 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
-**진행 중:** Glance `get_import_info`·기본 `stores`의 owned view·Source 기본값·페이지 순회 구현입니다. 고정 server controller의 두 기본 경로는 별도 admin policy를 호출하지 않지만 `stores(details=True)`는 admin 또는 service role·project scope를 요구하므로 핵심 admin에 둡니다. 단일 stores 선언은 상세 분기까지 닫기 전 unresolved를 유지하며 기존 getter/schema를 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)를 기록했고 전체 API 목표는 active입니다.
+**당시 진행 단위:** Glance `get_import_info`·기본 `stores`의 owned view·Source 기본값·페이지 순회 구현이었으며 위 최신 단위에서 getter와 기본 목록을 완료했습니다. 고정 server controller의 두 기본 경로는 별도 admin policy를 호출하지 않지만 `stores(details=True)`는 admin 또는 service role·project scope를 요구하므로 핵심 admin에 둡니다. 단일 stores 선언은 상세 분기까지 닫기 전 unresolved를 유지하며 기존 getter/schema를 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)를 기록했고 전체 API 목표는 active입니다.
 
 **직전 API 완료 (2026-10-09): 핵심 user Glance object·namespace owned 목록2개, 전체265→267(+2)·핵심191→193/2,292·Glance29→31/120.** `ListRecords/AllRecords`가 object9필드·namespace13필드의 declared Resource, 실제 Wire/page receipt, 기본값·descriptor 변환·현재 location·공통 페이지 순회와 부분 결과를 제공합니다. namespace의 nil/0 limit 구분과 정확한 `/v2/` collection alias를 추가했고, 공통 응답 읽기 직후 guard를 검사하여 Close 복원 전에 실패를 보존합니다. 기존 typed List/All의 strict200 계약은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-object-namespace-record-lists.md), [검증 기록](sdk-support-ledger.md#glance-objectnamespace-owned-목록-완료)을 추가했습니다.
 
@@ -174,11 +182,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 269 (8.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 270 (8.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,092 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,091 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 550 | 아직 개별 기록 없는 선언 2,812 |
-| 기록한 부분·전체 계약 | 3,496 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,508 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -229,12 +237,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 195 / 2,292 | 8.5% | 181 | 1,915 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 196 / 2,292 | 8.6% | 180 | 1,915 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 269 / 3,362 | 8.0% | 280 | 2,812 | 1 |
+| 전체 | 270 / 3,362 | 8.0% | 279 | 2,812 | 1 |
 
 **핵심 서비스**
 
@@ -244,7 +252,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 33 / 120 | 46 | 41 | 0 |
+| Image / Glance | 34 / 120 | 45 | 41 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -359,7 +367,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance import 정보·기본 store owned records | pinned Source·server 기본/detail 정책 검토 완료 | Import4·Store6 view와 shared reader/pager 구현 중; 상세는 admin 후순위 | 기존 serviceinfo/REST/Connection fixture 재사용하여 테스트 작성 중 | Python 비교·standalone main 작성 중 | 두 선언 unresolved 유지; 전체269/3,362 | user 기본 목록 진행; 상세 미완료 stores 선언 승격하지 않음 |
+| Glance import 정보·기본 store owned records | pinned Source·server 기본/detail 정책 검토 완료 | **Import4·Store6 owned view·기본 목록·필터·Connection 완료**; 상세는 admin 후순위 | 새15그룹146·집중93그룹556·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **import go_mapping1행·전체270/3,362**; stores는 상세 미완료 unresolved | 구현99cd9850·2545b808·a00b5144 push 완료; 정확한 원격 설치 검증 진행 |
 | Glance member owned 목록·검색 | 고정 Source·reader 기본 정책·alias/seed/GET fallback 검토 완료 | **owned 9필드 List/All·GET-first Find 완료** | 새16그룹180·집중206그룹893·Cinder 회귀2사례·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체269/3,362** | 구현5커밋·문서de9f98fa·판정0647ce86 push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |
 | Glance object·namespace owned 목록 | pinned descriptor·public kwargs·generic pagination 검토 완료 | **두 leaf의 owned Record/ListRecords 완료** | 새34그룹272사례·집중176그룹2,194·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체267/3,362** | 코드/테스트7개 commit 49869890~760f546a·문서/판정73f54853 push 완료; 원격 main2개 build·Go SHA/라이선스13개 일치 |
 | Glance object owned 생성·수정·개별/전체 삭제 | 고정 Source7 Body·fresh update·Resource reuse·bulk delete 초기 검토; 기본 정책 admin | 핵심 admin 순서 대기 | 기존 property/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 네 선언 unresolved 유지 | 핵심 user 완료 뒤 구현 |
