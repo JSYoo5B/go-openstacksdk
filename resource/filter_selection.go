@@ -3,6 +3,7 @@ package resource
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 )
@@ -105,4 +106,34 @@ func (s *FilterSelection) OriginalQuery() (url.Values, error) {
 		query[name] = values
 	}
 	return query, nil
+}
+
+// PrepareFilterSelectionGuarded checks operation ownership around every option
+// and the complete selection. A failed observation prevents later callbacks
+// from restoring state and hiding that failure. Existing unguarded selections
+// retain their behavior when no ownership guard is required.
+func PrepareFilterSelectionGuarded(descriptor *FilterDescriptor, check func() error, options ...ListOption) (*FilterSelection, error) {
+	if check == nil {
+		return PrepareFilterSelection(descriptor, options...)
+	}
+	if err := check(); err != nil {
+		return nil, err
+	}
+	guarded := make([]ListOption, len(options))
+	for index, option := range options {
+		if option == nil {
+			continue
+		}
+		guarded[index] = func(config *listOptions) error {
+			if err := check(); err != nil {
+				return err
+			}
+			return errors.Join(option(config), check())
+		}
+	}
+	selection, err := PrepareFilterSelection(descriptor, guarded...)
+	if err = errors.Join(err, check()); err != nil {
+		return nil, err
+	}
+	return selection, nil
 }
