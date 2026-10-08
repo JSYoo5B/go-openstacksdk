@@ -5,8 +5,10 @@ import (
 	"net/http"
 )
 
-// Acknowledgement records an actual DELETE 204 independently of response
-// handling errors. Name is nil for DeleteAll; a handled 404 has no result.
+// Acknowledgement records an actual DELETE response independently of handling
+// errors. Name is nil for a collection deletion. Legacy Delete/DeleteAll return
+// only actual204 receipts; owned DeleteRecord also retains handled404 evidence,
+// and both owned methods retain actual200..399 receipts.
 type Acknowledgement struct {
 	Namespace  string
 	Name       *string
