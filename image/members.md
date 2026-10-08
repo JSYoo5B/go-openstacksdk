@@ -1,5 +1,7 @@
 # 이미지 공유 멤버
 
+Source Member view·일반 페이지 순회·GET400/403/404 이후 목록 검색은 별도 `ListImageMemberRecords/AllImageMemberRecords/FindImageMemberRecord`로 제공합니다. [레코드 목록·검색 비교와 독립 main](member-records.md)에 concrete 옵션·9필드 Resource·실제 Wire·중복·부분 오류를 설명합니다. 아래 기존 typed 목록·직접 Find 계약은 유지합니다.
+
 `image.Service`의 멤버 workflow는 모든 호출에 부모 이미지 `resource.Ref`를 요구합니다. 이미지 ID는 직접 사용하고 명시적인 `resource.Name`만 기존 exact-name resolver로 찾습니다. 멤버는 프로젝트의 literal ID 문자열이며 Name 검색·프로젝트 조회·Member 객체에서 부모 복구를 하지 않습니다.
 
 | 호출 | 고정 요청 | 정상 응답 |

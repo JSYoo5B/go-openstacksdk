@@ -187,6 +187,8 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 
 `service.AddImageMember/GetImageMember/UpdateImageMember/RemoveImageMember/FindImageMember/ListImageMembers/AllImageMembers`는 부모 이미지 Ref와 멤버 ID를 명시해 사용합니다. [멤버 사용법](members.md)에 직접 ID 조회·미존재 기본값·local MaxItems·timestamp 문자열과 기존 `API.Members.InImage`의 차이를 설명합니다.
 
+`service.ListImageMemberRecords/AllImageMemberRecords/FindImageMemberRecord`는 Member의9필드 declared Resource·실제 Wire, 일반 페이지 순회와 ID/name 검색 fallback·중복 판정을 제공합니다. [레코드 목록·검색의 Python/Go 비교와 독립 main](member-records.md)에 무옵션 기본값·concrete Go 확장·부분 결과·직접 GET seed를 설명합니다.
+
 `service.API.MetadefNamespaces.Create/Get/Update/Delete`는 literal namespace 이름을 사용하고 `List/All`은 서버가 광고한 다음 페이지를 순회합니다. [Namespace 사용법](v2/metadefnamespaces/README.md)에 생략한 PUT 필드의 초기화·rename·`limit=0`·일반 헤더와 raw 응답을 설명합니다.
 
 `service.API.MetadefObjects.InNamespace(ctx, namespace)`는 HTTP 없이 namespace와 서비스 대상을 고정합니다. 범위의 `Create/Get/Update/Delete/DeleteAll/List/All`과 [Object 사용법](v2/metadefobjects/README.md)에 nested raw property·생략/빈 값·PUT 교체·유한 목록·삭제 기본값을 설명합니다.
