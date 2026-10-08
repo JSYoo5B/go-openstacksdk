@@ -14,9 +14,9 @@ import (
     "time"
 
     "github.com/gophercloud/gophercloud/v2"
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func detachDefault(ctx context.Context, conn *sdk.Connection, serverID, volumeID string) (*blockstorage.DetachVolumeResult, error) {

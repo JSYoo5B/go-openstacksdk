@@ -32,7 +32,7 @@ func (p *preparedCreateObject) planSegments(ctx context.Context, result *CreateO
 	if err = joinMetadataErrors(err, p.note(ctx)); err != nil {
 		return nil, err
 	}
-	result.SegmentPrefix = p.metadata.object + "/.gophercloudsdk-upload-" + hex.EncodeToString(entropy[:]) + "/"
+	result.SegmentPrefix = p.metadata.object + "/.go-openstacksdk-upload-" + hex.EncodeToString(entropy[:]) + "/"
 	width := len(strconv.FormatInt(count-1, 10))
 	if width < 6 {
 		width = 6

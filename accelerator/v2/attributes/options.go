@@ -2,7 +2,7 @@ package attributes
 
 import (
 	"encoding/json"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CreateOpts creates one attribute. DeployableID is the numeric database ID,

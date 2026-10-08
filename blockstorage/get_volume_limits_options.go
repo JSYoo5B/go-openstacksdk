@@ -2,8 +2,8 @@ package blockstorage
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlimits"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlimits"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // GetVolumeLimitsRequest optionally selects another project by exact name/ID.

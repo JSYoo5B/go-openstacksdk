@@ -4,7 +4,7 @@
 
 ## openstacksdk 대응
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.orchestration.stacks()` | `service.Stacks.Resources().List(ctx)` |
 | `find_stack(name, ignore_missing=False)` | `Resources().Find(ctx, resource.Name(name))` |

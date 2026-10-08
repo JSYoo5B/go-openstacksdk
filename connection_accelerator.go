@@ -1,8 +1,8 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
-	accelerator "github.com/JSYoo5B/gophercloudsdk/accelerator/v2"
+	accelerator "github.com/JSYoo5B/go-openstacksdk/accelerator/v2"
 	"github.com/gophercloud/gophercloud/v2"
 	"strings"
 )

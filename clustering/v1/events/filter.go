@@ -1,6 +1,6 @@
 package events
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 
 // These are the pinned Event Body fields and their Python attribute aliases.
 var filterSpec = senlin.BodyFilterSpec{

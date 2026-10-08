@@ -2,13 +2,13 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/apiversions"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/buildinfo"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/resourcetypes"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackevents"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackresources"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
-	resource6 "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacktemplates"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/apiversions"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/buildinfo"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/resourcetypes"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacktemplates"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

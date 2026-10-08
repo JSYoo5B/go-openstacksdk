@@ -12,7 +12,7 @@ import (
     "context"
     "fmt"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
 )
 
 func main() {

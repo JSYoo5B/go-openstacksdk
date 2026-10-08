@@ -6,11 +6,11 @@ import (
 	"iter"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
-	"github.com/JSYoo5B/gophercloudsdk/internal/masakari"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/go-openstacksdk/internal/masakari"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

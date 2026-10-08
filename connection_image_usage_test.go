@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 )
 
 func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {

@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 func (c *Connection) DeleteUnattachedFloatingIPs(ctx context.Context, options ...compute.FloatingIPDeleteOption) (*compute.DeleteUnattachedFloatingIPsResult, error) {

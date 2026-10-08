@@ -1,4 +1,4 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // DeleteVolume prepares original callbacks once before selecting cached Cinder

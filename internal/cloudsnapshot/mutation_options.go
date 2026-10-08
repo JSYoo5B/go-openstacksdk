@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // MutationWaitOptions keeps omission distinct from an explicit zero timeout.

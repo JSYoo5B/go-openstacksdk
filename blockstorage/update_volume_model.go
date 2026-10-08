@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cindervolume"
-	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cindervolume"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Canonicalize known raw attributes in actual JSON member order. This retains

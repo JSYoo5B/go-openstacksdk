@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestImageUploadOptionsFactoriesAndSnapshots(t *testing.T) {

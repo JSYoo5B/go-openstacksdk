@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 func volumeMutationSuccessCodes() []int {

@@ -1,10 +1,10 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
-	blocklimits "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits"
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/limits"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	blocklimits "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/limits"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ProjectLimits resolves a Nova limits project once and fixes its tenant query.

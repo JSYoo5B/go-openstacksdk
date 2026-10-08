@@ -24,8 +24,8 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
 )
 
 type TagEvidence struct {

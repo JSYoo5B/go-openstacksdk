@@ -110,7 +110,7 @@ def main():
             operation["kind"] = "proxy"
             models = {resource.split(".")[-1] for resource in operation["resources"]}
             family = SERVICES.get(service, service)
-            operation["candidates"] = [binding["package"] for binding in bindings if (binding.get("model") in models or binding.get("upstream_model") in models) and binding["package"].startswith(f"github.com/JSYoo5B/gophercloudsdk/{family}/{version}/")]
+            operation["candidates"] = [binding["package"] for binding in bindings if (binding.get("model") in models or binding.get("upstream_model") in models) and binding["package"].startswith(f"github.com/JSYoo5B/go-openstacksdk/{family}/{version}/")]
             operation["review"] = "pending"
         name = service + "/" + version + ".json"
         write(args.output / name, {"revision": revision, "operations": operations})

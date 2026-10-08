@@ -2,7 +2,7 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/baremetalintrospection/v1/introspection"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -7,10 +7,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	infraquotas "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	infraquotas "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )

@@ -1,11 +1,11 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
 )
 
 // CreateVolumeBackup prepares original options and validates literal input

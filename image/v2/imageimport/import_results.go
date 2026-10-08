@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // ImportResult records the actual asynchronous import acknowledgement. A 202

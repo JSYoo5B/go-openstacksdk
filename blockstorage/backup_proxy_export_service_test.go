@@ -10,10 +10,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	blockstoragev3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
-	backupsv3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	blockstoragev3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
+	backupsv3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

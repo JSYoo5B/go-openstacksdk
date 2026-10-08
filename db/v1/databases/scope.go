@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/db/v1/instances"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/db/v1/databases"
 	"github.com/gophercloud/gophercloud/v2/pagination"

@@ -1,14 +1,20 @@
-# gophercloudsdk
+# go-openstacksdk
+
+An independent high-level Go SDK for OpenStack.
+
+OpenStack 및 Gophercloud의 공식 프로젝트가 아니며, 해당 프로젝트의 승인·후원을 주장하지 않습니다.
 
 Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사용 방식을 제공하는 Go SDK 프로젝트입니다. 애플리케이션이 기본값, 이름 조회, 페이지네이션, 상태 대기, 요청 builder를 반복해서 구현하지 않도록 하는 것이 목적입니다.
 
-현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 경로는 `github.com/JSYoo5B/gophercloudsdk`입니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
+현재는 **개발 중**입니다. 고정한 Gophercloud의 공개 API 호출은 제공하며, openstacksdk 수준의 리소스·복합 작업 계층을 확장하고 있습니다. Go 1.25 이상과 Gophercloud v2.15.0을 사용합니다. 모듈 경로는 `github.com/JSYoo5B/go-openstacksdk`입니다. 옆 디렉토리의 개발 브랜치에 의존하는 `replace`는 사용하지 않습니다.
 
 [구현 순서와 단계별 현황](docs/implementation-plan.md)은 **핵심 user API → 핵심 admin API → 매니지드 user API → 매니지드 admin API** 순으로 작업을 배치하고 소스 검토·구현·테스트·문서·최종 판정·커밋과 push를 구분합니다. 전체 API의 지원 범위와 완료 기준은 [지원 판정대장](docs/sdk-support-ledger.md)에서 확인합니다.
 
 **현재 SDK 완료 수와 진행 중인 작업:** [자동 집계·현재 단계](docs/implementation-plan.md#현재-집계와-진행-중인-작업). 아래의 Gophercloud 공개 연산 수는 고정 transport 목록이며, SDK 완료 수는 위 링크의 연산별 판정으로 확인합니다.
 
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
+
+[이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.
 
 [Keypair 목록·검색](compute/keypairs-list-find.md)은 SDK가 필터·페이지 순회·owner를 유지하는 검색 fallback과 nullable Resource·실제 응답을 처리합니다.
 
@@ -23,7 +29,7 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 ## 디렉토리와 지원 범위
 
 ```text
-gophercloudsdk/
+go-openstacksdk/
 ├── connection*.go           # 인증, 설정, 24개 서비스 접근과 캐시
 ├── accelerator/             # SDK 소유 Cyborg v2 모델·transport
 ├── clustering/              # SDK 소유 Senlin v1 profile·policy·cluster·node·receiver·action
@@ -226,7 +232,7 @@ Heat는 `orchestration.Stacks.InStack(ctx, ref)` 또는 이름·ID가 모두 있
 
 openstacksdk는 `Connection`에서 서비스 Proxy에 접근합니다. 이 프로젝트는 Go에서 오류와 context를 명시하도록 서비스 접근을 메서드로 제공합니다. 리소스 연산은 `Servers`, `Networks` 등의 typed collection에 모읍니다. [openstacksdk 사용 계층](https://docs.openstack.org/openstacksdk/latest/user/)
 
-| 작업 | openstacksdk | gophercloudsdk |
+| 작업 | openstacksdk | go-openstacksdk |
 |---|---|---|
 | 연결 | `openstack.connect(cloud="dev")` | `sdk.Connect(ctx, sdk.WithCloud("dev"))` |
 | 서비스 접근 | `conn.compute` | `conn.Compute(ctx)` → `*compute.Service, error` |
@@ -275,9 +281,9 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {
@@ -504,3 +510,7 @@ Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션�
 [독립 Floating IP 생성](compute/floating-ip-create.md)은 가용 IP를 재사용하지 않고 새 allocation을 생성합니다. SDK가 Neutron/Nova·port 우선·optional server/NAT·공개 Get 대기·wait timeout 정리를 처리하며, 접수된 응답과 compatibility/wait/cleanup 부분 결과를 보존합니다.
 
 [미연결 Floating IP 일괄 정리](compute/floating-ip-unattached-delete.md)는 Neutron 전체 목록을 확보한 뒤 port가 비어 있는 항목을 순차 삭제합니다. 개별 false는 계속 처리하고 오류는 중단하며 SDK 소유 옵션·한 deadline·항목별 부분 결과를 제공합니다.
+
+## License
+
+프로젝트 코드는 [Apache-2.0](LICENSE)을 적용합니다. 제3자 코드와 데이터에는 원래 라이선스가 함께 적용되며, [NOTICE](NOTICE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [라이선스·출처 안내](docs/licensing.md)에 범위와 고지를 기록합니다.

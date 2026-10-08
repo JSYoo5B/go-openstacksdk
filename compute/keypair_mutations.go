@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // The cloud convenience creates a name and only a truthy public key. The

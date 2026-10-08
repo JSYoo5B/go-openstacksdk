@@ -1,14 +1,14 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	"io"
 	"net/http"

@@ -13,7 +13,7 @@ Gophercloud **v2.15.0**에서 서비스 클라이언트를 받는 공개 함수 
 ```go
 import (
     "context"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 )
 
 func example(ctx context.Context, api *ports.API) error {

@@ -3,8 +3,8 @@ package servers
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/servicewait"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/servicewait"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func (a *API) waitResources() *resource.Collection[Server] {

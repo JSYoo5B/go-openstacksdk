@@ -1,11 +1,11 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 )
 
 func TestCachedManualServicesRespectCanceledContext(t *testing.T) {

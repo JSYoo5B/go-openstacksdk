@@ -1,10 +1,10 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"os"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 func configuredServerAddresses(settings, client map[string]any) (compute.ServerAddressPolicy, error) {

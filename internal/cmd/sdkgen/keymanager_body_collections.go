@@ -70,7 +70,7 @@ func rawBodyNativePage(pkg *types.Package, model types.Type, pageName, extractor
 // Secret and Container use the same native builder and raw-record bridge.
 // Their strict schemas, source hashes and selectors remain resource-specific.
 func emitKeyManagerBodyRecordAdapter(e *emitter, plan *collectionPlan, selector string) {
-	e.use("github.com/JSYoo5B/gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use("maps")
 	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){return %s(record,key)},\n", plan.modelName, selector)
 	e.printf("IterateBodyControlled:func(ctx context.Context,q url.Values,control resource.ListControl)iter.Seq2[*resource.BodyRecord[%s],error]{\n", plan.modelName)
@@ -79,7 +79,7 @@ func emitKeyManagerBodyRecordAdapter(e *emitter, plan *collectionPlan, selector 
 }
 
 func emitKeyManagerBodyFilterList(e *emitter, plan *collectionPlan, envelope, extractor string) {
-	e.use("github.com/JSYoo5B/gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
 	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)

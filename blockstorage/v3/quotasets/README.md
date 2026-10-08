@@ -14,7 +14,7 @@
 
 ```go
 // context.Context ctx와 Cinder v3 *gophercloud.ServiceClient volumeClient를
-// 사용하는 함수 안에서. resource/quotasets는 gophercloudsdk 패키지입니다.
+// 사용하는 함수 안에서. resource/quotasets는 go-openstacksdk 패키지입니다.
 api := quotasets.New(volumeClient)
 scope, err := api.InProject(ctx, resource.ID("project-id"))
 if err != nil { return err }

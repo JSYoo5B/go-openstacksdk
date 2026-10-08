@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 )
 
 // GetVolumeTypeAccess resolves an exact Type through cached Cinder v3, then

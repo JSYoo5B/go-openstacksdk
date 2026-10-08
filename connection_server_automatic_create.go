@@ -1,10 +1,10 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 	"errors"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 // CreateWithAutomaticFloatingIP discovers Compute lazily, then delegates all

@@ -19,7 +19,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 )
 
 func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.Time, version string) error {

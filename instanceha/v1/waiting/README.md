@@ -41,7 +41,7 @@ notification = conn.instance_ha.wait_for_status(
 ```
 
 ```go
-// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서
+// context.Context ctx, *openstack.Connection conn을 사용하는 함수 안에서
 service, err := conn.InstanceHAV1(ctx)
 if err != nil { return err }
 notification, err := service.Notifications.WaitForStatus(ctx,
@@ -79,7 +79,7 @@ if err := service.Segments.WaitForDelete(ctx, ref,
     resource.WithPollInterval(time.Second)); err != nil { return err }
 ```
 
-예제에서 `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `fmt`와 `time`은 표준 라이브러리입니다.
+예제에서 `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`, `fmt`와 `time`은 표준 라이브러리입니다.
 뒤의 옵션이 SDK 기본값을 덮어씁니다. `WithUnlimitedWait()`는 SDK timeout을 없애며 parent
 context의 deadline과 취소는 항상 적용합니다. `WithProgressCallback`은 비종결 조회에서
 동기 호출하고 context 취소가 발생하면 다음 GET을 수행하지 않습니다. 현재 네 모델에는

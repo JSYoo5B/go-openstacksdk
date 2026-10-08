@@ -14,14 +14,14 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage/metadata"
-	snapshots2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
-	volumes2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/volumes"
-	snapshots3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
-	volumes3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	snapshots2 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
+	volumes2 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes"
+	snapshots3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	volumes3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

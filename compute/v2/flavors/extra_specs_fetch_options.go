@@ -1,8 +1,8 @@
 package flavors
 
 import (
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // FlavorExtraSpecsOpts supplies an owned read policy. Nil Microversion keeps

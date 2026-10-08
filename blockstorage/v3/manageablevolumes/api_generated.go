@@ -3,7 +3,7 @@ package manageablevolumes
 
 import (
 	context "context"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/manageablevolumes"
 	volumes "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"

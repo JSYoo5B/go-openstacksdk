@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )

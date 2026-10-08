@@ -20,9 +20,9 @@ import (
     "errors"
     "fmt"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func showPhase(name string, phase *objects.ObjectCreatePhaseResult) {
@@ -159,7 +159,7 @@ stale 비교는 available local digest 하나 이상이 match하고 모든 avail
 
 file/Reader의 segment size 기본 요청은 1GiB이며 fresh capability의 max-first/min-second 선택과 clean404/412 fallback maximum 2684354561을 사용합니다. explicit0은 유지하고 음수는 input 읽기 전에 거부합니다. empty file은 selected0에도 ordinary PUT이며 nonempty file의 selected size가 0이면 capability 증거와 오류를 반환합니다. file size가 selected size 이하이면 ordinary PUT입니다. 더 크면 기본 SLO, `UseSLO=false`이면 DLO를 사용합니다. false는 작은 file을 강제로 segmented upload하지 않습니다. [기존 capability 계약](../info.md)을 따릅니다.
 
-segmented upload는 object 아래의 unique `.gophercloudsdk-upload-<generation>/` prefix에 저장하고 이를 결과에 반환합니다. index는 최소 6자리이며 필요한 폭을 모두 동일하게 사용해 순서를 유지합니다. 고정 5 workers, segment 최대 2 logical rounds, manifest 최대 3 logical attempts를 사용하며 native physical retry는 별도로 기록합니다. 모든 physical attempt는 처음부터 읽는 독립적인 owned view를 받습니다. accepted 응답의 body·Close·context·source 처리 실패는 재전송하지 않습니다. 성공한 재시도 이전의 오류는 attempt 기록에 남으며 최종 workflow가 성공하면 returned error는 nil입니다. terminal·cleanup·local Close 오류는 반환 오류에 함께 유지합니다.
+segmented upload는 object 아래의 unique `.go-openstacksdk-upload-<generation>/` prefix에 저장하고 이를 결과에 반환합니다. index는 최소 6자리이며 필요한 폭을 모두 동일하게 사용해 순서를 유지합니다. 고정 5 workers, segment 최대 2 logical rounds, manifest 최대 3 logical attempts를 사용하며 native physical retry는 별도로 기록합니다. 모든 physical attempt는 처음부터 읽는 독립적인 owned view를 받습니다. accepted 응답의 body·Close·context·source 처리 실패는 재전송하지 않습니다. 성공한 재시도 이전의 오류는 attempt 기록에 남으며 최종 workflow가 성공하면 returned error는 nil입니다. terminal·cleanup·local Close 오류는 반환 오류에 함께 유지합니다.
 
 각 segment PUT은 native retry/redirect alias 이후에도 `If-None-Match: *`를 유지합니다. clean201만 observed created ownership을 줍니다. collision412는 ownership이 없으며 segment202는 실제 acknowledgement와 `ObjectCreateUnconfirmedSegmentError`를 반환하고 manifest publication을 중단합니다. segment ETag는 optional이며 하나의 surrounding quote pair를 logical 값에서 제거합니다. SLO는 literal `/container/segment-name`, exact size와 observed ETag의 ordered JSON array를 보내지만 logical caller Content-Type을 유지하거나 server guess에 맡깁니다. whole-file MD5 또는 manifest JSON MD5를 request ETag로 보내지 않습니다. DLO는 empty body와 이 generation의 slash-terminated prefix를 한 번 quote한 `X-Object-Manifest`를 보냅니다.
 

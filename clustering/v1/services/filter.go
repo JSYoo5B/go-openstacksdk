@@ -1,6 +1,6 @@
 package services
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 
 func bodyFilterSpec() senlin.BodyFilterSpec {
 	return senlin.BodyFilterSpec{Namespace: "services.local_filters", Fields: map[string]string{

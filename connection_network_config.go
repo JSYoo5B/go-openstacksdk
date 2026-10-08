@@ -1,10 +1,10 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 )
 
 // Called after the existing default-network parser validates list/row/flag

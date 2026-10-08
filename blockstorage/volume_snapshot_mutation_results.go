@@ -1,6 +1,6 @@
 package blockstorage
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+import "github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
 
 // VolumeSnapshotMutationPage owns an actual mutation or polling response.
 type VolumeSnapshotMutationPage = cloudsnapshot.MutationPage

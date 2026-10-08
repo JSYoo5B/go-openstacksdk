@@ -8,11 +8,11 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 )
 
-func discoverUsage(ctx context.Context, conn *gophercloudsdk.Connection) (*serviceinfo.UsageInfo, error) {
+func discoverUsage(ctx context.Context, conn *openstack.Connection) (*serviceinfo.UsageInfo, error) {
     service, err := conn.ImageV2(ctx)
     if err != nil {
         return nil, err

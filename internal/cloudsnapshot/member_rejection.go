@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // Gophercloud discards Read/Close errors on unexpected status responses.

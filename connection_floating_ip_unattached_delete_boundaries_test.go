@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestFloatingIPUnattachedPreflightAndCapturedSource(t *testing.T) {

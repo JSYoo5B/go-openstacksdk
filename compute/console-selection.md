@@ -2,7 +2,7 @@
 
 `conn.Compute(ctx)`의 `CreateConsole`은 고정 openstacksdk의 `conn.compute.create_console`에 대응합니다. 서버가 광고한 microversion 범위와 선택된 버전으로 modern remote-console 또는 legacy action을 선택합니다. 호출자는 서버 ID·console type·선택 protocol을 전달합니다.
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.compute.create_console(server, "novnc")` | `service.CreateConsole(ctx, serverID, "novnc")` |
 | `console_protocol="vnc"` | `compute.WithConsoleProtocol("vnc")` |
@@ -30,8 +30,8 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 func main() {

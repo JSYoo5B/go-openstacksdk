@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Nova availability filters raw rows before normalizing every selected row.

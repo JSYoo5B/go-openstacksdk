@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins(t *testing.T) {

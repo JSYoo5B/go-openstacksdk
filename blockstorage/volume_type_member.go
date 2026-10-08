@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func (p *preparedVolumeTypes) member(ctx context.Context, id string, query url.Values, result *GetVolumeTypeResult) (record *volumeTypeIdentityRecord, err error) {

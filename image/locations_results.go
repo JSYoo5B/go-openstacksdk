@@ -3,7 +3,7 @@ package image
 import (
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // AddImageLocationResult retains an actual 202 acknowledgement, including

@@ -3,8 +3,8 @@ package users
 
 import (
 	context "context"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	groups "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/groups"
 	projects "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/projects"

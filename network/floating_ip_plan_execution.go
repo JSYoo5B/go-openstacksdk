@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	floatingipapi "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func (f *FloatingIPs) executeFloatingIPPlan(ctx context.Context, selection FloatingIPSelection, policy EnsureFloatingIPPolicy, guard func(context.Context) error) (*FloatingIPAssignment, error) {

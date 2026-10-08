@@ -121,7 +121,7 @@ func snapshotMetadataActualNative(t *testing.T) (generator, types.Importer) {
 	t.Helper()
 	path := os.Getenv("GOPHERCLOUD_METADATA")
 	if path == "" {
-		path = "/private/tmp/gophercloudsdk-upstream-packages.json"
+		path = "/private/tmp/go-openstacksdk-upstream-packages.json"
 	}
 	file, err := os.Open(path)
 	if os.IsNotExist(err) {
@@ -272,7 +272,7 @@ func TestSnapshotMetadataExtractorEmitsSafeMapAndPreservesBuildersAndInventoryPo
 				t.Fatalf("unsafe/misleading %q: %s", forbidden, out)
 			}
 		}
-		if e.imports["github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata"] != "snapshotmetadata" || operationReturnPolicy(fn) != "extract" {
+		if e.imports["github.com/JSYoo5B/go-openstacksdk/internal/snapshotmetadata"] != "snapshotmetadata" || operationReturnPolicy(fn) != "extract" {
 			t.Fatal("safe helper import/return policy missing")
 		}
 		// The optional inventory marker describes this correction without changing

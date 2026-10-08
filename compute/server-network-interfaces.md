@@ -4,7 +4,7 @@
 
 ## Python과 Go의 호출 대응
 
-| 고정 openstacksdk | gophercloudsdk |
+| 고정 openstacksdk | go-openstacksdk |
 |---|---|
 | cloud `network="private"` | `compute.WithNetworks(resource.Name("private"))` |
 | cloud `nics=[{"net-id": id}]` | `ServerNetworkInterface{Network: resource.ID(id)}` |
@@ -52,10 +52,10 @@ import (
 	"log"
 	"time"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {

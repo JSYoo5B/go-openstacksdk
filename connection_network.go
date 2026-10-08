@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Invoked during Create, after the Compute constructor releases c.mu.

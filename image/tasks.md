@@ -20,7 +20,7 @@ import (
     "context"
     "encoding/json"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image"
 )
 
 func createTask(ctx context.Context, svc *image.Service) (*image.TaskInfo, error) {

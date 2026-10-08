@@ -29,8 +29,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listNetworks(ctx context.Context, client *gophercloud.ServiceClient) ([]*networks.Network, error) {
@@ -73,8 +73,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func firstPageNetworks(ctx context.Context, client *gophercloud.ServiceClient) ([]*networks.Network, error) {

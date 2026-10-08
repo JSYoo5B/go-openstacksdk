@@ -37,7 +37,7 @@ func secretPythonBodyFields() map[string]pythonFilterField {
 
 func secretPythonFilterMetadataValid(manifest *pythonFilterManifest) bool {
 	return manifest != nil && manifest.SchemaVersion == 1 && manifest.SourcePin == pythonFilterPin &&
-		manifest.Resource == secretPythonResource && manifest.SDKPackage == "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets" && manifest.BasePath == "/secrets" && manifest.Envelope == "secrets" &&
+		manifest.Resource == secretPythonResource && manifest.SDKPackage == "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets" && manifest.BasePath == "/secrets" && manifest.Envelope == "secrets" &&
 		manifest.Counts.CanonicalQuery == 12 && manifest.Counts.AcceptedQuery == 13 && manifest.Counts.LocalBody == 12 &&
 		reflect.DeepEqual(manifest.Query, secretPythonQueryFields()) && reflect.DeepEqual(manifest.Body, secretPythonBodyFields()) &&
 		len(manifest.QueryFormats) == 0 && len(manifest.URI) == 0 && manifest.UnknownFilters == "discard" && manifest.QueryCollision == "canonical_client_name_wins" &&

@@ -1,13 +1,13 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	v3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	"net/http"

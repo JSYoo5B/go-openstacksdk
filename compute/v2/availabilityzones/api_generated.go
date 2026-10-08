@@ -3,7 +3,7 @@ package availabilityzones
 
 import (
 	context "context"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/availabilityzones"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"

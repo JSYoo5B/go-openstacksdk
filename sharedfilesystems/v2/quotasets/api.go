@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/manilaversion"
-	"github.com/JSYoo5B/gophercloudsdk/internal/project"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaversion"
+	"github.com/JSYoo5B/go-openstacksdk/internal/project"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

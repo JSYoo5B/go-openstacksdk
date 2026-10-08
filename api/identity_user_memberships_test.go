@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/identity/v2/extensions"
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/groups"
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

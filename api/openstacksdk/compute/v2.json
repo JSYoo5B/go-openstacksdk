@@ -70,7 +70,7 @@
       "id": "compute/v2/find_flavor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -91,7 +91,7 @@
       "id": "compute/v2/create_flavor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -117,7 +117,7 @@
       "id": "compute/v2/delete_flavor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -142,7 +142,7 @@
       "id": "compute/v2/update_flavor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -168,7 +168,7 @@
       "id": "compute/v2/get_flavor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -199,7 +199,7 @@
       "id": "compute/v2/flavors",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -224,7 +224,7 @@
       "id": "compute/v2/flavor_add_tenant_access",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -249,7 +249,7 @@
       "id": "compute/v2/flavor_remove_tenant_access",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -270,7 +270,7 @@
       "id": "compute/v2/get_flavor_access",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -291,7 +291,7 @@
       "id": "compute/v2/fetch_flavor_extra_specs",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -316,7 +316,7 @@
       "id": "compute/v2/create_flavor_extra_specs",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -341,7 +341,7 @@
       "id": "compute/v2/get_flavor_extra_specs_property",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -370,7 +370,7 @@
       "id": "compute/v2/update_flavor_extra_specs_property",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -401,7 +401,7 @@
       "id": "compute/v2/delete_flavor_extra_specs_property",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
       ],
       "review": "pending"
     },
@@ -441,7 +441,7 @@
       "id": "compute/v2/aggregates",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -462,7 +462,7 @@
       "id": "compute/v2/get_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -488,7 +488,7 @@
       "id": "compute/v2/find_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -509,7 +509,7 @@
       "id": "compute/v2/create_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -534,7 +534,7 @@
       "id": "compute/v2/update_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -560,7 +560,7 @@
       "id": "compute/v2/delete_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -585,7 +585,7 @@
       "id": "compute/v2/add_host_to_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -610,7 +610,7 @@
       "id": "compute/v2/remove_host_from_aggregate",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -641,7 +641,7 @@
       "id": "compute/v2/set_aggregate_metadata",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -666,7 +666,7 @@
       "id": "compute/v2/aggregate_precache_images",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
       ],
       "review": "pending"
     },
@@ -1007,7 +1007,7 @@
       "id": "compute/v2/create_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1038,7 +1038,7 @@
       "id": "compute/v2/delete_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1074,7 +1074,7 @@
       "id": "compute/v2/find_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1095,7 +1095,7 @@
       "id": "compute/v2/get_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1126,7 +1126,7 @@
       "id": "compute/v2/servers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1151,7 +1151,7 @@
       "id": "compute/v2/update_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1176,7 +1176,7 @@
       "id": "compute/v2/change_server_password",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1197,7 +1197,7 @@
       "id": "compute/v2/get_server_password",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1218,7 +1218,7 @@
       "id": "compute/v2/clear_server_password",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1243,7 +1243,7 @@
       "id": "compute/v2/reset_server_state",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1268,7 +1268,7 @@
       "id": "compute/v2/reboot_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1298,7 +1298,7 @@
       "id": "compute/v2/rebuild_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1325,8 +1325,8 @@
       "id": "compute/v2/resize_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1347,7 +1347,7 @@
       "id": "compute/v2/confirm_server_resize",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1368,7 +1368,7 @@
       "id": "compute/v2/revert_server_resize",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1409,7 +1409,7 @@
       "id": "compute/v2/create_server_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1453,7 +1453,7 @@
       "id": "compute/v2/backup_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1474,7 +1474,7 @@
       "id": "compute/v2/pause_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1495,7 +1495,7 @@
       "id": "compute/v2/unpause_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1516,7 +1516,7 @@
       "id": "compute/v2/suspend_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1537,7 +1537,7 @@
       "id": "compute/v2/resume_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1563,7 +1563,7 @@
       "id": "compute/v2/lock_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1584,7 +1584,7 @@
       "id": "compute/v2/unlock_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1616,7 +1616,7 @@
       "id": "compute/v2/rescue_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1637,7 +1637,7 @@
       "id": "compute/v2/unrescue_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1678,7 +1678,7 @@
       "id": "compute/v2/evacuate_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1699,7 +1699,7 @@
       "id": "compute/v2/start_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1720,7 +1720,7 @@
       "id": "compute/v2/stop_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1741,7 +1741,7 @@
       "id": "compute/v2/restore_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1762,7 +1762,7 @@
       "id": "compute/v2/shelve_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1783,7 +1783,7 @@
       "id": "compute/v2/shelve_offload_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1816,7 +1816,7 @@
       "id": "compute/v2/unshelve_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1837,7 +1837,7 @@
       "id": "compute/v2/trigger_server_crash_dump",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1862,7 +1862,7 @@
       "id": "compute/v2/add_tag_to_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1887,7 +1887,7 @@
       "id": "compute/v2/remove_tag_from_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1908,7 +1908,7 @@
       "id": "compute/v2/remove_tags_from_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1929,7 +1929,7 @@
       "id": "compute/v2/fetch_server_security_groups",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1955,8 +1955,8 @@
       "id": "compute/v2/add_security_group_to_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/secgroups",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -1982,8 +1982,8 @@
       "id": "compute/v2/remove_security_group_from_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/secgroups",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2010,7 +2010,7 @@
       "id": "compute/v2/add_fixed_ip_to_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2035,7 +2035,7 @@
       "id": "compute/v2/remove_fixed_ip_from_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2065,7 +2065,7 @@
       "id": "compute/v2/add_floating_ip_to_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2090,7 +2090,7 @@
       "id": "compute/v2/remove_floating_ip_from_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2117,7 +2117,7 @@
       "id": "compute/v2/create_server_interface",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2150,7 +2150,7 @@
       "id": "compute/v2/delete_server_interface",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2178,7 +2178,7 @@
       "id": "compute/v2/get_server_interface",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2205,7 +2205,7 @@
       "id": "compute/v2/server_interfaces",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2233,7 +2233,7 @@
       "id": "compute/v2/server_ips",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2274,7 +2274,7 @@
       "id": "compute/v2/fetch_server_metadata",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2296,7 +2296,7 @@
       "id": "compute/v2/get_server_metadata",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2321,7 +2321,7 @@
       "id": "compute/v2/set_server_metadata",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2347,7 +2347,7 @@
       "id": "compute/v2/delete_server_metadata",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2368,7 +2368,7 @@
       "id": "compute/v2/create_server_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
       ],
       "review": "pending"
     },
@@ -2394,7 +2394,7 @@
       "id": "compute/v2/delete_server_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
       ],
       "review": "pending"
     },
@@ -2425,7 +2425,7 @@
       "id": "compute/v2/find_server_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
       ],
       "review": "pending"
     },
@@ -2446,7 +2446,7 @@
       "id": "compute/v2/get_server_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
       ],
       "review": "pending"
     },
@@ -2472,7 +2472,7 @@
       "id": "compute/v2/server_groups",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
       ],
       "review": "pending"
     },
@@ -2498,7 +2498,7 @@
       "id": "compute/v2/hypervisors",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/hypervisors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
       ],
       "review": "pending"
     },
@@ -2529,7 +2529,7 @@
       "id": "compute/v2/find_hypervisor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/hypervisors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
       ],
       "review": "pending"
     },
@@ -2550,7 +2550,7 @@
       "id": "compute/v2/get_hypervisor",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/hypervisors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
       ],
       "review": "pending"
     },
@@ -2571,7 +2571,7 @@
       "id": "compute/v2/get_hypervisor_uptime",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/hypervisors"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
       ],
       "review": "pending"
     },
@@ -2797,8 +2797,8 @@
       "id": "compute/v2/create_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2835,8 +2835,8 @@
       "id": "compute/v2/update_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2869,8 +2869,8 @@
       "id": "compute/v2/delete_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2898,8 +2898,8 @@
       "id": "compute/v2/get_volume_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2926,8 +2926,8 @@
       "id": "compute/v2/volume_attachments",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
       ],
       "review": "pending"
     },
@@ -2953,7 +2953,7 @@
       "id": "compute/v2/migrate_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -2994,7 +2994,7 @@
       "id": "compute/v2/live_migrate_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3026,7 +3026,7 @@
       "id": "compute/v2/abort_server_migration",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3053,7 +3053,7 @@
       "id": "compute/v2/force_complete_server_migration",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3085,7 +3085,7 @@
       "id": "compute/v2/get_server_migration",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3108,7 +3108,7 @@
       "id": "compute/v2/server_migrations",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3149,7 +3149,7 @@
       "id": "compute/v2/get_server_diagnostics",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3239,7 +3239,7 @@
       "id": "compute/v2/create_server_remote_console",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3264,7 +3264,7 @@
       "id": "compute/v2/get_server_console_url",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3309,7 +3309,7 @@
       "id": "compute/v2/get_server_console_output",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3340,7 +3340,7 @@
       "id": "compute/v2/create_console",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3520,7 +3520,7 @@
       "id": "compute/v2/get_server_action",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3547,7 +3547,7 @@
       "id": "compute/v2/server_actions",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3593,7 +3593,7 @@
       "id": "compute/v2/wait_for_server",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3706,7 +3706,7 @@
       "id": "compute/v2/create_share_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3738,7 +3738,7 @@
       "id": "compute/v2/delete_share_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3765,7 +3765,7 @@
       "id": "compute/v2/get_share_attachment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     },
@@ -3792,7 +3792,7 @@
       "id": "compute/v2/share_attachments",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
       ],
       "review": "pending"
     }

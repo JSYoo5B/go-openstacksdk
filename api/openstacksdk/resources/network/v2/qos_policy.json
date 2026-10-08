@@ -200,7 +200,7 @@
   ],
   "resource": "openstack.network.v2.qos_policy.QoSPolicy",
   "schema_version": 1,
-  "sdk_package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies",
+  "sdk_package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies",
   "source_controls": {
     "proxy_list": [
       "resource_type",

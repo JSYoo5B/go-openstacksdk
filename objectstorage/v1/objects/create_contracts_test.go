@@ -21,8 +21,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -310,7 +310,7 @@ func TestCreateObjectContractsSLOAndDLOWire(t *testing.T) {
 			if err != nil || result == nil || result.Mode != mode || len(result.Segments) != 3 || result.Manifest == nil || result.Manifest.Acknowledgement.StatusCode != 202 || !result.ManifestAmbiguous || len(result.Cleanup) != 0 {
 				t.Fatalf("result=%+v err=%v", result, err)
 			}
-			if !regexp.MustCompile(`^` + regexp.QuoteMeta(key) + `/\.gophercloudsdk-upload-[0-9a-f]{32}/$`).MatchString(result.SegmentPrefix) {
+			if !regexp.MustCompile(`^` + regexp.QuoteMeta(key) + `/\.go-openstacksdk-upload-[0-9a-f]{32}/$`).MatchString(result.SegmentPrefix) {
 				t.Fatalf("prefix=%q", result.SegmentPrefix)
 			}
 			for i, segment := range result.Segments {

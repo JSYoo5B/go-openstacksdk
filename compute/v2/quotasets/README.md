@@ -18,7 +18,7 @@ Quota는 프로젝트 또는 프로젝트 내 사용자에 대한 limit 집합�
 
 ```go
 // context.Context ctx, Nova *gophercloud.ServiceClient computeClient을
-// 사용하는 함수 안에서. resource와 quotasets는 gophercloudsdk 패키지입니다.
+// 사용하는 함수 안에서. resource와 quotasets는 go-openstacksdk 패키지입니다.
 api := quotasets.New(computeClient)
 scope, err := api.InProject(ctx, resource.ID("project-id"))
 if err != nil { return err }

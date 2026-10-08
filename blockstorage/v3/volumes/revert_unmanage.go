@@ -3,7 +3,7 @@ package volumes
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 )
 
 // RevertVolumeToSnapshot takes an explicit volume ID and literal snapshot body

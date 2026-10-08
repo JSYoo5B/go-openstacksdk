@@ -29,8 +29,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listTrunks(ctx context.Context, client *gophercloud.ServiceClient) ([]*trunks.Trunk, error) {
@@ -72,8 +72,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func firstPageTrunks(ctx context.Context, client *gophercloud.ServiceClient) ([]*trunks.Trunk, error) {

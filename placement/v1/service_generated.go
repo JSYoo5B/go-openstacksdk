@@ -2,12 +2,12 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocationcandidates"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocations"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/placement/v1/traits"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/placement/v1/usages"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

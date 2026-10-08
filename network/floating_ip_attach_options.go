@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // AttachFloatingIPRequest selects an existing IP and a server. IP uses an

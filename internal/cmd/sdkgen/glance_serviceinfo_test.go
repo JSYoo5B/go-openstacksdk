@@ -13,7 +13,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	g, _ := snapshotMetadataActualNative(t)
 	g.root = t.TempDir()
 	for _, record := range sdkOwnedCollections {
-		if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo" {
+		if record.Package == "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo" {
 			g.collections = append(g.collections, record)
 		}
 	}
@@ -39,7 +39,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Count(string(registry), `"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"`) != 1 || strings.Count(string(registry), "ServiceInfo ") != 1 || strings.Count(string(registry), "ServiceInfo:") != 1 {
+	if strings.Count(string(registry), `"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"`) != 1 || strings.Count(string(registry), "ServiceInfo ") != 1 || strings.Count(string(registry), "ServiceInfo:") != 1 {
 		t.Fatalf("missing or duplicate aggregate: %s", registry)
 	}
 	docs, err := os.ReadFile(filepath.Join(g.root, "image/v2/README.md"))
@@ -57,7 +57,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	var records int
 	models := map[string]string{"Store": "list_only", "ImportInfo": "service_info", "UsageInfo": "service_info"}
 	for _, record := range g.collections {
-		if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo" {
+		if record.Package == "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo" {
 			records++
 			if record.Source != "sdk_owned" || record.Find || record.Delete || record.Wait || record.Scope != "" || record.Kind != models[record.Model] || models[record.Model] == "" {
 				t.Fatalf("invented discovery capability: %+v", record)

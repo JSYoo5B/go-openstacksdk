@@ -13,9 +13,9 @@ func TestGlanceMetadefPropertiesRegistryAndConcreteScope(t *testing.T) {
 	g.root = t.TempDir()
 	var properties int
 	for _, record := range sdkOwnedCollections {
-		if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties" {
+		if record.Package == "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties" {
 			properties++
-			if record.Source != "sdk_owned" || record.Model != "Property" || record.Kind != "scoped_definition" || !record.Delete || record.Find || record.Wait || record.Scope != "InNamespace" || record.Parent != "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces" {
+			if record.Source != "sdk_owned" || record.Model != "Property" || record.Kind != "scoped_definition" || !record.Delete || record.Find || record.Wait || record.Scope != "InNamespace" || record.Parent != "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces" {
 				t.Fatalf("invented property capability: %+v", record)
 			}
 			g.collections = append(g.collections, record)
@@ -45,7 +45,7 @@ func TestGlanceMetadefPropertiesRegistryAndConcreteScope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"`, "MetadefProperties ", "MetadefProperties:"} {
+	for _, want := range []string{`"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"`, "MetadefProperties ", "MetadefProperties:"} {
 		if strings.Count(string(registry), want) != 1 {
 			t.Fatalf("missing or duplicate property aggregate: %s", want)
 		}

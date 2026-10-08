@@ -2,9 +2,9 @@
 package v2
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

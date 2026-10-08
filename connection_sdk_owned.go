@@ -1,4 +1,4 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"net/url"

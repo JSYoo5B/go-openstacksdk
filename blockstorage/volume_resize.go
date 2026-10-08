@@ -3,7 +3,7 @@ package blockstorage
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

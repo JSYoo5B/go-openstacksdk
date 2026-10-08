@@ -20,8 +20,8 @@ import (
     "context"
     "encoding/json"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func updateQueuedImageExample(ctx context.Context, svc *image.Service, imageID, ownerID string) (*image.ImageInfo, error) {

@@ -18,7 +18,7 @@
       "id": "key_manager/v1/create_container",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -44,7 +44,7 @@
       "id": "key_manager/v1/delete_container",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -70,7 +70,7 @@
       "id": "key_manager/v1/find_container",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -91,7 +91,7 @@
       "id": "key_manager/v1/get_container",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -112,7 +112,7 @@
       "id": "key_manager/v1/containers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -137,7 +137,7 @@
       "id": "key_manager/v1/update_container",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
       ],
       "review": "pending"
     },
@@ -158,7 +158,7 @@
       "id": "key_manager/v1/create_order",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -184,7 +184,7 @@
       "id": "key_manager/v1/delete_order",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -210,7 +210,7 @@
       "id": "key_manager/v1/find_order",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -231,7 +231,7 @@
       "id": "key_manager/v1/get_order",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -252,7 +252,7 @@
       "id": "key_manager/v1/orders",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -277,7 +277,7 @@
       "id": "key_manager/v1/update_order",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
       ],
       "review": "pending"
     },
@@ -298,7 +298,7 @@
       "id": "key_manager/v1/create_secret",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -324,7 +324,7 @@
       "id": "key_manager/v1/delete_secret",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -350,7 +350,7 @@
       "id": "key_manager/v1/find_secret",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -371,7 +371,7 @@
       "id": "key_manager/v1/get_secret",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -392,7 +392,7 @@
       "id": "key_manager/v1/secrets",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -417,7 +417,7 @@
       "id": "key_manager/v1/update_secret",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -573,7 +573,7 @@
       "id": "key_manager/v1/get_secret_acl",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -600,7 +600,7 @@
       "id": "key_manager/v1/set_secret_acl",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -627,7 +627,7 @@
       "id": "key_manager/v1/update_secret_acl",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -655,7 +655,7 @@
       "id": "key_manager/v1/delete_secret_acl",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -682,7 +682,7 @@
       "id": "key_manager/v1/create_secret_consumer",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -715,7 +715,7 @@
       "id": "key_manager/v1/delete_secret_consumer",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },
@@ -742,7 +742,7 @@
       "id": "key_manager/v1/secret_consumers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
       ],
       "review": "pending"
     },

@@ -4,8 +4,8 @@ package nodegroups
 import (
 	context "context"
 	fmt "fmt"
-	clusters "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clusters"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	clusters "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

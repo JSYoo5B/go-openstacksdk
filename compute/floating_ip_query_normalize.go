@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // normalizeQueryNovaIP mirrors the pinned cloud dictionary normalizer without

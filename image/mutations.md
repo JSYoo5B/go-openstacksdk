@@ -17,8 +17,8 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type MutationProof struct {

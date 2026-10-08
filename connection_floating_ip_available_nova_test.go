@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestAvailableIPNovaRawFilterBeforeNormalization(t *testing.T) {

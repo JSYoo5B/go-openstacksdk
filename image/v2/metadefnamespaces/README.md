@@ -21,8 +21,8 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 )
 
 type NamespaceEvidence struct {
@@ -178,8 +178,8 @@ import (
     "context"
     "encoding/json"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 )
 
 func createNestedNamespace(ctx context.Context, service *image.Service, namespace string) (*metadefnamespaces.Namespace, error) {

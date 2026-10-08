@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // Pinned Backup._action explicitly selects3.64. Ordinary create, lookup and

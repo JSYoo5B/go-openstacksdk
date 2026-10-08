@@ -22,8 +22,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func fetchSecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
@@ -51,8 +51,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func fetchBinarySecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {

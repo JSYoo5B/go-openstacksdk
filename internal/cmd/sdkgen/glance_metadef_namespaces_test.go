@@ -13,7 +13,7 @@ func TestGlanceMetadefNamespacesRegistryAndConcretePolicy(t *testing.T) {
 	g.root = t.TempDir()
 	var namespaces int
 	for _, record := range sdkOwnedCollections {
-		if record.Package == "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces" {
+		if record.Package == "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces" {
 			namespaces++
 			if record.Source != "sdk_owned" || record.Model != "Namespace" || record.Kind != "named_resource" || !record.Delete || record.Find || record.Wait || record.Scope != "" || record.Parent != "" {
 				t.Fatalf("invented namespace capability: %+v", record)
@@ -45,7 +45,7 @@ func TestGlanceMetadefNamespacesRegistryAndConcretePolicy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"`, "MetadefNamespaces ", "MetadefNamespaces:"} {
+	for _, want := range []string{`"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"`, "MetadefNamespaces ", "MetadefNamespaces:"} {
 		if strings.Count(string(registry), want) != 1 {
 			t.Fatalf("missing or duplicate namespace aggregate: %s", want)
 		}

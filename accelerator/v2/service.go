@@ -2,11 +2,11 @@
 package accelerator
 
 import (
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests"
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/attributes"
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deployables"
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deviceprofiles"
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deployables"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

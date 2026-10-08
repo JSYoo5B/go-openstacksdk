@@ -11,11 +11,11 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 )
 
-func secretPayload(ctx context.Context, conn *gophercloudsdk.Connection, secretID string) ([]byte, error) {
+func secretPayload(ctx context.Context, conn *openstack.Connection, secretID string) ([]byte, error) {
     service, err := conn.KeyManagerV1(ctx)
     if err != nil {
         return nil, err

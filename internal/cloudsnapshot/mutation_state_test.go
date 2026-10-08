@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func snapshotMutationModelOverlay(t *testing.T, state *mutationState, raw string) {

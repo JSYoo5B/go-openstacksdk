@@ -1,4 +1,4 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"crypto/tls"
@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

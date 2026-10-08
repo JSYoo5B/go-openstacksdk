@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 )
 
 // CreatedImageResponse retains an actual accepted metadata-creation response.

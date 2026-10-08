@@ -7,7 +7,7 @@ import (
 	"net/netip"
 	"slices"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // FloatingIPAttachSelection exposes only value copies of the fixed targets.

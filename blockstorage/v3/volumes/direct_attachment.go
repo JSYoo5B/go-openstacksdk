@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 )
 
 type CinderVolumeAttachOpts = cinderaction.DirectAttachOptions

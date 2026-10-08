@@ -286,7 +286,7 @@ func TestOrderPythonFilterPinnedSourceRequiresDualFormatterDictAndInheritedDefau
 	}
 	source := os.Getenv("OPENSTACKSDK_SOURCE")
 	if source == "" {
-		source = "/private/tmp/gophercloudsdk-openstacksdk"
+		source = "/private/tmp/go-openstacksdk-openstacksdk"
 	}
 	if _, err := os.Stat(filepath.Join(source, "openstack/key_manager/v1/order.py")); err != nil {
 		t.Skip("audited source checkout unavailable")
@@ -391,7 +391,7 @@ func TestOrderRawPageDependencyLoaderPreservesExactNumbersAndOriginalRows(t *tes
 func TestOrderBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods(t *testing.T) {
 	path := os.Getenv("GOPHERCLOUD_METADATA")
 	if path == "" {
-		path = "/private/tmp/gophercloudsdk-upstream-packages.json"
+		path = "/private/tmp/go-openstacksdk-upstream-packages.json"
 	}
 	file, err := os.Open(path)
 	if os.IsNotExist(err) {

@@ -3,8 +3,8 @@ package image
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/servicewait"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/servicewait"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // WaitForState polls an SDK collection with Glance's exact ERROR failure

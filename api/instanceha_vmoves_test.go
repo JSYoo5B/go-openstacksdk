@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/vmoves"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 const vmoveUUID = "55555555-5555-4555-8555-555555555555"

@@ -13,13 +13,13 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
-	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
-	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/netip"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/project"
-	floatingipapi "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/project"
+	floatingipapi "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/v2/pagination"

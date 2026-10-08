@@ -2,10 +2,10 @@
 package v2
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/claims"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/messages"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/messaging/v2/claims"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/messaging/v2/messages"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

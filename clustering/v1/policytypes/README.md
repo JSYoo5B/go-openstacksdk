@@ -99,8 +99,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
 )
 
 func FilterPolicyTypes(ctx context.Context, conn *sdk.Connection, typeName string) error {

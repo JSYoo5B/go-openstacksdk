@@ -1,7 +1,7 @@
 package quotasets
 
 import (
-	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

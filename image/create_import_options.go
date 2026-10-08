@@ -8,9 +8,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata"
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // CreateImportMetadataOpts owns creation fields. Empty formats select

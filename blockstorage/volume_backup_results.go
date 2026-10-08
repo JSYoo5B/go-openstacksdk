@@ -1,6 +1,6 @@
 package blockstorage
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/cloudbackup"
+import "github.com/JSYoo5B/go-openstacksdk/internal/cloudbackup"
 
 // VolumeBackupsPage owns an actual admitted backup response.
 type VolumeBackupsPage = cloudbackup.Page

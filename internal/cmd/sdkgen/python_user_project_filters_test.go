@@ -27,9 +27,11 @@ func TestUserProjectPythonFilterManifestKeepsOwnedParentAndInheritedDescriptors(
 		t.Fatal("pinned UserProject descriptor differs", manifest)
 	}
 	for name, mutate := range map[string]func(*pythonFilterManifest){
-		"native-user-model":          func(m *pythonFilterManifest) { m.Resource = "openstack.identity.v3.user.User" },
-		"native-project-collection":  func(m *pythonFilterManifest) { m.BasePath = "/projects" },
-		"wrong-package":              func(m *pythonFilterManifest) { m.SDKPackage = "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects" },
+		"native-user-model":         func(m *pythonFilterManifest) { m.Resource = "openstack.identity.v3.user.User" },
+		"native-project-collection": func(m *pythonFilterManifest) { m.BasePath = "/projects" },
+		"wrong-package": func(m *pythonFilterManifest) {
+			m.SDKPackage = "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+		},
 		"parent-not-query":           func(m *pythonFilterManifest) { m.Query["user_id"] = "user_id" },
 		"parent-uri":                 func(m *pythonFilterManifest) { delete(m.URI, "user_id") },
 		"enabled-alias":              func(m *pythonFilterManifest) { m.Query["is_enabled"] = "is_enabled" },
@@ -60,7 +62,7 @@ func TestUserProjectPythonFilterVerificationReadsFreshSourceAndRejectsProofDrift
 	}
 	source := os.Getenv("OPENSTACKSDK_SOURCE")
 	if source == "" {
-		source = "/private/tmp/gophercloudsdk-openstacksdk-pin-zqsdOs"
+		source = "/private/tmp/go-openstacksdk-openstacksdk-pin-zqsdOs"
 	}
 	if _, err := os.Stat(filepath.Join(source, "openstack/identity/v3/project.py")); err != nil {
 		t.Skip("pinned Python source unavailable; pass OPENSTACKSDK_SOURCE")

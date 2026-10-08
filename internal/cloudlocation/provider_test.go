@@ -3,8 +3,8 @@ package cloudlocation_test
 import (
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	v2 "github.com/gophercloud/gophercloud/v2/openstack/identity/v2/tokens"
 	v3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"

@@ -4,7 +4,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 
 ## openstacksdk 대응
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.image.get_image(id)` | `service.Images.Get(ctx, id)` |
 | `conn.image.find_image(name_or_id, ignore_missing=False)` | `service.Images.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |

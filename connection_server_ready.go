@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 // GetActiveServer checks supplied metadata and keeps known branches free of

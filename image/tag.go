@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // AddTag adds one literal tag through Glance's dedicated endpoint. An ID needs

@@ -22,7 +22,7 @@ Gophercloud v2.15.0의 sharedfilesystems/v2 API를 하나의 인증된 서비스
 ## Go 사용
 
 ```go
-// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서
+// context.Context ctx, *openstack.Connection conn을 사용하는 함수 안에서
 service, err := conn.SharedFileSystemV2(ctx)
 if err != nil { return err }
 for value, err := range service.Shares.Resources.List(ctx) {
@@ -34,7 +34,7 @@ if err != nil { return err }
 _ = value
 ```
 
-예제의 `fmt`는 표준 라이브러리, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.
+예제의 `fmt`는 표준 라이브러리, `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`입니다. Find는 기본적으로 미존재를 오류로 처리합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. Delete의 기본값은 미존재 무시입니다.
 
 ## 리소스와 공통 정책
 

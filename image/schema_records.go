@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // GetSchemaRecord reads one fixed schema using its pinned Schema/MetadefSchema

@@ -2,19 +2,19 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/buildinfo"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterattributes"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/events"
-	resource6 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
-	resource7 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
-	resource8 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes"
-	resource9 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
-	resource10 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes"
-	resource11 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers"
-	resource12 "github.com/JSYoo5B/gophercloudsdk/clustering/v1/services"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/buildinfo"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusterattributes"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusterpolicies"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/events"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
+	resource7 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes"
+	resource11 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers"
+	resource12 "github.com/JSYoo5B/go-openstacksdk/clustering/v1/services"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

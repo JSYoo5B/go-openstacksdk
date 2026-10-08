@@ -7,7 +7,7 @@ go run ./internal/cmd/paritycheck
 go run ./internal/cmd/paritycheck -sync
 ```
 
-기본 명령은 두 고정 inventory, 전체 catalog와 수작업 판정이 일치하는지 확인합니다. `-sync`는 새 연산을 catalog에 추가하며 수작업 판정 파일을 변경하지 않습니다. 판정이 없는 연산은 `unresolved`입니다. 검토한 원본이 변경되거나 기존 연산이 사라졌으면 저장 전에 실패하고 기존 catalog를 유지합니다. 미검토 연산도 조용히 삭제하지 않습니다. 저장은 임시 파일을 작성한 뒤 rename하여 write 실패에도 기존 근거를 보존합니다. `-root /path/to/gophercloudsdk`로 다른 위치의 checkout을 검사할 수도 있습니다.
+기본 명령은 두 고정 inventory, 전체 catalog와 수작업 판정이 일치하는지 확인합니다. `-sync`는 새 연산을 catalog에 추가하며 수작업 판정 파일을 변경하지 않습니다. 판정이 없는 연산은 `unresolved`입니다. 검토한 원본이 변경되거나 기존 연산이 사라졌으면 저장 전에 실패하고 기존 catalog를 유지합니다. 미검토 연산도 조용히 삭제하지 않습니다. 저장은 임시 파일을 작성한 뒤 rename하여 write 실패에도 기존 근거를 보존합니다. `-root /path/to/go-openstacksdk`로 다른 위치의 checkout을 검사할 수도 있습니다.
 
 | 파일 | 역할 |
 |---|---|
@@ -25,7 +25,7 @@ ID는 `gophercloud:compute/v2/servers.GetPassword` 또는 `python:compute/v2/get
   "operation": "python:service/v1/get_resource",
   "source_fingerprint": "catalog에 기록된 SHA-256",
   "status": "go_mapping",
-  "go_api": ["github.com/JSYoo5B/gophercloudsdk/service/v1/resources.API.Get"],
+  "go_api": ["github.com/JSYoo5B/go-openstacksdk/service/v1/resources.API.Get"],
   "contracts": [{
     "behavior": "ID 조회, 응답 값과 HTTP 오류 보존",
     "tests": ["api/resource_contracts_test.go:TestResourceGet"]

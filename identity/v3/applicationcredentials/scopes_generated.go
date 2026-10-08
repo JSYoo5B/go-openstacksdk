@@ -4,8 +4,8 @@ package applicationcredentials
 import (
 	context "context"
 	fmt "fmt"
-	users "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	users "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

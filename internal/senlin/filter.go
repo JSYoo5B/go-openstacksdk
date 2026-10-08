@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 )
 
 // MatchFilters applies the Body-filter semantics of pinned Python Resource.list.

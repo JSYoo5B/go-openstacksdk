@@ -4,9 +4,9 @@ package servers
 import (
 	context "context"
 	fmt "fmt"
-	nativefind "github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	iter "iter"
 	maps "maps"

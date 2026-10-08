@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 const userGroupRecordKind = "identity.user_groups"

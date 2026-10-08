@@ -1,6 +1,6 @@
 package serviceinfo
 
-import "github.com/JSYoo5B/gophercloudsdk/request"
+import "github.com/JSYoo5B/go-openstacksdk/request"
 
 // GetUsageInfoOpts has no wire parameters. Usage belongs to the authenticated
 // project and is read without a body or a project selection query.

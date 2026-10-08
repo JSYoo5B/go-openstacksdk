@@ -6,8 +6,8 @@ import (
 	"iter"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/query"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/query"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	volumes "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/volumes"
 	servers "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"

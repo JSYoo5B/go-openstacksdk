@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes(t *testing.T) {

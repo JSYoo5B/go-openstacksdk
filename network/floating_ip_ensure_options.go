@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // EnsureFloatingIPRequest selects a server and optionally its external network.

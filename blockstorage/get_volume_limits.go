@@ -2,7 +2,7 @@ package blockstorage
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlimits"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlimits"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

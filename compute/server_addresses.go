@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 )
 
 // ServerAddress retains wire family, type and MAC, including missing-vs-empty

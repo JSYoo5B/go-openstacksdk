@@ -26,9 +26,9 @@ package example
 import (
     "context"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func UpdateScopedCluster(ctx context.Context, conn *sdk.Connection, collectionPath string) (*clusters.Cluster, error) {
@@ -48,9 +48,9 @@ package example
 import (
     "context"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func UpdateScopedNode(ctx context.Context, conn *sdk.Connection, collectionPath, nodeID string) (*nodes.Node, error) {

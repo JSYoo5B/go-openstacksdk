@@ -1,8 +1,8 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 // AvailableFloatingIP supplies lazy service discovery and configured source

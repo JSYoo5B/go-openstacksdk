@@ -4,8 +4,8 @@ package nodes
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type Node struct {

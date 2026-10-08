@@ -4,7 +4,7 @@
 
 ## openstacksdk 대응
 
-| openstacksdk / Heat 계약 | gophercloudsdk |
+| openstacksdk / Heat 계약 | go-openstacksdk |
 |---|---|
 | `conn.orchestration.resources(stack)` | `scope.List(ctx)` 또는 `scope.All(ctx)` |
 | name/id를 가진 Stack Resource | `ForStack(stacks.StackIdentity{Name: name, ID: id})` |

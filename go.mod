@@ -1,4 +1,4 @@
-module github.com/JSYoo5B/gophercloudsdk
+module github.com/JSYoo5B/go-openstacksdk
 
 go 1.25.0
 

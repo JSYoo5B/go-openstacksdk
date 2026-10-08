@@ -4,8 +4,8 @@ package clusters
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Cluster keeps the server identity independent of the requested route and

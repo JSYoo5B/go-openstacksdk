@@ -4,8 +4,8 @@ package portforwarding
 import (
 	context "context"
 	fmt "fmt"
-	floatingips "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	floatingips "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

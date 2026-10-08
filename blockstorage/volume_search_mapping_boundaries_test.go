@@ -3,8 +3,8 @@ package blockstorage_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"net/http"
 	"sync/atomic"
 	"testing"

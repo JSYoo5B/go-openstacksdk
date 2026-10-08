@@ -2,7 +2,7 @@ package cloudbackup
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

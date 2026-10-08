@@ -30,8 +30,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listSecurityGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*groups.SecGroup, error) {
@@ -73,8 +73,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func firstPageSecurityGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*groups.SecGroup, error) {

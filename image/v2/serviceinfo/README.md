@@ -12,11 +12,11 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 )
 
-func discoverStores(ctx context.Context, conn *gophercloudsdk.Connection) ([]*serviceinfo.Store, error) {
+func discoverStores(ctx context.Context, conn *openstack.Connection) ([]*serviceinfo.Store, error) {
     service, err := conn.ImageV2(ctx)
     if err != nil {
         return nil, err
@@ -54,8 +54,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/image"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
+    "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 )
 
 func discoverImportMethods(ctx context.Context, client *gophercloud.ServiceClient) (*serviceinfo.ImportInfo, error) {

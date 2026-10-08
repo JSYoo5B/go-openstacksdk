@@ -4,7 +4,7 @@ import (
 	"context"
 	"unicode/utf8"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func (s *Service) prepareImageTasks(ctx context.Context, ref resource.Ref, options []ListImageTasksOption) (*preparedTaskSource, string, ListImageTasksOpts, error) {

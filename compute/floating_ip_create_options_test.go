@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestFloatingIPCreateOptionsDefaultsBulkAndIgnoredSelectors(t *testing.T) {

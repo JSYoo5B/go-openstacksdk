@@ -39,7 +39,7 @@ func createAndDelete(ctx context.Context, client *gophercloud.ServiceClient) err
 }
 ```
 
-Go 예제의 import는 `context`, `time`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deviceprofiles`, `github.com/JSYoo5B/gophercloudsdk/resource`입니다. 기존 Connection에서는 `conn.Accelerator(ctx)`로 서비스 client를 선택한 후 `service.DeviceProfiles`를 사용해 같은 API에 접근할 수 있습니다.
+Go 예제의 import는 `context`, `time`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles`, `github.com/JSYoo5B/go-openstacksdk/resource`입니다. 기존 Connection에서는 `conn.Accelerator(ctx)`로 서비스 client를 선택한 후 `service.DeviceProfiles`를 사용해 같은 API에 접근할 수 있습니다.
 
 `Create`는 **profile 하나가 든 배열**을 POST하며 201 응답을 요구합니다. pinned Python `DeviceProfile._prepare_request_body`와 Cyborg controller 모두 이 형태를 사용하고, controller는 여러 profile을 담은 배열을 거절합니다. `CreateOpts`의 `Name`은 영문자·숫자·`-`·`_`를 허용하고 `Groups`는 하나 이상의 JSON object를 요구합니다. group의 resource class, trait와 accelerator 값 검증 및 키 정규화는 서버가 담당합니다. `UUID`·`Description`은 pointer로 생략과 명시적인 값을 구분하며, 빈 description은 그대로 전송합니다.
 

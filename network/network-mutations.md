@@ -6,7 +6,7 @@
 
 ## Python과 Go의 대응
 
-| 고정 openstacksdk cloud 호출 | gophercloudsdk |
+| 고정 openstacksdk cloud 호출 | go-openstacksdk |
 |---|---|
 | `conn.create_network("private")` | `service.CreateNetwork(ctx, network.CreateNetworkRequest{Name: "private"})` |
 | `admin_state_up=False` | `network.WithNetworkAdminStateUp(false)` |
@@ -58,9 +58,9 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/network"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/network"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {
@@ -134,7 +134,7 @@ updated, err := service.UpdateNetwork(ctx, resource.ID(id),
     network.WithNetworkDNSDomainValue(request.Null[string]()))
 ```
 
-이 짧은 예제에는 `github.com/JSYoo5B/gophercloudsdk/request` import가 필요합니다. 같은 typed 옵션으로 사용되지 않는 필드의 nullable 동작까지 자동 확장되지는 않습니다. Project ID는 URL 선택에 쓰이지 않는 body 값이므로 빈 문자열도 그대로 보존합니다. 옵션이 없으면 생략하며, 실제 owner 값과 권한은 Neutron이 검사합니다. Python MTU 검사는 코드에서 68을 기준으로 하며 IPv6 subnet에 필요한 추가 제약은 Neutron이 판단합니다.
+이 짧은 예제에는 `github.com/JSYoo5B/go-openstacksdk/request` import가 필요합니다. 같은 typed 옵션으로 사용되지 않는 필드의 nullable 동작까지 자동 확장되지는 않습니다. Project ID는 URL 선택에 쓰이지 않는 body 값이므로 빈 문자열도 그대로 보존합니다. 옵션이 없으면 생략하며, 실제 owner 값과 권한은 Neutron이 검사합니다. Python MTU 검사는 코드에서 68을 기준으로 하며 IPv6 subnet에 필요한 추가 제약은 Neutron이 판단합니다.
 
 ## Provider·AZ와 extension 값
 

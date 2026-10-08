@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 )
 
 // TempURLKeyResult retains only the metadata responses actually accepted.

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

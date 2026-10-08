@@ -212,7 +212,7 @@ func TestSDKDiscoveryHintsDoNotInvalidateSourceReviews(t *testing.T) {
 		t.Fatal(err)
 	}
 	op := inventory["operations"].([]any)[0].(map[string]any)
-	op["candidates"] = []any{"github.com/JSYoo5B/gophercloudsdk/service/new_candidate"}
+	op["candidates"] = []any{"github.com/JSYoo5B/go-openstacksdk/service/new_candidate"}
 	op["review"] = "pending"
 	putJSON(t, root, "api/openstacksdk/service/v1.json", inventory)
 	after, err := loadInventory(root)

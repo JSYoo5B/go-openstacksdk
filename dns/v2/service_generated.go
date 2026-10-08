@@ -2,12 +2,12 @@
 package v2
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/accept"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/request"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/accept"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/request"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/dns/v2/tsigkeys"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

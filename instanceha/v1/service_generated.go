@@ -2,10 +2,10 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/hosts"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/notifications"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/vmoves"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/hosts"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

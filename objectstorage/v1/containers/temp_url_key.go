@@ -3,8 +3,8 @@ package containers
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // SetTempURLKey acknowledges one metadata POST. Empty keys remove the selected

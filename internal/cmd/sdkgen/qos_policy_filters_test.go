@@ -293,7 +293,7 @@ func TestQoSPolicyPythonFilterPinnedSourceRequiresTagMROAliasAndListCoercionProo
 	}
 	source := os.Getenv("OPENSTACKSDK_SOURCE")
 	if source == "" {
-		source = "/private/tmp/gophercloudsdk-openstacksdk"
+		source = "/private/tmp/go-openstacksdk-openstacksdk"
 	}
 	if _, err := os.Stat(filepath.Join(source, "openstack/network/v2/qos_policy.py")); err != nil {
 		t.Skip("pinned source unavailable")
@@ -446,7 +446,7 @@ func TestQoSPolicyRawDependencyLoaderPreservesSliceDecoderNumbersAndNativeLinks(
 func TestQoSPolicyBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods(t *testing.T) {
 	path := os.Getenv("GOPHERCLOUD_METADATA")
 	if path == "" {
-		path = "/private/tmp/gophercloudsdk-upstream-packages.json"
+		path = "/private/tmp/go-openstacksdk-upstream-packages.json"
 	}
 	file, err := os.Open(path)
 	if os.IsNotExist(err) {

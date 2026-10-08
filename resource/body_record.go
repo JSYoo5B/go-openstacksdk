@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/gophercloud/gophercloud/v2/pagination"
 )
 

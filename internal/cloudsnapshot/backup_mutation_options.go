@@ -2,7 +2,7 @@ package cloudsnapshot
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Backup creation has fixed cloud arguments rather than caller-defined fields.

@@ -2,7 +2,7 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/container/v1/capsules"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/container/v1/capsules"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

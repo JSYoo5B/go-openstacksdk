@@ -4,8 +4,8 @@ package volumeattach
 import (
 	context "context"
 	fmt "fmt"
-	servers "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	servers "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

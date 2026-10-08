@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"unicode/utf8"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // AddImageLocation submits a literal URL and optional hash pair to Glance's

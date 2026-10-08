@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
 )
 
 // UploadVolumeToImage prepares originals once before selecting cached Cinder.

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // GetImagesSchema reads the fixed image collection schema once.

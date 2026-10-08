@@ -3,8 +3,8 @@ package clusters
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // ScaleInOpts and ScaleOutOpts preserve Python's default count:null request.

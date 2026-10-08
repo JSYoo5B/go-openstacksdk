@@ -58,15 +58,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
-	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
-	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 )
 
 func main() {
 	ctx := context.Background()
-	conn, err := gophercloudsdk.Connect(ctx)
+	conn, err := go-openstacksdk.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -11,12 +11,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
-	"github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

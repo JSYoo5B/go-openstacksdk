@@ -18,7 +18,7 @@
       "id": "network/v2/create_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -44,7 +44,7 @@
       "id": "network/v2/delete_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -74,7 +74,7 @@
       "id": "network/v2/find_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -100,7 +100,7 @@
       "id": "network/v2/get_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -121,7 +121,7 @@
       "id": "network/v2/address_groups",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -146,7 +146,7 @@
       "id": "network/v2/update_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -171,7 +171,7 @@
       "id": "network/v2/add_addresses_to_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -196,7 +196,7 @@
       "id": "network/v2/remove_addresses_from_address_group",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
       ],
       "review": "pending"
     },
@@ -217,7 +217,7 @@
       "id": "network/v2/create_address_scope",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -243,7 +243,7 @@
       "id": "network/v2/delete_address_scope",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -273,7 +273,7 @@
       "id": "network/v2/find_address_scope",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -299,7 +299,7 @@
       "id": "network/v2/get_address_scope",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -320,7 +320,7 @@
       "id": "network/v2/address_scopes",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -345,7 +345,7 @@
       "id": "network/v2/update_address_scope",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes"
       ],
       "review": "pending"
     },
@@ -366,7 +366,7 @@
       "id": "network/v2/agents",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -392,7 +392,7 @@
       "id": "network/v2/delete_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -418,7 +418,7 @@
       "id": "network/v2/get_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -443,7 +443,7 @@
       "id": "network/v2/update_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -469,7 +469,7 @@
       "id": "network/v2/dhcp_agent_hosting_networks",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -495,8 +495,8 @@
       "id": "network/v2/add_dhcp_agent_to_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -522,8 +522,8 @@
       "id": "network/v2/remove_dhcp_agent_from_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -549,7 +549,7 @@
       "id": "network/v2/network_hosting_dhcp_agents",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -974,7 +974,7 @@
       "id": "network/v2/add_gateway_network_to_speaker",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -1001,7 +1001,7 @@
       "id": "network/v2/remove_gateway_network_from_speaker",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -1042,7 +1042,7 @@
       "id": "network/v2/get_bgp_dragents_hosting_speaker",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -1069,7 +1069,7 @@
       "id": "network/v2/add_bgp_speaker_to_dragent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -1091,7 +1091,7 @@
       "id": "network/v2/get_bgp_speakers_hosted_by_dragent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -1118,7 +1118,7 @@
       "id": "network/v2/remove_bgp_speaker_from_dragent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -2205,7 +2205,7 @@
       "id": "network/v2/create_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2236,7 +2236,7 @@
       "id": "network/v2/delete_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2252,7 +2252,7 @@
       "id": "network/v2/find_available_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2282,7 +2282,7 @@
       "id": "network/v2/find_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2308,7 +2308,7 @@
       "id": "network/v2/get_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2329,7 +2329,7 @@
       "id": "network/v2/ips",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2360,7 +2360,7 @@
       "id": "network/v2/update_ip",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -2381,7 +2381,7 @@
       "id": "network/v2/create_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -2412,8 +2412,8 @@
       "id": "network/v2/get_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -2448,8 +2448,8 @@
       "id": "network/v2/find_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -2480,8 +2480,8 @@
       "id": "network/v2/delete_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -2507,8 +2507,8 @@
       "id": "network/v2/port_forwardings",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -2538,8 +2538,8 @@
       "id": "network/v2/update_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -3230,7 +3230,7 @@
       "id": "network/v2/create_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3261,7 +3261,7 @@
       "id": "network/v2/delete_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3291,7 +3291,7 @@
       "id": "network/v2/find_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3317,7 +3317,7 @@
       "id": "network/v2/get_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3338,7 +3338,7 @@
       "id": "network/v2/networks",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3368,7 +3368,7 @@
       "id": "network/v2/update_network",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -3901,7 +3901,7 @@
       "id": "network/v2/create_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -3922,7 +3922,7 @@
       "id": "network/v2/create_ports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -3953,7 +3953,7 @@
       "id": "network/v2/delete_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -3983,7 +3983,7 @@
       "id": "network/v2/find_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4009,7 +4009,7 @@
       "id": "network/v2/get_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4030,7 +4030,7 @@
       "id": "network/v2/ports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4060,7 +4060,7 @@
       "id": "network/v2/update_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4086,8 +4086,8 @@
       "id": "network/v2/add_ip_to_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4108,7 +4108,7 @@
       "id": "network/v2/remove_ip_from_port",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
       ],
       "review": "pending"
     },
@@ -4130,8 +4130,8 @@
       "id": "network/v2/get_subnet_ports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -4157,7 +4157,7 @@
       "id": "network/v2/create_port_binding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4183,7 +4183,7 @@
       "id": "network/v2/activate_port_binding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4209,7 +4209,7 @@
       "id": "network/v2/port_bindings",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -4240,7 +4240,7 @@
       "id": "network/v2/delete_port_binding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
       ],
       "review": "pending"
     },
@@ -5386,7 +5386,7 @@
       "id": "network/v2/create_rbac_policy",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5412,7 +5412,7 @@
       "id": "network/v2/delete_rbac_policy",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5442,7 +5442,7 @@
       "id": "network/v2/find_rbac_policy",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5468,7 +5468,7 @@
       "id": "network/v2/get_rbac_policy",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5489,7 +5489,7 @@
       "id": "network/v2/rbac_policies",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5514,7 +5514,7 @@
       "id": "network/v2/update_rbac_policy",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies"
       ],
       "review": "pending"
     },
@@ -5535,7 +5535,7 @@
       "id": "network/v2/create_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5566,7 +5566,7 @@
       "id": "network/v2/delete_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5596,7 +5596,7 @@
       "id": "network/v2/find_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5622,7 +5622,7 @@
       "id": "network/v2/get_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5643,7 +5643,7 @@
       "id": "network/v2/routers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5673,7 +5673,7 @@
       "id": "network/v2/update_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5710,7 +5710,7 @@
       "id": "network/v2/add_interface_to_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5742,7 +5742,7 @@
       "id": "network/v2/remove_interface_from_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5767,7 +5767,7 @@
       "id": "network/v2/add_extra_routes_to_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5792,7 +5792,7 @@
       "id": "network/v2/remove_extra_routes_from_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5817,7 +5817,7 @@
       "id": "network/v2/add_gateway_to_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5842,7 +5842,7 @@
       "id": "network/v2/remove_gateway_from_router",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5867,7 +5867,7 @@
       "id": "network/v2/add_external_gateways",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5892,7 +5892,7 @@
       "id": "network/v2/update_external_gateways",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5917,7 +5917,7 @@
       "id": "network/v2/remove_external_gateways",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5943,7 +5943,7 @@
       "id": "network/v2/routers_hosting_l3_agents",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -5969,7 +5969,7 @@
       "id": "network/v2/agent_hosted_routers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
       ],
       "review": "pending"
     },
@@ -6000,8 +6000,8 @@
       "id": "network/v2/add_router_to_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -6032,8 +6032,8 @@
       "id": "network/v2/update_router_in_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -6059,8 +6059,8 @@
       "id": "network/v2/remove_router_from_agent",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -7225,7 +7225,7 @@
       "id": "network/v2/create_segment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7251,7 +7251,7 @@
       "id": "network/v2/delete_segment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7281,7 +7281,7 @@
       "id": "network/v2/find_segment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7307,7 +7307,7 @@
       "id": "network/v2/get_segment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7328,7 +7328,7 @@
       "id": "network/v2/segments",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7353,7 +7353,7 @@
       "id": "network/v2/update_segment",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments"
       ],
       "review": "pending"
     },
@@ -7530,7 +7530,7 @@
       "id": "network/v2/create_subnet",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7561,7 +7561,7 @@
       "id": "network/v2/delete_subnet",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7591,7 +7591,7 @@
       "id": "network/v2/find_subnet",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7617,7 +7617,7 @@
       "id": "network/v2/get_subnet",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7638,7 +7638,7 @@
       "id": "network/v2/subnets",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7668,7 +7668,7 @@
       "id": "network/v2/update_subnet",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
       ],
       "review": "pending"
     },
@@ -7689,7 +7689,7 @@
       "id": "network/v2/create_subnet_pool",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7715,7 +7715,7 @@
       "id": "network/v2/delete_subnet_pool",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7745,7 +7745,7 @@
       "id": "network/v2/find_subnet_pool",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7771,7 +7771,7 @@
       "id": "network/v2/get_subnet_pool",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7792,7 +7792,7 @@
       "id": "network/v2/subnet_pools",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7817,7 +7817,7 @@
       "id": "network/v2/update_subnet_pool",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
       ],
       "review": "pending"
     },
@@ -7844,8 +7844,8 @@
       "id": "network/v2/onboard_network_subnets",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/networks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
       ],
       "review": "pending"
     },
@@ -8019,7 +8019,7 @@
       "id": "network/v2/create_trunk",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8045,7 +8045,7 @@
       "id": "network/v2/delete_trunk",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8075,7 +8075,7 @@
       "id": "network/v2/find_trunk",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8101,7 +8101,7 @@
       "id": "network/v2/get_trunk",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8122,7 +8122,7 @@
       "id": "network/v2/trunks",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8147,7 +8147,7 @@
       "id": "network/v2/update_trunk",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8172,7 +8172,7 @@
       "id": "network/v2/add_trunk_subports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8197,7 +8197,7 @@
       "id": "network/v2/delete_trunk_subports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8218,7 +8218,7 @@
       "id": "network/v2/get_trunk_subports",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
       ],
       "review": "pending"
     },
@@ -8929,8 +8929,8 @@
       "id": "network/v2/create_floating_ip_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -8961,8 +8961,8 @@
       "id": "network/v2/delete_floating_ip_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -8997,8 +8997,8 @@
       "id": "network/v2/find_floating_ip_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -9029,8 +9029,8 @@
       "id": "network/v2/get_floating_ip_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -9056,8 +9056,8 @@
       "id": "network/v2/floating_ip_port_forwardings",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -9087,8 +9087,8 @@
       "id": "network/v2/update_floating_ip_port_forwarding",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding"
       ],
       "review": "pending"
     },
@@ -9114,7 +9114,7 @@
       "id": "network/v2/create_conntrack_helper",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -9140,7 +9140,7 @@
       "id": "network/v2/conntrack_helpers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -9166,7 +9166,7 @@
       "id": "network/v2/get_conntrack_helper",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -9196,7 +9196,7 @@
       "id": "network/v2/update_conntrack_helper",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -9227,7 +9227,7 @@
       "id": "network/v2/delete_conntrack_helper",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
       ],
       "review": "pending"
     },
@@ -9385,7 +9385,7 @@
       "id": "network/v2/create_tap_mirror",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },
@@ -9411,7 +9411,7 @@
       "id": "network/v2/delete_tap_mirror",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },
@@ -9441,7 +9441,7 @@
       "id": "network/v2/find_tap_mirror",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },
@@ -9467,7 +9467,7 @@
       "id": "network/v2/get_tap_mirror",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },
@@ -9492,7 +9492,7 @@
       "id": "network/v2/update_tap_mirror",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },
@@ -9513,7 +9513,7 @@
       "id": "network/v2/tap_mirrors",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors"
       ],
       "review": "pending"
     },

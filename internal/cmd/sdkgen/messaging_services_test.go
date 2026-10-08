@@ -11,10 +11,10 @@ import (
 )
 
 func TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities(t *testing.T) {
-	want := []collectionRecord{{Package: "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions", Source: "sdk_owned", Model: "Subscription", Kind: "queue_subscription", Scope: "InQueue", Parent: "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues"}}
+	want := []collectionRecord{{Package: "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions", Source: "sdk_owned", Model: "Subscription", Kind: "queue_subscription", Scope: "InQueue", Parent: "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"}}
 	var actual []collectionRecord
 	for _, record := range sdkOwnedCollections {
-		if strings.HasPrefix(record.Package, "github.com/JSYoo5B/gophercloudsdk/messaging/") {
+		if strings.HasPrefix(record.Package, "github.com/JSYoo5B/go-openstacksdk/messaging/") {
 			actual = append(actual, record)
 		}
 	}
@@ -22,7 +22,7 @@ func TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities(t *testing.T) {
 		t.Fatalf("messaging registry invented a native or common capability: %#v", actual)
 	}
 	root := t.TempDir()
-	g := generator{root: root, inventory: inventory{Operations: []operation{{SDKPackage: "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues", Name: "List"}}}, collections: actual}
+	g := generator{root: root, inventory: inventory{Operations: []operation{{SDKPackage: "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues", Name: "List"}}}, collections: actual}
 	if err := g.generateServices(); err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestMessagingSDKOwnedRegistryAndQueueScopeCapabilities(t *testing.T) {
 		}
 	}
 	registry := read("messaging/v2/service_generated.go")
-	for _, part := range []string{"Subscriptions", "Queues", "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions", "New(client)"} {
+	for _, part := range []string{"Subscriptions", "Queues", "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions", "New(client)"} {
 		if !strings.Contains(registry, part) {
 			t.Fatalf("missing shared-client registry %q: %s", part, registry)
 		}

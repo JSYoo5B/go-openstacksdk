@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type entry struct{ ID, Name, Status string }

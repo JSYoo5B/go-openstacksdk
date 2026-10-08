@@ -50,8 +50,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListServers(ctx context.Context, conn *sdk.Connection) error {
@@ -85,8 +85,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListRecordSets(ctx context.Context, conn *sdk.Connection, zoneID string) error {
@@ -121,8 +121,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListMembers(ctx context.Context, conn *sdk.Connection, poolID string) error {
@@ -166,8 +166,8 @@ package examples
 import (
     "context"
 
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListLocalMatches(ctx context.Context, service *networkv2.Service) error {

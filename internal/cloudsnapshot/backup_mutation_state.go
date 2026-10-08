@@ -3,7 +3,7 @@ package cloudsnapshot
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Backup has its own raw state; it never uses Snapshot's ID/status indices.

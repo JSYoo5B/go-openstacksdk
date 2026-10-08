@@ -2,7 +2,7 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/reservation/v1/hosts"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/reservation/v1/hosts"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

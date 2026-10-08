@@ -24,7 +24,7 @@ Cloud flavor의 eager 목록은 `service.AllFlavors`, 이름·dictionary/JMES �
 
 ## openstacksdk 대응
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.compute.get_server(id)` | `service.Servers.Get(ctx, id)` |
 | `conn.compute.find_server(name, ignore_missing=False)` | `service.Servers.Find(ctx, resource.Name(name))` |

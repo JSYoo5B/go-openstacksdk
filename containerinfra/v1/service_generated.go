@@ -2,11 +2,11 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/certificates"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clusters"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clustertemplates"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/nodegroups"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/certificates"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clustertemplates"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/nodegroups"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

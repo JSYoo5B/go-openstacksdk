@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CreateDirectoryMarkerObject writes an empty object with the owned

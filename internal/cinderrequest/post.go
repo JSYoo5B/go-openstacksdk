@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/internal/fixedrequest"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

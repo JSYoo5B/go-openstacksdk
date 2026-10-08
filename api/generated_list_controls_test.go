@@ -10,12 +10,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
-	"github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

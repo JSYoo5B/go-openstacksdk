@@ -69,7 +69,7 @@ func (p *preparedCreateObject) ownInput(ctx context.Context, input CreateObjectI
 			source = nil
 		}
 	}()
-	file, err := os.CreateTemp("", "gophercloudsdk-swift-")
+	file, err := os.CreateTemp("", "go-openstacksdk-swift-")
 	if err != nil {
 		return nil, metadataContextError(ctx, err)
 	}

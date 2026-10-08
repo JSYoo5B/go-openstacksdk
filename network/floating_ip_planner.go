@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/project"
+	"github.com/JSYoo5B/go-openstacksdk/internal/project"
 )
 
 // FloatingIPPlanner owns one lazy role snapshot and source binding for address

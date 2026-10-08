@@ -1,6 +1,6 @@
 package shareaccessrules
 
-import "github.com/JSYoo5B/gophercloudsdk/request"
+import "github.com/JSYoo5B/go-openstacksdk/request"
 
 // AllowOpts supplies access identity; an omitted access level uses Manila's default.
 // Optional pointer fields distinguish omission from explicit false or empty input.

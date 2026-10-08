@@ -4,7 +4,7 @@ package clustertemplates
 import (
 	context "context"
 	fmt "fmt"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

@@ -2,11 +2,11 @@
 package v2
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/identity/v2/extensions"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/identity/v2/roles"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/identity/v2/tokens"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/identity/v2/users"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/identity/v2/users"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

@@ -280,7 +280,7 @@ func TestIdentityMissingListEmitsFixedOwnedOverlayAndExplicitInventory(t *testin
 			if strings.Contains(body, "IdentityAllProjectsQuery:") {
 				modesCount++
 			}
-			record := collectionRecord{Package: "github.com/JSYoo5B/gophercloudsdk/" + spec.path, Model: spec.model, IdentityFind: true, IdentityGetQuery: true, IdentityMissingList: enabled}
+			record := collectionRecord{Package: "github.com/JSYoo5B/go-openstacksdk/" + spec.path, Model: spec.model, IdentityFind: true, IdentityGetQuery: true, IdentityMissingList: enabled}
 			data, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)

@@ -3,8 +3,8 @@ package cinderrequest
 import (
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/microversions"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // requireSupport follows supports_microversion and Keystoneauth's separately

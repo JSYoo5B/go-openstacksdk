@@ -1,9 +1,9 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
 )
 
 // GetVolumeID uses cached Cinder v3 to resolve an exact name or ID and preserves

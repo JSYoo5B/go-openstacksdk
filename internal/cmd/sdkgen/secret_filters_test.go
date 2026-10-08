@@ -255,7 +255,7 @@ func TestSecretPythonFilterPinnedSourceRequiresSHAAndIndependentAST(t *testing.T
 	}
 	source := os.Getenv("OPENSTACKSDK_SOURCE")
 	if source == "" {
-		source = "/private/tmp/gophercloudsdk-openstacksdk"
+		source = "/private/tmp/go-openstacksdk-openstacksdk"
 	}
 	if _, err := os.Stat(filepath.Join(source, "openstack/key_manager/v1/secret.py")); err != nil {
 		t.Skip("audited source checkout not present")

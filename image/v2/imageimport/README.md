@@ -9,8 +9,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func importStagedImage(ctx context.Context, client *gophercloud.ServiceClient, id string) (*imageimport.ImportResult, error) {
@@ -36,8 +36,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
-    "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
 )
 
 func importKnownFromWeb(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, uri string) (*imageimport.ImportResult, error) {

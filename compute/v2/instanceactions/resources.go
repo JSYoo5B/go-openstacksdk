@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/instanceactions"
 	"github.com/gophercloud/gophercloud/v2/pagination"

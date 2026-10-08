@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
-	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 )
 
 func (p *floatingIPQueryState) availableNeutron(result *AvailableFloatingIPResult, input AvailableFloatingIPRequest, policy network.AvailableFloatingIPPolicy) (*AvailableFloatingIPResult, error) {

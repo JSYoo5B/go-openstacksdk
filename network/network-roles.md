@@ -55,8 +55,8 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/network"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/network"
 )
 
 func main() {
@@ -133,7 +133,7 @@ func printNetwork(label string, net *network.RoleNetwork) {
 
 Go의 모든 조회에는 `context.Context`가 필요하며 오류를 별도로 반환합니다. 목록 getter는 `[]*network.RoleNetwork`, 단일 getter는 `*network.RoleNetwork`를 반환합니다. 해당 역할이 없으면 빈 목록 또는 `nil`이 정상 결과입니다. 설정한 네트워크가 실제 목록에 없거나 단일 역할의 selector가 여러 네트워크와 일치하면 오류입니다.
 
-| openstacksdk Connection | gophercloudsdk Connection |
+| openstacksdk Connection | go-openstacksdk Connection |
 | --- | --- |
 | `get_external_ipv4_networks()` | `GetExternalIPv4Networks(ctx)` |
 | `get_internal_ipv4_networks()` | `GetInternalIPv4Networks(ctx)` |
@@ -232,9 +232,9 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {

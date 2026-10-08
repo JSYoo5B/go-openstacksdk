@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 )
 
 func TestCloudFilterOrderedMappingConsumesOnlyReachedKeysAndKeepsDuplicateFirstPosition(t *testing.T) {

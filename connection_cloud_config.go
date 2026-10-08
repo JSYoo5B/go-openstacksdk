@@ -1,4 +1,4 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
-	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 	"gopkg.in/yaml.v2"

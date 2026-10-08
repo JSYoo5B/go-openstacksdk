@@ -15,9 +15,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	rt "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	rt "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

@@ -17,9 +17,9 @@ import (
     "fmt"
 
     "github.com/gophercloud/gophercloud/v2"
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func getForServer(ctx context.Context, conn *sdk.Connection, serverID string) error {

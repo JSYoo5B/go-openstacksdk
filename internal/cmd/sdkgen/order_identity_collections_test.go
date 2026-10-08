@@ -115,7 +115,7 @@ func TestOrderCollectionIdentityRejectsAmbiguousNativeShapeDrift(t *testing.T) {
 func TestOrderCollectionIdentityAcceptsActualPinnedCompiledTypeGraph(t *testing.T) {
 	path := os.Getenv("GOPHERCLOUD_METADATA")
 	if path == "" {
-		path = "/private/tmp/gophercloudsdk-upstream-packages.json"
+		path = "/private/tmp/go-openstacksdk-upstream-packages.json"
 	}
 	file, err := os.Open(path)
 	if os.IsNotExist(err) {

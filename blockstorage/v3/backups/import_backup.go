@@ -3,8 +3,8 @@ package backups
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudbackup"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudbackup"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

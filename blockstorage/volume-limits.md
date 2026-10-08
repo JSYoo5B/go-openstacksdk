@@ -25,9 +25,9 @@ import (
 
     "github.com/gophercloud/gophercloud/v2"
     nativeLimits "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/limits"
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func Inspect(result *blockstorage.GetVolumeLimitsResult) {

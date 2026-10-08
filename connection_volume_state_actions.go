@@ -1,12 +1,12 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 	"fmt"
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func (c *Connection) volumeStateAction(ctx context.Context, input blockstorage.VolumeActionRequest, state cinderaction.State) (*blockstorage.VolumeActionResult, error) {

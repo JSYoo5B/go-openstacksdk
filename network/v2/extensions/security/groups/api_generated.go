@@ -3,8 +3,8 @@ package groups
 
 import (
 	context "context"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/security/groups"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"

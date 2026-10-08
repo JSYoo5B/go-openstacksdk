@@ -36,7 +36,7 @@ func createAndList(ctx context.Context, client *gophercloud.ServiceClient) error
 }
 ```
 
-Go 예제의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/accelerator/v2/attributes`, `github.com/JSYoo5B/gophercloudsdk/resource`입니다. Connection을 사용하는 코드에서는 `conn.Accelerator(ctx)`가 반환한 `service.Attributes`로 같은 API에 접근합니다.
+Go 예제의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes`, `github.com/JSYoo5B/go-openstacksdk/resource`입니다. Connection을 사용하는 코드에서는 `conn.Accelerator(ctx)`가 반환한 `service.Attributes`로 같은 API에 접근합니다.
 
 `DeployableID`는 deployable UUID가 아니라 **숫자 database ID**이며 request JSON에도 정수로 전달합니다. `Create`는 `{"deployable_id":17,"key":"...","value":"..."}` 형태의 flat object를 POST하고 201 응답을 요구합니다. pinned controller는 JSON object를 받아 attribute 하나를 만들고 flat object를 반환합니다. 공식 API 문서의 POST 응답 예제에는 `{"attributes":[...]}` envelope가 있으므로 SDK는 flat object, singular `attribute` object, 항목이 정확히 하나인 `attributes` 배열을 모두 허용합니다. 빈 배열, 복수 항목, `null` 또는 잘못된 타입은 오류로 처리하며 결과를 임의로 하나만 선택하지 않습니다. 다른 schema의 서버가 생성 요청을 이미 수락한 뒤 decode 오류를 반환할 수 있으므로 오류가 났다는 이유만으로 생성 요청을 자동 재시도하지 마세요.
 

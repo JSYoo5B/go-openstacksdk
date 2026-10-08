@@ -2,7 +2,7 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/metric/v1/metrics"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/metric/v1/metrics"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

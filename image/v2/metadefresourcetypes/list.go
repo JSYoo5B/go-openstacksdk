@@ -7,7 +7,7 @@ import (
 	"iter"
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // List lazily consumes one finite global response. MaxItems is local; query,

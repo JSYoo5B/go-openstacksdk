@@ -4,7 +4,7 @@
 
 ## openstacksdk 대응
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.database.users(instance)` | `scope.List(ctx)` 또는 `scope.All(ctx)` |
 | `conn.database.find_user(name, instance, ignore_missing=False)` | `scope.Find(ctx, resource.Name(name))` |
@@ -91,9 +91,9 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/db/v1/users"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/db/v1/users"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListUsers(ctx context.Context, conn *sdk.Connection, instanceID, host string) error {

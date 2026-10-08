@@ -4,7 +4,7 @@
 
 ## Python과 Go의 대응
 
-| 고정 openstacksdk | gophercloudsdk |
+| 고정 openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.compute.create_server_remote_console(server_id, type="novnc")` | `service.RemoteConsoles.CreateConsole(ctx, serverID, remoteconsoles.WithConsoleCreateType("novnc"))` |
 | 명시 `protocol="vnc"` | `remoteconsoles.WithConsoleCreateProtocol("vnc")` |
@@ -40,9 +40,9 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs"
-    "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+    "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles"
 )
 
 func main() {

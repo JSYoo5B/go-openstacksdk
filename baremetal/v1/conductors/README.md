@@ -23,7 +23,7 @@ if err != nil { return err }
 fmt.Println(conductor.Hostname, conductor.Alive, conductor.Drivers)
 ```
 
-`sdk`는 `gophercloudsdk`, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `fmt`는 표준 라이브러리입니다. `resource.ID(hostname)`은 목록 요청 없이 native Get으로 조회합니다. `resource.Name(hostname)`은 페이지를 순회하며 hostname을 정확히 비교합니다. 접두사만 일치하는 이름은 선택하지 않으며 중복은 `resource.ErrAmbiguous`입니다. hostname이 이름이라는 이유로 ID를 UUID로 변환하거나 이름을 자동 추측하지 않습니다.
+`sdk`는 `go-openstacksdk`, `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`, `fmt`는 표준 라이브러리입니다. `resource.ID(hostname)`은 목록 요청 없이 native Get으로 조회합니다. `resource.Name(hostname)`은 페이지를 순회하며 hostname을 정확히 비교합니다. 접두사만 일치하는 이름은 선택하지 않으며 중복은 `resource.ErrAmbiguous`입니다. hostname이 이름이라는 이유로 ID를 UUID로 변환하거나 이름을 자동 추측하지 않습니다.
 
 Find는 미존재를 `resource.ErrNotFound`로 반환합니다. `resource.WithIgnoreMissing()`을 추가하면 `nil, nil`을 반환합니다. 원래 HTTP 403과 통신 오류는 보존됩니다. `All`은 목록을 수집하고 `List`는 `break`와 context 취소를 적용합니다. `resource.WithPageSize`와 `resource.WithQuery`로 목록 query를 지정할 수 있습니다.
 

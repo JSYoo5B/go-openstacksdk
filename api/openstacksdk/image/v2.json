@@ -38,7 +38,7 @@
       "id": "image/v2/cache_delete_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -61,7 +61,7 @@
       "id": "image/v2/queue_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -103,7 +103,7 @@
       "id": "image/v2/cached_image_nodes",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -277,7 +277,7 @@
       "id": "image/v2/create_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -345,7 +345,7 @@
       "id": "image/v2/import_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -382,7 +382,7 @@
       "id": "image/v2/stage_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -425,7 +425,7 @@
       "id": "image/v2/upload_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -466,7 +466,7 @@
       "id": "image/v2/download_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -498,7 +498,7 @@
       "id": "image/v2/delete_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -524,7 +524,7 @@
       "id": "image/v2/find_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -545,7 +545,7 @@
       "id": "image/v2/get_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -566,7 +566,7 @@
       "id": "image/v2/images",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -591,7 +591,7 @@
       "id": "image/v2/update_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -624,7 +624,7 @@
       "id": "image/v2/add_image_location",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -647,7 +647,7 @@
       "id": "image/v2/image_locations",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -668,7 +668,7 @@
       "id": "image/v2/deactivate_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -689,7 +689,7 @@
       "id": "image/v2/reactivate_image",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -720,7 +720,7 @@
       "id": "image/v2/update_image_properties",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -743,7 +743,7 @@
       "id": "image/v2/image_tasks",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -768,7 +768,7 @@
       "id": "image/v2/add_tag",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -793,7 +793,7 @@
       "id": "image/v2/remove_tag",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
       ],
       "review": "pending"
     },
@@ -820,8 +820,8 @@
       "id": "image/v2/add_member",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -854,8 +854,8 @@
       "id": "image/v2/remove_member",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -887,8 +887,8 @@
       "id": "image/v2/find_member",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -915,8 +915,8 @@
       "id": "image/v2/get_member",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -943,8 +943,8 @@
       "id": "image/v2/members",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -975,8 +975,8 @@
       "id": "image/v2/update_member",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/members"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members"
       ],
       "review": "pending"
     },
@@ -1795,7 +1795,7 @@
       "id": "image/v2/tasks",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
       ],
       "review": "pending"
     },
@@ -1816,7 +1816,7 @@
       "id": "image/v2/get_task",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
       ],
       "review": "pending"
     },
@@ -1837,7 +1837,7 @@
       "id": "image/v2/create_task",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
       ],
       "review": "pending"
     },
@@ -1879,7 +1879,7 @@
       "id": "image/v2/wait_for_task",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks"
       ],
       "review": "pending"
     },

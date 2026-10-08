@@ -3,8 +3,8 @@ package nodes
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/senlin"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/internal/senlin"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // CheckOpts has no required parameters. Extensions are sent inside check.

@@ -11,8 +11,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listPoliciesWithoutRules(ctx context.Context, client *gophercloud.ServiceClient) ([]*qospolicies.Policy, error) {
@@ -46,8 +46,8 @@ import (
     "encoding/json"
 
     "github.com/gophercloud/gophercloud/v2"
-    qospolicies "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listTenantPolicies(ctx context.Context, client *gophercloud.ServiceClient, expectedRules json.RawMessage) ([]*qospolicies.Policy, error) {

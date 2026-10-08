@@ -4,8 +4,8 @@ package hosts
 import (
 	"encoding/json"
 
-	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type Host struct {

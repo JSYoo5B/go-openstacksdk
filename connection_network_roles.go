@@ -1,8 +1,8 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 )
 
 // GetNetworkRoles shares one successful network/subnet discovery among all role

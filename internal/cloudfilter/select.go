@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/jmespath"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 )
 
 // Result contains an owned normalized JSON value. Ordinary selection retains

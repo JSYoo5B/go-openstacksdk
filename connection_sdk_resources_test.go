@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles"
-	"github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
+	"github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

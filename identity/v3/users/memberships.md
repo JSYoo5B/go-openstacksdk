@@ -4,14 +4,14 @@ Keystone v3에서 사용자가 접근할 수 있는 프로젝트와 속한 그�
 
 ## Python과 Go의 호출 대응
 
-| openstacksdk | gophercloudsdk | Go 반환형 |
+| openstacksdk | go-openstacksdk | Go 반환형 |
 |---|---|---|
 | `conn.identity.user_projects(user, **query)` | `identity.Users.ListProjectRecords(ctx, userID, options...)` | `iter.Seq2[*users.UserProjectRecord, error]` |
 | 프로젝트 목록의 native 호환 호출 | `identity.Users.ListProjects(ctx, userID)` | `iter.Seq2[*projects.Project, error]` |
 | `conn.identity.user_groups(user)` | `identity.Users.ListGroupRecords(ctx, userID)` | `iter.Seq2[*users.UserGroupRecord, error]` |
 | 그룹 목록의 native 호환 호출 | `identity.Users.ListGroups(ctx, userID)` | `iter.Seq2[*groups.Group, error]` |
 
-`users`, `projects`, `groups`는 `github.com/JSYoo5B/gophercloudsdk/identity/v3` 아래의 패키지입니다. 새 `UserProjectRecord`·`UserGroupRecord`는 SDK 소유 모델이며 `Resource`와 `Wire`를 각각 독립된 `*resource.RawResource`로 제공합니다. 기존 `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. native `ListProjects`·`ListGroups`의 인자·결과 타입·pager는 그대로이고, Python의 mutable Resource 상태나 연결 context를 native alias에 추가하지 않습니다.
+`users`, `projects`, `groups`는 `github.com/JSYoo5B/go-openstacksdk/identity/v3` 아래의 패키지입니다. 새 `UserProjectRecord`·`UserGroupRecord`는 SDK 소유 모델이며 `Resource`와 `Wire`를 각각 독립된 `*resource.RawResource`로 제공합니다. 기존 `Project`·`Group`은 Gophercloud v2.15.0의 동명 모델에 대한 타입 alias입니다. native `ListProjects`·`ListGroups`의 인자·결과 타입·pager는 그대로이고, Python의 mutable Resource 상태나 연결 context를 native alias에 추가하지 않습니다.
 
 Python:
 
@@ -40,7 +40,7 @@ import (
 	"os"
 	"time"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
 )
 
 func main() {
@@ -108,8 +108,8 @@ import (
 	"os"
 	"time"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 )
 
 func main() {

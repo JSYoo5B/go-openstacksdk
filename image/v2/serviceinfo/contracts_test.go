@@ -13,11 +13,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	nativeimport "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport"
-	"github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	nativeimport "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

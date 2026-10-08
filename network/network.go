@@ -5,10 +5,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
-	"github.com/JSYoo5B/gophercloudsdk/internal/query"
-	networkapi "github.com/JSYoo5B/gophercloudsdk/network/v2"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	"github.com/JSYoo5B/go-openstacksdk/internal/query"
+	networkapi "github.com/JSYoo5B/go-openstacksdk/network/v2"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"

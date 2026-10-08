@@ -1,111 +1,111 @@
 [
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/apiversions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/allocations",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/allocations",
     "model": "Allocation",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/conductors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/conductors",
     "model": "Conductor",
     "find": true,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/drivers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/drivers",
     "model": "Driver",
     "find": true,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/nodes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes",
     "model": "Node",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetal/v1/ports",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetal/v1/ports",
     "model": "Port",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/baremetalintrospection/v1/introspection",
+    "package": "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection",
     "model": "Introspection",
     "find": false,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/apiversions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/noauth",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/noauth",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/availabilityzones",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/availabilityzones",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/backups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups",
     "model": "Backup",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/limits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/limits",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/quotasets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/schedulerstats",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots",
     "model": "Snapshot",
     "find": true,
     "delete": true,
@@ -114,14 +114,14 @@
     "service_wait": "cinder"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/transfers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers",
     "model": "Transfer",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/volumes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes",
     "model": "Volume",
     "find": true,
     "delete": true,
@@ -130,28 +130,28 @@
     "service_wait": "cinder"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments",
     "model": "Attachment",
     "find": false,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/availabilityzones",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/availabilityzones",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups",
     "model": "Backup",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits",
     "model": "LimitsResource",
     "upstream_model": "Limits",
     "kind": "project_limits",
@@ -159,24 +159,24 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/manageablevolumes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/qos",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos",
     "model": "QoS",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/quotasets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets",
     "model": "QuotaResource",
     "upstream_model": "QuotaSet",
     "kind": "singleton",
@@ -184,24 +184,24 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/schedulerstats",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots",
     "model": "Snapshot",
     "find": true,
     "delete": true,
@@ -210,14 +210,14 @@
     "service_wait": "cinder"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers",
     "model": "Transfer",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes",
     "model": "Volume",
     "find": true,
     "identity_find": true,
@@ -230,65 +230,65 @@
     "service_wait": "cinder"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumetypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes",
     "model": "VolumeType",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/common/extensions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/common/extensions",
     "model": "Extension",
     "find": true,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/apiversions",
     "model": "APIVersion",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates",
     "model": "Aggregate",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/attachinterfaces",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces",
     "model": "Interface",
     "find": false,
     "delete": true,
     "wait": true,
     "scope": "InServer",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/availabilityzones",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/diagnostics",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/diagnostics",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/extensions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors",
     "model": "Flavor",
     "find": true,
     "identity_find": true,
@@ -299,31 +299,31 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/hypervisors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors",
     "model": "Hypervisor",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/instanceactions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions",
     "model": "ActionResource",
     "upstream_model": "InstanceAction",
     "find": false,
     "delete": false,
     "wait": false,
     "scope": "InServer",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs",
     "model": "KeyPair",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/limits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/limits",
     "model": "LimitsResource",
     "upstream_model": "Limits",
     "kind": "project_limits",
@@ -331,17 +331,17 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/migrations",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/quotasets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets",
     "model": "QuotaResource",
     "upstream_model": "QuotaSet",
     "kind": "singleton",
@@ -349,31 +349,31 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/remoteconsoles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/secgroups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups",
     "model": "SecurityGroup",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servergroups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups",
     "model": "ServerGroup",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers",
     "model": "Server",
     "find": true,
     "identity_find": true,
@@ -385,84 +385,84 @@
     "service_wait": "compute"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/services",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/tags",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags",
     "model": "string",
     "kind": "string_set",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "InServer",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/usage",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/compute/v2/volumeattach",
+    "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach",
     "model": "VolumeAttachment",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "InServer",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/container/v1/capsules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/container/v1/capsules",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/apiversions",
     "model": "APIVersion",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/certificates",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/certificates",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clusters",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters",
     "model": "Cluster",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clustertemplates",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clustertemplates",
     "model": "ClusterTemplate",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/nodegroups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/nodegroups",
     "model": "NodeGroup",
     "find": true,
     "delete": true,
     "wait": true,
     "scope": "InCluster",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/clusters"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clusters"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/containerinfra/v1/quotas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas",
     "model": "QuotaResource",
     "upstream_model": "Quotas",
     "kind": "project_resource_quota",
@@ -470,57 +470,57 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/configurations",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/configurations",
     "model": "Config",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/databases",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/databases",
     "model": "Database",
     "find": true,
     "delete": true,
     "wait": false,
     "scope": "InInstance",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/db/v1/instances"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/datastores",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/datastores",
     "model": "Datastore",
     "find": true,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/flavors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/flavors",
     "model": "Flavor",
     "find": true,
     "delete": false,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/instances",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/instances",
     "model": "Instance",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/db/v1/users",
+    "package": "github.com/JSYoo5B/go-openstacksdk/db/v1/users",
     "model": "UserResource",
     "upstream_model": "User",
     "find": true,
     "delete": true,
     "wait": false,
     "scope": "InInstance",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/db/v1/instances"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/quotas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas",
     "model": "QuotaResource",
     "upstream_model": "Quota",
     "kind": "singleton",
@@ -528,10 +528,10 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/recordsets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets",
     "model": "RecordSet",
     "find": true,
     "identity_find": true,
@@ -539,105 +539,105 @@
     "delete": true,
     "wait": true,
     "scope": "InZone",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/dns/v2/zones"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/accept",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/accept",
     "model": "TransferAccept",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/transfer/request",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/transfer/request",
     "model": "TransferRequest",
     "find": false,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/tsigkeys",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/tsigkeys",
     "model": "TSIGKey",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/dns/v2/zones",
+    "package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/zones",
     "model": "Zone",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v2/extensions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v2/roles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v2/tenants",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants",
     "model": "Tenant",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v2/tokens",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v2/users",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v2/users",
     "model": "User",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials",
     "model": "ApplicationCredential",
     "find": true,
     "delete": true,
     "wait": false,
     "scope": "InUser",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/applicationcredentials",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials",
     "model": "AccessRule",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "AccessRules",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/catalog",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/catalog",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/credentials",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials",
     "model": "Credential",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/domains",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains",
     "model": "Domain",
     "find": true,
     "identity_find": true,
@@ -646,37 +646,37 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2credentials",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials",
     "model": "Credential",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "InUser",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/ec2tokens",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/endpoints",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints",
     "model": "Endpoint",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/federation",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/groups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups",
     "model": "Group",
     "find": true,
     "identity_find": true,
@@ -685,42 +685,42 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/limits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits",
     "model": "Limit",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/oauth1",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/osinherit",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies",
     "model": "Policy",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projectendpoints",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects",
     "model": "Project",
     "find": true,
     "identity_find": true,
@@ -729,21 +729,21 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/regions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions",
     "model": "Region",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/registeredlimits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits",
     "model": "RegisteredLimit",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/roles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles",
     "model": "Role",
     "find": true,
     "identity_find": true,
@@ -752,28 +752,28 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/services",
     "model": "Service",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/tokens",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/trusts",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts",
     "model": "Trust",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/users",
+    "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/users",
     "model": "User",
     "find": true,
     "identity_find": true,
@@ -782,21 +782,21 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/imagedata",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/imageimport",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/images",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/images",
     "model": "Image",
     "find": true,
     "identity_find": true,
@@ -807,16 +807,16 @@
     "service_wait": "image"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/members",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/members",
     "model": "Member",
     "find": false,
     "delete": true,
     "wait": true,
     "scope": "InImage",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/tasks",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks",
     "model": "Task",
     "find": false,
     "delete": false,
@@ -824,14 +824,14 @@
     "task_wait": "WaitForTask"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/acls",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers",
     "model": "Container",
     "find": true,
     "body_filter_fields": [
@@ -877,7 +877,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders",
     "model": "Order",
     "find": false,
     "body_filter_fields": [
@@ -931,7 +931,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets",
     "model": "Secret",
     "find": true,
     "body_filter_fields": [
@@ -991,79 +991,79 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/amphorae",
     "model": "Amphora",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/apiversions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavorprofiles",
     "model": "FlavorProfile",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavors",
     "model": "Flavor",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies",
     "model": "L7Policy",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies",
     "model": "Rule",
     "find": false,
     "delete": true,
     "wait": true,
     "scope": "Rules",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/listeners",
     "model": "Listener",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/loadbalancers",
     "model": "LoadBalancer",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/monitors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/monitors",
     "model": "Monitor",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools",
     "model": "Pool",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools",
     "model": "Member",
     "find": true,
     "identity_find": true,
@@ -1071,17 +1071,17 @@
     "delete": true,
     "wait": true,
     "scope": "Members",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/providers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/providers",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/quotas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas",
     "model": "QuotaResource",
     "upstream_model": "Quota",
     "kind": "singleton",
@@ -1089,138 +1089,138 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/messaging/v2/claims",
+    "package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/claims",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/messaging/v2/messages",
+    "package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/messages",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues",
+    "package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/metric/v1/metrics",
+    "package": "github.com/JSYoo5B/go-openstacksdk/metric/v1/metrics",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/apiversions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/agents",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents",
     "model": "Agent",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/attributestags",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/bgp/peers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers",
     "model": "BGPPeer",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/bgp/speakers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers",
     "model": "BGPSpeaker",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/bgpvpns",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns",
     "model": "BGPVPN",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/fwaas_v2/groups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups",
     "model": "Group",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/fwaas_v2/policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies",
     "model": "Policy",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/fwaas_v2/rules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules",
     "model": "Rule",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/addressscopes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes",
     "model": "AddressScope",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/extraroutes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
     "model": "FloatingIP",
     "find": false,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/portforwarding",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/portforwarding",
     "model": "PortForwarding",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "InFloatingIP",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/floatingips"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers",
     "model": "Router",
     "find": true,
     "identity_find": true,
@@ -1284,14 +1284,14 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/networkipavailabilities",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies",
     "model": "Policy",
     "find": true,
     "identity_find": true,
@@ -1336,41 +1336,41 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/rules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules",
     "model": "BandwidthLimitRule",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "BandwidthLimitRules",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/rules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules",
     "model": "DSCPMarkingRule",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "DSCPMarkingRules",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/rules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules",
     "model": "MinimumBandwidthRule",
     "find": false,
     "delete": true,
     "wait": false,
     "scope": "MinimumBandwidthRules",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/policies"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/qos/ruletypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas",
     "model": "QuotaResource",
     "upstream_model": "Quota",
     "kind": "singleton",
@@ -1378,17 +1378,17 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/rbacpolicies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies",
     "model": "RBACPolicy",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups",
     "model": "AddressGroup",
     "find": true,
     "identity_find": true,
@@ -1428,7 +1428,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups",
     "model": "SecGroup",
     "find": true,
     "identity_find": true,
@@ -1477,21 +1477,21 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/rules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules",
     "model": "SecGroupRule",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/segments",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments",
     "model": "Segment",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/subnetpools",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools",
     "model": "SubnetPool",
     "find": true,
     "identity_find": true,
@@ -1553,14 +1553,14 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/taas/tapmirrors",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors",
     "model": "TapMirror",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/trunks",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks",
     "model": "Trunk",
     "find": true,
     "identity_find": true,
@@ -1604,42 +1604,42 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/vpnaas/endpointgroups",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups",
     "model": "EndpointGroup",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/vpnaas/ikepolicies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies",
     "model": "Policy",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/vpnaas/ipsecpolicies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies",
     "model": "Policy",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/vpnaas/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services",
     "model": "Service",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/vpnaas/siteconnections",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections",
     "model": "Connection",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/networks",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/networks",
     "model": "Network",
     "find": true,
     "identity_find": true,
@@ -1716,7 +1716,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/ports",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/ports",
     "model": "Port",
     "find": true,
     "identity_find": true,
@@ -1725,7 +1725,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/network/v2/subnets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets",
     "model": "Subnet",
     "find": true,
     "identity_find": true,
@@ -1793,14 +1793,14 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts",
+    "package": "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers",
     "model": "ContainerResource",
     "upstream_model": "Container",
     "find": true,
@@ -1808,45 +1808,45 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects",
+    "package": "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects",
     "model": "ObjectResource",
     "upstream_model": "Object",
     "find": true,
     "delete": true,
     "wait": false,
     "scope": "InContainer",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/swauth",
+    "package": "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/apiversions",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/buildinfo",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/buildinfo",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/resourcetypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/resourcetypes",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackevents",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents",
     "model": "EventResource",
     "upstream_model": "Event",
     "kind": "event_log",
@@ -1854,10 +1854,10 @@
     "delete": false,
     "wait": false,
     "scope": "InStack",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stackresources",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources",
     "model": "ResourceView",
     "upstream_model": "Resource",
     "kind": "compound_child",
@@ -1865,10 +1865,10 @@
     "delete": false,
     "wait": true,
     "scope": "InStack",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacks",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks",
     "model": "StackResource",
     "upstream_model": "RetrievedStack",
     "kind": "compound_identity",
@@ -1877,185 +1877,185 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/orchestration/v1/stacktemplates",
+    "package": "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacktemplates",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocationcandidates",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/allocations",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceclasses",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses",
     "model": "ResourceClass",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/resourceproviders",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders",
     "model": "ResourceProvider",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/traits",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/placement/v1/usages",
+    "package": "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/reservation/v1/hosts",
+    "package": "github.com/JSYoo5B/go-openstacksdk/reservation/v1/hosts",
     "model": "Host",
     "find": false,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/apiversions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/apiversions",
     "model": "APIVersion",
     "find": false,
     "delete": false,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/availabilityzones",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/availabilityzones",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/messages",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/messages",
     "model": "Message",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/replicas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/replicas",
     "model": "Replica",
     "find": false,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/schedulerstats",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/schedulerstats",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/securityservices",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/securityservices",
     "model": "SecurityService",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/services",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shareaccessrules",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules",
     "model": "AccessRule",
     "upstream_model": "ShareAccess",
     "find": false,
     "delete": true,
     "wait": true,
     "scope": "InShare",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharenetworks",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharenetworks",
     "model": "ShareNetwork",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares",
     "model": "Share",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetransfers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharetransfers",
     "model": "Transfer",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharetypes",
     "model": "ShareType",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/snapshots",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/snapshots",
     "model": "Snapshot",
     "find": true,
     "delete": true,
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/utils",
+    "package": "github.com/JSYoo5B/go-openstacksdk/utils",
     "find": false,
     "delete": false,
     "wait": false,
     "issue": "requires a scoped or specialized resource binding"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers",
     "model": "CronTrigger",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions",
     "model": "Execution",
     "find": false,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows",
+    "package": "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows",
     "model": "Workflow",
     "find": true,
     "delete": true,
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces",
     "source": "sdk_owned",
     "model": "Namespace",
     "kind": "named_resource",
@@ -2064,7 +2064,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefobjects",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects",
     "source": "sdk_owned",
     "model": "Object",
     "kind": "scoped_named_resource",
@@ -2072,10 +2072,10 @@
     "delete": true,
     "wait": false,
     "scope": "InNamespace",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties",
     "source": "sdk_owned",
     "model": "Property",
     "kind": "scoped_definition",
@@ -2083,10 +2083,10 @@
     "delete": true,
     "wait": false,
     "scope": "InNamespace",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags",
     "source": "sdk_owned",
     "model": "Tag",
     "kind": "scoped_tag_resource",
@@ -2094,10 +2094,10 @@
     "delete": true,
     "wait": false,
     "scope": "InNamespace",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefresourcetypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes",
     "source": "sdk_owned",
     "model": "ResourceType",
     "kind": "catalog_and_association",
@@ -2105,10 +2105,10 @@
     "delete": true,
     "wait": false,
     "scope": "InNamespace",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefnamespaces"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "Store",
     "kind": "list_only",
@@ -2117,7 +2117,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "ImportInfo",
     "kind": "service_info",
@@ -2126,7 +2126,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/image/v2/serviceinfo",
+    "package": "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo",
     "source": "sdk_owned",
     "model": "UsageInfo",
     "kind": "service_info",
@@ -2135,7 +2135,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores",
     "source": "sdk_owned",
     "model": "SecretStore",
     "kind": "store_defaults",
@@ -2144,7 +2144,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas",
     "source": "sdk_owned",
     "model": "Quota",
     "kind": "effective_project_quota",
@@ -2152,10 +2152,10 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers",
     "source": "sdk_owned",
     "model": "Consumer",
     "kind": "secret_consumer",
@@ -2163,10 +2163,10 @@
     "delete": false,
     "wait": false,
     "scope": "InSecret",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/messaging/v2/subscriptions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions",
     "source": "sdk_owned",
     "model": "Subscription",
     "kind": "queue_subscription",
@@ -2174,10 +2174,10 @@
     "delete": false,
     "wait": false,
     "scope": "InQueue",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/messaging/v2/queues"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets",
     "source": "sdk_owned",
     "model": "QuotaResource",
     "kind": "singleton",
@@ -2185,10 +2185,10 @@
     "delete": false,
     "wait": false,
     "scope": "InProject",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/identity/v3/projects"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotaclasssets",
+    "package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets",
     "source": "sdk_owned",
     "model": "QuotaClassResource",
     "kind": "named_singleton",
@@ -2198,7 +2198,7 @@
     "scope": "InClass"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/devices",
+    "package": "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/devices",
     "source": "sdk_owned",
     "model": "Device",
     "find": false,
@@ -2206,7 +2206,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deployables",
+    "package": "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deployables",
     "source": "sdk_owned",
     "model": "Deployable",
     "find": true,
@@ -2214,7 +2214,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/deviceprofiles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/deviceprofiles",
     "source": "sdk_owned",
     "model": "DeviceProfile",
     "find": true,
@@ -2222,7 +2222,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/attributes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/attributes",
     "source": "sdk_owned",
     "model": "Attribute",
     "find": false,
@@ -2230,7 +2230,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/accelerator/v2/acceleratorrequests",
+    "package": "github.com/JSYoo5B/go-openstacksdk/accelerator/v2/acceleratorrequests",
     "source": "sdk_owned",
     "model": "AcceleratorRequest",
     "find": false,
@@ -2238,7 +2238,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments",
+    "package": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments",
     "source": "sdk_owned",
     "model": "Segment",
     "find": true,
@@ -2246,17 +2246,17 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/hosts",
+    "package": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/hosts",
     "source": "sdk_owned",
     "model": "Host",
     "find": true,
     "delete": true,
     "wait": false,
     "scope": "InSegment",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/segments"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/notifications",
+    "package": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications",
     "source": "sdk_owned",
     "model": "Notification",
     "find": false,
@@ -2264,17 +2264,17 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/vmoves",
+    "package": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves",
     "source": "sdk_owned",
     "model": "VMove",
     "find": false,
     "delete": false,
     "wait": true,
     "scope": "InNotification",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/instanceha/v1/notifications"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/buildinfo",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/buildinfo",
     "source": "sdk_owned",
     "model": "BuildInfo",
     "kind": "service_info",
@@ -2283,7 +2283,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes",
     "source": "sdk_owned",
     "model": "ProfileType",
     "find": true,
@@ -2291,7 +2291,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes",
     "source": "sdk_owned",
     "model": "PolicyType",
     "find": true,
@@ -2299,7 +2299,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles",
     "source": "sdk_owned",
     "model": "Profile",
     "find": true,
@@ -2307,7 +2307,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies",
     "source": "sdk_owned",
     "model": "Policy",
     "find": true,
@@ -2315,7 +2315,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters",
     "source": "sdk_owned",
     "model": "Cluster",
     "kind": "async_resource",
@@ -2324,7 +2324,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/nodes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes",
     "source": "sdk_owned",
     "model": "Node",
     "kind": "async_resource",
@@ -2333,7 +2333,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/receivers",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers",
     "source": "sdk_owned",
     "model": "Receiver",
     "find": true,
@@ -2341,7 +2341,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/actions",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions",
     "source": "sdk_owned",
     "model": "Action",
     "find": true,
@@ -2349,7 +2349,7 @@
     "wait": true
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/events",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/events",
     "source": "sdk_owned",
     "model": "Event",
     "find": false,
@@ -2357,7 +2357,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/services",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/services",
     "source": "sdk_owned",
     "model": "Service",
     "kind": "list_only",
@@ -2366,7 +2366,7 @@
     "wait": false
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterpolicies",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusterpolicies",
     "source": "sdk_owned",
     "model": "ClusterPolicy",
     "kind": "policy_binding",
@@ -2374,10 +2374,10 @@
     "delete": false,
     "wait": false,
     "scope": "InCluster",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
   },
   {
-    "package": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusterattributes",
+    "package": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusterattributes",
     "source": "sdk_owned",
     "model": "ClusterAttribute",
     "kind": "scoped_list_only",
@@ -2385,6 +2385,6 @@
     "delete": false,
     "wait": false,
     "scope": "InCluster",
-    "parent": "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+    "parent": "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
   }
 ]

@@ -8,10 +8,10 @@ import (
 	"iter"
 	"slices"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type flavorWorkflowFailure struct{ error }

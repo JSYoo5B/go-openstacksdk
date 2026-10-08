@@ -4,7 +4,7 @@
 
 ## Python과 Go의 대응
 
-| 고정 openstacksdk | gophercloudsdk |
+| 고정 openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.compute.get_flavor(flavor_id)` | `service.Flavors.FindIdentity(ctx, flavorID, resource.WithIdentityFindFallback(resource.FindFallbackNever), resource.WithIdentityFindIgnoreMissing(false))` |
 | `get_flavor(flavor_id, get_extra_specs=True)` | 위 호출에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
@@ -43,10 +43,10 @@ import (
     "os"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs"
-    "github.com/JSYoo5B/gophercloudsdk/compute/v2/servers"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+    "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {

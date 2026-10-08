@@ -1,6 +1,6 @@
 package users
 
-import "github.com/JSYoo5B/gophercloudsdk/resource"
+import "github.com/JSYoo5B/go-openstacksdk/resource"
 
 // projectRecordFilterDescriptor binds the SDK-owned UserProject record, not
 // Users.Resources or the native projects.Project model. Its declarations are

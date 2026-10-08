@@ -4,7 +4,7 @@
 
 권한 분류는 **핵심 admin API**입니다. 2026-10-08에 확인한 [Nova 기본 정책](https://docs.openstack.org/nova/latest/configuration/policy.html)의 `os_compute_api:os-console-auth-tokens`는 `rule:context_is_admin`을 요구합니다. 배포의 policy override는 서버가 판단하며, SDK가 로컬 role 검사로 권한을 대신 결정하지 않습니다. 일반 사용자 console 생성과 토큰 연결 정보 조회의 권한은 다릅니다.
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.compute.validate_console_auth_token(token)` | `service.ValidateConsoleAuthToken(ctx, token)` |
 | ConsoleAuthToken Resource의 known 속성 | `record.Resource.Body`의 passive JSON 필드 |
@@ -37,7 +37,7 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
 )
 
 func main() {

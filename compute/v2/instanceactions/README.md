@@ -9,7 +9,7 @@ Instance action은 서버에 수행한 `reboot`, `stop` 등의 요청 이력입�
 | `ignore_missing=True` | `scope.Find(ctx, resource.ID(requestID), resource.WithIgnoreMissing())` |
 
 ```go
-// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서
+// context.Context ctx, *openstack.Connection conn을 사용하는 함수 안에서
 service, err := conn.ComputeV2(ctx)
 if err != nil { return err }
 scope, err := service.InstanceActions.InServer(ctx, resource.Name("worker"))
@@ -27,7 +27,7 @@ if action != nil && action.Events != nil {
 }
 ```
 
-예제의 `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`, `fmt`는 표준 라이브러리입니다. `WithPageSize`에는 Compute microversion 2.58 이상을 선택해야 합니다. `sdk.WithMicroversion(sdk.Compute, "2.84")` 또는 필요한 범위의 `sdk.WithMicroversionRange`를 Connection에 설정하면 예제의 pagination과 최신 event details를 요청할 수 있습니다. 기본 조회 전체에 2.84가 필요한 것은 아닙니다.
+예제의 `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`, `fmt`는 표준 라이브러리입니다. `WithPageSize`에는 Compute microversion 2.58 이상을 선택해야 합니다. `sdk.WithMicroversion(sdk.Compute, "2.84")` 또는 필요한 범위의 `sdk.WithMicroversionRange`를 Connection에 설정하면 예제의 pagination과 최신 event details를 요청할 수 있습니다. 기본 조회 전체에 2.84가 필요한 것은 아닙니다.
 
 서버 `resource.ID`는 사전 조회 없이 사용하고 `resource.Name`은 전체 페이지에서 정확히 찾습니다. 중복 이름·미존재·권한 오류를 숨기지 않습니다. 후속 작업에서 서버를 다시 찾지 않으며 응답의 `instance_uuid`가 달라도 부모 URL을 바꾸지 않습니다. 삭제한 서버의 이력은 이름으로 다시 찾기 어려우므로 보관한 서버 ID로 접근합니다.
 
@@ -83,8 +83,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListServerActions(ctx context.Context, conn *sdk.Connection, serverID string) error {

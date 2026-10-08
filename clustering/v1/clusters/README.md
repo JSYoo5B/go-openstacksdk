@@ -386,8 +386,8 @@ package example
 import (
     "context"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
 )
 
 func FindClusterStrict(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {
@@ -410,9 +410,9 @@ package example
 import (
     "context"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/clusters"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func RenameTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.Cluster, error) {

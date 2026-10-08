@@ -2,13 +2,13 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/acls"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/orders"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/quotas"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretconsumers"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
-	resource6 "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secretstores"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

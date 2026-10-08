@@ -2,17 +2,17 @@
 package v2
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/amphorae"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/apiversions"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavorprofiles"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/flavors"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/l7policies"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/listeners"
-	resource6 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
-	resource7 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/monitors"
-	resource8 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/pools"
-	resource9 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/providers"
-	resource10 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/quotas"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/amphorae"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/apiversions"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavorprofiles"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/flavors"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/l7policies"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/listeners"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/loadbalancers"
+	resource7 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/monitors"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/providers"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

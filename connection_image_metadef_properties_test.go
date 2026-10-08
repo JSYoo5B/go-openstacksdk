@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	prop "github.com/JSYoo5B/gophercloudsdk/image/v2/metadefproperties"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	prop "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

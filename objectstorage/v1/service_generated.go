@@ -2,10 +2,10 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/swauth"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

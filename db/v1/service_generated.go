@@ -2,12 +2,12 @@
 package v1
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/db/v1/configurations"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/db/v1/databases"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/db/v1/datastores"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/db/v1/flavors"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/db/v1/instances"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/db/v1/users"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/db/v1/configurations"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/db/v1/databases"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/db/v1/datastores"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/db/v1/flavors"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/db/v1/instances"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/db/v1/users"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

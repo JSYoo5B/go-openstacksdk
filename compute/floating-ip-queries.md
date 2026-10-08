@@ -6,7 +6,7 @@
 
 ## Python과 Go 대응
 
-| openstacksdk cloud | gophercloudsdk Service·Connection |
+| openstacksdk cloud | go-openstacksdk Service·Connection |
 |---|---|
 | `conn.list_floating_ips(filters=None)` | `ListFloatingIPs(ctx, options...)` → `*compute.FloatingIPQueryResult` |
 | `conn.search_floating_ips(id=None, filters=None)` | `SearchFloatingIPs(ctx, compute.SearchFloatingIPsRequest{ID: ...}, options...)` → 같은 결과 타입 |
@@ -51,8 +51,8 @@ import (
     "os"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 func main() {

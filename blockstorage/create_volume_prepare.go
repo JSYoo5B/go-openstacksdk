@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"net/url"
 
-	images "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	images "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

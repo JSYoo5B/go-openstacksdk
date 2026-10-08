@@ -308,7 +308,7 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 	e.use("context")
 	e.use("net/url")
 	e.use("iter")
-	e.use("github.com/JSYoo5B/gophercloudsdk/resource")
+	e.use("github.com/JSYoo5B/go-openstacksdk/resource")
 	e.use("fmt")
 	if plan.status != "" {
 		e.use("strings")
@@ -334,7 +334,7 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 	}
 	e.printf("Get:func(ctx context.Context,id string)(*%s,error){", plan.modelName)
 	if isInteger(plan.getIDType) {
-		e.use("github.com/JSYoo5B/gophercloudsdk/request")
+		e.use("github.com/JSYoo5B/go-openstacksdk/request")
 		e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return nil,err};return %s.%s(%s)},\n", e.typ(plan.getIDType), receiver, plan.getter.Name(), arguments("parsed"))
 	} else {
 		e.printf("return %s.%s(%s)},\n", receiver, plan.getter.Name(), arguments(e.typ(plan.getIDType)+"(id)"))
@@ -367,7 +367,7 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 		e.printf("Delete:func(ctx context.Context,id string)error{")
 		idArg := e.typ(plan.deleteIDType) + "(id)"
 		if isInteger(plan.deleteIDType) {
-			e.use("github.com/JSYoo5B/gophercloudsdk/request")
+			e.use("github.com/JSYoo5B/go-openstacksdk/request")
 			e.printf("parsed,err:=request.NumericID[%s](id);if err!=nil{return err};", e.typ(plan.deleteIDType))
 			idArg = "parsed"
 		}
@@ -395,7 +395,7 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 	list := plan.lister.Name()
 	listArgs := strings.Join(append(append([]string{"ctx"}, parents...), "control"), ",")
 	if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok && contract.rawListIterator != "" {
-		e.use("github.com/JSYoo5B/gophercloudsdk/internal/nativefind")
+		e.use("github.com/JSYoo5B/go-openstacksdk/internal/nativefind")
 		e.printf("return nativefind.%s(ctx,%s.RawClient(),q,control)\n", contract.rawListIterator, receiver)
 	} else if plan.listInput == nil {
 		e.printf("if len(q)!=0{return func(yield func(*%s,error)bool){yield(nil,resource.ErrUnsupported)}}\nreturn %s.%s(%s)\n", plan.modelName, receiver, controlledListName(list), listArgs)
@@ -404,13 +404,13 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 			// FindIdentity can retain repeated query values and a present nil
 			// name key. A sequence of WithQuery options would Set each value
 			// and collapse that input before the native builder sees it.
-			e.use("github.com/JSYoo5B/gophercloudsdk/request")
+			e.use("github.com/JSYoo5B/go-openstacksdk/request")
 			e.printf("options:=[]%sOption{func(config *request.Config[%s])error{config.Query=make(url.Values,len(q));for key,values:=range q{config.Query[key]=append([]string(nil),values...)};return nil}}\nreturn %s.%s(%s,options...)\n", list, e.typ(plan.listInput), receiver, controlledListName(list), listArgs)
 		} else {
 			e.printf("options:=make([]%sOption,0,len(q))\nfor key,values:=range q{for _,value:=range values{options=append(options,With%sQuery(key,value))}}\nreturn %s.%s(%s,options...)\n", list, list, receiver, controlledListName(list), listArgs)
 		}
 	} else {
-		e.use("github.com/JSYoo5B/gophercloudsdk/request")
+		e.use("github.com/JSYoo5B/go-openstacksdk/request")
 		e.printf("input,err:=request.QueryOptions[%s](q)\nif err!=nil{return func(yield func(*%s,error)bool){yield(nil,err)}}\nreturn %s.%s(%s,With%sOptions(input))\n", e.typ(plan.listInput), plan.modelName, receiver, controlledListName(list), listArgs, list)
 	}
 	e.printf("},}")

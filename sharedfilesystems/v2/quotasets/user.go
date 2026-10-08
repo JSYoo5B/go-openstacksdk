@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
-	"github.com/JSYoo5B/gophercloudsdk/internal/project"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/project"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // UserQuotaScope fixes both the project and user. It has no Defaults method

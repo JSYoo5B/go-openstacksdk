@@ -2,8 +2,8 @@ package blockstorage
 
 import (
 	"context"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudsnapshot"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type GetVolumeSnapshotByIDRequest struct{ ID string }

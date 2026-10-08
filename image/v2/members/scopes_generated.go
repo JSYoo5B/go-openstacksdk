@@ -4,8 +4,8 @@ package members
 import (
 	context "context"
 	fmt "fmt"
-	images "github.com/JSYoo5B/gophercloudsdk/image/v2/images"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	images "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
 	url "net/url"

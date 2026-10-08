@@ -28,8 +28,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listRouters(ctx context.Context, client *gophercloud.ServiceClient) ([]*routers.Router, error) {
@@ -72,8 +72,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/layer3/routers"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func firstPageRouters(ctx context.Context, client *gophercloud.ServiceClient) ([]*routers.Router, error) {

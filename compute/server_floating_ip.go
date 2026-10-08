@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // CreateWithFloatingIP creates a server, waits for its actual ACTIVE status,

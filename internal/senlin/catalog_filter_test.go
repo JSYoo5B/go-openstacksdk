@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/policytypes"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiletypes"
-	"github.com/JSYoo5B/gophercloudsdk/clustering/v1/services"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes"
+	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/services"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestBodyFilterCatalogFacadesUseRawFieldsAndOwnNamespaces(t *testing.T) {

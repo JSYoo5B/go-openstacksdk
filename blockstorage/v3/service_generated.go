@@ -2,19 +2,19 @@
 package v3
 
 import (
-	resource0 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/attachments"
-	resource1 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/availabilityzones"
-	resource2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/backups"
-	resource3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits"
-	resource4 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/manageablevolumes"
-	resource5 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/qos"
-	resource6 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/quotasets"
-	resource7 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/schedulerstats"
-	resource8 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/services"
-	resource9 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
-	resource10 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/transfers"
-	resource11 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
-	resource12 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumetypes"
+	resource0 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
+	resource1 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/availabilityzones"
+	resource2 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
+	resource7 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
+	resource11 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	resource12 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 

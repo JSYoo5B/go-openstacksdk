@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Download retains a streaming response body and its parsed metadata. The caller

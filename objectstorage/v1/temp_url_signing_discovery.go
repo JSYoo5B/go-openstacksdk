@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/accounts"
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Only phase orchestration is new: leaf APIs retain their strict response policy.

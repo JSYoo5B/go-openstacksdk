@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"slices"
 
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // OwnReadConfig snapshots the mutable request carriers around an option

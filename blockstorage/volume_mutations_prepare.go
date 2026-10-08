@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudlocation"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // Snapshot scope once after original options, before either physical stage.

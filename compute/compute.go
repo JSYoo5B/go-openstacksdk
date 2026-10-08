@@ -2,16 +2,16 @@ package compute
 
 import (
 	"context"
-	computeapi "github.com/JSYoo5B/gophercloudsdk/compute/v2"
+	computeapi "github.com/JSYoo5B/go-openstacksdk/compute/v2"
 	"iter"
 	"net/url"
 	"regexp"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/nativefind"
-	"github.com/JSYoo5B/gophercloudsdk/internal/query"
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	"github.com/JSYoo5B/go-openstacksdk/internal/query"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/flavors"

@@ -10,7 +10,9 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**최신 완료 (2026-10-08): 핵심 user Glance schema12개, 전체243→255(+12)·핵심169→181/2,292·Glance7→19/120.** `GetSchemaRecord`는 같은16고정 경로를 ordinary Schema·MetadefSchema class로 투영하고 nullable raw·dict·bool·list, ordered aliases와 Connection location을 처리합니다. 실제 Wire·Envelope·receipt는 분리하며 빈/비JSON 성공과 parsed nonobject 오류를 구분합니다. 기존16 strict getter의 API·200 정책은 유지합니다. [Python/Go 비교·독립 main](../image/schema-records.md), [검증 기록](sdk-support-ledger.md#glance-schema-class-records-완료)에 사용법과 숫자/encoding·명시 zone의 Go 차이를 설명합니다.
+**진행 중 (2026-10-08): 프로젝트 이름·모듈·루트 패키지 변경과 라이선스 정리.** 공개 모듈을 `github.com/JSYoo5B/go-openstacksdk`, 루트 패키지를 `openstack`으로 옮기고 생성기·문서·SDK 참조를 동기화합니다. 과거 source SHA·revision·임시 실행 로그는 당시 증거로 보존하며, 변경 후 전체 검사와 원격 설치 증거를 새로 기록합니다. API 집계·source pin·구현 우선순위는 이 작업으로 늘리지 않습니다.
+
+**앞선 API 완료 (2026-10-08): 핵심 user Glance schema12개, 전체243→255(+12)·핵심169→181/2,292·Glance7→19/120.** `GetSchemaRecord`는 같은16고정 경로를 ordinary Schema·MetadefSchema class로 투영하고 nullable raw·dict·bool·list, ordered aliases와 Connection location을 처리합니다. 실제 Wire·Envelope·receipt는 분리하며 빈/비JSON 성공과 parsed nonobject 오류를 구분합니다. 기존16 strict getter의 API·200 정책은 유지합니다. [Python/Go 비교·독립 main](../image/schema-records.md), [검증 기록](sdk-support-ledger.md#glance-schema-class-records-완료)에 사용법과 숫자/encoding·명시 zone의 Go 차이를 설명합니다.
 
 집중 race35그룹 중31개를 재사용했고 새4그룹65사례가 PASS했습니다. 공개 Gophercloud helper·기존 SDK transport/body fault fixture를 사용하며 새 서버·fault engine은0개입니다. 실제 고정 Python checkout을 지정한 전체 `make check`43개 test package·반복 생성 drift0·정확한 독립/설치 main의 local-consumer 빌드가 PASS했습니다. 기본 임시 checkout의 일부 Source 파일 누락으로 실패한 첫 전체 검사는 환경 경로를 교정해 해결했고 Go 코드는 바꾸지 않았습니다. Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 집중·전체·원격 module cache에서 같습니다.
 

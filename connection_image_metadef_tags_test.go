@@ -1,4 +1,4 @@
-package gophercloudsdk_test
+package openstack_test
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	tag "github.com/JSYoo5B/gophercloudsdk/image/v2/metadeftags"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	tag "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

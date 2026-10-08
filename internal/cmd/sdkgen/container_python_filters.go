@@ -29,7 +29,7 @@ func containerPythonBodyFields() map[string]pythonFilterField {
 
 func containerPythonFilterMetadataValid(manifest *pythonFilterManifest) bool {
 	if manifest == nil || manifest.SchemaVersion != 1 || manifest.SourcePin != pythonFilterPin ||
-		manifest.Resource != containerPythonResource || manifest.SDKPackage != "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers" || manifest.BasePath != "/containers" || manifest.Envelope != "containers" ||
+		manifest.Resource != containerPythonResource || manifest.SDKPackage != "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers" || manifest.BasePath != "/containers" || manifest.Envelope != "containers" ||
 		manifest.Counts.CanonicalQuery != 2 || manifest.Counts.AcceptedQuery != 2 || manifest.Counts.LocalBody != 10 ||
 		!reflect.DeepEqual(manifest.Query, map[string]string{"limit": "limit", "marker": "marker"}) || !reflect.DeepEqual(manifest.Body, containerPythonBodyFields()) ||
 		len(manifest.QueryFormats) != 0 || len(manifest.URI) != 0 || manifest.UnknownFilters != "discard" || manifest.QueryCollision != "canonical_client_name_wins" ||

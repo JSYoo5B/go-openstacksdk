@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
-	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotaclasssets"
-	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/quotasets"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets"
+	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
 )
 
 func TestManilaQuotaVersionLatestCannotChooseRoutesBeforeLookupOrHTTP(t *testing.T) {

@@ -46,7 +46,7 @@ func manageQuotas(ctx context.Context, client *gophercloud.ServiceClient) error 
 }
 ```
 
-예제 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/quotas`, `github.com/JSYoo5B/gophercloudsdk/resource`입니다. 인증과 endpoint가 설정된 LoadBalancer `ServiceClient`를 전달하며, SDK가 builder와 응답 처리를 관리합니다.
+예제 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas`, `github.com/JSYoo5B/go-openstacksdk/resource`입니다. 인증과 endpoint가 설정된 LoadBalancer `ServiceClient`를 전달하며, SDK가 builder와 응답 처리를 관리합니다.
 
 ## 프로젝트와 기본값
 

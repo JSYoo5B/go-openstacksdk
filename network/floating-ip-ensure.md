@@ -12,7 +12,7 @@
 
 ## Python과 Go의 대응
 
-| 고정 openstacksdk cloud 호출 | gophercloudsdk |
+| 고정 openstacksdk cloud 호출 | go-openstacksdk |
 |---|---|
 | `conn.add_ips_to_server(server, ip_pool="public", reuse=True)` | `Ensure(ctx, EnsureFloatingIPRequest{Server: ref, Network: resource.Name("public")})` |
 | `conn.add_auto_ip(server, reuse=True)` | Network를 생략한 Ensure의 자동 외부 네트워크 선택 |
@@ -57,9 +57,9 @@ import (
 	"log"
 	"time"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func main() {

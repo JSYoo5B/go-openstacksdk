@@ -3,7 +3,7 @@ package metadeftags
 import (
 	"net/http"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // Acknowledgement records an actual DELETE 204 independently of response

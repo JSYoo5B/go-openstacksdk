@@ -14,7 +14,7 @@
 
 ## 생성·검증·갱신
 
-다음 Go 예제는 `ctx context.Context`, `conn *gophercloudsdk.Connection`을 사용하는 함수 안에서 실행합니다. `policies`는 `github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies`, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다.
+다음 Go 예제는 `ctx context.Context`, `conn *openstack.Connection`을 사용하는 함수 안에서 실행합니다. `policies`는 `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies`, `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`입니다.
 
 ```go
 service, err := conn.Clustering(ctx)
@@ -183,8 +183,8 @@ package example
 import (
     "context"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies"
 )
 
 func FindPolicyStrict(ctx context.Context, conn *sdk.Connection) (*policies.Policy, error) {

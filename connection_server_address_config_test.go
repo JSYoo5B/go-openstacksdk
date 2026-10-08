@@ -1,11 +1,11 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 	"path/filepath"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 )
 
 func checkAddressConfiguration(t *testing.T, policy compute.ServerAddressPolicy, wantPrivate, wantForce bool) {

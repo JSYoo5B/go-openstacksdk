@@ -288,7 +288,7 @@
   ],
   "resource": "openstack.identity.v3.project.UserProject",
   "schema_version": 1,
-  "sdk_package": "github.com/JSYoo5B/gophercloudsdk/identity/v3/users",
+  "sdk_package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/users",
   "source_controls": {
     "proxy_list": [
       "resource_type",

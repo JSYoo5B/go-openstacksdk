@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/jmespath"
-	"github.com/JSYoo5B/gophercloudsdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 )
 
 // The primary-source fixture distinguishes Python 1.0.1 runtime goldens from

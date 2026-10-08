@@ -11,8 +11,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listAddressGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*addressgroups.AddressGroup, error) {
@@ -47,8 +47,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/addressgroups"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func listTenantAddressGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*addressgroups.AddressGroup, error) {

@@ -4,7 +4,7 @@ Cinder v3 볼륨의 조회, iterator, 삭제, 상태 대기를 제공합니다. 
 
 ## openstacksdk 대응
 
-| openstacksdk | gophercloudsdk |
+| openstacksdk | go-openstacksdk |
 |---|---|
 | `conn.block_storage.get_volume(id)` | `service.Volumes.Get(ctx, id)` |
 | `conn.block_storage.find_volume(name, ignore_missing=False)` | `service.Volumes.Find(ctx, resource.Name(name))` |

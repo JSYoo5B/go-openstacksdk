@@ -3,9 +3,9 @@ package snapshots
 
 import (
 	context "context"
-	snapshotmetadata "github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	snapshotmetadata "github.com/JSYoo5B/go-openstacksdk/internal/snapshotmetadata"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/snapshots"
 	pagination "github.com/gophercloud/gophercloud/v2/pagination"

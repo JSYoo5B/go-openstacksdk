@@ -1,6 +1,6 @@
 package clusterpolicies
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 
 // WithListHeader adds a header to this list operation. Authentication, version
 // and transport headers remain owned by the SDK.

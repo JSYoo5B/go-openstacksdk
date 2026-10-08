@@ -22,7 +22,7 @@ profile = conn.clustering.update_profile(profile)
 ```
 
 ```go
-// context.Context ctx, *gophercloudsdk.Connection conn을 사용하는 함수 안에서
+// context.Context ctx, *openstack.Connection conn을 사용하는 함수 안에서
 service, err := conn.ClusteringV1(ctx)
 if err != nil { return err }
 tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
@@ -37,8 +37,8 @@ if err != nil { return err }
 fmt.Println(profile.Name, tracked.Dirty(), tracked.Response().Body)
 ```
 
-`profiles`는 `github.com/JSYoo5B/gophercloudsdk/clustering/v1/profiles`, `policies`는
-`github.com/JSYoo5B/gophercloudsdk/clustering/v1/policies`, `resource`는 `github.com/JSYoo5B/gophercloudsdk/resource`입니다.
+`profiles`는 `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles`, `policies`는
+`github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies`, `resource`는 `github.com/JSYoo5B/go-openstacksdk/resource`입니다.
 기존 stateless `API.Update`는 여전히 명시한 필드를 바로 전송하며 빈 요청을 거부합니다.
 tracked handle의 변경 없는 `Commit`은 캐시 snapshot을 반환하고 HTTP를 수행하지 않습니다.
 

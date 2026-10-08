@@ -8,7 +8,7 @@ import (
 	"iter"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // find is the prepared ordinary lookup shared by GetVolume and VolumeExists.

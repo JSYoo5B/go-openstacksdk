@@ -1,13 +1,13 @@
-package gophercloudsdk
+package openstack
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/volumes"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // VolumeMetadata fixes Cinder v3 metadata to one volume ID or exact name.

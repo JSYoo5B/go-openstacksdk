@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/JSYoo5B/gophercloudsdk/blockstorage/metadata"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 func decode(response *rest.Response) (*metadata.Result, error) {

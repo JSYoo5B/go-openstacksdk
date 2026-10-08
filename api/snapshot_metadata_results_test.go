@@ -12,11 +12,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	snapshots2 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v2/snapshots"
-	snapshots3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/snapshots"
-	"github.com/JSYoo5B/gophercloudsdk/internal/snapshotmetadata"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	snapshots2 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
+	snapshots3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/internal/snapshotmetadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

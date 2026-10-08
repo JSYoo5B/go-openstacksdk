@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/cloudfilter"
-	"github.com/JSYoo5B/gophercloudsdk/internal/jmespath"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jmespath"
 )
 
 //go:embed testdata/python_cloud_filter_reference.json

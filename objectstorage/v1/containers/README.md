@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
-	sdk "github.com/JSYoo5B/gophercloudsdk"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListContainers(ctx context.Context, conn *sdk.Connection) error {
@@ -74,7 +74,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 )
 
 func changeContainerMetadata(ctx context.Context, api *containers.API, name string) error {
@@ -164,7 +164,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 )
 
 func containerLifecycle(ctx context.Context, api *containers.API, name string) error {

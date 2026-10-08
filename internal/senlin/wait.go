@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // WaitForStatus applies Senlin's proxy defaults without changing Collection's

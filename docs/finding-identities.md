@@ -49,10 +49,10 @@ package example
 import (
     "context"
 
-    computev2 "github.com/JSYoo5B/gophercloudsdk/compute/v2"
-    storagev3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
+    storagev3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindApplicationResources(ctx context.Context, compute *computev2.Service,
@@ -81,9 +81,9 @@ package example
 import (
     "context"
 
-    dnsv2 "github.com/JSYoo5B/gophercloudsdk/dns/v2"
-    lbv2 "github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    dnsv2 "github.com/JSYoo5B/go-openstacksdk/dns/v2"
+    lbv2 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindScopedResources(ctx context.Context, dns *dnsv2.Service,
@@ -196,9 +196,9 @@ package example
 import (
     "context"
 
-    computev2 "github.com/JSYoo5B/gophercloudsdk/compute/v2"
-    blockstoragev3 "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
+    blockstoragev3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
@@ -262,8 +262,8 @@ package example
 import (
     "context"
 
-    computev2 "github.com/JSYoo5B/gophercloudsdk/compute/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindFlavor(ctx context.Context, compute *computev2.Service) error {
@@ -312,8 +312,8 @@ package example
 import (
     "context"
 
-    imagev2 "github.com/JSYoo5B/gophercloudsdk/image/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    imagev2 "github.com/JSYoo5B/go-openstacksdk/image/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindImage(ctx context.Context, images *imagev2.Service) error {
@@ -340,9 +340,9 @@ package example
 import (
     "context"
 
-    identityv3 "github.com/JSYoo5B/gophercloudsdk/identity/v3"
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    identityv3 "github.com/JSYoo5B/go-openstacksdk/identity/v3"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindTenantResources(ctx context.Context, identity *identityv3.Service,
@@ -410,8 +410,8 @@ import (
     "context"
     "net/url"
 
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindNetworkExtensions(ctx context.Context, network *networkv2.Service,
@@ -467,8 +467,8 @@ package example
 import (
     "context"
 
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindSubnetPoolAndTrunk(ctx context.Context, network *networkv2.Service,
@@ -521,8 +521,8 @@ package example
 import (
     "context"
 
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func FindQoSAndAddresses(ctx context.Context, network *networkv2.Service,

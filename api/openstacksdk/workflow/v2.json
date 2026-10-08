@@ -18,7 +18,7 @@
       "id": "workflow/v2/create_workflow",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -43,7 +43,7 @@
       "id": "workflow/v2/update_workflow",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -64,7 +64,7 @@
       "id": "workflow/v2/get_workflow",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -85,7 +85,7 @@
       "id": "workflow/v2/workflows",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -111,7 +111,7 @@
       "id": "workflow/v2/delete_workflow",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -137,7 +137,7 @@
       "id": "workflow/v2/find_workflow",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/workflows"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/workflows"
       ],
       "review": "pending"
     },
@@ -158,7 +158,7 @@
       "id": "workflow/v2/create_execution",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
       ],
       "review": "pending"
     },
@@ -179,7 +179,7 @@
       "id": "workflow/v2/get_execution",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
       ],
       "review": "pending"
     },
@@ -200,7 +200,7 @@
       "id": "workflow/v2/executions",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
       ],
       "review": "pending"
     },
@@ -226,7 +226,7 @@
       "id": "workflow/v2/delete_execution",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
       ],
       "review": "pending"
     },
@@ -252,7 +252,7 @@
       "id": "workflow/v2/find_execution",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/executions"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/executions"
       ],
       "review": "pending"
     },
@@ -273,7 +273,7 @@
       "id": "workflow/v2/create_cron_trigger",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
       ],
       "review": "pending"
     },
@@ -294,7 +294,7 @@
       "id": "workflow/v2/get_cron_trigger",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
       ],
       "review": "pending"
     },
@@ -320,7 +320,7 @@
       "id": "workflow/v2/cron_triggers",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
       ],
       "review": "pending"
     },
@@ -346,7 +346,7 @@
       "id": "workflow/v2/delete_cron_trigger",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
       ],
       "review": "pending"
     },
@@ -381,7 +381,7 @@
       "id": "workflow/v2/find_cron_trigger",
       "kind": "proxy",
       "candidates": [
-        "github.com/JSYoo5B/gophercloudsdk/workflow/v2/crontriggers"
+        "github.com/JSYoo5B/go-openstacksdk/workflow/v2/crontriggers"
       ],
       "review": "pending"
     },

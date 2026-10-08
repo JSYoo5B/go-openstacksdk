@@ -40,7 +40,7 @@ func TestUserProjectRecordDescriptorMatchesPinnedOwnedManifest(t *testing.T) {
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.SourcePin != "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe" || manifest.Resource != "openstack.identity.v3.project.UserProject" || manifest.SDKPackage != "github.com/JSYoo5B/gophercloudsdk/identity/v3/users" || manifest.BasePath != "/users/%(user_id)s/projects" || manifest.Envelope != "projects" || manifest.Counts.CanonicalQuery != 11 || manifest.Counts.AcceptedQuery != 15 || manifest.Counts.LocalBody != 4 {
+	if manifest.SourcePin != "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe" || manifest.Resource != "openstack.identity.v3.project.UserProject" || manifest.SDKPackage != "github.com/JSYoo5B/go-openstacksdk/identity/v3/users" || manifest.BasePath != "/users/%(user_id)s/projects" || manifest.Envelope != "projects" || manifest.Counts.CanonicalQuery != 11 || manifest.Counts.AcceptedQuery != 15 || manifest.Counts.LocalBody != 4 {
 		t.Fatalf("unexpected owned UserProject manifest identity: %+v", manifest)
 	}
 	descriptor := projectRecordFilterDescriptor()

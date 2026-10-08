@@ -253,7 +253,7 @@
   ],
   "resource": "openstack.key_manager.v1.container.Container",
   "schema_version": 1,
-  "sdk_package": "github.com/JSYoo5B/gophercloudsdk/keymanager/v1/containers",
+  "sdk_package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers",
   "source_controls": {
     "proxy_list": [
       "resource_type",

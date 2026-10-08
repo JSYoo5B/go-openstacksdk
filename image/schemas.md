@@ -8,7 +8,7 @@ package example
 import (
     "context"
 
-    "github.com/JSYoo5B/gophercloudsdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image"
 )
 
 func getAllSchemas(ctx context.Context, service *image.Service) (map[string]*image.Schema, error) {

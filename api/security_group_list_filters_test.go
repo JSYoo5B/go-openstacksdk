@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	securitygroups "github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/security/groups"
-	"github.com/JSYoo5B/gophercloudsdk/network/v2/ports"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	securitygroups "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

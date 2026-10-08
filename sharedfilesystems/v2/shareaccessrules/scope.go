@@ -10,11 +10,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/manilaversion"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
-	"github.com/JSYoo5B/gophercloudsdk/request"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
-	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/shares"
+	"github.com/JSYoo5B/go-openstacksdk/internal/manilaversion"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shares"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

@@ -307,7 +307,7 @@ func TestPythonFilterPinnedCheckoutVerification(t *testing.T) {
 	// sdkgen itself never skips its required live-source verification.
 	source := os.Getenv("OPENSTACKSDK_SOURCE")
 	if source == "" {
-		source = "/private/tmp/gophercloudsdk-openstacksdk"
+		source = "/private/tmp/go-openstacksdk-openstacksdk"
 	}
 	if _, err := os.Stat(filepath.Join(source, "openstack/resource.py")); err != nil {
 		t.Skip("audited source checkout not present")

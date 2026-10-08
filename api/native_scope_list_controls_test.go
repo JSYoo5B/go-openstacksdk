@@ -12,13 +12,13 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/instanceactions"
-	"github.com/JSYoo5B/gophercloudsdk/db/v1/databases"
-	"github.com/JSYoo5B/gophercloudsdk/db/v1/users"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/containers"
-	"github.com/JSYoo5B/gophercloudsdk/objectstorage/v1/objects"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions"
+	"github.com/JSYoo5B/go-openstacksdk/db/v1/databases"
+	"github.com/JSYoo5B/go-openstacksdk/db/v1/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

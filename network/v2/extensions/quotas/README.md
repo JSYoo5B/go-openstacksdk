@@ -46,7 +46,7 @@ func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient)
 }
 ```
 
-예제의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas`, `github.com/JSYoo5B/gophercloudsdk/resource`입니다. `New`에는 인증과 endpoint가 설정된 Network `ServiceClient`를 전달합니다. SDK가 builder와 결과 처리를 관리합니다.
+예제의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas`, `github.com/JSYoo5B/go-openstacksdk/resource`입니다. `New`에는 인증과 endpoint가 설정된 Network `ServiceClient`를 전달합니다. SDK가 builder와 결과 처리를 관리합니다.
 
 Connection을 사용하면 `conn.NetworkProjectQuotas(ctx, resource.ID("project-id"))` 또는 `conn.CurrentNetworkProjectQuotas(ctx)`로 같은 scope를 얻습니다. 이름 reference는 Connection의 Identity client로 해석합니다.
 
@@ -96,7 +96,7 @@ func listQuotaOverrides(ctx context.Context, networkClient *gophercloud.ServiceC
 }
 ```
 
-이 fragment의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/gophercloudsdk/network/v2/extensions/quotas`입니다. 목록을 모두 수집하려면 `values, err := api.AllProjects(ctx)`를 사용합니다.
+이 fragment의 import는 `context`, `fmt`, `github.com/gophercloud/gophercloud/v2`, `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas`입니다. 목록을 모두 수집하려면 `values, err := api.AllProjects(ctx)`를 사용합니다.
 
 `WithListProjectID(id)`는 정확한 프로젝트 ID의 행만 소비하는 **로컬 필터**이며 Keystone 조회나 server query를 보내지 않습니다. `WithListMaxItems(n)`은 양의 최대 소비 수이며 HTTP 응답 크기를 제한하지 않습니다. 같은 옵션이 반복되면 마지막 값이 우선합니다. iterator 생성은 HTTP나 옵션 검증을 수행하지 않고 첫 소비 시 검증·GET을 수행합니다. 호출자의 옵션 slice는 생성 시 복사합니다. `break`나 최대 소비 수에 도달하면 이후 행을 decode하지 않으며 context 취소는 방문하는 행 사이에서도 확인합니다. 로컬 필터가 제외하는 방문 행도 먼저 검증하므로 잘못된 응답을 숨기지 않습니다.
 

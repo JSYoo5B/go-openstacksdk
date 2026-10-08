@@ -3,8 +3,8 @@ package compute
 import (
 	"time"
 
-	"github.com/JSYoo5B/gophercloudsdk/network"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type AutomaticFloatingIPRequest struct {

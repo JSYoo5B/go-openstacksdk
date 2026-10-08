@@ -21,8 +21,8 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/gophercloudsdk/blockstorage/v3/limits"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func readLimits(ctx context.Context, client *gophercloud.ServiceClient) error {

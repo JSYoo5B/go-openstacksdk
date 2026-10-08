@@ -3,8 +3,8 @@ package quotasets
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
-	"github.com/JSYoo5B/gophercloudsdk/sharedfilesystems/v2/sharetypes"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/sharetypes"
 )
 
 // ShareTypeQuotaScope fixes project/share-type IDs, using only share_type as

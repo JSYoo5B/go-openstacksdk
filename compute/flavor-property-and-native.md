@@ -45,9 +45,9 @@ import (
     "log"
     "time"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/compute"
-    "github.com/JSYoo5B/gophercloudsdk/compute/v2/flavors"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 )
 
 func main() {

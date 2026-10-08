@@ -3,9 +3,9 @@ package devices
 
 import (
 	"encoding/json"
-	"github.com/JSYoo5B/gophercloudsdk/accelerator/v2/common"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cyborg"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/accelerator/v2/common"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cyborg"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 

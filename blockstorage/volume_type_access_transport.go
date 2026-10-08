@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 // Type access's concrete Python exception gate accepts every final HTTP status

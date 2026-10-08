@@ -1,6 +1,6 @@
 package actions
 
-import "github.com/JSYoo5B/gophercloudsdk/internal/senlin"
+import "github.com/JSYoo5B/go-openstacksdk/internal/senlin"
 
 // These are the pinned Action Body fields and their Python attribute aliases.
 // The Go model's additional data field is not a pinned Body filter.

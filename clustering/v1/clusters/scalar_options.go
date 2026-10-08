@@ -1,6 +1,6 @@
 package clusters
 
-import "github.com/JSYoo5B/gophercloudsdk/request"
+import "github.com/JSYoo5B/go-openstacksdk/request"
 
 func WithCreateMinSize(value int) CreateOption {
 	return func(config *request.Config[CreateOpts]) error {

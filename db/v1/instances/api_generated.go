@@ -3,9 +3,9 @@ package instances
 
 import (
 	context "context"
-	troveroot "github.com/JSYoo5B/gophercloudsdk/internal/troveroot"
-	request "github.com/JSYoo5B/gophercloudsdk/request"
-	resource "github.com/JSYoo5B/gophercloudsdk/resource"
+	troveroot "github.com/JSYoo5B/go-openstacksdk/internal/troveroot"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
+	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/db/v1/instances"
 	users "github.com/gophercloud/gophercloud/v2/openstack/db/v1/users"

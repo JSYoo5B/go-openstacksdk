@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // WithHeader configures an additional API header without a header builder.

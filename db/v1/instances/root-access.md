@@ -11,10 +11,10 @@ package example
 import (
 	"context"
 
-	"github.com/JSYoo5B/gophercloudsdk"
+	"github.com/JSYoo5B/go-openstacksdk"
 )
 
-func rootEnabled(ctx context.Context, conn *gophercloudsdk.Connection, instanceID string) (bool, error) {
+func rootEnabled(ctx context.Context, conn *openstack.Connection, instanceID string) (bool, error) {
 	service, err := conn.DatabaseV1(ctx)
 	if err != nil {
 		return false, err

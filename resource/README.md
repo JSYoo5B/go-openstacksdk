@@ -252,7 +252,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func PrintFirstPage[T any](ctx context.Context, collection *resource.Collection[T]) error {

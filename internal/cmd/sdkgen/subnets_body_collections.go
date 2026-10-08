@@ -118,7 +118,7 @@ func identitySubnetBodySchema(pkg *types.Package, plan *collectionPlan) bool {
 }
 
 func emitSubnetBodyRecordAdapter(e *emitter, plan *collectionPlan) {
-	e.use("github.com/JSYoo5B/gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.printf("},\nBodyFilterRecordValue:func(record *resource.BodyRecord[%s],key string)(json.RawMessage,error){\n", plan.modelName)
 	e.printf("if record==nil{return nil,fmt.Errorf(\"%%w: nil body filter record\",resource.ErrInvalidOption)}\nswitch key{\n")
 	e.printf("case \"revision_number\":return resource.BodyRecordField(record.Fields,key,resource.BodyFieldInteger)\n")
@@ -187,7 +187,7 @@ func emitBodyFilterList(e *emitter, plan *collectionPlan) {
 		emitSecretBodyFilterList(e, plan)
 		return
 	}
-	e.use("github.com/JSYoo5B/gophercloudsdk/request")
+	e.use("github.com/JSYoo5B/go-openstacksdk/request")
 	e.use(upstreamModule + "/pagination")
 	e.use(e.pkg.Path())
 	e.printf("func(a *API)listBodyWithControl(ctx context.Context,control resource.ListControl,options ...ListOption)iter.Seq2[*resource.BodyRecord[%s],error]{\nvar opts ListOpts\ncfg,err:=request.Apply(opts,options...)\n", plan.modelName)

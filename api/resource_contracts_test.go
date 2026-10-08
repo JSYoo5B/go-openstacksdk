@@ -8,12 +8,12 @@ import (
 	"path"
 	"testing"
 
-	"github.com/JSYoo5B/gophercloudsdk/compute/v2/aggregates"
-	"github.com/JSYoo5B/gophercloudsdk/identity/v3/users"
-	"github.com/JSYoo5B/gophercloudsdk/internal/testcloud"
-	"github.com/JSYoo5B/gophercloudsdk/keymanager/v1/secrets"
-	"github.com/JSYoo5B/gophercloudsdk/loadbalancer/v2/loadbalancers"
-	"github.com/JSYoo5B/gophercloudsdk/resource"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/loadbalancers"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func checkResourceBinding[T any](t *testing.T, cloud *testcloud.Cloud, base, id, listEnvelope, getEnvelope string, model map[string]any, collection *resource.Collection[T], idOf func(*T) string, hasStatus bool) {

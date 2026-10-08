@@ -3,8 +3,8 @@ package volumes
 import (
 	"context"
 	"encoding/json"
-	"github.com/JSYoo5B/gophercloudsdk/internal/cinderaction"
-	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cinderaction"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
 type VolumeImageMetadataOpts = cinderaction.ImageMetadataOptions

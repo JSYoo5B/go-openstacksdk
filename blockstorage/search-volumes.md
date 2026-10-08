@@ -24,8 +24,8 @@ import (
     "encoding/json"
     "fmt"
 
-    sdk "github.com/JSYoo5B/gophercloudsdk"
-    "github.com/JSYoo5B/gophercloudsdk/blockstorage"
+    sdk "github.com/JSYoo5B/go-openstacksdk"
+    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
 )
 
 func Search(ctx context.Context, conn *sdk.Connection) error {

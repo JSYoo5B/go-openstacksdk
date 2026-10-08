@@ -23,8 +23,8 @@ import (
     "context"
     "fmt"
 
-    networkv2 "github.com/JSYoo5B/gophercloudsdk/network/v2"
-    "github.com/JSYoo5B/gophercloudsdk/resource"
+    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
+    "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func ListSubnets(ctx context.Context, service *networkv2.Service) error {
