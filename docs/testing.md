@@ -40,6 +40,8 @@ Remote console·keypair 삭제는 같은 fixture의6그룹으로 서비스별 �
 
 Keypair 생성·legacy console 조회는 기존 public HTTP fixture의6그룹과 공통 BodyFieldBoolean/RawResource clone2그룹을 재사용합니다. Keypair 고유43사례와 legacy의6개 action·raw scalar/array/null·strict JSON 오류를 검증하고, native Create의 실제 concrete 필드/extension·partial/null·200/201 계약은 같은 표에 넣었습니다. 집중8그룹·전체41 package gate·정확한 독립/원격 main 빌드가 PASS했습니다. 새 harness나 공통 오류 표 복제 없이 검증 근거를 [가이드](../compute/keypairs-console.md)와 [판정대장](sdk-support-ledger.md#keypair-생성과-legacy-console-url-완료)에 연결합니다.
 
+2026-10-08 정적 감사에서 `api/` 패키지의 직접 `httptest.NewServer` 호출은0개였습니다. 다른 패키지에는24개 호출이 남아 있으며 대부분의 서버 setup은 공개 fixture로 재사용할 수 있는 기존 코드입니다. 우선 Swift metadata의 반복 bootstrap과 단순 RoundTrip forwarding alias를 작은 정리 후보로 기록했습니다. TCP 주소 도달성·응답 Read/Close 실패 같은 별도 계약과 서버 setup의 중복을 구별합니다. 이번 새 조회의 실제12그룹 결과와 기존 setup 현황을 [판정대장](sdk-support-ledger.md#compute-console-auth-token-조회-완료)에 연결합니다.
+
 Read/Close 실패, 전송 중 취소, retry·reauth hook, 동적으로 바뀌는 token·source처럼 공개 helper가 표현하지 못하는 경우에는 전용 transport/handler를 유지합니다. upstream의 `internal` helper는 Go 접근 제한을 따르며 복사해서 우회하지 않습니다. 패키지 내부 테스트로만 공개된 fixture도 외부 import 대상이 아닙니다.
 
 ## 검증 범위

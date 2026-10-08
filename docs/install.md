@@ -6,7 +6,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/gophercloudsdk`를 사용
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@466f28d7f3f4a6f7f44d75cf9a4e4c1a96bea2f2
+GOWORK=off go get github.com/JSYoo5B/gophercloudsdk@40dbb0eaa8f97a19eb0c7aca417bc4251db955e9
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -55,6 +55,8 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
+2026-10-08에 source revision `40dbb0eaa8f97a19eb0c7aca417bc4251db955e9`을 새 외부 module에 replace 없이 설치하고 위 설치 main과 [Console token 조회 main](../compute/console-auth-token.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·실제 버전 `v0.0.0-20261008013006-40dbb0eaa8f9`이며 module-cache Go source1,968개 SHA256 `1b22fdecda0348eb93f1fc99c17b4a6caf4e79b1808eff1406d66dbadc901e31`가 집중12그룹·전체42 package gate와 같습니다. catalog/source pins/기존527 reviews를 보존한 새1행5계약으로 현재 API 완료 수는221/3,362입니다. SDK와 원격 소비자에 replace가 없고 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
 2026-10-08에 최종 source revision `466f28d7f3f4a6f7f44d75cf9a4e4c1a96bea2f2`를 새 외부 module에 replace 없이 설치하고 위 설치 main과 [Console 자동 선택 main](../compute/console-selection.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·실제 버전 `v0.0.0-20261008010620-466f28d7f3f4`이며 module-cache Go source1,965개 SHA256 `7543a1f9eaea5ab349f95f4bc6a9d3027137111e26ffc70acadc00d78f2bbc99`가 최종 전체42 package gate와 같습니다. 새 composition1개를 검토한 현재 API 완료 수는220/3,362입니다. SDK와 소비자에 replace가 없고 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 2026-10-08에 push한 `0851b89cb637`을 새 외부 module에서 replace 없이 설치하고, 위 설치 main과 [Keypair·legacy console main](../compute/keypairs-console.md)을 함께 빌드했습니다. `GOWORK=off`, `go get`·`go build -mod=readonly` exit0이며 실제 버전은 `v0.0.0-20261008003103-0851b89cb637`입니다. module-cache Go source1,960개 SHA256 `65af6c636b84bb427a832758738be65d823a78ac0e00dc4efaa31632b470d1b2`가 로컬 전체41 package gate의 최종 소스와 같습니다. SDK와 소비자에 replace가 없고 인증·OpenStack 호출은 실행하지 않았습니다. 당시 같은 Go 소스에서 user 작업2개와 native Create1개를 개별 판정하여 API 완료 수는219개였습니다.
@@ -79,3 +81,4 @@ GOWORK=off go build -mod=readonly ./...
 | Compute user 작업 추가 후 외부 설치·빌드 | PASS:`1d159655cb11`, no replace; 설치 main+action main2개와 원격/로컬 Go SHA 일치 |
 | Keypair 생성·legacy console 추가 후 외부 설치·빌드 | PASS:`0851b89cb637`, no replace; 설치 main+keypair/console main2개와 원격/로컬 Go SHA 일치 |
 | Console 자동 선택 추가 후 외부 설치·빌드 | PASS:`466f28d7f3f4`, no replace; 설치 main+자동 선택 main2개와 최종 원격/로컬 Go SHA 일치 |
+| Console token 조회 추가 후 외부 설치·빌드 | PASS:`40dbb0eaa8f9`, no replace; 설치 main+조회 main2개와 최종 원격/로컬 Go SHA 일치 |
