@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -24,6 +25,10 @@ import (
 type PagePolicy[T any] struct {
 	LinkKeys []string
 	NextKey  string
+	// IgnoreFalseyNext ignores falsey JSON values in the top-level next field
+	// before decoding a URL. Truthy nonstrings still fail. This opt-in matches
+	// Resource pagination while retaining strict defaults for other services.
+	IgnoreFalseyNext bool
 	// VersionedPath accepts one exact escaped relative version-prefixed path
 	// as an alias of the fixed collection, including behind reverse proxies.
 	// Other origins and paths retain the normal continuation checks.
@@ -417,12 +422,22 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 		key = "next"
 	}
 	if raw, exists := fields[key]; exists {
-		var next string
-		if err := json.Unmarshal(raw, &next); err != nil {
-			return nil, err
+		decode := true
+		if policy.IgnoreFalseyNext {
+			truthy, err := cloudfilter.PythonTruthy(raw)
+			if err != nil {
+				return nil, err
+			}
+			decode = truthy
 		}
-		if next != "" {
-			links = append(links, next)
+		if decode {
+			var next string
+			if err := json.Unmarshal(raw, &next); err != nil {
+				return nil, err
+			}
+			if next != "" {
+				links = append(links, next)
+			}
 		}
 	}
 	if policy.HTTPLink {
