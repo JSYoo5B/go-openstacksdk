@@ -18,6 +18,8 @@ nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console
 
 Flavor의 SDK 소유 목록·이름 조회는 `service.ListFlavors`·`service.FindFlavor`를 사용합니다. [Flavor 목록·find 가이드](flavor-records.md)에 summary/detail 기본값, semantic query·Body 필터, raw cap, 조건부 extra specs 및 Connection location과 실제 응답의 구분을 설명합니다. 옵션은 leaf의 `flavors.FlavorListOption`·`FlavorFindOption`을 그대로 사용하며 기존 typed collection도 유지합니다.
 
+Cloud flavor의 eager 목록은 `service.AllFlavors`, 이름·dictionary/JMES 검색은 `service.SearchFlavors`, 단건은 `service.GetFlavor`를 사용합니다. [Cloud Flavor 비교](flavor-cloud.md)에 List defaultfalse와 Search/Get defaulttrue, 전체 inventory 보충 후 검색, Get의 직접 Find·부분 결과를 설명합니다. Proxy의 lazy `ListFlavors`는 계속 별도로 사용합니다.
+
 ## openstacksdk 대응
 
 | openstacksdk | gophercloudsdk |
@@ -31,6 +33,9 @@ Flavor의 SDK 소유 목록·이름 조회는 `service.ListFlavors`·`service.Fi
 | `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 owned 조회에 `flavors.WithFlavorFindExtraSpecs(true)` 추가 |
 | `conn.compute.fetch_flavor_extra_specs(flavor)` | `service.API.Flavors.FetchExtraSpecs(ctx, request)`: [명시 extra-specs 조회](flavor-extra-specs.md) |
 | `conn.compute.flavors()` | `service.ListFlavors(ctx)` |
+| `conn.list_flavors(get_extra=False)` | `service.AllFlavors(ctx)` |
+| `conn.search_flavors(pattern, filters=filters)` | `service.SearchFlavors(ctx, pattern, compute.WithFlavorQueryFilters(rawFilters))` |
+| `conn.get_flavor(name_or_id, get_extra=True)` | `service.GetFlavor(ctx, nameOrID)` |
 | `conn.list_keypairs(filters=filters)` / `search_keypairs(name, filters)` | `service.ListKeypairs(ctx, options...)` / `SearchKeypairs(ctx, name, options...)`: [Cloud keypair](keypairs-cloud.md) |
 | `conn.get_keypair(name, user_id=owner)` | `service.GetKeypair(ctx, name, compute.WithKeypairQueryUserID(owner))` |
 | `conn.create_keypair(name, public_key=public_key)` / `delete_keypair(name)` | `service.CreateKeypair(ctx, name, options...)` / `DeleteKeypair(ctx, name)` |

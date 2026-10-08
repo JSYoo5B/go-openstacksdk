@@ -29,6 +29,8 @@ Gophercloud v2.15.0의 compute/v2 API를 하나의 인증된 서비스 객체에
 
 [Flavor 목록·검색의 Python/Go 비교](../flavor-records.md)는 `service.ListFlavors`/`FindFlavor`와 `API.Flavors.ListRecords`/`FindFlavor`의 query 별칭·descriptor 기본값·페이지 제어·조건부 specs 보강 및 독립 Resource/Wire 응답을 설명합니다.
 
+[Cloud Flavor 목록·검색·단건 조회](../flavor-cloud.md)는 eager `AllFlavors`와 `SearchFlavors`의 보충 후 필터 순서, `GetFlavor`의 Find 직접 위임 및 서로 다른 extra-specs 기본값을 설명합니다.
+
 `conn.Compute(ctx)`의 `ValidateConsoleAuthToken(ctx, token)`은 console token의 연결 정보를 직접 조회하고 seeded Resource·actual Wire·HTTP receipt를 제공합니다. 필수 token은 provider 인증 token과 별개이며, 미선택 버전의2.99 ceiling과 nullable 반환은 [Console auth-token의 Python/Go 비교](../console-auth-token.md)에 설명합니다.
 
 `conn.Compute(ctx)`의 상위 `CreateConsole(ctx, serverID, type, options...)`은 광고 범위와 선택 버전으로 modern/legacy console을 자동 선택합니다. protocol None 기본값·작업별 version ceiling·computed location·실패 시 다른 API 재시도 금지는 [Console 자동 선택의 Python/Go 비교](../console-selection.md)에 설명합니다.
