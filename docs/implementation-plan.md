@@ -14,7 +14,9 @@
 
 새 **17그룹132사례**와 기존32그룹240사례를 합친 **집중 race49그룹372사례**, 전체 vet·race **43개 실제 test package**가 PASS했습니다. 최종275 parity·progress·gofmt, 반복 생성 Go drift0와 대기/설치 main **2개**의 외부 local-replace build도 PASS했습니다. Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews·선택한 두 선언의 기존18계약·API·source pins/fingerprints를 보존하고 새12계약을 추가해 reviews550·contracts3,538입니다. mutable Resource/cache/session·arbitrary parser/runtime 동등성은 공통 목표에 남습니다.
 
-공통 삭제 guard `ab694cae`·Unicode16 비교와 출처/라이선스 `40cf0780`·대기 API/leaf 테스트 `6ffc3931`·Connection 테스트 `0786265b`·가이드 `85e9020e`를 의미 있는 단위로 commit/push했습니다. Unicode 자료에는 기존 `licenses/unicode-LICENSE`를 적용하고 source URL/hash·고지를 보완했습니다. 새 판정·문서 revision의 replace 없는 원격 설치와 main2개·Go source/라이선스14개 파일 일치는 다음 검증 단계입니다. 전체 목표는 active입니다.
+공통 삭제 guard `ab694cae`·Unicode16 비교와 출처/라이선스 `40cf0780`·대기 API/leaf 테스트 `6ffc3931`·Connection 테스트 `0786265b`·가이드 `85e9020e`를 의미 있는 단위로 commit/push했습니다. Unicode 자료에는 기존 `licenses/unicode-LICENSE`를 적용하고 source URL/hash·고지를 보완했습니다. 판정 `180b672b`도 commit/push하고 정확한 revision의 원격 설치·main2개·Go source/라이선스14개 파일 일치를 확인했습니다. 전체 목표는 active입니다.
+
+정확한 문서·판정 revision `180b672ba90518981c21913086af9bb060b7d544`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008210659-180b672ba905`·get/build exit0이며 대기/설치 main **2개**를 빌드했습니다. 원격 Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-waits-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance Image 조회·목록·검색3개, 전체270→273(+3)·핵심196→199/2,292·Glance34→37/120.** `GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`가 Body64개와 computed location, unknown properties packing·별칭·descriptor 변환·실제 Wire/receipt, 공통 페이지 순회·로컬 필터·GET→일반→숨김 검색을 제공합니다. 기존 typed/native 프로필은 유지합니다. [Python/Go 비교·독립 main](../image/image-records.md), [검증 기록](sdk-support-ledger.md#glance-image-owned-조회목록검색-완료)을 추가했습니다.
 
@@ -30,7 +32,7 @@
 
 정확한 문서·판정 revision `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008193028-95a7c6de03b2`·get/build exit0이며 discovery/설치 main **2개**를 빌드했습니다. 원격 Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
-**당시 착수한 단위는 위 상태·삭제 대기2개로 완료했습니다.** 다음 핵심 user 계약을 pinned Source와 기존 판정에서 선별 중입니다. Store 상세·task Get/List·metadata 쓰기는 핵심 admin에 유지하고 완료 API를 다시 세지 않습니다.
+**당시 착수한 단위는 위 상태·삭제 대기2개로 완료했습니다.** 다음 핵심 user 단위는 ImageRecord 기반 태그 add/remove2개입니다. 고정 기본 정책의 project-member 범위를 검토했고, owned 응답과 local tags 갱신을 기존 projector/opaque receipt에 연결합니다. 두 선언은 착수 단계 unresolved입니다. Store 상세·task Get/List·metadata 쓰기는 핵심 admin에 유지하고 완료 API를 다시 세지 않습니다.
 
 **직전 API 완료 (2026-10-09): 핵심 user Glance member owned 목록·검색2개, 전체267→269(+2)·핵심193→195/2,292·Glance31→33/120.** `ListImageMemberRecords/AllImageMemberRecords`가 9필드 declared Resource·실제 Wire·현재 location·공통 페이지 순회와 부분 수집을 제공합니다. `FindImageMemberRecord`는 seeded GET 후 clean native400/403/404에서 같은 목록을 사용해 정확한 ID/name과 중복을 검사합니다. 기존 finite typed 목록·literal Find·native scope는 유지합니다. [Python/Go 비교·독립 main](../image/member-records.md), [검증 기록](sdk-support-ledger.md#glance-member-owned-목록검색-완료)을 추가했습니다.
 
@@ -393,7 +395,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance ImageRecord status/delete 대기 | pinned defaults·initial shortcut·fresh GET/overlay·404·Unicode16 비교 검토 완료 | **owned 상태/삭제 대기·공통 guard 완료** | 새17그룹132·집중49그룹372·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체275/3,362** | 공통/API/Connection/문서5개 commit push 완료; 판정 revision의 원격 설치·main2개·Go SHA/라이선스14개 일치 검증 단계 |
+| Glance ImageRecord status/delete 대기 | pinned defaults·initial shortcut·fresh GET/overlay·404·Unicode16 비교 검토 완료 | **owned 상태/삭제 대기·공통 guard 완료** | 새17그룹132·집중49그룹372·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체275/3,362** | 공통/API/Connection/문서5개·판정180b672b push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 확인 |
 | Glance Image owned 조회·목록·검색 | pinned Body62+inherited2·generic pager·hidden lookup·reader 기본 정책 검토 완료 | **Get/List/All/Find·64 Body+location·Connection 완료** | 새23그룹182·집중123그룹874·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping3행·전체273/3,362** | 구현4커밋·가이드5545c5e6·판정16b2873a push 완료; 원격 main2개 build·Go SHA·라이선스14개 일치 |
 | Glance import 정보·기본 store owned records | pinned Source·server 기본/detail 정책 검토 완료 | **Import4·Store6 owned view·기본 목록·필터·Connection 완료**; 상세는 admin 후순위 | 새15그룹146·집중93그룹556·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **import go_mapping1행·전체270/3,362**; stores는 상세 미완료 unresolved | 구현3개·문서9832ed03·판정95a7c6de push 완료; 원격 main2개 build·Go SHA·라이선스14개 일치 |
 | Glance member owned 목록·검색 | 고정 Source·reader 기본 정책·alias/seed/GET fallback 검토 완료 | **owned 9필드 List/All·GET-first Find 완료** | 새16그룹180·집중206그룹893·Cinder 회귀2사례·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체269/3,362** | 구현5커밋·문서de9f98fa·판정0647ce86 push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |

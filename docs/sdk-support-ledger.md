@@ -21,7 +21,9 @@
 
 다른548 reviews·catalog bytes/pins/fingerprints와 선택한 두 선언의 기존18계약·API를 보존하고12계약을 추가했습니다. reviews550·go_mapping275·unresolved274·unsupported1·contracts3,538이며 catalog unresolved3,086개에는 미검토2,812개도 포함합니다. 기존 named immutable profile과 같은 판정 기준입니다. Python Resource same-instance/dirty/component lifecycle은 SDK-R1, configured Adapter cache는 SDK-C1, dynamic session/base_path/microversion은 SDK-S1에 남습니다. nullable targetNone·arbitrary attribute/progress·surrogate/parser/runtime 전체, 음수 duration·wall-clock timeout·seed/fresh location·response-driven route는 문서의 Go 경계입니다. 이 완료는 전체 Python runtime 동등성·실제 cloud 검증·전체 목표 완료를 뜻하지 않습니다.
 
-공통 guard `ab694cae`·Unicode 비교/출처 `40cf0780`·API/leaf 테스트 `6ffc3931`·Connection `0786265b`·문서 `85e9020e`를 각각 commit/push했습니다. 새 판정·문서의 정확한 remote revision을 replace 없는 외부 module에 설치하고 main2개·Go SHA·라이선스14개 일치를 확인하는 단계가 남아 있습니다. 전체 SDK 목표는 active이며 다음 핵심 user 계약을 선별 중입니다.
+공통 guard `ab694cae`·Unicode 비교/출처 `40cf0780`·API/leaf 테스트 `6ffc3931`·Connection `0786265b`·문서 `85e9020e`를 각각 commit/push했습니다. 판정 `180b672b`를 commit/push하고 정확한 remote revision의 replace 없는 설치·main2개·Go SHA·라이선스14개 일치도 확인했습니다. 전체 SDK 목표는 active이며 다음 핵심 user 단위는 owned Image 태그 add/remove2개입니다. 아직 두 선언의 판정은 unresolved입니다.
+
+정확한 문서·판정 revision `180b672ba90518981c21913086af9bb060b7d544`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008210659-180b672ba905`·get/build exit0이며 대기/설치 main **2개**를 빌드했습니다. 원격 Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-waits-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance Image owned 조회·목록·검색 완료
 
