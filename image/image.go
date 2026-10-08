@@ -17,16 +17,27 @@ import (
 
 type Image = images.Image
 
+// Dependencies supplies Connection facts without coupling the image service to
+// authentication or other service construction. Each operation owns its snapshot.
+type Dependencies struct {
+	CloudLocation func() (resource.CloudLocation, error)
+}
+
 type Service struct {
-	API    *imageapi.Service
-	Images *resource.Collection[Image]
-	client *gophercloud.ServiceClient
+	API          *imageapi.Service
+	Images       *resource.Collection[Image]
+	client       *gophercloud.ServiceClient
+	dependencies Dependencies
 }
 
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 
 func New(client *gophercloud.ServiceClient) *Service {
-	return &Service{client: client, API: imageapi.New(client), Images: resource.NewCollection[Image](resource.Adapter[Image]{
+	return NewWithDependencies(client, Dependencies{})
+}
+
+func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
+	return &Service{client: client, dependencies: dependencies, API: imageapi.New(client), Images: resource.NewCollection[Image](resource.Adapter[Image]{
 		Kind:                     "image",
 		IdentityFind:             true,
 		IdentityMissingListQuery: url.Values{"os_hidden": {"true"}},

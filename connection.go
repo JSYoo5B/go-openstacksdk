@@ -329,7 +329,7 @@ func (c *Connection) Image(ctx context.Context) (*image.Service, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.image = image.New(client)
+		c.image = image.NewWithDependencies(client, image.Dependencies{CloudLocation: c.CurrentLocation})
 	}
 	return c.image, nil
 }
