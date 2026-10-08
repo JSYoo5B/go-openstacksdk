@@ -78,6 +78,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 [Glance 이미지 조회·목록](image/images.md)은 concrete 선택 인자, nullable 모델과 확장 속성, 반복 필터를 보존하는 페이지 순회와 Python 사용법 비교를 제공합니다.
 
+`GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource·실제 Wire·응답 증거와 descriptor 기본값·properties packing·공통 페이지·숨김 이미지 fallback을 제공합니다. [이미지 레코드의 Python/Go 비교와 독립 main](image/image-records.md)에 literal GET seed, concrete 옵션·부분 결과와 검색 순서를 설명합니다.
+
 [Glance 이미지 수정](image/update.md)은 순서가 있는 concrete 패치와 속성 upsert, 값·삭제 구분 및 Python Resource 사용법 비교를 제공합니다.
 
 [Glance 직접 업로드](image/upload-image.md)는 concrete 옵션, 메타데이터 생성과 바이너리 전송의 단계별 응답, caller 스트림 소유권과 Python 사용법 비교를 제공합니다.

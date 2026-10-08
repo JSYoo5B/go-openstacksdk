@@ -157,6 +157,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 `service.GetImage/ListImages/AllImages`는 이미지 ID·이름 조회와 lazy 목록 순회를 제공합니다. [이미지 조회·목록 사용법](images.md)에 nullable 값·확장 속성·concrete 필터·서버 next의 반복 값 보완과 Python 대응을 설명합니다.
 
+`service.GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource와 실제 Wire를 분리하고 descriptor 변환·properties packing·공통 pager·ID/이름·숨김 이미지 검색을 처리합니다. [레코드의 Python/Go 비교와 독립 main](image-records.md)에 seed·기본값·concrete 옵션·부분 결과와 기존 typed API의 차이를 설명합니다.
+
 `service.UpdateImage/SetImageProperties`는 concrete 패치와 필드별 helper로 이미지를 수정합니다. [이미지 수정 사용법](update.md)에 패치 순서·속성 이름 escape·raw 값·빈 변경의 실제 응답과 Python dirty Resource·coercion의 차이를 설명합니다.
 
 `service.UploadImage`는 concrete 옵션으로 메타데이터를 생성하고 caller Reader를 한 번 전송합니다. [직접 업로드 사용법](upload-image.md)에 기본값·명시 size·단계별 응답과 Python 자동 길이 추론의 차이를 설명합니다.
