@@ -107,6 +107,11 @@ func (s *Service) GetImageRecord(ctx context.Context, input ImageRecordRequest, 
 	if err != nil {
 		return fail(err)
 	}
+	if !json.Valid(response.Body) {
+		// An invalid response does not clean an unsynchronized constructor.
+		// Preserve raw presence so a later owned update can commit its seed.
+		record.bodyState = pendingImageRecordBodyState(seed)
+	}
 	return record, nil
 }
 func imageRecordEndpoint(p *preparedImageRecord, id string) string {

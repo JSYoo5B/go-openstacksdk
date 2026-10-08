@@ -46,6 +46,16 @@ type RejectionPolicy struct {
 // specified rejected statuses. It preserves native retry and authentication
 // policy, while a faulty rejection cannot establish absence or allow fallback.
 func DoJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, policy RejectionPolicy, codes ...int) (*Response, error) {
+	return doJSONGuardedRejections(ctx, source, sourceGuard, method, endpoint, body, headers, policy, false, codes...)
+}
+
+// DoJSONGuardedRejectionsHeaders additionally fixes SDK-owned request headers
+// across retries and physical attempts while observing selected rejection faults.
+func DoJSONGuardedRejectionsHeaders(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, policy RejectionPolicy, codes ...int) (*Response, error) {
+	return doJSONGuardedRejections(ctx, source, sourceGuard, method, endpoint, body, headers, policy, true, codes...)
+}
+
+func doJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, policy RejectionPolicy, fixedHeaders bool, codes ...int) (*Response, error) {
 	selected := slices.Clone(policy.Codes)
 	client, err := fixedrequest.NewGuarded(source, method, endpoint, sourceGuard)
 	if err != nil {
@@ -71,7 +81,7 @@ func DoJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceCli
 	if policy.PreserveCleanRetry {
 		cleanRetry = selected
 	}
-	return doJSONGuarded(ctx, client, guard, method, endpoint, body, headers, false, cleanRetry, codes...)
+	return doJSONGuarded(ctx, client, guard, method, endpoint, body, headers, fixedHeaders, cleanRetry, codes...)
 }
 
 type rejectedResponseTransport func(*http.Request) (*http.Response, error)
