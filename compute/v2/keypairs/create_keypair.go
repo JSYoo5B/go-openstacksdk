@@ -213,21 +213,7 @@ func (a *API) CreateKeypair(ctx context.Context, options ...KeypairCreateOption)
 			seed[key] = bytes.Clone(raw)
 		}
 	}
-	view := &resource.RawResource{Metadata: resource.Metadata{Body: make(map[string]json.RawMessage, 9), Header: response.Header.Clone(), StatusCode: response.StatusCode}}
-	for _, key := range []string{"created_at", "fingerprint", "name", "private_key", "public_key", "type", "user_id"} {
-		raw, fieldErr := resource.BodyRecordField(seed, key, resource.BodyFieldJSON)
-		if fieldErr != nil {
-			return fail(result, response.Fail(cloudread.ContextError(ctx, fieldErr)))
-		}
-		if key == "type" {
-			if _, present := seed[key]; !present {
-				raw = json.RawMessage(`"ssh"`)
-			}
-		}
-		view.Body[key] = raw
-	}
-	view.Body["id"] = bytes.Clone(view.Body["name"])
-	view.Body["is_deleted"], err = resource.BodyRecordField(seed, "deleted", resource.BodyFieldBoolean)
+	view, err := projectKeypairRecord(seed, resource.Metadata{Header: response.Header, StatusCode: response.StatusCode})
 	if err != nil {
 		return fail(result, response.Fail(cloudread.ContextError(ctx, err)))
 	}
