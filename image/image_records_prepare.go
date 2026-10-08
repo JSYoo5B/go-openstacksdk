@@ -1,6 +1,7 @@
 package image
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -100,6 +101,30 @@ func imageRecordCodes() []int {
 	return codes
 }
 
+// Decode only complete UTF-8 JSON strings whose Unicode escapes preserve one
+// valid string identity. encoding/json otherwise replaces unpaired UTF-16
+// surrogates with U+FFFD and could select a different transport target. The
+// existing tag pairing check requires a complete quoted JSON string first.
+func decodeImageRecordString(raw json.RawMessage, label string) (string, error) {
+	if !utf8.Valid(raw) {
+		return "", uploadInvalid("%s must be UTF-8", label)
+	}
+	var value string
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return "", errors.Join(uploadInvalid("%s must be a complete JSON string", label), err)
+	}
+	trimmed := bytes.TrimSpace(raw)
+	// JSON null decodes into a string without an error, but is not an identity
+	// string. Successful parsing above also bounds the existing escape scanner.
+	if len(trimmed) < 2 || trimmed[0] != '"' {
+		return "", uploadInvalid("%s must be a JSON string", label)
+	}
+	if !imageRecordTagUnicodeString(trimmed) {
+		return "", uploadInvalid("%s must not contain unpaired UTF-16 surrogates", label)
+	}
+	return value, nil
+}
+
 func validateImageRecordIdentity(value string) error {
 	if strings.TrimSpace(value) == "" || !utf8.ValidString(value) || value == "." || value == ".." {
 		return uploadInvalid("image identity must be nonblank valid UTF-8 literal text")
@@ -115,8 +140,8 @@ func imageRecordText(value *ImageRecord, field string) string {
 	if value == nil || value.Resource == nil {
 		return ""
 	}
-	var text string
-	if json.Unmarshal(value.Resource.Body[field], &text) != nil {
+	text, err := decodeImageRecordString(value.Resource.Body[field], "image record "+field)
+	if err != nil {
 		return ""
 	}
 	return text

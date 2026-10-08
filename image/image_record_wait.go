@@ -43,9 +43,9 @@ func (s *Service) prepareImageRecordWaitInput(ctx context.Context, seed *ImageRe
 	if owned == nil || owned.Resource == nil {
 		return nil, uploadInvalid("image wait seed Resource is required")
 	}
-	var identity string
-	if err := json.Unmarshal(owned.Resource.Body["id"], &identity); err != nil {
-		return nil, errors.Join(uploadInvalid("image wait seed id must be a string"), err)
+	identity, err := decodeImageRecordString(owned.Resource.Body["id"], "image wait seed id")
+	if err != nil {
+		return nil, err
 	}
 	if err := validateImageRecordIdentity(identity); err != nil {
 		return nil, err

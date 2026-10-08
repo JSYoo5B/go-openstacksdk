@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"slices"
-	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -66,12 +65,9 @@ func (s *Service) writeImageMemberRecord(ctx context.Context, parent resource.Re
 		if update {
 			seed["member_id"], _ = json.Marshal(identity)
 			if raw, present := seed["id"]; present {
-				if !utf8.Valid(raw) {
-					return nil, uploadInvalid("member route identity must be UTF-8")
-				}
-				var replacement string
-				if err := json.Unmarshal(raw, &replacement); err != nil {
-					return nil, errors.Join(uploadInvalid("member route identity must be a string"), err)
+				replacement, err := decodeImageRecordString(raw, "member route identity")
+				if err != nil {
+					return nil, err
 				}
 				if err := validateImageMemberRecordIdentity(replacement); err != nil {
 					return nil, err
@@ -194,12 +190,11 @@ func imageMemberRecordRequestIdentity(input ImageMemberRecordRequest) (string, e
 		if !present {
 			raw = fields["member_id"]
 		}
-		if !utf8.Valid(raw) {
-			return "", uploadInvalid("member Record identity must be UTF-8")
+		selected, err := decodeImageRecordString(raw, "member Record identity")
+		if err != nil {
+			return "", err
 		}
-		if err := json.Unmarshal(raw, &identity); err != nil {
-			return "", errors.Join(uploadInvalid("member Record identity must be a string"), err)
-		}
+		identity = selected
 	}
 	if err := validateImageMemberRecordIdentity(identity); err != nil {
 		return "", err

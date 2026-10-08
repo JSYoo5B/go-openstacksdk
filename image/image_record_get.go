@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/url"
 	"slices"
@@ -83,8 +82,9 @@ func (s *Service) GetImageRecord(ctx context.Context, input ImageRecordRequest, 
 		if err != nil {
 			return nil, err
 		}
-		if err := json.Unmarshal(seed["id"], &identity); err != nil {
-			return nil, errors.Join(uploadInvalid("image seed identity must be a string"), err)
+		identity, err = decodeImageRecordString(seed["id"], "image seed identity")
+		if err != nil {
+			return nil, err
 		}
 		if err := validateImageRecordIdentity(identity); err != nil {
 			return nil, err

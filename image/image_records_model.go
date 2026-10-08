@@ -415,9 +415,9 @@ func imageRecordMarker(value *imageRecordRow) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var marker string
-	if err := json.Unmarshal(fields["id"], &marker); err != nil {
-		return "", uploadInvalid("image marker must be a string identity: %v", err)
+	marker, err := decodeImageRecordString(fields["id"], "image marker identity")
+	if err != nil {
+		return "", err
 	}
 	if strings.TrimSpace(marker) == "" {
 		return "", uploadInvalid("image marker must be nonempty")

@@ -117,6 +117,13 @@ func (s *Service) prepareImageRecordUpdate(ctx context.Context, input ImageRecor
 		for key, raw := range optionAttrs {
 			attrs[key] = bytes.Clone(raw)
 		}
+		// Validate the final supplied identity before raw equality can discard
+		// an unpaired surrogate as equal to an existing replacement character.
+		if raw, present := attrs["id"]; present {
+			if _, err := decodeImageRecordString(raw, "image update identity"); err != nil {
+				return nil, err
+			}
+		}
 		updates, methods, err := normalizeImageRecord(attrs, nil, false, true)
 		if err != nil {
 			return nil, err
@@ -128,8 +135,9 @@ func (s *Service) prepareImageRecordUpdate(ctx context.Context, input ImageRecor
 		// Discarding ID dirtiness does not restore its original value. A later
 		// non-ID change can therefore include /id while routing by current ID.
 		delete(seed.bodyState.dirty, "id")
-		if err := json.Unmarshal(seed.bodyState.current["id"], &identity); err != nil {
-			return nil, errors.Join(uploadInvalid("image record identity must be a string"), err)
+		identity, err = decodeImageRecordString(seed.bodyState.current["id"], "image record identity")
+		if err != nil {
+			return nil, err
 		}
 		if err := validateImageRecordIdentity(identity); err != nil {
 			return nil, err

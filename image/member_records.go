@@ -210,9 +210,9 @@ func imageMemberRecordMarker(value *imageMemberRecordRow) (string, error) {
 	if !present {
 		raw = fields["member_id"]
 	}
-	var marker string
-	if err := json.Unmarshal(raw, &marker); err != nil {
-		return "", uploadInvalid("member wire marker must be a string identity: %v", err)
+	marker, err := decodeImageRecordString(raw, "member wire marker identity")
+	if err != nil {
+		return "", err
 	}
 	if strings.TrimSpace(marker) == "" {
 		return "", uploadInvalid("member wire marker must be nonempty")

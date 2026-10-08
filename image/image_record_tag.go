@@ -51,8 +51,9 @@ func (s *Service) prepareImageRecordTag(ctx context.Context, input ImageRecordTa
 		if seed.Resource == nil {
 			return nil, uploadInvalid("image tag seed Resource is required")
 		}
-		if err := json.Unmarshal(seed.Resource.Body["id"], &identity); err != nil {
-			return nil, errors.Join(uploadInvalid("image tag seed id must be a string"), err)
+		identity, err = decodeImageRecordString(seed.Resource.Body["id"], "image tag seed id")
+		if err != nil {
+			return nil, err
 		}
 	}
 	if err := validateImageRecordIdentity(identity); err != nil {

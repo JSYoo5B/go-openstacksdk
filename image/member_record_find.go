@@ -93,8 +93,8 @@ func imageMemberRecordText(value *ImageMemberRecord, field string) string {
 	if value == nil || value.Resource == nil {
 		return ""
 	}
-	var text string
-	if json.Unmarshal(value.Resource.Body[field], &text) != nil {
+	text, err := decodeImageRecordString(value.Resource.Body[field], "member record "+field)
+	if err != nil {
 		return ""
 	}
 	return text
