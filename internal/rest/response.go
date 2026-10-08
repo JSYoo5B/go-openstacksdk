@@ -125,7 +125,9 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 	result := &Response{Header: wire.Header.Clone(), StatusCode: wire.StatusCode}
 	var readErr error
 	result.Body, readErr = io.ReadAll(wire.Body)
-	bodyErr := responseContextError(ctx, joinResponseErrors(readErr, wire.Body.Close(), checkSource()))
+	// Observe the read boundary before Close can restore a changed source.
+	readSourceErr := checkSource()
+	bodyErr := responseContextError(ctx, joinResponseErrors(readErr, readSourceErr, wire.Body.Close(), checkSource()))
 	if !slices.Contains(expectedCodes, result.StatusCode) {
 		// Native hooks can expand OkCodes. Actual response evidence still
 		// cannot establish success outside the SDK's original policy.

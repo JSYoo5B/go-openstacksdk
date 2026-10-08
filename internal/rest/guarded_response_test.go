@@ -402,3 +402,29 @@ func TestNewGuardedStopsSourceChangingNativeBackoffBeforePhysicalResend(t *testi
 		t.Fatal(got, err, requests.Load(), backoffs.Load(), first.closes.Load())
 	}
 }
+
+func TestDoJSONGuardedObservesReadFailureBeforeCloseRestoresSource(t *testing.T) {
+	for _, withReadError := range []bool{false, true} {
+		t.Run(fmt.Sprint(withReadError), func(t *testing.T) {
+			payload := []byte(`{"receipt":9007199254740993}`)
+			sourceCause := errors.New("changed during read")
+			readCause := errors.New("read failed")
+			var client *gophercloud.ServiceClient
+			body := &limitsGuardedBody{}
+			client = limitsGuardedClient(func(*http.Request) (*http.Response, error) {
+				cause := error(io.EOF)
+				if withReadError {
+					cause = readCause
+				}
+				body.Reader = &limitsGuardedReader{prefix: bytes.Clone(payload), cause: cause, onRead: func() { client.Microversion = "changed" }}
+				body.onClose = func() { client.Microversion = "3.38" }
+				return limitsGuardedWire(206, body), nil
+			})
+			got, err := rest.DoJSONGuarded(context.Background(), client, limitsGuardedSnapshot(client, sourceCause), http.MethodGet, limitsGuardedTarget, nil, nil, 206)
+			var proof *resource.ResponseError
+			if got == nil || !errors.Is(err, sourceCause) || !errors.As(err, &proof) || proof.StatusCode != 206 || !bytes.Equal(proof.Body, payload) || body.closes.Load() != 1 || client.Microversion != "3.38" || (withReadError && !errors.Is(err, readCause)) {
+				t.Fatal(got, err, proof, body.closes.Load())
+			}
+		})
+	}
+}
