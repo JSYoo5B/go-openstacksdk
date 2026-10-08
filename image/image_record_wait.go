@@ -34,34 +34,12 @@ type preparedImageRecordWait struct {
 	last   *ImageRecord
 }
 
-func cloneImageRecordWait(value *ImageRecord) *ImageRecord {
-	if value == nil {
-		return nil
-	}
-	return &ImageRecord{
-		Resource: value.Resource.Clone(), Wire: value.Wire.Clone(),
-		Envelope: bytes.Clone(value.Envelope), Header: value.Header.Clone(),
-		StatusCode: value.StatusCode, ImportMethods: slices.Clone(value.ImportMethods),
-	}
-}
-
-// Computed location and receipt metadata never become a fetched Body seed.
-func imageRecordWaitBody(value *ImageRecord) map[string]json.RawMessage {
-	body := make(map[string]json.RawMessage, len(imageRecordFields))
-	for _, field := range imageRecordFields {
-		if raw, present := value.Resource.Body[field.canonical]; present {
-			body[field.canonical] = bytes.Clone(raw)
-		}
-	}
-	return body
-}
-
 func (s *Service) prepareImageRecordWaitInput(ctx context.Context, seed *ImageRecord, options []ImageRecordWaitOption, deleting bool) (*preparedImageRecordWait, error) {
 	p, err := s.captureImageRecord(ctx)
 	if err != nil {
 		return nil, err
 	}
-	owned := cloneImageRecordWait(seed)
+	owned := cloneImageRecord(seed)
 	if owned == nil || owned.Resource == nil {
 		return nil, uploadInvalid("image wait seed Resource is required")
 	}
@@ -72,7 +50,7 @@ func (s *Service) prepareImageRecordWaitInput(ctx context.Context, seed *ImageRe
 	if err := validateImageRecordIdentity(identity); err != nil {
 		return nil, err
 	}
-	body := imageRecordWaitBody(owned)
+	body := imageRecordBodySnapshot(owned)
 	body, _, err = normalizeImageRecord(body, nil, false, false)
 	if err != nil {
 		return nil, err
@@ -147,7 +125,7 @@ func (p *preparedImageRecordWait) fetch(ctx context.Context, target string, dele
 		return nil, err
 	}
 	p.last = value
-	p.body = imageRecordWaitBody(value)
+	p.body = imageRecordBodySnapshot(value)
 	state, null, err := imageRecordWaitState(value, p.config.Attribute)
 	if err != nil {
 		return nil, response.Fail(err)
@@ -197,7 +175,7 @@ func (p *preparedImageRecordWait) failure(ctx context.Context, operation string,
 	if p.last != nil && !errors.As(err, &accepted) && !errors.As(err, &rejected) {
 		err = (&rest.Response{Body: bytes.Clone(p.last.Envelope), Header: p.last.Header.Clone(), StatusCode: p.last.StatusCode}).Fail(err)
 	}
-	return cloneImageRecordWait(p.last), wrapImageMutationError(ctx, operation, err)
+	return cloneImageRecord(p.last), wrapImageMutationError(ctx, operation, err)
 }
 
 // WaitForImageRecordStatus first checks the supplied Image descriptor and then
@@ -222,7 +200,7 @@ func (s *Service) WaitForImageRecordStatus(ctx context.Context, seed *ImageRecor
 		if err := p.check(p.ctx); err != nil {
 			return p.failure(ctx, operation, err)
 		}
-		return cloneImageRecordWait(p.seed), nil
+		return cloneImageRecord(p.seed), nil
 	}
 	policy, expired, err := imageRecordWaitPolicy(p.config, false)
 	if err != nil {
@@ -238,7 +216,7 @@ func (s *Service) WaitForImageRecordStatus(ctx context.Context, seed *ImageRecor
 	if err := p.check(p.ctx); err != nil {
 		return p.failure(ctx, operation, err)
 	}
-	return cloneImageRecordWait(observation.record), nil
+	return cloneImageRecord(observation.record), nil
 }
 
 // WaitForImageRecordDelete always starts with a GET, even for a cached deleted
@@ -266,7 +244,7 @@ func (s *Service) WaitForImageRecordDelete(ctx context.Context, seed *ImageRecor
 		return p.failure(ctx, operation, err)
 	}
 	if p.last != nil {
-		return cloneImageRecordWait(p.last), nil
+		return cloneImageRecord(p.last), nil
 	}
-	return cloneImageRecordWait(p.seed), nil
+	return cloneImageRecord(p.seed), nil
 }
