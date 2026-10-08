@@ -23,7 +23,9 @@
 
 Source 공개 Proxy는 None·TagMixin은 같은 mutable Resource를 반환하지만 Go는 caller와 독립적인 Record/ACK입니다. public `_get_resource(existing Image)`의 `_update(**{})`는 microversion·component recollection·connection-derived location·to_dict도 처리합니다. Go는 supplied location과 passive raw fields를 유지하며 그 전체 lifecycle을 재현하지 않습니다. Python mutable descriptor default alias와 arbitrary Munch/subclass/dirty/runtime은 SDK-R1, configured cache는 SDK-C1, dynamic session/base_path/microversion은 SDK-S1에 남습니다. malformed raw bytes는 Go 전용 입력 경계입니다. `/private/tmp/go-openstacksdk-image-record-tags-source-audit.json`과 추가 `source-corrections.json`은 고정 소스의 static 검토이며 Python runtime·실제 cloud 결과를 주장하지 않습니다.
 
-snapshot/타입 `17946082`·실행 `0edc5b7c`·leaf `85091653`·Connection `64e9840b`·문서 `0f8997f4`를 작은 단위로 commit/push했습니다. Gophercloud generator-test 발췌·변형과 Unicode full lowercase 출처/고지도 `fea9a547`로 보완했습니다. 판정 revision의 replace 없는 원격 설치·main2개·Go SHA/라이선스14개 보존을 이어 확인합니다. 전체 목표는 active이며 다음 검토 후보는 기존 native Image Update 한 선언입니다.
+snapshot/타입 `17946082`·실행 `0edc5b7c`·leaf `85091653`·Connection `64e9840b`·문서 `0f8997f4`를 작은 단위로 commit/push했습니다. Gophercloud generator-test 발췌·변형과 Unicode full lowercase 출처/고지도 `fea9a547`로 보완했습니다. 판정 `72cf240b`도 commit/push하고 정확한 revision의 replace 없는 원격 설치·main2개·Go SHA/라이선스14개 일치를 확인했습니다. 전체 목표는 active이며 다음 검토 후보는 기존 native Image Update 한 선언입니다.
+
+정확한 문서·판정 revision `72cf240b6a9508cbbbf4404ae882ef9576a306ce`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008214624-72cf240b6a95`·get/build exit0이며 태그/설치 main **2개**를 빌드했습니다. 원격 Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-tags-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance ImageRecord 상태·삭제 대기 완료
 

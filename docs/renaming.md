@@ -54,3 +54,9 @@ SDK가 새 segmented upload용으로 만드는 prefix는 `.gophercloudsdk-upload
 전체 `make check`는 43개 테스트 package·vet·API 판정·포맷 검사 모두 통과했습니다. 푸시한 `478f9b4feff6ea5b71a036a5db0c83aae45e8cbc`을 별도 Go 프로젝트에서 `GOWORK=off`·replace 없이 설치하고 문서의 설치·목록 main 2개를 빌드했습니다. 원격 Go source 2,044개가 검증한 로컬 소스와 같으며, 라이선스·고지 14개 파일도 byte-identical입니다. 원격 설치 버전은 `v0.0.0-20261008183000-478f9b4feff6`입니다.
 
 추가 재점검에서 기본 설치 명령이 libyaml MIT 고지 보완 전 revision을 가리키는 것을 확인해 `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`으로 갱신했습니다. 새 외부 프로젝트에서 [설치 안내](install.md)의 `go mod init`, `GOWORK=off go get`, `GOWORK=off go build -mod=readonly ./...` 명령과 정확한 main을 그대로 사용해 세 명령 모두 exit0을 확인했습니다. 소비자와 SDK에 replace가 없으며 라이선스·고지 14개 파일이 현재 트리와 byte-identical입니다. 원격 Go source 2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`도 기존 전체 43개 테스트 package 검사에 통과한 소스와 같습니다. 근거는 `/private/tmp/go-openstacksdk-naming-install-final-consumer.json`입니다. 인증·OpenStack 호출은 실행하지 않았습니다.
+
+## 최종 고지와 배포 검증 (2026-10-09)
+
+Gophercloud generator-test에 포함한 고정 source 발췌·변형과 Unicode full lowercase/context 데이터의 고지 범위를 `fea9a547`에서 보완했습니다. 모듈·import·생성기·Git remote의 실제 참조는 `go-openstacksdk`이며, 이전 이름은 변경 이력과 reference 출처에서만 보존합니다. 원본 라이선스 표10개의 hash와 internal JMESPath LICENSE 사본도 확인했습니다.
+
+정확한 문서·판정 revision `72cf240b6a9508cbbbf4404ae882ef9576a306ce`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008214624-72cf240b6a95`·get/build exit0이며 태그/설치 main **2개**를 빌드했습니다. 원격 Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-tags-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
