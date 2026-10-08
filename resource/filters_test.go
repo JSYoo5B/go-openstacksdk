@@ -23,6 +23,53 @@ func semanticAdapter(rows []bodyFilterEntry, calls *atomic.Int32) Adapter[bodyFi
 	return adapter
 }
 
+func TestSemanticFilterSelectionKeepsMemberSpellingSeedAndDeferredUnknownErrors(t *testing.T) {
+	descriptor := &FilterDescriptor{Query: map[string]string{"min_ram": "minRam", "is_public": "is_public"}, Body: map[string]string{"name": "name"}, Reserved: []string{"headers"}}
+	values := map[string]any{"min_ram": 2, "minRam": 7, "is_public": nil, "name": "seed", "vendor": json.Number("9007199254740993")}
+	selection, err := PrepareFilterSelection(descriptor, WithFilters(values))
+	values["name"] = "caller changed"
+	if err != nil || selection.Query.Get("minRam") != "2" || string(selection.Body["name"]) != `"seed"` {
+		t.Fatal(selection, err)
+	}
+	raw, present, err := selection.Attribute("is_public")
+	if err != nil || !present || string(raw) != "null" {
+		t.Fatal(raw, present, err)
+	}
+	query, err := selection.OriginalQuery()
+	if err != nil || query.Get("min_ram") != "2" || query.Get("minRam") != "7" || query.Get("vendor") != "9007199254740993" {
+		t.Fatal(query, err)
+	}
+	attributes, err := selection.OriginalAttributes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	attributes["name"][1] = 'X'
+	query.Set("min_ram", "changed")
+	again, err := selection.OriginalAttributes()
+	if err != nil || string(again["name"]) != `"seed"` || selection.Query.Get("minRam") != "2" {
+		t.Fatal(again, err)
+	}
+	ignored, err := PrepareFilterSelection(descriptor, WithFilters(map[string]any{"vendor": func() {}}))
+	if err != nil || len(ignored.Query) != 0 || len(ignored.Body) != 0 {
+		t.Fatal(ignored, err)
+	}
+	if _, err := ignored.OriginalQuery(); !errors.Is(err, ErrInvalidOption) {
+		t.Fatal("member encoding error was ignored", err)
+	}
+	cleared, err := PrepareFilterSelection(descriptor, WithFilter("vendor", func() {}), WithFilters(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if q, err := cleared.OriginalQuery(); err != nil || len(q) != 0 {
+		t.Fatal(q, err)
+	}
+	for _, option := range []ListOption{nil, WithFilter("headers", "bad"), WithQuery("vendor", "raw"), WithName("name"), WithMaxItems(1)} {
+		if _, err := PrepareFilterSelection(descriptor, option); err == nil {
+			t.Fatal("unsupported control accepted")
+		}
+	}
+}
+
 func TestSemanticFiltersCanonicalPrecedencePresenceAndExactQueryEncoding(t *testing.T) {
 	var calls atomic.Int32
 	descriptor := semanticAdapter(nil, &calls).FilterDescriptor
