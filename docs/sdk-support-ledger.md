@@ -21,6 +21,8 @@
 
 작은 구현 `9aba6303`, Connection 전달 `08517200`, property 경계 `454d9756`를 commit/push했습니다. **기존547개 다른 review와 세 review의 원래6계약·API·fingerprint를 모두 보존**했습니다. 두 list에 각각5개 계약을 추가하고 named mapping으로 판정했으며 property에1개 경계 계약을 추가해 reviews550·계약3,429입니다. property getter의 recognized seed/default/coercion/location/fetch translation은 아직 구현되지 않았으므로 [조회 가이드](../image/metadef-property.md)와 remaining에 명시하고 미해결을 유지합니다.
 
+정확한 revision `b4a0f6ab71ec34b698cf12ab670f0516112411dd`을 별도 외부 module에서 replace 없이 설치하여 동일한 main3개를 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008153156-b4a0f6ab71ec`이며 원격 Go source2,013개 SHA가 위 최종 gate와 같습니다. LICENSE·NOTICE·통합 고지·제3자 라이선스/고지 13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadef-records-remote-receipt.json`과 [설치 안내](install.md)에 결과를 기록합니다. 이후 JSON/prose 갱신에는 같은 Go의 전체 검사를 반복하지 않습니다.
+
 ## 초기 조사 이후 검증한 계약
 
 | 구현 단위 | 검증 증거 | 남은 비교 범위 |

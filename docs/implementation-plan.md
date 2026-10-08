@@ -16,6 +16,8 @@
 
 구현 `9aba6303`·두 Connection 경로 `08517200`·property 경계 `454d9756`를 작은 단위로 commit/push했습니다. catalog3,362개 fingerprint·source pins와 다른547 reviews·기존 계약을 그대로 보존했습니다. 새 선언을 추가하지 않고 기존 두 list의 미해결을 닫았으며 reviews550·계약3,429입니다. 서비스별 핵심183개는 user/admin 합산이고 새 HTTP endpoint2개를 뜻하지 않습니다. Python 전체 Resource/session lifecycle·실제 cloud·alpha tag 배포는 별도이며 전체 목표와 서비스 우선순위는 active입니다.
 
+정확한 revision `b4a0f6ab71ec34b698cf12ab670f0516112411dd`을 별도 외부 module에서 replace 없이 설치하여 동일한 main3개를 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008153156-b4a0f6ab71ec`이며 원격 Go source2,013개 SHA가 위 최종 gate와 같습니다. LICENSE·NOTICE·통합 고지·제3자 라이선스/고지 13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadef-records-remote-receipt.json`과 [설치 안내](install.md)에 결과를 기록합니다. 이후 JSON/prose 갱신에는 같은 Go의 전체 검사를 반복하지 않습니다.
+
 **다음 구현:** `get_metadef_property`는 초기 Resource 속성·descriptor default/coercion·fetch translation의 실제 구현 공백을 확인해 **미해결 유지**입니다. 기존 strict200 getter와 additive resource_type query를 완료로 재집계하지 않았습니다. [조회 비교·실행 main](../image/metadef-property.md)에 seed/default·200..399/invalid-JSON·mutable cache 차이를 기록했고 owned getter부터 이어갑니다.
 
 **앞선 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
