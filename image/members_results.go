@@ -6,7 +6,8 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 )
 
-// ImageMemberAcknowledgement retains an actual 204 member-deletion response.
+// ImageMemberAcknowledgement retains an actual member-deletion response.
+// RemoveImageMember uses strict204; RemoveImageMemberRecord accepts200..399.
 // IDs identify the fixed requested target. Body is opaque and may be partial
 // when an accepted response returns a read, Close or context error.
 type ImageMemberAcknowledgement struct {
