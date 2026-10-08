@@ -23,6 +23,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 명시 ID의 `get_flavor`는 `FindIdentity`에 `FindFallbackNever`와 strict 미존재 옵션을 함께 지정합니다. `Servers.Metadata`는 두 Python metadata 조회 이름에 대응하는 문자열 map이고, `KeyPairs.Get`은 이름과 optional owner를 직접 조회합니다. 새 `Servers.ConsoleOutput`은 선택적 length의 생략과0을 구분하며 native `ShowConsoleOutput`은 유지합니다. [Compute 조회의 Python/Go 비교](../user-read-apis.md)에 독립 main·기본값·typed 반환과 source response 차이를 설명합니다.
 
+`RemoteConsoles.CreateConsole`은 type의 protocol 기본값과 선택된 버전 조건을 SDK가 처리하고 Resource/Wire 결과를 제공합니다. `KeyPairs.DeleteKeypair`는 직접 이름 삭제의 optional owner와 기본 미존재 무시를 함께 제공합니다. [Compute 작업의 Python/Go 비교](../user-actions.md)에 concrete 옵션·생략/null·strict 선택과 native API 보존을 설명합니다.
+
 `conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
 `Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.
