@@ -513,6 +513,8 @@ Volume image metadata는 `SetVolumeImageMetadata`의 문자열·raw JSON 옵션�
 
 `MetadefResourceTypes.ListRecords/AllRecords`와 namespace scope의 같은 메서드는 declared Resource·실제 Wire/receipt, semantic 필터와 공통 paging을 제공합니다. [Python/Go 비교·독립 main](image/metadef-resource-types-records.md)에서 두 Connection 경로와 옵션을 설명합니다. `MetadefProperties` scope의 `GetRecord`는 초기 Resource 속성·descriptor 기본값과 변환·현재 location을 SDK가 처리하고 실제 응답과 구분합니다. [Property 레코드 조회·독립 main](image/metadef-property-records.md)과 [기존 raw 조회](image/metadef-property.md)에 두 API의 사용법을 설명합니다. [Property owned 목록·삭제](image/metadef-property-record-list.md)는 유한 dictionary의 key/name 병합·로컬 필터·부분 결과와 실제 삭제 receipt를 제공합니다. 같은 scope의 [레코드 생성·수정·PUT 생략](image/metadef-property-record-write.md)은 raw 요청 값·descriptor view·변경이 없는 수정의 로컬 결과를 제공합니다.
 
+`MetadefObjects` scope와 `MetadefNamespaces`의 `ListRecords/AllRecords`는 raw Body 기본값·descriptor 변환·현재 location·공통 페이지 순회와 부분 결과를 제공합니다. [객체·namespace 목록의 Python/Go 비교와 독립 main](image/metadef-object-namespace-record-lists.md)에 두 진입점과 concrete 옵션 사용법을 설명합니다.
+
 namespace association의 [owned 생성·삭제와 독립 main](image/metadef-resource-type-association-mutations.md)은 명시한6개 raw Body 값,8필드 declared Resource와 실제 응답을 구분합니다. `CreateRecord`는 name/id의 SDK 필수 조건 없이 dirty Body를 보내고, `DeleteRecord`는 복사한 identity와 고정 parent로 실제 opaque ACK를 남깁니다. 기본 physical404 receipt와 Source의 mutable Resource 재사용 차이도 설명합니다.
 
 ## License

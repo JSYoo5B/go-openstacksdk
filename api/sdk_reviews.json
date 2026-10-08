@@ -21955,7 +21955,7 @@
     {
       "operation": "python:image/v2/metadef_namespaces",
       "source_fingerprint": "c9e50ff4309b0323e79f400d847a37731c526b488def43636fd98d338c01f357",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListHeader",
@@ -21969,7 +21969,23 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithListSinglePage",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListFilters",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListVisibility",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListResourceTypes",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListSortKey",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithRecordListSortDir"
       ],
       "contracts": [
         {
@@ -22046,23 +22062,76 @@
             "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesResponseOwnershipAndNativeHooks",
             "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
           ]
+        },
+        {
+          "behavior": "Owned namespace projection includes12 Body descriptors and location (13 fields): inherited id/name; canonical is_protected aliases protected in original member order with JSON truthiness/null; tags missing[]/null/scalar list; associations list-of-dict converts nonobject elements to{}. Present id includingnull authoritative else namespace. Declared Body recomputes current location; no declared Body retains supplied raw location.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsDeclaredProjectionAndOwnedChannels",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsDescriptorNullDefaultAndAliasOrder",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCurrentLocationAndStickyGuards"
+          ]
+        },
+        {
+          "behavior": "Public namespace **query maps six server keys plus canonical declared Body local filters; visibility query takes precedence. Remote protected, unknown/tag query attrs are ignored; reserved heterogeneous/target/session/version controls rejected explicitly. Options own snapshots, full replacement/last wins, nil/errors/header/query conflicts fail before HTTP.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsSourceQueriesAndNormalizedLocalFilters",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCompletePreflightAndFaultReceipts"
+          ]
+        },
+        {
+          "behavior": "Namespace Limit pointer distinguishes nil omission and explicit numericzero wire0. Zero disables marker fallback but follows explicit continuations; positive MaxItems hint replaces falseyzero or absentlimit. Positive requested limits persist; consumed raw-row cap precedes filters. Shared paging zero permission is opt-in and other services retain positive-only validation.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership",
+            "internal/rest/list_zero_limit_test.go:TestListZeroLimitRequiresServiceOptIn",
+            "internal/rest/list_zero_limit_test.go:TestListZeroLimitRetainsExplicitLinksAndFalseyCapHint"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 requires whole UTF8 JSON, nonnull namespaces object envelope, array or single object; consumed rows nonnull objects. Constructor connection/microversion/_synchronized presence fails with original receipt/partial rows; self/other unknown fields remain passive actual Wire.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsActualStatusesAndMandatoryRepresentation",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions"
+          ]
+        },
+        {
+          "behavior": "Generic Body/HTTP Link continuation, short-page fallback using actual consumed id/namespace, empty stop, filters and cursor inheritance, cycle/drift/fixed path safety and exact relative /v2 collection aliases preserve pagination while AllRecords keeps partial rows.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions",
+            "internal/rest/list_versioned_path_test.go:TestListVersionedPathAliasRequiresExactRelativeCollection"
+          ]
+        },
+        {
+          "behavior": "Accepted read/Close/UTF8/JSON/context/source errors preserve actual response and causes; source/outer invariants are sticky through preparation and body handling. Shared read boundary check precedes Close restoration, body closes once and accepted handling errors are never replayed.",
+          "tests": [
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCurrentLocationAndStickyGuards",
+            "image/v2/metadefnamespaces/list_records_test.go:TestMetadefNamespaceRecordsCompletePreflightAndFaultReceipts",
+            "internal/rest/guarded_response_test.go:TestDoJSONGuardedObservesReadFailureBeforeCloseRestoresSource"
+          ]
+        },
+        {
+          "behavior": "Connection Image/ImageV2 share the original provider/client and current location; actual non200 pages, descriptor projection, remote Wire values, snapshot headers and live token survive two pages. Older typed strict200 API remains separate and unchanged.",
+          "tests": [
+            "connection_image_metadef_record_lists_test.go:TestConnectionImageMetadefRecordListsShareLocationAndPaging",
+            "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefnamespaces/README.md"
+        "image/v2/metadefnamespaces/README.md",
+        "image/metadef-object-namespace-record-lists.md"
       ],
       "differences": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Typed six query keys, leaf-only advertised next/prefix guards, local cap and no marker fallback/hint do not reproduce arbitrary Python query/Body filters or generic pagination/cache semantics."
+        "This named mapping uses owned ListRecords/AllRecords; legacy typed CRUD/List/All keeps its original strict statuses and bounded projection. It does not assert all inherited mutable Resource/dirty/cache/session surfaces are implemented.",
+        "Go fixes session/target/version/auth ownership, validates UTF8 and safe literal routes, retains independent receipts and raw Wire, and guards origin/path/query/cycles/conflicting links. Exact relative versioned collection links are allowed; arbitrary Python target or query replacements are excluded.",
+        "Selected semantic query values use Go scalar/scalar-array encoding; object/nested-array query forms are rejected. Local comparison keeps bool and number distinct with exact decimal equality, unlike some Python equality/float/exception behavior.",
+        "Dictionary links:{next:URL} is an explicit Go extension; Source dictionary iteration expects rel/href member objects. Namespace integer limit model does not preserve the dynamic Source difference between numeric0 and quoted0. Deprecated JMESPath applies to the Source generator before collection and may return heterogeneous non-list values; typed Go listing rejects that branch.",
+        "Default server policy places these reader operations in core user; deployment visibility/ownership/policy and real cloud state are handled by the server and not proven by local fixtures."
       ],
-      "remaining": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Typed six query keys, leaf-only advertised next/prefix guards, local cap and no marker fallback/hint do not reproduce arbitrary Python query/Body filters or generic pagination/cache semantics."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/update_metadef_namespace",
@@ -22334,7 +22403,7 @@
     {
       "operation": "python:image/v2/metadef_objects",
       "source_fingerprint": "a2ba1f1ff12df81d72970c374efdd86440f4adc00b85625b8d8dc57730799b93",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.List",
@@ -22342,7 +22411,23 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListOpts",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeader",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NewWithDependencies",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilters",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListVisibility",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListResourceTypes",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListSortKey",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListSortDir"
       ],
       "contracts": [
         {
@@ -22400,23 +22485,75 @@
             "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Owned namespace-only default listing follows pinned Proxy.metadef_objects: bodyless fixed GET, seven untyped Body fields plus fixed namespace/current location view9. Present id including null wins; absent id falls back name; unknown/self/date/raw values remain passive in independent Wire/Envelope. Three Source constructor duplicate keys connection/microversion/_synchronized reject with actual page receipt and prior rows.",
+          "tests": [
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsFixedRoutesProjectionAndReceipts",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsIdentityPresenceAndLocation",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsConstructorBindingFailuresKeepPartialReceipt"
+          ]
+        },
+        {
+          "behavior": "Owned pages accept actual200..399 with whole UTF8 mandatory objects JSON and singleton object envelope. Generic links/next/HTTPLink, last consumed raw marker, short-page fallback only for positive initial limit/hint, empty stop and exact relative /v2 collection alias behind reverse prefix are supported. Go fixes origin/path/query and rejects cycles/conflicting or changed targets before the next request.",
+          "tests": [
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsStatusEnvelopeAndEmptyPolicy",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsContinuationRepresentations",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsRejectedContinuationKeepsPartialReceipt",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsMarkerFallbackUsesWireIdentity",
+            "internal/rest/list_versioned_path_test.go:TestListVersionedPathAliasRequiresExactRelativeCollection"
+          ]
+        },
+        {
+          "behavior": "Concrete option factories snapshot maps/pointers/slices/selected JSON; callback configuration copied before/after, nil/error/options/reserved headers fail pre-HTTP, each lazy iteration resnapshots its source. Query/Body filters and controls are explicit Go extensions to the public Python namespace-only signature; semantic selected filters and query ownership are retained.",
+          "tests": [
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsLazyRepeatAndOptionSnapshots",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsSemanticFilters",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsCompletePreflight",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsFullOptionsAndRetainedCallbacksOwnStorage",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsQueryExtensionsAndFixedContinuation"
+          ]
+        },
+        {
+          "behavior": "Raw consumed-row cap precedes local filters; early break/cap skips unconsumed rows/next; AllRecords preserves successful partial rows. Accepted read/Close/UTF8/JSON/row/cancel/context failures retain actual Body/Header/status and original causes without accepted replay.",
+          "tests": [
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsRawCapAndEarlyStop",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsAcceptedReadCloseAndCancelCauses",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsRejectedContinuationKeepsPartialReceipt"
+          ]
+        },
+        {
+          "behavior": "SDK source, namespace and outer guard snapshots remain sticky through options/native retries/physical attempts/read/Close/yield. Read-time source failures are observed before Close can restore state; native target/body/status ownership and live provider token behavior remain bounded.",
+          "tests": [
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsPreflightOrderAndLocationFailures",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsNativeRetryAndOwnership",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsSourceAndOuterGuardAcrossPhysicalBoundaries",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsObservedGuardFailureSurvivesRestoration",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsNamespaceGuardAndRowProvenance",
+            "internal/rest/guarded_response_test.go:TestDoJSONGuardedObservesReadFailureBeforeCloseRestoresSource"
+          ]
+        },
+        {
+          "behavior": "Connection Image and ImageV2 use the same shared native client/provider and owned location dependencies; location captured before callbacks, nullable identity and fixed URI view survive actual multi-page receipts. Existing typed finite strict200 List/All remains separate.",
+          "tests": [
+            "connection_image_metadef_record_lists_test.go:TestConnectionImageMetadefRecordListsShareLocationAndPaging",
+            "image/v2/metadefobjects/list_records_test.go:TestMetadefObjectRecordsLegacyFiniteListRemainsSeparate"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefobjects/README.md"
+        "image/v2/metadefobjects/README.md",
+        "image/metadef-object-namespace-record-lists.md"
       ],
       "differences": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Go finite local cap deliberately avoids wire filters and continuation; pinned proxy has no query kwargs, generic Resource framework remains broader and official prose copies namespace paging."
+        "This named mapping uses owned ListRecords/AllRecords; legacy typed CRUD/List/All keeps its original strict statuses and bounded projection. It does not assert all inherited mutable Resource/dirty/cache/session surfaces are implemented.",
+        "Go fixes session/target/version/auth ownership, validates UTF8 and safe literal routes, retains independent receipts and raw Wire, and guards origin/path/query/cycles/conflicting links. Exact relative versioned collection links are allowed; arbitrary Python target or query replacements are excluded.",
+        "Selected semantic query values use Go scalar/scalar-array encoding; object/nested-array query forms are rejected. Local comparison keeps bool and number distinct with exact decimal equality, unlike some Python equality/float/exception behavior.",
+        "Dictionary links:{next:URL} is an explicit Go extension; Source dictionary iteration expects rel/href member objects. Namespace integer limit model does not preserve the dynamic Source difference between numeric0 and quoted0. Deprecated JMESPath applies to the Source generator before collection and may return heterogeneous non-list values; typed Go listing rejects that branch.",
+        "Default server policy places these reader operations in core user; deployment visibility/ownership/policy and real cloud state are handled by the server and not proven by local fixtures.",
+        "Pinned public metadef_objects(namespace) accepts no query kwargs: all caller query/filter/header/cap/pagination options are explicit Go extensions; default no-option calls retain the public Source responsibility."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Go finite local cap deliberately avoids wire filters and continuation; pinned proxy has no query kwargs, generic Resource framework remains broader and official prose copies namespace paging."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/update_metadef_object",

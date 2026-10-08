@@ -2,7 +2,9 @@
 
 `MetadefObjects`는 literal namespace 안의 객체를 다루는 SDK 소유 leaf입니다. `conn.ImageV2(ctx).MetadefObjects`, `image.Service.API.MetadefObjects`, `metadefobjects.New(client)`에서 같은 API를 사용합니다. 먼저 `InNamespace(ctx, namespace)`로 scope를 만들며 이 호출은 HTTP를 보내지 않습니다. namespace와 객체 이름은 UUID나 Ref가 아니라 그대로 사용할 이름이고, parent 조회나 Find를 실행하지 않습니다.
 
-| Go 호출 | 고정 Python proxy | 요청·정상 응답 |
+이 문서의 기존 CRUD·`List`·`All`은 bounded typed 계약입니다. scope의 `ListRecords`·`AllRecords`는 untyped Body 일곱 필드, 고정 namespace·Connection location, actual200..399, semantic 필터와 inherited continuation을 제공하는 별도 레코드 API입니다. 고정 Python public 객체 목록에는 query kwargs가 없으므로 옵션은 Go extension으로 구분합니다. [Python 비교와 독립 실행 예제](../../metadef-object-namespace-record-lists.md)를 참고하세요.
+
+| 기존 typed Go 호출 | 고정 Python proxy | 요청·정상 응답 |
 | --- | --- | --- |
 | `scope.Create` | `create_metadef_object` | collection POST, 201 |
 | `scope.Get` | `get_metadef_object` | child GET, 200 |
@@ -132,11 +134,11 @@ Required는 nil이면 생략, nonnil empty slice이면 `[]`를 보냅니다. ent
 
 Python `update_metadef_object`는 전달된 객체를 `_get_id`로 줄인 뒤 generic `_update`에 넘깁니다. 같은 cached 객체 자체를 넘기는 namespace proxy와 호출 경로가 다릅니다. [Resource.commit](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1874-L1937)은 dirty body/header가 없으면 HTTP 없이 반환할 수 있고, 객체의 mandatory name을 body에 자동으로 되넣지 않습니다. 위 Python 예제는 name을 명시합니다. Go는 current-name을 기본 body에 넣고 항상 replacement PUT을 보내는 명시적 편의 계약입니다.
 
-## 유한 목록과 scope 수명
+## 기존 typed 유한 목록과 scope 수명
 
 `List`는 iterator 생성 시 HTTP를 보내지 않습니다. iteration마다 옵션을 새로 준비하여 query와 body 없는 collection GET 하나만 실행합니다. required nonnull `objects` array의 행은 소비할 때만 decode합니다. `MaxItems=0`은 로컬 cap 없음, 양수는 로컬 소비 수 제한, 음수는 HTTP 전 오류입니다. cap이나 caller break 뒤의 사용하지 않는 malformed 행은 decode하지 않습니다. 성공한 빈 `All`은 nonnil empty slice이고 오류에서는 부분 slice를 버립니다.
 
-고정 [repository.list](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/db/__init__.py#L625-L632)와 [serializer.index](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_objects.py#L430-L435)는 전체 namespace 객체를 유한 배열로 반환하며 next를 생성하지 않습니다. [공식 List Objects 문서](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-objects)의 namespace pagination 설명과 실제 객체 경로의 차이를 반영했습니다. Go는 next·first·schema·self·links·HTTP Link를 해석하거나 따라가지 않고 wire limit·marker·sort·filter, hint나 fallback을 제공하지 않습니다. 고정 Python proxy도 목록 query 인자를 노출하지 않습니다.
+고정 [repository.list](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/db/__init__.py#L625-L632)와 [serializer.index](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_objects.py#L430-L435)는 전체 namespace 객체를 유한 배열로 반환하며 next를 생성하지 않습니다. [공식 List Objects 문서](https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-objects)의 namespace pagination 설명과 실제 객체 경로의 차이를 반영했습니다. 이 typed 목록은 next·first·schema·self·links·HTTP Link를 해석하거나 따라가지 않고 wire limit·marker·sort·filter, hint나 fallback을 제공하지 않습니다. 고정 Python proxy도 목록 query 인자를 노출하지 않습니다.
 
 `InNamespace`는 API/client/provider·type·endpoint·base·microversion을 scope 수명 동안 고정하고 context를 저장하지 않습니다. 이후 target/source drift는 callback 전에, accepted body 뒤와 소비하는 행 전후에 검사합니다. 일반 source header는 각 호출 때 최신 유효 값을 복사하고 원래 provider의 live auth를 사용합니다. 이전 응답의 namespace/name/self/schema로 route를 바꾸지 않습니다. client/provider를 동시에 임의 변경할 수 있다는 계약은 제공하지 않습니다.
 

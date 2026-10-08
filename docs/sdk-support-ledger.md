@@ -4,9 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance resource type association owned 생성·삭제](#glance-resource-type-association-owned-생성삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance object·namespace owned 목록](#glance-objectnamespace-owned-목록-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, 이후 user 목록2개를 먼저 배치합니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수265는 유지합니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는267입니다.
+
+## Glance object·namespace owned 목록 완료
+
+2026-10-09 핵심 user의 `metadef_objects`·`metadef_namespaces` 두 선언을 owned Go mapping으로 닫았습니다. **265→267(+2)**이며 핵심191→193/2,292·Glance29→31/120입니다. [Python/Go 비교·독립 main](../image/metadef-object-namespace-record-lists.md)에 기본 호출·concrete 옵션·동적 Python 제어와의 차이를 기록합니다.
+
+- 구현: object7 Body+namespace/location9필드, namespace12 Body+location13필드, nullable identity·descriptor 기본값/alias/변환·현재 location·raw Wire와 실제 page 증거. 응답 constructor binding3키의 오류와 앞선 정상 행을 보존합니다.
+- 목록: actual200..399 mandatory UTF8 JSON·singleton object, server query/declared Body 필터·raw 소비 cap·generic continuation·wire marker fallback·부분 결과. namespace Limit nil/0 구분과 cap hint, exact `/v2/` collection alias·fixed target 보호를 공통 paging에 연결했습니다.
+- 공통 수정: `DoJSONGuarded`는 ReadAll 직후 source guard를 검사하고 Close 전후의 원인을 유지합니다. Close가 상태를 복원해도 읽기 단계에서 관찰한 실패를 성공으로 바꾸지 않습니다.
+- 재사용: public Gophercloud helper·기존 object/namespace/association/Connection HTTP·body·fault fixture·공통 REST/FilterSelection/jsonfilter. 별도 서버나 fault engine을 만들지 않았습니다.
+
+새 [object20그룹138사례](../image/v2/metadefobjects/list_records_test.go)·[namespace9그룹122사례](../image/v2/metadefnamespaces/list_records_test.go)·[Connection1그룹2사례](../connection_image_metadef_record_lists_test.go)·공통4그룹10사례의 합은 **34그룹272사례**입니다. 기존142그룹1,922사례를 재사용한 집중176그룹2,194사례·전체 vet/race43개 실제 test package·최종267 parity/progress/gofmt가 PASS했습니다. 반복 생성 Go drift0, 정확한 목록 main과 설치 main의 별도 외부 module local-replace build **2개** exit0입니다. 인증/OpenStack/Python 서비스 호출은 실행하지 않았으며 JMESPath Source의 수집 전 generator 분기는 독립 비교 reference로 확인해 typed 지원 범위를 문서화했습니다.
+
+Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d40386936934d29`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews·pins/catalog/fingerprint와 선택한 두 선언의 기존13계약·Go API를 보존하고13계약을 추가하여 reviews550·계약3,484입니다. 예전 typed 계약도 보존하며 getter/schema와 metadata admin 쓰기는 재집계하지 않았습니다.
+
+공통 `49869890`·`252f9c2e`, object 구현/테스트 `11b57da4`·`f45866f4`, namespace 구현/테스트 `0b2ad4a6`·`3c0b7591`, Connection `760f546a`를 나눠 commit/push했습니다. `/private/tmp/go-openstacksdk-metadata-lists-{focused.jsonl,check.log,check-receipt.json,local-consumer.json,generation-repeat.log}`에 실행 근거를 기록합니다. 다음은 같은 reader 단계의 member 목록·검색입니다.
 
 ## Glance resource type association owned 생성·삭제 완료
 

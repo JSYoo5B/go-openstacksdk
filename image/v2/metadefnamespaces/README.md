@@ -2,7 +2,9 @@
 
 `MetadefNamespaces`는 namespace 이름을 직접 지정하는 SDK 소유 leaf API입니다. `conn.ImageV2(ctx).MetadefNamespaces`, `image.Service.API.MetadefNamespaces`, `metadefnamespaces.New(client)`에서 같은 API를 사용합니다. namespace는 UUID가 아니라 `OS::Example` 같은 이름이며, 별도 Find나 ID·Name resolver를 사용하지 않습니다.
 
-| Go 메서드 | 고정 Python proxy | 요청·정상 응답 |
+이 문서의 기존 CRUD·`List`·`All`은 bounded typed 계약입니다. `ListRecords`·`AllRecords`는 inherited name·tags를 포함한 declared view13, bool/list descriptor 변환, semantic query·Body 필터와 generic continuation을 제공하는 별도 레코드 API입니다. actual200..399의 Resource·Wire·physical page 증거를 독립적으로 반환하고 후속 오류에서 수집한 부분 행을 보존합니다. [Python 비교와 독립 실행 예제](../../metadef-object-namespace-record-lists.md)를 참고하세요.
+
+| 기존 typed Go 메서드 | 고정 Python proxy | 요청·정상 응답 |
 | --- | --- | --- |
 | `Create` | `create_metadef_namespace` | `POST metadefs/namespaces`, 201 |
 | `Get` | `get_metadef_namespace` | `GET metadefs/namespaces/{namespace}`, 200 |
@@ -121,7 +123,7 @@ def manage_namespace(conn, namespace, replacement_namespace, owner, page_limit):
     return created, fetched, rows, updated
 ```
 
-Python의 [5개 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1390-L1485)는 namespace 이름 또는 mutable `MetadefNamespace` Resource를 받고 create/get/update는 Resource, delete는 None, list는 generator를 반환합니다. 같은 소스는 namespace 자체가 identity라는 이유로 Find를 제공하지 않는다고 명시합니다. Python의 [모델](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_namespace.py)은 `is_protected`를 wire `protected`에 대응시키며 resource type association을 nested descriptor로 처리합니다. Go는 canonical `protected` bool pointer와 raw nested 응답을 제공합니다.
+Python의 [5개 proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1390-L1485)는 namespace 이름 또는 mutable `MetadefNamespace` Resource를 받고 create/get/update는 Resource, delete는 None, list는 generator를 반환합니다. 같은 소스는 namespace 자체가 identity라는 이유로 Find를 제공하지 않는다고 명시합니다. Python의 [모델](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_namespace.py)은 `is_protected`를 wire `protected`에 대응시키며 resource type association을 nested descriptor로 처리합니다. 기존 typed `Namespace`는 canonical `protected` bool pointer와 raw nested 응답을 제공합니다.
 
 ## Scalar 입력과 replacement update
 
@@ -135,7 +137,7 @@ Python proxy도 생략한 namespace를 body에 추가하지만, [Resource.commit
 
 `GetOpts.ResourceType`이 nil이면 query를 생략하고 explicit empty string도 그대로 `resource_type=`로 보냅니다. valid UTF-8/control-free literal 값만 허용합니다. property prefix 적용은 [서버 show](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_namespaces.py#L261-L340)가 수행하며 SDK는 응답을 로컬에서 재작성하지 않습니다.
 
-## 목록과 reverse prefix
+## 기존 typed 목록과 reverse prefix
 
 기본 ListOpts는 모든 query를 생략하고 `MaxItems=0`으로 cap 없이, `SinglePage=false`로 광고된 다음 page를 읽습니다. `Limit *int`는 nil이면 생략, 0이면 wire 0, 음수이면 오류입니다. Glance의 [limit 검사](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/metadef_namespaces.py#L552-L603)는 0을 허용하고 생략값에는 서버의 configured default/clamp를 적용합니다. Go가 기본 page 크기를 정하거나 cap을 limit hint로 바꾸지 않습니다.
 
