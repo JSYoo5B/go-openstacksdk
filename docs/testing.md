@@ -30,6 +30,8 @@ JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 
 
 공통 알고리즘의 계약은 공통 패키지 테스트에서 검증하고, 서비스 테스트에는 경로·envelope·서비스 고유 분기와 binding 연결만 추가합니다. 기존 테스트 표에 사례를 넣을 수 있으면 별도 테스트 서버나 harness를 만들지 않습니다. 새로운 transport가 필요할 때도 기존 fault/body wrapper를 먼저 재사용합니다. 검증한 동일 소스의 전체 테스트는 문서·지원 판정 갱신 때문에 반복하지 않습니다.
 
+Console auth-token 조회는 같은 공통 discovery와 Cinder에서 추출한 `microversions.MemberGet`의 bodyless·version header·retry 보호를 사용합니다. 새 고유3그룹42사례만 public fixture 표로 검증하고 기존 console composition·pure version·Cinder member GET·RawResource clone 검증9그룹을 함께 선택했습니다. 집중 race12그룹이 PASS했으며 이 중9그룹은 기존 검증의 재사용입니다. nullable passive 필드·token/auth 구분·location-before-discovery·actual Wire만 해당 리소스의 assertion으로 추가합니다. [사용법](../compute/console-auth-token.md)에 반환과 오류 정책을 설명합니다.
+
 Console 자동 선택은 Cinder의 version 비교·유한 guarded discovery를 `internal/microversions`로 추출해 공유합니다. composition3그룹과 공통 pure1그룹만 새로 추가하고, 기존 direct type gate1·Cinder import5·version snapshot2·Connection discovery4그룹을 함께 선택합니다. 집중16그룹 중12그룹은 기존 검증의 재사용입니다. 서비스별 status/self-link·광고/선택 분기·protocol/location·winning executor의 오류만 기존 public fixture 표에 추가합니다. source나 옵션이 바뀌면 해당 집중 검사와 전체 회귀 검사를 실행하고, 같은 Go source SHA의 문서·판정 변경은 parity/progress/gofmt만 다시 확인합니다. [사용법](../compute/console-selection.md), [검증 기록](sdk-support-ledger.md#compute-console-자동-선택-완료)에 결과를 연결합니다.
 
 Compute 조회5개도 이 방식을 적용했습니다. metadata·keypair의2테이블24사례는 기존 `testcloud.New`와 공개 method/header helper를 사용하고, 콘솔3그룹은 기존 `flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`를 재사용합니다. flavor의 GET-only/extra-specs는 기존 HTTP 그룹을 지원 근거로 연결했습니다. 집중15그룹과 최종41 test package 전체 gate가 PASS했으며, 문서/JSON 갱신 뒤에는 같은 Go 전체 검사를 반복하지 않습니다. [비교·실행 예제](../compute/user-read-apis.md), [소스 SHA와 결과](sdk-support-ledger.md#compute-user-조회5개-완료)를 확인할 수 있습니다.

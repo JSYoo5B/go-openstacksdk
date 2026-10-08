@@ -1,5 +1,7 @@
 # Compute
 
+console token의 연결 정보는 `conn.Compute(ctx)`·`service.ValidateConsoleAuthToken(ctx, token)`으로 조회합니다. [Python/Go 비교와 전체 main](console-auth-token.md)에 nullable Resource·actual Wire·버전 정책을 설명합니다.
+
 modern/legacy console의 자동 선택은 `conn.Compute(ctx)`·`service.CreateConsole(ctx, serverID, type)`을 사용합니다. [Python/Go 비교와 전체 main](console-selection.md)에 광고 범위·protocol 기본값·반환과 오류 정책을 설명합니다.
 
 Nova 서버와 flavor를 제공합니다. 연결은 [전체 README](../README.md)의 `sdk.Connect(ctx, ...)`로 준비합니다. 아래 Go 조각은 오류를 반환하는 함수 안에서 사용하며, `fmt`, `time`, `compute`, `resource`를 필요한 만큼 import합니다.

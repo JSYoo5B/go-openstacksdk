@@ -10,6 +10,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
+[Console auth-token 조회](compute/console-auth-token.md)는 명시 token으로 연결 정보를 GET하고 source-shaped Resource·actual Wire·receipt를 반환합니다.
+
 [Compute console 자동 선택](compute/console-selection.md)은 `conn.Compute(ctx)`에서 서버가 광고한 범위에 따라 modern/legacy API를 선택합니다.
 
 **사용 가능한 개발 preview:** `make smoke`로 핵심 user 5개 흐름을 실행하고 실제 결과를 확인합니다. [단계별 사용·릴리즈 기준](docs/release-milestones.md)에 현재 검증 범위와 첫 외부 설치용 alpha의 남은 조건을 기록합니다.
