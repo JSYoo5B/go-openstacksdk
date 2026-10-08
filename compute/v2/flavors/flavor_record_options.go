@@ -131,23 +131,7 @@ func ownFlavorReadConfig[T any](config *request.Config[T], clone func(T) T) {
 	}
 }
 func prepareFlavorReadConfig[T any](ctx context.Context, check func(context.Context) error, base T, clone func(T) T, options []request.Option[T]) (request.Config[T], error) {
-	guarded := make([]request.Option[T], len(options))
-	for index, option := range slices.Clone(options) {
-		apply := option
-		guarded[index] = func(c *request.Config[T]) error {
-			if err := check(ctx); err != nil {
-				return err
-			}
-			if apply == nil {
-				return fmt.Errorf("%w: nil flavor read option", resource.ErrInvalidOption)
-			}
-			ownFlavorReadConfig(c, clone)
-			err := apply(c)
-			ownFlavorReadConfig(c, clone)
-			return errors.Join(err, check(ctx))
-		}
-	}
-	config, err := request.Apply(base, guarded...)
+	config, err := cloudread.ApplyReadOptions(ctx, base, options, func(c *request.Config[T]) { ownFlavorReadConfig(c, clone) }, check)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, true, flavorRecordFiltersArgument)
 	}
