@@ -4,9 +4,26 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance ImageRecord 상태·삭제 대기](#glance-imagerecord-상태삭제-대기-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance ImageRecord 태그 추가·삭제](#glance-imagerecord-태그-추가삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는275입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는277입니다.
+
+## Glance ImageRecord 태그 추가·삭제 완료
+
+2026-10-09 핵심 user `add_tag`·`remove_tag`의 named immutable ImageRecord profile을 닫아 **275→277(+2)**, 핵심201→203/2,292·Glance39→41/120입니다. [Python/Go 비교·독립 main](../image/image-record-tags.md)은 전체 Connection·서비스 사용, library-owned constructor/list 기본값·concrete 헤더 옵션·HTTP 이후 list 변경·접수와 Go 경계를 설명합니다. [고정 Glance controller/policy](glance-policy-priorities.md#이미지-태그-추가삭제의-기본-정책)는 project scope ADMIN_OR_PROJECT_MEMBER이며 실제 배포 권한은 호출하지 않았습니다.
+
+- 요청·입력: ID는 GET 없이65필드 declared view를 만들며 tags=[], properties=null·captured location·fetch receipt 없음입니다. supplied Record는 Resource/Wire/Envelope/Header/ImportMethods/raw bytes·location·기존 receipt를 보존한 독립 snapshot입니다. fixed PUT/DELETE 한 태그 route를 사용하고 허용한 ID/tag를 각각 한 번 escape합니다. 이름 lookup·List·full-set PATCH·body/query·wait를 추가하지 않습니다.
+- list: 성공 후 duplicate append 또는 첫 exact string remove만 적용합니다. missing=[]·nonnull scalar/object=singleton·absent local=no-op이며 native404를 무시하지 않습니다. untyped raw members·big integers·nested values를 보존하고 lone surrogate/U+FFFD를 잘못 매치하지 않습니다. null과 Go-only malformed/nonUTF8 selected tags는 HTTP 이후 ACK+nil Record+error입니다.
+- 반환·실패: actual200..399의 opaque body/header/status는 새 Acknowledgement, local tags는 새 Record에만 반영합니다. 기존 fetch Wire/Envelope/Header/StatusCode를 mutation 응답으로 덮지 않습니다. accepted Read/Close/context/source/hook 실패에는 가능한 ACK와 nil Record+error를 보존합니다. rejected400..599는 native HTTP와 physical 원인을 보존하며 ACK로 합성하지 않습니다. clean retry 입력·native auth·기존 strict204 결과와 native `images.Update` 전체 tags PATCH를 유지합니다.
+- 재사용: common Image projector/snapshot·ImageMutationOption·semantic/source capture·guarded REST observer·public Gophercloud testhelper와 기존 taskCore/Connection/body fault fixture를 재사용했습니다. 새 HTTP 서버/fault engine/timer engine은0개이며 옵션 callback은 operation마다 한 번 처리합니다.
+
+새 **10그룹98개 최종 leaf 사례** + 기존41그룹326 = **집중 race51그룹424개**가 PASS했습니다. 실제 매치된 집중 테스트 package는4개입니다(명령 입력6개와 구분). 전체 `make check` vet·race **43개 실제 test package**, 동일 Go의 최종277 parity/progress/gofmt·반복 생성 drift0와 태그/설치 main2개의 외부 local-replace build도 PASS했습니다. Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. `/private/tmp/go-openstacksdk-image-record-tags-{focused.jsonl,focused-receipt.json,check.log,check-receipt.json,review-receipt.json,metadata.log,final-metadata-receipt.json,generation-repeat.log,local-consumer.json}`에 실행 근거를 기록합니다. 초기 실패 run은 지원 근거에 포함하지 않고, Go 변경 없는 최종 JSON/prose에는 전체 gate를 재사용했습니다.
+
+다른548 reviews·selected18 legacy contracts/API·catalog bytes/source pins/fingerprints를 보존하고12계약을 추가해 reviews550·go_mapping277·unresolved272·unsupported1·contracts3,550입니다. catalog unresolved3,084에는 미검토2,812개가 포함됩니다. 선택한 원래9계약씩은 strict204 Ref/ACK profile의 근거로 보존하며, 새 named profile과 구분했습니다.
+
+Source 공개 Proxy는 None·TagMixin은 같은 mutable Resource를 반환하지만 Go는 caller와 독립적인 Record/ACK입니다. public `_get_resource(existing Image)`의 `_update(**{})`는 microversion·component recollection·connection-derived location·to_dict도 처리합니다. Go는 supplied location과 passive raw fields를 유지하며 그 전체 lifecycle을 재현하지 않습니다. Python mutable descriptor default alias와 arbitrary Munch/subclass/dirty/runtime은 SDK-R1, configured cache는 SDK-C1, dynamic session/base_path/microversion은 SDK-S1에 남습니다. malformed raw bytes는 Go 전용 입력 경계입니다. `/private/tmp/go-openstacksdk-image-record-tags-source-audit.json`과 추가 `source-corrections.json`은 고정 소스의 static 검토이며 Python runtime·실제 cloud 결과를 주장하지 않습니다.
+
+snapshot/타입 `17946082`·실행 `0edc5b7c`·leaf `85091653`·Connection `64e9840b`·문서 `0f8997f4`를 작은 단위로 commit/push했습니다. Gophercloud generator-test 발췌·변형과 Unicode full lowercase 출처/고지도 `fea9a547`로 보완했습니다. 판정 revision의 replace 없는 원격 설치·main2개·Go SHA/라이선스14개 보존을 이어 확인합니다. 전체 목표는 active이며 다음 검토 후보는 기존 native Image Update 한 선언입니다.
 
 ## Glance ImageRecord 상태·삭제 대기 완료
 
@@ -21,7 +38,7 @@
 
 다른548 reviews·catalog bytes/pins/fingerprints와 선택한 두 선언의 기존18계약·API를 보존하고12계약을 추가했습니다. reviews550·go_mapping275·unresolved274·unsupported1·contracts3,538이며 catalog unresolved3,086개에는 미검토2,812개도 포함합니다. 기존 named immutable profile과 같은 판정 기준입니다. Python Resource same-instance/dirty/component lifecycle은 SDK-R1, configured Adapter cache는 SDK-C1, dynamic session/base_path/microversion은 SDK-S1에 남습니다. nullable targetNone·arbitrary attribute/progress·surrogate/parser/runtime 전체, 음수 duration·wall-clock timeout·seed/fresh location·response-driven route는 문서의 Go 경계입니다. 이 완료는 전체 Python runtime 동등성·실제 cloud 검증·전체 목표 완료를 뜻하지 않습니다.
 
-공통 guard `ab694cae`·Unicode 비교/출처 `40cf0780`·API/leaf 테스트 `6ffc3931`·Connection `0786265b`·문서 `85e9020e`를 각각 commit/push했습니다. 판정 `180b672b`를 commit/push하고 정확한 remote revision의 replace 없는 설치·main2개·Go SHA·라이선스14개 일치도 확인했습니다. 전체 SDK 목표는 active이며 다음 핵심 user 단위는 owned Image 태그 add/remove2개입니다. 아직 두 선언의 판정은 unresolved입니다.
+공통 guard `ab694cae`·Unicode 비교/출처 `40cf0780`·API/leaf 테스트 `6ffc3931`·Connection `0786265b`·문서 `85e9020e`를 각각 commit/push했습니다. 판정 `180b672b`를 commit/push하고 정확한 remote revision의 replace 없는 설치·main2개·Go SHA·라이선스14개 일치도 확인했습니다. 당시 다음 핵심 user 단위였던 owned Image 태그 add/remove2개는 위 최신 단위에서 완료했습니다. 이 문단의275개는 당시 판정입니다.
 
 정확한 문서·판정 revision `180b672ba90518981c21913086af9bb060b7d544`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008210659-180b672ba905`·get/build exit0이며 대기/설치 main **2개**를 빌드했습니다. 원격 Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-waits-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 

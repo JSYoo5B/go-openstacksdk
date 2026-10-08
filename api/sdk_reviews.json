@@ -18453,12 +18453,13 @@
     {
       "operation": "python:image/v2/add_tag",
       "source_fingerprint": "f27ca938ed635a51a4010679f6dd1d94e4c3fe8c02d244a4e84227d046544da1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddTag",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageRecordTag"
       ],
       "contracts": [
         {
@@ -18564,38 +18565,81 @@
             "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
             "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
           ]
+        },
+        {
+          "behavior": "AddImageRecordTag takes exactly one literal ID or supplied ImageRecord and performs PUT /images/{once-escaped-id}/tags/{once-escaped-tag} without GET/List/body/query. ID constructs 65 declared fields with tags=[], properties=null and captured current location; supplied record preserves its own location and fetch receipt.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagLiteralConstructorBoundsAndCurrentLocation",
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "After accepted HTTP, Add appends the literal tag including duplicates. Missing tags uses an independent empty list; nonnull scalar/object becomes a singleton; existing untyped raw members and caller record remain unchanged.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "image/image_record_tag_test.go:TestImageRecordTagLiteralConstructorBoundsAndCurrentLocation"
+          ]
+        },
+        {
+          "behavior": "The named owned tag profile accepts actual200..399 and returns independent opaque mutation bytes/header/status in Acknowledgement. Response body is never decoded as Image or tags; supplied Record Wire/Envelope/Header/StatusCode remain the original fetch evidence, while a literal-ID constructor has no fetch evidence.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagAcceptsOpaque200Through399",
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "Explicit-null tags and broken selected RawResource tags fail only after accepted HTTP. Acknowledgement remains inspectable with nil Record plus error; malformed JSON/nonUTF8 raw input is a Go-only representation boundary. Unrelated raw fields are passive, not reprojected.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagNullLocalListFailsAfterAcknowledgement"
+          ]
+        },
+        {
+          "behavior": "Input records/raw bytes, option slice and each callback config are captured independently. Existing concrete ImageMutationOpts/Header/Headers helpers run once per operation, captured route/location/source and ordinary headers are guarded, auth stays live, and ID/tag/source/context/header validation precedes callbacks or HTTP.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagSourceHeaderSeedAndOptionSnapshots",
+            "image/image_record_tag_test.go:TestImageRecordTagPreflightAndGuardedCallbacks",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/context/source/hook failures retain possible opaque Acknowledgement and nil Record plus original causes. Rejected actual400..599 keeps nil result and native HTTP identity with physical Read/Close/cancel/binding causes. Clean native retry input stays unmodified; strict204 legacy mutation and native full-set PATCH behavior remain.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagAcceptedReadCloseAndStickyGuardAcknowledgements",
+            "image/image_record_tag_test.go:TestImageRecordTagNativeRejectionsRetryAndLegacy204",
+            "image/image_record_tag_test.go:TestImageRecordTagRejectedPhysicalFaults"
+          ]
         }
       ],
       "documentation": [
         "image/mutations.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/image-record-tags.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
-        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
-        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
-        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
-        "Pinned TagMixin URL helper joins raw components and TagMixin raise_from_response rejects status>=400. Go adds deliberate bounded tag-route preflight and once-escaped literal identity, and requires actual204.",
-        "Python TagMixin updates the local Resource.tags list after successful HTTP. Go never fetches or modifies that local tag cache and uses a dedicated single-tag mutation; native ReplaceImageTags remains a separate full-set PATCH.",
-        "Server set addition makes repeated Add idempotent at the endpoint; Go sends the dedicated PUT again and does not perform Python local duplicate-list handling or read-modify-write."
+        "The original nine contracts and old AddTag/RemoveTag APIs describe the retained strict204 Ref/ACK profile. New AddImageRecordTag/RemoveImageRecordTag provides the named immutable ImageRecord profile and actual200..399 local-list behavior; legacy profile differences are not limitations of the new profile.",
+        "Pinned public Proxy returns None while TagMixin mutates and returns the same Resource. Go returns an independent Record and separate Acknowledgement; it does not return or mutate the caller object. Full same-instance/dirty/component/default alias lifecycle remains SDK-R1.",
+        "Pinned Proxy._get_resource(existing Image) invokes Resource._update(**{}), which resets microversion, recollects components, updates connection-derived location and to_dict. Go deliberately preserves supplied location and unrelated RawResource fields; this incidental preparation lifecycle is not reproduced by the named immutable profile (SDK-R1/S1).",
+        "Python Body tags uses a shared mutable default list and descriptor list coercion. Go defaults are private for each call and nonnull raw scalar/object wraps in one list. Explicit null errors after HTTP as Source; malformed JSON/nonUTF8 selected raw bytes are Go-only input errors. Complete Python Munch/subclass/arbitrary descriptor/runtime behavior remains SDK-R1.",
+        "Pinned URL join strips outer slashes and leaves inner slashes; Go validates literal identity/tag and escapes each URI segment once. Empty/invalidUTF8/control/exact dot segments reject before HTTP, while whitespace-only/nonempty slash/backslash and tags longer than255 characters remain server-owned. No schema/permission/storage conclusion is inferred.",
+        "Go owns actual response bytes/header/status and guards captured source/route/body/options with live native auth. Full configured Python Adapter/cache/conditional GET/dynamic session/base_path/microversion behavior remains SDK-C1/S1; no accepted response replay, metadata gate, automatic wait/rollback or current full-tag fetch is added.",
+        "The new local tags list reflects seed plus this operation, not a server-confirmed complete set. Backend persistence, deployed policy overrides/permissions/length limits and actual cloud outcomes are not proved by local fixtures or example builds."
       ],
-      "remaining": [
-        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
-        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
-        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
-        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
-        "Python local tag-list append/remove, descriptor/dirty state and supplied Resource cache mutation semantics remain unresolved; server tag count constraints and persistence are not client-inferred."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/remove_tag",
       "source_fingerprint": "60739ecdd9f8f7a5479ee3c9ccac51548f1950bb736a822426ac00ab59396d88",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveTag",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeader",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageMutationHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.RemoveImageRecordTag"
       ],
       "contracts": [
         {
@@ -18701,28 +18745,70 @@
             "image/mutation_contracts_test.go:TestImageMutationsAcceptedFailuresAndStrictStatuses",
             "image/mutation_core_test.go:TestImageMutationCoreAcceptedFailuresKeepIndependentEvidence"
           ]
+        },
+        {
+          "behavior": "RemoveImageRecordTag takes exactly one literal ID or supplied ImageRecord and performs DELETE /images/{once-escaped-id}/tags/{once-escaped-tag} without GET/List/body/query. ID uses independent 65-field constructor defaults/current location and no fetch receipt; supplied location/other fields/fetch evidence are preserved.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagLiteralConstructorBoundsAndCurrentLocation",
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "After accepted HTTP, Remove deletes the first exactly matching string only. Missing tags or absent local member is a local no-op, while native HTTP404 is an error. Scalars become singleton lists and nonstring/raw members remain passive; lone surrogate members do not match U+FFFD, valid surrogate pairs and literal escaped backslash do match.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "image/image_record_tag_test.go:TestImageRecordTagNativeRejectionsRetryAndLegacy204"
+          ]
+        },
+        {
+          "behavior": "The named owned tag profile accepts actual200..399 and returns independent opaque mutation bytes/header/status in Acknowledgement. Response body is never decoded as Image or tags; supplied Record Wire/Envelope/Header/StatusCode remain the original fetch evidence, while a literal-ID constructor has no fetch evidence.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagAcceptsOpaque200Through399",
+            "image/image_record_tag_test.go:TestImageRecordTagOwnedSeedListSemanticsAndReceipts",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "Explicit-null tags and broken selected RawResource tags fail only after accepted HTTP. Acknowledgement remains inspectable with nil Record plus error; malformed JSON/nonUTF8 raw input is a Go-only representation boundary. Unrelated raw fields are passive, not reprojected.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagNullLocalListFailsAfterAcknowledgement"
+          ]
+        },
+        {
+          "behavior": "Input records/raw bytes, option slice and each callback config are captured independently. Existing concrete ImageMutationOpts/Header/Headers helpers run once per operation, captured route/location/source and ordinary headers are guarded, auth stays live, and ID/tag/source/context/header validation precedes callbacks or HTTP.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagSourceHeaderSeedAndOptionSnapshots",
+            "image/image_record_tag_test.go:TestImageRecordTagPreflightAndGuardedCallbacks",
+            "connection_image_record_tags_test.go:TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/context/source/hook failures retain possible opaque Acknowledgement and nil Record plus original causes. Rejected actual400..599 keeps nil result and native HTTP identity with physical Read/Close/cancel/binding causes. Clean native retry input stays unmodified; strict204 legacy mutation and native full-set PATCH behavior remain.",
+          "tests": [
+            "image/image_record_tag_test.go:TestImageRecordTagAcceptedReadCloseAndStickyGuardAcknowledgements",
+            "image/image_record_tag_test.go:TestImageRecordTagNativeRejectionsRetryAndLegacy204",
+            "image/image_record_tag_test.go:TestImageRecordTagRejectedPhysicalFaults"
+          ]
         }
       ],
       "documentation": [
         "image/mutations.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/image-record-tags.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
-        "Pinned Proxy methods accept direct ID strings or mutable Image Resource objects and return None. Go uses explicit ID/Name Ref and concrete owned headers, returns actual acknowledgement evidence, and introduces exact Name lookup as a typed convenience.",
-        "Go intentionally accepts actual204 only, owns accepted body bytes/headers and preserves result+ResponseError on read/Close/context failures. Complete Python response translation, adapter/session exceptions, request preparation and arbitrary hooks remain broader.",
-        "Go snapshots captured route/ordinary headers/options with live original auth and enforces bounded route/source/request-body guards. Existing native Name continuation/body behavior and configured same-target redirect/prebody retry policies remain unchanged; no single wire-attempt promise under configured retries.",
-        "Pinned TagMixin URL helper joins raw components and TagMixin raise_from_response rejects status>=400. Go adds deliberate bounded tag-route preflight and once-escaped literal identity, and requires actual204.",
-        "Python TagMixin updates the local Resource.tags list after successful HTTP. Go never fetches or modifies that local tag cache and uses a dedicated single-tag mutation; native ReplaceImageTags remains a separate full-set PATCH.",
-        "Python remove_tag suppresses only local list.remove ValueError after successful HTTP; it does not ignore HTTP404. Go missing image/tag remains an error and produces no acknowledgement."
+        "The original nine contracts and old AddTag/RemoveTag APIs describe the retained strict204 Ref/ACK profile. New AddImageRecordTag/RemoveImageRecordTag provides the named immutable ImageRecord profile and actual200..399 local-list behavior; legacy profile differences are not limitations of the new profile.",
+        "Pinned public Proxy returns None while TagMixin mutates and returns the same Resource. Go returns an independent Record and separate Acknowledgement; it does not return or mutate the caller object. Full same-instance/dirty/component/default alias lifecycle remains SDK-R1.",
+        "Pinned Proxy._get_resource(existing Image) invokes Resource._update(**{}), which resets microversion, recollects components, updates connection-derived location and to_dict. Go deliberately preserves supplied location and unrelated RawResource fields; this incidental preparation lifecycle is not reproduced by the named immutable profile (SDK-R1/S1).",
+        "Python Body tags uses a shared mutable default list and descriptor list coercion. Go defaults are private for each call and nonnull raw scalar/object wraps in one list. Explicit null errors after HTTP as Source; malformed JSON/nonUTF8 selected raw bytes are Go-only input errors. Complete Python Munch/subclass/arbitrary descriptor/runtime behavior remains SDK-R1.",
+        "Pinned URL join strips outer slashes and leaves inner slashes; Go validates literal identity/tag and escapes each URI segment once. Empty/invalidUTF8/control/exact dot segments reject before HTTP, while whitespace-only/nonempty slash/backslash and tags longer than255 characters remain server-owned. No schema/permission/storage conclusion is inferred.",
+        "Go owns actual response bytes/header/status and guards captured source/route/body/options with live native auth. Full configured Python Adapter/cache/conditional GET/dynamic session/base_path/microversion behavior remains SDK-C1/S1; no accepted response replay, metadata gate, automatic wait/rollback or current full-tag fetch is added.",
+        "The new local tags list reflects seed plus this operation, not a server-confirmed complete set. Backend persistence, deployed policy overrides/permissions/length limits and actual cloud outcomes are not proved by local fixtures or example builds."
       ],
-      "remaining": [
-        "Full supplied Resource/subclass/Munch/connection/default/descriptor/coercion/dirty/cache/session/microversion semantics remain unresolved; a concrete Ref and acknowledgement are not a Python Resource object overload.",
-        "Complete Python adapter/exception/response/cache/retry policy and custom transport internals remain partial. Native rejected-response ownership and Name native pager continuation/model/body semantics are retained.",
-        "Release/deployment support, configured permission and server state validation, reverse-proxy routing and actual backend persistence are server-owned; local HTTP proof does not establish real-cloud outcomes or full lifecycle parity.",
-        "The SDK performs no metadata/status gate, capability discovery, read-modify-write tags PATCH, collection-tags request, wait, cache update or automatic rollback/cleanup.",
-        "Python local tag-list append/remove, descriptor/dirty state and supplied Resource cache mutation semantics remain unresolved; server tag count constraints and persistence are not client-inferred."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/deactivate_image",
