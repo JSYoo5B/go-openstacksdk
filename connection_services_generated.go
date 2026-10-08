@@ -114,7 +114,7 @@ func (c *Connection) Identity(ctx context.Context) (*service11.Service, error) {
 
 // ImageV2 returns a cached, authenticated image/v2 API proxy.
 func (c *Connection) ImageV2(ctx context.Context) (*service12.Service, error) {
-	return cachedService(ctx, c, Image, "v2", service12.New)
+	return cachedService(ctx, c, Image, "v2", c.newImageV2Service)
 }
 
 // InstanceHAV1 returns a cached, authenticated instanceha/v1 API proxy.

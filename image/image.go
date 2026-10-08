@@ -37,7 +37,8 @@ func New(client *gophercloud.ServiceClient) *Service {
 }
 
 func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *Service {
-	return &Service{client: client, dependencies: dependencies, API: imageapi.New(client), Images: resource.NewCollection[Image](resource.Adapter[Image]{
+	api := imageapi.NewWithDependencies(client, imageapi.Dependencies{CloudLocation: dependencies.CloudLocation})
+	return &Service{client: client, dependencies: dependencies, API: api, Images: resource.NewCollection[Image](resource.Adapter[Image]{
 		Kind:                     "image",
 		IdentityFind:             true,
 		IdentityMissingListQuery: url.Values{"os_hidden": {"true"}},

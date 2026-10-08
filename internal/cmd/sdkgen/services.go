@@ -144,7 +144,11 @@ func (g *generator) generateServices() error {
 			return err
 		}
 		method := spec.name + strings.ToUpper(parts[1][:1]) + parts[1][1:]
-		fmt.Fprintf(&connection, "// %s returns a cached, authenticated %s API proxy.\nfunc(c *Connection)%s(ctx context.Context)(*service%d.Service,error){return cachedService(ctx,c,%s,%q,service%d.New)}\n", method, key, method, i, spec.constant, parts[1], i)
+		factory := fmt.Sprintf("service%d.New", i)
+		if key == "image/v2" {
+			factory = "c.newImageV2Service"
+		}
+		fmt.Fprintf(&connection, "// %s returns a cached, authenticated %s API proxy.\nfunc(c *Connection)%s(ctx context.Context)(*service%d.Service,error){return cachedService(ctx,c,%s,%q,%s)}\n", method, key, method, i, spec.constant, parts[1], factory)
 		if parts[1] == spec.version && parts[0] != "compute" && parts[0] != "network" && parts[0] != "image" && parts[0] != "blockstorage" {
 			fmt.Fprintf(&connection, "func(c *Connection)%s(ctx context.Context)(*service%d.Service,error){return c.%s(ctx)}\n", spec.name, i, method)
 		}
