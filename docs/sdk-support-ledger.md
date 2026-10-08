@@ -4,7 +4,22 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef property owned 목록·삭제](#glance-metadef-property-owned-목록삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance metadef property owned 생성·수정](#glance-metadef-property-owned-생성수정-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+
+## Glance metadef property owned 생성·수정 완료
+
+2026-10-09 핵심 user `create_metadef_property`·`update_metadef_property`의 fresh Resource/dirty Body 계약을 owned Go mapping으로 닫았습니다. **261→263(+2)**이며 핵심187→189/2,292·Glance25→27/120입니다. [Python/Go 비교·독립 main](../image/metadef-property-record-write.md)에 raw request와 descriptor view, literal identity·옵션·no-op·응답 차이를 설명합니다.
+
+- 생성: 명시한19개 known Body 속성만 wire 이름으로 flat POST. id/name은 passive raw 데이터이며 Type/Title·name의 SDK 필수값을 추가하지 않습니다. empty/unknown-only 입력도 POST `{}`입니다.
+- 수정: 입력 Resource는 identity만 snapshot하고 나머지 정의/receipt를 버립니다. fresh18개 non-id 속성의 null·false·0·default-equal·동일 name도 dirty이며 선택한 child에 raw PUT합니다. 누락 기본값·old definition·synthetic name·id는 보내지 않습니다. empty/unknown-only/header-only는 property HTTP 없이21필드 local Resource와 nil Wire/Envelope/Header·status0을 반환합니다.
+- 응답: actual200..399·whole UTF8·present alias overlay·tolerated empty/invalid JSON·현재 location/namespace·독립 view/Wire/receipt. valid nonobject·descriptor/read/Close/source/context 실패는 실제 원인을 보존하며 accepted body를 replay하지 않습니다.
+- 재사용: public Gophercloud helper·기존 Property/Connection HTTP/fault fixture·shared descriptor/capture/REST guard. Get/Create/Update response와 Get/List/Create/Update location을 공통화했습니다. 새 HTTP 서버/fault engine0개입니다.
+
+새 [leaf8그룹201사례](../image/v2/metadefproperties/record_write_test.go)와 [Connection1그룹2사례](../connection_image_metadef_property_write_records_test.go)가 PASS했습니다. 기존 owned getter/list/delete33그룹274사례를 재사용한 **집중 race42그룹477개 최종 사례**·전체 `make check`의 vet/race **43개 실제 test package**·최종263개 parity/progress/gofmt가 exit0입니다. 같은 최종 Go source2,029개 SHA256 `71d742e983a57a99a6fdba10b86318c7b7ac87bb1e3e29e298fd0eed07ef03e0`에서 반복 생성 drift0를 확인하고 생성수정/조회/목록/설치 main **4개**의 별도 module local-replace 빌드를 확인했습니다. 인증·API·Python은 실행하지 않았습니다.
+
+catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`, source pins·다른548 reviews·기존12계약을 보존하고12계약을 추가해 reviews550·계약3,460입니다. Source의 public update는 Resource를 ID로 줄여 새 모델을 만들며 직접 mutable Resource.commit은 별도 표면입니다. Go의 unordered canonical 우선·모든 concrete 입력의 safe literal/id reservation·fixed base_path·header snapshot은 명시한 차이입니다. 전체 Resource/session·server schema/policy/DB/cloud 검증은 계속 추적하며 다음은 association 생성·삭제입니다.
+
+단계 `a4614dc0`·공통 `0093f8fc`·API `d0177a45`·leaf 테스트 `7502bd37`·Connection `6ab931b3`를 작은 commit으로 push했습니다. `/private/tmp/go-openstacksdk-property-write-{focused.jsonl,check.log,check-receipt.json,review-receipt.json,generation-repeat.log,consumer.json}`에 실제 실행 근거를 기록합니다.
 
 ## Glance metadef property owned 목록·삭제 완료
 
@@ -17,7 +32,7 @@
 
 집중 race **33그룹·274개 최종 사례**가 PASS했습니다. 기존 getter [12그룹91사례](../image/v2/metadefproperties/record_get_test.go)·[Connection1그룹1사례](../connection_image_metadef_property_record_test.go)를 재사용하고, 새 [목록11그룹115사례](../image/v2/metadefproperties/list_records_test.go)·[Connection1그룹1사례](../connection_image_metadef_property_list_records_test.go)·[삭제8그룹66사례](../image/v2/metadefproperties/delete_records_test.go)를 추가했습니다. 전체 `make check`의 vet·race **43개 실제 test package**가 exit0입니다. 동일 Go의 판정 JSON 갱신 뒤 `make -o vet -o test check`로 최종261개 parity·progress·gofmt를 확인했습니다. 반복 생성 Go drift0입니다.
 
-최종 Go source2,024개 SHA256 `76ad963e062c1d685aba025872b49ec057391d3748931458ee27080cfc93d21a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. **다른547개 review·기존16계약·API/fingerprint·source pins를 보존**하고13계약을 추가해 reviews550·계약3,448입니다. 새 endpoint가 아닌 고정 Source named 선언3개의 완료이며, 전체 Python Resource/session과 실제 cloud 동작은 별도 목표입니다. 다음 핵심 user 단위는 property 생성·수정의 dirty-only/no-op 계약입니다.
+최종 Go source2,024개 SHA256 `76ad963e062c1d685aba025872b49ec057391d3748931458ee27080cfc93d21a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. **다른547개 review·기존16계약·API/fingerprint·source pins를 보존**하고13계약을 추가해 reviews550·계약3,448입니다. 새 endpoint가 아닌 고정 Source named 선언3개의 완료이며, 전체 Python Resource/session과 실제 cloud 동작은 별도 목표입니다. 당시 다음 단위였던 property 생성·수정은 위 최신 완료에 기록했습니다.
 
 공통 guard `c834f9ef`, 목록 `ebd363d6`, Connection `404000d7`, JSON Accept `0f35bef3`, 삭제 `4e1388ba`, 삭제 테스트 `cf0652dc`, 문서 `50b43025`를 각각 commit/push했습니다. 정확한 revision `50b4302520ee2d05a1ced1119e40f919e857bc01`을 GOWORK=off·replace 없는 별도 외부 module에 설치했습니다. 실제 버전 `v0.0.0-20261008163807-50b4302520ee`·get/build exit0이며 목록/조회/설치 main3개와 삭제 package example1개가 빌드됐습니다. 원격 Go SHA와 라이선스·고지13개 파일은 로컬과 같습니다. 인증·API·Python 실행은 포함하지 않습니다. `/private/tmp/go-openstacksdk-property-list-{focused.jsonl,check.log,metadata-check.log,check-receipt.json,review-receipt.json,generation-repeat.log,consumer.json,remote-receipt.json}`에 실제 근거를 기록합니다.
 

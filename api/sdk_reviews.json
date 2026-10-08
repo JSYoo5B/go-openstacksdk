@@ -22671,7 +22671,7 @@
     {
       "operation": "python:image/v2/create_metadef_property",
       "source_fingerprint": "782d19b4505c9652f3726c6beb70ee094f367f93ed910643c211012e10cc9030",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Create",
@@ -22682,7 +22682,14 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateTitle",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateDescription",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordCreateAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -22743,22 +22750,65 @@
             "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_properties_test.go:TestGlanceMetadefPropertiesRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Owned CreateRecord always sends one flat collection POST with actual200..399 acceptance, including POST {} when no recognized Body attributes remain. Only supplied raw values among 19 declared Body fields are transposed to their wire names; name/type/title are not SDK-required and missing descriptor defaults are not sent. Supplied id/name, including null, arrays/objects, empty/slash/long names, are passive Body data and cannot append a child or retarget the fixed parent. No discovery/GET/schema gate/rollback is added.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesKeepAllRawDirtyFieldsSeparateFromView",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate"
+          ]
+        },
+        {
+          "behavior": "Source construction eagerly reads descriptor values before HTTP without replacing stored raw inputs. Owned create validates the same shared property projection before sending: nullable untyped/int/bool/list/dict fields, explicit null retention, missing min_length/min_items0 and require_unique_itemsfalse, inherited id presence or name fallback, plus fixed namespace URI and captured location form a 21-field Resource. Raw request values such as numeric strings or boolean strings remain unchanged on the wire while the returned view is converted.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesKeepAllRawDirtyFieldsSeparateFromView",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteInputAttributeAndHeaderPreflight",
+            "image/v2/metadefproperties/record_get_test.go:TestMetadefPropertyRecordDescriptorsAliasesAndExplicitNull"
+          ]
+        },
+        {
+          "behavior": "Concrete create opts/header(s)/attribute(s) helpers use full-config replacement, later-option selection and independent map/slice/raw JSON factory snapshots with copy-before/copy-after callback ownership. Plural attributes replace the selection and singular attributes replace a key. Unordered-map canonical names win over wire aliases including null, so superseded alias encoding failures are hidden; ordinary unknown fields including value/location are ignored before encoding. Reserved bindings/route/session/version controls, nil/nonsemantic options, known marshal errors and owned-header conflicts fail before HTTP.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteFactoriesSelectionAndCapturedLocation",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteInputAttributeAndHeaderPreflight"
+          ]
+        },
+        {
+          "behavior": "Present recognized response fields overlay the private request seed; omitted values retain that seed, ordered parsed dictionary aliases use their last effective value, and unknown response fields remain Wire-only. Resource, actual Wire, physical Envelope and each Header own independent bytes with actual status/header metadata; fixed Namespace and location stay request provenance and Key is nil. Returned id/name/links do not select a follow-up route.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesActualStatusesOverlayAndOwnedChannels",
+            "connection_image_metadef_property_write_records_test.go:TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState"
+          ]
+        },
+        {
+          "behavior": "Owned create requires whole-response validUTF8 but accepts empty/opaque/syntactically invalid JSON after actual200..399 as seeded/default success with Wire nil and an actual receipt. Valid parsed nonobjects, descriptor/read/Close/context/source failures retain actual Body/Header/StatusCode and all causes in ResponseError without replay. Native rejected-status/body/retry/reauth ownership stays native, response-less failures invent no receipt, and native OkCodes/request JSON mutations cannot widen the owned boundary.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesSuccessDecodeAndAcceptedFaultReceipts",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesNativeBodyOwnershipAndLegacyContracts"
+          ]
+        },
+        {
+          "behavior": "Source/context/outer lifetime checks precede location and options; Connection location is snapshotted before callbacks, and sticky source/namespace/context guards surround each callback and physical/read/Close boundary. Both Connection Image and ImageV2 entry points supply the same owned current location and live original authentication, while direct construction defaults location to null. Existing required Type/Title raw Create and its strict201 policy remain separate unchanged contracts.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteFactoriesSelectionAndCapturedLocation",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteGuardsAlsoCoverLocalNoop",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesNativeBodyOwnershipAndLegacyContracts",
+            "connection_image_metadef_property_write_records_test.go:TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefproperties/README.md"
+        "image/v2/metadefproperties/README.md",
+        "image/metadef-property-record-write.md",
+        "image/metadef-property-records.md",
+        "image/metadef-property-record-list.md"
       ],
       "differences": [
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
-        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
-      ],
-      "remaining": [
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
-        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+        "Owned CreateRecord maps the public fresh Resource.new/create operation: supplied declared raw attributes only, no SDK-required name/type/title, passive supplied id, eager descriptor view and empty POST {}. The original raw Create keeps its required literal name/Type/Title and strict201 policy; server schema/WSME/DB acceptance remains server behavior.",
+        "Go attributes are encoding/json snapshots; canonical map keys take precedence over wire aliases including null because Go maps lack Python insertion order. Python ordered kwargs use the later recognized alias. Arbitrary Python runtime objects, mutable attribute references and cache/dirty instance identity are not reproduced; unknown actual response fields are retained separately in Wire.",
+        "Go rejects explicit bound/generic route/session/version controls under its fixed namespace/client policy. Some names collide in Python bindings, while base_path is a legitimate Source dynamic override and __conflicting_attrs can inject constructor attributes; these dynamic paths are deliberately unavailable in this bounded mapping.",
+        "Go adds independent Resource/Wire/Envelope/Header/status evidence, whole UTF8/JSON shape validation, explicit header ownership, context/native errors and sticky target/source guards. Source default to_dict has20 Body/computed fields while Go additionally exposes fixed namespace_name and typed Namespace; captured explicit Go zone follows the existing documented location policy.",
+        "Local reused transport fixtures and compile-only examples establish payload/projection/ownership contracts. Authenticated cloud creation, actual Python execution, server schema/protection/policy/DB conversions or full Resource/session parity are not proven."
       ]
     },
     {
@@ -23051,7 +23101,7 @@
     {
       "operation": "python:image/v2/update_metadef_property",
       "source_fingerprint": "7f7975eb9210d40c7886e64cfea2a9f6812c2aff650f0232e5be9f3d57ab20b1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.Update",
@@ -23063,7 +23113,14 @@
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateTitle",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateDescription",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NamespaceScope.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.WithRecordUpdateAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties.NewWithDependencies"
       ],
       "contracts": [
         {
@@ -23123,22 +23180,68 @@
             "image/v2/metadefproperties/contracts_test.go:TestMetadefPropertiesOwnedPreparationAndSource",
             "connection_image_metadef_properties_test.go:TestConnectionImageMetadefPropertiesShareClientAndFixedScope"
           ]
+        },
+        {
+          "behavior": "Owned UpdateRecord snapshots exactly one concrete ID or RawResource identity before callbacks. Explicitly present id including null takes precedence over name; only missing id permits name fallback. The selected child must be nonempty validUTF8 safe literal<=80runes even on no-op, and missing/conflicting/unsafe identities fail before callbacks. Other input Resource fields, invalid nonidentity descriptors and old receipt metadata are discarded, matching the public Source Resource._get_id reduction rather than reusing a mutable existing definition; attrs id/value cannot retarget either input form.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteInputAttributeAndHeaderPreflight"
+          ]
+        },
+        {
+          "behavior": "Every supplied recognized non-id Body attribute is fresh dirty input, including null, false, zero, empty values, descriptor-default values and name equal to selected id. One fixed-child query-free PUT transposes only these18 supplied fields to wire names and preserves their raw JSON values; seeded id, missing defaults, old Resource fields and synthesized name are not sent. Name is a passive rename body value while request id stays fixed. There is no read-modify-write, PATCH, implicit Type/Title requirement or promise that server PUT retains omitted fields.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesKeepAllRawDirtyFieldsSeparateFromView",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate"
+          ]
+        },
+        {
+          "behavior": "After full source/location/options/header/descriptor validation, absence of recognized dirty Body fields returns an independent 21-field local Resource without HTTP. Header-only, ordinary-unknown-only or attribute-selection-cleared updates do not force PUT. Local result contains only selected id, descriptor defaults/nulls, fixed namespace and captured current location; Wire/Envelope/Header are nil, StatusCode0 and Resource receipt metadata is absent, so it does not claim a fetched or changed server definition.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteEmptyConstructionAndIdentityOnlyUpdate",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteFactoriesSelectionAndCapturedLocation",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteGuardsAlsoCoverLocalNoop",
+            "connection_image_metadef_property_write_records_test.go:TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState"
+          ]
+        },
+        {
+          "behavior": "Concrete update opts/header(s)/attribute(s) preserve full-replacement/later-option selection and deep map/slice/raw JSON callback/factory ownership. Canonical attribute presence including null wins over a wire alias and hides superseded alias marshal failures; unknown fields are ignored before encoding. All input forms reserve id/value plus fixed route/session/version/binding controls; nil/nonsemantic options, known encoding/conversion errors and invalid/conflicting protected headers fail before HTTP, including no-op calls.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteFactoriesSelectionAndCapturedLocation",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteInputAttributeAndHeaderPreflight"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 response fields overlay only the private selected-id-plus-explicit-attributes seed, retaining omitted inputs and preserving parsed alias ordering. Empty/opaque/invalid JSON leaves the seed/default view with Wire nil but actual Envelope/Header/status; valid nonobject or descriptor/wholeUTF8 failure retains accepted evidence. Resource/Wire/page/headers are independently owned, Key stays nil, fixed Namespace/location are not overwritten and returned id/name are passive response data. Both Connection routes preserve the same current location and fresh identity-only/no-op state.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesActualStatusesOverlayAndOwnedChannels",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesSuccessDecodeAndAcceptedFaultReceipts",
+            "connection_image_metadef_property_write_records_test.go:TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState"
+          ]
+        },
+        {
+          "behavior": "Source/context/outer validation occurs before location/options and selected Resource identity is immutable before callbacks. Sticky source/parent/context guards run around every callback and physical/read/Close boundary and also protect the local no-op result. Accepted read/Close/context/source errors retain all actual receipt/cancellation causes without replay; native retry/reauth, rejected-response evidence and request JSON/OkCodes ownership remain guarded. Old raw Update still requires Type/Title and strict200, independently of owned dirty/no-op behavior.",
+          "tests": [
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWriteGuardsAlsoCoverLocalNoop",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesSuccessDecodeAndAcceptedFaultReceipts",
+            "image/v2/metadefproperties/record_write_test.go:TestMetadefPropertyRecordWritesNativeBodyOwnershipAndLegacyContracts",
+            "connection_image_metadef_property_write_records_test.go:TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState"
+          ]
         }
       ],
       "documentation": [
-        "image/v2/metadefproperties/README.md"
+        "image/v2/metadefproperties/README.md",
+        "image/metadef-property-record-write.md",
+        "image/metadef-property-records.md",
+        "image/metadef-property-record-list.md"
       ],
       "differences": [
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
-        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
-      ],
-      "remaining": [
-        "Pinned Python accepts Resource or strings through generic object_arg/_get_id paths, descriptor coercion, arbitrary attrs, mutable dirty/cache state and adapter/session/version controls; Go is a fixed literal scoped API with explicit input/status/UTF8/canonical-type validation.",
-        "Property keywords remain raw in Go responses and raw/any in requests; pinned Python typed descriptors/defaults/coercion and cached Resource returns differ. Schema additionalProperties=false conflicts with WSME accepted fields and representations: confidential/required, numeric bounds, default bytes and reset behavior do not imply arbitrary JSON round-trip parity.",
-        "Local transport fixtures establish bounded wire/evidence behavior; server schema/policy/protection/DB defaults, authenticated cloud side effects and Python execution are not proven. No full parity claim.",
-        "No local schema fetch/validation or exact WSME/model/SQL conversion emulation; scalar nil Type/Title versus supplied empty Title and request attrs versus response DTO remain explicit."
+        "Pinned public update_metadef_property first reduces a Property Resource to Resource._get_id and constructs a fresh id-bound resource; its other Body and dirty state are not retained. Owned UpdateRecord likewise snapshots only identity and fresh explicit attrs. Direct mutable Resource.commit/cache reuse is a separate Source surface, while old raw Update retains its required Type/Title full-replacement strict200 behavior.",
+        "Go validates a fixed safe literal identity before callbacks and no-op, and reserves attrs id for every concrete input. Normal Source string/Resource-reduced IDs collide with new(id=value,**attrs), but Source None/nonliteral/dynamic Resource paths can behave differently and its no-op precedes URL/required-ID preparation. Those paths are outside the fixed Go identity domain.",
+        "Go map canonical names beat wire aliases including null, unlike Python ordered kwargs, and any values use encoding/json factory snapshots. Raw supplied values are transmitted without descriptor conversion; defaults affect the declared view and do not enter a request. Unknown inputs are ignored while actual unknown response fields remain Wire-only.",
+        "No-op Go results add explicit no-receipt evidence: Wire/Envelope/Header nil and status0 with an independent21-field declared Resource. Actual HTTP with tolerated JSON failure instead keeps actual status/header/body. Source returns its new mutable Resource; Go neither fetches old fields nor infers existence or server update success from local no-op.",
+        "Go adds fixed scope/header/context/native error and sticky target/source ownership, rejects dynamic route/session/version controls including legitimate Source base_path, and captures Connection location before options. Its extra namespace_name/Namespace and explicit zone policy remain documented differences from default Source to_dict.",
+        "Local reused fixtures and compile-only consumers verify dirty payload/no-op/projection/receipt contracts. No authenticated cloud mutation, actual Python execution, server schema/protection/policy/DB conversion, omitted-field preservation or full Resource/session parity is proven."
       ]
     },
     {

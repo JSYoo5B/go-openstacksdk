@@ -196,3 +196,5 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `MetadefResourceTypes.ListRecords/AllRecords`와 namespace scope의 같은 메서드는 declared Resource·실제 Wire/receipt, semantic 필터와 공통 paging을 제공합니다. [Python/Go 비교·독립 main](metadef-resource-types-records.md)에서 두 Connection 경로와 옵션을 설명합니다. `MetadefProperties` scope의 `GetRecord`는 초기 Resource 속성·descriptor 기본값과 변환·현재 location을 SDK가 처리하고 실제 응답과 구분합니다. [Property 레코드 조회·독립 main](metadef-property-records.md)과 [기존 raw 조회](metadef-property.md)에 두 API의 사용법을 설명합니다.
 
 `MetadefProperties` scope의 `ListRecords/AllRecords`는 finite dictionary를 선언 Resource로 변환하고 로컬 조건·raw cap·부분 결과를 처리합니다. `DeleteRecord/DeleteAllRecords`는 같은 concrete 입력·기존 옵션으로 실제 opaque 삭제 receipt를 반환합니다. [목록 비교·독립 main](metadef-property-record-list.md)과 [삭제 예제](v2/metadefproperties/README.md#owned-목록과-삭제)를 참고하세요.
+
+property의 owned `CreateRecord/UpdateRecord`는 명시한 raw Body 속성만 전송하고 같은 descriptor view·현재 location을 반환합니다. 변경 속성이 없는 수정은 HTTP 없이 local snapshot을 제공합니다. [Python/Go 비교·독립 main](metadef-property-record-write.md)에 fresh identity·dirty payload·응답과 raw CRUD의 차이를 설명합니다.

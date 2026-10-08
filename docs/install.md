@@ -37,6 +37,10 @@ import (
 func main() {
     _ = sdk.Connect
     _ = (*sdk.Connection).AttachVolume
+    _ = (*metadefproperties.NamespaceScope).CreateRecord
+    _ = (*metadefproperties.NamespaceScope).UpdateRecord
+    _ = metadefproperties.WithRecordCreateAttributes(map[string]any{"name": "example", "type": "string"})
+    _ = metadefproperties.WithRecordUpdateAttribute("min_length", 0)
     _ = (*metadefproperties.NamespaceScope).ListRecords
     _ = (*metadefproperties.NamespaceScope).DeleteRecord
     _ = (*metadefproperties.NamespaceScope).DeleteAllRecords

@@ -4,10 +4,12 @@
 
 | Go 호출 | 고정 Python proxy | 요청·정상 응답 |
 | --- | --- | --- |
-| `scope.Create` | `create_metadef_property` | collection POST, 201 |
+| `scope.Create` | raw 생성 API | collection POST, 201 |
 | `scope.Get` | raw 조회 API | child GET, 200 |
+| `scope.CreateRecord` | `create_metadef_property`의 owned Go mapping | flat POST, 200..399·명시한 속성만 전송 |
+| `scope.UpdateRecord` | `update_metadef_property`의 owned Go mapping | dirty 속성만 PUT, 200..399·빈 수정은 local snapshot |
 | `scope.GetRecord` | `get_metadef_property`의 owned Go mapping | query 없는 child GET, 200..399 |
-| `scope.Update` | `update_metadef_property` | 현재 child PUT, 200 |
+| `scope.Update` | raw 교체 API | 현재 child PUT, 200 |
 | `scope.Delete` | raw 삭제 API | child DELETE, 204 |
 | `scope.DeleteAll` | raw 전체 삭제 API | collection DELETE, 204 |
 | `scope.List` | raw 목록 API | lazy한 단일 collection GET, 200 |
@@ -211,3 +213,9 @@ def delete_owned_properties(conn, namespace, id, clear_namespace=False):
 개별 삭제의 기본 `ignore_missing=true`는 clean physical404를 native retry callback 없이 처리하며 **actual404 ACK**를 반환합니다. 이 상태는 부재를 처리한 응답 증거이며 삭제 접수의 성공을 주장하지 않습니다. handled404의 read/Close/source 오류는 ACK와 `*resource.ResponseError`를 함께 반환합니다. `WithDeleteIgnoreMissing(false)`와 전체 삭제의404는 native 오류이고, transport가 주장하는404는 physical missing으로 바꾸지 않습니다.
 
 Source의 공개 삭제는 반환값 None이고 Go는 실제 receipt를 추가합니다. immutable concrete identity·고정 scope/client·header 옵션·callback snapshot·sticky guards는 라이브러리가 소유합니다. Python Resource/cache/dirty/session 재사용을 주장하지 않습니다. 기존 raw `Delete/DeleteAll`은 strict204이며 handled404에는 nil 결과를 유지합니다. 기존 WithDelete/WithDeleteAll 옵션을 재사용하므로 builder 구현이나 새 중복 옵션 체계를 요구하지 않습니다.
+
+## Owned 생성과 수정
+
+[CreateRecord/UpdateRecord 비교·독립 main](../../metadef-property-record-write.md)은 raw 요청 값과 변환된 Resource view, 입력 identity만 사용하는 fresh 수정과 PUT 생략을 설명합니다. concrete `WithRecordCreateAttribute(s)`·`WithRecordUpdateAttribute(s)`와 Header(s)·Opts helper를 사용하며 builder 구현은 필요하지 않습니다. 생성은 name/type/title을 SDK 필수값으로 제한하지 않고 빈 입력도 POST `{}`를 보냅니다. 수정은 이번 호출에서 지정한 non-id Body 속성만 전송하며 Header 옵션만 있으면 서버 호출 없이 반환합니다.
+
+`UpdateRecord`의 로컬 결과는 Wire·Envelope·Header가 nil이고 status0입니다. 실제200..399 응답의 빈/invalid JSON은 Wire만 nil이고 실제 receipt를 남깁니다. Source처럼 명시한 raw 값은 그대로 wire 이름으로 전송하고 누락 descriptor 기본값은 전송하지 않습니다. 기존 raw Create/Update의 required Type/Title·strict201/200 계약과 구분해서 사용합니다. 서버 PUT이 생략한 정의를 유지한다고 추정하지 않습니다.
