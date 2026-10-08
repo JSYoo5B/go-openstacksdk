@@ -21,8 +21,16 @@ association의 정확한 쓰기 rule은 `add_metadef_resource_type_association`�
 
 완료한 property 생성·수정·삭제와 association 생성·삭제는 admin 범위의 구현으로 유지합니다. property 목록·조회와 resource type/association 목록은 user 범위입니다. 기존 서비스별 완료 수는 user/admin 합산이므로 숫자를 감소시키거나 다시 세지 않습니다.
 
-`metadef_objects`와 `metadef_namespaces`의 owned 목록2개는 핵심 user 단계에서 완료했고 현재 전체267/3,362입니다. object getter와 schema getter는 이미 완료했으므로 재집계하지 않습니다. object의 생성·수정·개별/전체 삭제4개는 핵심 admin 단계로 옮깁니다. 다른 metadata 쓰기도 같은 단계에서 처리하고, 다음 후보의 권한 근거가 부족하면 먼저 서버 rule을 확인합니다.
+`metadef_objects`와 `metadef_namespaces`의 owned 목록2개는 핵심 user 단계에서 완료했고 현재 전체269/3,362입니다. object getter와 schema getter는 이미 완료했으므로 재집계하지 않습니다. object의 생성·수정·개별/전체 삭제4개는 핵심 admin 단계로 옮깁니다. 다른 metadata 쓰기도 같은 단계에서 처리하고, 다음 후보의 권한 근거가 부족하면 먼저 서버 rule을 확인합니다.
 
-다음 member 목록·검색은 고정 [Glance image 조회 정책](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L251-L278)의 `get_member`·`get_members`가 admin 또는 project/shared member reader를 허용하므로 핵심 user에 배치합니다. metadata 생성·수정·삭제의 admin 순서는 유지합니다.
+member owned 목록·검색2개를 완료했습니다. 이 범위는 고정 [Glance image 조회 정책](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L251-L278)의 `get_member`·`get_members`가 admin 또는 project/shared member reader를 허용하므로 핵심 user에 배치합니다. metadata 생성·수정·삭제의 admin 순서는 유지합니다.
 
 [구현 계획](implementation-plan.md)과 [지원 판정대장](sdk-support-ledger.md)에서 현재 수치와 검증 범위를 확인합니다.
+
+## 다음 import info와 store 조회
+
+같은 고정 Glance revision의 실제 구현은 `api/v2/info.py`가 아닌 `api/v2/discovery.py`입니다. [import 정보41–51행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L41-L51)과 [기본 stores53–93행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L53-L93)은 별도 per-operation policy 호출이 없어 핵심 user 후보로 분류합니다. 이는 controller의 admin 제한 부재에서 도출한 분류이며 인증이나 실제 접근 결과를 보장하지 않습니다.
+
+상세 `/info/stores/detail`은 [controller165–193행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/discovery.py#L165-L193)에서 [Discovery API policy125–133행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/policy.py#L125-L133)의 `stores_info_detail`을 호출합니다. [정책21–33행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/discovery.py#L21-L33)은 `ADMIN_OR_SERVICE_ROLE`과 project scope를 요구합니다. 따라서 `stores(details=True)`는 핵심 admin/service 분기입니다.
+
+읽은 controller/discovery policy/API policy의 SHA256은 각각 `11f24d5a5d592f27234fb6d138157e97c27b755a03ead5d8796d350a39593b5b`·`b06d81a0834f8b7392579b929641806f766500edd1f163ca120cf96f25c8a1f1`·`6abba4e3adfc602c8a199a2d15187e21b8bdaa3109421a7558a51c5445a86940`입니다. 두 후보의 지원 판정은 아직 올리지 않았습니다. stores는 같은 선언의 상세 경로도 구현·검증한 뒤 전체 mapping으로 판정하며, 실제 policy override와 multi-backend 상태는 서버가 판단합니다.

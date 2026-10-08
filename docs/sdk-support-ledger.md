@@ -4,9 +4,25 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance object·namespace owned 목록](#glance-objectnamespace-owned-목록-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance member owned 목록·검색](#glance-member-owned-목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는267입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는269입니다.
+
+## Glance member owned 목록·검색 완료
+
+2026-10-09 핵심 user `members`·`find_member` 두 선언을 owned Go mapping으로 닫았습니다. **267→269(+2)**, 핵심193→195/2,292·Glance31→33/120입니다. 핵심 집계는 user/admin 합산이며 reader 기본 정책 분류는 [Glance 우선순위](glance-policy-priorities.md)를 따릅니다. [Python/Go 사용법·정확한 standalone main](../image/member-records.md)에 Source 기본값과 명시적 Go 확장을 기록합니다.
+
+- 목록: public Python proxy가 모든 query kwargs를 버리는 기본 호출을 유지하고, 9필드 Resource projector·raw Wire/Envelope/receipt·현재 location·lazy iterator·partial All을 제공합니다. `member`/`member_id`의 순서와 canonical precedence·명시 `id:null`을 보존합니다. Go limit/marker/raw cap/필터/header/paginated는 별도 확장입니다.
+- 검색: exact member 문자열을 id로 seed하여 actual200..399 GET을 처리하고, clean 최종 native400/403/404만 같은 prepared 목록으로 넘깁니다. 기존 `Collection.FindIdentity`가 ID/name·중복·끝까지 uniqueness 확인·후속 실패 시 candidate 폐기를 담당합니다. 선택된 행을 다시 GET하지 않습니다.
+- 공통 처리: `IgnoreFalseyNext` opt-in은 null/false/0/빈 문자열·배열·객체 뒤 HTTP Link·marker fallback을 허용합니다. 기존 Cinder rejection body observer를 REST로 공통화하고 Read boundary에서 source 오류를 Close 복원 전에 보존합니다. selected rejected GET400/403/404만 관찰하며 다른 native 상태의 IO 정책은 유지합니다.
+- 호환성: `PreserveCleanRetry`는 Glance 검색의 선택 상태에서만 동일 native RetryFunc 반환을 clean rejection으로 남깁니다. 전체 검사에서 발견한 Compute 키페어 삭제 회귀를 이 범위 제한으로 해결했습니다. 기존 Cinder plain callback terminal·Read 중 source 변경 후 Close 복원 차단2사례와 기존 Compute 계약을 함께 통과시켰습니다.
+- 재사용: public Gophercloud testhelper·기존 image deleteCore/body·Connection·Cinder fixture, REST/fixedrequest·CloudLocation·JSON filter·Collection.FindIdentity를 사용했습니다. 새 HTTP 서버/fault engine은0개이며 Close callback adapter만 추가했습니다. 기존 typed finite member 목록·literal Find·native ABI는 유지합니다.
+
+새16그룹180사례와 기존190그룹713사례(Cinder의2개 회귀 추가 포함)를 합친 **집중 race206그룹893개 최종 leaf 사례**가 PASS했습니다. 전체 `make check`의 **43개 실제 test package**·vet·race·고정269 parity/progress/gofmt, 반복 생성 Go drift0, member/설치 main2개 외부 local-consumer build가 통과했습니다. 이전 실패 run은 지원 증거에 포함하지 않습니다. Go source2,054개 SHA256 `7020575e2638e33b2a0f12e7c31ae8cb18d9952137da76b216d1e7b858d3ec35`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`이며 `/private/tmp/go-openstacksdk-member-records-{focused-final.jsonl,focused-receipt.json,check-final.log,check-receipt.json,generation-repeat.log,local-consumer.json}`에 실행 근거가 있습니다.
+
+다른548 reviews·catalog bytes/pins/fingerprints와 선택한 두 선언의 기존14계약·API를 원문까지 보존하고12계약을 추가했습니다. reviews550·go_mapping269·unresolved280·unsupported1·contracts3,496입니다. catalog의 unresolved3,092개는 미검토2,812개도 포함합니다. 완료 수는 endpoint 수 또는 Python 전체 Resource/session 동등성을 뜻하지 않습니다. 실제 인증·OpenStack/Python runtime은 실행하지 않았습니다.
+
+공통 `8bfe2ddd`·`c520fa86`, 목록 `455bb7bc`, 검색 `ab6a92b3`, 범위 수정 `e06f5f62`를 각각 commit/push했습니다. 새 문서·판정을 push한 정확한 revision의 replace 없는 원격 설치·main2개·라이선스/고지14개 검증을 이어서 기록합니다. 다음 후보는 import info/store의 고정 Source·서버 권한 확인이며 user/admin 순서와 전체 목표는 계속 유지합니다.
 
 ## Glance object·namespace owned 목록 완료
 
