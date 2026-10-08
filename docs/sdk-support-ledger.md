@@ -6,21 +6,23 @@
 
 현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance resource type association owned 생성·삭제](#glance-resource-type-association-owned-생성삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, 이후 user 목록2개를 먼저 배치합니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수265는 유지합니다.
+
 ## Glance resource type association owned 생성·삭제 완료
 
-2026-10-09 핵심 user `create_metadef_resource_type_association`·`delete_metadef_resource_type_association` 두 선언을 owned Go mapping으로 닫았습니다. **263→265(+2)**이며 핵심189→191/2,292·Glance27→29/120입니다. [Python/Go 비교와 독립 main](../image/metadef-resource-type-association-mutations.md)은 raw6개 Body·8필드 Resource·기본값/location·immutable identity·실제 opaque ACK의 사용법과 Source 차이를 설명합니다.
+2026-10-09 핵심 admin `create_metadef_resource_type_association`·`delete_metadef_resource_type_association` 두 선언을 owned Go mapping으로 닫았습니다. **263→265(+2)**이며 핵심189→191/2,292·Glance27→29/120입니다. [Python/Go 비교와 독립 main](../image/metadef-resource-type-association-mutations.md)은 raw6개 Body·8필드 Resource·기본값/location·immutable identity·실제 opaque ACK의 사용법과 Source 차이를 설명합니다.
 
 `CreateRecord`는 새 dirty Body의 명시한 값만 POST하고 name/id 필수 조건을 합성하지 않습니다. 빈 입력도 POST `{}`이며 반환 view는 기존 association 목록 projector를 재사용합니다. response의 known6개 값만 seed에 overlay하고 unknown/self·Wire·Envelope·receipt는 독립 보존합니다. whole UTF-8과 actual200..399를 검증하며 empty/invalid JSON은 seeded view와 Wire nil을 남깁니다. `DeleteRecord`는 기존 DeleteOption을 재사용하고 옵션 전 Resource identity를 복사해 parent/child를 고정합니다. opaque200..399와 기본 physical404의 ACK를 handling 오류와 함께 보존합니다. Python은 child Resource를 재사용해 namespace URI를 변경할 수 있지만 Go는 caller 객체를 바꾸지 않습니다. 기존 strict201 Create·strict204 Delete의 clean404 nil 계약은 유지합니다.
 
 집중 race **45그룹753사례 = 기존34그룹620 재사용 + 새11그룹133**입니다. [leaf10그룹131](../image/v2/metadefresourcetypes/record_mutations_test.go)과 [양쪽 Connection1그룹2](../connection_image_metadef_association_mutations_test.go)를 추가했습니다. 기존 ResourceType/Connection fixture·public Gophercloud helper·공통 projection/semantic capture/REST guard를 재사용하며 새 서버/fault engine은0개입니다. 전체 `make check` vet·race **43개 실제 test package**가 exit0이고, 동일 Go의 최종265개 JSON/prose는 metadata gate를 통과했습니다. 정확한 생성삭제/목록/설치 main3개를 외부 local-replace module에서 빌드했고 반복 생성 Go drift0입니다.
 
-Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`·catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`를 기록합니다. 다른548 reviews·기존11계약·source pins와 fingerprint를 보존하고 새11계약을 추가해 reviews550·계약3,471입니다. Go 함수·메서드와 실행한 test anchor만 판정에 연결했습니다. 두 SDK Source 메서드에 admin 전용 지정은 없으며 서버 permission/protection/DB·실제 cloud 검증을 뜻하지 않습니다. 전체 mutable Resource/session 목표는 계속 남아 있습니다.
+Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`·catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`를 기록합니다. 다른548 reviews·기존11계약·source pins와 fingerprint를 보존하고 새11계약을 추가해 reviews550·계약3,471입니다. Go 함수·메서드와 실행한 test anchor만 판정에 연결했습니다. SDK 설명만으로 user 분류했던 판단을 [고정 Glance 기본 정책](glance-policy-priorities.md)의 metadef_admin에 따라 핵심 admin으로 교정했습니다. 서버 permission/protection/DB·실제 cloud 검증을 뜻하지 않습니다. 전체 mutable Resource/session 목표는 계속 남아 있습니다.
 
-단계 `01d5df58`·API `2467fdce`·leaf `ee2514c5`·Connection `fbc88b37`를 작은 commit으로 각각 push했습니다. `/private/tmp/go-openstacksdk-association-{focused.jsonl,check.log,check-receipt.json,generation-repeat.log,local-consumer.json}`에 실제 실행 근거를 기록합니다. 정확한 구현·문서 commit의 원격 설치 검증은 push 후 별도로 기록합니다.
+단계 `01d5df58`·API `2467fdce`·leaf `ee2514c5`·Connection `fbc88b37`를 작은 commit으로 각각 push했습니다. `/private/tmp/go-openstacksdk-association-{focused.jsonl,check.log,check-receipt.json,generation-repeat.log,local-consumer.json}`에 실제 실행 근거를 기록합니다. 정확한 구현·문서 revision `1f9c1d7a5ede8f0b2c12142e033ce0af5d75e435`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008173702-1f9c1d7a5ede`·get/build exit0이며 생성삭제/목록/설치 main3개가 빌드됐습니다. 원격 Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`가 최종 전체/집중/반복 생성의 소스와 같고 라이선스·고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-association-remote-consumer.json`과 [설치 안내](install.md)에 기록합니다.
 
 ## Glance metadef property owned 생성·수정 완료
 
-2026-10-09 핵심 user `create_metadef_property`·`update_metadef_property`의 fresh Resource/dirty Body 계약을 owned Go mapping으로 닫았습니다. **261→263(+2)**이며 핵심187→189/2,292·Glance25→27/120입니다. [Python/Go 비교·독립 main](../image/metadef-property-record-write.md)에 raw request와 descriptor view, literal identity·옵션·no-op·응답 차이를 설명합니다.
+2026-10-09 핵심 admin `create_metadef_property`·`update_metadef_property`의 fresh Resource/dirty Body 계약을 owned Go mapping으로 닫았습니다. **261→263(+2)**이며 핵심187→189/2,292·Glance25→27/120입니다. [Python/Go 비교·독립 main](../image/metadef-property-record-write.md)에 raw request와 descriptor view, literal identity·옵션·no-op·응답 차이를 설명합니다.
 
 - 생성: 명시한19개 known Body 속성만 wire 이름으로 flat POST. id/name은 passive raw 데이터이며 Type/Title·name의 SDK 필수값을 추가하지 않습니다. empty/unknown-only 입력도 POST `{}`입니다.
 - 수정: 입력 Resource는 identity만 snapshot하고 나머지 정의/receipt를 버립니다. fresh18개 non-id 속성의 null·false·0·default-equal·동일 name도 dirty이며 선택한 child에 raw PUT합니다. 누락 기본값·old definition·synthetic name·id는 보내지 않습니다. empty/unknown-only/header-only는 property HTTP 없이21필드 local Resource와 nil Wire/Envelope/Header·status0을 반환합니다.
@@ -37,7 +39,7 @@ catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6
 
 ## Glance metadef property owned 목록·삭제 완료
 
-2026-10-09 핵심 user `metadef_properties`·`delete_metadef_property`·`delete_all_metadef_properties` 세 선언을 owned Go mapping으로 닫았습니다. **258→261(+3)**이며 핵심184→187/2,292·Glance22→25/120입니다. [목록 비교·독립 main](../image/metadef-property-record-list.md)과 [삭제 예제](../image/v2/metadefproperties/README.md#owned-목록과-삭제)에 Source와 Go의 입력·필터·응답 차이를 기록합니다.
+2026-10-09 핵심 Glance(user 목록·admin 삭제) `metadef_properties`·`delete_metadef_property`·`delete_all_metadef_properties` 세 선언을 owned Go mapping으로 닫았습니다. **258→261(+3)**이며 핵심184→187/2,292·Glance22→25/120입니다. [목록 비교·독립 main](../image/metadef-property-record-list.md)과 [삭제 예제](../image/v2/metadefproperties/README.md#owned-목록과-삭제)에 Source와 Go의 입력·필터·응답 차이를 기록합니다.
 
 - 목록: 한 번의 query/body 없는 actual200..399 GET, mandatory properties dictionary·wire 순서/중복·key→name seed·공통21필드 descriptor view·canonical19 Body 필터·raw-entry cap·partial collection. 실제 Wire/page/receipt·Key는 독립 소유하며 두 Connection 경로가 현재 location을 전달합니다.
 - 삭제: immutable ID/Resource identity snapshot·고정 parent, 실제200..399 opaque ACK, 기본 member physical404 ACK·strict missing 옵션·bulk native404 오류. read/Close/source/context 오류에서도 실제 증거와 원인을 보존하며 body를 재전송하지 않습니다.

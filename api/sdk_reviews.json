@@ -23919,14 +23919,15 @@
       "documentation": [
         "image/v2/metadefresourcetypes/README.md",
         "image/metadef-resource-type-association-mutations.md",
-        "image/metadef-resource-types-records.md"
+        "image/metadef-resource-types-records.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
         "Owned CreateRecord provides fixed immutable declared Resource/Wire/receipt views and an eight-field Resource including namespace_name; Source returns a mutable association whose default to_dict has seven fields excluding URI. General Resource cache/commit/session/dirty reuse parity is outside this named create contract.",
         "Source resource_type/namespace_name/connection/_synchronized constructor bindings can collide, base_path is a legitimate dynamic route override, and __conflicting_attrs/microversion have constructor behavior. Go explicitly rejects all 17 reserved route/client controls and keeps its captured client/parent/session/version/header ownership; these controls are not all Python keyword collisions.",
         "Parent is a safe nonempty UTF8<=80rune literal with route/control/dot rejection and exact-once escaping, without Python Resource/Ref/name lookup. This local route policy does not constrain passive create Body id/name, which remain raw JSON; server schema and readonly/date constraints are not emulated.",
         "Whole UTF8 and complete parsed object boundaries are explicit Go choices. Both new owned creation and Source tolerate empty or invalid JSON syntax; malformed valid nonobjects fail. Existing raw Create remains strict201 and typed, while owned CreateRecord uses actual200..399.",
-        "Pinned SDK public create/class has no admin-only branch, but server permission/protection/schema/WSME/DB/collation/transaction and authenticated cloud effects are unexecuted. No full Python Resource or server-policy parity is claimed."
+        "The SDK has no admin-only branch, but pinned Glance server policy57f7dd9e assigns both association writes to metadef_admin -> role:admin. Classified as core admin; server overrides and authenticated permission/protection/DB effects remain unexecuted. See docs/glance-policy-priorities.md. No full Python Resource or server-policy parity is claimed."
       ]
     },
     {
@@ -24033,14 +24034,15 @@
       "documentation": [
         "image/v2/metadefresourcetypes/README.md",
         "image/metadef-resource-type-association-mutations.md",
-        "image/metadef-resource-types-records.md"
+        "image/metadef-resource-types-records.md",
+        "docs/glance-policy-priorities.md"
       ],
       "differences": [
         "Source association delete passes the supplied Resource into Proxy._get_resource, which can reuse and mutate its namespace URI; unlike property deletion it does not first normalize the child to ID. Go privately snapshots only identity before options, never mutates input, and keeps a safe nonempty UTF8<=80rune fixed literal parent/child without Resource/Ref/name lookup.",
         "Source public delete returns None. Go owned DeleteRecord retains opaque actual200..399 acknowledgements and default physical404 receipts, including ACK with accepted handling failure. Old strict204 raw Delete still returns no ACK for clean handled404. Actual404 handling is bounded evidence, not server deletion success or absence proof.",
         "Defaulttrue directly owned physical404 bypasses native404 retry as explicit Go missing policy; explicitfalse keeps native404 response/retry errors. Transport claims and general Python NotFound hierarchy are not treated as proof of received physical404.",
         "Captured route/client/version/header ownership, local UTF8/literal route validation and immutable identity are explicit Go choices. General mutable Resource URI/session/cache/request-control behavior is outside this named deletion contract.",
-        "Pinned SDK public delete/class has no admin-only branch, but server permission/protection/schema/DB/global-type effects and authenticated cloud behavior are unexecuted. No full Python Resource or server-policy parity is claimed."
+        "The SDK has no admin-only branch, but pinned Glance server policy57f7dd9e assigns both association writes to metadef_admin -> role:admin. Classified as core admin; server overrides and authenticated permission/protection/DB effects remain unexecuted. See docs/glance-policy-priorities.md. No full Python Resource or server-policy parity is claimed."
       ]
     },
     {
