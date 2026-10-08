@@ -157,7 +157,7 @@ assert same is updated
 
 생략과 명시 null·default-equal 값은 다릅니다. ID-only Image에 `name=None` 또는 `tags=[]`를 지정하면 getter 기본값과 같아도 raw key를 새로 넣은 변경입니다. 이미 저장된 동일 raw값을 지정하면 clean 상태를 유지할 수 있습니다. unknown attrs는 client properties에 packing하지만 한번의 _update에서 properties 묶음을 교체할 수 있어 sibling property의 remove까지 생성할 수 있습니다. 일반 native property add/upsert와 같은 merge 계약이 아닙니다.
 
-현재 `images.API.Update`는 위 Python dirty lifecycle을 재현하지 않으며 계획한 owned `UpdateImageRecord` 수정 계층은 아직 public API로 제공하지 않으며 별도 구현·검증 대상입니다. 기존 [상위 명시적 PATCH 가이드](../../update.md) 역시 입력 Patch를 매번 보내는 계약을 유지합니다. [Source pyproject](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/pyproject.toml#L15-L20)는 jsonpatch dependency를 `!=1.20,>=1.16`으로 허용하므로 SDK revision만으로 모든 nested/array diff의 한 버전 byte 결과를 고정했다고 주장하지 않습니다. arbitrary mutable Resource/subclass·Munch·dynamic session/cache와 lifecycle 비교 범위도 남습니다.
+현재 `images.API.Update`는 위 Python dirty lifecycle을 재현하지 않습니다. 상위 [owned UpdateImageRecord](../../image-record-update.md)는 private original/current·sticky dirty·same-value/no-op·wire alias·properties 교체·자동 diff·응답 overlay를 제공합니다. Go는 반환한 독립 Record를 다음 수정에 사용하며 array 편집의 실행 순서를 유지하므로 Source의 전체 path 정렬과 차이가 있습니다. 기존 [상위 명시적 PATCH 가이드](../../update.md) 역시 입력 Patch를 매번 보내는 계약을 유지합니다. [Source pyproject](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/pyproject.toml#L15-L20)는 jsonpatch dependency를 `!=1.20,>=1.16`으로 허용하므로 SDK revision만으로 모든 nested/array diff의 한 버전 byte 결과를 고정했다고 주장하지 않습니다. arbitrary mutable Resource/subclass·Munch·dynamic session/cache와 lifecycle 비교 범위도 남습니다.
 
 ## 권한·검증 경계
 

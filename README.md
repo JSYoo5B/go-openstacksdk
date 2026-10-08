@@ -80,6 +80,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 `GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource·실제 Wire·응답 증거와 descriptor 기본값·properties packing·공통 페이지·숨김 이미지 fallback을 제공합니다. [이미지 레코드의 Python/Go 비교와 독립 main](image/image-records.md)에 literal GET seed, concrete 옵션·부분 결과와 검색 순서를 설명합니다. [ImageRecord 상태·삭제 대기](image/image-record-waits.md)는 초기 seed 목표 상태의 HTTP 없는 반환과 마지막 관측·부분 결과, SDK가 소유하는 timeout·callback·404 계약을 제공합니다. [owned 태그 추가·삭제](image/image-record-tags.md)는 literal ID·ImageRecord와 concrete mutation 옵션을 받아 로컬 tags와 실제 ACK를 분리해 반환합니다.
 
+`UpdateImageRecord`는 ID 또는 이전 ImageRecord와 변경 속성만 받아 raw 값 비교·요청 생략·자동 JSON Patch·응답 후 기준 갱신을 제공합니다. 전체 Connection도 같은 API를 제공합니다. [이미지 수정의 Python/Go 비교·독립 main](image/image-record-update.md)에 properties 교체, concrete 옵션과 부분 오류·명시적 재시도를 설명합니다.
+
 [Native Image PATCH의 Python/Go 비교·독립 main](image/v2/images/update.md)은 전체 Connection과 `API.Images.Update`의9종 concrete patch·기본200·nil/empty·partial Extract를 설명합니다.
 
 [Glance 이미지 수정](image/update.md)은 순서가 있는 concrete 패치와 속성 upsert, 값·삭제 구분 및 Python Resource 사용법 비교를 제공합니다.

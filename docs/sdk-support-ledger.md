@@ -4,9 +4,22 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native Update와 raw Body 기반](#glance-native-update와-owned-수정용-raw-body-기반)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 현재 검증 단위는 [Glance owned ImageRecord 수정](#glance-owned-imagerecord-수정-검증)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는278입니다.
+
+## Glance owned ImageRecord 수정 검증
+
+2026-10-09 핵심 user `python:image/v2/update_image`의 named immutable JSON-domain profile을 구현했습니다. [Python/Go 비교·독립 main](../image/image-record-update.md)은 전체 Connection·서비스에서 ID/SDK Record·concrete 옵션을 사용하는 방법과 반환 Record 재사용을 설명합니다. API 최종 판정·원격 소비자 검증은 진행 중이며 아래 실행 근거는 현재 Go 소스의 완료한 검증입니다.
+
+- SDK가 private sparse raw original/current와 sticky dirty를 관리합니다. ID와 supplied Record·raw same-value·missing/null/default 구분·ID retarget·properties component 교체·wire alias·import header reset·no-op을 검증했습니다. invalid GET의 unsynchronized raw seed를 추가 GET 없이 commit할 수 있습니다.
+- 공통 `internal/jsonpatch`는 escaped object token·exact JSON number·nested object/array와 결정적인 add/remove/replace를 제공합니다. array index의 실행 순서를 유지하며 Source 전체 path 정렬·move/copy·최소 operation 수나 특정 Python jsonpatch bytes를 재현하지 않습니다. 생성 코드와 독립인 patch 적용기로 30×30 문서 행렬도 확인했습니다. dirty 비교의 bool/number Python 동등성과 diff의 RFC JSON 동등성은 서로 다른 단계입니다.
+- valid object 응답은 overlay 후 baseline을 clean합니다. invalid JSON syntax는 tolerated 성공이지만 pending original/dirty를 유지합니다. accepted read/Close/source/context/decode/projection 실패는 제출 Record·실제 Envelope/Header/StatusCode와 오류를 함께 반환합니다. accepted replay를 자동 수행하지 않습니다. 200..399·빈 Accept·v2.1 Content-Type은 요청/retry에서 고정하고 native 거부 응답·일반 retry header·live token 정책은 보존합니다.
+- 기존 ImageRecord projector/options/capture·REST guard·Python JSON-domain 비교·taskCore/Connection/fault fixture·public Gophercloud testhelper를 재사용했습니다. 새 HTTP 서버/fault engine은0개입니다. 새 engine은 독립 작성했으며 upstream diff 구현을 복사하지 않았고 배포 라이선스·고지14개 파일은 유지합니다.
+
+새 **25그룹165개 최종 leaf 사례 = Image/Connection17그룹94 + engine8그룹71**, 기존48그룹375를 재사용한 **집중 race73그룹540개**가5개 package에서 PASS했습니다. 전체 `make check` vet·race·parity·progress·gofmt는 **45개 실제 test package**가 PASS했습니다. Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. `/private/tmp/go-openstacksdk-image-owned-update-{focused.jsonl,focused-receipt.json,source.json,check.log,check-receipt.json}`에 실행 근거가 있습니다. 재생성 Go drift0·owned 수정/설치 main2개의 외부 local-replace build도 PASS했습니다. 초기 compile 실패는 지원 근거에 포함하지 않으며 최종 Go를 고정하고 JSON/prose에 전체 gate를 재사용합니다.
+
+공통 엔진 `dc837814`·공개 API/REST/Get state `c7a79ea0`·계약/Connection 테스트 `8178fb38`을 작은 단위로 commit/push했습니다. Python same-instance/arbitrary Resource/Munch/subclass·공유 descriptor history는 SDK-R1, cache는 SDK-C1, dynamic Adapter/session/base_path/microversion은 SDK-S1에 남습니다. 실제 Python/jsonpatch/runtime·cloud 인증은 실행하지 않았고 전체 SDK 목표는 active입니다.
 
 ## Glance native Update와 owned 수정용 raw Body 기반
 
@@ -20,7 +33,7 @@
 
 Go source2,089개 SHA256 `0bbe5d809249c129a9b4355dcdcbb92e7519bd3c2b8f3a77655b0f67df0bbfa3`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 기존550 reviews·3,550계약·catalog bytes/pins/fingerprints를 보존하고 native1행6계약만 추가했습니다. reviews551·go_mapping278·unresolved272·unsupported1·contracts3,556이며 catalog unresolved3,083에는 미검토2,811개가 포함됩니다. `/private/tmp/go-openstacksdk-image-update-raw-{focused.jsonl,focused-receipt.json,check.log,check-receipt.json,review-receipt.json,metadata.log,generation-repeat.log,local-consumer.json,policy-audit.json}`에 실행 근거를 기록했습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용했습니다.
 
-**`python:image/v2/update_image`는 unresolved 그대로입니다.** public Proxy·ComponentManager dirty 결정·wire alias/properties flatten·id route·original/current diff·response overlay/clean·same-instance·Accept빈값은 후속 owned 구현이 필요합니다. Source 허용 jsonpatch 범위는 floating이므로 특정 nested/array/move byte 결과까지 SDK revision만으로 단정하지 않습니다. `/private/tmp/go-openstacksdk-image-owned-update-source-audit.json`의8개 파일 SHA·정확 AST span·64canonical/63wire 매핑·남은 검증을 기준으로 구현하며 실제 Python/jsonpatch/cloud 실행은 하지 않았습니다. SDK-R1/C1/S1 전체 목표도 계속 추적합니다.
+**이 앞선 native 완료 시점에는 `python:image/v2/update_image`가 unresolved였습니다.** public Proxy·ComponentManager dirty 결정·wire alias/properties flatten·id route·original/current diff·response overlay/clean·same-instance·Accept빈값은 후속 owned 구현이 필요합니다. Source 허용 jsonpatch 범위는 floating이므로 특정 nested/array/move byte 결과까지 SDK revision만으로 단정하지 않습니다. `/private/tmp/go-openstacksdk-image-owned-update-source-audit.json`의8개 파일 SHA·정확 AST span·64canonical/63wire 매핑·남은 검증을 기준으로 구현하며 실제 Python/jsonpatch/cloud 실행은 하지 않았습니다. SDK-R1/C1/S1 전체 목표도 계속 추적합니다.
 
 기반/회귀 `2f5b87a2`·native 테스트 `b55ed8aa`·문서 `3d901393`를 작은 단위로 commit/push했습니다. 판정 `862eef0b`도 commit/push하고 정확한 revision의 원격 설치·main2개·Go SHA·라이선스14개 일치를 확인했습니다. 이 완료는 생성 함수만으로 전체 SDK parity를 주장하는 판정이 아니며 전체 목표는 active입니다.
 
