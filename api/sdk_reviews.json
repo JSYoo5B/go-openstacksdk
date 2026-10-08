@@ -11034,13 +11034,19 @@
     {
       "operation": "python:image/v2/find_image",
       "source_fingerprint": "85abe6abd3a3f1a4e43a7b1cb85a844175b27b5f92211c215d296a798d090e44",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.FindIdentity",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindFallback",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.FindImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithFindImageRecordListOptions"
       ],
       "contracts": [
         {
@@ -11091,22 +11097,67 @@
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
+        },
+        {
+          "behavior": "FindImageRecord performs a literal escaped ID GET with the owned Image projector; only clean final native400/403/404 enter exact ID-or-name listing. A complete successful normal-list absence triggers a hidden list using the frozen original caller query plus mandatory os_hidden=True and without the auto-name hint. Visible duplicates and normal-list failures never enter hidden lookup.",
+          "tests": [
+            "image/image_record_find_test.go:TestFindImageRecordDefaultHiddenPhases",
+            "image/image_record_find_test.go:TestFindImageRecordErrorsNeverBecomeHiddenSearch"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 GET returns the owned seeded record, including tolerated invalid JSON; accepted malformed shapes/conversions and nonaccepted nonselected errors remain terminal. Default missing returns nil only after both successful empty searches; strict IgnoreMissing=false returns ErrNotFound without a suppressed GET cause.",
+          "tests": [
+            "image/image_record_find_test.go:TestFindImageRecordAcceptedGetAndAbsence",
+            "image/image_record_find_test.go:TestFindImageRecordErrorsNeverBecomeHiddenSearch"
+          ]
+        },
+        {
+          "behavior": "Both fallback searches consume the shared owned list pager, compare exact passive id/name, continue after the first candidate to prove uniqueness, and discard it after duplicates or later page/row/transport failures. Invalid passive row IDs may be compared but never form a new URI. The selected row is not re-fetched.",
+          "tests": [
+            "image/image_record_find_test.go:TestFindImageRecordDefaultHiddenPhases",
+            "image/image_record_find_test.go:TestFindImageRecordErrorsNeverBecomeHiddenSearch",
+            "resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsAreOnlyCompared"
+          ]
+        },
+        {
+          "behavior": "Rejected selected400/403/404 body Read/Close/transport/cancellation/native-hook/source failures are terminal rather than hidden absence. PreserveCleanRetry is applied only to these selected Glance lookup rejections; actual rejected evidence and underlying causes are retained.",
+          "tests": [
+            "image/image_record_find_test.go:TestFindImageRecordRejectedOwnershipFaultsAreTerminal",
+            "image/image_record_find_test.go:TestFindImageRecordErrorsNeverBecomeHiddenSearch"
+          ]
+        },
+        {
+          "behavior": "One prepared source/location snapshot and one concrete option evaluation span GET, normal and hidden pages. Nested List options and filters affect lists only; List.Headers apply to all phases and Find.Headers override them. Option slices/maps/pointers are copied; source checks between nested callbacks stop mutation before HTTP.",
+          "tests": [
+            "image/image_record_find_test.go:TestFindImageRecordOptionsAndLocationOwnAllPhases",
+            "image/image_record_find_test.go:TestFindImageRecordNestedCallbackSourceChangeStopsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Root Connection executes owned literal get, two-page list and hidden find through the same source and current location, retaining independent declared/wire channels and live original auth. Existing native FindIdentity behavior and direct typed Image APIs are preserved as separate profiles.",
+          "tests": [
+            "connection_image_records_test.go:TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery",
+            "image/image_record_find_test.go:TestFindImageRecordOptionsAndLocationOwnAllPhases"
+          ]
         }
       ],
       "documentation": [
         "docs/finding-identities.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/image-records.md",
+        "docs/glance-policy-priorities.md",
+        "docs/implementation-plan.md"
       ],
       "differences": [
         "Go exposes SDK-owned concrete options and additional raw wire query on FindIdentity; the pinned direct find_image declaration (openstack/image/v2/_proxy.py:1013-1033) accepts only name_or_id and ignore_missing. Python query alias is_hidden is not automatically transposed; Go uses os_hidden. details/all_projects are not capabilities of this Image binding.",
-        "Unsafe route strings use literal list-only lookup and invalid identities/result IDs fail before further HTTP. Go keeps the native Image extractor/pager and full-page native decode policy; this does not claim Python descriptor coercion, arbitrary-precision unknown numeric fields or every inherited continuation form."
+        "Unsafe route strings use literal list-only lookup and invalid identities/result IDs fail before further HTTP. Go keeps the native Image extractor/pager and full-page native decode policy; this does not claim Python descriptor coercion, arbitrary-precision unknown numeric fields or every inherited continuation form.",
+        "Earlier contracts and differences above describe the preserved native/typed API profiles. The additional owned ImageRecord default profile supplies the missing declared Image projector, constructor packing, descriptor conversion, aliases, generic paging and lookup behavior described by the new contracts below; existing strict typed/native behavior is unchanged.",
+        "The added ImageRecord APIs are fresh immutable Go snapshots for the named default profile. They do not mutate a supplied Python-like Resource or implement its dirty state, same-instance fetch, configured Adapter cache/conditional GET, dynamic session/microversion/base-path replacement, or arbitrary Python descriptor objects. These full SDK contracts remain explicitly tracked as SDK-R1, SDK-C1, SDK-J1 and SDK-S1 in docs/implementation-plan.md; API mapping here does not mean complete Python runtime equivalence or live cloud validation.",
+        "FindImageRecord List options are a Go extension; the pinned public find_image signature accepts only name_or_id and ignore_missing. Find uses the owned JSON-domain projector/pager rather than the preserved native Image extractor, allows safe escaped slash/space IDs, and keeps unsafe control/dot strings preflight errors. Arbitrary Python Resource identity and session/cache behavior remain common SDK work."
       ],
-      "remaining": [
-        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that conditional response cache.",
-        "Pinned Image.find reaches Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394), which merges the internally seeded Image and applies Resource descriptors/defaults/unknown-property response rules. Native Image.GetResult extraction preserves its own Properties and import headers but does not map that entire Resource response lifecycle.",
-        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) supports RFC Link-header and limit/marker continuation paths. The two searches retain native ImagePage next/base endpoint semantics; those other inherited continuation paths and session controls are not fully mapped."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/find_flavor",
@@ -24853,12 +24904,18 @@
     {
       "operation": "python:image/v2/get_image",
       "source_fingerprint": "53f9e38eaad08c16a694a176d90d1370875478d3695092a95984679de87f3caa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeader",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordAttributes"
       ],
       "contracts": [
         {
@@ -24921,28 +24978,74 @@
             "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy",
             "internal/cmd/sdkgen/glance_image_read_test.go:TestGlanceImageReadFacadePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GetImageRecord accepts a literal ID or a captured RawResource/attribute seed, rejects conflicting literal-ID seeds and reserved constructor controls, validates the final string before HTTP, and performs a bodyless query-free single-escaped-segment GET with actual200..399 acceptance. Request/option attributes overlay raw names before one constructor packing pass; slash/backslash/space are passive ID bytes.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetPackingAliasesAndSeedOverlay",
+            "image/image_record_get_test.go:TestImageRecordGetCompletePreflightAndLegacyBoundary"
+          ]
+        },
+        {
+          "behavior": "The pinned Image Body62 fields plus inherited id/tags produce 64 declared Body mappings and computed location, preserving canonical/wire owner aliases, default/null distinctions, self stripping and unknown properties packing. Ordered JSON aliases use first-position/last-value semantics, and scalar explicit properties wrap only when packing unknown values. Resource, actual Wire, raw Envelope and response metadata are independent.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetProjectionAndIndependentReceipts",
+            "image/image_record_get_test.go:TestImageRecordGetPackingAliasesAndSeedOverlay"
+          ]
+        },
+        {
+          "behavior": "Image descriptor projection integrates Python truthiness, dictionary/list wrapping, int/float conversion, exact BoolStr, JSON-domain Python string representation and raw untyped values. Missing tags become an empty list while explicit null is retained. Exact case-insensitive actual import header values are folded then split without trimming; computed location comes from captured cloud facts.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetDescriptorIntegration",
+            "image/image_record_get_test.go:TestImageRecordGetLocationAndConcreteSnapshots",
+            "internal/cloudfilter/python_string_test.go:TestPythonStringKeepsWholeDescriptorValue"
+          ]
+        },
+        {
+          "behavior": "Accepted empty/syntax-invalid JSON returns the seeded/default declared view with nil Wire; parsed nonobject, invalid whole UTF-8 and descriptor failures return no record and retain actual accepted receipt and causes. Clean nonaccepted errors preserve native Gophercloud error semantics.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetAcceptedToleranceAndNativeErrors",
+            "image/image_record_get_test.go:TestImageRecordGetDescriptorIntegration"
+          ]
+        },
+        {
+          "behavior": "Options, the top-level seed attributes and RawResource are captured before caller marshaling/location/option callbacks. Concrete option replacement and immediate helper snapshots preserve caller ownership. One cloud-location snapshot and sticky endpoint/provider/base/type/microversion/service bindings govern the whole operation while original provider auth remains live.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetCapturesOptionsAndTopLevelAttributesBeforeMarshal",
+            "image/image_record_get_test.go:TestImageRecordGetLocationAndConcreteSnapshots",
+            "image/image_record_get_test.go:TestImageRecordGetCompletePreflightAndLegacyBoundary"
+          ]
+        },
+        {
+          "behavior": "Accepted Read/Close/native-hook/context/source failures are terminal with physical response evidence, including a source change during Read restored by Close. Root Connection uses the same owned Image service and current location. Existing typed GetImage/native/generated APIs retain their separate contracts.",
+          "tests": [
+            "image/image_record_get_test.go:TestImageRecordGetReadCloseAndStickyGuardEvidence",
+            "image/image_record_get_test.go:TestImageRecordGetCompletePreflightAndLegacyBoundary",
+            "connection_image_records_test.go:TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery"
+          ]
         }
       ],
       "documentation": [
-        "image/images.md"
+        "image/images.md",
+        "image/image-records.md",
+        "docs/glance-policy-priorities.md",
+        "docs/implementation-plan.md"
       ],
       "differences": [
         "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
         "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
         "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
-        "Go explicitName Ref extension performs existing native exactName lookup then freshGET. Python get_image is literalID/Resource fetch, no find/name fallback or Resource same-instance/cache semantics equivalence."
+        "Go explicitName Ref extension performs existing native exactName lookup then freshGET. Python get_image is literalID/Resource fetch, no find/name fallback or Resource same-instance/cache semantics equivalence.",
+        "Earlier contracts and differences above describe the preserved native/typed API profiles. The additional owned ImageRecord default profile supplies the missing declared Image projector, constructor packing, descriptor conversion, aliases, generic paging and lookup behavior described by the new contracts below; existing strict typed/native behavior is unchanged.",
+        "The added ImageRecord APIs are fresh immutable Go snapshots for the named default profile. They do not mutate a supplied Python-like Resource or implement its dirty state, same-instance fetch, configured Adapter cache/conditional GET, dynamic session/microversion/base-path replacement, or arbitrary Python descriptor objects. These full SDK contracts remain explicitly tracked as SDK-R1, SDK-C1, SDK-J1 and SDK-S1 in docs/implementation-plan.md; API mapping here does not mean complete Python runtime equivalence or live cloud validation.",
+        "Raw-name seed overlay is a deliberate Go input policy rather than Python mutable Resource._update component replacement. Go map alias processing uses deterministic sorted keys. Literal GetImageRecord does not perform implicit name lookup; the preserved GetImage typed Ref name extension remains separate."
       ],
-      "remaining": [
-        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
-        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
-        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
-        "Go explicitName Ref extension performs existing native exactName lookup then freshGET. Python get_image is literalID/Resource fetch, no find/name fallback or Resource same-instance/cache semantics equivalence."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/images",
       "source_fingerprint": "55a5b8eabd360632cb91b0a0221c7c747fd5907d087b95b114fcc8bb55f59d69",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImages",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImages",
@@ -24972,7 +25075,18 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilter",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesFilters",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListImagesSinglePage",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.ListImageRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListFilters",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordListPaginated"
       ],
       "contracts": [
         {
@@ -25061,25 +25175,68 @@
             "image/images_contracts_test.go:TestImageContractsResponseOwnershipAndNativePolicy",
             "internal/cmd/sdkgen/glance_image_read_test.go:TestGlanceImageReadFacadePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "Every consumed list row uses the same 64 Body mappings plus computed location, aliases, Source defaults/descriptor conversion and unknown-property packing; each record owns raw row Wire, whole-page Envelope/Header/status and declared Resource independently. The exact constructor body key OpenStack-image-import-methods is consumed and split, while actual list HTTP import headers are ignored.",
+          "tests": [
+            "image/image_record_lists_test.go:TestImageRecordListProjectionPackingAndImportMethods",
+            "image/image_record_lists_test.go:TestImageRecordListEnvelopeConstructorAndStatusEvidence"
+          ]
+        },
+        {
+          "behavior": "The pinned16 remote query names use JSON-domain Python Requests expansion/repetition/null omission; is_hidden maps to os_hidden with canonical precedence. Other canonical Body conditions are evaluated locally after projection; ordinary unknown names are discarded before marshaling. Dedicated controls reject their raw Filter spellings, and explicit invalid selected values fail before HTTP.",
+          "tests": [
+            "image/image_record_lists_test.go:TestImageRecordListSourceQueryAndLocalFilterClassification",
+            "image/image_record_lists_test.go:TestImageRecordListCompletePreflightAndLegacyBoundary"
+          ]
+        },
+        {
+          "behavior": "ListImageRecords is lazy and repeatable, captures the option slice at construction and evaluates copied concrete options/current location once per iteration. Nil limit is omitted, explicit0 is retained, positive max-items hints absent/zero server limit and caps consumed raw rows before local filtering; Paginated false reads one page. Header/default Accept snapshots and source guards govern all pages.",
+          "tests": [
+            "image/image_record_lists_test.go:TestImageRecordListLazyRepeatedOptionSnapshots",
+            "image/image_record_lists_test.go:TestImageRecordListPagingRawCapsAndPartials"
+          ]
+        },
+        {
+          "behavior": "The shared generic pager handles explicit body continuation forms and HTTP Link, dictionary links, falsey next, versioned exact collection aliases and the first server-limit reduction. Positive caller limit permits raw-row marker fallback even on a short page; empty pages stop, raw marker remains independent of caller record mutations, and cycles/scope/query changes retain page evidence.",
+          "tests": [
+            "image/image_record_lists_test.go:TestImageRecordListPagingRawCapsAndPartials",
+            "internal/rest/list_short_page_test.go:TestListShortPageMarkerPolicyUsesWireRowsAndStopsOnEmptyPage"
+          ]
+        },
+        {
+          "behavior": "Actual200..399 pages require a valid object envelope and decoded consumed rows; accepted204 with an empty body still fails JSON decoding. Singleton plural objects are accepted by the shared Resource envelope policy. Late decode/IO/Close/cancellation/source failures preserve earlier All results and actual whole-page evidence, while early break/cap leaves unconsumed rows and continuations untouched.",
+          "tests": [
+            "image/image_record_lists_test.go:TestImageRecordListEnvelopeConstructorAndStatusEvidence",
+            "image/image_record_lists_test.go:TestImageRecordListPhysicalIOAndPostYieldGuards",
+            "image/image_record_lists_test.go:TestImageRecordListPagingRawCapsAndPartials"
+          ]
+        },
+        {
+          "behavior": "Root Connection list pagination shares captured current location and the native provider/auth source with direct owned Get and Find. Existing typed ListImages/AllImages and native/generated finite APIs retain strict typed extraction and their prior paging/filter policies. Existing public Gophercloud helpers and shared fixtures/pager/filter engines are reused.",
+          "tests": [
+            "connection_image_records_test.go:TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery",
+            "image/image_record_lists_test.go:TestImageRecordListCompletePreflightAndLegacyBoundary"
+          ]
         }
       ],
       "documentation": [
-        "image/images.md"
+        "image/images.md",
+        "image/image-records.md",
+        "docs/glance-policy-priorities.md",
+        "docs/implementation-plan.md"
       ],
       "differences": [
         "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
         "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
         "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
         "Go restores originalrepeatquery after boundedvalidadvertisedcollapse; pinned Python/native follow collapsed serverquery, so filter/sort preservation is an explicitGo repair. Go has body-next-only continuation andlocalcap/no serverhint; Python Resource pager has broader Link/fallback/clientBody/JMESPath/filter behavior.",
-        "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim."
+        "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim.",
+        "Earlier contracts and differences above describe the preserved native/typed API profiles. The additional owned ImageRecord default profile supplies the missing declared Image projector, constructor packing, descriptor conversion, aliases, generic paging and lookup behavior described by the new contracts below; existing strict typed/native behavior is unchanged.",
+        "The added ImageRecord APIs are fresh immutable Go snapshots for the named default profile. They do not mutate a supplied Python-like Resource or implement its dirty state, same-instance fetch, configured Adapter cache/conditional GET, dynamic session/microversion/base-path replacement, or arbitrary Python descriptor objects. These full SDK contracts remain explicitly tracked as SDK-R1, SDK-C1, SDK-J1 and SDK-S1 in docs/implementation-plan.md; API mapping here does not mean complete Python runtime equivalence or live cloud validation.",
+        "The pinned Proxy._list JMESPath branch is reachable from images(**query); ImageRecord Filter rejects jmespath_filters and per-call base_path/session/microversion controls explicitly. Arbitrary JMESPath result shapes and configured session/cache are pending common SDK-J1/SDK-S1/SDK-C1 contracts, not supported by this mapping. Local Go comparisons distinguish bool/number and use exact decimal rather than Python True==1/binary-float behavior. Server query validation, visibility and sorting remain Glance responsibilities."
       ],
-      "remaining": [
-        "Pinned Python mutableResource reuse/Adapter configuredcache/session/microversion, typeddescriptor coercion/commonimageproperties/owner aliases/self stripping/unknownproperties packing/headerimport parsing are broader anddifferent from owned canonical ImageInfo/rawProperties/header evidence.",
-        "Canonical nullable Go types/exactint64/tags/locations are deliberateGo shapevalidation, not complete Python descriptor coercion or output JSONSchema/range/enum/date/UUID/name-length parity; URLs and aliases remainpassive.",
-        "Go fixedsource/body/status/preflight/context ownership andacceptedResponseError are newcontracts; native originalprebody/advancedMoreHeaders/reauthwrapperfield behavior remains and no livecloud/sourcepermission guarantee follows.",
-        "Go restores originalrepeatquery after boundedvalidadvertisedcollapse; pinned Python/native follow collapsed serverquery, so filter/sort preservation is an explicitGo repair. Go has body-next-only continuation andlocalcap/no serverhint; Python Resource pager has broader Link/fallback/clientBody/JMESPath/filter behavior.",
-        "Typed knownwire filters plus unknown Filters extension are not Pythonaliases/arbitraryResource attributes/clientfilter parity. Server stillowns filtering/normalization/configurabledefaultlimit/policyvisibility/order; no capability/discovery/schema gate or snapshot-consistency claim."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/update_image",
@@ -26014,7 +26171,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -26388,11 +26545,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -26453,11 +26610,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -33574,7 +33731,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -33675,7 +33832,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -33933,7 +34090,7 @@
           ]
         },
         {
-          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status\u2192Backup.reset_status\u2192Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
+          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status→Backup.reset_status→Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
           "tests": [
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsPreserveNativeTypedRestoreAndSelectedVersionReset",
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorLabels",
@@ -37519,7 +37676,7 @@
           ]
         },
         {
-          "behavior": "The default standalone Wait wire context carries a deadline179\u2013181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
+          "behavior": "The default standalone Wait wire context carries a deadline179–181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
           "tests": [
             "compute/server_ready_boundaries_test.go:TestWaitForServerDefaultWholeBudgetIs180Seconds",
             "compute/server_ready_boundaries_test.go:TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel"
@@ -41004,7 +41161,7 @@
         "Go exposes a typed request and concrete options with a result separating the source boolean Deleted from actual absence, present DOWN, accepted logical attempts, last public-Get verification and failed-response evidence. An accepted DELETE is not itself verified disappearance; retry0 intentionally has no verification. This does not reproduce Python's scalar return or mutable Resource/Munch/session surface.",
         "The delete's verification deliberately reuses ordinary cloud Get semantics rather than always using GetFloatingIPByID. Mutation backend, query fallback backend and normalization source remain distinct. Nova's source-synthetic logical ACTIVE is separated from raw Wire; a DOWN success can describe a still-existing row and never asserts an actual ACTIVE wait or deletion convergence.",
         "Typed safe UTF-8/path IDs, explicit source/location/strict/direct-get policy and optional one shared operation timeout are Go API choices. Defaults add no SDK deadline; a bulk zero-valued options replacement sets retry0, while dedicated default preparation retains retry1. The mapping does not establish every Python dynamic retry argument, configuration or has_service/session policy.",
-        "Owned mutation transport follows the cloud-style passive HTTP200\u2013399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
+        "Owned mutation transport follows the cloud-style passive HTTP200–399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
         "Direct UUID verification intentionally preserves source getter trust: a different response ID with DOWN can satisfy the source boolean, with the actual row retained and Absent=false. The result is a source success policy rather than identity-checked requested-resource disappearance. Dedicated deletion options do not add filters or expression parameters that are absent from the source deletion signature.",
         "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade.",
         "The declared ID/retry deletion contract is mapped. Connection/profile use_direct_get configuration is expressed as an explicit Go option with default false; typed safe IDs and int retries, exact missing-catalog fallback, guarded context/accepted-error behavior, and the local legacy version preflight are documented Go choices. Inherited mutable Resource/session/cache APIs remain separately tracked in the SDK scope rather than missing arguments of this declaration.",
@@ -41449,7 +41606,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -41509,7 +41666,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -41569,7 +41726,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]

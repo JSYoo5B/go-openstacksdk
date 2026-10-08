@@ -4,9 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance import 정보·기본 store owned records](#glance-import-정보기본-store-owned-records)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Image owned 조회·목록·검색](#glance-image-owned-조회목록검색-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는270입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는273입니다.
+
+## Glance Image owned 조회·목록·검색 완료
+
+2026-10-09 핵심 user `get_image`·`images`·`find_image`의 named owned Go 기본 profile을 닫아 **270→273(+3)**, 핵심196→199/2,292·Glance34→37/120입니다. [Python/Go 비교·정확한 독립 main](../image/image-records.md)은 전체 Connection과 서비스 사용, 입력·기본값·서버/로컬 조건·부분 결과·기존 typed/native 차이를 설명합니다. [고정 서버 기본 정책](glance-policy-priorities.md)의 `get_image/get_images` reader 분류를 확인했으며 실제 cloud 권한은 실행하지 않았습니다.
+
+- 조회: literal ID 또는 captured RawResource/attributes를 seed로 받아 body/query 없는 escaped GET을 수행합니다. raw-name overlay 후 한 번 packing하며 64 Body+computed location을 제공합니다. alias·unknown properties·self stripping·untyped/bool/dict/int/float/string/BoolStr/list 변환과 import header 파싱을 실제 Resource/Wire/receipt에서 검증했습니다. actual200..399의 empty/invalid JSON은 seeded 기본 view, parsed nonobject/invalid UTF-8/변환 오류는 nil record와 실제 응답 오류입니다.
+- 목록: 같은 projector와 canonical Body 로컬 비교, pinned16 server query·is_hidden→os_hidden·Requests JSON-domain 반복 query를 연결했습니다. unknown 조건은 encoding 전 무시하고 controls는 concrete 옵션으로 받습니다. nil/0 limit·raw cap hint·pagination false·4 body link/HTTP Link/dictionary links·falsey next·첫 server limit·짧은 positive-limit page의 raw marker fallback과 partial collector를 제공합니다.
+- 검색: literal GET→정확한 ID/name 일반 목록→완전한 성공 absence에서 원본 query+os_hidden=True 숨김 목록을 수행합니다. 숨김 단계에는 자동 name을 넘기지 않습니다. 선택 native400/403/404만 clean fallback하며 IO/Close/취소/source/accepted 변환·중복·후속 page 오류는 terminal입니다. 후보를 끝까지 확인하며 마지막 실패 때 폐기하고 선택된 row를 재GET하지 않습니다.
+- 소유권·재사용: callback/marshaler 전 top-level 입력·option slice를 복사하고 한 location/source 준비를 전체 phase에 재사용합니다. 모든 응답 channel이 독립이며 실제 provider auth는 live입니다. 공개 Gophercloud testhelper·기존 taskCore/deleteCore/Connection fault fixture·REST pager·JSON descriptor/filter·Collection.FindIdentity를 재사용했습니다. 새 HTTP 서버/fault engine은0개입니다.
+
+새 **23그룹182사례**와 기존100그룹692사례를 합친 **집중 race123그룹874개 최종 leaf 사례**, 전체 `make check`의 **43개 실제 test package**·vet·race가 PASS했습니다. 최종273 parity·progress·gofmt, 반복 생성 Go drift0, 정확한 Image/설치 main2개의 별도 외부 local-replace build도 PASS했습니다. Go source2,074개 SHA256 `3cc9702bc1924492bbb534fb6d94640aa739e90543a5268c488b0249fd4c9b91`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`이며 `/private/tmp/go-openstacksdk-image-records-{focused-final.jsonl,focused-receipt.json,check.log,check-receipt.json,local-consumer.json}`에 근거를 기록했습니다. 초기 실패 run은 지원 증거에 포함하지 않습니다. 최종 prose/JSON에 대해 동일 Go 소스의 전체 gate를 재사용했습니다.
+
+다른547 reviews·catalog bytes/pins/fingerprints와 선택한 세 선언의 기존23계약·API를 보존하고18계약을 추가했습니다. reviews550·go_mapping273·unresolved276·unsupported1·contracts3,526이며 catalog unresolved3,088개에는 미검토2,812개도 포함합니다. 기존 `get_import_info`·`get_metadef_property`·`metadef_namespaces`와 같은 named immutable Go 기본 profile 판정 기준을 적용했습니다. pinned `images(**query)`에서 JMESPath가 도달 가능한 사실은 숨기지 않으며 새 ImageRecord Filter는 `jmespath_filters`를 명시적으로 거부합니다. mutable Resource·dirty/same-instance lifecycle, 선택적 cache/conditional GET, 임의 JMESPath 결과 shape와 동적 per-call session/base_path/microversion은 [SDK-R1/C1/J1/S1](implementation-plan.md#공통-sdk의-남은-계약)에 별도로 남깁니다. 이 판정은 전체 Python runtime 동등성이나 전체 목표 완료를 뜻하지 않습니다.
+
+공통 helper `7a3da054`·조회 `03c9d8e1`·목록 `497defd5`·검색/Connection `24e3b273`·가이드 `5545c5e6`을 작은 단위로 commit/push했습니다. 기존 strict typed/native 프로필을 유지하며 정확한 최종 문서·판정 revision의 원격 소비자 설치 검증을 이어갑니다. 다음 핵심 user 후보는 ImageRecord 기반 status/delete 대기의 유한 계약입니다.
 
 ## Glance import 정보·기본 store owned records
 
