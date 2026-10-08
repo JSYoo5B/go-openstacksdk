@@ -20,6 +20,8 @@
   해당 데이터의 Unicode-3.0 조건과 저작권을 보존합니다.
 - **Go 의존성:** Gophercloud v2.15.0과 yaml.v2 v2.4.0은 모듈 의존성입니다.
   원본 라이선스를 보관하며 YAML의 실제 upstream `NOTICE`도 그대로 포함합니다.
+  YAML의 Go 구현에는 Apache-2.0, libyaml에서 포팅한 여덟 파일에는 원래 MIT 조건이
+  적용되므로 Kirill Simonov의 저작권과 별도 `LICENSE.libyaml` 원문도 보존합니다.
 - **비교·추출 기준:** 고정 OpenStackSDK 소스에서 공개 선언과 리소스 metadata를
   추출합니다. Python과 jmespath.py는 동작 비교용이며 SDK runtime에 포함하지 않습니다.
   고정 버전·출처·참조 결과의 범위는 통합 고지 문서에 구분해 기록합니다.

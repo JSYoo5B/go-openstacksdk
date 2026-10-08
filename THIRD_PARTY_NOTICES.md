@@ -30,13 +30,20 @@ implementation.
 ## yaml.v2 v2.4.0: dependency
 
 - Source: [go-yaml/yaml v2.4.0](https://github.com/go-yaml/yaml/tree/v2.4.0).
-- License: Apache-2.0; [exact upstream LICENSE](licenses/yaml-v2.4.0-LICENSE).
-- Copyright: 2011–2016 Canonical Ltd.
+- Licenses: Apache-2.0 for the Go implementation, with MIT terms retained for
+  the libyaml port; [exact upstream LICENSE](licenses/yaml-v2.4.0-LICENSE) and
+  [exact upstream LICENSE.libyaml](licenses/yaml-v2.4.0-LICENSE.libyaml).
+- Copyright: 2011–2016 Canonical Ltd.; libyaml port: (c) 2006 Kirill Simonov.
 - Scope: the direct `gopkg.in/yaml.v2` dependency used for cloud configuration.
 - Upstream attribution: [exact upstream NOTICE](licenses/yaml-v2.4.0-NOTICE).
 
 The implementation is imported as a Go module, not vendored into this repository.
-Its original NOTICE is included for distributions that incorporate the dependency.
+Its original NOTICE and libyaml license are included for distributions that
+incorporate the dependency. Upstream `LICENSE.libyaml` identifies eight files
+ported from libyaml C sources: `apic.go`, `emitterc.go`, `parserc.go`, `readerc.go`,
+`scannerc.go`, `writerc.go`, `yamlh.go`, and `yamlprivateh.go`. Those files retain
+the original MIT copyright and permission terms; the Apache project license does
+not replace them.
 
 ## go-jmespath v0.4.0: adapted source fork
 

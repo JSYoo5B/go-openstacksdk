@@ -11,6 +11,7 @@ third-party code and data retain their respective terms.
 | [gophercloud-v2.15.0-LICENSE](gophercloud-v2.15.0-LICENSE) | [Gophercloud v2.15.0](https://github.com/gophercloud/gophercloud/blob/v2.15.0/LICENSE) | `36208a19f74a7af9ab7342c027bb7acf6f27828137bea2919f13ee73321fa002` |
 | [yaml-v2.4.0-LICENSE](yaml-v2.4.0-LICENSE) | [yaml v2.4.0](https://github.com/go-yaml/yaml/blob/v2.4.0/LICENSE) | `b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1` |
 | [yaml-v2.4.0-NOTICE](yaml-v2.4.0-NOTICE) | [yaml v2.4.0](https://github.com/go-yaml/yaml/blob/v2.4.0/NOTICE) | `f6c2dd3a67b576eafb89b80200b8b1627230bf3821a0c14cb99a22ac19107d00` |
+| [yaml-v2.4.0-LICENSE.libyaml](yaml-v2.4.0-LICENSE.libyaml) | [yaml v2.4.0 libyaml port](https://github.com/go-yaml/yaml/blob/v2.4.0/LICENSE.libyaml) | `a94710b55e03b5285f77d048c5ba61bb9d6ee04a06c0eb90e68821e11b0c707a` |
 | [openstacksdk-LICENSE](openstacksdk-LICENSE) | [OpenStackSDK ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/LICENSE) | `09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b` |
 | [go-jmespath-v0.4.0-LICENSE](go-jmespath-v0.4.0-LICENSE) | [go-jmespath v0.4.0](https://github.com/jmespath/go-jmespath/blob/v0.4.0/LICENSE) | `03cfaf331a260694d06227a589cdd2b5fcfab474697b72e250736696c313655a` |
 | [python-3.14.8-LICENSE](python-3.14.8-LICENSE) | [CPython v3.14.8](https://github.com/python/cpython/blob/v3.14.8/LICENSE), exact audited installed runtime file | `b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231` |
@@ -27,7 +28,9 @@ downloaded files were hashed without rewriting whitespace or copyright text.
 The go-jmespath upstream `LICENSE` is a copyright and Apache application notice,
 not the full Apache license. It is intentionally retained unchanged together
 with the full root license and [existing internal notice](../internal/jmespath/LICENSE).
-The YAML `NOTICE` is retained in addition to its license.
+The YAML `NOTICE` is retained in addition to its Apache license. Its separate
+`LICENSE.libyaml` preserves the original MIT terms and Kirill Simonov copyright
+for the eight files ported from libyaml.
 
 The Unicode license is the official retrieved text, which currently carries
 Copyright © 1991–2026 Unicode, Inc. The [UCD 16.0.0 source notice](https://www.unicode.org/Public/16.0.0/ucd/ReadMe.txt)

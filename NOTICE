@@ -23,6 +23,10 @@ The project depends on yaml.v2 v2.4.0. Its original NOTICE is retained in
 licenses/yaml-v2.4.0-NOTICE:
 Copyright 2011-2016 Canonical Ltd.
 Licensed under the Apache License, Version 2.0.
+The dependency also includes a Go port of libyaml under the MIT license:
+Copyright (c) 2006 Kirill Simonov
+The original port scope and permission notice are retained in
+licenses/yaml-v2.4.0-LICENSE.libyaml.
 
 Glob bracket parsing is adapted from CPython 3.14.8 Lib/fnmatch.py:
 Copyright (c) 2001 Python Software Foundation; All Rights Reserved
