@@ -4,9 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 수정](#glance-owned-imagerecord-수정-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned MemberRecord 조회·추가·수정·삭제](#glance-owned-memberrecord-조회추가수정삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는279입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는282입니다.
+
+## Glance owned MemberRecord 조회·추가·수정·삭제 완료
+
+2026-10-09 핵심 user `add_member/update_member/remove_member`의 named immutable JSON-domain profile을 닫아 **279→282(+3)**, 핵심205→208/2,292·Glance43→46/120입니다. `get_member`의 기존 go_mapping을 보존하면서 공개 owned getter를 보완했으므로 조회를 다시 집계하지 않습니다. [Python/Go 비교·독립 main](../image/member-record-mutations.md)은 동일 Connection/Service API와 owner/recipient 역할, raw 속성·헤더 옵션과 기본값을 설명합니다.
+
+- 요청: 새 Member를 만드는 Source public proxy를 따릅니다. Get은 member_id만 seed하고 Add는 attrs가 없으면 POST `{}`입니다. Update는 선택한 ID를 wire member에 bind하므로 attrs 생략·같은 status·unknown only에도 PUT합니다. id attrs는 route만 바꾸고 PUT Body에서 제외합니다. 선택 Record의 다른 attrs와 receipt는 재전송하지 않습니다.
+- 입력/옵션: present id는 null/invalid/empty도 member_id fallback을 막으며 id가 없을 때만 alias를 선택합니다. literal slash/percent/Unicode/query/backslash를 한 path segment로 escape합니다. 공통 semantic classifier를 guarded 옵션으로 재사용하고 callback 뒤 관찰한 source/context 실패는 후속 복원 callback으로 숨기지 않습니다. 알려진7 Body raw 값만 flat body로 보내고 unknown은 버립니다. full opts/attrs 교체·header merge·snapshot·live token·native retry를 검증했습니다.
+- 응답:200..399 object를 fresh seed에 overlay하고 빈 body/invalid syntax는 seed를 유지합니다. valid null/scalar/array/nonUTF8와 accepted physical/source/context/projection 실패는 가능한 submitted Record와 실제 receipt를 오류와 함께 보존합니다. Remove는 opaque actual ACK를 보존하고 기본 ignore_missing은 깨끗한 최종 native404만 무시하며404 ACK를 합성하지 않습니다. accepted 처리 실패를 자동 재실행하지 않습니다.
+- 범위: 기존 typed200/204·strict status/safe segment 계약은 legacy API로 한정해 보존합니다. canonical alias 우선·Go JSON·독립 Record/ACK·fixed controls 차이를 명시합니다. arbitrary Resource/Munch/subclass/same-instance·descriptor lifecycle은 SDK-R1, cache는 SDK-C1, dynamic session/class/conflict/base_path/microversion은 SDK-S1에서 계속 추적합니다. 특히 Add의 Source __conflicting_attrs helper를 Go fixed profile로 노출하지 않습니다.
+
+새 **22그룹196개 최종 leaf** + 기존38그룹651 = **집중 race60그룹847개**가4개 실제 package에서 PASS했습니다. 전체 `make check` vet·race·parity·progress·gofmt는 **45개 실제 test package**가 PASS했습니다. 재생성1회 Go drift0와 멤버/설치 main2개의 외부 local-replace build도 PASS했습니다. Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 공개 Gophercloud testhelper·기존 taskCore/deleteCore/REST/Connection/fault fixture를 재사용했고 새 HTTP 서버/fault engine은0개입니다. 초기 실패 run은 최종 지원 근거에서 제외합니다.
+
+다른547 reviews·선택한 기존28계약의 테스트와 API·source pins/fingerprints·catalog bytes를 보존하고 설명만 legacy typed 범위로 한정했습니다. 새26계약으로 reviews551·contracts3,588·go_mapping282·review unresolved268·unsupported1이며 catalog unresolved3,079에는 미검토2,811개가 포함됩니다. `/private/tmp/go-openstacksdk-member-record-{source-audit,policy-audit,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 보존·실행 근거가 있습니다. 고정 Glance policy는 guide에 연결한 pin의 static 검토이며 실제 Python/cloud/server policy 호출은 실행하지 않았습니다.
+
+공통 옵션 `a993b5cf`·공개 API `48086df6`·계약 테스트 `abf27b47`·사용 가이드 `36cea3b1`을 각각 commit/push했습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하며 최종 parity/progress/gofmt를 별도 확인합니다. 전체 SDK 목표는 active입니다.
 
 ## Glance owned ImageRecord 수정 완료
 
