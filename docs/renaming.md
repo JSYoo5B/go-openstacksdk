@@ -44,3 +44,11 @@ SDK가 새 segmented upload용으로 만드는 prefix는 `.gophercloudsdk-upload
 프로젝트의 배포 조건은 [LICENSE](../LICENSE), 포함하거나 의존하는 제3자 자료의 출처와 고지는 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md), 적용 범위와 이름 사용 설명은 [라이선스 안내](licensing.md)에 기록합니다. 기존 저작권과 upstream 라이선스 고지는 이름 변경 후에도 보존합니다.
 
 이름 변경과 라이선스 문서 추가는 상표 사용 허가나 상표 중복 검토 완료를 의미하지 않습니다. Python openstacksdk와의 모든 동작 동등성 또는 전체 API 구현 완료를 주장하지 않으며, 실제 지원 범위와 남은 작업은 연산별 판정을 따릅니다.
+
+## 현재 트리 재검증
+
+2026-10-09에 실제 디렉토리, Git remote, GitHub 저장소 이름·설명, GoLand 설정, Go import·패키지 선언, 생성기·manifest·문서·예제를 재점검했습니다. 사용 중인 경로는 모두 새 이름입니다. 옛 이름은 변경 전후 비교, 과거 커밋의 설치 검증과 테스트 reference 출처에만 보존합니다.
+
+라이선스 재검토에서 yaml.v2에 포함된 libyaml 포팅 코드 여덟 파일의 MIT 고지를 보완했습니다. upstream `LICENSE.libyaml` 원문과 Kirill Simonov의 저작권을 보존하며, 프로젝트의 Apache-2.0 조건과 적용 범위를 구분합니다. 라이선스 표의 SHA-256 10개를 확인했고, 실제 SDK와 테스트의 외부 Go 의존성은 고정된 Gophercloud·yaml.v2 두 모듈입니다.
+
+전체 `make check`는 43개 테스트 package·vet·API 판정·포맷 검사 모두 통과했습니다. 푸시한 `478f9b4feff6ea5b71a036a5db0c83aae45e8cbc`을 별도 Go 프로젝트에서 `GOWORK=off`·replace 없이 설치하고 문서의 설치·목록 main 2개를 빌드했습니다. 원격 Go source 2,044개가 검증한 로컬 소스와 같으며, 라이선스·고지 14개 파일도 byte-identical입니다. 원격 설치 버전은 `v0.0.0-20261008183000-478f9b4feff6`입니다.
