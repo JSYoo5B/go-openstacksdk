@@ -46,7 +46,7 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 // callbacks, authentication and accepted read/Close failures. Its nil-guard
 // form retains DoJSON's existing behavior.
 func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, nil, codes...)
 }
 
 // DoJSONGuardedHeaders additionally fixes operation-owned headers through native
@@ -54,10 +54,10 @@ func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 // Neutron revision, not for ordinary caller headers whose source precedence and
 // retry policy are intentionally retained by DoJSONGuarded.
 func DoJSONGuardedHeaders(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, nil, codes...)
 }
 
-func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, codes ...int) (*Response, error) {
+func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, cleanRetryRejections []int, codes ...int) (*Response, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -115,7 +115,7 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 				// Returning the native input error stops retrying without
 				// adding another cause. Duplicate copies must not make a
 				// clean final HTTP rejection look like a handling failure.
-				if native, ok := original.(gophercloud.ErrUnexpectedResponseCode); ok {
+				if native, ok := original.(gophercloud.ErrUnexpectedResponseCode); ok && slices.Contains(cleanRetryRejections, native.Actual) {
 					if returned, ok := callbackErr.(gophercloud.ErrUnexpectedResponseCode); ok && reflect.DeepEqual(native, returned) {
 						return responseContextError(ctx, callbackErr)
 					}

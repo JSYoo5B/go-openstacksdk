@@ -116,7 +116,7 @@ func TestVolumeSnapshotMutationAcceptedFailuresRetainCurrentPhaseAndCauses(t *te
 }
 
 func TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard(t *testing.T) {
-	for _, fault := range []string{"clean", "read", "read joined EOF", "close", "close EOF", "context", "source", "wrapped callback"} {
+	for _, fault := range []string{"clean", "read", "read joined EOF", "close", "close EOF", "context", "source", "source restored at Close", "plain callback", "wrapped callback"} {
 		t.Run(fault, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := snapshotReadContractClient(cloud)
@@ -138,6 +138,14 @@ func TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard(t *testin
 				rejected.onClose = func() { cancel(cause) }
 			case "source":
 				rejected.onClose = func() { client.ResourceBase += "changed/" }
+			case "source restored at Close":
+				base := client.ResourceBase
+				rejected.onRead = func() { client.ResourceBase = base + "changed/" }
+				rejected.onClose = func() { client.ResourceBase = base }
+			case "plain callback":
+				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
+					return err
+				}
 			case "wrapped callback":
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 					return fmt.Errorf("native wrapper: %w", err)
@@ -180,7 +188,7 @@ func TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard(t *testin
 			if fault == "context" && !errors.Is(err, context.Canceled) {
 				t.Fatal(err)
 			}
-			if fault == "source" && !errors.Is(err, resource.ErrInvalidOption) {
+			if (fault == "source" || fault == "source restored at Close") && !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatal(err)
 			}
 		})

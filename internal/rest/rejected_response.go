@@ -34,11 +34,19 @@ func (f *RejectedResponseFaults) Err() error {
 	return f.cause
 }
 
+// RejectionPolicy selects rejected bodies to observe. PreserveCleanRetry also
+// allows a retry hook returning the identical native rejection to leave that
+// rejection eligible for lookup fallback. Existing workflows omit this opt-in.
+type RejectionPolicy struct {
+	Codes              []int
+	PreserveCleanRetry bool
+}
+
 // DoJSONGuardedRejections observes Read/Close and source failures only for the
 // specified rejected statuses. It preserves native retry and authentication
 // policy, while a faulty rejection cannot establish absence or allow fallback.
-func DoJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, rejected []int, codes ...int) (*Response, error) {
-	selected := slices.Clone(rejected)
+func DoJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, policy RejectionPolicy, codes ...int) (*Response, error) {
+	selected := slices.Clone(policy.Codes)
 	client, err := fixedrequest.NewGuarded(source, method, endpoint, sourceGuard)
 	if err != nil {
 		return nil, err
@@ -59,7 +67,11 @@ func DoJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceCli
 		}
 		return response, err
 	})
-	return DoJSONGuarded(ctx, client, guard, method, endpoint, body, headers, codes...)
+	var cleanRetry []int
+	if policy.PreserveCleanRetry {
+		cleanRetry = selected
+	}
+	return doJSONGuarded(ctx, client, guard, method, endpoint, body, headers, false, cleanRetry, codes...)
 }
 
 type rejectedResponseTransport func(*http.Request) (*http.Response, error)

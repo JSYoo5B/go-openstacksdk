@@ -24,12 +24,15 @@ func (f snapshotReadTransport) RoundTrip(r *http.Request) (*http.Response, error
 type snapshotReadTransportBody struct {
 	data                  io.Reader
 	readError, closeError error
-	onClose               func()
+	onRead, onClose       func()
 	closes                atomic.Int32
 }
 
 func (b *snapshotReadTransportBody) Read(p []byte) (int, error) {
 	n, err := b.data.Read(p)
+	if b.onRead != nil {
+		b.onRead()
+	}
 	if err == io.EOF && b.readError != nil {
 		return n, b.readError
 	}

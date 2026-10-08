@@ -51,7 +51,7 @@ func (s *Service) FindImageMemberRecord(ctx context.Context, parent resource.Ref
 			for i := range codes {
 				codes[i] = 200 + i
 			}
-			response, err := rest.DoJSONGuardedRejections(readCtx, p.client, p.check, http.MethodGet, imageMemberEndpoint(p.preparedImageMutation, &identity), nil, nil, []int{http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound}, codes...)
+			response, err := rest.DoJSONGuardedRejections(readCtx, p.client, p.check, http.MethodGet, imageMemberEndpoint(p.preparedImageMutation, &identity), nil, nil, rest.RejectionPolicy{Codes: []int{http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound}, PreserveCleanRetry: true}, codes...)
 			if err != nil {
 				return nil, err
 			}

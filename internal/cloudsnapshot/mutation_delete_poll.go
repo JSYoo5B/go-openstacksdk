@@ -10,7 +10,7 @@ import (
 // A 404 may complete deletion only after fault-free native rejection handling.
 func (p *reader) deletePoll(ctx context.Context, target string) (*rest.Response, error) {
 	return rest.DoJSONGuardedRejections(ctx, &p.source.Client, p.source.Guard, http.MethodGet, target, nil, nil,
-		[]int{http.StatusNotFound}, sourceCodes()...)
+		rest.RejectionPolicy{Codes: []int{http.StatusNotFound}}, sourceCodes()...)
 }
 
 // Backup export request framing shares the same operation-owned fault state.
