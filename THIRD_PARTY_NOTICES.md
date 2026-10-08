@@ -108,7 +108,7 @@ does not replace them. Python itself and its standard library are not bundled
 as an executable dependency of this SDK. The full upstream license is retained
 rather than selecting only one agreement from Python's historical license chain.
 
-## Unicode 16.0.0: digit-property data
+## Unicode 16.0.0: digit-property and lowercase data
 
 - Reference: [Unicode Character Database 16.0.0](https://www.unicode.org/Public/16.0.0/ucd/ReadMe.txt).
 - License: Unicode-3.0; [official Unicode License V3](licenses/unicode-LICENSE).
@@ -123,6 +123,17 @@ code points using `str.isdecimal()` produces the 71 stored decimal ranges;
 ranges. Both results were verified to match the Go tables exactly. This records
 a verified reproduction method; it does not assert an undocumented historical
 extraction directly from `UnicodeData.txt`.
+
+The Image record waiter's `internal/cloudfilter/python_lower_data.go` also
+contains Unicode 16.0.0 full lowercase mappings and Cased/Case_Ignorable ranges
+extracted from the official [UnicodeData.txt](https://www.unicode.org/Public/16.0.0/ucd/UnicodeData.txt),
+[SpecialCasing.txt](https://www.unicode.org/Public/16.0.0/ucd/SpecialCasing.txt)
+and [DerivedCoreProperties.txt](https://www.unicode.org/Public/16.0.0/ucd/DerivedCoreProperties.txt).
+The generated file records each exact source SHA-256 and Unicode-3.0 attribution.
+The original Go `PythonLower` algorithm applies language-neutral full mappings
+and original-string Final_Sigma context without relying on Go's Unicode version.
+These Unicode data retain their own terms; the surrounding original Go algorithm
+uses the project's Apache-2.0 license. No Python executable or extra module is bundled.
 
 The data is represented as inclusive Go rune ranges, separate from the original
 conversion algorithms. Unicode's copyright and permission terms continue to

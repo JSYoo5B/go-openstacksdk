@@ -17,6 +17,8 @@
   Python 라이선스 원문과 Go matcher로 변경한 내용을 별도로 고지합니다.
 - **데이터:** `internal/jsonfilter/descriptor_integer.go`의 숫자 표는
   Unicode 16.0.0 속성을 고정 Python runtime으로 재현할 수 있습니다.
+  `internal/cloudfilter/python_lower_data.go`의 full lowercase와 문맥 속성 표도
+  공식 Unicode16 원문에서 생성하며 파일에 source SHA·Unicode-3.0 출처를 보존합니다.
   해당 데이터의 Unicode-3.0 조건과 저작권을 보존합니다.
 - **Go 의존성:** Gophercloud v2.15.0과 yaml.v2 v2.4.0은 모듈 의존성입니다.
   원본 라이선스를 보관하며 YAML의 실제 upstream `NOTICE`도 그대로 포함합니다.
