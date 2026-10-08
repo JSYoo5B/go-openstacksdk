@@ -2,13 +2,13 @@
 
 Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사용합니다. 전체 SDK는 개발 중이며, 지원 범위는 [구현 현황](implementation-plan.md)에서 확인합니다. `v0.1.0-alpha.1` tag는 아직 배포하지 않았습니다.
 
-이 문서의 공개 import와 설치 명령은 이름 변경 후 모듈을 사용합니다. 아래의 과거 검증 기록은 이름 변경 전 커밋의 증거이며, 변경 후 원격 설치 검증은 별도로 기록합니다.
+2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
 
 새 프로젝트에서 아래처럼 설치합니다. 기존 Go 프로젝트에서는 `go mod init`을 생략합니다. 이 커밋은 원격 설치·빌드를 확인한 revision입니다.
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@main
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@7cec3a4df3a46838d23f6a4c381034eb6e27b947
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
@@ -59,7 +59,7 @@ GOWORK=off go build -mod=readonly ./...
 
 이 절의 revision·버전·source SHA는 당시 `github.com/JSYoo5B/gophercloudsdk` 모듈과 예제로 검증했습니다. 현재 예제의 새 import 경로를 이 과거 revision에 조합하면 안 됩니다.
 
-2026-10-08 최신 schema Source revision `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새 외부 module에 replace 없이 설치해 아래 설치 main과 [Glance schema main](../image/schema-records.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 원격 Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 최종 전체43 package gate와 같으며 SDK와 소비자에 replace가 없습니다. 이번 단위의 완료 집계는255/3,362입니다. 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+2026-10-08 최신 schema Source revision `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새 외부 module에 replace 없이 설치해 당시 설치 main과 [Glance schema main](../image/schema-records.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 원격 Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 최종 전체43 package gate와 같으며 SDK와 소비자에 replace가 없습니다. 이번 단위의 완료 집계는255/3,362입니다. 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 2026-10-08에 source revision `2488a769b27401fab85115e989cf511c01a86cfa`을 별도 외부 module에 replace 없이 설치하고 위 설치 main과 [Availability Zone main](../compute/availability-zones.md)을 빌드했습니다. GOWORK=off·get/build exit0·실제 버전 `v0.0.0-20261008045149-2488a769b274`이며 module-cache Go source2,001개 SHA256 `915a3a9d4f67131b4aaba489232d613643347134ff634b51fc43d670bb9d294d`가 집중41그룹(기존38재사용)·전체43 package gate와 같습니다. 새3행12계약 중 완료2개·Proxy부분1개 판정으로 완료243/3,362이며 catalog/source pins와 기존547 reviews를 보존했습니다. 같은 최종 Go의 JSON/prose에는 전체 Go gate를 재실행하지 않습니다. 인증/OpenStack/Python 실행·alpha tag 배포는 포함하지 않습니다.
 

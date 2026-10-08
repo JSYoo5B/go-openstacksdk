@@ -2106,3 +2106,11 @@ catalog bytes·3,362개 IDs/fingerprints·source pins와 기존547 reviews/text�
 기존12행의5계약씩60개를 원문까지 보존하고 실제 test anchors36계약을 추가했습니다. 다른538 reviews의 원문, 전체550행, source fingerprints/catalog/pins/module 선언은 보존했습니다. 총 contracts3,382→3,418이며 SDK 완료 수와 계약 수를 섞지 않습니다. JSON/prose만 바뀐 후에는 같은 Go SHA의 전체 gate를 재사용하고 최종 parity/progress/format을 확인합니다.
 
 Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이고, Python JSON backend의 binary underflow와 다를 수 있습니다. invalidUTF8/nonfinite JSON parser corner, physical Close 오류, explicit WithCloudLocation.Zone override는 Go 차이로 기록합니다. Resource/session/cache/lifecycle 전체 범위는 원래 SDK 목표에 계속 남기며 finite 무인자 getter의 별도 blocker로 추가하지 않습니다. 이12개는 source 그대로 supported 판정이 아니라 명시적 go_mapping 완료입니다.
+
+## 프로젝트 이름 변경과 라이선스 배포 검증
+
+2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
+
+공개 모듈은 `github.com/JSYoo5B/go-openstacksdk`, 루트 패키지는 `openstack`입니다. 기존 Source 식별자·fingerprint·pin·지원 상태·3,418개 계약은 유지하고 SDK API 참조만 옮겼습니다. 프로젝트 Apache-2.0, 변경 JMESPath Apache 고지, CPython 포팅 조건, Unicode-3.0 데이터, YAML 원본 NOTICE와 비교 reference MIT를 [통합 고지](../THIRD_PARTY_NOTICES.md)에 구분합니다. 보존한 9개 원문 SHA와 로컬 upstream 파일의 byte equality, 새 문서 링크를 확인했고 GitHub도 Apache-2.0을 인식합니다. 원본 라이선스의 공백은 byte equality를 위해 그대로 보존합니다.
+
+새 실제 checkout은 `/Users/jsyoo5b/Workspace/OpenStack/3rdParty/go-openstacksdk`입니다. Codex가 저장한 옛 프로젝트 경로를 이 작업의 도구로 변경할 수 없고 symlink writable root도 허용하지 않으므로 옛 경로 연결은 남기지 않습니다. Codex에서 새 폴더를 열어 사용합니다. 코드 라이선스와 독립 프로젝트 고지는 상표 사용 허가를 뜻하지 않습니다.

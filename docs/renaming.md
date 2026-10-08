@@ -21,7 +21,7 @@ import (
 )
 ```
 
-별칭을 생략하면 루트 패키지의 식별자는 `openstack`입니다. 설치 명령과 외부 소비자 예제는 [설치 안내](install.md)를 참고하세요. GitHub 저장소와 로컬 checkout의 최종 이름도 `go-openstacksdk`로 맞춥니다.
+별칭을 생략하면 루트 패키지의 식별자는 `openstack`입니다. 설치 명령과 외부 소비자 예제는 [설치 안내](install.md)를 참고하세요. GitHub 저장소는 [JSYoo5B/go-openstacksdk](https://github.com/JSYoo5B/go-openstacksdk)이며 실제 로컬 checkout은 `/Users/jsyoo5b/Workspace/OpenStack/3rdParty/go-openstacksdk`입니다. 기존 Codex 프로젝트가 저장한 경로는 도구로 변경할 수 없어 Codex에서는 새 폴더를 열어야 합니다. 실행 환경이 symlink writable root를 허용하지 않아 옛 디렉토리의 호환 링크는 남기지 않습니다.
 
 ## 구현과 검증 기록
 

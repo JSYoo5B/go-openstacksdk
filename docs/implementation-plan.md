@@ -10,7 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**진행 중 (2026-10-08): 프로젝트 이름·모듈·루트 패키지 변경과 라이선스 정리.** 공개 모듈을 `github.com/JSYoo5B/go-openstacksdk`, 루트 패키지를 `openstack`으로 옮기고 생성기·문서·SDK 참조를 동기화합니다. 과거 source SHA·revision·임시 실행 로그는 당시 증거로 보존하며, 변경 후 전체 검사와 원격 설치 증거를 새로 기록합니다. API 집계·source pin·구현 우선순위는 이 작업으로 늘리지 않습니다.
+**최신 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
+
+2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
+
+이름 변경 `17499af7`·라이선스 `7cec3a4d`를 별도 commit/push했습니다. catalog3,362개 fingerprint·source pins·550개 reviews의 판정/계약을 보존했고 API 완료는 **255/3,362**, 계약은 **3,418**로 유지합니다. 실제 실행 근거는 `/private/tmp/go-openstacksdk-rename-check-receipt.json`, `/private/tmp/go-openstacksdk-rename-remote-receipt.json`, `.reports/core-smoke.json`입니다. 서비스 우선순위와 전체 구현 범위는 유지합니다.
 
 **앞선 API 완료 (2026-10-08): 핵심 user Glance schema12개, 전체243→255(+12)·핵심169→181/2,292·Glance7→19/120.** `GetSchemaRecord`는 같은16고정 경로를 ordinary Schema·MetadefSchema class로 투영하고 nullable raw·dict·bool·list, ordered aliases와 Connection location을 처리합니다. 실제 Wire·Envelope·receipt는 분리하며 빈/비JSON 성공과 parsed nonobject 오류를 구분합니다. 기존16 strict getter의 API·200 정책은 유지합니다. [Python/Go 비교·독립 main](../image/schema-records.md), [검증 기록](sdk-support-ledger.md#glance-schema-class-records-완료)에 사용법과 숫자/encoding·명시 zone의 Go 차이를 설명합니다.
 
