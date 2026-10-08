@@ -1,3 +1,8 @@
+// Portions of the bracket translation are adapted from CPython 3.14.8
+// Lib/fnmatch.py, Copyright (c) 2001 Python Software Foundation; All Rights Reserved.
+// The Python license and local changes are recorded in THIRD_PARTY_NOTICES.md
+// and licenses/python-3.14.8-LICENSE at the repository root.
+
 package cloudfilter
 
 import (

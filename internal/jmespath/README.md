@@ -3,7 +3,9 @@
 This is an adapted source fork of
 [jmespath/go-jmespath v0.4.0](https://github.com/jmespath/go-jmespath/tree/v0.4.0).
 The original copyright is James Saryerwinnie, 2015. The exact upstream
-Apache-2.0 `LICENSE` is retained here. The upstream grammar, Pratt parser,
+Apache-2.0 application notice is retained in `LICENSE` here. The complete
+license terms are included in the repository root `LICENSE`; see
+`../../THIRD_PARTY_NOTICES.md` for the distribution notices. The upstream grammar, Pratt parser,
 lexer, AST and generated token names are retained with the changes below.
 There is no external process or runtime dependency.
 

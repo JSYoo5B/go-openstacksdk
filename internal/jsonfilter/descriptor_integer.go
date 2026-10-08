@@ -1,3 +1,7 @@
+// The digit property tables reproduce Unicode 16.0.0 data through CPython 3.14.8.
+// Copyright (c) 2024 Unicode, Inc. The data is subject to Unicode-3.0;
+// see THIRD_PARTY_NOTICES.md and licenses/unicode-LICENSE at the repository root.
+
 package jsonfilter
 
 import (

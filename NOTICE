@@ -1,0 +1,42 @@
+go-openstacksdk
+Copyright 2026 JaeSang Yoo and the go-openstacksdk contributors
+
+Original project contributions are licensed under the Apache License,
+Version 2.0. Third-party code and data retain their respective licenses
+and copyright notices; see THIRD_PARTY_NOTICES.md and licenses/.
+
+This distribution includes an adapted go-jmespath v0.4.0 source fork:
+Copyright 2015 James Saryerwinnie
+Licensed under the Apache License, Version 2.0.
+
+Generated API declarations and wrappers use Gophercloud v2.15.0:
+Copyright 2012-2013 Rackspace, Inc.
+Copyright Gophercloud authors
+Licensed under the Apache License, Version 2.0.
+
+OpenStackSDK source is the reference for extracted API/resource metadata
+and Python-compatible behavior. The pinned Cloud filter source includes:
+Copyright (c) 2015 Hewlett-Packard Development Company, L.P.
+Licensed under the Apache License, Version 2.0.
+
+The project depends on yaml.v2 v2.4.0. Its original NOTICE is retained in
+licenses/yaml-v2.4.0-NOTICE:
+Copyright 2011-2016 Canonical Ltd.
+Licensed under the Apache License, Version 2.0.
+
+Glob bracket parsing is adapted from CPython 3.14.8 Lib/fnmatch.py:
+Copyright (c) 2001 Python Software Foundation; All Rights Reserved
+The Python license agreements and change summary are retained separately.
+
+Unicode 16.0.0 digit-property data is used in compact rune ranges:
+Copyright 2024 Unicode, Inc.
+The Unicode License V3 is retained in licenses/unicode-LICENSE.
+
+JMESPath.py 1.0.1 is a test reference, not a bundled Python runtime:
+Copyright (c) 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved
+Its MIT license is retained in licenses/jmespath-py-v1.0.1-LICENSE.
+
+go-openstacksdk is an independent project. It is not affiliated with or
+endorsed by the OpenInfra Foundation, OpenStackSDK, or Gophercloud projects.
+This notice does not grant rights to upstream trademarks or imply approval
+of the project name by an upstream rights holder.
