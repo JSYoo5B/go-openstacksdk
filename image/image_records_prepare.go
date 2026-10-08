@@ -1,0 +1,123 @@
+package image
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+)
+
+type preparedImageRecord struct {
+	*preparedTaskSource
+	ctx      context.Context
+	check    func(context.Context) error
+	location json.RawMessage
+}
+
+// Capture fixed routing, provider, service bindings, headers and an outer guard
+// before caller data or location/options callbacks can run. Failure is sticky.
+func (s *Service) captureImageRecord(ctx context.Context) (*preparedImageRecord, error) {
+	if err := cloudread.Context(ctx); err != nil {
+		return nil, err
+	}
+	source, err := s.captureTaskSource(ctx)
+	if err != nil {
+		return nil, err
+	}
+	api, images := s.API, s.Images
+	resourceBase := source.source.ResourceBase
+	outer := rest.OperationGuard(ctx)
+	var observed error
+	check := func(checkCtx context.Context) error {
+		if observed != nil {
+			return cloudread.ContextError(checkCtx, observed)
+		}
+		var binding, ancestor error
+		if s.API != api || s.Images != images || source.source.ResourceBase != resourceBase || api != nil && api.RawClient() != source.source {
+			binding = uploadInvalid("image record service binding changed")
+		}
+		if outer != nil {
+			ancestor = outer(checkCtx)
+		}
+		observed = errors.Join(source.check(checkCtx), binding, ancestor)
+		return cloudread.ContextError(checkCtx, observed)
+	}
+	opctx := rest.WithOperationGuard(ctx, check)
+	if err := check(opctx); err != nil {
+		return nil, err
+	}
+	return &preparedImageRecord{preparedTaskSource: source, ctx: opctx, check: check, location: json.RawMessage("null")}, nil
+}
+
+func (s *Service) prepareImageRecord(ctx context.Context, apply func(context.Context, func(context.Context) error) (map[string]string, error)) (*preparedImageRecord, error) {
+	p, err := s.captureImageRecord(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := p.prepare(apply); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+// Get captures caller seeds before this location callback. List/Find use the
+// wrapper above. All options observe exactly one current-location snapshot.
+func (p *preparedImageRecord) prepare(apply func(context.Context, func(context.Context) error) (map[string]string, error)) error {
+	if err := p.check(p.ctx); err != nil {
+		return err
+	}
+	var err error
+	if p.service.dependencies.CloudLocation != nil {
+		facts, readErr := p.service.dependencies.CloudLocation()
+		err = readErr
+		if err == nil {
+			p.location, err = facts.ForResource(nil, facts.Zone)
+		}
+	}
+	if err = errors.Join(err, p.check(p.ctx)); err != nil {
+		return err
+	}
+	if apply == nil {
+		return uploadInvalid("image record option preparation is required")
+	}
+	headers, err := apply(p.ctx, p.check)
+	if err = errors.Join(err, p.check(p.ctx)); err != nil {
+		return err
+	}
+	return errors.Join(p.preparedTaskSource.finish(p.ctx, headers, nil), p.check(p.ctx))
+}
+
+func imageRecordCodes() []int {
+	codes := make([]int, 200)
+	for i := range codes {
+		codes[i] = 200 + i
+	}
+	return codes
+}
+
+func validateImageRecordIdentity(value string) error {
+	if strings.TrimSpace(value) == "" || !utf8.ValidString(value) || value == "." || value == ".." {
+		return uploadInvalid("image identity must be nonblank valid UTF-8 literal text")
+	}
+	for _, char := range value {
+		if unicode.IsControl(char) {
+			return uploadInvalid("image identity must not contain controls")
+		}
+	}
+	return nil
+}
+func imageRecordText(value *ImageRecord, field string) string {
+	if value == nil || value.Resource == nil {
+		return ""
+	}
+	var text string
+	if json.Unmarshal(value.Resource.Body[field], &text) != nil {
+		return ""
+	}
+	return text
+}
