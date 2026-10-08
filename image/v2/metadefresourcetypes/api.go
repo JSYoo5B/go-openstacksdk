@@ -1,5 +1,6 @@
 // Package metadefresourcetypes provides Glance metadata resource types and
-// their associations with literal namespaces. Both lists are finite responses.
+// their associations with literal namespaces. Typed lists read finite responses;
+// owned record lists add semantic filters and guarded pagination.
 package metadefresourcetypes
 
 import (
@@ -8,14 +9,26 @@ import (
 	"net/http"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
 const kind = "image.metadef_resource_type"
 
-type API struct{ client *gophercloud.ServiceClient }
+// Dependencies supplies current Connection facts without an authentication dependency.
+type Dependencies struct {
+	CloudLocation func() (resource.CloudLocation, error)
+}
 
-func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+type API struct {
+	client       *gophercloud.ServiceClient
+	dependencies Dependencies
+}
+
+func New(client *gophercloud.ServiceClient) *API { return NewWithDependencies(client, Dependencies{}) }
+func NewWithDependencies(client *gophercloud.ServiceClient, dependencies Dependencies) *API {
+	return &API{client: client, dependencies: dependencies}
+}
 func (a *API) RawClient() *gophercloud.ServiceClient {
 	if a == nil {
 		return nil
