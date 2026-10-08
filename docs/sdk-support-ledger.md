@@ -23,6 +23,8 @@ Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d4038
 
 공통 `49869890`·`252f9c2e`, object 구현/테스트 `11b57da4`·`f45866f4`, namespace 구현/테스트 `0b2ad4a6`·`3c0b7591`, Connection `760f546a`를 나눠 commit/push했습니다. `/private/tmp/go-openstacksdk-metadata-lists-{focused.jsonl,check.log,check-receipt.json,local-consumer.json,generation-repeat.log}`에 실행 근거를 기록합니다. 다음은 같은 reader 단계의 member 목록·검색입니다.
 
+정확한 문서·판정 revision `73f54853810614b582e2e5513a4812e6cd8a97e2`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008181840-73f548538106`·get/build exit0이며 목록/설치 main **2개**를 빌드했습니다. 원격 Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d40386936934d29`가 집중 race·전체43 package gate·반복 생성 drift0의 source와 같고 라이선스/고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadata-lists-remote-consumer.json`에 기록했습니다. 실제 인증/cloud 호출은 실행하지 않았습니다.
+
 ## Glance resource type association owned 생성·삭제 완료
 
 2026-10-09 핵심 admin `create_metadef_resource_type_association`·`delete_metadef_resource_type_association` 두 선언을 owned Go mapping으로 닫았습니다. **263→265(+2)**이며 핵심189→191/2,292·Glance27→29/120입니다. [Python/Go 비교와 독립 main](../image/metadef-resource-type-association-mutations.md)은 raw6개 Body·8필드 Resource·기본값/location·immutable identity·실제 opaque ACK의 사용법과 Source 차이를 설명합니다.
