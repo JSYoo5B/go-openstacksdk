@@ -1,8 +1,10 @@
-# 서버의 이미지·암호 응답
+# 서버의 응답과 legacy console URL
 
 서버 API는 응답의 해석까지 SDK가 처리합니다.
 
 `Metadata(ctx, serverID)`와 `ConsoleOutput(ctx, serverID, options...)`의 Python 대응·문자열 반환·length 생략과0은 [Compute 조회 가이드](../../user-read-apis.md)를 참고하세요. 기존 native `ShowConsoleOutput`은 별도로 유지합니다.
+
+`ConsoleURL(ctx, serverID, consoleType)`은6개 legacy action 중 하나를 호출하고 실제 console 값을 `json.RawMessage`로 반환합니다. [Keypair·console 가이드](../../keypairs-console.md)에 필수 type·null/scalar/array 반환·오류 정책과 독립 main을 설명합니다.
 
 | 작업 | 반환값 |
 |---|---|
