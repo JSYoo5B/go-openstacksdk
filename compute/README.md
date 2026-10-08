@@ -85,6 +85,8 @@ GET 실패는 IgnoreMissing으로 숨기지 않습니다. [Python/Go 예제와 �
 
 명시적인 extra-specs 조회는 `service.API.Flavors.FetchExtraSpecs(ctx, flavors.FlavorExtraSpecsRequest{ID: flavorID})`를 사용합니다. 이 호출은 inline specs가 있어도 항상 해당 ID의 `/os-extra_specs`를 조회하며, supplied Flavor/RawResource의 소유 복사와 실제 raw specs·응답 receipt를 구분합니다. 자동 조회의 조건부 보충 옵션과 반환 모델이 다릅니다. [별도 조회의 Python/Go 비교](flavor-extra-specs.md)에 concrete 입력·null/빈 값·native `ListExtraSpecs`와의 차이를 설명합니다.
 
+Cloud의 ID 전용 조회는 `service.GetFlavorByID(ctx, flavorID)`입니다. 기본 specs 보강은 false이고 `compute.WithFlavorByIDExtraSpecs(true)`로 선택합니다. 단일 extra-spec 값은 `service.API.Flavors.GetExtraSpecsProperty(ctx, flavors.FlavorExtraSpecsRequest{ID: flavorID}, property)`의 raw Value/Present로 받습니다. [단일 property와 native 조회](flavor-property-and-native.md)에 missing/null/빈 값, 기존 Flavor를 변경하지 않는 입력 정책, native Get/GetExtraSpec/ListDetail과의 비교를 설명합니다.
+
 ## 이름 해석을 포함한 생성
 
 Go의 생성 예제:

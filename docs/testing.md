@@ -22,6 +22,8 @@ Go 1.25 이상, 의존성 다운로드, localhost 포트 바인딩 허용이 필
 
 ## 공개 테스트 도구 재사용
 
+Flavor 단일 property와 Cloud ID 조회는 기존 Fetch의 입력·옵션·버전·응답 reader, strict identity/enrichment를 공유합니다. 고유 API binding은 공개 testhelper·기존 fixture로 검증하고 기존 Fetch/nativefind/identity/guard/version28개 그룹을 그대로 선택했습니다. 최종 집중 race35그룹에서 새7그룹74사례가 함께 PASS했으며, 공통 옵션/physical fault matrix를 다시 작성하지 않았습니다. [Python/Go 가이드](../compute/flavor-property-and-native.md)와 [판정대장](sdk-support-ledger.md)에 native DTO/string-map/linked page와 owned raw property의 서로 다른 계약을 기록합니다.
+
 공통 `internal/testcloud.New`는 Gophercloud v2.15.0의 공개 `testhelper.SetupHTTP()`와 `FakeServer.Teardown()`을 사용합니다. SDK 어댑터는 공유 Provider, 토큰 잠금과 서비스별 endpoint만 구성합니다. 각 fixture는 격리된 mux/server를 사용하며 cleanup을 등록합니다. 공통 REST 목록 테스트의 기존 `listSpec`도 같은 공개 `SetupHTTP`를 사용합니다. 서비스별로 서버 구성 코드를 복제하지 않습니다.
 
 새 테스트는 공개 `testhelper.TestMethod`, `TestHeader`, `TestHeaderUnset`, `TestBody`, `TestJSONRequest`와 `testhelper/fixture.SetupHandler`를 먼저 검토합니다. 단순 요청 검증과 고정 응답에 맞으면 재사용하고, SDK의 단계 순서·부분 결과·정확한 raw JSON·응답 소유권 검증만 추가합니다. Cinder 생성 계약의 공통 wire 검증은 method·source·token에 공개 helper를 사용합니다. `SetupHandler`는 upstream 고정 token을 검사하므로 SDK의 token 교체·공유 검증에는 별도 handler가 필요합니다.
@@ -32,7 +34,7 @@ JSON 비교 helper는 float64 기반이므로 큰 정수나 원문 바이트의 
 
 Cloud keypair 조합의 [HTTP 테스트](../api/compute_keypair_cloud_test.go)는 공개 Gophercloud `TestMethod`·`TestHeader`, `internal/testcloud.New`, 기존 `flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`를 재사용합니다. 새 목록 엔진이나 fault wrapper를 만들지 않고 기존 `ListRecords`·`FindKeypair`·생성/삭제 binding에 eager 수집과 필터 presence·public-key 생략·bool 결과의 assertion을 추가합니다. dictionary의 첫 semantic 필터와 두 번째 Cloud 필터, ordered/glob/JMESPath 선택은 공통 `internal/cloudfilter.Select`·`First`로 조합합니다. `resource.CloudLocation.ForResource`의 소유 snapshot은 Cloud view에만 보충하고, 실제 Wire/Envelope를 바꾸지 않는 연결을 검증합니다.
 
-명시 [Flavor extra-specs HTTP 테스트](../api/compute_flavor_extra_specs_fetch_test.go)는 같은 public fixture와 response fault helper를 사용합니다. 기존 `TestNativeFlavorExtraSpecs...` 계열의 조건부 보충·native map 계약을 회귀 근거로 재사용하면서, 새 `FetchExtraSpecs`의 항상 GET·raw 값·supplied 모델 복사만 별도 binding으로 검증합니다. 공통 `microversions.MemberGet`과 REST의 guarded response·decode·receipt 처리는 그대로 사용하며 서비스마다 Read/Close/source 오류 matrix를 복제하지 않습니다. 이 단위의 실행 결과와 지원 판정은 [판정대장](sdk-support-ledger.md)에 별도로 기록하며, 위 테스트 설명은 아직 새로운 통과 수치를 보고하지 않습니다.
+명시 [Flavor extra-specs HTTP 테스트](../api/compute_flavor_extra_specs_fetch_test.go)는 같은 public fixture와 response fault helper를 사용합니다. 기존 `TestNativeFlavorExtraSpecs...` 계열의 조건부 보충·native map 계약을 회귀 근거로 재사용하면서, 새 `FetchExtraSpecs`의 항상 GET·raw 값·supplied 모델 복사만 별도 binding으로 검증합니다. 공통 `microversions.MemberGet`과 REST의 guarded response·decode·receipt 처리는 그대로 사용하며 서비스마다 Read/Close/source 오류 matrix를 복제하지 않습니다. 이 단위의 실행 결과와 지원 판정은 [판정대장](sdk-support-ledger.md)에 별도로 기록합니다.
 
 Keypair 목록·찾기는 기존 public `testcloud.New`·method/header helper·`flavorIdentityClient`·`payloadContractTrack`·`secretFetchRoundTripFunc`를 사용합니다. 고유6그룹97사례는 row projection·owner·version·native ABI의 binding을 검증하고, 공통 reader의 기존 표에10사례를 넣었습니다. 직접 GET/fallback·필터·continuation·passive ID의 기존91그룹을 함께 선택해 집중 race98그룹·전체42 package gate가 PASS했습니다. 같은 Go SHA의 문서·판정 변경에는 전체 검사를 반복하지 않고 parity·progress·gofmt를 확인합니다. 목록용 서버나 fault wrapper를 새로 만들지 않고, 생성의9필드 projector도 공유합니다. [목록·검색 사용법](../compute/keypairs-list-find.md)에 기본값과 source/Go 차이를 기록합니다.
 
