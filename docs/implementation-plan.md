@@ -340,7 +340,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance object·namespace owned 목록 | 고정 Source와 project reader 기본 정책 확인 | 구현 전 | 기존 object/namespace/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 두 선언 unresolved 유지; getter 완료 보존 | 다음 핵심 user 단위 |
+| Glance object·namespace owned 목록 | 고정 Source·descriptor·generic pagination·project reader 기본 정책 검토 중 | **두 leaf의 owned Record/ListRecords 구현 중** | 기존 object/namespace/association fixture 재사용; Connection 검증 준비 | Python 비교·독립 main 작성 중 | 두 선언 unresolved 유지; getter 완료 보존 | 핵심 user 현재 단위; 구현·테스트·문서별 작은 커밋 예정 |
 | Glance object owned 생성·수정·개별/전체 삭제 | 고정 Source7 Body·fresh update·Resource reuse·bulk delete 초기 검토; 기본 정책 admin | 핵심 admin 순서 대기 | 기존 property/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 네 선언 unresolved 유지 | 핵심 user 완료 뒤 구현 |
 | Glance resource type association owned 생성·삭제 | pinned6 Body·constructor·public Resource reuse·delete/404 검토 완료 | **CreateRecord/DeleteRecord 완료** | 기존34그룹 재사용·새11그룹133사례·집중45그룹753·전체43 package gate PASS | Python 비교·정확한 main3개 외부 build PASS | **go_mapping2행·전체265/3,362** | API2467fdce·leafee2514c5·Connectionfbc88b37 push 완료; 문서1f9c1d7a 원격 main3개 build·Go SHA/라이선스13개 일치 확인 |
 | Glance property owned 목록·삭제 | pinned finite list·두 deletion·identity·has_body=False 검토 완료 | **ListRecords/AllRecords·DeleteRecord/DeleteAllRecords·공통 guard 완료** | 기존13그룹 재사용·새20그룹182사례·집중33그룹274·전체43 package race/vet·최종261 metadata PASS | Python 비교·정확한 main3개/example1개 local/remote build PASS | **go_mapping3행·전체261/3,362** | 구현·검증·문서7개 commit push 완료. [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료) |
