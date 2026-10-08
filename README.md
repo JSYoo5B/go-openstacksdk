@@ -12,6 +12,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 [Keypair 목록·검색](compute/keypairs-list-find.md)은 SDK가 필터·페이지 순회·owner를 유지하는 검색 fallback과 nullable Resource·실제 응답을 처리합니다.
 
+[Cloud keypair 조합](compute/keypairs-cloud.md)은 `conn.Compute(ctx)`의 `ListKeypairs`·`SearchKeypairs`·`GetKeypair`·`CreateKeypair`·`DeleteKeypair`를 비교합니다. eager 목록·필터 presence·public key 생략·삭제 bool을 SDK가 처리하고, leaf의9필드 Resource에 Connection location을 보충하며 실제 Wire는 보존합니다. [명시 flavor extra-specs 조회](compute/flavor-extra-specs.md)는 `service.API.Flavors.FetchExtraSpecs`로 inline 값과 관계없이 조회하는 사용법을 설명합니다.
+
 [Console auth-token 조회](compute/console-auth-token.md)는 명시 token으로 연결 정보를 GET하고 source-shaped Resource·actual Wire·receipt를 반환합니다.
 
 [Compute console 자동 선택](compute/console-selection.md)은 `conn.Compute(ctx)`에서 서버가 광고한 범위에 따라 modern/legacy API를 선택합니다.

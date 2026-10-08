@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**진행 중 (2026-10-08): 다음 핵심 user 계약의 재사용 범위 검토.** keypair 목록·검색과 native List의3개 판정을 반영했습니다. 다음 후보는 `fetch_flavor_extra_specs`의 항상 직접 GET 계약이며 기존 inline-extra-specs shortcut과 구별해 공통 member reader·기존 fixture를 활용합니다. 새 keypair API로 cloud wrapper에서 닫을 수 있는 계약도 병렬로 조사합니다. 전체 목표와 서비스 순서는 유지합니다.
+**진행 중 (2026-10-08): 핵심 user flavor 명시 extra-specs 조회와 cloud keypair5개 연결.** 구현과 새6그룹85사례, 기존40개 공통 그룹을 포함한 집중 race46그룹이 PASS했습니다. flavor `58662346`과 cloud keypair `cb3f7866` 두 커밋을 push했습니다. 항상 member GET·raw specs/source dict view·필터 두 단계·filters presence·Connection location은 기존 reader/projector/필터/공개 testhelper로 연결했습니다. 동일 최종 Go의 전체42 package gate·재생성 Go drift0·문서의 정확한 독립 main2개 빌드도 PASS했습니다. 원격 설치 검증과7개 source 판정을 마무리하며 현재 완료 집계224에는 이7개 후보를 아직 넣지 않았습니다.
 
 **최신 완료 (2026-10-08): 핵심 user keypair 목록·검색과 native List, 전체221→224(+3)·핵심147→150/2,292·Nova23→26/333.** `KeyPairs.ListRecords`는9필드 Resource와 실제 행·semantic 필터·전체 페이지를 제공하고 `FindKeypair`는 직접 GET 이후 clean400/403/404에서 owner를 유지해 전체 목록을 검색합니다. native List의6string·SinglePageBase·200/204/300 계약은 별도로 검토했습니다. 새 HTTP 동작2개와 native 선언1개의 완료이며 기존 Create/Get/Delete를 재집계하지 않습니다. [Python 비교·전체 main](../compute/keypairs-list-find.md), [검증 기록](sdk-support-ledger.md#compute-keypair-목록검색과-native-list-완료)을 함께 갱신했습니다.
 

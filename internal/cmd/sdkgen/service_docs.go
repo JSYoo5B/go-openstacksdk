@@ -99,6 +99,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	if key == "compute/v2" {
 		out.WriteString("`KeyPairs.ListRecords`는 raw keypair 목록·로컬 필터·페이지 제어를 제공하고, `KeyPairs.FindKeypair`는 직접 이름 GET 뒤 실제400/403/404에만 같은 owner의 목록을 검색합니다. default ssh·nullable 필드·기본 미존재 허용과 버전 선택, 기존 native List/Find의 차이는 [Keypair 목록·찾기의 Python/Go 비교](../keypairs-list-find.md)에 설명합니다.\n\n")
+		out.WriteString("[Cloud keypair 목록·검색·생성·삭제](../keypairs-cloud.md)는 전체 inventory와 두 단계 필터, owner·missing 결과를 SDK가 처리합니다.\n\n")
+		out.WriteString("[Flavor extra-specs 명시 조회](../flavor-extra-specs.md)는 inline 값이 있어도 직접 GET하고 source dict view와 실제 raw specs를 분리합니다.\n\n")
 		out.WriteString("`conn.Compute(ctx)`의 `ValidateConsoleAuthToken(ctx, token)`은 console token의 연결 정보를 직접 조회하고 seeded Resource·actual Wire·HTTP receipt를 제공합니다. 필수 token은 provider 인증 token과 별개이며, 미선택 버전의2.99 ceiling과 nullable 반환은 [Console auth-token의 Python/Go 비교](../console-auth-token.md)에 설명합니다.\n\n")
 		out.WriteString("`conn.Compute(ctx)`의 상위 `CreateConsole(ctx, serverID, type, options...)`은 광고 범위와 선택 버전으로 modern/legacy console을 자동 선택합니다. protocol None 기본값·작업별 version ceiling·computed location·실패 시 다른 API 재시도 금지는 [Console 자동 선택의 Python/Go 비교](../console-selection.md)에 설명합니다.\n\n")
 		out.WriteString("Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/detail` 전체를 검사하며, caller가 지정하지 않은 `is_public`은 목록에만 `None`으로 설정합니다. 기본 extra specs 추가 조회는 하지 않습니다. `resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가 비어 있을 때만 반환된 ID의 `/os-extra_specs`를 조회합니다. 후속 GET에는 caller query를 전달하지 않으며 실패를 미존재로 숨기지 않습니다. 이 옵션은 Flavor만 지원하고 summary/all-projects 목록 모드는 제공하지 않습니다.\n\n")

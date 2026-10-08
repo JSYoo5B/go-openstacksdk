@@ -12,6 +12,8 @@ remote console 생성과 optional owner·기본 미존재 무시를 결합한 �
 
 [Keypair 목록·검색](keypairs-list-find.md)은 `service.API.KeyPairs`의 concrete 옵션으로 local 필터·전체 페이지 순회·owner를 유지하는 검색 fallback을 제공합니다.
 
+`conn.Compute(ctx)`가 반환하는 `compute.Service`의 `ListKeypairs`·`SearchKeypairs`·`GetKeypair`는 선택한 목록의 eager 수집과 Cloud 필터 조합을 처리하고, `CreateKeypair`는 public key 생략을, `DeleteKeypair`는 성공/미존재 bool을 처리합니다. [Cloud keypair 가이드](keypairs-cloud.md)에 필터 생략과 명시 빈 값·owner·부분 inventory·JMESPath 반환을 설명합니다. owned leaf의 Resource는9개 Body 필드이며 Cloud 결과는 Connection의 computed location을 추가합니다. 실제 Wire·Envelope는 응답 원문을 유지합니다.
+
 nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console action은 [Keypair·console 비교](keypairs-console.md)의 전체 main을 참고하세요. 생성의 `ssh` view 기본값과 legacy 조회의 raw 반환을 SDK가 처리합니다.
 
 ## openstacksdk 대응
@@ -25,7 +27,11 @@ nullable 속성·ID/name 별칭을 가진 키페어 생성과6개 legacy console
 | `conn.compute.wait_for_server(server, status="ACTIVE", wait=300)` | `service.Servers.Wait(ctx, resource.ID(server.ID), "ACTIVE", resource.WithTimeout(5*time.Minute))` |
 | `conn.compute.find_flavor(name_or_id, ignore_missing=False)` | `service.Flavors.FindIdentity(ctx, nameOrID, resource.WithIdentityFindIgnoreMissing(false))` |
 | `conn.compute.find_flavor(name_or_id, get_extra_specs=True)` | 위 자동 조회에 `resource.WithIdentityFindExtraSpecs(true)` 추가 |
+| `conn.compute.fetch_flavor_extra_specs(flavor)` | `service.API.Flavors.FetchExtraSpecs(ctx, request)`: [명시 extra-specs 조회](flavor-extra-specs.md) |
 | `conn.compute.flavors()` | `service.Flavors.List(ctx)` |
+| `conn.list_keypairs(filters=filters)` / `search_keypairs(name, filters)` | `service.ListKeypairs(ctx, options...)` / `SearchKeypairs(ctx, name, options...)`: [Cloud keypair](keypairs-cloud.md) |
+| `conn.get_keypair(name, user_id=owner)` | `service.GetKeypair(ctx, name, compute.WithKeypairQueryUserID(owner))` |
+| `conn.create_keypair(name, public_key=public_key)` / `delete_keypair(name)` | `service.CreateKeypair(ctx, name, options...)` / `DeleteKeypair(ctx, name)` |
 | `conn.create_server(...)` | `service.Servers.Create(ctx, compute.CreateServerRequest{...}, ...)` |
 | `conn.add_ips_to_server(server, ip_pool="public")` | [AddIPsToServer](server-ip-helpers.md): 기본60초·비동기, pool → IP 목록 → auto |
 | `conn.add_ip_list(server, ips)` | [AddIPList](server-ip-helpers.md): positional 목록·중복·빈 목록 no-op, 선택적인 raw 주소 관측 |
@@ -76,6 +82,8 @@ for server, err := range service.Servers.List(ctx, resource.WithStatus("ACTIVE")
 `resource.WithIdentityFindExtraSpecs(true)`를 지정하면 단일 결과의 ExtraSpecs가
 비어 있을 때만 반환된 ID의 extra-specs GET을 추가합니다. 기본값은 false이고, 후속
 GET 실패는 IgnoreMissing으로 숨기지 않습니다. [Python/Go 예제와 옵션](../docs/finding-identities.md#nova-flavor와-extra-specs)을 참고하세요.
+
+명시적인 extra-specs 조회는 `service.API.Flavors.FetchExtraSpecs(ctx, flavors.FlavorExtraSpecsRequest{ID: flavorID})`를 사용합니다. 이 호출은 inline specs가 있어도 항상 해당 ID의 `/os-extra_specs`를 조회하며, supplied Flavor/RawResource의 소유 복사와 실제 raw specs·응답 receipt를 구분합니다. 자동 조회의 조건부 보충 옵션과 반환 모델이 다릅니다. [별도 조회의 Python/Go 비교](flavor-extra-specs.md)에 concrete 입력·null/빈 값·native `ListExtraSpecs`와의 차이를 설명합니다.
 
 ## 이름 해석을 포함한 생성
 
