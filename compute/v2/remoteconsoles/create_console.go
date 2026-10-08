@@ -15,10 +15,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/gophercloudsdk/internal/cloudread"
+	"github.com/JSYoo5B/gophercloudsdk/internal/microversions"
 	"github.com/JSYoo5B/gophercloudsdk/internal/rest"
 	"github.com/JSYoo5B/gophercloudsdk/request"
 	"github.com/JSYoo5B/gophercloudsdk/resource"
-	"github.com/gophercloud/gophercloud/v2/openstack/utils"
 )
 
 // ConsoleCreateOpts preserves omitted, null and empty console attributes.
@@ -155,9 +155,9 @@ func (a *API) CreateConsole(ctx context.Context, serverID string, options ...Con
 			minimum = 99
 		}
 		if minimum != 0 {
-			major, minor, parseErr := utils.ParseMicroversion(source.Client.Microversion)
-			if parseErr != nil || major != 2 || minor < minimum {
-				err = fmt.Errorf("%w: console type %q requires selected Compute microversion 2.%d or later (client uses %q)", resource.ErrUnsupported, kind, minimum, source.Client.Microversion)
+			matches, parseErr := microversions.Matches(source.Client.Microversion, fmt.Sprintf("2.%d", minimum))
+			if parseErr != nil || !matches {
+				err = errors.Join(fmt.Errorf("%w: console type %q requires selected Compute microversion 2.%d or later (client uses %q)", resource.ErrUnsupported, kind, minimum, source.Client.Microversion), parseErr)
 			}
 		}
 		fields := make(map[string]any)

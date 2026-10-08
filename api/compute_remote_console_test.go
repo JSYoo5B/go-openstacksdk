@@ -129,6 +129,7 @@ func TestComputeRemoteConsoleWinningTypeSelectedVersionGates(t *testing.T) {
 		{"spice-direct below explicit protocol", "2.98", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct"), remoteconsoles.WithConsoleCreateProtocol("literal")}, false},
 		{"spice-direct boundary", "2.99", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
 		{"numeric 2.100", "2.100", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
+		{"finite major latest", "2.latest", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
 		{"symbolic latest cannot prove gate", "latest", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
 		{"malformed selected gate", "2.invalid", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
 		{"no local 2.6 prerequisite", "2.5", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc")}, true},
