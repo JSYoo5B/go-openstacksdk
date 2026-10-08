@@ -57,6 +57,9 @@ import (
 func main() {
     _ = (*image.Service).WaitForImageRecordStatus
     _ = (*image.Service).WaitForImageRecordDelete
+    _ = (*image.Service).AddImageRecordTag
+    _ = (*image.Service).RemoveImageRecordTag
+    _ = image.ImageRecordTagRequest{ID: "literal-image-id"}
     _ = image.WithImageRecordWaitUnlimited()
     _ = image.WithImageRecordWaitAttribute("status")
     _ = (*image.Service).GetImageRecord

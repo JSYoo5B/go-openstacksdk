@@ -78,7 +78,7 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 [Glance 이미지 조회·목록](image/images.md)은 concrete 선택 인자, nullable 모델과 확장 속성, 반복 필터를 보존하는 페이지 순회와 Python 사용법 비교를 제공합니다.
 
-`GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource·실제 Wire·응답 증거와 descriptor 기본값·properties packing·공통 페이지·숨김 이미지 fallback을 제공합니다. [이미지 레코드의 Python/Go 비교와 독립 main](image/image-records.md)에 literal GET seed, concrete 옵션·부분 결과와 검색 순서를 설명합니다. [ImageRecord 상태·삭제 대기](image/image-record-waits.md)는 초기 seed 목표 상태의 HTTP 없는 반환과 마지막 관측·부분 결과, SDK가 소유하는 timeout·callback·404 계약을 제공합니다.
+`GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource·실제 Wire·응답 증거와 descriptor 기본값·properties packing·공통 페이지·숨김 이미지 fallback을 제공합니다. [이미지 레코드의 Python/Go 비교와 독립 main](image/image-records.md)에 literal GET seed, concrete 옵션·부분 결과와 검색 순서를 설명합니다. [ImageRecord 상태·삭제 대기](image/image-record-waits.md)는 초기 seed 목표 상태의 HTTP 없는 반환과 마지막 관측·부분 결과, SDK가 소유하는 timeout·callback·404 계약을 제공합니다. [owned 태그 추가·삭제](image/image-record-tags.md)는 literal ID·ImageRecord와 concrete mutation 옵션을 받아 로컬 tags와 실제 ACK를 분리해 반환합니다.
 
 [Glance 이미지 수정](image/update.md)은 순서가 있는 concrete 패치와 속성 upsert, 값·삭제 구분 및 Python Resource 사용법 비교를 제공합니다.
 
