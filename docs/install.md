@@ -55,6 +55,8 @@ GOWORK=off go build -mod=readonly ./...
 
 ## 검증 상태
 
+2026-10-08에 source revision `2490e4813a564b5d8163f15091eff5448817398f`을 새 외부 module에 replace 없이 설치하고 위 설치 main과 [Keypair 목록·검색 main](../compute/keypairs-list-find.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·실제 버전 `v0.0.0-20261008020804-2490e4813a56`이며 module-cache Go source1,973개 SHA256 `bbb1c68d0a0a67e5a50a531247d85c0f13b71ca2b8ebf3d530ffbb3ffb3ef9b3`가 집중98그룹·전체42 package gate와 같습니다. 새3행12계약으로 현재 완료 수는224/3,362이며 기존528 reviews/catalog/source pins를 보존했습니다. 소비자-only local replace 예제 빌드와 이 원격 설치는 별개로 확인했습니다. 인증·실제 OpenStack/Python 호출·alpha tag 배포는 수행하지 않았습니다.
+
 2026-10-08에 source revision `40dbb0eaa8f97a19eb0c7aca417bc4251db955e9`을 새 외부 module에 replace 없이 설치하고 위 설치 main과 [Console token 조회 main](../compute/console-auth-token.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·실제 버전 `v0.0.0-20261008013006-40dbb0eaa8f9`이며 module-cache Go source1,968개 SHA256 `1b22fdecda0348eb93f1fc99c17b4a6caf4e79b1808eff1406d66dbadc901e31`가 집중12그룹·전체42 package gate와 같습니다. catalog/source pins/기존527 reviews를 보존한 새1행5계약으로 현재 API 완료 수는221/3,362입니다. SDK와 원격 소비자에 replace가 없고 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 2026-10-08에 최종 source revision `466f28d7f3f4a6f7f44d75cf9a4e4c1a96bea2f2`를 새 외부 module에 replace 없이 설치하고 위 설치 main과 [Console 자동 선택 main](../compute/console-selection.md)을 빌드했습니다. `GOWORK=off`, get/build exit0·실제 버전 `v0.0.0-20261008010620-466f28d7f3f4`이며 module-cache Go source1,965개 SHA256 `7543a1f9eaea5ab349f95f4bc6a9d3027137111e26ffc70acadc00d78f2bbc99`가 최종 전체42 package gate와 같습니다. 새 composition1개를 검토한 현재 API 완료 수는220/3,362입니다. SDK와 소비자에 replace가 없고 인증·OpenStack/Python 호출은 실행하지 않았습니다.

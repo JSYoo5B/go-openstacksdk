@@ -41393,6 +41393,153 @@
         "This token connection-information GET is classified as a core admin API: the official Nova policy documented on 2026-10-08 sets os_compute_api:os-console-auth-tokens to rule:context_is_admin. The earlier work-plan user classification is corrected. Server deployment policy overrides remain authoritative; this SDK adds no local role gate. End-user console creation is a separate policy and operation."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/keypairs",
+      "source_fingerprint": "6e0128e7d59e1aac2730cb997da5ff39c0a5362fe959b1e02e8fae39f771a04b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.ListRecords",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairListOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairListFilter",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairListFilters"
+      ],
+      "contracts": [
+        {
+          "behavior": "Wrapped and flat rows produce a nine-attribute source-shaped Resource: nested keypair fields override outer fields, canonical name overrides literal id including null/empty, logical id follows name, omitted type defaults to ssh and deleted uses response Boolean truthiness. Resource fields and headers are independent of the complete actual outer-row Wire, raw row Envelope and record headers, including precise extension numbers.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership"
+          ]
+        },
+        {
+          "behavior": "Semantic user_id/limit/marker go to the server while id/created_at/is_deleted/fingerprint/name/private_key/public_key/type filter the normalized Resource locally. Unknown attributes and wire deleted as a semantic key are ignored. Option maps/pointers/carriers are owned; list construction is lazy and each repeated iteration applies callbacks once to fresh state.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership"
+          ]
+        },
+        {
+          "behavior": "Advertised body links, keypairs_links, top-level next and HTTP Link continue the fixed collection. A filtered-out last row still supplies its normalized name as fallback marker, caller mutations do not change that marker, raw max_items precedes local filtering, single-page and break stop requests, and an empty page stops even with next. A first server-introduced positive limit does not activate marker fallback. Late403 retains already yielded results and actual HTTP evidence.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors",
+            "internal/rest/list_test.go:TestListDictionaryLinksAreExplicitAndGuarded"
+          ]
+        },
+        {
+          "behavior": "A selected Compute version is retained; otherwise finite Nova discovery selects at most2.10. Explicit empty overrides selection for versionless reads on a private client. Invalid controls/collisions/options and changed source fail before subsequent work; accepted page read/source faults remain ResponseError with actual body/header/status and cannot be replayed or mistaken for missing.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding"
+          ]
+        },
+        {
+          "behavior": "The plural keypairs envelope accepts an array or one object. Owned accepted204 still requires a list representation rather than silently becoming an empty native page; parsed or physical failures retain accepted response evidence.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership",
+            "api/compute_keypair_records_test.go:TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding",
+            "internal/rest/list_test.go:TestListOptionalReaderAndRepresentationsKeepDefaultPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-list-find.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "Concrete With-functions and iter.Seq2 replace Python kwargs and its generator. The owned Resource exposes the nine declared keypair Body attributes; computed Connection location and mutable Python Resource methods are not synthesized by this leaf API. Wire and raw row Envelope retain the actual response without normalized aliases/defaults.",
+        "Typed Limit/MaxItems are nonnegative with zero meaning omitted/unbounded; a present pagination limit must be one positive integer and marker one nonempty string. Raw queries override same typed queries; semantic query collisions with typed/raw inputs are rejected rather than silently overwriting them. Unknown semantic fields are discarded; explicit raw query extensions remain separate.",
+        "Operation controls use dedicated options. Arbitrary base_path, deprecated jmespath_filters and allow_unknown_params are explicitly unsupported instead of becoming wire filters. Continuations are guarded to the captured collection route and query; inconsistent/cyclic links fail. Dictionary links.next is an installed Go compatibility extension; the pinned source ordinary-next dictionary does not follow that form.",
+        "Nil operation microversion uses the captured selected version or the shared finite Nova discovery capped at2.10. Explicit empty deliberately performs versionless reads; no mutation of the original client or automatic upgrade to the newer keypair pagination version occurs. This does not reproduce KSA's entire discovery/cache/session system.",
+        "Source JSON fields remain passive raw values, while malformed object shapes, physical accepted faults and Go context/source errors are explicit. The native List/All results and single-page policy remain separate and unchanged.",
+        "Canonical deleted wins a conflicting is_deleted response field deterministically; the pinned Python body component may depend on insertion order when both wire and alias names are present."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/find_keypair",
+      "source_fingerprint": "c9ef6fc6036325f1b23bea367385806d87f30b907396736e75a8e4a90ab295b9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.FindKeypair",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairFindOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairFindUserID",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithKeypairFindIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find always attempts the escaped fixed member GET for accepted literal UTF-8 input and optional truthy owner. A successful member response returns its input-name/owner-seeded Resource with response fields overriding seed including null, while Wire and Envelope contain only actual response data. Opaque/malformed/empty accepted bodies retain the seed with nil Wire; valid nonobject/envelope failures retain a receipt beside the error.",
+          "tests": [
+            "api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback",
+            "resource/find_identity_response_id_test.go:TestCollectionFindIdentityPassiveIDsAreOnlyCompared"
+          ]
+        },
+        {
+          "behavior": "Only clean actual400/403/404 permits a full owned list fallback with the same owner, version, headers and live provider token; no name query hint is added. Passive numeric names do not equal a string identity. Unique matches consume the complete list, duplicate matches raise ErrAmbiguous, late list errors remain errors, default missing returns nil,nil and strict missing returns ErrNotFound.409/500 do not fall back.",
+          "tests": [
+            "api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback"
+          ]
+        },
+        {
+          "behavior": "Automatic ceiling2.10 selection occurs once across direct GET and fallback, and concrete options apply once for the whole find. Explicit empty preserves the original selected client while issuing both phases versionless with owned option pointers/maps/headers and final missing-policy precedence.",
+          "tests": [
+            "api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback",
+            "api/compute_keypair_find_test.go:TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Nil/invalid inputs, options, canceled context, outer guard and changed source fail before subsequent callbacks/HTTP. Accepted read/Close/source failures with nested404 are terminal and preserve the actual member receipt, or discovery evidence without fabricating a member result. Native retry source mutation cannot issue another member/fallback; live reauthentication preserves the fixed member and owner.",
+          "tests": [
+            "api/compute_keypair_find_test.go:TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-list-find.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "FindKeypair is an additive concrete-option API returning the owned KeypairRecord. Existing Find(resource.Ref), Get and their native KeyPair ABI retain their explicit lookup and strict native decode policies. Default missing is true without Python's deprecation warning.",
+        "Literal identity validation rejects empty/whitespace-only, invalid UTF-8, controls and exact '.' or '..' identities; reserved characters and internal spaces use escaped always-member GET through the audited direct-route hook. Passive response name/id values never choose another target.",
+        "The declared nine Body fields are projected without Python mutable Resource or computed Connection location. Accepted malformed/nonJSON body tolerance preserves a seeded Resource with nil Wire; physical failures and parsed invalid objects return an error with actual accepted receipt. Missing/duplicate failures use Go errors.Is sentinels. Invalid UTF-8 response bytes also use the Go tolerant opaque-body path; Python HTTP text decoding is not reproduced.",
+        "Microversion selection uses the shared finite Nova reader once. Explicit empty is a Go versionless override; source/session discovery caches and warning facilities are not replicated. Foreign-owner access still depends on deployment policy and its HTTP failures remain visible."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/keypairs.List",
+      "source_fingerprint": "0c3f8a575a5ce01bf6dad1a0ce34548b205007b3a745646a296c59d88e092e33",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.API.List",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithListOptions",
+        "github.com/JSYoo5B/gophercloudsdk/compute/v2/keypairs.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "The unchanged native List binding serializes typed UserID then applies raw wire overrides/extensions using its SDK-owned concrete builder. GET retains selected ResourceBase, live token, source header and both2.55 version headers, with no body. Raw limit is a request extension rather than a native ListOpts field.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI"
+          ]
+        },
+        {
+          "behavior": "Native nested keypair extraction preserves six string fields and ignores vendor fields; omitted/null type stays empty and null nested keypair yields its zero native model. SinglePageBase does not follow body or HTTP next links. The tested empty204 without JSON Content-Type is an empty native page;200/300 retain normal extraction and201 remains outside native pager codes.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI"
+          ]
+        },
+        {
+          "behavior": "Unexpected201 and403 preserve native actual/expected200,204,300 statuses, GET method, exact owner-bearing URL, response body/header. Invalid known string types preserve json.UnmarshalTypeError and stop before yielding partially decoded rows.",
+          "tests": [
+            "api/compute_keypair_records_test.go:TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/keypairs-list-find.md",
+        "compute/v2/keypairs/README.md"
+      ],
+      "differences": [
+        "The optional upstream ListOptsBuilder is replaced by concrete ListOption/WithListOptions plus a library-owned serializer, and the native pager/extractor are exposed as iter.Seq2. Native ListOpts, six-string KeyPair alias,200/204/300 pager acceptance and SinglePageBase behavior remain intact. Additive ListRecords implements the separately reviewed Python-style list instead of changing this native operation."
+      ],
+      "remaining": []
     }
   ]
 }

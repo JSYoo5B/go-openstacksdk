@@ -10,9 +10,15 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**진행 중 (2026-10-08): 핵심 user keypair 목록·찾기의 지원 판정과 원격 설치 검증.** `ListRecords`·`FindKeypair`와 native List 계약을 구현했고 집중 race98그룹·전체42 package `make check`·독립 main 빌드가 PASS했습니다. 기존91그룹·public testhelper·공통 필터/페이지네이션/find·fault wrapper를 재사용하고 새6 API 그룹97사례와 공통 reader 표10사례를 추가했습니다. 공통 reader `c50e9ce8`·literal member binding `a28c3e92`·목록 `48355084`·찾기 `e78609f7`은 작은 단위로 push 완료입니다. [Python/Go 사용법](../compute/keypairs-list-find.md)을 확인하고, 원격 설치와 마지막 판정 정합성을 검증한 뒤3개 매핑을 반영합니다. 현재 완료 집계221은 판정 대기 중인3개를 포함하지 않습니다.
+**진행 중 (2026-10-08): 다음 핵심 user 계약의 재사용 범위 검토.** keypair 목록·검색과 native List의3개 판정을 반영했습니다. 다음 후보는 `fetch_flavor_extra_specs`의 항상 직접 GET 계약이며 기존 inline-extra-specs shortcut과 구별해 공통 member reader·기존 fixture를 활용합니다. 새 keypair API로 cloud wrapper에서 닫을 수 있는 계약도 병렬로 조사합니다. 전체 목표와 서비스 순서는 유지합니다.
 
-**최신 완료 (2026-10-08): Compute console auth-token 조회, 전체220→221(+1)·핵심146→147/2,292·Nova22→23/333.** `Service.ValidateConsoleAuthToken`은 token을 고정 member로 조회하며 nullable7필드·location과 실제 Wire·receipt를 분리합니다. Cinder `MemberGet`을 공통화하고 공개 testhelper·기존 fault wrapper를 사용했습니다. [Python 비교·전체 main](../compute/console-auth-token.md), [검증 기록](sdk-support-ledger.md#compute-console-auth-token-조회-완료)에 유한 discovery·seed·nonJSON·Go 차이를 기록합니다.
+**최신 완료 (2026-10-08): 핵심 user keypair 목록·검색과 native List, 전체221→224(+3)·핵심147→150/2,292·Nova23→26/333.** `KeyPairs.ListRecords`는9필드 Resource와 실제 행·semantic 필터·전체 페이지를 제공하고 `FindKeypair`는 직접 GET 이후 clean400/403/404에서 owner를 유지해 전체 목록을 검색합니다. native List의6string·SinglePageBase·200/204/300 계약은 별도로 검토했습니다. 새 HTTP 동작2개와 native 선언1개의 완료이며 기존 Create/Get/Delete를 재집계하지 않습니다. [Python 비교·전체 main](../compute/keypairs-list-find.md), [검증 기록](sdk-support-ledger.md#compute-keypair-목록검색과-native-list-완료)을 함께 갱신했습니다.
+
+공통 reader `c50e9ce8`·member binding `a28c3e92`·목록 `48355084`·검색 `e78609f7`·문서 `2490e481`을 작은 단위로 push했습니다. 기존 public testhelper·서버/오류 fixture·projector·필터/페이징/find를 재사용하고 집중 race98그룹 중91그룹은 기존 검증입니다. 새6 API 그룹97사례와 공통 표10사례, 전체42 test package gate·재생성 Go drift0·정확한 독립 main build가 PASS했습니다. Go source1,973개 SHA256 `bbb1c68d0a0a67e5a50a531247d85c0f13b71ca2b8ebf3d530ffbb3ffb3ef9b3`는 집중·전체 gate와 원격 module cache에서 같습니다. 정확한 revision `2490e4813a564b5d8163f15091eff5448817398f`의 replace 없는 원격 설치·같은 main/설치 main 빌드도 PASS이고 버전은 `v0.0.0-20261008020804-2490e4813a56`입니다. catalog/source pins·기존528 reviews를 보존하고 새3행12계약을 추가했습니다. 같은 Go source의 문서·판정 갱신에는 전체 검사를 반복하지 않습니다.
+
+own-user는 핵심 user 단계로 분류하며 다른 owner의 권한은 [Nova 기본 index/show 정책](https://docs.openstack.org/nova/latest/configuration/policy.html)과 배포별 설정이 판단합니다. 핵심150개는 user/admin 서비스 합산이며1단계 완료 수로 표시하지 않습니다. 실제 OpenStack/Python 호출·alpha tag 배포는 포함하지 않으며 전체 Resource/session 목표는 active입니다.
+
+**앞선 완료 (2026-10-08): Compute console auth-token 조회, 전체220→221(+1)·핵심146→147/2,292·Nova22→23/333.** `Service.ValidateConsoleAuthToken`은 token을 고정 member로 조회하며 nullable7필드·location과 실제 Wire·receipt를 분리합니다. Cinder `MemberGet`을 공통화하고 공개 testhelper·기존 fault wrapper를 사용했습니다. [Python 비교·전체 main](../compute/console-auth-token.md), [검증 기록](sdk-support-ledger.md#compute-console-auth-token-조회-완료)에 유한 discovery·seed·nonJSON·Go 차이를 기록합니다.
 
 공통 `e742005c`·구현/테스트 `8e9a7827`·비교 문서 `40dbb0ea`를 작은 단위로 push했습니다. 새3그룹42사례와 기존9개 회귀 그룹을 합친 집중 race12그룹·전체42 test package `make check`·정확한 main 빌드·원격 replace 없는 설치/빌드가 PASS입니다. Go source1,968개 SHA256 `1b22fdecda0348eb93f1fc99c17b4a6caf4e79b1808eff1406d66dbadc901e31`는 집중·전체 gate와 원격 module cache에서 같습니다. 재생성의 기존 Go drift0이며 catalog·source pins·기존527 reviews를 보존하고1행5계약만 추가했습니다.
 
@@ -56,17 +62,17 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
 
-**현재 핵심 user 단위:** keypair 목록·찾기의 최종 검토·원격 설치·3개 판정을 닫습니다. 다음 후보는 `fetch_flavor_extra_specs`의 항상 직접 GET 계약이며, 기존 flavor의 inline-extra-specs shortcut과 구별해 공통 reader·기존 테스트의 재사용 범위를 조사했습니다. `find_flavor`의 inherited pager/query·cloud keypair 계약도 계속 추적합니다. 전체 Resource/session 목표와 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
+**다음 핵심 user 단위:** `fetch_flavor_extra_specs`의 항상 직접 GET 계약을 기존 member reader와 연결하고, 완료한 keypair 목록·검색·생성·삭제를 사용하는 cloud wrapper의 추가 계약을 조사합니다. `find_flavor`의 inherited pager/query·전체 Resource/session도 계속 추적합니다. 전체 목표와 핵심 user → 핵심 admin → 후속 user → 후속 admin 순서는 유지합니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 221 (6.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 224 (6.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,140 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 528 | 아직 개별 기록 없는 선언 2,834 |
-| 기록한 부분·전체 계약 | 3,300 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,137 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 531 | 아직 개별 기록 없는 선언 2,831 |
+| 기록한 부분·전체 계약 | 3,312 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -92,6 +98,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Keypair 생성·legacy console 및 native Create | 216 → 219 (+3) | existing public fixture 확장·집중8그룹·전체41 package check·독립/원격 main build·생성 Go drift0 | 구현 `df34b6f6`·`23df3da5`·문서 `0851b89c` push 완료 |
 | Compute console 자동 선택 | 219 → 220 (+1) | 공통 Cinder discovery 추출·기존12그룹 재사용, composition49사례·집중16그룹·전체42 package check·생성 Go drift0 | 공통 `537b6531`·구현 `963fb1bc`·eligibility `2ff3f866` push 완료 |
 | Compute console auth-token 조회 | 220 → 221 (+1) | 공통 member GET·public fixture·기존9그룹 재사용, 집중12그룹·전체42 package gate·독립/원격 main build·생성 Go drift0 | `e742005c`·`8e9a7827`·`40dbb0ea` push 완료; 기본 정책상 핵심 admin 분류 |
+| Compute keypair 목록·검색 및 native List | 221 → 224 (+3) | 공통 reader/projector·public fixture·기존91그룹 재사용, 집중98그룹·전체42 package gate·독립/원격 main build·Go drift0 | `c50e9ce8`·`a28c3e92`·`48355084`·`e78609f7`·`2490e481` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
 
@@ -104,19 +111,19 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 147 / 2,292 | 6.4% | 207 | 1,937 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 150 / 2,292 | 6.5% | 207 | 1,934 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 221 / 3,362 | 6.6% | 306 | 2,834 | 1 |
+| 전체 | 224 / 3,362 | 6.7% | 306 | 2,831 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
-| Compute / Nova | 23 / 333 | 21 | 289 | 0 |
+| Compute / Nova | 26 / 333 | 21 | 286 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 7 / 120 | 72 | 41 | 0 |
@@ -267,7 +274,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 | Compute keypair 생성·legacy console URL 및 native Create | nullable 속성·ID/name 별칭·view 기본값·6개 legacy action·native ABI 검토 완료 | **CreateKeypair·ConsoleURL 완료** | public fixture6그룹·shared bool/clone2그룹·전체41 package gate PASS | Python 비교·독립/원격 main build PASS | **3개 go_mapping·전체219/3,362** | `df34b6f6`·`23df3da5`·`0851b89c` push 완료. 기존523 reviews/catalog 보존·12계약 추가 |
 | Compute create_console의 modern/legacy 자동 선택 | endpoint 범위·selected tuple·기본 null·dict·status/self-link 조사·감사 완료 | **Service.CreateConsole·공통 discovery 완료** | public fixture 재사용·기존12그룹·집중16그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체220/3,362** | `537b6531`·`963fb1bc`·`2ff3f866` push 완료. catalog/기존524행 보존·direct 설명2행 교정·새6계약 |
 | Compute console auth-token 조회 | 고정 Resource.fetch·selected/max·location 순서·Nova 기본 권한 확인 완료 | **SDK 소유 조회·Cinder MemberGet 공통화 완료** | 기존9그룹·새3그룹42사례·집중12그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체221/3,362** | **2단계핵심 admin으로 user 분류 교정.** 공통 `e742005c`·구현/테스트 `8e9a7827`·문서 `40dbb0ea` push 완료; 다음은 핵심 user |
-| Compute keypair 목록·찾기 및 native List | 고정 source·own-user/foreign-owner·native 계약 검토 완료 | **SDK 소유 ListRecords·FindKeypair·공통 reader/GET binding 완료** | 기존91그룹 재사용·집중98그룹·전체42 package gate PASS | Python 비교·독립 main build PASS | 3개 go_mapping 후보, 최종 판정 대기 | 공통 `c50e9ce8`·`a28c3e92`·목록 `48355084`·검색 `e78609f7` push 완료. 원격 설치·판정/집계 정합성을 닫는 중; [가이드](../compute/keypairs-list-find.md) |
+| Compute keypair 목록·찾기 및 native List | 고정 source·own-user/foreign-owner·native 계약 검토 완료 | **SDK 소유 ListRecords·FindKeypair·공통 reader/GET binding 완료** | 기존91그룹 재사용·집중98그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping3행·전체224/3,362** | 공통 `c50e9ce8`·`a28c3e92`·목록 `48355084`·검색 `e78609f7`·문서 `2490e481` push 완료. 기존528 reviews/catalog 보존·새12계약; [가이드](../compute/keypairs-list-find.md) |
 | 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
 | Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
 | Glance·Swift Task 업로드 연계 | 선택 분기·Swift 의존 확인, 세부 계약 조사 대기 | 상위 연계 미완료 | 연계 계약 검증 대기 | 기존 이미지 문서에 남은 범위 기록 | 미완료, 지원 승격 없음 | 2단계 후보. Swift 기본 연산은 1단계에서 준비하고 Task 권한·대기·정리·부분 실패 계약을 함께 조사 |
