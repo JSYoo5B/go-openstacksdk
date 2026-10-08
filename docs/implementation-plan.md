@@ -18,7 +18,7 @@
 
 정확한 문서·판정 revision `0647ce86adc0e5f0cdbfbe8f3dc7c100c7655433`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008190535-0647ce86adc0`·get/build exit0이며 member/설치 main **2개**를 빌드했습니다. 원격 Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`가 최종 집중/전체 gate의 소스와 같고, 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
-**다음 작업:** Glance `get_import_info`·기본 `stores` owned view를 핵심 user 후보로 검토합니다. 고정 server controller의 두 기본 경로는 별도 admin policy를 호출하지 않지만 `stores(details=True)`는 admin 또는 service role·project scope를 요구하므로 핵심 admin에 둡니다. 단일 stores 선언은 상세 분기까지 닫기 전 unresolved를 유지하며 기존 getter/schema를 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)를 기록했고 전체 API 목표는 active입니다.
+**진행 중:** Glance `get_import_info`·기본 `stores`의 owned view·Source 기본값·페이지 순회 구현입니다. 고정 server controller의 두 기본 경로는 별도 admin policy를 호출하지 않지만 `stores(details=True)`는 admin 또는 service role·project scope를 요구하므로 핵심 admin에 둡니다. 단일 stores 선언은 상세 분기까지 닫기 전 unresolved를 유지하며 기존 getter/schema를 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)를 기록했고 전체 API 목표는 active입니다.
 
 **직전 API 완료 (2026-10-09): 핵심 user Glance object·namespace owned 목록2개, 전체265→267(+2)·핵심191→193/2,292·Glance29→31/120.** `ListRecords/AllRecords`가 object9필드·namespace13필드의 declared Resource, 실제 Wire/page receipt, 기본값·descriptor 변환·현재 location·공통 페이지 순회와 부분 결과를 제공합니다. namespace의 nil/0 limit 구분과 정확한 `/v2/` collection alias를 추가했고, 공통 응답 읽기 직후 guard를 검사하여 Close 복원 전에 실패를 보존합니다. 기존 typed List/All의 strict200 계약은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-object-namespace-record-lists.md), [검증 기록](sdk-support-ledger.md#glance-objectnamespace-owned-목록-완료)을 추가했습니다.
 
@@ -359,6 +359,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance import 정보·기본 store owned records | pinned Source·server 기본/detail 정책 검토 완료 | Import4·Store6 view와 shared reader/pager 구현 중; 상세는 admin 후순위 | 기존 serviceinfo/REST/Connection fixture 재사용하여 테스트 작성 중 | Python 비교·standalone main 작성 중 | 두 선언 unresolved 유지; 전체269/3,362 | user 기본 목록 진행; 상세 미완료 stores 선언 승격하지 않음 |
 | Glance member owned 목록·검색 | 고정 Source·reader 기본 정책·alias/seed/GET fallback 검토 완료 | **owned 9필드 List/All·GET-first Find 완료** | 새16그룹180·집중206그룹893·Cinder 회귀2사례·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체269/3,362** | 구현5커밋·문서de9f98fa·판정0647ce86 push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |
 | Glance object·namespace owned 목록 | pinned descriptor·public kwargs·generic pagination 검토 완료 | **두 leaf의 owned Record/ListRecords 완료** | 새34그룹272사례·집중176그룹2,194·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체267/3,362** | 코드/테스트7개 commit 49869890~760f546a·문서/판정73f54853 push 완료; 원격 main2개 build·Go SHA/라이선스13개 일치 |
 | Glance object owned 생성·수정·개별/전체 삭제 | 고정 Source7 Body·fresh update·Resource reuse·bulk delete 초기 검토; 기본 정책 admin | 핵심 admin 순서 대기 | 기존 property/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 네 선언 unresolved 유지 | 핵심 user 완료 뒤 구현 |
