@@ -22,7 +22,9 @@ Go source2,089개 SHA256 `0bbe5d809249c129a9b4355dcdcbb92e7519bd3c2b8f3a77655b0f
 
 **`python:image/v2/update_image`는 unresolved 그대로입니다.** public Proxy·ComponentManager dirty 결정·wire alias/properties flatten·id route·original/current diff·response overlay/clean·same-instance·Accept빈값은 후속 owned 구현이 필요합니다. Source 허용 jsonpatch 범위는 floating이므로 특정 nested/array/move byte 결과까지 SDK revision만으로 단정하지 않습니다. `/private/tmp/go-openstacksdk-image-owned-update-source-audit.json`의8개 파일 SHA·정확 AST span·64canonical/63wire 매핑·남은 검증을 기준으로 구현하며 실제 Python/jsonpatch/cloud 실행은 하지 않았습니다. SDK-R1/C1/S1 전체 목표도 계속 추적합니다.
 
-기반/회귀 `2f5b87a2`·native 테스트 `b55ed8aa`·문서 `3d901393`를 작은 단위로 commit/push했습니다. 정확한 판정 revision의 원격 설치·main2개·Go SHA·라이선스14개 일치를 이어 확인합니다. 이 완료는 생성 함수만으로 전체 SDK parity를 주장하는 판정이 아니며 전체 목표는 active입니다.
+기반/회귀 `2f5b87a2`·native 테스트 `b55ed8aa`·문서 `3d901393`를 작은 단위로 commit/push했습니다. 판정 `862eef0b`도 commit/push하고 정확한 revision의 원격 설치·main2개·Go SHA·라이선스14개 일치를 확인했습니다. 이 완료는 생성 함수만으로 전체 SDK parity를 주장하는 판정이 아니며 전체 목표는 active입니다.
+
+정확한 문서·판정 revision `862eef0b0d0b0ec08a072ac8937aae5b8916b776`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008220600-862eef0b0d0b`·get/build exit0이며 native 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,089개 SHA256 `0bbe5d809249c129a9b4355dcdcbb92e7519bd3c2b8f3a77655b0f67df0bbfa3`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-update-raw-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다.
 
 ## Glance ImageRecord 태그 추가·삭제 완료
 
