@@ -24,22 +24,7 @@ func (s *NamespaceScope) GetRecord(ctx context.Context, input RecordRequest, opt
 		return fail(err)
 	}
 	namespace := s.namespace
-	outer := rest.OperationGuard(ctx)
-	var observed error
-	check := func(checkCtx context.Context) error {
-		if observed != nil {
-			return observed
-		}
-		var parent, binding error
-		if outer != nil {
-			parent = outer(checkCtx)
-		}
-		if s.namespace != namespace {
-			binding = invalid("property namespace changed")
-		}
-		observed = errors.Join(p.check(checkCtx), parent, binding)
-		return observed
-	}
+	check := p.operationGuard(ctx)
 	opctx := rest.WithOperationGuard(ctx, check)
 	if err := check(opctx); err != nil {
 		return fail(err)

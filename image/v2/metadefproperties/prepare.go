@@ -50,6 +50,28 @@ func (s *NamespaceScope) capture(ctx context.Context, name *string) (*preparedSo
 	return &preparedSource{scope: s, client: &client}, nil
 }
 
+// operationGuard freezes the namespace and keeps any observed source or outer
+// guard failure sticky across owned record fetch/list physical boundaries.
+func (p *preparedSource) operationGuard(ctx context.Context) func(context.Context) error {
+	namespace := p.scope.namespace
+	outer := rest.OperationGuard(ctx)
+	var observed error
+	return func(checkCtx context.Context) error {
+		if observed != nil {
+			return observed
+		}
+		var parent, binding error
+		if outer != nil {
+			parent = outer(checkCtx)
+		}
+		if p.scope.namespace != namespace {
+			binding = invalid("property namespace changed")
+		}
+		observed = errors.Join(p.check(checkCtx), parent, binding)
+		return observed
+	}
+}
+
 func (p *preparedSource) check(ctx context.Context) error { return p.scope.check(ctx) }
 func (p *preparedSource) finish(ctx context.Context, headers map[string]string, err error) error {
 	if checkErr := p.check(ctx); checkErr != nil {

@@ -14,9 +14,11 @@ import (
 
 // Record separates the Source-shaped property from the actual response.
 // Namespace is captured request provenance. Resource, Wire, Envelope and
-// Header own their bytes; Wire can be nil when successful JSON decoding was
+// Header own their bytes. Key is list-only dictionary provenance, never route
+// identity; it is nil on GetRecord. Wire can be nil when successful JSON decoding was
 // tolerated and the declared Resource is based on the request seed.
 type Record struct {
+	Key            *string `json:"-"`
 	Namespace      string
 	Resource, Wire *resource.RawResource
 	Envelope       json.RawMessage
