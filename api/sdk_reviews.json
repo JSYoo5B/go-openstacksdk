@@ -46399,6 +46399,40 @@
         "The SDK exposes the native pager as iter.Seq2 and keeps native query construction, including the int64 size filter omission; callers can send size_min/size_max with WithListQuery. Iteration errors are native and only option preparation errors receive List/images context."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/images.Create",
+      "source_fingerprint": "a01d9fa15c5b7a665073f156726b9902003089b54c1edbdc7abcf296c92a7c3d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Generated API.Create serializes CreateOpts with the pinned BuildRequestBody, omitting zero values while sending explicit pointer false, then copies Properties over declared keys and appends non-colliding WithCreateField extension JSON with exact raw bytes before one POST to native images with JSON headers and service MoreHeaders.",
+          "tests": [
+            "image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection"
+          ]
+        },
+        {
+          "behavior": "A 201 response uses the shared Extract header merge and Image.UnmarshalJSON projection. Missing required name, nil options and extensions colliding with core or existing body keys fail before HTTP; other statuses keep native ErrUnexpectedResponseCode with Expected [201] under Create/images context without an owned receipt.",
+          "tests": [
+            "image/v2/images/create_contracts_test.go:TestNativeImageCreateBodyPropertiesExtensionsAndProjection",
+            "image/v2/images/create_contracts_test.go:TestNativeImageCreatePreflightAndStrictStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/images/create.md",
+        "image/v2/images/README.md"
+      ],
+      "differences": [
+        "This declaration maps Gophercloud native metadata Create only; it is not Python create_image parity, which CreateImageRecord and CreateCloudImageRecord cover.",
+        "WithCreateField is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
