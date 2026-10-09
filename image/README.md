@@ -162,6 +162,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 `service.GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`는 Image의65필드 declared Resource와 실제 Wire를 분리하고 descriptor 변환·properties packing·공통 pager·ID/이름·숨김 이미지 검색을 처리합니다. [레코드의 Python/Go 비교와 독립 main](image-records.md)에 seed·기본값·concrete 옵션·부분 결과와 기존 typed API의 차이를 설명합니다.
 
+`service.AllCloudImageRecords/SearchImageRecords/GetCloudImageRecord/GetImageRecordByID`는 Cloud 계층의 `list_images/search_images/get_image/get_image_by_id`에 대응합니다. 기본 목록의 deleted status 제외·`show_all`의 member query, 이름 glob과 dictionary/JMESPath 선택, `get_image`의 Find 경로와 필터 경로를 SDK가 처리합니다. [Cloud 이미지 조회의 Python/Go 비교와 독립 main](image-record-cloud.md)에 함수별 concrete 옵션과 부분 결과를 설명합니다.
+
 `service.WaitForImageRecordStatus/WaitForImageRecordDelete`는 owned ImageRecord를 받아 초기 상태·fresh GET·시간 예산·삭제404의 마지막 관측을 처리합니다. [레코드 대기의 Python/Go 비교와 독립 main](image-record-waits.md)에 concrete duration/header/attribute/callback 옵션, nullable 상태·부분 결과와 기존 typed 대기의 차이를 설명합니다.
 
 `service.UpdateImageRecord`와 `conn.UpdateImageRecord`는 ID 또는 SDK가 반환한 ImageRecord에 변경 속성을 적용해 same-value 요청을 생략하고 JSON Patch를 자동 생성합니다. [레코드 수정의 Python/Go 비교와 독립 main](image-record-update.md)에 raw baseline·properties 교체·concrete 옵션·응답과 다음 수정의 관계를 설명합니다.
