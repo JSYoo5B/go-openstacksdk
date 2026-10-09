@@ -4,13 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 목록·검색·조회](#glance-cloud-이미지-목록검색조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 exclude·이름·ID 조회](#glance-cloud-이미지-exclude이름id-조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는296입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는299입니다.
+
+## Glance Cloud 이미지 exclude·이름·ID 조회 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 exclude helper3개, 전체296→299(+3)·핵심222→225/2,292·Glance60→63/120.** `Service.GetImageRecordExclude`·`GetImageRecordName`·`GetImageRecordID`가 Cloud의 `get_image_exclude`·`get_image_name`·`get_image_id`에 대응합니다. 세 함수는 앞 단위의 필터 없는 `search_images` inventory를 그대로 사용하고 행 순서대로 Python `exclude not in image.name`을 평가합니다. [Python/Go 비교](../image/image-record-cloud.md#exclude-선택과-이름id-반환)에 반환 값과 오류 경계를 설명합니다.
+
+exclude 멤버십은 name이 문자열이면 부분 문자열, 배열이면 문자열 원소 동등 비교, 객체면 key 멤버십입니다. 도달한 null·숫자·bool name은 Python TypeError에 대응하는 입력 오류이며 그 행의 목록 응답 증거와 Inventory를 보존합니다. 선택 뒤의 행은 검사하지 않습니다. 결과 Value는 각각 선택 행의 declared view, raw name, raw id이며 선택된 null name은 결과 없음과 구별합니다.
+
+새 집중 테스트2그룹15사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새3행·12계약을 추가해 reviews559·contracts3,766·go_mapping299·catalog unresolved3,062입니다. 공개 API `0a4df3f5`·테스트 `6f4d80ed`·가이드 `e38bedc2`를 작은 commit으로 main에 push했습니다. `wait_for_image`·Cloud `delete_image`·`download_image`·`create_image`·`update_image_properties`와 공통 SDK-R1/C1/S1은 계속 추적합니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance Cloud 이미지 목록·검색·조회 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 조회 helper4개, 전체292→296(+4)·핵심218→222/2,292·Glance56→60/120.** `Service.AllCloudImageRecords`·`SearchImageRecords`·`GetCloudImageRecord`·`GetImageRecordByID`가 고정 Cloud의 `list_images`·`search_images`·`get_image`·`get_image_by_id`에 대응합니다. 기존 owned ImageRecord 목록·Find·literal Get 엔진과 Connection location, 공통 `cloudfilter.Select`·`First`를 재사용하며 별도 pager나 HTTP 엔진을 추가하지 않았습니다. 기본 정책상 이미지 조회·목록은 project reader 범위이므로 [권한 근거](glance-policy-priorities.md#이미지-조회목록검색의-기본-정책)에 따라 핵심 user에 배치합니다. [Python/Go 비교·독립 main](../image/image-record-cloud.md)에 함수별 concrete 옵션과 부분 결과를 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 조회 helper4개, 전체292→296(+4)·핵심218→222/2,292·Glance56→60/120.** `Service.AllCloudImageRecords`·`SearchImageRecords`·`GetCloudImageRecord`·`GetImageRecordByID`가 고정 Cloud의 `list_images`·`search_images`·`get_image`·`get_image_by_id`에 대응합니다. 기존 owned ImageRecord 목록·Find·literal Get 엔진과 Connection location, 공통 `cloudfilter.Select`·`First`를 재사용하며 별도 pager나 HTTP 엔진을 추가하지 않았습니다. 기본 정책상 이미지 조회·목록은 project reader 범위이므로 [권한 근거](glance-policy-priorities.md#이미지-조회목록검색의-기본-정책)에 따라 핵심 user에 배치합니다. [Python/Go 비교·독립 main](../image/image-record-cloud.md)에 함수별 concrete 옵션과 부분 결과를 설명합니다.
 
 `list_images`는 기본 목록 전체를 eager 수집하고 Python `status.lower()`가 `deleted`인 행을 제외합니다. `show_all`은 `filter_deleted`를 끄고 `member_status=all`만 추가합니다. status 검사는 필터가 켜졌을 때만 수행하며 문자열이 아니면 해당 목록 응답 증거와 함께 실패하고 소비한 Inventory를 보존합니다. `search_images`는 인자 없는 `list_images`를 끝낸 뒤 이름/ID exact-or-fnmatch와 dictionary 또는 JMESPath 선택을 적용합니다. dictionary는 Image의 선언65필드와 location을 검사하므로 선언된 null 필드는 일치할 수 있고 미선언 최상위 key는 입력 오류입니다.
 

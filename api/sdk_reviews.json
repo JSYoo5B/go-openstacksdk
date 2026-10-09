@@ -45921,6 +45921,147 @@
         "Go accepts a literal string ID only and rejects blank, dot-segment and control identities before HTTP; it does not accept a Resource seed or Attributes like the Proxy GetImageRecord request."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/get_image_exclude",
+      "source_fingerprint": "f21b30f77ca70149ed03bff8b0d1fc9d732cd399dedad94f78ff24485f5ac5e7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordExclude",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues",
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions"
+          ]
+        },
+        {
+          "behavior": "Exclude membership follows Python `in` on the raw name: substring for strings, string element equality for lists and key membership for dictionaries. A reached null, number or bool name fails with the actual list-page ResponseError and retained Inventory, while unreached rows are not inspected. Absent selection returns nil Image and Value with the consumed Inventory.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        },
+        {
+          "behavior": "Filters, show_all, filter_deleted and invalid UTF-8 exclude fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeArgumentsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Value is the selected row's declared Resource view, including Connection location.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns a connected mutable Image Resource or its raw attribute; Go returns an owned CloudImageRecordResult whose Value is the Source return value and whose Image keeps actual Wire/Envelope/header/status evidence. No Resource identity, adapter cache or session parity is claimed.",
+        "The owned profile requires paired Unicode JSON name strings for exclude membership, while Python str also admits lone surrogates. Headers are a Go extension for every request; filters and list controls are absent from the Source signature and fail before HTTP."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/get_image_name",
+      "source_fingerprint": "01857e5246a72eccad2d74efd6e90b51e0736354f0aed411483911ecfd10e46c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues",
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions"
+          ]
+        },
+        {
+          "behavior": "Exclude membership follows Python `in` on the raw name: substring for strings, string element equality for lists and key membership for dictionaries. A reached null, number or bool name fails with the actual list-page ResponseError and retained Inventory, while unreached rows are not inspected. Absent selection returns nil Image and Value with the consumed Inventory.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        },
+        {
+          "behavior": "Filters, show_all, filter_deleted and invalid UTF-8 exclude fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeArgumentsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Value is the selected row's raw name JSON; a selected null or list name remains present and distinct from no selection.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns a connected mutable Image Resource or its raw attribute; Go returns an owned CloudImageRecordResult whose Value is the Source return value and whose Image keeps actual Wire/Envelope/header/status evidence. No Resource identity, adapter cache or session parity is claimed.",
+        "The owned profile requires paired Unicode JSON name strings for exclude membership, while Python str also admits lone surrogates. Headers are a Go extension for every request; filters and list controls are absent from the Source signature and fail before HTTP."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/get_image_id",
+      "source_fingerprint": "25dee17b45f709ca292e550226606e1d7676e154eb956901ed1497e377514dc3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordID",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "The helper completes the default filter-free search_images inventory first, so deleted rows are never candidates and an empty identifier selects every row. An empty exclude returns the first selected row; otherwise rows are visited in order and the first whose name does not contain exclude is selected without inspecting later rows.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues",
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions"
+          ]
+        },
+        {
+          "behavior": "Exclude membership follows Python `in` on the raw name: substring for strings, string element equality for lists and key membership for dictionaries. A reached null, number or bool name fails with the actual list-page ResponseError and retained Inventory, while unreached rows are not inspected. Absent selection returns nil Image and Value with the consumed Inventory.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        },
+        {
+          "behavior": "Filters, show_all, filter_deleted and invalid UTF-8 exclude fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeArgumentsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Value is the selected row's raw id JSON; the identifier phase matches numeric IDs by their string representation.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordExcludeMembershipOrderAndValues"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns a connected mutable Image Resource or its raw attribute; Go returns an owned CloudImageRecordResult whose Value is the Source return value and whose Image keeps actual Wire/Envelope/header/status evidence. No Resource identity, adapter cache or session parity is claimed.",
+        "The owned profile requires paired Unicode JSON name strings for exclude membership, while Python str also admits lone surrogates. Headers are a Go extension for every request; filters and list controls are absent from the Source signature and fail before HTTP."
+      ],
+      "remaining": []
     }
   ]
 }
