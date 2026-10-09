@@ -16,8 +16,9 @@ type ImageTagResult struct {
 	StatusCode int
 }
 
-// ImageActionResult retains an actual 204 acknowledgement for a compiled image
-// action. It does not establish the image's fetched or eventual status.
+// ImageActionResult retains an opaque acknowledgement for a compiled image
+// action. DeactivateImage/ReactivateImage require actual204; the owned Record
+// methods accept actual200..399. It does not establish an eventual image status.
 type ImageActionResult struct {
 	ImageID    string
 	Action     string
