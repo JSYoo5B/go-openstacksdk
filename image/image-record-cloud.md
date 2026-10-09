@@ -1,6 +1,6 @@
 # Cloud 이미지 목록·검색·조회: Python과 Go
 
-`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID`는 같은 검색 결과를 쓰는 `get_image_exclude`, `get_image_name`, `get_image_id`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
+`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID`는 같은 검색 결과를 쓰는 `get_image_exclude`, `get_image_name`, `get_image_id`에, `WaitForCloudImageRecord`는 `wait_for_image`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
 
 | 고정 openstacksdk | Go | 실제 기본값과 순서 |
 |---|---|---|
@@ -11,6 +11,7 @@
 | `conn.get_image_exclude(name_or_id, exclude)` | `service.GetImageRecordExclude(ctx, nameOrID, exclude, options...)` | `search_images(name_or_id)` 순서대로 name에 exclude가 없는 첫 행 |
 | `conn.get_image_name(image_id, exclude=None)` | `service.GetImageRecordName(ctx, imageID, exclude, options...)` | 위 선택 행의 raw `name` |
 | `conn.get_image_id(image_name, exclude=None)` | `service.GetImageRecordID(ctx, imageName, exclude, options...)` | 위 선택 행의 raw `id` |
+| `conn.wait_for_image(image, timeout=3600)` | `service.WaitForCloudImageRecord(ctx, record, options...)` | 2초 간격으로 Proxy find 반복; 정확한 `active` 성공, 정확한 `error` 실패 |
 
 `show_all=True`이면 Source가 `filter_deleted`를 False로 덮어쓴 뒤 v2 query `member_status=all`을 추가합니다. Go Service는 Glance v2 전용이므로 `supports_version(image, '2')` 분기는 항상 v2 경로입니다. `search_images`와 `get_image`의 검색 경로는 `list_images()`를 인자 없이 호출하므로 항상 deleted 필터를 적용하고 `member_status`를 보내지 않습니다. 이름이나 Cloud 필터는 목록 query나 Proxy의 Body 필터로 먼저 보내지 않습니다.
 
@@ -174,8 +175,16 @@ deleted 필터가 켜져 있으면 Source의 `image.status.lower()`처럼 status
 
 결과는 `CloudImageRecordResult`입니다. 선택한 행이 없으면 Image와 Value가 nil이며 Python의 None에 해당합니다. `GetImageRecordExclude`의 Value는 선택 행의 declared view이고 `GetImageRecordName`과 `GetImageRecordID`의 Value는 그 행의 raw `name`, `id` JSON입니다. Python은 None name과 결과 없음을 구별하지 못하지만 Go는 선택된 null name을 Value `null`과 non-nil Image로 구별합니다. 식별자 단계는 숫자 ID도 문자열 표현으로 비교합니다.
 
+## 이미지 대기
+
+`WaitForCloudImageRecord`는 전달한 record의 문자열 `id`만 읽습니다. record에 이미 기록된 status는 사용하지 않고, 반복마다 `get_image(image_id)`와 같은 Proxy find 경로(ignore_missing true)를 호출합니다. 찾지 못하면 계속 기다리고, status가 정확히 `"active"`이면 그 record를 반환하며 정확히 `"error"`이면 `resource.FailedStateError`로 실패합니다. 비교는 Python `==`이므로 대소문자가 다른 값, null, 숫자 status는 계속 대기합니다. 이 점은 소문자 비교를 쓰는 `WaitForImageRecordStatus`와 다릅니다. find 자체의 오류는 즉시 반환합니다.
+
+시간 정책은 `iterate_timeout`을 따릅니다. 기본 timeout은 3600초이고 `WithImageRecordCloudWaitUnlimited`가 Python None입니다. 각 조회 전에 deadline을 확인하므로 0이나 음수 timeout은 HTTP 없이 `context.DeadlineExceeded`를 감싼 오류입니다. 진행 중인 조회는 deadline으로 취소하지 않으며 조회 뒤 간격 전체를 기다립니다. 기본 간격은 2초이고 `WithImageRecordCloudWaitPollInterval`은 Go 확장이며 양수여야 합니다. caller context 취소는 대기 중에도 즉시 반영합니다.
+
+결과 `ImageRecordCloudWaitResult`의 Image는 성공한 active record이고 Last는 마지막으로 찾은 record, Lookups는 수행한 조회 수입니다. timeout, error 상태, 취소는 Last의 실제 응답 증거를 오류에 붙이고 결과를 함께 반환합니다. Python의 timeout 메시지 문자열과 SDKException 계층은 Go 오류 타입으로 대체합니다.
+
 ## 남은 범위와 근거
 
-Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `wait_for_image`, `delete_image`, `download_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
+Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `delete_image`, `download_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
 
-고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166), [get_image_exclude·get_image_name·get_image_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L221-L246)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
+고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166), [get_image_exclude·get_image_name·get_image_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L221-L246), [wait_for_image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L248-L263), [iterate_timeout](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/utils.py#L53-L101)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
