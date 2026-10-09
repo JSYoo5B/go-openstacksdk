@@ -205,6 +205,13 @@ func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte,
 	return nil
 }
 
+// ValidateUnreadResponseRequest shares the JSON engine's request/response
+// ownership check with binary GET workflows. Native retry hooks may change
+// ordinary headers, but cannot add a body, decode JSON or close a caller stream.
+func ValidateUnreadResponseRequest(options *gophercloud.RequestOpts) error {
+	return responseRequestOwnership(options, nil, nil, nil)
+}
+
 // Only headers supplied by the SDK operation are fixed. Native service/version
 // headers and the caller's unrelated retry headers retain their existing policy.
 func ownedRequestHeaders(actual, expected map[string]string, absent []string) bool {
