@@ -46617,6 +46617,79 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/imagedata.Upload",
+      "source_fingerprint": "8b2ffa99d3c30f70537ea3720b1ecf624abbcbace32fa91b1a1af720bb2b8e2f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.Upload",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Upload PUTs the caller reader once to images/{raw imageID}/file with application/octet-stream and service MoreHeaders, ignores the response body and accepts only 204; other statuses keep native ErrUnexpectedResponseCode under Upload/imagedata context without an owned receipt.",
+          "tests": [
+            "image/v2/imagedata/native_contracts_test.go:TestNativeImageDataUploadAndStage"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imagedata/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native data call only; it is not Python upload/stage/download parity, which the owned image record data workflows cover.",
+        "The SDK adds only request.Wrap operation context and, for Download, the request.Download wrapper whose Header field repeats the native body; native URLs, OkCodes, retries and stream ownership are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/imagedata.Stage",
+      "source_fingerprint": "b76b60285a875542ffbaccb945c09fe5dc6c4536945bd0d28471d60066f02761",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.Stage"
+      ],
+      "contracts": [
+        {
+          "behavior": "Stage PUTs the caller reader once to images/{raw imageID}/stage with application/octet-stream, ignores the response body and accepts only 204 under Stage/imagedata context.",
+          "tests": [
+            "image/v2/imagedata/native_contracts_test.go:TestNativeImageDataUploadAndStage"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imagedata/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native data call only; it is not Python upload/stage/download parity, which the owned image record data workflows cover.",
+        "The SDK adds only request.Wrap operation context and, for Download, the request.Download wrapper whose Header field repeats the native body; native URLs, OkCodes, retries and stream ownership are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/imagedata.Download",
+      "source_fingerprint": "9ccea228bfc84cfbf107ff583a6787814208344681bf61ae4f1122bbc5bd2053",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.Download"
+      ],
+      "contracts": [
+        {
+          "behavior": "Download GETs images/{imageID}/file, accepts only 200 and hands the open native body to the caller without reading or closing it; the returned Header field is the same ReadCloser from native Extract. Rejected statuses such as 204 and 206 return a Download/imagedata error and no stream.",
+          "tests": [
+            "image/v2/imagedata/native_contracts_test.go:TestNativeImageDataDownloadOwnershipAndStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imagedata/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native data call only; it is not Python upload/stage/download parity, which the owned image record data workflows cover.",
+        "The SDK adds only request.Wrap operation context and, for Download, the request.Download wrapper whose Header field repeats the native body; native URLs, OkCodes, retries and stream ownership are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

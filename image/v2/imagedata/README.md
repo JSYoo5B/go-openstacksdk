@@ -81,3 +81,18 @@ binary PUT의 private Provider에서는 reauth·retry·backoff를 끄고 redirec
 기존 native `Stage(ctx, id, data) error`, `Upload`, `Download`와 상위 `image.Service.Upload`는 그대로 제공합니다. 새 workflow의 queued 검사·optional size·단일 PUT 정책·fresh 조회와 승인 증거가 native ABI를 바꾸지 않습니다.
 
 실제 계약은 [전체 HTTP workflow 테스트](../../../api/glance_stage_contracts_test.go), [reader·승인 증거·native decode 테스트](stage_core_test.go), [옵션 snapshot·header ownership 테스트](stage_options_test.go), [native binding 경계 테스트](../../../internal/cmd/sdkgen/glance_stage_test.go)에서 확인합니다.
+
+## native Upload·Stage·Download
+
+`API.Upload(ctx, imageID, data)`, `API.Stage(ctx, imageID, data)`, `API.Download(ctx, imageID)`는 Gophercloud `v2.15.0`의 [native 함수](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/image/v2/imagedata/requests.go)를 그대로 호출하는 저수준 API입니다. 위 `StageImage`처럼 상태 확인·재조회·부분 결과 보존을 하지 않으며 imageID는 escape 없이 경로 segment로 이어 붙입니다.
+
+| 메서드 | 요청 | 기본 성공 status | 반환 |
+|---|---|---|---|
+| `Upload` | `PUT images/{imageID}/file`, `Content-Type: application/octet-stream`, data 그대로 | 204 | error |
+| `Stage` | `PUT images/{imageID}/stage`, 같은 header·본문 | 204 | error |
+| `Download` | `GET images/{imageID}/file`, 응답 본문 유지 | 200 | `*request.Download[io.ReadCloser]` |
+
+Upload와 Stage는 caller의 Reader를 한 번 읽어 보내며 Reader를 닫지 않습니다. 응답 본문은 해석하지 않습니다. Download는 열린 응답 본문을 caller에게 넘기므로 다 읽은 뒤 `Close()`해야 합니다. 이 generated 결과의 `Header` 필드는 HTTP header가 아니라 native `Extract()`가 돌려준 같은 ReadCloser입니다. 응답 header·checksum 검증·파일 저장이 필요하면 [owned 다운로드](../../image-record-download.md)의 `DownloadImageRecord`를 사용합니다. 206 같은 다른 status는 native `gophercloud.ErrUnexpectedResponseCode`이고 이때 SDK가 본문을 닫습니다.
+
+다른 status의 오류에는 `resource.OperationError{Operation: "Upload"·"Stage"·"Download", Resource: "imagedata"}` 문맥만 더합니다. native 재시도 시 이미 읽은 Reader를 다시 보내는 문제 등 재시도·재인증 정책은 upstream을 그대로 따릅니다.
+
