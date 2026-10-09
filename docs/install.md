@@ -50,7 +50,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 당시 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
 
-새 프로젝트에서 아래처럼 설치합니다. 기존 Go 프로젝트에서는 `go mod init`을 생략합니다. 이 커밋은 원격 설치·빌드와 라이선스·고지 14개 파일의 포함을 확인한 revision입니다.
+새 프로젝트에서 아래처럼 설치합니다. 기존 Go 프로젝트에서는 `go mod init`을 생략합니다. 이 커밋은 원격 설치·빌드와 라이선스·고지 16개 파일의 포함을 확인한 revision입니다.
 
 ```sh
 go mod init example.com/mycloud

@@ -1,4 +1,4 @@
-.PHONY: test vet fmt check generate parity progress progress-check smoke
+.PHONY: test vet fmt check generate parity progress progress-check smoke license-check
 
 generate:
 	sh internal/cmd/sdkgen/generate.sh
@@ -24,5 +24,8 @@ progress:
 progress-check:
 	python3 internal/cmd/parity/progress.py --check
 
-check: vet test parity progress-check
+license-check:
+	python3 internal/cmd/licensing/check.py
+
+check: license-check vet test parity progress-check
 	test -z "$$(gofmt -l .)"

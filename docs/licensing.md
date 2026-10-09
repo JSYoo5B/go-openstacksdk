@@ -50,3 +50,12 @@ OpenStack, OpenInfra Foundation 및 Gophercloud의 공식 프로젝트나 승인
 새로 작성한 기여 코드는 프로젝트의 Apache-2.0 조건을 따릅니다.
 외부 코드나 데이터를 포함하는 변경은 원래 저작권·라이선스·버전·출처 및 변경사항을
 고지 문서에 함께 기록합니다. 기존 upstream 고지를 프로젝트 저작권으로 덮어쓰지 않습니다.
+
+## 자동 점검
+
+`make license-check`는 보관한 원문 12개의 SHA-256, `go.mod`의 네 모듈과
+라이선스 대응, JMESPath fork의 원본 고지 및 배포 고지 파일을 확인합니다.
+네트워크를 사용하지 않으며 `make check`에도 포함됩니다. 의존성 추가나
+버전 변경 시 원문과 적용 범위를 검토하고
+[`licenses/dependencies.json`](../licenses/dependencies.json)을 함께 갱신합니다.
+이 검사는 저장한 파일과 대응의 무결성을 확인하는 것으로, 법률 판단이나 상표 승인을 대신하지 않습니다.

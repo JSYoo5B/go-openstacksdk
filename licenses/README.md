@@ -42,3 +42,11 @@ data attribution without editing the upstream license text.
 The golang.org/x/crypto and golang.org/x/sys BSD-3-Clause originals were copied
 verbatim from the pinned module cache. They cover imported BLAKE2 and its CPU
 capability dependency; no implementation source is copied into this SDK.
+
+The pinned Go module-to-license mapping is maintained in
+[dependencies.json](dependencies.json). Run `make license-check` to verify the
+original hashes, runtime module coverage, adapted JMESPath notice, and required
+distribution notices. The check runs offline and is included in `make check`.
+A new module or version must be reviewed before updating this mapping. This
+checks the recorded distribution files; it does not provide trademark approval
+or independently determine legal compliance.
