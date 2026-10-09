@@ -205,4 +205,4 @@ caller reader는 전송 중 현재 위치에서 소비되며 SDK가 닫지 않�
 
 ordinary 생성·upload는 핵심 user 경로입니다. 같은 metadata 입력의 public visibility·다른 프로젝트 owner는 기본 정책에서 admin 분기이며 community visibility는 project member/admin 범위입니다. client는 role을 검사하거나 visibility/owner를 강제로 바꾸지 않습니다. 실제 소유권·이미지 상태·quota·backend·policy override는 서버가 판단합니다. [고정 정책 근거](../docs/glance-policy-priorities.md)에 Source 범위를 설명합니다.
 
-비교는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 공개 `upload_image` 전체 graph와 Glance `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, Gophercloud v2.15.0을 기준으로 합니다. 동적 Python class 확장·mutable cache·전체 Adapter/session 계약은 공통 후속 범위입니다. [구현 계획](../docs/implementation-plan.md)과 [지원 판정대장](../docs/sdk-support-ledger.md)의 최신 실제 검증을 기준으로 지원 수치를 확인합니다.
+비교는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 공개 `upload_image` 전체 graph와 Glance `57f7dd9e76ef24e1e9013eceaa703bd442469a24`, Gophercloud v2.15.0을 기준으로 합니다. 동적 Python class 확장(SDK-R1)·mutable cache(SDK-C1)·전체 Adapter/session 계약(SDK-S1)은 공통 후속 범위입니다. [구현 계획](../docs/implementation-plan.md)과 [지원 판정대장](../docs/sdk-support-ledger.md)의 최신 실제 검증을 기준으로 지원 수치를 확인합니다.
