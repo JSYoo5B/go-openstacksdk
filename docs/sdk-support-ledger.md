@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native imageimport](#glance-native-imageimport-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native imagedata](#glance-native-imagedata-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는315입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는318입니다.
+
+## Glance native imagedata 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance native `imagedata` 3개, 전체315→318(+3)·핵심241→244/2,292·Glance78→81/120.** 기존 generated `Upload/Stage`가 caller Reader를 octet-stream PUT으로 한 번 보내고 기본204만 허용하는지, `Download`가 기본200에서 열린 본문을 caller에게 넘기고 거부 status에서는 stream을 주지 않는지 검증했습니다. generated Download의 `Header` 필드가 HTTP header가 아니라 native Extract가 돌려준 같은 ReadCloser라는 점도 테스트와 [imagedata 가이드](../image/v2/imagedata/README.md#native-uploadstagedownload)에 명시했습니다. 구현 변경은 없습니다.
+
+새 집중 계약 테스트2그룹7사례가 race로 통과했고 전체 `make check`의 race **46개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새3행·3계약을 추가해 reviews578·contracts3,802·go_mapping318입니다. 테스트 `2d318e7d`·가이드/판정 `b7927fdb`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Glance native imageimport 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance native `imageimport` 2개, 전체313→315(+2)·핵심239→241/2,292·Glance76→78/120.** 기존 generated `Get`이 `info/import`·기본200·`import-methods` decode를, `Create`가 빈 값까지 보내는 `{"method":{...}}` 본문·기본202·opaque 응답을 그대로 따르는지 검증했습니다. 본문이 object 하나라 공통 확장 병합이 `WithCreateField` 값을 method 안에 넣는 동작과 name/uri 충돌 거부도 고정했습니다. 구현 변경은 없으며 [imageimport 가이드](../image/v2/imageimport/README.md#native-getcreate)에 native 절을 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance native `imageimport` 2개, 전체313→315(+2)·핵심239→241/2,292·Glance76→78/120.** 기존 generated `Get`이 `info/import`·기본200·`import-methods` decode를, `Create`가 빈 값까지 보내는 `{"method":{...}}` 본문·기본202·opaque 응답을 그대로 따르는지 검증했습니다. 본문이 object 하나라 공통 확장 병합이 `WithCreateField` 값을 method 안에 넣는 동작과 name/uri 충돌 거부도 고정했습니다. 구현 변경은 없으며 [imageimport 가이드](../image/v2/imageimport/README.md#native-getcreate)에 native 절을 추가했습니다.
 
 새 집중 계약 테스트2그룹11사례가 race로 통과했고 전체 `make check`의 race **46개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새2행·2계약을 추가해 reviews575·contracts3,799·go_mapping315입니다. 테스트 `e4b7b212`·가이드/판정 `108b07f7`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 

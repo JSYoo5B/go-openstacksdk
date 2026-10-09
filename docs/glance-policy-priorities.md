@@ -110,3 +110,11 @@ AST와 SHA256으로 route·controller·policy를 확인했으며 action controll
 [CreateImageRecord 가이드](../image/image-record-create.md)의 기본 이미지 생성·직접 업로드·일반 import는 핵심 user 범위입니다. 같은 공개 operation의 owner·public/community visibility와 copy-image·configured Task 분기는 native 서버 정책으로 처리하며 별도 operation으로 세지 않습니다. 메타데이터 쓰기의 기존 핵심 admin 우선순위는 유지합니다.
 
 whole API 테스트는 owner/public/community 속성을 실제 POST에 전달하고 허용 응답 또는 native403을 보존합니다. copy-image403은 생성 뒤 binary/import try 내부의 이미지 삭제를 수행하며 Task403은 entered wait 이전이어서 업로드한 객체를 유지합니다. client role gate로 서버의 policy override를 대체하지 않습니다. 실제 권한·backend·quota·Swift ACL과 비동기 처리는 서버가 결정합니다. 전체1개 finite Go mapping의 최종 수치와 검증 근거는 구현 계획·판정대장의 최신 완료 단위를 기준으로 합니다.
+
+
+## 이미지 location 추가·조회의 기본 정책
+
+같은 고정 Glance pin `57f7dd9e76ef24e1e9013eceaa703bd442469a24`의 [image 정책202–222행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L202-L222)은 `POST /v2/images/{image_id}/locations`의 `add_image_location`에 project scope `SERVICE_OR_PROJECT_MEMBER`, `GET`의 `fetch_image_location`에 `SERVICE`를 적용합니다. [base 정책87–91행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/base.py#L87-L91)에서 전자는 service API 또는 이미지 owner 프로젝트의 member이고 후자는 service API뿐입니다. [API policy234–238행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/policy.py#L234-L238)이 두 rule을 enforce합니다.
+
+따라서 Python `add_image_location`은 핵심 user, `image_locations`는 핵심 admin/service 단계에 둡니다. image 정책과 API policy의 SHA256은 위에 기록한 동일 hash입니다. 실제 queued 상태·store 설정·policy override는 서버가 판단하며 이 분류만으로 지원 수를 바꾸지 않습니다.
+
