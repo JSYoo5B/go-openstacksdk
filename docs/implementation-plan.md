@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance Cloud `download_image` 검증·판정 완료.** 전체301/3,362·핵심227/2,292·Glance65/120입니다. 다음 범위는 같은 Cloud mixin의 `update_image_properties`·`delete_image`·`create_image` 등 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
+**현재 구현 (2026-10-10): Glance Cloud `update_image_properties` 검증·판정 완료.** 전체302/3,362·핵심228/2,292·Glance66/120입니다. 다음 범위는 같은 Cloud mixin의 `delete_image`(Task 업로드 Swift 객체 정리·삭제 대기 포함)와 Cloud `create_image` 등 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `download_image`1개, 전체300→301(+1)·핵심226→227/2,292·Glance64→65/120.** `Service.DownloadCloudImageRecord`가 필수 출력 검사·strict Find·owned 다운로드를 연결하고 Found와 하위 다운로드 증거를 분리해 반환합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-다운로드)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-다운로드-완료)에 설명합니다. 새2그룹12사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `e746f5f9`·`53f5ac00`·`5f4d7de8`를 push했습니다.
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `update_image_properties`1개, 전체301→302(+1)·핵심227→228/2,292·Glance65→66/120.** `Service.UpdateCloudImageProperties`가 `image or name_or_id` 선택 뒤 owned 속성 helper에 위임합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-속성-갱신)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-속성-갱신-완료)에 설명합니다. 새1그룹4사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `a46250e8`·`3d109207`·`b0aeb599`를 push했습니다.
+
+**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `download_image`1개, 전체300→301(+1)·핵심226→227/2,292·Glance64→65/120.** `Service.DownloadCloudImageRecord`가 필수 출력 검사·strict Find·owned 다운로드를 연결하고 Found와 하위 다운로드 증거를 분리해 반환합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-다운로드)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-다운로드-완료)에 설명합니다. 새2그룹12사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `e746f5f9`·`53f5ac00`·`5f4d7de8`를 push했습니다.
 
 **앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `wait_for_image`1개, 전체299→300(+1)·핵심225→226/2,292·Glance63→64/120.** `Service.WaitForCloudImageRecord`가 Proxy find 반복·정확한 active/error 비교·`iterate_timeout`의3600초/2초 정책을 제공하고 실패 때 마지막 record와 실제 응답 증거를 보존합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-대기)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-대기-완료)에 설명합니다. 새3그룹14사례(20회 반복)와 전체 `make check`(race 45개 실제 test package)가 통과했고 `eb3a1c38`·`2771798b`·`78d2a6e3`를 push했습니다.
 
@@ -358,11 +360,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 301 (9.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 302 (9.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,060 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 561 | 아직 개별 기록 없는 선언 2,801 |
-| 기록한 부분·전체 계약 | 3,772 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,059 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 562 | 아직 개별 기록 없는 선언 2,800 |
+| 기록한 부분·전체 계약 | 3,774 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -405,6 +407,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Glance Cloud update_image_properties | 301 → 302 (+1) | 새1그룹4·전체 `make check` PASS | `a46250e8`·`3d109207`·`b0aeb599` push 완료 |
 | Glance Cloud download_image | 300 → 301 (+1) | 새2그룹12·전체 `make check` PASS | `e746f5f9`·`53f5ac00`·`5f4d7de8` push 완료 |
 | Glance Cloud wait_for_image | 299 → 300 (+1) | 새3그룹14·20회 반복·전체 `make check` PASS | `eb3a1c38`·`2771798b`·`78d2a6e3` push 완료 |
 | Glance Cloud 이미지 exclude·이름·ID | 296 → 299 (+3) | 새2그룹15·전체 `make check` PASS | `0a4df3f5`·`6f4d80ed`·`e38bedc2` push 완료 |
@@ -429,12 +432,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 227 / 2,292 | 9.9% | 160 | 1,904 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 228 / 2,292 | 9.9% | 160 | 1,903 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 301 / 3,362 | 9.0% | 259 | 2,801 | 1 |
+| 전체 | 302 / 3,362 | 9.0% | 259 | 2,800 | 1 |
 
 **핵심 서비스**
 
@@ -444,7 +447,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 65 / 120 | 25 | 30 | 0 |
+| Image / Glance | 66 / 120 | 25 | 29 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -570,6 +573,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance Cloud update_image_properties | pinned Cloud wrapper의 `image or name_or_id` 검토 완료 | 선택 wrapper·owned helper 위임 Service API 완료 | 새1그룹4·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·302/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image |
 | Glance Cloud download_image | pinned Cloud `download_image`·`_download.py` 출력 분기 검토 완료 | 출력 검사·strict Find·owned 다운로드 연결 Service API 완료 | 새2그룹12·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·301/3,362** | 작은 commit3개 push 완료; 다음 Cloud update_image_properties/delete_image |
 | Glance Cloud wait_for_image | pinned Cloud `wait_for_image`·`utils.iterate_timeout` 검토 완료 | 반복 find·정확한 상태 비교·timeout/간격 옵션 Service API 완료 | 새3그룹14·20회 반복·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·300/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image/download_image |
 | Glance Cloud 이미지 exclude·이름·ID | pinned Cloud `_image.py` 3함수·Python `in` 의미 검토 완료 | 공통 search 재사용·exclude 멤버십·Service API3개 완료 | 새2그룹15·전체 `make check` PASS | Python 비교 절 추가 | **신규3행 go_mapping·299/3,362** | 작은 commit3개 push 완료; 다음 wait_for_image |

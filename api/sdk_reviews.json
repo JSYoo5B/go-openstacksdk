@@ -46150,6 +46150,46 @@
         "Python treats an empty output_path as present and then falls back to memory mode; Go treats an empty Filename as absent and rejects it before HTTP. Headers are a Go extension for both phases, and Proxy-only download options keep their defaults because the Cloud signature has no such arguments."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/update_image_properties",
+      "source_fingerprint": "e470d8433edbc9d8205df751ad50bb151c5258483b0939a73965121e816de745",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.UpdateCloudImageProperties",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperty",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordProperties",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertyMeta",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordPropertiesMetaJSON"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateCloudImageProperties selects image or name_or_id: a Record wins over both string forms, otherwise a nonempty literal ID wins over NameOrID, and NameOrID is passed on as a literal identity without any name lookup or HTTP.",
+          "tests": [
+            "image/image_record_cloud_properties_test.go:TestCloudImagePropertiesSelectsImageOrNameOrIDAndDelegates"
+          ]
+        },
+        {
+          "behavior": "The selected image is delegated unchanged to the owned UpdateImagePropertiesRecord helper with the same options, returning its Updated/Record result: cached property copy, kernel/ramdisk lookup, conversions, raw meta precedence and conditional automatic PATCH. Literal identities keep the lower helper's missing cached-properties failure before HTTP, and errors are renamed to the Cloud operation without nesting.",
+          "tests": [
+            "image/image_record_cloud_properties_test.go:TestCloudImagePropertiesSelectsImageOrNameOrIDAndDelegates",
+            "image/image_record_properties_test.go:TestImageRecordPropertiesBooleanUsesCanonicalComparisonAndCachedSeed",
+            "image/image_record_properties_test.go:TestImageRecordPropertiesRawValuesPythonStringsAndMetaLast",
+            "image/image_record_properties_test.go:TestImageRecordPropertiesBooleanControlsPendingCommitAndRetargeting"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-record-properties.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python's image argument may be an Image object or a string; Go separates Record and ID fields and keeps NameOrID for name_or_id. Python truthiness of an empty string is represented by empty Go strings.",
+        "Properties and meta use the existing concrete ImageRecordPropertiesOption values instead of Python **properties and meta dictionaries; the lower helper's documented Go differences apply unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 다운로드](#glance-cloud-이미지-다운로드-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 속성 갱신](#glance-cloud-이미지-속성-갱신-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는301입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는302입니다.
+
+## Glance Cloud 이미지 속성 갱신 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `update_image_properties`1개, 전체301→302(+1)·핵심227→228/2,292·Glance65→66/120.** `Service.UpdateCloudImageProperties`가 Source의 `image or name_or_id` 선택을 Record·ID·NameOrID 순서로 수행하고 이름 조회 없이 owned `UpdateImagePropertiesRecord`에 위임합니다. literal identity의 캐시 properties 부재 실패와 하위 helper의 변환·kernel/ramdisk 조회·조건부 PATCH 계약은 그대로입니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-속성-갱신)에 설명합니다.
+
+새 집중 테스트1그룹4사례가 race로 통과했고 기존 property helper 테스트를 계약 근거로 연결했습니다. 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·2계약을 추가해 reviews562·contracts3,774·go_mapping302·catalog unresolved3,059입니다. 공개 API `a46250e8`·테스트 `3d109207`·가이드 `b0aeb599`를 push했습니다. Cloud `delete_image`·`create_image`와 공통 SDK-R1/C1/S1은 계속 추적합니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance Cloud 이미지 다운로드 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `download_image`1개, 전체300→301(+1)·핵심226→227/2,292·Glance64→65/120.** `Service.DownloadCloudImageRecord`가 출력 하나를 HTTP 전에 확인하고 ignore_missing false Find로 이미지를 찾은 뒤, 찾은 record를 기존 owned `DownloadImageRecord`에 넘깁니다. 필수 metadata GET·binary GET·기본 checksum 검증·writer/파일 규칙은 하위 단위와 같고 Cloud 서명의 `chunk_size`·`stream`만 concrete 옵션으로 받습니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-다운로드)에 빈 경로와 출력 우선순위 차이를 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `download_image`1개, 전체300→301(+1)·핵심226→227/2,292·Glance64→65/120.** `Service.DownloadCloudImageRecord`가 출력 하나를 HTTP 전에 확인하고 ignore_missing false Find로 이미지를 찾은 뒤, 찾은 record를 기존 owned `DownloadImageRecord`에 넘깁니다. 필수 metadata GET·binary GET·기본 checksum 검증·writer/파일 규칙은 하위 단위와 같고 Cloud 서명의 `chunk_size`·`stream`만 concrete 옵션으로 받습니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-다운로드)에 빈 경로와 출력 우선순위 차이를 설명합니다.
 
 새 집중 테스트2그룹12사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·3계약을 추가해 reviews561·contracts3,772·go_mapping301·catalog unresolved3,060입니다. 공개 API `e746f5f9`·테스트 `53f5ac00`·가이드 `5f4d7de8`를 push했습니다. Cloud `delete_image`·`create_image`·`update_image_properties`와 공통 SDK-R1/C1/S1은 계속 추적합니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
