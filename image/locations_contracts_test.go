@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -648,11 +649,12 @@ func TestImageLocationsAcceptedFailuresAndStatusPolicy(t *testing.T) {
 			})
 		}
 		for _, code := range []int{200, 201, 202, 204, 206, 300, 400, 403, 404, 409, 429, 500} {
-			expected := 200
+			// Add follows Python Resource.create: every actual status below 400.
+			expected := []int{200}
 			if add {
-				expected = 202
+				expected = locationsAddCodes()
 			}
-			if code == expected {
+			if slices.Contains(expected, code) {
 				continue
 			}
 			t.Run(fmt.Sprint("strict status ", add, " ", code), func(t *testing.T) {
@@ -666,7 +668,7 @@ func TestImageLocationsAcceptedFailuresAndStatusPolicy(t *testing.T) {
 				if add {
 					method = http.MethodPost
 				}
-				if value != nil || !errors.As(err, &native) || native.Actual != code || !reflect.DeepEqual(native.Expected, []int{expected}) || native.Method != method || native.URL != locationsBase+"images/fixed/locations" || string(native.Body) != "raw status proof" || native.ResponseHeader.Get("X-Request-Id") != "actual-locations" || errors.As(err, &proof) || calls.Load() != 1 || body.closes.Load() != 1 {
+				if value != nil || !errors.As(err, &native) || native.Actual != code || !reflect.DeepEqual(native.Expected, expected) || native.Method != method || native.URL != locationsBase+"images/fixed/locations" || string(native.Body) != "raw status proof" || native.ResponseHeader.Get("X-Request-Id") != "actual-locations" || errors.As(err, &proof) || calls.Load() != 1 || body.closes.Load() != 1 {
 					t.Fatal(value, err, native, calls.Load(), body.closes.Load())
 				}
 			})
@@ -728,7 +730,12 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 				} else if r.Method != http.MethodGet || r.Body != nil {
 					t.Error(r.Method, r.Body)
 				}
-				body := &locationsBody{Reader: strings.NewReader("[]")}
+				// A valid non-object Add response fails like Python body.pop.
+				raw := "[]"
+				if add {
+					raw = ""
+				}
+				body := &locationsBody{Reader: strings.NewReader(raw)}
 				bodies = append(bodies, body)
 				return locationsWire(codes[n], body), nil
 			})
@@ -780,7 +787,7 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 				if n == 2 {
 					code, raw = 202, "ack"
 					if change == "expanded OkCodes" {
-						code, raw = 200, "private200"
+						code, raw = 404, "private404"
 					}
 				}
 				body := &locationsBody{Reader: strings.NewReader(raw)}
@@ -830,7 +837,7 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 				case "GET nil to null":
 					options.JSONBody = json.RawMessage("null")
 				case "expanded OkCodes":
-					options.OkCodes = []int{202, 200}
+					options.OkCodes = []int{202, 404}
 					return nil
 				}
 				return callbackCause
@@ -848,7 +855,7 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 			} else if change == "expanded OkCodes" {
 				var native gophercloud.ErrUnexpectedResponseCode
 				var proof *resource.ResponseError
-				if value != nil || !errors.As(err, &native) || native.Actual != 200 || !reflect.DeepEqual(native.Expected, []int{202}) || string(native.Body) != "private200" || native.ResponseHeader.Get("X-Request-Id") != "actual-locations" || errors.As(err, &proof) || calls.Load() != 2 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) {
+				if value != nil || !errors.As(err, &native) || native.Actual != 404 || !reflect.DeepEqual(native.Expected, locationsAddCodes()) || string(native.Body) != "private404" || native.ResponseHeader.Get("X-Request-Id") != "actual-locations" || errors.As(err, &proof) || calls.Load() != 2 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) {
 					t.Fatal(value, err, native, calls.Load())
 				}
 			} else if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callbackCause) || !gophercloud.ResponseCodeIs(err, 503) || calls.Load() != 1 {
@@ -972,4 +979,12 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 			t.Fatal(value, err, calls.Load())
 		}
 	})
+}
+
+func locationsAddCodes() []int {
+	codes := make([]int, 0, 200)
+	for code := 200; code < 400; code++ {
+		codes = append(codes, code)
+	}
+	return codes
 }

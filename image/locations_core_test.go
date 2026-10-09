@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -303,7 +304,11 @@ func TestImageLocationsCoreAcceptedFailuresKeepOwnedProof(t *testing.T) {
 func TestImageLocationsCoreStrictStatusesAndRetryOwnership(t *testing.T) {
 	for _, add := range []bool{false, true} {
 		for _, status := range []int{200, 202, 204, 404, 409} {
-			if status == map[bool]int{false: 200, true: 202}[add] {
+			expected := []int{200}
+			if add {
+				expected = imageRecordCodes()
+			}
+			if slices.Contains(expected, status) {
 				continue
 			}
 			client := deleteCoreClient(func(*http.Request) (*http.Response, error) { return deleteCoreHTTP(status, http.NoBody, nil), nil })
@@ -322,7 +327,7 @@ func TestImageLocationsCoreStrictStatusesAndRetryOwnership(t *testing.T) {
 				err = failure
 			}
 			var native gophercloud.ErrUnexpectedResponseCode
-			if !errors.As(err, &native) || native.Actual != status || !reflect.DeepEqual(native.Expected, []int{map[bool]int{false: 200, true: 202}[add]}) {
+			if !errors.As(err, &native) || native.Actual != status || !reflect.DeepEqual(native.Expected, expected) {
 				t.Fatalf("status=%d err=%v native=%+v", status, err, native)
 			}
 		}
@@ -358,15 +363,15 @@ func TestImageLocationsCoreStrictStatusesAndRetryOwnership(t *testing.T) {
 		if calls == 1 {
 			return deleteCoreHTTP(503, http.NoBody, nil), nil
 		}
-		return deleteCoreHTTP(200, io.NopCloser(strings.NewReader("opaque unexpected body")), nil), nil
+		return deleteCoreHTTP(404, io.NopCloser(strings.NewReader("opaque unexpected body")), nil), nil
 	})
 	client.ProviderClient.RetryFunc = func(_ context.Context, _, _ string, options *gophercloud.RequestOpts, _ error, _ uint) error {
-		options.OkCodes = append(options.OkCodes, 200)
+		options.OkCodes = append(options.OkCodes, 404)
 		return nil
 	}
 	ack, err := New(client).AddImageLocation(context.Background(), resource.ID("fixed"), "literal")
 	var native gophercloud.ErrUnexpectedResponseCode
-	if ack != nil || !errors.As(err, &native) || native.Actual != 200 || !reflect.DeepEqual(native.Expected, []int{202}) || string(native.Body) != "opaque unexpected body" || calls != 2 {
+	if ack != nil || !errors.As(err, &native) || native.Actual != 404 || !reflect.DeepEqual(native.Expected, imageRecordCodes()) || string(native.Body) != "opaque unexpected body" || calls != 2 {
 		t.Fatalf("expanded status ack=%v err=%v native=%+v calls=%d", ack, err, native, calls)
 	}
 }

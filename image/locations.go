@@ -13,11 +13,12 @@ import (
 )
 
 // AddImageLocation submits a literal URL and optional hash pair to Glance's
-// asynchronous location task. It returns only an actual 202 acknowledgement;
+// asynchronous location task. Like Python Resource.create it accepts any actual
+// 200..399 response and returns the acknowledgement with an ImageLocation view;
 // the server owns storage, permissions and eventual content verification.
 func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locationURL string, options ...AddImageLocationOption) (*AddImageLocationResult, error) {
 	options = append([]AddImageLocationOption(nil), options...)
-	var body json.RawMessage
+	var body, validationJSON json.RawMessage
 	prepared, err := s.prepareImageMutation(ctx, ref, nil, []ImageMutationOption{func(config *ImageMutationOpts) error {
 		if locationURL == "" || !utf8.ValidString(locationURL) {
 			return uploadInvalid("location URL must be nonempty valid UTF-8")
@@ -31,6 +32,9 @@ func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locati
 			validation["os_hash_algo"] = pair.OSHashAlgo
 			validation["os_hash_value"] = pair.OSHashValue
 		}
+		if validationJSON, err = json.Marshal(validation); err != nil {
+			return err
+		}
 		body, err = json.Marshal(map[string]any{"url": locationURL, "validation_data": validation})
 		config.Headers = policy.Headers
 		return err
@@ -39,8 +43,26 @@ func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locati
 		return nil, wrapImageMutationError(ctx, "AddImageLocation", err)
 	}
 	endpoint := prepared.base + "images/" + url.PathEscape(prepared.id) + "/locations"
-	response, err := rest.DoJSON(ctx, prepared.client, http.MethodPost, endpoint, body, nil, http.StatusAccepted)
-	return addImageLocationResult(prepared.id, locationURL, response), wrapImageMutationError(ctx, "AddImageLocation", err)
+	response, err := rest.DoJSON(ctx, prepared.client, http.MethodPost, endpoint, body, nil, imageRecordCodes()...)
+	result := addImageLocationResult(prepared.id, locationURL, response)
+	if err != nil || result == nil {
+		return result, wrapImageMutationError(ctx, "AddImageLocation", err)
+	}
+	var location json.RawMessage
+	if s.dependencies.CloudLocation != nil {
+		facts, locationErr := s.dependencies.CloudLocation()
+		if locationErr == nil {
+			location, locationErr = facts.ForResource(nil, facts.Zone)
+		}
+		if locationErr != nil {
+			return result, wrapImageMutationError(ctx, "AddImageLocation", response.Fail(locationErr))
+		}
+	}
+	result.Resource, err = imageLocationView(prepared.id, locationURL, validationJSON, location, response)
+	if err != nil {
+		return result, wrapImageMutationError(ctx, "AddImageLocation", response.Fail(err))
+	}
+	return result, nil
 }
 
 // GetImageLocations fetches one complete bare array without pagination. An ID
