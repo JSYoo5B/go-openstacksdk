@@ -16,7 +16,9 @@
 
 Download 전용 감사의 pinned Source16Python+10Glance파일·86 AST spans·26개 새 계약을 검토했습니다. 다른551 reviews와 legacy `DownloadTo`10계약·18개 test refs·기존 API profile·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,712·go_mapping291·review unresolved260·unsupported1이며 catalog unresolved3,070에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 뜻하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-download-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 Source audit SHA256 `4a9a0de7f6dc62d094191acbb93dbcff7c2cc6e4dbf123a66f8ec4afeecc5102`입니다.
 
-중간 계획 `ad82f1ee`·defaults/hash/license `76fcb99a`·workflow 공개 API `01423c67`를 의미 있는 작은 commit으로 main에 push했습니다. 테스트·사용 문서·최종 판정은 각각 별도 작은 commit으로 관리합니다. 이 download 단위의 정확한 revision 원격 설치·main2·라이선스16개 일치 결과는 후속 root 검증으로 기록합니다.
+중간 계획 `ad82f1ee`·defaults/hash/license `76fcb99a`·workflow 공개 API `01423c67`를 의미 있는 작은 commit으로 main에 push했습니다. 테스트·사용 문서·최종 판정은 각각 별도 작은 commit으로 관리합니다. 이 download 단위의 정확한 revision 원격 설치·main2·라이선스16개 일치 결과도 검증했습니다.
+
+정확한 문서·판정 revision `a4688f1b4cf4ae8aa26896629a0321965054840d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009033426-a4688f1b4cf4`·get/build exit0이며 download/설치 main **2개**를 빌드했습니다. 원격 Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **16개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-download-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 Resource raw map/JSON과 owned private Record는 option callback 전에 snapshot하고 declared65필드·properties/current location을 project합니다. valid metadata object는 sparse overlay/clean하며 fetched id가 바뀌면 후속 binary target에도 적용합니다. invalid JSON syntax는 pending state와 실제 metadata receipt/header를 보존하고 valid nonobject·descriptor·fetched identity 오류는 binary 전에 멈춥니다. public view/Wire/self/file 수정은 target을 바꾸지 않으며 이전 private borrowed data도 새 binary payload로 대체하지 않습니다.
 
