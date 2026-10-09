@@ -46433,6 +46433,139 @@
         "WithCreateField is a Go extension that rejects collisions instead of overwriting; native body construction, OkCodes and response projection are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/members.Create",
+      "source_fingerprint": "f786726b0b827e207356b03530fe46a2d1316f9dbee6029418ec52fd0baff655",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create posts {\"member\": memberID} to native images/{imageID}/members with JSON headers, service MoreHeaders and live token, decodes the native Member and accepts only 200.",
+          "tests": [
+            "image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode",
+            "image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/members/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native member call only; it is not Python member Resource parity, which the owned member record APIs cover.",
+        "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/members.Get",
+      "source_fingerprint": "2f3f49b1ccc3b020fa400ebcf2f6f2dec702e9bb49bca18b2d6a2da403860803",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends one GET to images/{imageID}/members/{memberID} joined from raw IDs without escaping, decodes the native Member and accepts only 200; rejections keep ErrUnexpectedResponseCode under Get/members context.",
+          "tests": [
+            "image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode",
+            "image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/members/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native member call only; it is not Python member Resource parity, which the owned member record APIs cover.",
+        "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/members.List",
+      "source_fingerprint": "1c0ecbfeed080d0831cb2758657dd16abb761593e60a6db5186b6970aa03b854",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List lazily yields the single native members page in order, yields nothing for an empty array and returns native HTTP rejections from the iterator without extra operation context.",
+          "tests": [
+            "image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode",
+            "image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/members/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native member call only; it is not Python member Resource parity, which the owned member record APIs cover.",
+        "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/members.Update",
+      "source_fingerprint": "7ea418152cdde5ec026a28c61265aa7acd2e50b068cd04b01dbecabb0505b411",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"status\": opts.Status}, including an empty status, appends non-colliding WithUpdateField extensions, rejects status collisions and nil options before HTTP, returns the decoded server Member and accepts only 200.",
+          "tests": [
+            "image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode",
+            "image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/members/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native member call only; it is not Python member Resource parity, which the owned member record APIs cover.",
+        "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/members.Delete",
+      "source_fingerprint": "d6b43fa225b0d05119081d12074e40579a440ddaf3d7c6f86ed969d28db80aa2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/members.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE to the raw member path and accepts only 204; other statuses keep the native error under Delete/members context without an owned receipt.",
+          "tests": [
+            "image/v2/members/contracts_test.go:TestNativeImageMembersRoutesBodiesAndDecode",
+            "image/v2/members/contracts_test.go:TestNativeImageMembersStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/members/README.md",
+        "image/v2/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native member call only; it is not Python member Resource parity, which the owned member record APIs cover.",
+        "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
