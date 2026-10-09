@@ -46566,6 +46566,57 @@
         "The SDK adds only request.Wrap operation context; native raw-ID ServiceURL construction, fixed OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/imageimport.Get",
+      "source_fingerprint": "62f68634b0cab585d9f32c7dd6741ac041aafd14814a7ce7172ae8bff8fb0bc5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET info/import with default headers, service MoreHeaders and live token, decodes only import-methods into ImportInfo and accepts only 200; other statuses keep native ErrUnexpectedResponseCode under Get/imageimport context without an owned receipt.",
+          "tests": [
+            "image/v2/imageimport/native_contracts_test.go:TestNativeImageImportInfoGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imageimport/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native call only; it is not Python import_image/get_import_info parity, which the owned ImportImageRecord and import info records cover.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/imageimport.Create",
+      "source_fingerprint": "ab56d5bea51f2f5b8dccf11234ac215099cdba0c36ba09b4a9aa898c301e3fd8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create posts {\"method\":{\"name\",\"uri\"}} including empty values to images/{raw imageID}/import, merges non-colliding WithCreateField values inside the single method object, rejects name/uri collisions and nil options before HTTP, drains the accepted body and accepts only 202.",
+          "tests": [
+            "image/v2/imageimport/native_contracts_test.go:TestNativeImageImportCreateBodyExtensionsAndStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/imageimport/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native call only; it is not Python import_image/get_import_info parity, which the owned ImportImageRecord and import info records cover.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

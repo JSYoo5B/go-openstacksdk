@@ -81,3 +81,14 @@ Python singular `store`는 호환 헤더와 one-element `stores` 배열을 함�
 기존 native `Create`는 기존 `CreateOpts`의 `method` envelope와 error-only 결과를, `Get`은 import discovery 결과를 유지합니다. 새 workflow의 최상위 stores/boolean과 actual acknowledgement가 그 기존 선언을 바꾸지는 않습니다.
 
 실제 계약은 [HTTP import 테스트](../../../api/glance_import_contracts_test.go), [옵션 snapshot·본문 namespace 테스트](import_options_test.go), [조회·승인 응답 증거 테스트](import_core_test.go), [native binding 경계 테스트](../../../internal/cmd/sdkgen/glance_import_test.go)에서 확인합니다.
+
+## native Get·Create
+
+`API.Get(ctx)`와 `API.Create(ctx, imageID, opts, options...)`는 Gophercloud `v2.15.0`의 [native 함수](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/image/v2/imageimport/requests.go)를 그대로 호출하는 저수준 API입니다. 위 `ImportImage`와 달리 Image 조회·format 검사·응답 증거 보존을 하지 않습니다.
+
+Get은 `GET info/import`를 보내고 기본 성공 status는 200입니다. 응답의 `import-methods`를 `ImportInfo.ImportMethods{Description, Type, Value}`로 decode하고 다른 key는 버립니다.
+
+Create는 `CreateOpts{Name, URI}`를 `{"method":{"name":...,"uri":...}}`로 감싸 `POST images/{imageID}/import`에 보냅니다. 두 필드에 omitempty가 없어 빈 값도 `""`로 전송합니다. 기본 성공 status는 202뿐이고 응답 본문은 decode하지 않으며 error만 반환합니다. imageID는 escape 없이 경로 segment로 이어 붙입니다.
+
+`WithCreateField(key, value)`는 Go 확장입니다. 공통 병합은 본문이 object 값 하나만 가진 경우 그 안쪽에 필드를 넣으므로 확장 필드는 `method` 객체 안에 들어갑니다. `name`, `uri`나 이미 있는 key와 겹치면 HTTP 전에 `resource.ErrInvalidOption`입니다. 다른 status는 native `gophercloud.ErrUnexpectedResponseCode`이며 SDK는 `resource.OperationError{Operation: "Get" 또는 "Create", Resource: "imageimport"}` 문맥만 더합니다.
+
