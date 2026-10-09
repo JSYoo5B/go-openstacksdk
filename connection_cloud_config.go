@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
@@ -19,10 +20,11 @@ import (
 // Freeze the selected files once. Native authentication/TLS parsing and SDK
 // network policy then consume the same bytes, even if files change meanwhile.
 type cloudConfiguration struct {
-	parseOptions    []clouds.ParseOption
-	defaultNetwork  string
-	networkRoles    network.NetworkRolePolicy
-	serverAddresses compute.ServerAddressPolicy
+	parseOptions      []clouds.ParseOption
+	defaultNetwork    string
+	networkRoles      network.NetworkRolePolicy
+	serverAddresses   compute.ServerAddressPolicy
+	imageCreatePolicy image.ImageCreatePolicy
 }
 
 type cloudNetworkDocument struct {
@@ -151,6 +153,10 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		return result, err
 	}
 	result.serverAddresses, err = configuredServerAddresses(settings, clientSettings)
+	if err != nil {
+		return result, err
+	}
+	result.imageCreatePolicy, err = configuredImageCreatePolicy(name, settings)
 	return result, err
 }
 

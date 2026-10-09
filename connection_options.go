@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -46,6 +47,8 @@ type connectionOptions struct {
 	networkRolesSet          bool
 	serverAddresses          compute.ServerAddressPolicy
 	serverAddressesSet       bool
+	imageCreatePolicy        image.ImageCreatePolicy
+	imageCreatePolicySet     bool
 }
 
 type ConnectionOption func(*connectionOptions) error

@@ -3,6 +3,7 @@ package image
 import (
 	"context"
 	imageapi "github.com/JSYoo5B/go-openstacksdk/image/v2"
+	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"net/url"
 	"strings"
 
@@ -21,6 +22,8 @@ type Image = images.Image
 // authentication or other service construction. Each operation owns its snapshot.
 type Dependencies struct {
 	CloudLocation func() (resource.CloudLocation, error)
+	CreatePolicy  ImageCreatePolicy
+	ObjectStorage func(context.Context) (*objectapi.Service, error)
 }
 
 type Service struct {

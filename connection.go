@@ -62,6 +62,9 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 			return nil, fmt.Errorf("load cloud configuration: %w", err)
 		}
 		o.configuredDefaultNetwork = configuration.defaultNetwork
+		if !o.imageCreatePolicySet {
+			o.imageCreatePolicy = configuration.imageCreatePolicy
+		}
 		if !o.networkRolesSet {
 			o.networkRoles = configuration.networkRoles
 		}
@@ -131,6 +134,11 @@ func FromProvider(provider *gophercloud.ProviderClient, opts ...ConnectionOption
 }
 
 func newConnection(provider *gophercloud.ProviderClient, o connectionOptions, eo gophercloud.EndpointOpts) (*Connection, error) {
+	var policyErr error
+	o.imageCreatePolicy, policyErr = image.PrepareImageCreatePolicy(image.WithImageCreatePolicyOpts(o.imageCreatePolicy))
+	if policyErr != nil {
+		return nil, policyErr
+	}
 	if o.networkRolesSet {
 		o.configuredDefaultNetwork = o.networkRoles.DefaultNetworkSelector()
 	}
@@ -329,7 +337,7 @@ func (c *Connection) Image(ctx context.Context) (*image.Service, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.image = image.NewWithDependencies(client, image.Dependencies{CloudLocation: c.CurrentLocation})
+		c.image = image.NewWithDependencies(client, image.Dependencies{CloudLocation: c.CurrentLocation, CreatePolicy: c.options.imageCreatePolicy, ObjectStorage: c.imageCreateSwiftService})
 	}
 	return c.image, nil
 }
