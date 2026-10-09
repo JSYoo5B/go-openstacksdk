@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance native `members` 5개 테스트·가이드·판정 5행 완료, 전체 gate 진행 중.** 직전 완료 집계는 전체308/3,362·핵심234/2,292·Glance71/120입니다. generated members `Create/Get/List/Update/Delete`의 raw ID 경로, 고정 OkCodes(200·200·single page·200·204), Update의 status 본문·확장 필드 충돌 거부, Member decode와 거부 status를 검증했습니다. 이 package의 첫 테스트라 전체 test package 수는46이 됩니다. 테스트 `8d60976b`와 가이드·판정을 push했고 판정 반영 집계는313입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Glance native `members` 5개 검증·판정 완료, native `imageimport` 2개 착수.** 전체313/3,362·핵심239/2,292·Glance76/120입니다. 다음은 generated imageimport `Get`(import 정보, 기본200)과 `Create`(`{"method":{"name","uri"}}` 본문, 기본202, 확장 필드)를 고정 Gophercloud v2.15.0 기준으로 검증하는 단위입니다. 기본 import 정보 조회와 ordinary import method는 [Glance 정책](glance-policy-priorities.md)상 핵심 user입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** generated `API.Create`의 본문·확장·기본201 계약을 고정했습니다. [native 생성 가이드](../image/v2/images/create.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imagescreate-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4c96f116`·`0b04de99`를 push했습니다.
+**최신 API 완료 (2026-10-10): 핵심 user Glance native `members` 5개, 전체308→313(+5)·핵심234→239/2,292·Glance71→76/120.** generated members 다섯 호출의 경로·본문·고정 status 계약을 고정했습니다. [native 멤버 가이드](../image/v2/members/README.md)와 [검증 기록](sdk-support-ledger.md#glance-native-members-완료)에 설명합니다. 새2그룹24사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `8d60976b`·`5cdbd56e`를 push했습니다.
+
+**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** generated `API.Create`의 본문·확장·기본201 계약을 고정했습니다. [native 생성 가이드](../image/v2/images/create.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imagescreate-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4c96f116`·`0b04de99`를 push했습니다.
 
 **앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.List`1개, 전체306→307(+1)·핵심232→233/2,292·Glance69→70/120.** generated `API.List`의 query·페이지·중단 계약을 고정하고 int64 size 필터가 빠지는 native 동작과 대체 방법을 문서화했습니다. [native 목록 가이드](../image/v2/images/list.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imageslist-완료)에 설명합니다. 새2그룹8사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `139ecc29`·`3778942c`를 push했습니다.
 
@@ -419,10 +421,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Glance native members 5개 | pinned Gophercloud v2.15.0 members requests/results/urls 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS, 전체 gate 대기 | native 멤버 가이드 추가 | 신규5행 go_mapping 기록, gate 대기 | `8d60976b`·가이드·판정 push; 다음 gate·대장 |
+| Glance native imageimport 2개 | pinned Gophercloud v2.15.0 imageimport requests/results/urls 검토 완료 | 기존 generated facade | 진행 중 | 대기 | 대기 | 착수 |
+| Glance native members 5개 | pinned Gophercloud v2.15.0 members requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹24·전체 `make check` PASS | native 멤버 가이드 추가 | **신규5행 go_mapping·313/3,362** | 작은 commit2개 push 완료; 다음 native imageimport |
 | Glance native images.Create | pinned Gophercloud v2.15.0 Create·CreateOpts·ToImageCreateMap 검토 완료 | 기존 generated facade 유지 | 새2그룹13·전체 `make check` PASS | native 생성 가이드 추가 | **신규1행 go_mapping·308/3,362** | 작은 commit2개 push 완료; 다음 native members |
 | Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 새2그룹8·전체 `make check` PASS | native 목록 가이드 추가 | **신규1행 go_mapping·307/3,362** | 작은 commit2개 push 완료; 다음 native images.Create |
 | Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
+| Glance native members 5개 | 308 → 313 (+5) | 새2그룹24·전체 `make check`(46 package) PASS | `8d60976b`·`5cdbd56e` push 완료 |
 | Glance native images.Create | 307 → 308 (+1) | 새2그룹13·전체 `make check` PASS | `4c96f116`·`0b04de99` push 완료 |
 | Glance native images.List | 306 → 307 (+1) | 새2그룹8·전체 `make check` PASS | `139ecc29`·`3778942c` push 완료 |
 | Glance native images.Get | 305 → 306 (+1) | 새2그룹16·전체 `make check` PASS | `f3c653e6`·`f83ab0b9` push 완료 |

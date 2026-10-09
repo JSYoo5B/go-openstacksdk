@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native images.Create](#glance-native-imagescreate-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native members](#glance-native-members-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는308입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는313입니다.
+
+## Glance native members 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance native `members` 5개, 전체308→313(+5)·핵심234→239/2,292·Glance71→76/120.** 기존 generated members `Create/Get/List/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID ServiceURL, 고정 OkCodes(200·200·단일 페이지·200·204), Update의 `status` 본문(빈 값 포함)과 충돌을 거부하는 확장 필드, Member decode를 바꾸지 않고 `request.Wrap` 문맥만 더하는지 검증했습니다. Python member owned API와 같은 정책 근거로 핵심 user에 둡니다. 구현 변경은 없으며 [native 멤버 가이드](../image/v2/members/README.md)를 추가했습니다.
+
+새 집중 계약 테스트2그룹24사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **46개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새5행·5계약을 추가해 reviews573·contracts3,797·go_mapping313입니다. 테스트 `8d60976b`·가이드/판정 `5cdbd56e`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Glance native images.Create 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** 기존 generated `API.Create`가 고정 BuildRequestBody 직렬화(required name·omitempty·pointer false), 선언 key를 덮어쓰는 Properties 병합, 충돌을 거부하는 `WithCreateField` 확장, 기본201과 공통 응답 projection을 따르는지 검증했습니다. 구현 변경은 없으며 [native 생성 가이드](../image/v2/images/create.md)를 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** 기존 generated `API.Create`가 고정 BuildRequestBody 직렬화(required name·omitempty·pointer false), 선언 key를 덮어쓰는 Properties 병합, 충돌을 거부하는 `WithCreateField` 확장, 기본201과 공통 응답 projection을 따르는지 검증했습니다. 구현 변경은 없으며 [native 생성 가이드](../image/v2/images/create.md)를 추가했습니다.
 
 새 집중 계약 테스트2그룹13사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·2계약을 추가해 reviews568·contracts3,792·go_mapping308입니다. 테스트 `4c96f116`·가이드/판정 `0b04de99`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
