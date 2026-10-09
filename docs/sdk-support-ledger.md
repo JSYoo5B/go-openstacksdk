@@ -18,6 +18,8 @@ Source의 기본 `raise_exc=False`는 정상 transport의 HTTP400..599에도 공
 
 공통 preparation `7850ddfb`·공개 API `9e718050`·계약/Connection 테스트 `8d4e89f3`를 각각 작은 commit으로 main에 push했습니다. `/private/tmp/go-openstacksdk-image-record-actions-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 실행 근거를 기록합니다. full public `create_image`는20파일 전체 graph·12계약 unresolved 상태를 유지하며, metadata POST만으로 이 선언을 완료 처리하지 않습니다.
 
+정확한 문서·판정 revision `f65e5be7321b6c98cbefc79d3c10fcb012ebbc76`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009002558-f65e5be7321b`·get/build exit0이며 액션/설치 main **2개**를 빌드했습니다. 원격 Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-actions-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
 `python:image/v2/deactivate_image`와 `reactivate_image`는 기본 project-scoped ADMIN_OR_PROJECT_MEMBER 정책의 핵심 user 선언입니다. Source action에는 response translation이 없으므로 응답의 id/status/location/ImportMethods header는 local Record를 갱신하지 않습니다. accepted read·Close·context/source 처리 실패는 Record=nil·partial ACK·원인 오류로 보존하며 자동 POST replay를 하지 않습니다. native400..599는 nil result와 inspectable 오류이고404도 숨기지 않습니다. fixed path·live auth·retry hook·header snapshot·sticky guard·partial evidence·pending 후속 PATCH·2개의 Connection binding을 실제 집중 테스트로 확인했습니다. Gophercloud pin에는 action native 선언이 없으므로 새 native 연산을 만들거나 집계하지 않습니다.
 
 ## Glance owned ImageRecord 삭제와 native Delete 완료
