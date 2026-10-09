@@ -4,13 +4,27 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord download](#glance-owned-imagerecord-download-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance 현대 ImageRecord create](#glance-현대-imagerecord-create-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는291입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는292입니다.
+
+## Glance 현대 ImageRecord create 완료
+
+**최신 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
+
+새87그룹361사례 + 기존2,445그룹19,800사례 = **집중 race11개 package·2,532그룹20,161사례**가 PASS했습니다. 전체 `make check`의 license 원문12개·pinned Go 의존성4개·vet·race **45개 실제 test package**·pinned parity·progress·gofmt가 통과했고 실제 재생성1회 Go drift0입니다. Go source2,184개 SHA256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection/Swift fixtures, find/property/metadata/size/REST/native response와 Swift 파일/SLO 엔진을 재사용했습니다.
+
+실제 red→green 회귀로 Task 시간 예산·HTTP 요청 타이머가 부모 guard를 오염시키는 문제, 정상 Swift 응답 Close의 자동 타이머 취소를 실패로 처리하던 문제와 configured store header 충돌을 수정했습니다. 타이머 만료 뒤 살아 있는 caller context로 정리하며, 사용자 취소·실제 source/binding drift·혼합 오류는 후속 HTTP를 계속 막습니다. native rejection은 원래 body/header를 보존하고 accepted 응답 증거로 합성하지 않습니다.
+
+Pinned Source20파일·103 AST spans를 독립 재확인하고 새30계약을 기존 legacy CreateAndImport12계약·32개 ordered refs 뒤에 추가했습니다. 다른551 reviews·catalog·source pins/fingerprint는 그대로입니다. reviews552·contracts3,742·go_mapping292·review unresolved259·catalog unresolved3,069·미검토2,810·unsupported1·supported0입니다. 공통 SDK-R1/C1/S1과 standalone Swift/Task 행은 미해결이며 전체 목표는 active입니다. 유한 JSON/source-fixed 전체 생성 graph의 Go mapping을 완료했고, 임의 Python Resource/Adapter/session 동등성이나 실제 OpenStack/Python 인증·호출을 판정하지 않았습니다.
+
+생성·설치 문서의 독립 main2개를 외부 local-replace consumer로 빌드하고, push한 정확한 revision `dbbac08b66c13a9e1a5de2c1eb1653e1a8389f2e`을 새 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009045305-dbbac08b66c1`·get/build exit0이며 원격 Go2,184개와 라이선스·고지·대응표17개 파일이 로컬 검증 bytes와 같습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-create-{focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer,remote-consumer}.json`과 source audit/independent source revalidation입니다.
+
+타이머 수정 `5669f1af`·전체 연결 `99e1331c`·공통 guard `d8c67e13`·preface/connection 테스트 `a51ceb80`·direct/admin 테스트 `261ca8fa`·Swift/deadline 테스트 `e58aea99`·비교 문서 `dbbac08b`를 작은 의미 단위로 main에 push했습니다.
 
 ## Glance owned ImageRecord download 완료
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
+**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
 
 새28그룹197사례 + 기존385그룹2736 = **집중 race413그룹2933사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 download/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/native Download/Record/Connection fixture, private capture·descriptor projection·prepared fetch·fixed request/native retry·borrowed writer chunk-copy·response body guard 엔진을 재사용했습니다. 별도 HTTP fixture 서버나 builder/interface 확장 책임을 추가하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
 

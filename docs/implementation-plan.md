@@ -10,11 +10,23 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-09): 핵심 user Glance modern CreateImageRecord 전체 연결·집중 검증 완료, 최종 판정 중.** Service/Connection 공개 facade에 metadata·직접 upload/import·checksum/현재 ID 삭제와 lazy Swift Task·396 공유 예산·속성 후처리·wait finally 정리를 연결했습니다. Task/HTTP 타이머의 만료가 부모 guard를 오염시키던 문제와 정상 Swift 응답 Close의 자동 취소 문제를 실제 실패→수정→회귀 통과로 확인했습니다. 새87그룹361사례를 포함한 집중 race **11개 실제 package·2,532그룹20,161사례**가 통과했습니다. 타이머/전체 facade/공통 guard/기본값·정책/direct·admin/Swift·deadline 테스트를 작은 commit으로 main에 push했습니다. 남은 작업은 새 Python/Go 비교 문서의 외부 빌드, 실제 재생성·전체 검사와 기존12계약을 보존하는 최종30계약 판정입니다. 완료 집계는 그 판정 전까지291/3,362를 유지합니다.
+**현재 구현 (2026-10-09): Glance 현대 이미지 생성 전체 검증·판정 완료.** 전체292/3,362·핵심218/2,292·Glance56/120입니다. 다음 범위는 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서·설치 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
+**최신 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
+
+새87그룹361사례 + 기존2,445그룹19,800사례 = **집중 race11개 package·2,532그룹20,161사례**가 PASS했습니다. 전체 `make check`의 license 원문12개·pinned Go 의존성4개·vet·race **45개 실제 test package**·pinned parity·progress·gofmt가 통과했고 실제 재생성1회 Go drift0입니다. Go source2,184개 SHA256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection/Swift fixtures, find/property/metadata/size/REST/native response와 Swift 파일/SLO 엔진을 재사용했습니다.
+
+실제 red→green 회귀로 Task 시간 예산·HTTP 요청 타이머가 부모 guard를 오염시키는 문제, 정상 Swift 응답 Close의 자동 타이머 취소를 실패로 처리하던 문제와 configured store header 충돌을 수정했습니다. 타이머 만료 뒤 살아 있는 caller context로 정리하며, 사용자 취소·실제 source/binding drift·혼합 오류는 후속 HTTP를 계속 막습니다. native rejection은 원래 body/header를 보존하고 accepted 응답 증거로 합성하지 않습니다.
+
+Pinned Source20파일·103 AST spans를 독립 재확인하고 새30계약을 기존 legacy CreateAndImport12계약·32개 ordered refs 뒤에 추가했습니다. 다른551 reviews·catalog·source pins/fingerprint는 그대로입니다. reviews552·contracts3,742·go_mapping292·review unresolved259·catalog unresolved3,069·미검토2,810·unsupported1·supported0입니다. 공통 SDK-R1/C1/S1과 standalone Swift/Task 행은 미해결이며 전체 목표는 active입니다. 유한 JSON/source-fixed 전체 생성 graph의 Go mapping을 완료했고, 임의 Python Resource/Adapter/session 동등성이나 실제 OpenStack/Python 인증·호출을 판정하지 않았습니다.
+
+생성·설치 문서의 독립 main2개를 외부 local-replace consumer로 빌드하고, push한 정확한 revision `dbbac08b66c13a9e1a5de2c1eb1653e1a8389f2e`을 새 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009045305-dbbac08b66c1`·get/build exit0이며 원격 Go2,184개와 라이선스·고지·대응표17개 파일이 로컬 검증 bytes와 같습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-create-{focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer,remote-consumer}.json`과 source audit/independent source revalidation입니다.
+
+타이머 수정 `5669f1af`·전체 연결 `99e1331c`·공통 guard `d8c67e13`·preface/connection 테스트 `a51ceb80`·direct/admin 테스트 `261ca8fa`·Swift/deadline 테스트 `e58aea99`·비교 문서 `dbbac08b`를 작은 의미 단위로 main에 push했습니다.
+
+**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
 
 새28그룹197사례 + 기존385그룹2736 = **집중 race413그룹2933사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 download/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/native Download/Record/Connection fixture, private capture·descriptor projection·prepared fetch·fixed request/native retry·borrowed writer chunk-copy·response body guard 엔진을 재사용했습니다. 별도 HTTP fixture 서버나 builder/interface 확장 책임을 추가하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
 
@@ -336,11 +348,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 291 (8.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 292 (8.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,070 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,069 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 552 | 아직 개별 기록 없는 선언 2,810 |
-| 기록한 부분·전체 계약 | 3,712 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,742 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -403,12 +415,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 217 / 2,292 | 9.5% | 161 | 1,913 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 218 / 2,292 | 9.5% | 160 | 1,913 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 291 / 3,362 | 8.7% | 260 | 2,810 | 1 |
+| 전체 | 292 / 3,362 | 8.7% | 259 | 2,810 | 1 |
 
 **핵심 서비스**
 
@@ -418,7 +430,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 55 / 120 | 26 | 39 | 0 |
+| Image / Glance | 56 / 120 | 25 | 39 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |

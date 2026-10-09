@@ -18075,7 +18075,7 @@
     {
       "operation": "python:image/v2/create_image",
       "source_fingerprint": "28928737435d50a5e0bdc4af314cdd02f9f62009f400a514c69ebe42ce66a210",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CreateAndImport",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateImportOpts",
@@ -18087,7 +18087,42 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateImportWait",
         "github.com/JSYoo5B/go-openstacksdk/image.WithoutCreateImportWait",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.PrepareStageOptions",
-        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.PrepareImportOptions"
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport.API.PrepareImportOptions",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CreateImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk.WithImageCreatePolicy",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.CreateImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateContainer",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateMD5",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSHA256",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateDiskFormat",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateContainerFormat",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTags",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateDisableVendorAgent",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAllowDuplicates",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateWait",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateValidateChecksum",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateUseImport",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSize",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateMeta",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateImportOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateSwiftHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.ImageRecordCreateBytes",
+        "github.com/JSYoo5B/go-openstacksdk/image.ImageRecordCreateText",
+        "github.com/JSYoo5B/go-openstacksdk/image.ImageRecordCreateReader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageCreatePolicyOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageCreatePolicyFormat",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageCreatePolicyTasks",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageCreatePolicyVendorAgent",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageCreatePolicyObjectStoreEnabled",
+        "github.com/JSYoo5B/go-openstacksdk/image.PrepareImageCreatePolicy",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateImageImportObject"
       ],
       "contracts": [
         {
@@ -18181,30 +18216,329 @@
             "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportKeepsNativeImageAPIAndDocumentsUpperService",
             "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportRejectsNativeMetadataAndResponseFieldDrift"
           ]
+        },
+        {
+          "behavior": "Whole modern CreateImageRecord defaults container only when omitted to images, falsey formal disk_format to frozen cloud image_format (qcow2 by default), falsey container_format to bare and inserts tags only when truthy; it does not inject private visibility. Connection merged configuration and explicit concrete policy snapshots preserve raw presence/nulls and lazy Task configuration.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowDefaultsUsePythonTruthiness",
+            "image/image_record_create_policy_test.go:TestImageCreatePolicyDefaultsRetainExplicitRawAndServicePresence",
+            "connection_image_create_policy_test.go:TestCloudImageConfigurationMergesDefaultsAndFreezesSourceValues"
+          ]
+        },
+        {
+          "behavior": "Tagged None/empty/nonempty bytes, UTF-8 text and borrowed Reader preserve Source truthiness versus presence. Truthy filename+data rejects before hashes/discovery; both falsey invoke the actual name/file helper including leading-dot splitext and the pinned second-branch isfile(name) typo. Filename plus present falsey data can fail later in Swift after container establishment.",
+          "tests": [
+            "image/image_record_create_data_test.go:TestImageRecordCreateDataFactoriesPreserveNoneEmptyAndTruthiness",
+            "image/image_record_create_data_test.go:TestImageRecordCreateDataOwnsBytesAndBorrowsReaderWithoutCaptureIO",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreatePrefaceFilenameInferencePreservesSourceBugAndDotfiles",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreatePrefaceTruthyFilenameAndDataFailBeforeHashOrDiscovery",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeContainerEnsureAndLateEmptyDataConflict"
+          ]
+        },
+        {
+          "behavior": "Preface checksum validation permits truthy bytes/file and rejects truthy text/Reader before IO or duplicate lookup. Both MD5/SHA256 are calculated only when neither supplied hash is truthy; supplied one hash prevents computation of the other. File hashing uses guarded chunks and closes its own handle before later phases; empty falsey bytes do not compute hashes.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreatePrefaceChecksumValidationComputesBothOrNeither",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreatePrefaceChecksumRejectsTextAndBorrowedReaderWithoutReading",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreatePrefaceConfiguredFormatTypeIsCheckedOnlyDuringInference"
+          ]
+        },
+        {
+          "behavior": "Unless allow_duplicates is truthy, reuse runs the complete prepared GET-first/visible-list/hidden-list find graph, including exact name/raw ID, duplicate and terminal error rules. Modern owner_specified.openstack hash key presence overrides legacy shade fallback even when null; at least one expected hash must be truthy, each supplied truthy hash must match Python JSON equality, and reuse returns before vendor/property/upload/Task availability errors.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowDuplicateHashesRespectModernPresence",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowReuseStopsBeforeVendorPropertiesAndUploadConflicts",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowDiscoveryTraversesVisibleThenHidden",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowDuplicateDiscoveryFailureDoesNotCreate",
+            "image/image_record_find_test.go:TestFindImageRecordRejectedOwnershipFaultsAreTerminal"
+          ]
+        },
+        {
+          "behavior": "After reuse, raw kwargs are overwritten by selected frozen vendor mapping/pair-list values; legacy properties is popped as a mapping, synthesized raw MD5/SHA256 (falsey becomes empty string) and object container/name overwrite it, then its contents override kwargs. Source/vendor input maps stay unchanged, malformed selected shapes fail at this phase, and explicit vendor disable avoids those late errors.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowMetadataConversionVendorPropertiesAndMetaOrder",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowVendorFlagAndPairListFollowSourceUpdate",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowLegacyPropertiesShapeFailsAfterDiscovery",
+            "image/image_record_create_policy_test.go:TestImageCreatePolicyRawVendorOverrideDefersShapeChecksAndTypedHelperClearsIt"
+          ]
+        },
+        {
+          "behavior": "Whole metadata and non-Task upload reuse exact property int/string/raw/None conversion: integer keys including min_disk/min_ram/size/virtual_size convert before Meta and None fails; other values stringify with Python JSON policy except preserved tags/protection/null. Meta overrides without conversion, formal name is forced last, and raw constructor hooks can override the resulting attributes with no final format/default recheck.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowIntegerConversionPrecedesMetaOverride",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowMetadataConversionVendorPropertiesAndMetaOrder",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadChecksumUsesFlatMetaBeforeConstructorHook"
+          ]
+        },
+        {
+          "behavior": "Only truthy filename, tagged data or import_method selects upload. use_import/URI/remote/store flags alone remain metadata-only and do not trigger Task configuration, store validation or timeout. Selected upload alone warns on mere is_public key presence, removes it and sets root public/private by Python truthiness; configured Task plus explicit truthy use_import rejects before Swift.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowFalseyDataKeepsMetadataOnlyBranch",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowIsPublicWarningBelongsToSelectedUploadOnly",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeAvailabilityIsLazyAndRawConfigIsBool"
+          ]
+        },
+        {
+          "behavior": "Metadata-only uses the same private all64-Body raw Image constructor/create engine as owned Upload, including explicit id, aliases, properties packing, __conflicting_attrs, captured location, pending/original/dirty state and independent sparse/opaque accepted POST proof. It imposes no returned ID, status or formats gate and performs no binary/import/Task/wait/final GET.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowMetadataOnlyAcceptsSparseAndOpaqueSuccess",
+            "image/image_record_upload_test.go:TestImageRecordUploadAllDeclaredFieldsSubmitRawWireWithoutProjectionDefaults",
+            "image/image_record_upload_test.go:TestImageRecordUploadConflictingAttributesAndPropertiesFollowSourceConstructorOrder",
+            "image/image_record_upload_test.go:TestImageRecordUploadInvalidMetadataSyntaxPreservesConstructorDirtyIDAndLaterCommit",
+            "image/image_record_upload_test.go:TestImageRecordUploadMetadataTranslationFailuresKeepActualCreatedEvidence"
+          ]
+        },
+        {
+          "behavior": "After duplicate reuse and non-Task store controls, a selected filename opens before property conversion or metadata POST whenever data is falsey. Metadata/create or unsupported-method failures remain outside upload cleanup. SDK handles close once on every exit and are removed from retained Record.data; Task retains its separate file/SLO path and ignores Meta and Size.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadFilenameOpenedBeforeConversionAndNotRetainedClosed",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadStoreConflictPrecedesFileOpenAndMetadataConversion",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodRejectionAfterCreateHasNoCleanup",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeSuccessMergesUnconvertedPropertiesAndFinallyDeletesObject"
+          ]
+        },
+        {
+          "behavior": "Non-Task direct upload assigns data unconditionally including None, then performs one opaque file PUT without a queued gate or response Body overlay. Explicit Size accepts Source Python integers including bool with signed arbitrary-precision decimal/True/False headers; non-integer JSON fails inside cleanup. Omitted/null size infers total length only for SDK filename or borrowed file-like Reader and restores its cursor; Bytes/Text never gain Go-only seek inference. Provider binary retry/reauth/backoff/redirect replay is disabled.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadDirectAcceptsOpaqueResponsesWithoutQueuedGateWaitOrRefresh",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadSizePreservesPythonIntegersAndRejectsOtherTypesInsideCleanup",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadReaderSizeRestoresCursorAndBorrowedLifetime",
+            "image/image_record_stage_test.go:TestImageRecordStageSizeInferenceKeepsSeekFailuresAndESPIPEUnknown",
+            "image/image_record_stage_test.go:TestImageRecordStageBinaryRejectionsNeverReplayReauthenticateOrBackoff"
+          ]
+        },
+        {
+          "behavior": "Non-Task create ignores Wait and Timeout, returning the created/uploaded/imported private image without active waiting or mandatory final GET. Only the independently selected legacy checksum comparison adds one metadata fetch. Connection uses the same concrete whole operation and source without adding lifecycle requests.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadDirectAcceptsOpaqueResponsesWithoutQueuedGateWaitOrRefresh",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodSpecificForwardingAndNoBinaryRead",
+            "image_record_create_integration_test.go:TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy"
+          ]
+        },
+        {
+          "behavior": "Import capability is checked after accepted metadata creation and unconditional data assignment, using exact creation OpenStack-image-import-methods membership with no trimming/case normalization. Unsupported methods retain the created record/receipt, consume no data and perform no stage/import/cleanup; method defaults to glance-direct only after import selection.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodRejectionAfterCreateHasNoCleanup"
+          ]
+        },
+        {
+          "behavior": "Truthy plural Stores/all_stores/all_stores_must_succeed imply use_import; all_stores with truthy plural stores rejects before file open/metadata creation. Nonnil Stores, including an empty slice, suppress both all-store flags before import compilation, while an empty body stores list may be omitted. Store identity snapshots/order/duplicates and fixed compatibility header policy reuse the owned Import compiler.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadStoreImplicationAndEmptyStorePresence",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadStoreConflictPrecedesFileOpenAndMetadataConversion",
+            "image/image_record_create_options_test.go:TestImageRecordCreateOptionsMergeReplaceAndEmptyStorePresenceRemainDistinct"
+          ]
+        },
+        {
+          "behavior": "glance-direct stages raw data once without a queued gate or mandatory metadata GET. Its opaque accepted response translates headers only, preserving raw Body/dirty/data while exposing the stage receipt. Subsequent Proxy-style empty _update resets ImportMethods and projects the same private image before import formats/controls are checked.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadStoreImplicationAndEmptyStorePresence",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportFormatsFailAfterStageAndTriggerImageCleanup",
+            "image/image_record_stage_test.go:TestImageRecordStageInvalidFetchPreservesPendingBodyForLaterCommit"
+          ]
+        },
+        {
+          "behavior": "Advertised glance-direct, web-download, glance-download, copy-image and custom methods use the complete owned raw Import compiler without image/store/method discovery. Only exact web-download forwards URI; only exact glance-download forwards a complete truthy remote tuple. Stores preserve raw IDs and order, formats use Python truthiness after empty update, and invalid selected controls retain prior stage/create evidence and invoke selected cleanup.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodSpecificForwardingAndNoBinaryRead",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadStoreImplicationAndEmptyStorePresence",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportFormatsFailAfterStageAndTriggerImageCleanup",
+            "image/image_record_import_test.go:TestImageRecordImportPluralStoreConstructorsPreserveRawIDsOrderDuplicatesAndMissingNull"
+          ]
+        },
+        {
+          "behavior": "Native HTTP import failures are explicit Go errors even though the Source branch can ignore a returned no-raise ACK. Accepted import Body is opaque and preserved separately; read/close/guard faults keep actual ACK proof, native rejections invent no accepted receipt, and either selected failure reaches the same non-Task cleanup boundary.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadNativeFailuresAndCleanMissingCleanupPreserveOriginalEvidence",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadAcceptedResponseFaultAndCleanupFaultAreJoinedWithReceipts",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary"
+          ]
+        },
+        {
+          "behavior": "Optional remote checksum GET runs only when ValidateChecksum and either final flat hash after property conversion and Meta overrides are truthy. Expected values are captured before the constructor conflicting hook. A falsey actual checksum is accepted with Compared/Matched false; otherwise exact Python JSON equality with MD5 OR SHA256 decides. No os_hash/download/content-proof substitution or extra final fetch is added.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadChecksumUsesFlatMetaBeforeConstructorHook",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadFalseyRemoteChecksumRemainsUnverified",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadChecksumFailureDeletesFetchedPrivateCurrentID"
+          ]
+        },
+        {
+          "behavior": "Only failures inside binary/stage/import/checksum trigger whole-image cleanup using the current private ID, including an ID changed by the checksum fetch. Cleanup constructs an ID-only resource and suppresses only a clean final native404; POST/unsupported/pre-block failures cause no DELETE. Original and cleanup causes/actual receipts are joined, and failed/canceled/sticky source guards never use detached cleanup contexts.",
+          "tests": [
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodRejectionAfterCreateHasNoCleanup",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadNativeFailuresAndCleanMissingCleanupPreserveOriginalEvidence",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadChecksumFailureDeletesFetchedPrivateCurrentID",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadAcceptedResponseFaultAndCleanupFaultAreJoinedWithReceipts",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadRestoredSourceFailureNeverUsesDetachedCleanup",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateNativeRequestDeadlineKeepsParentLiveForCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskWaitKeepsCallerCancellationAndSourceFailureSticky"
+          ]
+        },
+        {
+          "behavior": "Task resolves object-store availability/configured service lazily after reuse and only when upload and cloud Tasks are selected. Raw has_object_store is type-checked as bool at this branch; disabled/clean absence reports unavailable while other provider/auth/source errors propagate. Metadata/direct/reused operations do not construct Swift or observe its branch-only configuration.",
+          "tests": [
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeAvailabilityIsLazyAndRawConfigIsBool",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowReuseStopsBeforeVendorPropertiesAndUploadConflicts",
+            "image_record_create_integration_test.go:TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy",
+            "image/image_record_create_policy_test.go:TestImageCreatePolicyRawObjectStoreOverrideDefersAvailabilityChecksAndTypedHelperClearsIt"
+          ]
+        },
+        {
+          "behavior": "Task ensures its derived container through actual broad200..399 HEAD: existing returns, clean physical404 causes PUT then HEAD. Container receipts stay independent, invalid/faulted responses remain errors and no container rollback is introduced. Captured Swift source-only registration and outer operation guard remain active during options/auth/retry/response Read/Close.",
+          "tests": [
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeContainerEnsureAndLateEmptyDataConflict",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeNoWaitKeepsRawTaskAndAllSourceSuccessCodes",
+            "objectstorage/v1/containers/image_import_guard_test.go:TestImageImportContainerMetadataOuterGuardStopsNativeReplay",
+            "objectstorage/v1/containers/image_import_guard_test.go:TestImageImportContainerOuterGuardReadFailureRemainsAfterCloseRestore",
+            "objectstorage/v1/containers/image_import_guard_test.go:TestImageImportContainerSourceOnlyRegistrationPersistsWithoutRecursion"
+          ]
+        },
+        {
+          "behavior": "Task bytes/text/borrowed Reader use a single ordinary Swift PUT without pre-read/Seek/Close/spool/replay. File input reuses capability discovery/staleness and ordinary or default-SLO engines. All uploads own octet-stream, x-delete-after86400 and x-object-meta-x-sdk-autocreated=true; raw-data hashes are ignored, and filename/data presence conflict remains late after ensure.",
+          "tests": [
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectBorrowedDataUsesOnlyOneOrdinaryPUT",
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectPresentNilDataIsEmptyPUT",
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectBorrowedDataNeverRunsNativeReplayPolicies",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeNoWaitKeepsRawTaskAndAllSourceSuccessCodes",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFilenameReusesSwiftCapabilityStaleAndArbitraryHashProfile"
+          ]
+        },
+        {
+          "behavior": "Modern synthesized absent filename hashes are non-None empty strings, so the reused Swift profile sets GenerateChecksums=false. Missing HEAD sends no calculated hash metadata; an existing no-hash HEAD uses comparison-only fallback. Supplied filename hashes cross the concrete valid UTF-8 string bridge without hex restrictions; raw-data input does not convert or use supplied hashes.",
+          "tests": [
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectFilenameReusesStaleAndArbitraryHashPolicy",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFilenameReusesSwiftCapabilityStaleAndArbitraryHashProfile",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreChecksumDecisions"
+          ]
+        },
+        {
+          "behavior": "Task filename upload reuses the actual Swift immutable spool, capability/stale policies, segment scheduling/native physical retry, exact-owned cleanup and manifest ambiguity handling. The image composition accepts its broad Source200..399 acknowledgements (including segment202) through a private profile while standalone Swift behavior stays separate; no second SLO implementation or Reader-to-spool substitution is introduced.",
+          "tests": [
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectFilenameReusesSLOWithBroadSourceAcknowledgements",
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectFilenameNativeRetryCannotReplaceImageControls",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadSegmentRoundsAndExactCleanup",
+            "objectstorage/v1/objects/create_upload_test.go:TestObjectCreateUploadManifestAttemptsAndAmbiguity",
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsCleanupAndStickyAmbiguity"
+          ]
+        },
+        {
+          "behavior": "Task POST type import/input import_from container/name/image_properties formal name follows object creation without image metadata POST. No-wait returns raw Task with absent/null/nonstring ID/status/result accepted, Source declared descriptors and captured location, exact accepted receipt and no object cleanup; server TTL remains. Object/Task creation failures before wait also do not enter finally cleanup.",
+          "tests": [
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeNoWaitKeepsRawTaskAndAllSourceSuccessCodes",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFailuresBeforeWaitLeaveObjectAndContainer",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskNoWaitPreservesRawMissingAndNonstringDescriptors",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskConstructorAndSparseTranslationUseTaskDescriptors",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary"
+          ]
+        },
+        {
+          "behavior": "Task wait returns seeded success before GET, identity and timeout validation; otherwise it uses the original default3600-second budget and2-second polls with parent context. JSON null is unbounded, zero/negative expires and numeric/bool/fractional timeout follows finite Go timer bounds. Only exact396 recreates fetched raw type/input within the same budget; recreated success still pauses/GETs, and OriginalTask preserves the outer pre-recreation object for diagnostics. The Task budget context is child-scoped; expiration returns its deadline error without poisoning parent-scope source invariants.",
+          "tests": [
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitSeedSuccessPrecedesIDAndTimeoutValidation",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitTimeoutDomainAndFixedBudget",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitExact396RecreatesRawInputsAndGetsRecreatedSuccess",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitMissingRecreationFieldsBecomeExplicitNull",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitDefaultPauseHonorsParentAndFractionalBudget",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitPreservesOriginalDiagnosticObjectAcrossRecreations",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskOwnDeadlineKeepsParentLiveForFinallyCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateNativeRequestDeadlineKeepsParentLiveForCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskWaitKeepsCallerCancellationAndSourceFailureSticky"
+          ]
+        },
+        {
+          "behavior": "Task success takes raw result.image_id, fetches the complete image, copies fetched properties and overwrites them with original unconverted create properties, retaining root tags/selected legacy visibility while removing root formats. Meta/Size are ignored and the shared normalized automatic PATCH applies with no conversion, name re-force or resolver. Task/Image location comes from captured Source-style current-location collection.",
+          "tests": [
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeSuccessMergesUnconvertedPropertiesAndFinallyDeletesObject",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFailureDiagnosesOriginalTaskOnlyForResourceFailure",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskConstructorAndSparseTranslationUseTaskDescriptors"
+          ]
+        },
+        {
+          "behavior": "Only an observed non396 Task failure is a ResourceFailure and triggers an extra GET of the outer original Task for diagnostic evidence; HTTP/type/timeout/source failures do not. Every entered wait exit performs Swift metadata HEAD/delete/SLO cleanup with joined errors, including success/update failure, and never rolls back image/container. No-wait and pre-wait object/Task failures remain outside this finally. Every entered wait exit invokes the existing Swift cleanup engine using the original parent context. Actual HEAD/DELETE remains possible after an internal wait timeout when the parent/source are live; parent cancellation or genuine source failure stops physical cleanup and preserves its cause, without detached context.",
+          "tests": [
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFailureDiagnosesOriginalTaskOnlyForResourceFailure",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeFailuresBeforeWaitLeaveObjectAndContainer",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeJoinsCleanupFailureAndStopsAfterSwiftSourceDrift",
+            "image/image_record_create_swift_test.go:TestImageRecordCreateTaskWholeSLOCleanupUsesExistingBulkDeleteEvidence",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskWaitPreservesOriginalDiagnosticObjectAcrossRecreations",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskOwnDeadlineKeepsParentLiveForFinallyCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateNativeRequestDeadlineKeepsParentLiveForCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskWaitKeepsCallerCancellationAndSourceFailureSticky"
+          ]
+        },
+        {
+          "behavior": "Concrete With factories and operation preparation independently own raw/maps/bytes/store/header/config snapshots, apply nested callbacks once and stop after each sticky guard. Glance/Connection/provider/base/type/microversion/API source remains captured across all phases; lazy Swift source-only guards avoid recursive registries and cover native auth/retry/Read/Close. Borrowed lifetimes and actual accepted phase receipts remain independent and no fabricated ready/active/proof is returned. Sticky source failures and caller cancellation remain authoritative; temporary request/wait lifetime contexts must not be cached as permanent source-binding failures. HTTP/native request timer cancellation is returned per request rather than stored as source drift; normal response Close timer cancellation does not turn successful Swift upload into failure. Genuine Source drift and caller cancellation, including mixed timeout errors, remain sticky.",
+          "tests": [
+            "image/image_record_create_options_test.go:TestImageRecordCreateWholeOptionsCaptureNestedRawMapsStoresAndReuseIndependently",
+            "image/image_record_create_options_test.go:TestImageRecordCreateNestedImportCallbacksRunOnceAndStopAfterEachGuard",
+            "image/image_record_create_options_test.go:TestImageRecordCreateOptionAndMarshalerGuardsStopLaterCallbacks",
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowCallbacksAndSourceAreCapturedOnce",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadRestoredSourceFailureNeverUsesDetachedCleanup",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskNativeRetryFreezesRawSubmissionAndRetainsLiveAuthentication",
+            "objectstorage/v1/objects/image_import_source_test.go:TestImageImportObjectOuterGuardRetainsRequestReadAndAcceptedResponseEvidence",
+            "objectstorage/v1/objects/image_import_metadata_guard_test.go:TestImageImportObjectMetadataOuterGuardStopsNativeRetryAndReauthentication",
+            "objectstorage/v1/objects/image_import_metadata_guard_test.go:TestImageImportObjectMetadataReadGuardKeepsAcceptedEvidenceBeforeCloseRestores",
+            "objectstorage/v1/containers/image_import_guard_test.go:TestImageImportContainerMetadataOuterGuardStopsNativeReplay",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskOwnDeadlineKeepsParentLiveForFinallyCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateNativeRequestDeadlineKeepsParentLiveForCleanup",
+            "image/image_record_create_deadline_test.go:TestImageRecordCreateTaskWaitKeepsCallerCancellationAndSourceFailureSticky"
+          ]
+        },
+        {
+          "behavior": "Whole create forwards ordinary own-project metadata/import/update and admin-scoped public visibility/other-project owner/copy-image/configured external Task controls through the same operation without client role gates. Native server policy/quota/store/URI/backend errors remain authoritative; one create_image declaration is counted, not each branch, and local accepted transport proof does not establish deployment outcome.",
+          "tests": [
+            "image/image_record_create_workflow_test.go:TestImageRecordCreateWorkflowIsPublicWarningBelongsToSelectedUploadOnly",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadImportMethodSpecificForwardingAndNoBinaryRead",
+            "image/image_record_create_upload_test.go:TestImageRecordCreateUploadNativeFailuresAndCleanMissingCleanupPreserveOriginalEvidence",
+            "image/image_record_create_task_test.go:TestImageRecordCreateTaskNativeRejectionsPreserveStatusWithoutResourceFailure",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeForwardsOwnerAndVisibilityToServerPolicy",
+            "image/image_record_create_admin_test.go:TestImageRecordCreateWholeNativeAdminDenialKeepsBranchCleanupBoundary"
+          ]
+        },
+        {
+          "behavior": "Preserve all12 legacy CreateAndImport contract objects/test refs and its explicit fresh-image/queued/post-stage/default/wait/no-cleanup profile; add the complete modern whole Service and Connection creation graph separately. Public whole-project/service guides and executable standalone/Connection examples must cover all modern routes and explicit differences. Promotion is allowed only after actual focused/full checks, generator zero drift, local/remote consumers and Source/contract/test inventories are verified; global SDK-R1/C1/S1 and standalone Swift/Task rows remain unresolved.",
+          "tests": [
+            "image_record_create_integration_test.go:TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy",
+            "image_record_create_integration_test.go:TestConnectionOwnedImageCreateRejectsInvalidInvocation",
+            "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportKeepsNativeImageAPIAndDocumentsUpperService",
+            "internal/cmd/sdkgen/glance_create_import_test.go:TestGlanceCreateImportRejectsNativeMetadataAndResponseFieldDrift"
+          ]
         }
       ],
       "documentation": [
         "image/create-import.md",
         "image/README.md",
-        "image/v2/README.md"
+        "image/v2/README.md",
+        "image/image-record-create.md",
+        "README.md",
+        "docs/glance-policy-priorities.md",
+        "docs/install.md"
       ],
       "differences": [
-        "CreateAndImport is an explicit fresh-image import workflow with qcow2/bare/private, glance-direct and no-wait defaults. Python create_image additionally selects metadata-only/direct-file/configured Swift task paths and uses cloud format/vendor/container configuration.",
-        "Go prepares and freezes concrete metadata/stage/import/wait policy before POST or reader consumption, using local-only SDK seams and separate callback namespaces. Python kwargs/meta conversion, descriptor values and mutable Resource/session behavior are broader.",
-        "Python non-task _upload_image_put does not receive create_image wait or timeout. Go optional active wait is an explicit five-minute/two-second policy, with caller overrides and parent context, rather than a reproduction of timeout3600 for that source branch.",
-        "Go preserves actual accepted201/204/200/202 phase evidence and performs no cleanup DELETE after failure. Python checks response import-method capability after creation, stages without this post-stage metadata GET and deletes upload/import/checksum failures inside its try block.",
-        "Go canonical created ID and original lowercase post-stage format decisions reject missing/unsafe data while typed case aliases and passive Location cannot choose the route. Go retains native typed projection/header behavior alongside independent raw response evidence.",
-        "Go explicit plural stores and optional false flags are preserved together, while Python stores-is-not-None suppresses both all-store flags. Existing leaf singular Store is header-only rather than Python header plus one-element stores body.",
-        "Go borrows explicit io.Reader without filename/name inference, hashing, automatic whole-file size or checksum validation. Binary staging disables SDK replay callbacks and redirects; caller RoundTripper internals and blocking Read release remain caller responsibilities."
+        "Legacy CreateAndImport profile: CreateAndImport is an explicit fresh-image import workflow with qcow2/bare/private, glance-direct and no-wait defaults. Python create_image additionally selects metadata-only/direct-file/configured Swift task paths and uses cloud format/vendor/container configuration.",
+        "Legacy CreateAndImport profile: Go prepares and freezes concrete metadata/stage/import/wait policy before POST or reader consumption, using local-only SDK seams and separate callback namespaces. Python kwargs/meta conversion, descriptor values and mutable Resource/session behavior are broader.",
+        "Legacy CreateAndImport profile: Python non-task _upload_image_put does not receive create_image wait or timeout. Go optional active wait is an explicit five-minute/two-second policy, with caller overrides and parent context, rather than a reproduction of timeout3600 for that source branch.",
+        "Legacy CreateAndImport profile: Go preserves actual accepted201/204/200/202 phase evidence and performs no cleanup DELETE after failure. Python checks response import-method capability after creation, stages without this post-stage metadata GET and deletes upload/import/checksum failures inside its try block.",
+        "Legacy CreateAndImport profile: Go canonical created ID and original lowercase post-stage format decisions reject missing/unsafe data while typed case aliases and passive Location cannot choose the route. Go retains native typed projection/header behavior alongside independent raw response evidence.",
+        "Legacy CreateAndImport profile: Go explicit plural stores and optional false flags are preserved together, while Python stores-is-not-None suppresses both all-store flags. Existing leaf singular Store is header-only rather than Python header plus one-element stores body.",
+        "Legacy CreateAndImport profile: Go borrows explicit io.Reader without filename/name inference, hashing, automatic whole-file size or checksum validation. Binary staging disables SDK replay callbacks and redirects; caller RoundTripper internals and blocking Read release remain caller responsibilities.",
+        "Modern whole CreateImageRecord covers the complete finite JSON/source-fixed create_image graph. Legacy CreateAndImport remains a separately named stricter fresh-image import profile with its preserved12 contracts; its defaults/queued/followupGET/active-wait/no-cleanup differences do not describe modern creation.",
+        "Go owns immutable tagged data, raw JSON/maps/headers/store/config snapshots and independent Image/Task/phase/cleanup receipts, rather than mutating arbitrary Python Resource/Munch/subclasses. Raw Body/current/original/dirty presence, constructor hook ordering, Source-style captured current location and header collector reset reuse owned Resource helpers; full dynamic class/component/default alias/header/URI/backing lifecycle remains SDK-R1.",
+        "Go native400..599 import rejection and retained response causes are explicit improvements over Source returned no-raise import ACK. Errors within selected binary/import/checksum block delete current private image ID; no successful import is equated with backend completion or active status.",
+        "Go closes SDK-owned filenames once and clears their retained data reference; Source opens its upload file without a comparable owned closure. Borrowed Readers stay open/current-cursor, binary replay disabled, and blocked caller Read or custom RoundTripper internal replay still requires caller cooperation.",
+        "Go joins original and cleanup faults rather than Source masking or cloud SDKException suppression, preserves actual partial receipts and keeps source/context failure sticky. Cleanup uses the same captured context/source and is never detached to bypass a failed binding.",
+        "Source signed arbitrary Python integer/bool Size is retained in the JSON domain, including bool True/False; float/string/container size rejects inside cleanup. Size inference is restricted to Source file-like filename/Reader capability, excluding artificial Go Bytes/Text seekability. Task timeout null/zero/bool/number/fraction is retained but positive timer values beyond Go duration range are saturated and tiny positives bounded to1ns.",
+        "Swift filename composition reuses unique segment prefixes, immutable replay sections, exact-owned cleanup and ambiguity policies instead of reproducing the Source FileSegment cursor bug. Image-only profile broad200..399 and segment202 differ from unchanged standalone Swift gates. Arbitrary valid UTF-8 string hashes are accepted without hex restrictions; nonstring filename hashes lie outside the concrete Swift string bridge, while raw-data hashes are ignored like Source.",
+        "The actual pinned filename-extension inference typo is preserved. No corrected inference mode or extra default/private/queued/active gates are introduced.",
+        "Only clean disabled/object-store absence becomes unavailable; mixed/auth/IO/source errors propagate rather than broad Source has_service suppression. Formal Go request fields and options are separate concrete namespaces where Python duplicate-argument binding cannot be represented; fixed string-key JSON, complete UTF-8/paired-surrogate routing, safe literal IDs/header/source controls and JSON serializer order remain explicit bounds.",
+        "Native server policy including own-project modify/community visibility and admin public/other-owner/copy-image/tasks access, store availability, Swift ACL/quota/URI authorization and eventual backend processing remain server-owned. Local tests cannot establish live cloud success or universal policy overrides.",
+        "Captured provider/origin/base/type/microversion and source-only nested guards preserve current operation. Full Adapter caching/conditional GET/invalidation/metrics/global request configuration remain SDK-C1; arbitrary session/adapter/response/microversion/base-path injection remains SDK-S1. The global shared objectives and standalone Swift/Task declaration rows are not promoted by this finite modern operation.",
+        "Request-owned Task/HTTP timer expiry does not invalidate live parent-source invariants; caller cancellation or real binding/source drift, including joined timeout errors, stays sticky and cannot be bypassed by detached cleanup. Ordinary response closure can cancel native request timers without manufacturing failed Swift uploads.",
+        "The modern import phase reuses the owned ImportImageRecord policy: configured legacy store headers are discarded from the copied request client, then an explicit singular selection supplies its fixed header. Source/shared header maps stay unchanged."
       ],
-      "remaining": [
-        "Cloud configuration image_format/vendor flags, automatic Swift object/container and image_api_use_tasks selection, task workflow/cleanup and configuration-specific upload/import capability handling are not reproduced by this explicit workflow.",
-        "Python filename opening/name inference, bytes/string/file polymorphism, MD5/SHA256 calculation and duplicate hash freshness shortcut, synthesized owner_specified/legacy shade properties, legacy checksum fetch/compare and seekable whole-file size remain outside the concrete reader API.",
-        "Python kwargs integer/string/raw conversion and meta precedence, full mutable Image Resource defaults/descriptors/coercion/dirty state/alternate identity/cache/seed/header merge and injected session/adapter behavior remain unresolved.",
-        "Deployment method/storage availability, URL policy, quota, permissions, actual backend processing, eventual import state and end-to-end cloud success are server-owned. Local HTTP proof does not establish those outcomes or a full create_image mapping.",
-        "Response models keep native numeric/timestamp/unknown-property projection limits; raw response evidence does not make typed Image precision or arbitrary source Resource semantics exact. Shared wait returns no original response body/header/status or last-failure image evidence.",
-        "Custom RoundTripper internal replay and forcibly unblocking a caller reader are outside the SDK one-binary-provider-attempt guarantee. The SDK deliberately avoids cleanup and leaves retained side effects for caller decisions."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/download_image",
@@ -27734,7 +28068,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -28108,11 +28442,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -28173,11 +28507,11 @@
         }
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
       ],
       "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
@@ -35294,7 +35628,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -35395,7 +35729,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -35653,7 +35987,7 @@
           ]
         },
         {
-          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status\u2192Backup.reset_status\u2192Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
+          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status→Backup.reset_status→Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
           "tests": [
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsPreserveNativeTypedRestoreAndSelectedVersionReset",
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorLabels",
@@ -39239,7 +39573,7 @@
           ]
         },
         {
-          "behavior": "The default standalone Wait wire context carries a deadline179\u2013181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
+          "behavior": "The default standalone Wait wire context carries a deadline179–181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
           "tests": [
             "compute/server_ready_boundaries_test.go:TestWaitForServerDefaultWholeBudgetIs180Seconds",
             "compute/server_ready_boundaries_test.go:TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel"
@@ -42724,7 +43058,7 @@
         "Go exposes a typed request and concrete options with a result separating the source boolean Deleted from actual absence, present DOWN, accepted logical attempts, last public-Get verification and failed-response evidence. An accepted DELETE is not itself verified disappearance; retry0 intentionally has no verification. This does not reproduce Python's scalar return or mutable Resource/Munch/session surface.",
         "The delete's verification deliberately reuses ordinary cloud Get semantics rather than always using GetFloatingIPByID. Mutation backend, query fallback backend and normalization source remain distinct. Nova's source-synthetic logical ACTIVE is separated from raw Wire; a DOWN success can describe a still-existing row and never asserts an actual ACTIVE wait or deletion convergence.",
         "Typed safe UTF-8/path IDs, explicit source/location/strict/direct-get policy and optional one shared operation timeout are Go API choices. Defaults add no SDK deadline; a bulk zero-valued options replacement sets retry0, while dedicated default preparation retains retry1. The mapping does not establish every Python dynamic retry argument, configuration or has_service/session policy.",
-        "Owned mutation transport follows the cloud-style passive HTTP200\u2013399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
+        "Owned mutation transport follows the cloud-style passive HTTP200–399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
         "Direct UUID verification intentionally preserves source getter trust: a different response ID with DOWN can satisfy the source boolean, with the actual row retained and Absent=false. The result is a source success policy rather than identity-checked requested-resource disappearance. Dedicated deletion options do not add filters or expression parameters that are absent from the source deletion signature.",
         "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade.",
         "The declared ID/retry deletion contract is mapped. Connection/profile use_direct_get configuration is expressed as an explicit Go option with default false; typed safe IDs and int retries, exact missing-catalog fallback, guarded context/accepted-error behavior, and the local legacy version preflight are documented Go choices. Inherited mutable Resource/session/cache APIs remain separately tracked in the SDK scope rather than missing arguments of this declaration.",
@@ -43169,7 +43503,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -43229,7 +43563,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -43289,7 +43623,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]

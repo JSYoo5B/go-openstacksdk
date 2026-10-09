@@ -91,7 +91,7 @@ AST와 SHA256으로 route·controller·policy를 확인했으며 action controll
 
 [API add_image243–260행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/policy.py#L243-L260)은 visibility 검사를 함께 적용하고, [visibility helper111–115행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/policy.py#L111-L115)은 public/community에 각각 publicize/communitize를 적용합니다. [publicize·communitize 정책94–117행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L94-L117)은 public에 project `ADMIN`, community에 `ADMIN_OR_PROJECT_MEMBER`를 요구합니다. 같은 `UploadImageRecord`의 metadata 속성으로 전달하며 branch를 별도 operation으로 세지 않습니다.
 
-[owned 업로드 가이드](../image/image-record-upload.md)는 deprecated Python `upload_image`의 private create→binary PUT 전체 graph, 명시 형식 precheck·raw 속성 overlay·signed size와 GET 없는 반환을 설명합니다. client role·enum·상태 검사를 추가하지 않으며 실제 소유권·schema·quota·backend·policy override는 서버가 판단합니다. Source SHA/AST는 `/private/tmp/go-openstacksdk-image-record-upload-source-audit.json`에 고정했습니다. 현대 공개 `create_image` 전체 분기는 별도 미해결 범위이고, 지원 수치는 [구현 계획](implementation-plan.md)·[지원 판정대장](sdk-support-ledger.md)의 실제 최종 검증을 기준으로 확인합니다.
+[owned 업로드 가이드](../image/image-record-upload.md)는 deprecated Python `upload_image`의 private create→binary PUT 전체 graph, 명시 형식 precheck·raw 속성 overlay·signed size와 GET 없는 반환을 설명합니다. client role·enum·상태 검사를 추가하지 않으며 실제 소유권·schema·quota·backend·policy override는 서버가 판단합니다. Source SHA/AST는 `/private/tmp/go-openstacksdk-image-record-upload-source-audit.json`에 고정했습니다. 현대 공개 `create_image` 전체 분기는 아래 최신 완료 단위에서 검증했으며, 지원 수치는 [구현 계획](implementation-plan.md)·[지원 판정대장](sdk-support-ledger.md)의 실제 최종 검증을 기준으로 확인합니다.
 
 
 ## 이미지 다운로드의 user·deactivated admin 분기
@@ -102,4 +102,11 @@ AST와 SHA256으로 route·controller·policy를 확인했으며 action controll
 
 [prefer deserializer598–612행](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/image_data.py#L598-L612)은 cache 경로의 preference 우회를 설명하고 comma 분리·whitespace/empty 제거를 수행합니다. 이후 controller가 backend 설정·scheme과 location을 검증합니다. client의 ordered preference 값 전달이 backend 순서·cache 우회·storage 성공을 보장하지 않습니다.
 
-[owned 다운로드 가이드](../image/image-record-download.md)는 lower Python `download_image`의 필수 metadata fetch→binary GET→hash 선택과 output/stream/memory 전체 분기를 설명합니다. Source SHA/AST는 `/private/tmp/go-openstacksdk-image-record-download-source-audit.json`에 고정하며 별도 cloud wrapper·현대 공개 create와 공통 SDK-R1/C1/S1은 후속 범위입니다. 정책 확인이나 새 문서만으로 지원 수를 올리지 않습니다. 실제 판정은 [구현 계획](implementation-plan.md)·[지원 판정대장](sdk-support-ledger.md)의 최종 gate를 기준으로 합니다.
+[owned 다운로드 가이드](../image/image-record-download.md)는 lower Python `download_image`의 필수 metadata fetch→binary GET→hash 선택과 output/stream/memory 전체 분기를 설명합니다. Source SHA/AST는 `/private/tmp/go-openstacksdk-image-record-download-source-audit.json`에 고정하며 현대 공개 create는 아래 최신 완료 단위에서 검증했고 별도 cloud wrapper와 공통 SDK-R1/C1/S1은 후속 범위입니다. 정책 확인이나 새 문서만으로 지원 수를 올리지 않습니다. 실제 판정은 [구현 계획](implementation-plan.md)·[지원 판정대장](sdk-support-ledger.md)의 최종 gate를 기준으로 합니다.
+
+
+## 현대 이미지 생성의 user·admin 분기 완료
+
+[CreateImageRecord 가이드](../image/image-record-create.md)의 기본 이미지 생성·직접 업로드·일반 import는 핵심 user 범위입니다. 같은 공개 operation의 owner·public/community visibility와 copy-image·configured Task 분기는 native 서버 정책으로 처리하며 별도 operation으로 세지 않습니다. 메타데이터 쓰기의 기존 핵심 admin 우선순위는 유지합니다.
+
+whole API 테스트는 owner/public/community 속성을 실제 POST에 전달하고 허용 응답 또는 native403을 보존합니다. copy-image403은 생성 뒤 binary/import try 내부의 이미지 삭제를 수행하며 Task403은 entered wait 이전이어서 업로드한 객체를 유지합니다. client role gate로 서버의 policy override를 대체하지 않습니다. 실제 권한·backend·quota·Swift ACL과 비동기 처리는 서버가 결정합니다. 전체1개 finite Go mapping의 최종 수치와 검증 근거는 구현 계획·판정대장의 최신 완료 단위를 기준으로 합니다.
