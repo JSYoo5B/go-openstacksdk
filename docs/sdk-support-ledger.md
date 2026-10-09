@@ -4,13 +4,31 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 비활성화·재활성화](#glance-owned-imagerecord-비활성화재활성화-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 속성 helper](#glance-owned-imagerecord-속성-helper-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는286입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는287입니다.
+
+## Glance owned ImageRecord 속성 helper 완료
+
+**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 속성 helper1개, 전체286→287(+1)·핵심212→213/2,292·Glance50→51/120.** `Service.UpdateImagePropertiesRecord`와 `Connection`의 같은 facade가 cached properties copy·ordered kwargs·kernel/ramdisk 전체 목록 검색·int/raw/string 변환·raw meta overlay·canonical backing 비교·공통 owned Update commit을 처리합니다. Source의 bool을 `Updated`로 보존하므로 True가 PATCH 전송을 뜻하지 않고 False는 Update를 생략합니다. literal ID에는 자동 GET을 넣지 않으며 truthy 참조 검색 뒤 missing properties copy가 실패하는 Source 순서도 유지합니다. [Python/Go 비교·독립 main](../image/image-record-properties.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-속성-helper-완료)에 concrete 옵션·no-op/pending·부분 오류와 JSON/Unicode/control 경계를 기록했습니다.
+
+새20그룹128사례 + 기존156그룹1211 = **집중 race176그룹1339사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 속성/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,123개 SHA256 `dc7351eaadb7b5a1402fabf4dc3bf15636747813a20cc716bbf7514344f91d50`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper·기존 HTTP/fault/Record/Connection fixture, pager·cloudfilter·integer/string 변환·RFC6902·prepared update/response 엔진을 재사용했습니다. 새 HTTP 서버·독립 resolver builder를 요구하지 않습니다. 최종 focused/full/generation은 동일한 Go 소스를 확인합니다.
+
+고정 Source11파일/40 AST의18개 새 계약을 추가하고 기존 typed add-per-key10계약의 API/test refs와 다른551 reviews·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,634·go_mapping287·review unresolved264·unsupported1이며 catalog unresolved3,074에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 주장하는 supported 판정은0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-properties-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`입니다.
+
+공통 Update preparation `74ea3ede`·공개 helper `9db5159c`·계약/Connection 테스트 `3295bda9`·Python 비교 문서 `542c27cb`를 각각 작은 commit으로 main에 push했습니다.
+
+데이터 workflow Source 감사 `/private/tmp/go-openstacksdk-image-data-workflows-source-audit.json`의 SHA256은 `2af47c35353e44463f2d33125fafb5ed8a49714769b993fdbc3039817de107c0`입니다. 13개 pinned Python 파일과10개 pinned Glance 파일의66 AST를 확인했으며 stage/import/upload/download4개 선언의 기존44계약은 아직 unresolved입니다. 다음 complete owned StageImageRecord부터 진행하고 import의 copy-image admin 분기·deprecated upload의 create 기반·download의 writer/path/stream/memory도 전체 public graph로 추적합니다. public `create_image`의20파일 전체 graph·12계약 unresolved 상태를 보존하며 metadata POST만으로 닫지 않습니다. 정확한 revision의 원격 설치·라이선스14개 일치 증거는 후속 결과로 기록합니다.
+
+고정 `python:image/v2/update_image_properties`의 전체 helper를 한 선언으로 집계합니다. Reference lookup은 각각 모든 페이지를 읽고 deleted status를 제외한 뒤 첫 exact/glob match를 고르며 중복 오류·hidden fallback·대상 GET을 넣지 않습니다. 뒤 페이지/status/descriptor/physical 오류는 앞선 candidate가 있어도 terminal입니다. Source kwargs의 truthiness·alias 순서·resolver-before-copy·helper int/raw/string·meta-last·cached shape·canonical dict.get 비교를 함께 검증했습니다.
+
+`Updated`는 prepared property map이 nonempty인 성공 분기를 뜻하며 server save/실제 PATCH/field change를 합성하지 않습니다. clean nonempty seed의 True/noHTTP, empty seed의 False, unrelated pending·dirty empty []·id retargeting과 cached alias promotion을 shared Update로 처리합니다. 준비/조회/복사/변환/native 거부는 nil result+error이고 accepted PATCH 처리 실패만 Updated=false·partial submitted Record/actual receipt·cause를 남깁니다. Read/Close·source/context·decode/projection failure를 복구하기 위한 자동 PATCH replay는 없습니다.
+
+concrete8옵션은 caller builder 없이 defaults와 입력 소유권을 제공합니다. map bulk는 sorted incoming key upsert로 기존 first position을 유지하고 raw JSON kwargs/meta는 각각 whole-object 교체, FullOpts는 전체 설정 교체입니다. kwargs/meta·headers·private current/original/dirty와 passive receipt·option slice·callback·live original provider auth를 하나의 captured source로 고정합니다. resolver status와 direct/meta identity는 complete UTF8·paired escaped Unicode를 요구하는 명시적 Go 경계입니다. 일반 property는 기본 project-member user 경로이며 public visibility/location removal은 admin 필드 분기로 남깁니다. legacy SetImageProperties·native API와 임의 mutable Python Resource/Adapter/session의 계약은 별도로 보존합니다.
 
 ## Glance owned ImageRecord 비활성화·재활성화 완료
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 비활성화·재활성화2개, 전체284→286(+2)·핵심210→212/2,292·Glance48→50/120.** `Connection`과 `Service`가 private current ID·concrete header 옵션·현재 location의65필드 preparation과 독립 local Record/actual ACK를 제공합니다. 추가 GET·discovery·wait 없이 고정 POST를 보내며 pending raw Body·이전 fetch receipt를 보존하고 local status를 합성하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-actions.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-비활성화재활성화-완료)에 사용법과 명시적인 HTTP 오류 정책 차이를 기록했습니다.
+**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 비활성화·재활성화2개, 전체284→286(+2)·핵심210→212/2,292·Glance48→50/120.** `Connection`과 `Service`가 private current ID·concrete header 옵션·현재 location의65필드 preparation과 독립 local Record/actual ACK를 제공합니다. 추가 GET·discovery·wait 없이 고정 POST를 보내며 pending raw Body·이전 fetch receipt를 보존하고 local status를 합성하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-actions.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-비활성화재활성화-완료)에 사용법과 명시적인 HTTP 오류 정책 차이를 기록했습니다.
 
 Source의 기본 `raise_exc=False`는 정상 transport의 HTTP400..599에도 공개 action에서 None으로 끝날 수 있지만 Go는 native 오류를 반환하고 actual200..399의 opaque ACK를 보존합니다. 따라서 이2행은 `go_mapping`이며 Source status 동등성을 주장하지 않습니다. 기존550 reviews·두 legacy8계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 새16계약으로 reviews552·contracts3,616·go_mapping286·review unresolved265·unsupported1입니다. catalog unresolved3,075에는 미검토2,810개가 포함됩니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
