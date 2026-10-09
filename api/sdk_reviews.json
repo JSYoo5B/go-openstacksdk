@@ -46106,6 +46106,50 @@
         "The fixed two-second Python interval is the default; a positive PollInterval and request headers are Go extensions. An in-flight lookup is not cancelled by the wait deadline, matching iterate_timeout, while caller context cancellation is observed during sleeps."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/download_image",
+      "source_fingerprint": "b70dce56c174066055fe3bd48402654ec18101ad2b9f0f755b726444526a96e3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadCloudImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream"
+      ],
+      "contracts": [
+        {
+          "behavior": "Missing or duplicate destinations, typed nil writers, invalid filenames, blank identities, nil options and invalid headers fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadStrictFindAndPreflight"
+          ]
+        },
+        {
+          "behavior": "DownloadCloudImageRecord finds the image with the owned ignore_missing false Find graph, returning ErrNotFound without download requests when absent, then passes the found record to DownloadImageRecord: mandatory metadata GET of the found identity, binary GET of the fetched identity and default checksum verification, writing to the borrowed writer or SDK-created file. Stream is forwarded but the required destination wins; chunk size and headers reach the lower phases.",
+          "tests": [
+            "image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadFindsThenDownloadsToRequiredOutput",
+            "image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadStrictFindAndPreflight"
+          ]
+        },
+        {
+          "behavior": "A lower download failure returns Found plus the partial download result and the native cause under the DownloadCloudImageRecord operation without nesting the delegated operation.",
+          "tests": [
+            "image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadFindsThenDownloadsToRequiredOutput"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-record-download.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns the lower download value or raises SDKException/ResourceNotFound; Go returns ImageRecordCloudDownloadResult separating the strict Find record from the lower download phases and wraps typed errors.",
+        "Python treats an empty output_path as present and then falls back to memory mode; Go treats an empty Filename as absent and rejects it before HTTP. Headers are a Go extension for both phases, and Proxy-only download options keep their defaults because the Cloud signature has no such arguments."
+      ],
+      "remaining": []
     }
   ]
 }
