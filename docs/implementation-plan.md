@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance Cloud `update_image_properties` 검증·판정 완료.** 전체302/3,362·핵심228/2,292·Glance66/120입니다. 다음 범위는 같은 Cloud mixin의 `delete_image`(Task 업로드 Swift 객체 정리·삭제 대기 포함)와 Cloud `create_image` 등 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
+**현재 구현 (2026-10-10): Glance Cloud `delete_image` 구현·집중 테스트 완료, 가이드·판정·전체 gate 진행 중.** 직전 완료 집계는 전체302/3,362·핵심228/2,292·Glance66/120입니다. `Service.DeleteCloudImageRecord`가 ignore_missing Find·owned 전체 삭제·`image_api_use_tasks`일 때 properties의 Task 업로드 Swift 객체 정리·선택적 부재 대기를 연결합니다. 공통 대기 루프 `4348b877`·operation 이름 공통화 `55a9171d`·공개 API `abfcdb7e`와 집중 테스트를 push했습니다. 다음은 가이드 절·판정 1행·전체 `make check`이고 그 뒤 Cloud `create_image`를 검토합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `update_image_properties`1개, 전체301→302(+1)·핵심227→228/2,292·Glance65→66/120.** `Service.UpdateCloudImageProperties`가 `image or name_or_id` 선택 뒤 owned 속성 helper에 위임합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-속성-갱신)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-속성-갱신-완료)에 설명합니다. 새1그룹4사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `a46250e8`·`3d109207`·`b0aeb599`를 push했습니다.
 
@@ -573,6 +573,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance Cloud delete_image | pinned Cloud `delete_image`·Proxy `delete_object`/Object.delete SLO 분기 검토 완료 | Find·owned delete·Task 객체 정리·부재 대기 Service API 완료 | 집중 테스트 PASS, 전체 `make check` 대기 | 진행 중 | 진행 중 | `4348b877`·`55a9171d`·`abfcdb7e`·테스트 push; 다음 가이드·판정 |
 | Glance Cloud update_image_properties | pinned Cloud wrapper의 `image or name_or_id` 검토 완료 | 선택 wrapper·owned helper 위임 Service API 완료 | 새1그룹4·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·302/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image |
 | Glance Cloud download_image | pinned Cloud `download_image`·`_download.py` 출력 분기 검토 완료 | 출력 검사·strict Find·owned 다운로드 연결 Service API 완료 | 새2그룹12·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·301/3,362** | 작은 commit3개 push 완료; 다음 Cloud update_image_properties/delete_image |
 | Glance Cloud wait_for_image | pinned Cloud `wait_for_image`·`utils.iterate_timeout` 검토 완료 | 반복 find·정확한 상태 비교·timeout/간격 옵션 Service API 완료 | 새3그룹14·20회 반복·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·300/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image/download_image |
