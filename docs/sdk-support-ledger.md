@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 Proxy create_image](#cinder-v3-proxy-create_image-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 생성](#glance-cloud-이미지-생성-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는304입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는305입니다.
+
+## Glance Cloud 이미지 생성 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `create_image`1개, 전체304→305(+1)·핵심230→231/2,292·Glance67→68/120.** `Connection.CreateCloudImageRecord`가 volume 유무로 owned `CreateImageRecord`와 Cinder Proxy `CreateVolumeImageRecord`를 고르고, wait가 truthy이면 Cloud get_image를 반복해 status가 정확히 queued/saving이 아닌 첫 record를 반환합니다. timeout은 생성 옵션의 raw 값을 `iterate_timeout`처럼 해석하고, 만료되면 Cloud delete_image(wait)로 정리한 뒤 두 원인을 함께 보존합니다. 생성 옵션 callback은 새 `image.PrepareImageRecordCreateOptions` snapshot으로 한 번만 실행합니다. 이 단위로 고정 ImageCloudMixin의 12개 helper가 모두 go_mapping입니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-생성)에 설명합니다.
+
+새 집중 테스트2그룹10사례가 race로 통과했고 시간 의존 그룹은10회 반복했습니다. 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·4계약을 추가해 reviews565·contracts3,785·go_mapping305·catalog unresolved3,056입니다. 공개 API `d35410d8`·테스트 `9d8d50c8`·가이드/판정 `09f5987e`를 push했습니다. 공통 SDK-R1/C1/S1은 계속 추적합니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Cinder v3 Proxy create_image 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Cinder v3 Proxy `create_image`1개, 전체303→304(+1)·핵심229→230/2,292.** Cloud `create_image`의 volume 분기가 쓰는 선행 의존으로 처리했으며 Cinder 후속 범위를 앞당기는 뜻은 아닙니다. `Connection.CreateVolumeImageRecord`가 falsey disk format에 설정 `image_format`(기본 qcow2, null이면 생략), falsey container format에 `bare`, force에 allow_duplicates를 채워 기존 upload-to-image 액션을 한 번 보냅니다. 응답 `image_id`로 새 `image.Service.ExistingImageRecord`가 Python `Image.existing(id=...)`처럼 Glance 요청 없는 동기화 record를 만듭니다. 고정 Proxy가 읽지 않는 wait/timeout은 제공하지 않습니다. [사용법](../blockstorage/volume-upload-image.md#proxy-create_image-기본-형식과-image-반환)에 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Cinder v3 Proxy `create_image`1개, 전체303→304(+1)·핵심229→230/2,292.** Cloud `create_image`의 volume 분기가 쓰는 선행 의존으로 처리했으며 Cinder 후속 범위를 앞당기는 뜻은 아닙니다. `Connection.CreateVolumeImageRecord`가 falsey disk format에 설정 `image_format`(기본 qcow2, null이면 생략), falsey container format에 `bare`, force에 allow_duplicates를 채워 기존 upload-to-image 액션을 한 번 보냅니다. 응답 `image_id`로 새 `image.Service.ExistingImageRecord`가 Python `Image.existing(id=...)`처럼 Glance 요청 없는 동기화 record를 만듭니다. 고정 Proxy가 읽지 않는 wait/timeout은 제공하지 않습니다. [사용법](../blockstorage/volume-upload-image.md#proxy-create_image-기본-형식과-image-반환)에 설명합니다.
 
 새 집중 테스트2그룹13사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·3계약을 추가해 reviews564·contracts3,781·go_mapping304입니다. 공개 API `6e224837`·테스트 `249537cf`·가이드/판정 `b1cfeca0`를 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 

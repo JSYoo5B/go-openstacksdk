@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance Cloud `create_image` 구현·테스트·가이드·판정 1행 완료, 전체 gate 진행 중.** 직전 완료 집계는 전체304/3,362·핵심230/2,292·Glance67/120입니다. `Connection.CreateCloudImageRecord`가 volume 유무로 `CreateImageRecord`와 `CreateVolumeImageRecord`를 고르고, wait이면 Cloud get_image를 반복해 status가 queued/saving이 아닐 때 반환하며 timeout이면 Cloud delete_image(wait)로 정리합니다. 공개 API `d35410d8`(옵션 snapshot `image.PrepareImageRecordCreateOptions` 포함)·테스트 `9d8d50c8`·가이드·판정을 push했고 판정 반영 집계는305입니다. 다음은 전체 `make check`와 판정대장 기록이며 이 단위로 Cloud ImageCloudMixin 12개가 모두 닫힙니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Glance Cloud `create_image` 검증·판정 완료(ImageCloudMixin 12개 완료), native Gophercloud `images.Get` 계약 검증 중.** 전체305/3,362·핵심231/2,292·Glance68/120입니다. 다음 핵심 user Glance 범위는 남은 native Gophercloud 조회(`images.Get`·`images.List`)이며, 고정 v2.15.0의 기본200·header merge·UnmarshalJSON projection을 그대로 검증합니다. 집중 계약 테스트를 push했고 다음은 가이드·판정입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
-**최신 API 완료 (2026-10-10): 핵심 user Cinder v3 Proxy `create_image`1개, 전체303→304(+1)·핵심229→230/2,292.** Cloud `create_image` volume 분기의 선행 의존으로 `Connection.CreateVolumeImageRecord`와 `image.Service.ExistingImageRecord`를 추가했습니다. [사용법](../blockstorage/volume-upload-image.md#proxy-create_image-기본-형식과-image-반환)과 [검증 기록](sdk-support-ledger.md#cinder-v3-proxy-create_image-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `6e224837`·`249537cf`·`b1cfeca0`를 push했습니다.
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `create_image`1개, 전체304→305(+1)·핵심230→231/2,292·Glance67→68/120.** `Connection.CreateCloudImageRecord`가 Glance·Cinder 분기, 생성 후 Cloud 대기, timeout 정리를 연결해 ImageCloudMixin 12개를 모두 닫았습니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-생성)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-생성-완료)에 설명합니다. 새2그룹10사례(10회 반복)와 전체 `make check`(race 45개 실제 test package)가 통과했고 `d35410d8`·`9d8d50c8`·`09f5987e`를 push했습니다.
+
+**앞선 API 완료 (2026-10-10): 핵심 user Cinder v3 Proxy `create_image`1개, 전체303→304(+1)·핵심229→230/2,292.** Cloud `create_image` volume 분기의 선행 의존으로 `Connection.CreateVolumeImageRecord`와 `image.Service.ExistingImageRecord`를 추가했습니다. [사용법](../blockstorage/volume-upload-image.md#proxy-create_image-기본-형식과-image-반환)과 [검증 기록](sdk-support-ledger.md#cinder-v3-proxy-create_image-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `6e224837`·`249537cf`·`b1cfeca0`를 push했습니다.
 
 **앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `delete_image`1개, 전체302→303(+1)·핵심228→229/2,292·Glance66→67/120.** `Service.DeleteCloudImageRecord`가 Find·owned 삭제·Task 업로드 Swift 객체 정리·선택적 부재 대기를 연결합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-삭제)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-삭제-완료)에 설명합니다. 새3그룹23사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4348b877`·`55a9171d`·`abfcdb7e`·`2381134a`·`61f79f2e`·`78b0c67c`를 push했습니다.
 
@@ -411,6 +413,8 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Glance Cloud create_image | 304 → 305 (+1) | 새2그룹10·10회 반복·전체 `make check` PASS | `d35410d8`·`9d8d50c8`·`09f5987e` push 완료 |
 | Cinder v3 Proxy create_image | 303 → 304 (+1) | 새2그룹13·전체 `make check` PASS | `6e224837`·`249537cf`·`b1cfeca0` push 완료 |
 | Glance Cloud delete_image | 302 → 303 (+1) | 새3그룹23·전체 `make check` PASS | `abfcdb7e`·`2381134a`·`61f79f2e`·`78b0c67c` push 완료 |
 | Glance Cloud update_image_properties | 301 → 302 (+1) | 새1그룹4·전체 `make check` PASS | `a46250e8`·`3d109207`·`b0aeb599` push 완료 |
@@ -579,7 +583,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance Cloud create_image | pinned Cloud `create_image`·wait/timeout cleanup 검토 완료 | image/volume 분기·Cloud 대기·timeout 삭제 완료 | 집중 테스트 PASS(10회 반복), 전체 gate 대기 | Cloud 가이드 절 추가 | 신규1행 go_mapping 기록, gate 대기 | `d35410d8`·`9d8d50c8`·가이드·판정 push; 다음 gate·대장 |
+| Glance Cloud create_image | pinned Cloud `create_image`·wait/timeout cleanup 검토 완료 | image/volume 분기·Cloud 대기·timeout 삭제 완료 | 새2그룹10·10회 반복·전체 `make check` PASS | Cloud 가이드 절 추가 | **신규1행 go_mapping·305/3,362** | 작은 commit4개 push 완료; 다음 native images.Get |
 | Cinder v3 Proxy create_image (Cloud create_image 의존) | pinned `block_storage/v3/_proxy.py` create_image·`Volume.upload_to_image` 검토 완료 | 형식 기본값·upload 액션·`ExistingImageRecord` 완료 | 새2그룹13·전체 `make check` PASS | upload 가이드 절 추가 | **신규1행 go_mapping·304/3,362** | 작은 commit3개 push 완료; 다음 Cloud create_image |
 | Glance Cloud delete_image | pinned Cloud `delete_image`·Proxy `delete_object`/Object.delete SLO 분기 검토 완료 | Find·owned delete·Task 객체 정리·부재 대기 Service API 완료 | 새3그룹23·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·303/3,362** | 작은 commit6개 push 완료; 다음 Cinder v3 Proxy create_image |
 | Glance Cloud update_image_properties | pinned Cloud wrapper의 `image or name_or_id` 검토 완료 | 선택 wrapper·owned helper 위임 Service API 완료 | 새1그룹4·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·302/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image |
