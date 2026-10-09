@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 )
 
 // ImageRecordCreateOpts owns Source-domain option values. Nil remains omitted
@@ -274,4 +276,15 @@ func prepareImageRecordCreateOptions(ctx context.Context, check func(context.Con
 		config.SwiftHeaders, err = imageRecordCreateSwiftHeaders(config.SwiftHeaders)
 	}
 	return config, errors.Join(err, imageRecordImportCheck(ctx, check))
+}
+
+// PrepareImageRecordCreateOptions applies create options once and returns an
+// owned snapshot. Callers that need the raw Source values, such as the Cloud
+// create_image wrapper, pass it back with WithImageRecordCreateOpts so caller
+// callbacks are not run a second time.
+func PrepareImageRecordCreateOptions(ctx context.Context, options ...ImageRecordCreateOption) (ImageRecordCreateOpts, error) {
+	if err := cloudread.Context(ctx); err != nil {
+		return ImageRecordCreateOpts{}, err
+	}
+	return prepareImageRecordCreateOptions(ctx, cloudread.Context, options)
 }
