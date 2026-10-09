@@ -22,6 +22,8 @@ Whole은 SDK private current body를 현재 location의65필드 Resource로 투�
 
 native 테스트 `a011b3aa`·공통 ID 수정 `233167a1`·owned API `b04fa490`·삭제/Connection 테스트 `198c0443`를 작은 단위로 commit/push했습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-delete-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`, Source/policy 감사와 별도 native source audit에 있습니다. 초기 집중 run은 최종 소스의 근거로 쓰지 않습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하고 최종 parity/progress/gofmt를 확인합니다. 실제 인증·OpenStack/Python 호출 및 전체 SDK-R1/C1/S1 완료는 주장하지 않습니다.
 
+정확한 문서·판정 revision `cdddf468c1df9375684acf21575b23a45deb3efa`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009000252-cdddf468c1df`·get/build exit0이며 삭제/설치 main **2개**를 빌드했습니다. 원격 Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-delete-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. native tests·shared fix·owned API·tests·guide·판정을 각각 작은 commit으로 main에 push했습니다.
+
 ## Glance owned MemberRecord 조회·추가·수정·삭제 완료
 
 2026-10-09 핵심 user `add_member/update_member/remove_member`의 named immutable JSON-domain profile을 닫아 **279→282(+3)**, 핵심205→208/2,292·Glance43→46/120입니다. `get_member`의 기존 go_mapping을 보존하면서 공개 owned getter를 보완했으므로 조회를 다시 집계하지 않습니다. [Python/Go 비교·독립 main](../image/member-record-mutations.md)은 동일 Connection/Service API와 owner/recipient 역할, raw 속성·헤더 옵션과 기본값을 설명합니다.
