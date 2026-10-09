@@ -85,3 +85,8 @@ Gophercloud source fixture를 포함하거나 결합·변형하는 테스트 파
 ## 이미지 staging 완료 후 배포 확인
 
 정확한 문서·판정 revision `046b489d4cf328e8be77e67b36dbe501b6727c61`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009013644-046b489d4cf3`·get/build exit0이며 staging/설치 main **2개**를 빌드했습니다. 원격 Go source2,132개 SHA256 `845e89a3170ae14989cb3279403749d618be928802179d7ccc2429c491bc1bdb`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-stage-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 공개 module·root package·import 경로와 라이선스 배포 범위는 [이름 변경 안내](#모듈과-패키지)와 [라이선스 안내](licensing.md)를 따릅니다.
+
+
+## 이미지 import 완료 후 배포 확인
+
+정확한 문서·판정 revision `8c616a274fb357161d717193902018194886e367`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009021503-8c616a274fb3`·get/build exit0이며 import/설치 main **2개**를 빌드했습니다. 원격 Go source2,141개 SHA256 `4c9a95cd0621ed629ff6e4daacc0f82189594d8fbaaf391edd3b1ee4ec099e0f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-import-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 공개 module·root package·import 경로와 라이선스 배포 범위는 [이름 변경 안내](#모듈과-패키지)와 [라이선스 안내](licensing.md)를 따릅니다.
