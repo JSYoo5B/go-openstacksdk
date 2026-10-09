@@ -4,9 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 삭제와 native Delete](#glance-owned-imagerecord-삭제와-native-delete-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 비활성화·재활성화](#glance-owned-imagerecord-비활성화재활성화-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는284입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는286입니다.
+
+## Glance owned ImageRecord 비활성화·재활성화 완료
+
+**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 비활성화·재활성화2개, 전체284→286(+2)·핵심210→212/2,292·Glance48→50/120.** `Connection`과 `Service`가 private current ID·concrete header 옵션·현재 location의65필드 preparation과 독립 local Record/actual ACK를 제공합니다. 추가 GET·discovery·wait 없이 고정 POST를 보내며 pending raw Body·이전 fetch receipt를 보존하고 local status를 합성하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-actions.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-비활성화재활성화-완료)에 사용법과 명시적인 HTTP 오류 정책 차이를 기록했습니다.
+
+Source의 기본 `raise_exc=False`는 정상 transport의 HTTP400..599에도 공개 action에서 None으로 끝날 수 있지만 Go는 native 오류를 반환하고 actual200..399의 opaque ACK를 보존합니다. 따라서 이2행은 `go_mapping`이며 Source status 동등성을 주장하지 않습니다. 기존550 reviews·두 legacy8계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 새16계약으로 reviews552·contracts3,616·go_mapping286·review unresolved265·unsupported1입니다. catalog unresolved3,075에는 미검토2,810개가 포함됩니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
+
+새12그룹81사례 + 기존144그룹1130 = **집중 race156그룹1211사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 액션/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection fixture를 재사용했고 새 HTTP 서버 engine은 없습니다. 첫 집중 run의 잘못된 wire/canonical fixture는 수정했으며 최종 소스의 근거는 재실행한 receipt입니다.
+
+공통 preparation `7850ddfb`·공개 API `9e718050`·계약/Connection 테스트 `8d4e89f3`를 각각 작은 commit으로 main에 push했습니다. `/private/tmp/go-openstacksdk-image-record-actions-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 실행 근거를 기록합니다. full public `create_image`는20파일 전체 graph·12계약 unresolved 상태를 유지하며, metadata POST만으로 이 선언을 완료 처리하지 않습니다.
+
+`python:image/v2/deactivate_image`와 `reactivate_image`는 기본 project-scoped ADMIN_OR_PROJECT_MEMBER 정책의 핵심 user 선언입니다. Source action에는 response translation이 없으므로 응답의 id/status/location/ImportMethods header는 local Record를 갱신하지 않습니다. accepted read·Close·context/source 처리 실패는 Record=nil·partial ACK·원인 오류로 보존하며 자동 POST replay를 하지 않습니다. native400..599는 nil result와 inspectable 오류이고404도 숨기지 않습니다. fixed path·live auth·retry hook·header snapshot·sticky guard·partial evidence·pending 후속 PATCH·2개의 Connection binding을 실제 집중 테스트로 확인했습니다. Gophercloud pin에는 action native 선언이 없으므로 새 native 연산을 만들거나 집계하지 않습니다.
 
 ## Glance owned ImageRecord 삭제와 native Delete 완료
 
