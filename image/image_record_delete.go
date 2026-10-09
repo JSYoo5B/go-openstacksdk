@@ -10,7 +10,6 @@ import (
 	"slices"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -66,19 +65,9 @@ func (s *Service) DeleteImageRecord(ctx context.Context, input ImageRecordDelete
 		if !storeMode {
 			// Source's whole-image _update materializes all descriptor values.
 			// A store helper needs only IDs, so unrelated conversions are skipped.
-			seed.ImportMethods = make([]string, 0)
-			var passive resource.Metadata
-			if seed.Resource != nil {
-				passive = seed.Resource.Metadata
-			}
-			view, err := projectImageRecord(seed.bodyState.current, p.location,
-				resource.Metadata{Header: seed.Header.Clone(), StatusCode: seed.StatusCode})
-			if err != nil {
+			if err := projectImageRecordMutationSeed(seed, p.location); err != nil {
 				return nil, err
 			}
-			// These already-owned passive fields do not enter Body or the route.
-			view.CreatedAt, view.UpdatedAt, view.Links = passive.CreatedAt, passive.UpdatedAt, passive.Links
-			seed.Resource = view
 		}
 		return policy.Headers, check(opctx)
 	})
@@ -119,24 +108,7 @@ func (s *Service) DeleteImageRecord(ctx context.Context, input ImageRecordDelete
 }
 
 func imageRecordDeleteSeed(input ImageRecordDeleteRequest) (*ImageRecord, string, error) {
-	if input.ID != "" && input.Record != nil {
-		return nil, "", uploadInvalid("select image ID or Record, not both")
-	}
-	seed := cloneImageRecord(input.Record)
-	if seed == nil {
-		if err := validateImageRecordIdentity(input.ID); err != nil {
-			return nil, "", err
-		}
-		rawID, _ := json.Marshal(input.ID)
-		seed = &ImageRecord{bodyState: pendingImageRecordBodyState(map[string]json.RawMessage{"id": rawID})}
-	} else if seed.bodyState == nil {
-		return nil, "", uploadInvalid("image Record must retain SDK-produced raw body state")
-	}
-	identity, err := imageRecordDeleteLiteral(seed.bodyState.current["id"], "image Record")
-	if err != nil {
-		return nil, "", err
-	}
-	return seed, identity, nil
+	return imageRecordMutationSeed(input.ID, input.Record)
 }
 
 func imageRecordDeleteStoreIdentity(policy ImageRecordDeleteOpts) (string, bool, error) {
