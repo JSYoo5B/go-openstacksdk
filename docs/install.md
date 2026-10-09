@@ -61,6 +61,8 @@ import (
     "github.com/JSYoo5B/go-openstacksdk/compute"
     "github.com/JSYoo5B/go-openstacksdk/image"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
@@ -74,6 +76,31 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).ImportImageRecord
+    _ = (*image.Service).ImportImageRecord
+    _ = image.ImageRecordImportRequest{ID: "literal-image-id"}
+    _ = image.ImageRecordImportResult{}
+    _ = image.ImageRecordImportOpts{}
+    _ = image.ImageRecordImportStore{ID: "store-id"}
+    _ = imageimport.ImportResult{}
+    _ = serviceinfo.StoreImportIdentity
+    _ = (*serviceinfo.StoreRecord).ImportIdentity
+    _ = image.WithImageRecordImportOpts
+    _ = image.WithImageRecordImportMethod
+    _ = image.WithImageRecordImportURI
+    _ = image.WithImageRecordImportRemoteRegion
+    _ = image.WithImageRecordImportRemoteImageID
+    _ = image.WithImageRecordImportRemoteServiceInterface
+    _ = image.WithImageRecordImportStore
+    _ = image.WithImageRecordImportStores
+    _ = image.WithImageRecordImportAllStores
+    _ = image.WithImageRecordImportAllStoresMustSucceed
+    _ = image.WithImageRecordImportHeader
+    _ = image.WithImageRecordImportHeaders
+    _ = image.WithImageRecordImportField
+    _ = image.WithImageRecordImportFields
+    _ = image.WithImageRecordImportMethodField
+    _ = image.WithImageRecordImportMethodFields
     _ = (*sdk.Connection).StageImageRecord
     _ = (*image.Service).StageImageRecord
     _ = image.ImageRecordStageRequest{ID: "literal-image-id"}

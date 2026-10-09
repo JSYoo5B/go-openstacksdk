@@ -15,6 +15,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
 | `conn.image.create_image(..., use_import=True)` | `service.CreateAndImport(ctx, image.CreateAndImportRequest{...}, ...)`; [단계별 옵션·결과 비교](create-import.md) |
+| `conn.image.import_image(record, ...)` | `service.ImportImageRecord(ctx, image.ImageRecordImportRequest{Record: record}, ...)`; [owned 입력·옵션·응답 비교](image-record-import.md) |
 
 조회 대상은 이미지 메타데이터이며 이미지 데이터 다운로드 자체가 아닙니다. [공식 Image API](https://docs.openstack.org/openstacksdk/latest/user/proxies/image_v2.html)
 
@@ -174,6 +175,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 `service.UploadImage`는 concrete 옵션으로 메타데이터를 생성하고 caller Reader를 한 번 전송합니다. [직접 업로드 사용법](upload-image.md)에 기본값·명시 size·단계별 응답과 Python 자동 길이 추론의 차이를 설명합니다.
 
 Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는 `conn.ImageV2(ctx)`의 `Tasks`에서 기다립니다. [Task 전용 사용법](v2/tasks/README.md)은 success·failure·120초·2초 기본값, 정확한 396 오류의 재생성, 같은 시간 제한으로 새 ID 조회, 실제 응답과 부분 실패를 설명합니다. Python의 cached Task 대신 fresh ID를 받고 `tasks.WithTaskWait...` 옵션을 사용합니다. 공통 이미지 상태 대기와 import 제출은 각각 별도 호출입니다.
+
+`service.ImportImageRecord`와 `conn.ImportImageRecord`는 SDK Record의 private formats·pending Body를 유지하고 초기 조회 없이 한 번 import POST를 제출합니다. [owned import 비교·독립 main](image-record-import.md)은 raw JSON 기본값·presence·완전한 remote triple·store constructor/private ID와 singular JSON+header, ordinary3/copy admin method 분기·opaque ACK/부분 오류를 설명합니다. 아래 native typed import profile과 구분해서 사용합니다.
 
 `service.API.ImageImport.ImportImage(ctx, ref, options...)`는 기존 이미지의 ID/Name 참조를 해결하고 format을 조회한 뒤 import를 제출합니다. 이미 보유한 native Image는 `ImportKnownImage`로 조회 없이 사용할 수 있습니다. [Import 사용법](v2/imageimport/README.md)에 기본 glance-direct, web/remote 소스, 저장소 선택, 명시적 false와 실제 202 응답을 설명합니다. 결과는 접수 응답이며 이미지가 active라는 뜻은 아닙니다. 준비된 이미지의 완료 대기는 `service.API.Images.WaitForState(ctx, ref, "active", options...)`로 별도 선택합니다.
 

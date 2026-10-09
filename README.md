@@ -94,6 +94,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 `StageImageRecord`는 Connection·Image Service에서 queued SDK Record와 filename 또는 borrowed reader를 받아 한 번 staging하고 메타데이터를 조회합니다. [레코드 staging의 Python/Go 비교·독립 main](image/image-record-stage.md)에 명시적 GET, 기본 total-size 추론·optout, reader 수명·pending Body와 단계별 실제 응답을 설명합니다.
 
+`ImportImageRecord`는 Connection·Image Service에서 private formats가 있는 SDK Record로 한 번 import를 제출합니다. [레코드 import의 Python/Go 비교·독립 main](image/image-record-import.md)에 raw 기본값·store JSON/header 선택·user/admin method 분기와 local pending 상태·실제 비동기 ACK를 설명합니다.
+
 [Glance 직접 업로드](image/upload-image.md)는 concrete 옵션, 메타데이터 생성과 바이너리 전송의 단계별 응답, caller 스트림 소유권과 Python 사용법 비교를 제공합니다.
 
 [Swift 계정 메타데이터](objectstorage/v1/accounts/README.md)는 concrete 옵션과 nullable 카운터, 조회·설정·삭제의 실제 응답 및 Python 사용법 비교를 제공합니다.
