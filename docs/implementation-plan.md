@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 단계 (2026-10-09): 핵심 user Glance owned ImageRecord upload 검증 완료.** deprecated public `upload_image`의 private constructor→raw metadata POST→data/size→binary PUT 전체 finite owned20계약을 닫아 전체290/3,362입니다. 4개 데이터 workflow 중 Stage/Import/Upload3개를 완료했고 Download1개 선언·기존10계약을 unresolved로 유지합니다. 다음은 whole `DownloadImageRecord`의 private Resource/data flow이며 그 뒤 현대 public `create_image`의20파일 전체 graph·기존12계약을 구현합니다. 초기/최종 GET·PUT response translation·public filename 인자를 upload에 합성하지 않습니다.
+**현재 구현 (2026-10-09): 핵심 user Glance owned DownloadImageRecord.** 고정 Source26파일·78 AST·26계약에서 raw constructor→필수 metadata fetch→새 private ID binary GET→buffer/writer/file/stream 네 모드와 raw checksum 전체 흐름을 확인했습니다. 기존 capture·Record 응답 투영·고정 GET·복사·Gophercloud fixture를 재사용해 Service/Connection과 concrete 옵션을 구현 중이며 테스트·Python/Go 비교 문서를 병행합니다. 이번 Download1행은 최종 검증 전까지 unresolved이며 전체290/3,362를 유지합니다. 현대 public `create_image`20파일 전체 graph·기존12계약도 계속 추적합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
