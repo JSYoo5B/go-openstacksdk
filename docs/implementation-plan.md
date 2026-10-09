@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance Cloud `delete_image` 검증·판정 완료, Cinder v3 Proxy `create_image` 착수.** 전체303/3,362·핵심229/2,292·Glance67/120입니다. Cloud `create_image`의 volume 분기가 쓰는 Cinder v3 Proxy `create_image`(볼륨 upload-to-image 뒤 fetch 없는 Image 반환)를 선행 의존으로 먼저 구현합니다. 이 의존 처리는 Cloud `create_image`를 닫기 위한 것이며 Cinder 후속 범위를 앞당기는 뜻이 아닙니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Cinder v3 Proxy `create_image` 구현·집중 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체303/3,362·핵심229/2,292·Glance67/120입니다. `Connection.CreateVolumeImageRecord`가 설정 `image_format`/`bare` 기본값과 force로 볼륨 upload-to-image 액션을 보내고, 응답 `image_id`로 HTTP 없는 동기화 Image(`image.Service.ExistingImageRecord`)를 반환합니다. Cloud `create_image`의 volume 분기 선행 의존이며 Cinder 후속 범위를 앞당기는 뜻은 아닙니다. 다음은 가이드·판정 1행·전체 gate이고 그 뒤 Cloud `create_image`입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `delete_image`1개, 전체302→303(+1)·핵심228→229/2,292·Glance66→67/120.** `Service.DeleteCloudImageRecord`가 Find·owned 삭제·Task 업로드 Swift 객체 정리·선택적 부재 대기를 연결합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-삭제)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-삭제-완료)에 설명합니다. 새3그룹23사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4348b877`·`55a9171d`·`abfcdb7e`·`2381134a`·`61f79f2e`·`78b0c67c`를 push했습니다.
 
@@ -576,7 +576,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Cinder v3 Proxy create_image (Cloud create_image 의존) | pinned `block_storage/v3/_proxy.py` create_image·`Volume.upload_to_image` 검토 완료 | 진행 중: 형식 기본값·upload 액션·`ExistingImageRecord` | 대기 | 대기 | 대기 | 착수 |
+| Cinder v3 Proxy create_image (Cloud create_image 의존) | pinned `block_storage/v3/_proxy.py` create_image·`Volume.upload_to_image` 검토 완료 | 형식 기본값·upload 액션·`ExistingImageRecord` 완료 | 집중 테스트 PASS | 진행 중 | 진행 중 | API·테스트 push; 다음 가이드·판정 |
 | Glance Cloud delete_image | pinned Cloud `delete_image`·Proxy `delete_object`/Object.delete SLO 분기 검토 완료 | Find·owned delete·Task 객체 정리·부재 대기 Service API 완료 | 새3그룹23·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·303/3,362** | 작은 commit6개 push 완료; 다음 Cinder v3 Proxy create_image |
 | Glance Cloud update_image_properties | pinned Cloud wrapper의 `image or name_or_id` 검토 완료 | 선택 wrapper·owned helper 위임 Service API 완료 | 새1그룹4·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·302/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image |
 | Glance Cloud download_image | pinned Cloud `download_image`·`_download.py` 출력 분기 검토 완료 | 출력 검사·strict Find·owned 다운로드 연결 Service API 완료 | 새2그룹12·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·301/3,362** | 작은 commit3개 push 완료; 다음 Cloud update_image_properties/delete_image |
