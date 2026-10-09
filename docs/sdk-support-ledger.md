@@ -16,7 +16,9 @@
 
 Upload 전용 감사의 pinned Source26파일·67 AST spans·20개 새 계약을 검토했습니다. 다른551 reviews와 legacy `UploadImage`10계약·17개 test refs·기존 API profile·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,686·go_mapping290·review unresolved261·unsupported1이며 catalog unresolved3,071에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 뜻하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-upload-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 `/private/tmp/go-openstacksdk-image-record-upload-source-audit.json`입니다.
 
-현재 구현 단계 `0066f089`·공통/옵션 `ce36dcff`·공개 API `53cb43b0`를 작은 commit으로 main에 push했습니다. 테스트 `dd014ac1`·가이드 `42ead228`도 별도 작은 commit으로 관리하고 판정은 최종 검증 뒤 갱신합니다. 이 upload 단위의 정확한 revision 원격 설치·main2·라이선스14개 일치 결과는 후속 root 검증으로 기록합니다.
+현재 구현 단계 `0066f089`·공통/옵션 `ce36dcff`·공개 API `53cb43b0`를 작은 commit으로 main에 push했습니다. 테스트 `dd014ac1`·가이드 `42ead228`·검증 판정 `a20f06ca`도 별도 작은 commit으로 main에 push했습니다. 이 upload 단위의 정확한 revision 원격 설치·main2·라이선스14개 일치 결과도 검증했습니다.
+
+정확한 문서·판정 revision `a20f06ca2f5b6572de79e9c251f643fc1e1a980d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009024601-a20f06ca2f5b`·get/build exit0이며 upload/설치 main **2개**를 빌드했습니다. 원격 Go source2,148개 SHA256 `c36b09fce4c592dbc54b9ef68d2c62bb1182a9790e2236611816e5617c3c84f2`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-upload-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
 형식 formal 입력은 raw JSON의 falsey 값을 생성 전에 거부하며 truthy 비문자열도 서버 입력으로 보존합니다. formal 바인딩 뒤 `__conflicting_attrs.items()`와 properties overlay가 형식을 null 등으로 바꿔도 최종 wire 검사를 반복하지 않습니다. raw constructor Body의 supplied id도 POST에 포함하고, getter 기본값/변환을 생성 Body로 역주입하지 않습니다. valid object metadata 응답은 sparse overlay/clean을 수행하며 invalid syntax는 pending baseline을 보존하고 actual header/receipt를 유지합니다. 유효한 non-object·descriptor 오류는 visible이며 metadata 후 private raw id를 단일 고정 file route로 선택합니다.
 
