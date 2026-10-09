@@ -29,6 +29,8 @@ type StoreRecord struct {
 	Envelope       json.RawMessage
 	Header         http.Header
 	StatusCode     int
+	// Private import identity never follows mutable public views or receipts.
+	importID json.RawMessage
 }
 
 type discoveryRecordType uint8
@@ -167,6 +169,10 @@ func prepareStoreRecord(value *storeRecordRow, location json.RawMessage, envelop
 	value.Resource, err = projectDiscoveryRecord(storeRecordFields[:], fields, location, value.Wire.Metadata)
 	if err != nil {
 		return err
+	}
+	value.importID = bytes.Clone(fields["id"])
+	if value.importID == nil {
+		value.importID = json.RawMessage("null")
 	}
 	value.Envelope = bytes.Clone(envelope)
 	value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode

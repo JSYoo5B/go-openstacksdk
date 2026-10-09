@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 단계 (2026-10-09): 핵심 user Glance owned ImageRecord staging 검증 완료.** 전체 public `stage_image`의 finite owned16계약을 닫아 전체288/3,362입니다. 다음은 complete owned `ImportImageRecord`의 cached format·method/store·glance-direct/web-download/glance-download/copy-image·import 접수와 admin 분기 전체 graph입니다. 고정 4개 데이터 workflow 중 Stage만 완료했고 import/upload/download3개 선언의 기존32계약은 unresolved로 유지합니다. public `create_image`의20파일 전체 graph와12계약도 계속 unresolved입니다.
+**현재 구현 (2026-10-09): 핵심 user Glance owned ImportImageRecord.** 고정 Source24파일·74 AST·16계약으로 cached format·method/URI/remote·모든 store 선택·한 번의 import POST와 copy-image admin 분기까지 전체 public graph를 연결합니다. StoreRecord의 private JSON ID 보존·로컬 constructor 변환 공통층과 새4그룹33사례 race 검증을 완료했습니다. 공개 API·Service/Connection 테스트·비교 가이드를 병행합니다. import 기존12계약과 unresolved 판정·전체288/3,362는 최종 검증 전까지 유지하며 upload/download·public create_image의 전체 graph도 계속 추적합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
