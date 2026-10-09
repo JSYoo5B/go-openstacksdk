@@ -7,9 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -188,4 +191,120 @@ func (s *Service) GetImageRecordByID(ctx context.Context, id string, options ...
 		return record, &renamed
 	}
 	return record, err
+}
+
+// pythonContains evaluates Source `exclude in value` for a decoded JSON value:
+// substring for strings, string element equality for lists and key
+// membership for dictionaries. Other values raise TypeError in Python.
+func pythonContains(raw json.RawMessage, needle string) (bool, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 {
+		return false, uploadInvalid("Cloud image name is required")
+	}
+	switch trimmed[0] {
+	case '"':
+		text, err := decodeImageRecordString(raw, "Cloud image name")
+		return err == nil && strings.Contains(text, needle), err
+	case '[':
+		var items []json.RawMessage
+		if err := json.Unmarshal(trimmed, &items); err != nil {
+			return false, errors.Join(uploadInvalid("Cloud image name list must be complete JSON"), err)
+		}
+		for _, item := range items {
+			if element := bytes.TrimSpace(item); len(element) == 0 || element[0] != '"' {
+				continue
+			}
+			text, err := decodeImageRecordString(item, "Cloud image name element")
+			if err != nil {
+				return false, err
+			}
+			if text == needle {
+				return true, nil
+			}
+		}
+		return false, nil
+	case '{':
+		var members map[string]json.RawMessage
+		if err := json.Unmarshal(trimmed, &members); err != nil {
+			return false, errors.Join(uploadInvalid("Cloud image name dictionary must be complete JSON"), err)
+		}
+		_, present := members[needle]
+		return present, nil
+	default:
+		return false, uploadInvalid("Cloud image name %s is not a container for exclude", trimmed)
+	}
+}
+
+// cloudImageRecordExclude is Cloud get_image_exclude: the first search_images
+// row, or with truthy exclude the first reached row whose name does not
+// contain it. Rows after the selected one are never inspected.
+func cloudImageRecordExclude(p *preparedImageRecord, nameOrID, exclude string) (*CloudImageRecordResult, error) {
+	if !utf8.ValidString(exclude) {
+		return nil, uploadInvalid("Cloud image exclude must be valid UTF-8")
+	}
+	search, err := cloudImageRecordSearch(p, nameOrID, nil)
+	result := &CloudImageRecordResult{Inventory: search.Inventory}
+	if err != nil {
+		return result, err
+	}
+	for _, record := range search.Images {
+		if err := p.check(p.ctx); err != nil {
+			return result, err
+		}
+		if exclude != "" {
+			contains, err := pythonContains(record.Resource.Body["name"], exclude)
+			if err != nil {
+				receipt := &rest.Response{Body: record.Envelope, Header: record.Header, StatusCode: record.StatusCode}
+				return result, receipt.Fail(err)
+			}
+			if contains {
+				continue
+			}
+		}
+		result.Image = record
+		return result, p.check(p.ctx)
+	}
+	return result, p.check(p.ctx)
+}
+
+func (s *Service) getImageRecordExcluded(ctx context.Context, operation, nameOrID, exclude, field string, options []ImageRecordQueryOption) (*CloudImageRecordResult, error) {
+	p, _, err := s.prepareImageRecordQuery(ctx, options, imageRecordQueryArguments{})
+	if err != nil {
+		return nil, wrapImageMutationError(ctx, operation, err)
+	}
+	result, err := cloudImageRecordExclude(p, nameOrID, exclude)
+	if err != nil {
+		return result, wrapImageMutationError(ctx, operation, err)
+	}
+	if result.Image != nil {
+		if field == "" {
+			result.Value, err = imageRecordObject(result.Image.Resource.Body)
+		} else {
+			result.Value = bytes.Clone(result.Image.Resource.Body[field])
+		}
+		if err = errors.Join(err, p.check(p.ctx)); err != nil {
+			result.Value = nil
+			return result, wrapImageMutationError(ctx, operation, err)
+		}
+	}
+	return result, nil
+}
+
+// GetImageRecordExclude implements Cloud get_image_exclude. It always uses
+// the default search_images inventory; an empty exclude returns the first
+// selected row. Value is the selected declared view and nil when absent.
+func (s *Service) GetImageRecordExclude(ctx context.Context, nameOrID, exclude string, options ...ImageRecordQueryOption) (*CloudImageRecordResult, error) {
+	return s.getImageRecordExcluded(ctx, "GetImageRecordExclude", nameOrID, exclude, "", options)
+}
+
+// GetImageRecordName implements Cloud get_image_name. Value is the selected
+// row's raw name JSON, so a selected null name is present as null.
+func (s *Service) GetImageRecordName(ctx context.Context, imageID, exclude string, options ...ImageRecordQueryOption) (*CloudImageRecordResult, error) {
+	return s.getImageRecordExcluded(ctx, "GetImageRecordName", imageID, exclude, "name", options)
+}
+
+// GetImageRecordID implements Cloud get_image_id. Value is the selected row's
+// raw id JSON; the identifier phase also matches IDs and globs.
+func (s *Service) GetImageRecordID(ctx context.Context, imageName, exclude string, options ...ImageRecordQueryOption) (*CloudImageRecordResult, error) {
+	return s.getImageRecordExcluded(ctx, "GetImageRecordID", imageName, exclude, "id", options)
 }

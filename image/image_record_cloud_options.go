@@ -124,10 +124,12 @@ type ImageRecordQueryResult struct {
 	Inventory []*ImageRecord
 }
 
-// CloudImageRecordResult is the Cloud get_image result. Value is nil when no
-// image is selected; a selected false, zero or empty string remains present.
-// Image is an actual record for direct find or one ordinary selected row.
-// Inventory is populated only by the filtered search path.
+// CloudImageRecordResult is the result of Cloud get_image and the
+// get_image_exclude/name/id helpers. Value is the Source return value and nil
+// when no image is selected; a selected false, zero, empty string or null name
+// remains present. Image is the actual record for direct find, one ordinary
+// selected row or the exclude selection. Inventory is populated by every
+// search-based path, including partial work on error.
 type CloudImageRecordResult struct {
 	Value     json.RawMessage
 	Image     *ImageRecord
