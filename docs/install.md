@@ -68,6 +68,7 @@ import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
@@ -84,6 +85,55 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).CreateImageRecord
+    _ = (*image.Service).CreateImageRecord
+    _ = sdk.WithImageCreatePolicy
+    _ = image.WithImageRecordCreateOpts
+    _ = image.WithImageRecordCreateContainer
+    _ = image.WithImageRecordCreateMD5
+    _ = image.WithImageRecordCreateSHA256
+    _ = image.WithImageRecordCreateDiskFormat
+    _ = image.WithImageRecordCreateContainerFormat
+    _ = image.WithImageRecordCreateTags
+    _ = image.WithImageRecordCreateDisableVendorAgent
+    _ = image.WithImageRecordCreateAllowDuplicates
+    _ = image.WithImageRecordCreateWait
+    _ = image.WithImageRecordCreateTimeout
+    _ = image.WithImageRecordCreateValidateChecksum
+    _ = image.WithImageRecordCreateUseImport
+    _ = image.WithImageRecordCreateSize
+    _ = image.WithImageRecordCreateMeta
+    _ = image.WithImageRecordCreateAttribute
+    _ = image.WithImageRecordCreateAttributes
+    _ = image.WithImageRecordCreateImportOptions
+    _ = image.WithImageRecordCreateHeader
+    _ = image.WithImageRecordCreateHeaders
+    _ = image.WithImageRecordCreateSwiftHeader
+    _ = image.WithImageRecordCreateSwiftHeaders
+    _ = image.ImageRecordCreateBytes
+    _ = image.ImageRecordCreateText
+    _ = image.ImageRecordCreateReader
+    _ = image.WithImageCreatePolicyOpts
+    _ = image.WithImageCreatePolicyFormat
+    _ = image.WithImageCreatePolicyTasks
+    _ = image.WithImageCreatePolicyVendorAgent
+    _ = image.WithImageCreatePolicyObjectStoreEnabled
+    _ = image.PrepareImageCreatePolicy
+    _ = image.ImageRecordCreateResult{}
+    _ = image.ImageRecordCreateChecksum{}
+    _ = image.ImageRecordCreateRequest{}
+    _ = image.ImageRecordCreateOpts{}
+    _ = image.ImageRecordCreateOption(nil)
+    _ = image.ImageRecordCreateData{}
+    _ = image.ImageCreatePolicy{}
+    _ = image.ImageCreatePolicyOption(nil)
+    _ = image.ImageRecordCreateSwiftResult{}
+    _ = image.ImageRecordCreateTask{}
+    _ = image.ImageRecordCreateTaskWaitResult{}
+    _ = image.ImageRecordCreateTaskFailureError{}
+    _ = (*objects.API).CreateImageImportObject
+    _ = objects.ImageImportObjectRequest{}
+    _ = objects.ImageImportObjectResult{}
     _ = (*sdk.Connection).DownloadImageRecord
     _ = (*image.Service).DownloadImageRecord
     _ = image.ImageRecordDownloadRequest{}

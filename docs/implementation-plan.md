@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-09): 핵심 user Glance modern CreateImageRecord 전체 흐름.** 옵션·tagged data·클라우드 정책, Task 생성/조회/공유 timeout/396 재생성, Swift borrowed PUT·기존 파일/SLO 연결과 회귀 테스트를 구현했습니다. Connection의 병합된 이미지 설정·lazy Swift 구성, 기존 find/binary 재사용 및 private 입력/hash/중복/vendor/metadata 준비도 추가했습니다. 현재 트리는 라이선스 원문·의존성 점검과 전체 vet·race **45개 실제 test package**, pinned parity·progress·gofmt를 통과했습니다. 남은 작업은 Service/Connection 공개 whole facade에 direct/import와 Swift/Task 분기를 연결하고 checksum·rollback·wait cleanup, 서비스 비교 문서와 전체 계약을 검증하는 것입니다. metadata 생성만으로 완료하지 않으며 현대 create1행·기존12계약은 unresolved, 완료 집계는291/3,362입니다.
+**현재 구현 (2026-10-09): 핵심 user Glance modern CreateImageRecord 전체 연결·집중 검증 완료, 최종 판정 중.** Service/Connection 공개 facade에 metadata·직접 upload/import·checksum/현재 ID 삭제와 lazy Swift Task·396 공유 예산·속성 후처리·wait finally 정리를 연결했습니다. Task/HTTP 타이머의 만료가 부모 guard를 오염시키던 문제와 정상 Swift 응답 Close의 자동 취소 문제를 실제 실패→수정→회귀 통과로 확인했습니다. 새87그룹361사례를 포함한 집중 race **11개 실제 package·2,532그룹20,161사례**가 통과했습니다. 타이머/전체 facade/공통 guard/기본값·정책/direct·admin/Swift·deadline 테스트를 작은 commit으로 main에 push했습니다. 남은 작업은 새 Python/Go 비교 문서의 외부 빌드, 실제 재생성·전체 검사와 기존12계약을 보존하는 최종30계약 판정입니다. 완료 집계는 그 판정 전까지291/3,362를 유지합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 

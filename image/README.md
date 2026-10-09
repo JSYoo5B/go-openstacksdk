@@ -1,6 +1,6 @@
 # Image
 
-Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이터 생성·직접 업로드·staging과 import, checksum 검사를 포함한 다운로드를 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
+Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 현대 이미지 생성의 cloud 기본값·checksum 재사용·메타데이터·직접 업로드/import·Swift Task 구성, checksum 검사를 포함한 다운로드를 제공합니다. `conn`과 `ctx`는 [전체 README](../README.md)처럼 준비합니다. Go 조각은 `fmt`, `os`, `time`, `image`, `resource` 등을 필요한 만큼 import한 오류 반환 함수 안에서 사용합니다.
 
 ## openstacksdk 대응
 
@@ -13,9 +13,9 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.delete_image(id, store="archive")` | `service.DeleteImage(ctx, resource.ID(id), image.WithDeleteImageStore("archive"))` |
 | `conn.image.download_image(record_or_id, output=path_or_file, stream=False)` | `service.DownloadImageRecord(ctx, image.ImageRecordDownloadRequest{ID: id, Filename: path}, ...)`; [owned 네 모드·checksum 비교](image-record-download.md) |
 | `conn.image.download_image(id, output=file)` | `service.DownloadTo(ctx, resource.ID(id), writer, ...)`; [다운로드 옵션·결과 비교](download.md) |
-| `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
-| `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
-| `conn.image.create_image(..., use_import=True)` | `service.CreateAndImport(ctx, image.CreateAndImportRequest{...}, ...)`; [단계별 옵션·결과 비교](create-import.md) |
+| `conn.image.create_image(name, filename=path, ...)` 또는 `data=data` | `service.CreateImageRecord(ctx, image.ImageRecordCreateRequest{Name: name, Filename: path}, ...)` 또는 tagged `Data`; [현대 생성·22개 옵션·독립 main](image-record-create.md) |
+| modern `conn.create_image(..., wait=True, timeout=300)` | `conn.CreateImageRecord(..., image.WithImageRecordCreateWait(true), image.WithImageRecordCreateTimeout(300))`; wait는 Task 경로에 적용 |
+| `conn.image.create_image(..., use_import=True, import_method="glance-direct")` | `CreateImageRecord`에 `WithImageRecordCreateUseImport(true)`와 `WithImageRecordCreateImportOptions(WithImageRecordImportMethod("glance-direct"))` |
 | `conn.image.upload_image(container_format="bare", disk_format="qcow2", data=file, **attrs)` | `service.UploadImageRecord(ctx, image.ImageRecordUploadRequest{Data: file, Attributes: attrs}, image.WithImageRecordUploadContainerFormat("bare"), image.WithImageRecordUploadDiskFormat("qcow2"))`; [owned 생성·전송 비교](image-record-upload.md) |
 | `conn.image.import_image(record, ...)` | `service.ImportImageRecord(ctx, image.ImageRecordImportRequest{Record: record}, ...)`; [owned 입력·옵션·응답 비교](image-record-import.md) |
 
@@ -148,7 +148,7 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 생성·속성 수정, 데이터 업로드·다운로드, import, task, 멤버 관리는 `service.API`의 [Image v2 API](v2/README.md)에서 제공합니다. `service.API.Images`, `ImageData`, `ImageImport`, `Tasks`, `Members`에서 각 호출을 사용하며, 멤버는 `Members.InImage(ctx, ref)`로 부모 이미지를 고정할 수 있습니다. 서버 생성의 이미지 이름 해석은 이 패키지의 Find를 사용합니다.
 
-`Service.CreateAndImport`는 metadata 생성·직접 staging·import 접수를 연결하고 remote URL/Glance 소스와 저장소 선택도 concrete 옵션으로 처리합니다. [생성·import 사용법](create-import.md)은 실제 단계별 접수 증거와 부분 실패, 기본값·소유권·선택적 active 대기를 설명합니다. Swift task 업로드, checksum 계산·검증, 기존 이미지 재사용과 vendor/cloud 설정의 자동 적용은 남은 비교 범위입니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
+`Service.CreateAndImport`는 metadata 생성·직접 staging·import 접수를 연결하고 remote URL/Glance 소스와 저장소 선택도 concrete 옵션으로 처리합니다. [생성·import 사용법](create-import.md)은 실제 단계별 접수 증거와 부분 실패, 기본값·소유권·선택적 active 대기를 설명합니다. 현대 전체 흐름은 `service.CreateImageRecord`와 `conn.CreateImageRecord`에서 cloud 기본값·checksum 계산/재사용·vendor metadata·선택된 Swift Task를 구성합니다. [현대 생성 사용법](image-record-create.md)에 typed convenience API와의 차이·실제 Source 순서·부분 결과·명시적 Go 경계를 설명합니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
 
 [image_test.go](image_test.go)는 Glance의 envelope 없는 응답, 추가 Properties, 실패 상태를 검증합니다. [upload_test.go](upload_test.go)는 업로드 HTTP 계약과 검증·실패 정책을, [upload_retry_test.go](upload_retry_test.go)는 단일 PUT·지연된 Body.Close·현재 offset·Reader 소유권과 원인 오류 보존을 검증합니다. [서버 생성 통합 테스트](../server_create_test.go)는 Compute에서 이미지 이름을 해석하는 과정을 검증합니다.
 
@@ -187,6 +187,8 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.StageImageRecord`와 `conn.StageImageRecord`는 queued SDK Record의 private state를 유지하고 filename 또는 borrowed reader를 한 번 staging한 뒤 필수 metadata GET을 수행합니다. [owned staging 비교·독립 main](image-record-stage.md)은 literal ID의 queued seed 실패·명시적 GET, 기본 total-size 추론·signed size·optout, owned file close·borrowed data 유지와 partial receipt를 설명합니다. 아래 `StageImage/StageKnownImage`의 native typed profile과 구분해서 사용합니다.
 
 `service.API.ImageData.StageImage(ctx, ref, data, options...)`는 queued 이미지를 확인하고 `io.Reader`를 한 번 전송한 뒤 최신 이미지를 조회합니다. `StageKnownImage`는 이미 보유한 native Image의 ID/status를 복사해 첫 조회를 생략합니다. [Staging 사용법](v2/imagedata/README.md)은 선택적 크기 헤더, caller의 Reader 소유권, 실제 PUT204 접수와 후속 GET200 결과·부분 실패를 설명합니다. staged 데이터의 import 제출과 active 상태 대기는 이어서 선택할 수 있습니다.
+
+`service.CreateImageRecord`와 `conn.CreateImageRecord`는 같은 concrete request와 옵션으로 현대 `create_image`를 호출합니다. [현대 생성 비교·scenario별 독립 main](image-record-create.md)에 metadata-only·filename·tagged bytes·import·Task 선택, SDK 기본값·중복 재사용·raw Meta·cleanups와 검증 경계를 설명합니다.
 
 `service.DownloadImageRecord`와 `conn.DownloadImageRecord`는 ID·owned Record·raw constructor Resource의 필수 metadata fetch 뒤 file/writer/buffer/stream을 처리합니다. [owned 다운로드 비교·독립 main](image-record-download.md)에 sparse overlay의 private ID·after-GET hash 선택·registry/factory·200..399 응답·부분 오류·borrowed writer와 caller stream Close를 설명합니다. 기본 memory에는 전체 크기 cap이 없으며 stream-only는 자동 checksum proof를 만들지 않습니다.
 
