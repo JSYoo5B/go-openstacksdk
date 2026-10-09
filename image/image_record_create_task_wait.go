@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -152,6 +153,12 @@ func waitCreatedImageRecordTaskWithPause(p *preparedImageRecord, task *ImageReco
 	defer cancel()
 	owned := *p
 	owned.ctx = ctx
+	// Polling owns its timer, while Source/binding failures belong to the whole
+	// workflow. Check those invariants with the caller context so this child
+	// deadline cannot poison the sticky guard needed by finally cleanup.
+	owned.check = func(checkCtx context.Context) error {
+		return cloudread.ContextError(checkCtx, p.check(p.ctx))
+	}
 	originalID, err := cloudfilter.PythonString(imageRecordCreateTaskRaw(result.Task, "id"))
 	if err != nil {
 		return imageRecordCreateTaskWaitError(result, err)
