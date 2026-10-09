@@ -46190,6 +46190,59 @@
         "Properties and meta use the existing concrete ImageRecordPropertiesOption values instead of Python **properties and meta dictionaries; the lower helper's documented Go differences apply unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/delete_image",
+      "source_fingerprint": "388303ace59e0e81fe4d141f26bc302f58036b9ead017495d966bdd6a966918d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.DeleteCloudImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteWait",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeleteUnlimited",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDeletePollInterval"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteCloudImageRecord finds the image with the ignore-missing Find graph; absence returns Deleted false without DELETE. A found record is deleted with the owned whole-image DeleteImageRecord, and a native delete failure returns Found under the Cloud operation before any Swift cleanup or wait.",
+          "tests": [
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits",
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases"
+          ]
+        },
+        {
+          "behavior": "When the captured image_api_use_tasks value is Python-truthy, the found properties are checked for the openstack object key and then the shade key; the stored container/name is split at the first slash and deleted through objects.DeleteObject with SLO HEAD discovery and ignore-missing defaults, without image headers. Falsey or absent configuration and missing keys skip Swift.",
+          "tests": [
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits"
+          ]
+        },
+        {
+          "behavior": "Listed null properties, non-string or null object locations and values without a separator fail after the image delete with the found record's receipt and no Swift request. Optional wait repeats the shared Cloud find loop until absence, and timeout keeps the last found record.",
+          "tests": [
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteLateFailuresKeepPhases",
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteFindsDeletesCleansAndWaits"
+          ]
+        },
+        {
+          "behavior": "Blank identities, nil options, nonpositive intervals, invalid headers and invalid captured task configuration fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_delete_test.go:TestCloudImageRecordDeleteInputFailsBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-record-delete.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns a bool and raises SDKException, TypeError, AttributeError, ValueError or ResourceTimeout; Go returns ImageRecordCloudDeleteResult with Deleted, Found, Delete, Object and wait evidence plus typed errors.",
+        "The pinned delete_objects argument is never read by the source body, so Go omits it. Wait polling intervals and request headers are Go extensions; headers apply to Glance requests only."
+      ],
+      "remaining": []
     }
   ]
 }
