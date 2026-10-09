@@ -11,6 +11,8 @@ Task396 재생성은 이 상태 대기 API에 포함되지 않습니다.
 
 `Images.Update(ctx, imageID, images.UpdateOpts{...}, options...)`는 native concrete Patch를 순서대로 전송하고 strict 200 응답을 Extract합니다. [native PATCH의 Python/Go 비교와 독립 main](update.md)은 아홉 Patch 타입, property add/replace/remove, nil·빈 값·옵션, partial Image 오류와 별도 owned dirty-state 수정 범위를 설명합니다.
 
+`Images.List(ctx, options...)`는 native ListOpts query와 next link 페이지를 lazy 순회합니다. [native 목록 가이드](list.md)는 int64 size 필터가 빠지는 고정 동작과 `WithListQuery` 대체, 빈 페이지·204·조기 중단을 설명합니다.
+
 `Images.Get(ctx, imageID)`는 native raw ID와 기본200 정책, header merge와 `Image.UnmarshalJSON` projection을 유지합니다. [native 조회 가이드](get.md)는 size·properties·import methods 변환과 partial Extract를 설명합니다.
 
 `Images.Delete(ctx, imageID)`는 native raw ID와 기본202·204 정책을 유지하며 error만 반환합니다. [native 삭제 가이드](delete.md)는404·응답 Read/Close·재인증/재시도와 [owned 레코드 삭제](../../image-record-delete.md)의 Record/ACK 차이를 설명합니다.

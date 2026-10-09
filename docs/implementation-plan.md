@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance native `images.List` 계약 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체306/3,362·핵심232/2,292·Glance69/120입니다. generated `API.List`의 ListOpts query·확장 query, next link의 ServiceURL 재기준화, 빈 페이지·본문 없는 204의 native EOF, 뒤 페이지 오류와 조기 중단을 검증했습니다. 고정 `BuildQueryString`이 int64 `SizeMin/SizeMax`를 버리는 native 동작도 확인해 `WithListQuery` 대체 방법을 문서화합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Glance native `images.List` 테스트·가이드·판정 1행 완료, 전체 gate 진행 중.** 직전 완료 집계는 전체306/3,362·핵심232/2,292·Glance69/120입니다. generated `API.List`의 ListOpts query·확장 query, next link의 ServiceURL 재기준화, 빈 페이지·본문 없는 204의 native EOF, 뒤 페이지 오류와 조기 중단을 검증했습니다. 고정 `BuildQueryString`이 int64 `SizeMin/SizeMax`를 버리는 native 동작도 확인해 `WithListQuery` 대체 방법을 문서화했습니다. 테스트 `139ecc29`와 가이드·판정을 push했고 판정 반영 집계는307입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance native `images.Get`1개, 전체305→306(+1)·핵심231→232/2,292·Glance68→69/120.** generated `API.Get`의 native 경로·기본200·header merge·projection을 계약 테스트로 고정했습니다. [native 조회 가이드](../image/v2/images/get.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imagesget-완료)에 설명합니다. 새2그룹16사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `f3c653e6`·`f83ab0b9`를 push했습니다.
 
@@ -368,11 +368,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 306 (9.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 307 (9.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,055 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 566 | 아직 개별 기록 없는 선언 2,796 |
-| 기록한 부분·전체 계약 | 3,788 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,054 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 567 | 아직 개별 기록 없는 선언 2,795 |
+| 기록한 부분·전체 계약 | 3,790 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -415,7 +415,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS, 전체 gate 대기 | native 목록 가이드 추가 | 신규1행 go_mapping 기록, gate 대기 | `139ecc29`·가이드·판정 push; 다음 gate·대장 |
 | Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
 | Glance native images.Get | 305 → 306 (+1) | 새2그룹16·전체 `make check` PASS | `f3c653e6`·`f83ab0b9` push 완료 |
 | Glance Cloud create_image | 304 → 305 (+1) | 새2그룹10·10회 반복·전체 `make check` PASS | `d35410d8`·`9d8d50c8`·`09f5987e` push 완료 |
@@ -446,12 +446,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 232 / 2,292 | 10.1% | 160 | 1,899 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 233 / 2,292 | 10.2% | 160 | 1,898 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 306 / 3,362 | 9.1% | 259 | 2,796 | 1 |
+| 전체 | 307 / 3,362 | 9.1% | 259 | 2,795 | 1 |
 
 **핵심 서비스**
 
@@ -461,7 +461,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 69 / 120 | 25 | 26 | 0 |
+| Image / Glance | 70 / 120 | 25 | 25 | 0 |
 | Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |

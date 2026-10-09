@@ -46366,6 +46366,39 @@
         "The SDK adds only request.Wrap operation context; native URL construction, status policy, retries, reauthentication and partial Extract results are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/images.List",
+      "source_fingerprint": "493b16bb48259cf3601eef86b05412eacba15ec1546f3d4560eec6a638914400",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Generated API.List serializes ListOpts through the pinned ToImageListQuery, omitting zero values, repeating tag, formatting created/updated date filters and silently dropping int64 SizeMin/SizeMax in BuildQueryString, then appends WithListQuery extension values; zero options send no query.",
+          "tests": [
+            "image/v2/images/list_contracts_test.go:TestNativeImageListQueryAndExtensions"
+          ]
+        },
+        {
+          "behavior": "The lazy SDK stream follows native next links rebased onto the client ServiceURL path, stops on an empty images page even with next, surfaces the native EOF for a bodyless 204, yields earlier rows before a late native HTTP error, returns row decode errors and sends no further page after the caller stops.",
+          "tests": [
+            "image/v2/images/list_contracts_test.go:TestNativeImageListPagingStopsAndErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/images/list.md",
+        "image/v2/images/README.md"
+      ],
+      "differences": [
+        "This declaration maps Gophercloud native List only; it is not Python images() descriptor/local-filter/location parity or Cloud list_images behavior.",
+        "The SDK exposes the native pager as iter.Seq2 and keeps native query construction, including the int64 size filter omission; callers can send size_min/size_max with WithListQuery. Iteration errors are native and only option preparation errors receive List/images context."
+      ],
+      "remaining": []
     }
   ]
 }
