@@ -46243,6 +46243,44 @@
         "The pinned delete_objects argument is never read by the source body, so Go omits it. Wait polling intervals and request headers are Go extensions; headers apply to Glance requests only."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_image",
+      "source_fingerprint": "de522c102a417a62d92c4adc9fa955bb66cf3b078fed7c2f048e5c2d26c96a1e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CreateVolumeImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.ExistingImageRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateVolumeImageRecord fills a falsey disk format from the captured cloud image_format (default qcow2, omitted when configured null), a falsey container format with bare and force from allow_duplicates, then sends one upload-to-image volume action through the existing Cinder upload engine.",
+          "tests": [
+            "connection_volume_image_create_test.go:TestConnectionCreateVolumeImageRecordDefaultsUploadAndExistingImage"
+          ]
+        },
+        {
+          "behavior": "The upload result's image_id becomes Image.existing(id=...) through image.Service.ExistingImageRecord: a synchronized id-only record with the 65 declared fields and Connection location and no Glance request.",
+          "tests": [
+            "connection_volume_image_create_test.go:TestConnectionCreateVolumeImageRecordDefaultsUploadAndExistingImage"
+          ]
+        },
+        {
+          "behavior": "A non-object result, missing, null, non-string or blank image_id returns the upload evidence with an invalid-option error under the Cloud operation; a non-string configured format and invalid volume IDs fail before HTTP.",
+          "tests": [
+            "connection_volume_image_create_test.go:TestConnectionCreateVolumeImageRecordFailuresKeepUploadEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/volume-upload-image.md",
+        "blockstorage/README.md"
+      ],
+      "differences": [
+        "Python accepts a Volume Resource or ID and returns an Image Resource; Go takes a literal VolumeID and returns VolumeImageCreateResult separating the Cinder upload evidence from the ImageRecord.",
+        "The pinned Proxy accepts wait and timeout but never reads them, so Go omits them. Python sends any configured image_format value; Go requires a string or null configuration and a nonblank string image_id."
+      ],
+      "remaining": []
     }
   ]
 }

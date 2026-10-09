@@ -190,4 +190,4 @@ Backup import는 `ImportVolumeBackup`에 `ImportVolumeBackupRequest{BackupServic
 
 [Volume image metadata](volume-image-metadata.md)는 설정의 빈 object 기본값, 삭제의 전체·빈 목록 구분, 키별 부분 응답과 원본의 일반 metadata 순회 문제 보정을 설명합니다. package·Connection·service 예제와 factory·Prepare를 함께 제공합니다.
 
-[Volume을 image로 업로드](volume-upload-image.md)는 force=false·formats 생략 기본값과 명시적인 visibility/protected의 3.1 지원 확인, 원본 upload JSON 및 실패 시 부분 응답을 설명합니다. Connection·package·service 호출과 factory·Prepare를 함께 제공합니다.
+[Volume을 image로 업로드](volume-upload-image.md)는 force=false·formats 생략 기본값과 명시적인 visibility/protected의 3.1 지원 확인, 원본 upload JSON 및 실패 시 부분 응답을 설명합니다. Connection·package·service 호출과 factory·Prepare를 함께 제공합니다. Proxy `create_image`에 해당하는 `conn.CreateVolumeImageRecord`는 형식 기본값을 채워 업로드한 뒤 `image_id`로 동기화 ImageRecord를 반환합니다.

@@ -152,6 +152,21 @@ Visibility/Protected가 둘 다 nil이면 minimum gate가 없습니다. nonempty
 
 missing key·nonobject outer shape·malformed/invalid-UTF-8 JSON은 Applied proof를 남긴 채 Completed=false/Upload=nil로 실패합니다. accepted Read/Close·source·custom cancellation에도 해당 단계의 실제 proof가 남을 수 있습니다. native rejected action은 Applied가 없고 이전 Discovery를 현재 오류의 proof로 빌리지 않습니다. 파싱 오류를 이유로 POST를 재시도하거나 Glance GET·poll·rollback을 수행하지 않습니다. Completed=true는 helper의 acknowledgement·응답 선택이 끝났다는 뜻이며 image status=active나 데이터 복사 완료를 증명하지 않습니다.
 
+## Proxy create_image: 기본 형식과 Image 반환
+
+고정 Cinder v3 Proxy의 `create_image(name, volume, allow_duplicates, container_format, disk_format, wait, timeout)`는 위 upload 액션에 기본값을 채운 wrapper입니다. Go에서는 `conn.CreateVolumeImageRecord(ctx, openstack.VolumeImageCreateRequest{...})`가 담당합니다.
+
+| Python 인자 | Go 필드 | 처리 |
+|---|---|---|
+| `name` | `Name` | upload의 `image_name` |
+| `volume` | `VolumeID` | 조회 없이 그대로 사용 |
+| `allow_duplicates` | `AllowDuplicates` | `force` 값 |
+| `disk_format` | `DiskFormat` | 빈 값이면 cloud 설정 `image_format`(기본 `qcow2`), 설정이 null이면 생략 |
+| `container_format` | `ContainerFormat` | 빈 값이면 `bare` |
+| `wait`, `timeout` | 없음 | 고정 소스가 읽지 않으므로 제공하지 않음 |
+
+액션 응답에서 `image_id`를 읽어 `image.Service.ExistingImageRecord`로 Python `Image.existing(id=...)`와 같은 동기화 record를 만듭니다. 이 record는 id만 가진 Image 선언 필드65개와 현재 Connection location을 담고 Glance 요청을 보내지 않습니다. 결과 `VolumeImageCreateResult`는 Cinder upload 증거와 Image를 분리합니다. 응답이 object가 아니거나 `image_id`가 없거나 문자열이 아니면 upload 증거와 함께 입력 오류를 반환합니다. 문자열이 아닌 설정 `image_format`은 HTTP 전에 거부합니다. 이미지 상태 대기는 Cloud `create_image`의 몫입니다.
+
 ## 기존 API·Source 경계
 
 기존 native `cinder.Volumes.UploadImage(ctx, id, UploadImageOpts, ...)`는 모든 기본 DTO field의 omitempty와 HTTP202/typed `VolumeImage` 결과 계약을 유지합니다. 그 DTO의 force=false·protected=false·empty name/formats 생략 정책과 새 helper의 presence policy는 다릅니다. Glance `image.Service.UploadImage`의 metadata+파일 bytes workflow는 [별도 이미지 업로드 가이드](../image/upload-image.md)를 참고하세요. 이 Cinder helper가 그 workflow를 실행하지 않습니다.
