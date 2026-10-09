@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance `add_image_location` 보완 구현 중.** 직전 완료 집계는 전체318/3,362·핵심244/2,292·Glance81/120입니다. 고정 Python `Resource.create`와 대조해 실제 누락 두 가지를 보완합니다. accepted status를 202 전용에서 Python `raise_from_response`와 같은 200..399로 넓히고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON 응답은 Python `body.pop`처럼 오류입니다. 202 전용을 가정한 기존 테스트를 새 계약으로 고치고 새 동작의 집중 테스트를 추가했으며 다음은 가이드·판정입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Glance `add_image_location` 보완·테스트·가이드·판정 완료, 전체 gate 진행 중.** 직전 완료 집계는 전체318/3,362·핵심244/2,292·Glance81/120입니다. 고정 Python `Resource.create`와 대조해 실제 누락 두 가지를 보완합니다. accepted status를 202 전용에서 Python `raise_from_response`와 같은 200..399로 넓히고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON 응답은 Python `body.pop`처럼 오류입니다. 202 전용을 가정한 기존 테스트를 새 계약으로 고치고 새 동작의 집중 테스트를 추가했으며 [location 가이드](../image/locations.md#add-결과의-imagelocation-view)를 갱신하고 판정을 go_mapping으로 닫아 판정 반영 집계는319입니다. 다음은 전체 `make check`와 대장 기록입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance native `imagedata` 3개, 전체315→318(+3)·핵심241→244/2,292·Glance78→81/120.** generated `Upload/Stage/Download`의 경로·status·stream 소유권 계약을 고정했습니다. [imagedata 가이드](../image/v2/imagedata/README.md#native-uploadstagedownload)와 [검증 기록](sdk-support-ledger.md#glance-native-imagedata-완료)에 설명합니다. 새2그룹7사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `2d318e7d`·`b7927fdb`를 push했습니다.
 
@@ -378,11 +378,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 318 (9.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 319 (9.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,043 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,042 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 578 | 아직 개별 기록 없는 선언 2,784 |
-| 기록한 부분·전체 계약 | 3,802 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,803 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -425,7 +425,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새 집중 테스트 PASS | 진행 중 | 진행 중 | `a382f17c`·테스트 push; 다음 가이드·판정 |
+| Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새 집중 테스트 PASS, 전체 gate 대기 | location 가이드 갱신 | unresolved→go_mapping, gate 대기 | `a382f17c`·`177f9f60`·가이드·판정 push; 다음 gate·대장 |
 | Glance native imagedata 3개 | pinned Gophercloud v2.15.0 imagedata requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹7·전체 `make check` PASS | native 절 추가 | **신규3행 go_mapping·318/3,362** | 작은 commit2개 push 완료; 다음 add_image_location 재검토 |
 | Glance native imageimport 2개 | pinned Gophercloud v2.15.0 imageimport requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹11·전체 `make check` PASS | native 절 추가 | **신규2행 go_mapping·315/3,362** | 작은 commit2개 push 완료; 다음 native imagedata |
 | Glance native members 5개 | pinned Gophercloud v2.15.0 members requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹24·전체 `make check` PASS | native 멤버 가이드 추가 | **신규5행 go_mapping·313/3,362** | 작은 commit2개 push 완료; 다음 native imageimport |
@@ -466,12 +466,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 244 / 2,292 | 10.6% | 160 | 1,887 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 245 / 2,292 | 10.7% | 159 | 1,887 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 318 / 3,362 | 9.5% | 259 | 2,784 | 1 |
+| 전체 | 319 / 3,362 | 9.5% | 258 | 2,784 | 1 |
 
 **핵심 서비스**
 
@@ -481,7 +481,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 81 / 120 | 25 | 14 | 0 |
+| Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |

@@ -1,6 +1,6 @@
 # 전용 image location 추가·조회
 
-`image.Service.AddImageLocation`은 선택한 이미지의 `POST images/{id}/locations`를 준비하고 실제 202 acknowledgement를 반환합니다. `GetImageLocations`는 같은 endpoint에 body/query 없는 GET을 보내 실제 200의 유한한 location 배열을 읽습니다. ID는 직접 사용하며 명시적인 `resource.Name`만 기존 exact-name native paging으로 한 번 resolve합니다.
+`image.Service.AddImageLocation`은 선택한 이미지의 `POST images/{id}/locations`를 준비하고 실제 200..399 acknowledgement와 Python ImageLocation view를 반환합니다. `GetImageLocations`는 같은 endpoint에 body/query 없는 GET을 보내 실제 200의 유한한 location 배열을 읽습니다. ID는 직접 사용하며 명시적인 `resource.Name`만 기존 exact-name native paging으로 한 번 resolve합니다.
 
 ```go
 package example
@@ -35,7 +35,7 @@ func addValidatedThenGetLocations(ctx context.Context, service *image.Service, r
 }
 ```
 
-첫 함수의 기본 JSON body는 `{"url": "입력 문자열", "validation_data": {}}`입니다. 두 번째 함수는 hash pair를 전달한 뒤 별도 GET을 수행합니다. POST와 GET은 독립 요청이고 202 직후 GET에 새 location이 나타난다고 보장하지 않습니다. POST accepted body 실패에서도 nonnil acknowledgement를 보존하므로 오류와 result를 함께 확인합니다.
+첫 함수의 기본 JSON body는 `{"url": "입력 문자열", "validation_data": {}}`입니다. 두 번째 함수는 hash pair를 전달한 뒤 별도 GET을 수행합니다. POST와 GET은 독립 요청이고 접수 직후 GET에 새 location이 나타난다고 보장하지 않습니다. POST accepted body 실패에서도 nonnil acknowledgement를 보존하므로 오류와 result를 함께 확인합니다.
 
 ## Python Resource와 실제 서버 응답
 
@@ -52,7 +52,7 @@ def add_and_read_locations(conn, image_id, location_url, validation_data=None):
 
 Python의 inherited create는 비어 있는 응답의 JSON `ValueError`를 무시하고 입력 URL·validation data로 준비한 mutable Resource를 반환할 수 있습니다. Go의 Add result는 고정된 request `ImageID`·`URL`과 실제 `Body []byte`·`Header`·`StatusCode`입니다. 서버가 location 객체나 stable location ID를 돌려줬다고 추정하지 않고, seeded Resource·descriptor·dirty/cache·session 동작을 재현하지 않습니다.
 
-[공식 Add Location 문서](https://docs.openstack.org/api-ref/image/v2/index.html#add-location)는 정상 200을 기재하지만, 고정된 Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`의 [serializer](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/images.py#L1882-L1883)는 body 없는 202를 설정합니다. Go는 이 실제 소스의 202만 받으며 문서의 200이나 다른 2xx로 성공 범위를 넓히지 않습니다. [controller](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/images.py#L1161-L1257)는 비동기 `location_import`를 접수하므로 202는 hash 검증·활성화·완료 증거가 아닙니다.
+[공식 Add Location 문서](https://docs.openstack.org/api-ref/image/v2/index.html#add-location)는 정상 200을 기재하지만, 고정된 Glance commit `57f7dd9e76ef24e1e9013eceaa703bd442469a24`의 [serializer](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/images.py#L1882-L1883)는 body 없는 202를 설정합니다. Go는 고정 Python `Resource.create`의 `raise_from_response`처럼 400 미만 status를 모두 accepted로 받으므로 문서의 200도 성공입니다. [controller](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/images.py#L1161-L1257)는 비동기 `location_import`를 접수하므로 accepted 응답은 hash 검증·활성화·완료 증거가 아닙니다.
 
 ## URL·validation data·옵션
 
@@ -74,11 +74,15 @@ GET result는 선택한 `ImageID`, `Locations []*ImageLocation`과 실제 전체
 
 ## 응답 실패와 기존 source 정책
 
-POST actual 202의 empty/non-JSON/invalid UTF-8 bytes는 opaque acknowledgement입니다. accepted read·Close·context 실패에서도 독립적인 Body/Header 복사본을 가진 result와 `resource.ResponseError`를 함께 반환합니다. GET은 accepted read·Close·context·UTF-8·JSON·schema 실패에서 nil typed result를 반환하고 전체 실제 200 bytes/header/status는 `ResponseError`에 남깁니다. partial typed row 성공으로 바꾸지 않습니다. 원래 read/Close·`ctx.Err()`·custom cause를 보존하며 body는 한 번 닫고 accepted 실패 뒤 replay하지 않습니다.
+POST accepted 응답의 bytes는 opaque acknowledgement로 그대로 보존합니다. accepted read·Close·context 실패에서도 독립적인 Body/Header 복사본을 가진 result와 `resource.ResponseError`를 함께 반환합니다. GET은 accepted read·Close·context·UTF-8·JSON·schema 실패에서 nil typed result를 반환하고 전체 실제 200 bytes/header/status는 `ResponseError`에 남깁니다. partial typed row 성공으로 바꾸지 않습니다. 원래 read/Close·`ctx.Err()`·custom cause를 보존하며 body는 한 번 닫고 accepted 실패 뒤 replay하지 않습니다.
+
+## Add 결과의 ImageLocation view
+
+`AddImageLocationResult.Resource`는 Python `_create`가 반환하는 ImageLocation의 `to_dict` view입니다. 요청 seed의 `image_id`·`url`·`validation_data`(생략 시 `{}`), 기본 `id`·`name`·`metadata` null, 현재 Connection location에서 시작합니다. 응답 본문이 비었거나 JSON이 아니면 Python이 `ValueError`를 무시하듯 seed를 그대로 둡니다. JSON object이면 `self`를 버리고 선언 필드 `id`·`name`·`url`·`validation_data`·`metadata`만 덮어쓰며 `image_id`와 나머지 key는 무시합니다. 유효한 JSON이지만 object가 아니면 Python `body.pop`처럼 오류입니다. dict 형식인 `validation_data`·`metadata`는 object나 null만 받으며, Python `dict()`가 변환할 수 있는 쌍 목록 등은 Go에서 오류입니다. 이 경우와 location 조회 실패는 acknowledgement와 `resource.ResponseError`를 함께 반환합니다. `URL` 필드는 계속 요청한 값입니다.
 
 기존 mutation의 source 준비·header 규칙을 유지합니다. source/client/provider·prefix·일반 headers를 callback 전에 capture하고 body/header 옵션을 준비한 뒤 정확한 Name lookup을 수행합니다. absent·ambiguous·surfaced native list/decode/HTTP/context 실패나 잘못된 chosen ID는 location 요청을 보내지 않습니다. Name의 native typed model·body ownership·continuation은 기존 경계입니다. provider 교체·foreign retarget은 차단하고 원래 provider의 live auth token을 사용합니다.
 
-공통 `DoJSON`은 native pre-body retry·reauth·backoff와 같은 target의 configured redirect를 유지합니다. method·origin·path·query 변경은 transport 전에 차단하고 실제 202/200 acceptance를 고정합니다. RetryFunc의 동일 serialized JSON 교체는 허용하되 URL/hash·response ownership 변경, RawBody·KeepResponseBody·JSONResponse 변경과 GET nil body→JSON null은 다음 요청 전에 거부합니다. 원래 pre-body 오류·hook/encoding cause를 유지하며 native reauth의 `ErrOriginal`·`ErrReauth`는 wrapper 필드에서 확인합니다. configured 정책으로 accepted body 전에 여러 attempt가 있을 수 있습니다.
+공통 `DoJSON`은 native pre-body retry·reauth·backoff와 같은 target의 configured redirect를 유지합니다. method·origin·path·query 변경은 transport 전에 차단하고 Add의 200..399와 Get의 200 acceptance를 고정합니다. RetryFunc의 동일 serialized JSON 교체는 허용하되 URL/hash·response ownership 변경, RawBody·KeepResponseBody·JSONResponse 변경과 GET nil body→JSON null은 다음 요청 전에 거부합니다. 원래 pre-body 오류·hook/encoding cause를 유지하며 native reauth의 `ErrOriginal`·`ErrReauth`는 wrapper 필드에서 확인합니다. configured 정책으로 accepted body 전에 여러 attempt가 있을 수 있습니다.
 
 queued 상태·권한·store·import lock·실제 hash 검증·backend persistence는 서버 소유 정책입니다. SDK는 metadata/status gate, location ID 합성, cache mutation, task 조회, polling·wait·rollback·cleanup을 수행하지 않습니다. local HTTP 계약은 배포의 기능·권한·비동기 완료나 full Python Resource/cache/session parity를 증명하지 않습니다.
 

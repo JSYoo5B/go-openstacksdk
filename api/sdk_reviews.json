@@ -20113,7 +20113,7 @@
     {
       "operation": "python:image/v2/add_image_location",
       "source_fingerprint": "4c13c5b79261e10ee958698ba78014977bb63381047b1fa837f902590e9656f6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AddImageLocation",
         "github.com/JSYoo5B/go-openstacksdk/image.WithAddImageLocationOpts",
@@ -20133,12 +20133,12 @@
           ]
         },
         {
-          "behavior": "Only actual202 establishes Add acknowledgement with fixed request ImageID/URL and independently cloned opaque Body/Header/status. Empty/nonJSON/invalidUTF8 acknowledgement is accepted without location model/ID decoding. Pinned serializer sets202/no body despite official documented200; documented200 and other statuses do not create a Go result.",
+          "behavior": "Like pinned Resource.create raise_from_response, every actual 200..399 response establishes the Add acknowledgement with fixed request ImageID/URL and independently cloned opaque Body/Header/status; 400 and above keep native errors whose Expected list is 200..399, and expanded OkCodes cannot widen it.",
           "tests": [
             "image/locations_contracts_test.go:TestImageLocationsFixedRoutesAndPassiveData",
-            "image/locations_core_test.go:TestImageLocationsCoreFixedRoutesAndPassiveData",
             "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
-            "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
+            "image/locations_core_test.go:TestImageLocationsCoreStrictStatusesAndRetryOwnership",
+            "image/locations_python_view_test.go:TestImageLocationPythonViewSeedAcrossAcceptedStatuses"
           ]
         },
         {
@@ -20201,6 +20201,13 @@
             "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
             "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
           ]
+        },
+        {
+          "behavior": "Resource is the Python ImageLocation view: seeded image_id/url/validation_data (default {}), null id/name/metadata and the Connection location, kept for empty or invalid JSON and overlaid only by declared id/name/url/validation_data/metadata of a JSON object response with self and other keys ignored. Valid non-object JSON, non-object dict-typed fields and location failures return the acknowledgement with a ResponseError and no view.",
+          "tests": [
+            "image/locations_python_view_test.go:TestImageLocationPythonViewSeedAcrossAcceptedStatuses",
+            "image/locations_python_view_test.go:TestImageLocationPythonViewOverlayAndFailures"
+          ]
         }
       ],
       "documentation": [
@@ -20209,18 +20216,12 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python accepts Image Resource/ID and uses inherited mutable ImageLocation Resource, descriptors, dirty/cache/session/microversion behavior. Go uses explicit ID/Name Ref, concrete owned options and actual raw response evidence; explicit Name resolution is an additional convenience.",
-        "Go retains native Name pager model/body/continuation and rejected native response policy, while owning accepted response bytes/header/status and body failures. Full Python Resource/adapter/exception/cache/transport policy remains broader.",
-        "Python ImageLocation._max_microversion2.17 is a framework capability hint. Go preserves existing source version policy without inventing a location microversion header, capability discovery or minimum deployment support gate.",
-        "Python create may swallow empty/nonJSON response JSON ValueError and return the seeded URL/validation_data Resource. Go returns actual202 acknowledgement; neither seeded Resource nor acknowledgement proves a returned location or completed asynchronous validation.",
-        "Nil Go validation defaults{} like Python None, but an explicit Go zero/partial pair is invalid while Python arbitrary dict input remains broader. Paired presence is a deliberate local rule beyond schema behavior in older allowed jsonschema drafts. do_secure_hash is server configuration, not a new client body option."
+        "Pinned Python accepts an Image Resource or ID and returns a mutable ImageLocation Resource; Go uses an explicit ID/Name Ref and concrete owned options and returns AddImageLocationResult with the acknowledgement plus an owned ImageLocation view. Explicit Name resolution is an additional convenience and SDK-wide mutable Resource/session behavior is tracked separately as SDK-R1/S1.",
+        "Go retains native Name pager model/body/continuation and rejected native response policy while owning accepted response bytes/header/status and body failures.",
+        "Python ImageLocation._max_microversion 2.17 is a framework capability hint. Go preserves the existing source version policy without inventing a location microversion header, capability discovery or minimum deployment support gate.",
+        "Nil Go validation defaults to {} like Python None, but Go accepts only the paired os_hash_algo/os_hash_value strings while Python accepts any dict, and Go rejects non-object dict-typed response fields that Python dict() might coerce. Neither the view nor the acknowledgement proves a stored location or completed asynchronous validation, which the server owns."
       ],
-      "remaining": [
-        "Full mutable supplied Resource/subclass/Munch/connection/default/descriptor/coercion/unknown-body/dirty/cache/session semantics remain unresolved; typed Ref/result objects do not implement that Python object model.",
-        "Complete Python adapter/response translation, cache invalidation, generic list pagination/filtering/query coercion and arbitrary custom transport policies remain partial. Native Name continuation/body/error policy is retained.",
-        "Queued image state, permissions, configured store and HTTP URI policy, import lock, server schema/digest/algorithm support and actual asynchronous hash validation/backend persistence are server-owned. Accepted HTTP proof does not establish deployment support or task completion.",
-        "No metadata/status gate, capability discovery, synthetic location ID, RMW/PATCH, client URL fetch, cache mutation, wait/poll/task lookup, rollback or cleanup is added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/image_locations",
