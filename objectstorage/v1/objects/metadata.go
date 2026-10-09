@@ -90,7 +90,7 @@ func (a *API) changeMetadata(ctx context.Context, container, object, method stri
 	}
 	client := *p.client
 	client.MoreHeaders = headers
-	ack, err := rest.DoJSON(ctx, &client, "POST", p.target, nil, nil, 202)
+	ack, err := rest.DoJSONGuarded(ctx, &client, p.check, "POST", p.target, nil, nil, 202)
 	err = p.observe(ctx, ack, err)
 	if ack != nil {
 		result.Acknowledgement = &MetadataResponse{Body: append([]byte(nil), ack.Body...), Header: ack.Header.Clone(), StatusCode: ack.StatusCode}
@@ -103,7 +103,7 @@ func (p *preparedMetadata) read(ctx context.Context, mutation bool) (*GetMetadat
 	if mutation {
 		target += "?symlink=get"
 	}
-	response, err := rest.DoJSON(ctx, p.client, "HEAD", target, nil, nil, 200)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, "HEAD", target, nil, nil, 200)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, nil, err

@@ -26,7 +26,7 @@ func (a *API) CreateContainer(ctx context.Context, container string, options ...
 	for key, value := range headers {
 		p.client.MoreHeaders[key] = value
 	}
-	response, err := rest.DoJSON(ctx, p.client, http.MethodPut, p.target, nil, nil, http.StatusCreated, http.StatusAccepted)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, http.MethodPut, p.target, nil, nil, http.StatusCreated, http.StatusAccepted)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, request.Wrap("CreateContainer", "containers", err)
@@ -51,7 +51,7 @@ func (a *API) DeleteContainer(ctx context.Context, container string, options ...
 	if cfg.IgnoreMissing == nil || *cfg.IgnoreMissing {
 		codes = append(codes, http.StatusNotFound)
 	}
-	response, err := rest.DoJSON(ctx, p.client, http.MethodDelete, p.target, nil, nil, codes...)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, http.MethodDelete, p.target, nil, nil, codes...)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, request.Wrap("DeleteContainer", "containers", err)

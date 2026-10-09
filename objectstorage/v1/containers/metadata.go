@@ -21,7 +21,7 @@ func (a *API) GetMetadata(ctx context.Context, container string, options ...GetM
 	if cfg.Newest != nil {
 		p.client.MoreHeaders["X-Newest"] = strconv.FormatBool(*cfg.Newest)
 	}
-	response, err := rest.DoJSON(ctx, p.client, "HEAD", p.target, nil, nil, 204)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, "HEAD", p.target, nil, nil, 204)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, request.Wrap("GetMetadata", "containers", err)
@@ -67,7 +67,7 @@ func (a *API) changeMetadata(ctx context.Context, container, method string, inpu
 	for key, value := range headers {
 		p.client.MoreHeaders[key] = value
 	}
-	response, err := rest.DoJSON(ctx, p.client, "POST", p.target, nil, nil, 204)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, "POST", p.target, nil, nil, 204)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, request.Wrap(method, "containers", err)

@@ -32,7 +32,7 @@ func (a *API) SetTempURLKey(ctx context.Context, container, key string, options 
 	for name, value := range headers {
 		p.client.MoreHeaders[name] = value
 	}
-	response, err := rest.DoJSON(ctx, p.client, "POST", p.target, nil, nil, 204)
+	response, err := rest.DoJSONGuarded(ctx, p.client, p.check, "POST", p.target, nil, nil, 204)
 	err = p.observe(ctx, response, err)
 	if response == nil {
 		return nil, request.Wrap("SetTempURLKey", "containers", err)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -21,6 +22,10 @@ type preparedMetadata struct {
 	provider                                                 *gophercloud.ProviderClient
 	endpoint, base, target, container, object, kind, version string
 	headers                                                  map[string]string
+	outer                                                    func(context.Context) error
+	extraSource                                              func(map[string]string) error
+	mu                                                       sync.Mutex
+	sourceObserved, observed                                 error
 }
 
 func (a *API) captureMetadata(ctx context.Context, container, object string) (*preparedMetadata, error) {
@@ -44,13 +49,40 @@ func (a *API) captureMetadata(ctx context.Context, container, object string) (*p
 	}
 	client := *source
 	client.MoreHeaders = cloneMetadataHeaders(headers)
-	return &preparedMetadata{api: a, source: source, client: &client, provider: source.ProviderClient, endpoint: source.Endpoint, base: source.ResourceBase, target: target, container: container, object: object, headers: headers, kind: source.Type, version: source.Microversion}, nil
+	p := &preparedMetadata{api: a, source: source, client: &client, provider: source.ProviderClient, endpoint: source.Endpoint, base: source.ResourceBase, target: target, container: container, object: object, headers: headers, kind: source.Type, version: source.Microversion, outer: rest.OperationGuard(ctx)}
+	rest.RegisterOperationSource(ctx, p.sourceCheck)
+	if err := p.check(ctx); err != nil {
+		return nil, err
+	}
+	return p, nil
 }
+func (p *preparedMetadata) sourceCheck(ctx context.Context) error {
+	err := p.currentSourceCheck(ctx)
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.sourceObserved = joinMetadataErrors(p.sourceObserved, err)
+	return p.sourceObserved
+}
+
+// The registered source guard never invokes the outer compound workflow.
 func (p *preparedMetadata) check(ctx context.Context) error {
+	err := p.sourceCheck(ctx)
+	if p.outer != nil {
+		err = joinMetadataErrors(err, p.outer(ctx))
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.observed = joinMetadataErrors(p.observed, err)
+	return p.observed
+}
+func (p *preparedMetadata) currentSourceCheck(ctx context.Context) error {
 	if p.api.client != p.source || p.source.ProviderClient != p.provider || p.source.Endpoint != p.endpoint || p.source.ResourceBase != p.base || p.source.ServiceURL(url.PathEscape(p.container), url.PathEscape(p.object)) != p.target || p.source.Type != p.kind || p.source.Microversion != p.version {
 		return metadataContextError(ctx, metadataInvalid("object metadata source or target changed"))
 	}
 	_, err := validateMetadataSource(ctx, p.source)
+	if p.extraSource != nil {
+		err = joinMetadataErrors(err, p.extraSource(p.source.MoreHeaders))
+	}
 	return err
 }
 func (p *preparedMetadata) finish(ctx context.Context, headers map[string]string, err error) error {
