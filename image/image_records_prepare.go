@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 
@@ -34,9 +35,13 @@ func (s *Service) captureImageRecord(ctx context.Context) (*preparedImageRecord,
 	resourceBase := source.source.ResourceBase
 	outer := rest.OperationGuard(ctx)
 	var observed error
+	var observedMu sync.Mutex
 	check := func(checkCtx context.Context) error {
-		if observed != nil {
-			return cloudread.ContextError(checkCtx, observed)
+		observedMu.Lock()
+		prior := observed
+		observedMu.Unlock()
+		if prior != nil {
+			return cloudread.ContextError(checkCtx, prior)
 		}
 		var binding, ancestor error
 		if s.API != api || s.Images != images || source.source.ResourceBase != resourceBase || api != nil && api.RawClient() != source.source {
@@ -45,8 +50,14 @@ func (s *Service) captureImageRecord(ctx context.Context) (*preparedImageRecord,
 		if outer != nil {
 			ancestor = outer(checkCtx)
 		}
-		observed = errors.Join(source.check(checkCtx), binding, ancestor)
-		return cloudread.ContextError(checkCtx, observed)
+		fresh := errors.Join(source.check(checkCtx), binding, ancestor)
+		// Upload reads can overlap response handling. Do not race the sticky
+		// cause, or hold its lock while invoking an ancestor callback.
+		observedMu.Lock()
+		observed = errors.Join(observed, fresh)
+		current := observed
+		observedMu.Unlock()
+		return cloudread.ContextError(checkCtx, current)
 	}
 	opctx := rest.WithOperationGuard(ctx, check)
 	if err := check(opctx); err != nil {

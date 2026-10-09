@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"slices"
 	"strings"
@@ -29,6 +30,11 @@ type ImageRecord struct {
 	// Raw component presence is retained before descriptor/default projection.
 	// It is private so projected view/receipt edits cannot forge a commit baseline.
 	bodyState *imageRecordBodyState
+
+	// Plain binary data is outside Body and HTTP evidence. Borrowed readers retain
+	// their current cursor and lifetime across immutable Resource operations.
+	// SDK-owned filename handles are released by their workflow and not retained.
+	data io.Reader
 }
 
 type imageRecordKind uint8

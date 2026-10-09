@@ -5,12 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"maps"
 	"net/http"
 	"net/url"
-	"strconv"
 
-	"github.com/JSYoo5B/go-openstacksdk/internal/fixedrequest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -57,41 +54,7 @@ func (s *Service) UploadImage(ctx context.Context, input UploadImageRequest, opt
 }
 
 func uploadImageDataOnce(ctx context.Context, source *gophercloud.ServiceClient, endpoint string, data io.Reader, size *int64) (*rest.Response, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, imageUploadContextError(ctx, err)
-	}
-	if err := rest.ValidateTarget(source, endpoint); err != nil {
-		return nil, imageUploadContextError(ctx, err)
-	}
-	client, err := fixedrequest.New(source, http.MethodPut, endpoint)
-	if err != nil {
-		return nil, imageUploadContextError(ctx, err)
-	}
-	// A native retry can replay a consumed reader without rewinding it. Keep the
-	// original HTTP transport/timeout/live auth, and disable resend policy here.
-	client.ProviderClient.ReauthFunc = nil
-	client.ProviderClient.RetryFunc = nil
-	client.ProviderClient.RetryBackoffFunc = nil
-	client.ProviderClient.MaxBackoffRetries = 0
-	client.ProviderClient.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	client.MoreHeaders = maps.Clone(source.MoreHeaders)
-	client.MoreHeaders["Content-Type"], client.MoreHeaders["Accept"] = "application/octet-stream", ""
-	if size != nil {
-		client.MoreHeaders["X-OpenStack-Image-Size"] = strconv.FormatInt(*size, 10)
-	}
-	wire, err := client.Request(ctx, http.MethodPut, endpoint, &gophercloud.RequestOpts{
-		RawBody: borrowedUploadReader{Reader: data}, KeepResponseBody: true, OkCodes: []int{http.StatusNoContent},
-	})
-	if err != nil {
-		return nil, imageUploadContextError(ctx, err)
-	}
-	response := &rest.Response{Header: wire.Header.Clone(), StatusCode: wire.StatusCode}
-	response.Body, err = io.ReadAll(wire.Body)
-	err = imageUploadContextError(ctx, imageUploadErrors(err, wire.Body.Close()))
-	if err != nil {
-		return response, response.Fail(err)
-	}
-	return response, nil
+	return imageDataOnce(ctx, source, nil, endpoint, data, size, []int{http.StatusNoContent})
 }
 
 func imageUploadErrors(causes ...error) error {

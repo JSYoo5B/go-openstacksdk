@@ -80,6 +80,7 @@ func commitImageRecordUpdate(p *preparedImageRecordUpdate) (*ImageRecord, error)
 		// update the original body. This state survives immutable Go returns.
 		record.bodyState = cloneImageRecordBodyState(p.seed.bodyState)
 	}
+	record.data = p.seed.data
 	return record, nil
 }
 

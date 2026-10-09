@@ -124,6 +124,7 @@ func (p *preparedImageRecordWait) fetch(ctx context.Context, target string, dele
 	if err != nil {
 		return nil, err
 	}
+	value.data = p.seed.data
 	p.last = value
 	p.body = imageRecordBodySnapshot(value)
 	state, null, err := imageRecordWaitState(value, p.config.Attribute)

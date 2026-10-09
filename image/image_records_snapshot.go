@@ -16,7 +16,7 @@ func cloneImageRecord(value *ImageRecord) *ImageRecord {
 		Resource: value.Resource.Clone(), Wire: value.Wire.Clone(),
 		Envelope: bytes.Clone(value.Envelope), Header: value.Header.Clone(),
 		StatusCode: value.StatusCode, ImportMethods: slices.Clone(value.ImportMethods),
-		bodyState: cloneImageRecordBodyState(value.bodyState),
+		bodyState: cloneImageRecordBodyState(value.bodyState), data: value.data,
 	}
 }
 
