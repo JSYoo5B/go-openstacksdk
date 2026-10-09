@@ -110,3 +110,5 @@ NOTICE 누락을 모두 거부하는 것을 확인했습니다. 전체 vet·race
 pinned parity·진행표·gofmt 검사도 통과했습니다. 운영 경로·import·설치 예제는
 `go-openstacksdk`이며 이전 이름은 변경 이력과 참조 출처에만 보존합니다.
 GitHub 저장소 `JSYoo5B/go-openstacksdk`와 Apache-2.0 표시도 확인했습니다.
+
+최종 원격 설치 확인: revision `a6b944ae6fdc6f98a90942345ca5e2cd519ba2b3`, 실제 버전 `v0.0.0-20261009041345-a6b944ae6fdc`을 외부 프로젝트에서 replace 없이 설치하고 문서 main 두 개를 빌드했습니다. get/build exit0이며 Go 소스 2,173개와 라이선스·고지·대응표 17개 파일이 로컬과 동일합니다. 기본 설치 명령도 이 검증한 revision으로 갱신했습니다.
