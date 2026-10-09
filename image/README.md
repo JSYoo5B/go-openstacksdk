@@ -163,6 +163,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 `service.UpdateImageRecord`와 `conn.UpdateImageRecord`는 ID 또는 SDK가 반환한 ImageRecord에 변경 속성을 적용해 same-value 요청을 생략하고 JSON Patch를 자동 생성합니다. [레코드 수정의 Python/Go 비교와 독립 main](image-record-update.md)에 raw baseline·properties 교체·concrete 옵션·응답과 다음 수정의 관계를 설명합니다.
 
+`service.UpdateImagePropertiesRecord`와 Connection의 같은 메서드는 SDK Record의 기존 properties를 복사하고 keyword 변환·참조 이미지 검색·meta overlay·조건부 자동 PATCH를 처리합니다. [속성 helper 비교·독립 main](image-record-properties.md)에 bool/no-op, ordered JSON·map 옵션과 literal ID의 properties seed 실패를 설명합니다.
+
 `service.AddImageRecordTag/RemoveImageRecordTag`는 literal ID 또는 owned ImageRecord를 받아 태그 하나의 접수와 성공 후 로컬 tags 변경을 구분합니다. [레코드 태그의 Python/Go 비교와 독립 main](image-record-tags.md)에 concrete header 옵션, 중복·첫 일치 삭제, 기존 조회 증거와 후행 오류의 접수를 설명합니다.
 
 `service.UpdateImage/SetImageProperties`는 concrete 패치와 필드별 helper로 이미지를 수정합니다. [이미지 수정 사용법](update.md)에 패치 순서·속성 이름 escape·raw 값·빈 변경의 실제 응답과 Python dirty Resource·coercion의 차이를 설명합니다.

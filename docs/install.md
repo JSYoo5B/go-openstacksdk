@@ -70,6 +70,17 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).UpdateImagePropertiesRecord
+    _ = (*image.Service).UpdateImagePropertiesRecord
+    _ = image.ImageRecordPropertiesRequest{ID: "literal-image-id"}
+    _ = image.WithImageRecordPropertiesOpts(image.ImageRecordPropertiesOpts{})
+    _ = image.WithImageRecordPropertiesHeader
+    _ = image.WithImageRecordPropertiesHeaders
+    _ = image.WithImageRecordProperty
+    _ = image.WithImageRecordProperties
+    _ = image.WithImageRecordPropertiesJSON
+    _ = image.WithImageRecordPropertyMeta
+    _ = image.WithImageRecordPropertiesMetaJSON
     _ = (*sdk.Connection).DeactivateImageRecord
     _ = (*sdk.Connection).ReactivateImageRecord
     _ = (*image.Service).DeactivateImageRecord

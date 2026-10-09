@@ -82,6 +82,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 `UpdateImageRecord`는 ID 또는 이전 ImageRecord와 변경 속성만 받아 raw 값 비교·요청 생략·자동 JSON Patch·응답 후 기준 갱신을 제공합니다. 전체 Connection도 같은 API를 제공합니다. [이미지 수정의 Python/Go 비교·독립 main](image/image-record-update.md)에 properties 교체, concrete 옵션과 부분 오류·명시적 재시도를 설명합니다.
 
+`UpdateImagePropertiesRecord`는 기존 custom properties 보존·값 변환·kernel/ramdisk 전체 목록 검색·raw meta overlay와 조건부 commit을 SDK가 처리합니다. [속성 helper의 Python/Go 비교·독립 main](image/image-record-properties.md)에 명시적 레코드 조회, concrete 옵션과 `Updated`·실제 PATCH의 관계를 설명합니다.
+
 [Native Image PATCH의 Python/Go 비교·독립 main](image/v2/images/update.md)은 전체 Connection과 `API.Images.Update`의9종 concrete patch·기본200·nil/empty·partial Extract를 설명합니다.
 
 `DeleteImageRecord`는 Connection·Image Service에서 owned ID/Record와 concrete store·missing 옵션으로 삭제합니다. [레코드 삭제 비교·독립 main](image/image-record-delete.md)은 whole Record+ACK와 store ACK-only, private identity·opaque 응답 및 whole user/store admin 분기를 설명합니다. [native 이미지 삭제](image/v2/images/delete.md)는 `API.Images.Delete`의 error-only·기본202/204·raw ID·Read/Close와 재시도 정책을 설명합니다.
