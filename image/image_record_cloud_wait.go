@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 // ImageRecordCloudWaitOpts controls Cloud wait_for_image. Nil Timeout means
@@ -135,9 +136,45 @@ func (s *Service) WaitForCloudImageRecord(ctx context.Context, image *ImageRecor
 	if err != nil {
 		return fail(nil, err)
 	}
+	result := &ImageRecordCloudWaitResult{}
+	result.Lookups, result.Last, err = cloudImageRecordPoll(p, id, policy, "to snapshot", func(record *ImageRecord) (bool, error) {
+		if record == nil {
+			return false, nil
+		}
+		if imageRecordStatusIs(record, "active") {
+			result.Image = record
+			return true, nil
+		}
+		if imageRecordStatusIs(record, "error") {
+			return false, &resource.FailedStateError{Resource: "images", ID: id, Status: "error"}
+		}
+		return false, nil
+	})
+	if err != nil {
+		return fail(result, err)
+	}
+	return result, nil
+}
+
+// cloudImageRecordPoll is the Cloud iterate_timeout loop around repeated
+// ignore-missing find_image lookups. The deadline is checked before each
+// lookup, an in-flight lookup is not cancelled by it and the full interval is
+// slept after every unfinished lookup. Errors after a found record carry that
+// record's actual receipt unless they already hold newer response evidence.
+func cloudImageRecordPoll(p *preparedImageRecord, id string, policy ImageRecordCloudWaitOpts, purpose string, done func(*ImageRecord) (bool, error)) (int, *ImageRecord, error) {
+	lookups := 0
+	var last *ImageRecord
+	lastFailure := func(err error) (int, *ImageRecord, error) {
+		var accepted *resource.ResponseError
+		var rejected gophercloud.ErrUnexpectedResponseCode
+		if last != nil && !errors.As(err, &accepted) && !errors.As(err, &rejected) {
+			err = (&rest.Response{Body: last.Envelope, Header: last.Header, StatusCode: last.StatusCode}).Fail(err)
+		}
+		return lookups, last, err
+	}
 	parameters, err := prepareImageRecordList(p.ctx, p.check, nil)
 	if err != nil {
-		return fail(nil, err)
+		return lookups, last, err
 	}
 	timeout, interval := 3600*time.Second, 2*time.Second
 	if policy.Timeout != nil {
@@ -146,38 +183,28 @@ func (s *Service) WaitForCloudImageRecord(ctx context.Context, image *ImageRecor
 	if policy.PollInterval != nil {
 		interval = *policy.PollInterval
 	}
-	result := &ImageRecordCloudWaitResult{}
-	lastFailure := func(err error) (*ImageRecordCloudWaitResult, error) {
-		if last := result.Last; last != nil {
-			var accepted *resource.ResponseError
-			if !errors.As(err, &accepted) {
-				err = (&rest.Response{Body: last.Envelope, Header: last.Header, StatusCode: last.StatusCode}).Fail(err)
-			}
-		}
-		return fail(result, err)
-	}
 	deadline := time.Now().Add(timeout)
 	for {
 		if err := p.check(p.ctx); err != nil {
 			return lastFailure(err)
 		}
 		if !policy.Unlimited && !time.Now().Before(deadline) {
-			return lastFailure(fmt.Errorf("%w: timeout waiting for image %q to snapshot", context.DeadlineExceeded, id))
+			return lastFailure(fmt.Errorf("%w: timeout waiting for image %q %s", context.DeadlineExceeded, id, purpose))
 		}
-		result.Lookups++
+		lookups++
 		record, err := findPreparedImageRecord(p, id, FindImageRecordOpts{}, parameters)
 		if err != nil {
-			return fail(result, err)
+			return lookups, last, err
 		}
 		if record != nil {
-			result.Last = record
-			if imageRecordStatusIs(record, "active") {
-				result.Image = record
-				return result, nil
-			}
-			if imageRecordStatusIs(record, "error") {
-				return lastFailure(&resource.FailedStateError{Resource: "images", ID: id, Status: "error"})
-			}
+			last = record
+		}
+		finished, err := done(record)
+		if err != nil {
+			return lastFailure(err)
+		}
+		if finished {
+			return lookups, last, nil
 		}
 		timer := time.NewTimer(interval)
 		select {
