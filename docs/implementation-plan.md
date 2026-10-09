@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 단계 (2026-10-09): 핵심 user Glance owned 이미지 속성 helper 검증 완료.** 전체 public `update_image_properties`의 finite owned JSON-domain18계약을 닫아 전체287/3,362입니다. 다음 핵심 user 후보인 complete owned `StageImageRecord`의 queued seed·filename/data·size·binary PUT·seeded 후속 GET 전체 graph를 검토합니다. 데이터 workflow의 Source13Python+10Glance파일/66 AST 감사는 완료했으며 stage/import/upload/download4개 선언의 기존44계약은 unresolved 상태를 유지합니다. 이 Source 감사만으로 API 완료 수를 추가하지 않습니다.
+**현재 구현 (2026-10-09): 핵심 user Glance owned StageImageRecord.** 고정 Source24파일·72 AST·16계약으로 queued 검사·filename/borrowed/private data·기본 total size 추론·binary PUT header-only 번역·필수 seeded GET 전체 흐름을 구현했습니다. 공통층 `6b0e05ea`·공개 API `39d3779c`를 작은 commit으로 push했으며 새20그룹104 + 기존224그룹1713, 집중 race244그룹1817이 PASS했습니다. 전체45 package 검사·실제 재생성·서비스/설치 main 외부 빌드와 최종 판정 갱신을 진행합니다. Stage의 기존12계약·unresolved와 전체287/3,362는 최종 검증 전까지 유지합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
