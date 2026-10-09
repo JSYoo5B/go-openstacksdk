@@ -1,6 +1,6 @@
 # Cloud 이미지 목록·검색·조회: Python과 Go
 
-`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID`는 같은 검색 결과를 쓰는 `get_image_exclude`, `get_image_name`, `get_image_id`에, `WaitForCloudImageRecord`는 `wait_for_image`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
+`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID`는 같은 검색 결과를 쓰는 `get_image_exclude`, `get_image_name`, `get_image_id`에, `WaitForCloudImageRecord`는 `wait_for_image`에, `DownloadCloudImageRecord`는 `download_image`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
 
 | 고정 openstacksdk | Go | 실제 기본값과 순서 |
 |---|---|---|
@@ -12,6 +12,7 @@
 | `conn.get_image_name(image_id, exclude=None)` | `service.GetImageRecordName(ctx, imageID, exclude, options...)` | 위 선택 행의 raw `name` |
 | `conn.get_image_id(image_name, exclude=None)` | `service.GetImageRecordID(ctx, imageName, exclude, options...)` | 위 선택 행의 raw `id` |
 | `conn.wait_for_image(image, timeout=3600)` | `service.WaitForCloudImageRecord(ctx, record, options...)` | 2초 간격으로 Proxy find 반복; 정확한 `active` 성공, 정확한 `error` 실패 |
+| `conn.download_image(name_or_id, output_path=None, output_file=None, chunk_size=1MiB, stream=False)` | `service.DownloadCloudImageRecord(ctx, request, options...)` | 출력 하나를 HTTP 전에 확인; `find_image(ignore_missing=False)` 뒤 Proxy download |
 
 `show_all=True`이면 Source가 `filter_deleted`를 False로 덮어쓴 뒤 v2 query `member_status=all`을 추가합니다. Go Service는 Glance v2 전용이므로 `supports_version(image, '2')` 분기는 항상 v2 경로입니다. `search_images`와 `get_image`의 검색 경로는 `list_images()`를 인자 없이 호출하므로 항상 deleted 필터를 적용하고 `member_status`를 보내지 않습니다. 이름이나 Cloud 필터는 목록 query나 Proxy의 Body 필터로 먼저 보내지 않습니다.
 
@@ -183,8 +184,16 @@ deleted 필터가 켜져 있으면 Source의 `image.status.lower()`처럼 status
 
 결과 `ImageRecordCloudWaitResult`의 Image는 성공한 active record이고 Last는 마지막으로 찾은 record, Lookups는 수행한 조회 수입니다. timeout, error 상태, 취소는 Last의 실제 응답 증거를 오류에 붙이고 결과를 함께 반환합니다. Python의 timeout 메시지 문자열과 SDKException 계층은 Go 오류 타입으로 대체합니다.
 
+## 이미지 다운로드
+
+`DownloadCloudImageRecord`는 `ImageRecordCloudDownloadRequest{NameOrID, Output, Filename}`를 받습니다. Source처럼 출력이 없거나 둘 다 있으면 HTTP 전에 입력 오류입니다. 그다음 `find_image(name_or_id, ignore_missing=False)`와 같은 Find 경로로 이미지를 찾고, 없으면 `resource.ErrNotFound` 오류를 반환합니다. 찾은 record는 [owned 다운로드](image-record-download.md)의 `DownloadImageRecord`에 그대로 넘기므로 필수 metadata GET, binary GET, 기본 checksum 검증, 파일 생성·writer 차용 규칙이 같습니다.
+
+옵션은 Cloud 서명의 `chunk_size`, `stream`만 concrete하게 받습니다(`WithImageRecordCloudDownloadChunkSize`, `WithImageRecordCloudDownloadStream`). 출력이 필수이므로 stream 값은 전달해도 출력 모드가 우선합니다. store 선호·checksum 검증 끄기·hash factory 같은 Proxy 전용 옵션은 Cloud 함수에 없어 기본값을 사용합니다. header는 Find와 다운로드 단계 모두에 적용하는 Go 확장입니다.
+
+결과 `ImageRecordCloudDownloadResult`는 Find 결과 `Found`와 하위 `Download` 결과를 분리합니다. 다운로드 단계가 실패하면 Found와 이미 받은 metadata·binary 증거를 함께 반환하고 operation 이름은 `DownloadCloudImageRecord`로 표시합니다. Python에서 빈 문자열 경로는 None이 아니어서 검사를 통과한 뒤 메모리 모드로 바뀌지만, Go는 빈 Filename을 출력 없음으로 보고 HTTP 전에 거부합니다.
+
 ## 남은 범위와 근거
 
-Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `delete_image`, `download_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
+Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `delete_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
 
-고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166), [get_image_exclude·get_image_name·get_image_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L221-L246), [wait_for_image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L248-L263), [iterate_timeout](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/utils.py#L53-L101)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
+고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166), [get_image_exclude·get_image_name·get_image_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L221-L246), [wait_for_image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L248-L263), [download_image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L168-L219), [iterate_timeout](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/utils.py#L53-L101)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
