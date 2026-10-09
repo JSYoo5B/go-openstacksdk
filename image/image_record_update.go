@@ -48,9 +48,16 @@ func (s *Service) UpdateImageRecord(ctx context.Context, input ImageRecordUpdate
 	if err != nil {
 		return fail(nil, err)
 	}
+	record, err := commitImageRecordUpdate(p)
+	return fail(record, err)
+}
+
+// Already-prepared callers share the commit without recapturing source,
+// options or current location between discovery and PATCH.
+func commitImageRecordUpdate(p *preparedImageRecordUpdate) (*ImageRecord, error) {
 	if len(p.seed.bodyState.dirty) == 0 {
 		if err := p.check(p.ctx); err != nil {
-			return fail(nil, err)
+			return nil, err
 		}
 		return p.seed, nil
 	}
@@ -59,14 +66,14 @@ func (s *Service) UpdateImageRecord(ctx context.Context, input ImageRecordUpdate
 		map[string]string{"Content-Type": imageRecordPatchContentType, "Accept": ""},
 		rest.RejectionPolicy{Codes: imageRecordTagRejectionCodes(), PreserveCleanRetry: true}, imageRecordCodes()...)
 	if response == nil {
-		return fail(nil, err)
+		return nil, err
 	}
 	if err != nil {
-		return fail(imageRecordUpdateReceipt(p.seed, response), err)
+		return imageRecordUpdateReceipt(p.seed, response), err
 	}
 	record, err := imageRecordFromResponse(p.ctx, p.check, p.seed.bodyState.current, p.location, response)
 	if err != nil {
-		return fail(imageRecordUpdateReceipt(p.seed, response), err)
+		return imageRecordUpdateReceipt(p.seed, response), err
 	}
 	if !json.Valid(response.Body) {
 		// Source ValueError tolerance does not clean the pending components or
@@ -104,8 +111,7 @@ func (s *Service) prepareImageRecordUpdate(ctx context.Context, input ImageRecor
 	if err := validateImageRecordUpdateAttributes(attrs, input.ID != ""); err != nil {
 		return nil, err
 	}
-	var identity string
-	var patches []jsonpatch.Operation
+	var prepared *preparedImageRecordUpdate
 	err = p.prepare(func(opctx context.Context, check func(context.Context) error) (map[string]string, error) {
 		optionAttrs, headers, err := prepareImageRecordGet(opctx, check, options)
 		if err != nil {
@@ -117,8 +123,7 @@ func (s *Service) prepareImageRecordUpdate(ctx context.Context, input ImageRecor
 		for key, raw := range optionAttrs {
 			attrs[key] = bytes.Clone(raw)
 		}
-		// Validate the final supplied identity before raw equality can discard
-		// an unpaired surrogate as equal to an existing replacement character.
+		// Keep direct-update supplied-ID validation ahead of normalization.
 		if raw, present := attrs["id"]; present {
 			if _, err := decodeImageRecordString(raw, "image update identity"); err != nil {
 				return nil, err
@@ -128,49 +133,71 @@ func (s *Service) prepareImageRecordUpdate(ctx context.Context, input ImageRecor
 		if err != nil {
 			return nil, err
 		}
-		seed.ImportMethods = methods
-		if err := updateImageRecordBody(seed.bodyState, updates); err != nil {
-			return nil, err
-		}
-		// Discarding ID dirtiness does not restore its original value. A later
-		// non-ID change can therefore include /id while routing by current ID.
-		delete(seed.bodyState.dirty, "id")
-		identity, err = decodeImageRecordString(seed.bodyState.current["id"], "image record identity")
-		if err != nil {
-			return nil, err
-		}
-		if err := validateImageRecordIdentity(identity); err != nil {
-			return nil, err
-		}
-		seed.Resource, err = projectImageRecord(seed.bodyState.current, p.location,
-			resource.Metadata{Header: seed.Header.Clone(), StatusCode: seed.StatusCode})
-		if err != nil {
-			return nil, err
-		}
-		if len(seed.bodyState.dirty) != 0 {
-			original, err := imageRecordPatchBody(seed.bodyState.original)
-			if err != nil {
-				return nil, err
-			}
-			current, err := imageRecordPatchBody(seed.bodyState.current)
-			if err != nil {
-				return nil, err
-			}
-			patches, err = jsonpatch.Diff(original, current)
-			if err != nil {
-				return nil, errors.Join(uploadInvalid("image body diff failed"), err)
-			}
-		}
-		return headers, check(opctx)
+		prepared, err = prepareImageRecordNormalizedUpdate(p, seed, updates, methods)
+		return headers, errors.Join(err, check(opctx))
 	})
 	if err != nil {
 		return nil, err
 	}
-	// Set the captured ServiceClient defaults as well as the operation-owned
-	// request headers: native service header precedence cannot replace them.
+	installImageRecordUpdateHeaders(p)
+	return prepared, p.check(p.ctx)
+}
+
+// Raw normalized components are applied to an already-owned seed. The
+// helper is shared by direct updates and the whole property-helper workflow.
+func prepareImageRecordNormalizedUpdate(p *preparedImageRecord, seed *ImageRecord, updates map[string]json.RawMessage, methods []string) (*preparedImageRecordUpdate, error) {
+	// Validate before equality can hide an unpaired surrogate as equal to an
+	// existing replacement character.
+	if raw, present := updates["id"]; present {
+		if _, err := decodeImageRecordString(raw, "image update identity"); err != nil {
+			return nil, err
+		}
+	}
+	if seed.bodyState.dirty == nil {
+		seed.bodyState.dirty = make(map[string]struct{})
+	}
+	seed.ImportMethods = slices.Clone(methods)
+	if err := updateImageRecordBody(seed.bodyState, updates); err != nil {
+		return nil, err
+	}
+	// Discarding dirtiness retains the new current ID. Another dirty component
+	// can therefore commit an /id change while routing through the current ID.
+	delete(seed.bodyState.dirty, "id")
+	identity, err := decodeImageRecordString(seed.bodyState.current["id"], "image record identity")
+	if err != nil {
+		return nil, err
+	}
+	if err := validateImageRecordIdentity(identity); err != nil {
+		return nil, err
+	}
+	seed.Resource, err = projectImageRecord(seed.bodyState.current, p.location,
+		resource.Metadata{Header: seed.Header.Clone(), StatusCode: seed.StatusCode})
+	if err != nil {
+		return nil, err
+	}
+	var patches []jsonpatch.Operation
+	if len(seed.bodyState.dirty) != 0 {
+		original, err := imageRecordPatchBody(seed.bodyState.original)
+		if err != nil {
+			return nil, err
+		}
+		current, err := imageRecordPatchBody(seed.bodyState.current)
+		if err != nil {
+			return nil, err
+		}
+		patches, err = jsonpatch.Diff(original, current)
+		if err != nil {
+			return nil, errors.Join(uploadInvalid("image body diff failed"), err)
+		}
+	}
+	return &preparedImageRecordUpdate{preparedImageRecord: p, seed: seed, id: identity, patches: patches}, p.check(p.ctx)
+}
+
+func installImageRecordUpdateHeaders(p *preparedImageRecord) {
+	// Keep both native service defaults and operation-owned request headers so
+	// native header precedence cannot replace the image PATCH representation.
 	p.client.MoreHeaders["Content-Type"] = imageRecordPatchContentType
 	p.client.MoreHeaders["Accept"] = ""
-	return &preparedImageRecordUpdate{preparedImageRecord: p, seed: seed, id: identity, patches: patches}, p.check(p.ctx)
 }
 
 func validateImageRecordUpdateAttributes(attrs map[string]json.RawMessage, literal bool) error {
