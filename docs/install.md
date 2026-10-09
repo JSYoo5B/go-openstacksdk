@@ -78,6 +78,23 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).UploadImageRecord
+    _ = (*image.Service).UploadImageRecord
+    _ = image.ImageRecordUploadRequest{}
+    _ = image.ImageRecordUploadResult{}
+    _ = image.ImageRecordUploadOpts{}
+    _ = image.ImageRecordUploadOption(nil)
+    _ = image.ImageUploadResponse{}
+    _ = image.WithImageRecordUploadOpts
+    _ = image.WithImageRecordUploadContainerFormat
+    _ = image.WithImageRecordUploadDiskFormat
+    _ = image.WithImageRecordUploadAttribute
+    _ = image.WithImageRecordUploadAttributes
+    _ = image.WithImageRecordUploadHeader
+    _ = image.WithImageRecordUploadHeaders
+    _ = image.WithImageRecordUploadSize
+    _ = image.WithoutImageRecordUploadSize
+    _ = image.WithImageRecordUploadSizeInference
     _ = (*sdk.Connection).ImportImageRecord
     _ = (*image.Service).ImportImageRecord
     _ = image.ImageRecordImportRequest{ID: "literal-image-id"}

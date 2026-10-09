@@ -15,6 +15,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
 | `conn.image.create_image(..., use_import=True)` | `service.CreateAndImport(ctx, image.CreateAndImportRequest{...}, ...)`; [단계별 옵션·결과 비교](create-import.md) |
+| `conn.image.upload_image(container_format="bare", disk_format="qcow2", data=file, **attrs)` | `service.UploadImageRecord(ctx, image.ImageRecordUploadRequest{Data: file, Attributes: attrs}, image.WithImageRecordUploadContainerFormat("bare"), image.WithImageRecordUploadDiskFormat("qcow2"))`; [owned 생성·전송 비교](image-record-upload.md) |
 | `conn.image.import_image(record, ...)` | `service.ImportImageRecord(ctx, image.ImageRecordImportRequest{Record: record}, ...)`; [owned 입력·옵션·응답 비교](image-record-import.md) |
 
 조회 대상은 이미지 메타데이터이며 이미지 데이터 다운로드 자체가 아닙니다. [공식 Image API](https://docs.openstack.org/openstacksdk/latest/user/proxies/image_v2.html)
@@ -171,6 +172,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 `service.UpdateImage/SetImageProperties`는 concrete 패치와 필드별 helper로 이미지를 수정합니다. [이미지 수정 사용법](update.md)에 패치 순서·속성 이름 escape·raw 값·빈 변경의 실제 응답과 Python dirty Resource·coercion의 차이를 설명합니다.
 
 [Native Image PATCH의 Python/Go 비교·독립 main](v2/images/update.md)은 `service.API.Images.Update`의9종 concrete patch·기본200·nil/empty·옵션 교체와 native partial Extract를 설명합니다.
+
+`service.UploadImageRecord`와 `conn.UploadImageRecord`는 명시 형식·raw constructor 속성으로 metadata를 생성하고 borrowed reader를 한 번 전송합니다. [owned 업로드 비교·독립 main](image-record-upload.md)에 기본 total-size 추론·signed size·optout, pending/translated Record와 Metadata·Uploaded 접수·후행 오류를 설명합니다. 형식·name·visibility 기본값과 필수 reader 조건은 이 owned API에 추가하지 않습니다.
 
 `service.UploadImage`는 concrete 옵션으로 메타데이터를 생성하고 caller Reader를 한 번 전송합니다. [직접 업로드 사용법](upload-image.md)에 기본값·명시 size·단계별 응답과 Python 자동 길이 추론의 차이를 설명합니다.
 
