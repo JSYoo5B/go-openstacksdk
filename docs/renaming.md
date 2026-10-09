@@ -21,9 +21,45 @@ import (
 )
 ```
 
-별칭을 생략하면 루트 패키지의 식별자는 `openstack`입니다. 설치 명령과 외부 소비자 예제는 [설치 안내](install.md)를 참고하세요. GitHub 저장소는 [JSYoo5B/go-openstacksdk](https://github.com/JSYoo5B/go-openstacksdk)이며 실제 로컬 checkout은 `/Users/jsyoo5b/Workspace/OpenStack/3rdParty/go-openstacksdk`입니다. 기존 Codex 프로젝트가 저장한 경로는 도구로 변경할 수 없어 Codex에서는 새 폴더를 열어야 합니다. 실행 환경이 symlink writable root를 허용하지 않아 옛 디렉토리의 호환 링크는 남기지 않습니다.
+별칭을 생략하면 루트 패키지의 식별자는 `openstack`입니다. 설치 명령과 외부 소비자 예제는 [설치 안내](install.md)를 참고하세요. GitHub 저장소는 [JSYoo5B/go-openstacksdk](https://github.com/JSYoo5B/go-openstacksdk)이며 실제 로컬 checkout은 `/Users/jsyoo5b/Workspace/OpenStack/3rdParty/go-openstacksdk`입니다. Codex에 등록된 프로젝트 이름과 경로도 `go-openstacksdk`와 새 로컬 checkout으로 일치함을 확인했습니다.
 
-## 구현과 검증 기록
+## 현재 확인한 상태 (2026-10-09)
+
+모듈·package·import·생성기·서비스 문서·설치 예제·Swift 생성 prefix에서
+운영용 옛 이름 참조는 **0개**입니다. Git origin과 GitHub 저장소는
+`JSYoo5B/go-openstacksdk`이며, GitHub 라이선스 표시는 Apache-2.0입니다.
+옛 이름이 남은 여섯 파일은 이름 변경 안내와 변경 전 검증·Source 출처 기록입니다.
+
+라이선스 원문 **12개**의 SHA-256과 JMESPath 원본 고지를 확인했습니다.
+현재 Go 의존성 **네 모듈**은 `licenses/dependencies.json`에 고정되어 있습니다.
+Darwin·Linux의 amd64/arm64 및 Windows amd64에서 실제 SDK·테스트 패키지의
+의존성을 조회해 모두 이 고지 범위에 들어오는 것을 확인했습니다.
+`x/sys`는 CPU 지원 코드가 필요한 플랫폼에서 사용되는 간접 의존성입니다.
+Gophercloud 원본 발췌를 담은 테스트 파일의 출처·변경 고지를 보존하고,
+이를 조합하는 테스트에 대한 설명도 실제 fixture 정의 범위에 맞게 정정했습니다.
+
+전체 `make check`의 **45개 테스트 package**·race·vet·고정 API 판정·진행표·
+포맷·라이선스 검사가 통과했습니다. 라이선스 원문 변경, 미등록 의존성,
+버전 변경, fork 고지 변경, NOTICE 누락을 넣은 임시 사본 다섯 개는
+`make license-check`의 검사기로 모두 거부했습니다.
+
+고지 보완 revision `831bfb1542e1263d0c1604e4ffc269946d85bde5`을 새 외부 Go 프로젝트에서
+`GOWORK=off`·replace 없이 설치하고 문서의 main 두 개를 빌드했습니다.
+실제 버전은 `v0.0.0-20261009051450-831bfb1542e1`이며 get/build exit0입니다.
+Go 소스 **2,184개** SHA-256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`,
+라이선스·고지·대응표 **17개 파일**, 라이선스 안내와 API 판정·catalog가
+로컬 검증본과 byte-identical입니다. [기본 설치 명령](install.md)도 이 revision을 사용합니다.
+
+이 절은 현재 검증 결과입니다. 아래의 API 집계·의존성 수·고지 파일 수·
+revision은 각 변경 당시 기록으로 보존합니다. 이름·라이선스 정리는 API 지원
+판정을 올리지 않으며 현재 완료 집계는 **292 / 3,362**입니다.
+
+근거는 `/private/tmp/go-openstacksdk-rename-license-final-consumer.json`,
+`go-openstacksdk-rename-license-current-dependencies.json`,
+`go-openstacksdk-rename-license-current-check.log`,
+`go-openstacksdk-rename-license-negative-probes.json`에 기록했습니다.
+
+## 이름 변경 당시 구현과 검증 기록
 
 이름 변경은 지원 API를 추가하거나 지원 판정을 올리지 않습니다. 변경 기준의 완료 집계는 Go 매핑 **255 / 3,362**, 검토 기록 **550개**, 계약 **3,418개**이며, 이후의 현재 수치는 [구현 계획](implementation-plan.md)과 [지원 판정대장](sdk-support-ledger.md)에서 확인합니다.
 
@@ -45,7 +81,7 @@ SDK가 새 segmented upload용으로 만드는 prefix는 `.gophercloudsdk-upload
 
 이름 변경과 라이선스 문서 추가는 상표 사용 허가나 상표 중복 검토 완료를 의미하지 않습니다. Python openstacksdk와의 모든 동작 동등성 또는 전체 API 구현 완료를 주장하지 않으며, 실제 지원 범위와 남은 작업은 연산별 판정을 따릅니다.
 
-## 현재 트리 재검증
+## 이름 변경 직후 재검증 기록
 
 2026-10-09에 실제 디렉토리, Git remote, GitHub 저장소 이름·설명, GoLand 설정, Go import·패키지 선언, 생성기·manifest·문서·예제를 재점검했습니다. 사용 중인 경로는 모두 새 이름입니다. 옛 이름은 변경 전후 비교, 과거 커밋의 설치 검증과 테스트 reference 출처에만 보존합니다.
 
@@ -72,7 +108,7 @@ Gophercloud source fixture를 포함하거나 결합·변형하는 테스트 파
 당시 [기본 설치 명령](install.md)은 owned 이미지 수정까지 포함한 검증 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 사용했습니다. 원격 get/build·문서 main2개·최종 Go source2,095개 일치와 기존 라이선스·고지14개 파일의 배포를 다시 확인했습니다. 이름·라이선스 적용 범위는 위와 같으며 새 자동 JSON Patch engine은 독립 작성한 프로젝트 코드입니다.
 
 
-## 현재 배포 확인 (MemberRecord 완료 후)
+## MemberRecord 완료 당시 배포 확인
 
 정확한 문서·판정 revision `4aa85ff43194756fcbe31c6beffe5d1c6707cc2a`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008232408-4aa85ff43194`·get/build exit0이며 멤버 CRUD/설치 main **2개**를 빌드했습니다. 원격 Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-record-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 모듈·root package·서비스·문서 예제의 현재 이름은 `go-openstacksdk`/`openstack`이며 라이선스·고지 원문은 그대로 보존합니다. 현재 기본 설치 revision은 [설치 안내](install.md)를 따릅니다.
 
@@ -111,4 +147,4 @@ pinned parity·진행표·gofmt 검사도 통과했습니다. 운영 경로·imp
 `go-openstacksdk`이며 이전 이름은 변경 이력과 참조 출처에만 보존합니다.
 GitHub 저장소 `JSYoo5B/go-openstacksdk`와 Apache-2.0 표시도 확인했습니다.
 
-최종 원격 설치 확인: revision `a6b944ae6fdc6f98a90942345ca5e2cd519ba2b3`, 실제 버전 `v0.0.0-20261009041345-a6b944ae6fdc`을 외부 프로젝트에서 replace 없이 설치하고 문서 main 두 개를 빌드했습니다. get/build exit0이며 Go 소스 2,173개와 라이선스·고지·대응표 17개 파일이 로컬과 동일합니다. 기본 설치 명령도 이 검증한 revision으로 갱신했습니다.
+당시 원격 설치 확인: revision `a6b944ae6fdc6f98a90942345ca5e2cd519ba2b3`, 실제 버전 `v0.0.0-20261009041345-a6b944ae6fdc`을 외부 프로젝트에서 replace 없이 설치하고 문서 main 두 개를 빌드했습니다. get/build exit0이며 Go 소스 2,173개와 라이선스·고지·대응표 17개 파일이 로컬과 동일합니다. 기본 설치 명령도 이 검증한 revision으로 갱신했습니다.
