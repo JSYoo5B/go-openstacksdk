@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ImageRecordCloudPropertiesRequest mirrors Cloud update_image_properties'
@@ -33,11 +32,5 @@ func (s *Service) UpdateCloudImageProperties(ctx context.Context, input ImageRec
 		}
 	}
 	result, err := s.UpdateImagePropertiesRecord(ctx, selected, options...)
-	if failure, ok := err.(*resource.OperationError); ok {
-		// Name the Cloud entry point without nesting the delegated operation.
-		renamed := *failure
-		renamed.Operation = operation
-		return result, &renamed
-	}
-	return result, err
+	return result, renameImageOperation(err, operation)
 }

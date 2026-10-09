@@ -184,13 +184,7 @@ func (s *Service) GetImageRecordByID(ctx context.Context, id string, options ...
 		return mergeImageRecordHeaders(&config.Headers, policy.Headers)
 	})
 	record, err := s.GetImageRecord(ctx, ImageRecordRequest{ID: id}, converted...)
-	if failure, ok := err.(*resource.OperationError); ok {
-		// Name the Cloud entry point without nesting the delegated operation.
-		renamed := *failure
-		renamed.Operation = operation
-		return record, &renamed
-	}
-	return record, err
+	return record, renameImageOperation(err, operation)
 }
 
 // pythonContains evaluates Source `exclude in value` for a decoded JSON value:
@@ -307,4 +301,15 @@ func (s *Service) GetImageRecordName(ctx context.Context, imageID, exclude strin
 // raw id JSON; the identifier phase also matches IDs and globs.
 func (s *Service) GetImageRecordID(ctx context.Context, imageName, exclude string, options ...ImageRecordQueryOption) (*CloudImageRecordResult, error) {
 	return s.getImageRecordExcluded(ctx, "GetImageRecordID", imageName, exclude, "id", options)
+}
+
+// renameImageOperation names a Cloud entry point on a delegated operation
+// error without nesting it; the delegated cause stays inspectable.
+func renameImageOperation(err error, operation string) error {
+	if failure, ok := err.(*resource.OperationError); ok {
+		renamed := *failure
+		renamed.Operation = operation
+		return &renamed
+	}
+	return err
 }

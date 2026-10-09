@@ -6,8 +6,6 @@ import (
 	"io"
 	"slices"
 	"unicode/utf8"
-
-	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ImageRecordCloudDownloadRequest names the Cloud download_image image and
@@ -140,11 +138,5 @@ func (s *Service) DownloadCloudImageRecord(ctx context.Context, input ImageRecor
 	}
 	download := ImageRecordDownloadOpts{Stream: policy.Stream, ChunkSize: policy.ChunkSize, Headers: policy.Headers}
 	result.Download, err = s.DownloadImageRecord(ctx, ImageRecordDownloadRequest{Record: found, Output: input.Output, Filename: input.Filename}, WithImageRecordDownloadOpts(download))
-	if failure, ok := err.(*resource.OperationError); ok {
-		// Name the Cloud entry point without nesting the delegated operation.
-		renamed := *failure
-		renamed.Operation = operation
-		return result, &renamed
-	}
-	return result, err
+	return result, renameImageOperation(err, operation)
 }
