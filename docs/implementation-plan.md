@@ -10,9 +10,13 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-09): 핵심 user Glance owned ImageRecord 전체/store 삭제.** 고정 Proxy·Image/Store·Resource의7개 Source 파일을 정적 검토했습니다. 전체 삭제는 현재 raw 레코드를 재투영하고 `has_body=False`이므로 pending Body를 clean하지 않습니다. store 삭제는 canonical ID만 읽으며 Image를 재투영하거나 응답 Body를 decode하지 않습니다. 이 두 경로를 concrete store/header/ignore-missing 옵션과 동일 Connection API로 구현하고 기존 Gophercloud helper·삭제/Record/REST/Connection fixture로 검증합니다. 정적 근거는 `/private/tmp/go-openstacksdk-image-record-delete-source-audit.json`입니다. `delete_image`는 unresolved이며 **282/3,362**를 유지합니다.
+**최신 API 완료 (2026-10-09): Glance owned ImageRecord 전체·store 삭제와 별도 native Delete, 전체282→284(+2)·핵심208→210/2,292·Glance46→48/120.** 전체 삭제는 고정 Glance 정책의 user 경로이고 store location 삭제는 admin 경로이며 단일 Python proxy 선언을 한 번만 집계합니다. `DeleteImageRecord`는 private current ID·concrete 옵션·whole Record+actual ACK 또는 store ACK를 제공하고 pending Body를 clean하지 않습니다. native `API.Images.Delete`는 error-only·기본202/204·raw ID 전달 정책을 별도 검증했습니다. [Python/Go 비교·독립 main](../image/image-record-delete.md), [native 가이드](../image/v2/images/delete.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-삭제와-native-delete-완료)에 사용법과 범위를 설명합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance MemberRecord 조회·추가·수정·삭제, 전체279→282(+3)·핵심205→208/2,292·Glance43→46/120.** 기존 조회의 go_mapping은 그대로 보존하고 Add/Update/Remove3개만 새로 닫았습니다. `Connection`과 `Service`의 네 메서드가 raw declared 속성·fresh Member 요청·200..399 응답 overlay·부분 결과·삭제404 기본값을 처리합니다. 같은 status·attrs 생략에도 Update는 bound `member`를 포함한 PUT을 보냅니다. [Python 비교·owner/recipient·독립 main](../image/member-record-mutations.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-memberrecord-조회추가수정삭제-완료)에 기존 typed API·Source 제어 인자·immutable JSON-domain 경계를 설명합니다.
+새28그룹195사례 + 기존116그룹935 = **집중 race144그룹1130사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 삭제/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다.
+
+공통 ID decoder를 기존 Unicode 검사와 결합해 Image/Member Get·Update·Tag·Wait·Find·marker가 raw lone surrogate를 다른 U+FFFD ID로 바꾸지 않게 했습니다. 실제 U+FFFD·valid pair·literal backslash-u는 유지합니다. serviceinfo의 별도 store marker는 후속 추적하며 전체 JSON equality 엔진을 변경한 것으로 판정하지 않습니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection fixture를 재사용했습니다. native 테스트의 작은 transport/body adapter는 leaf 패키지에서 작성했으며 새 HTTP 서버 엔진은 없습니다. 다른550 reviews·선택한 legacy10계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 새12계약으로 reviews552·contracts3,600입니다. 실제 cloud/Python 호출은 실행하지 않았으며 SDK-R1/C1/S1과 전체 목표는 active입니다.
+
+**앞선 API 완료 (2026-10-09): 핵심 user Glance MemberRecord 조회·추가·수정·삭제, 전체279→282(+3)·핵심205→208/2,292·Glance43→46/120.** 기존 조회의 go_mapping은 그대로 보존하고 Add/Update/Remove3개만 새로 닫았습니다. `Connection`과 `Service`의 네 메서드가 raw declared 속성·fresh Member 요청·200..399 응답 overlay·부분 결과·삭제404 기본값을 처리합니다. 같은 status·attrs 생략에도 Update는 bound `member`를 포함한 PUT을 보냅니다. [Python 비교·owner/recipient·독립 main](../image/member-record-mutations.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-memberrecord-조회추가수정삭제-완료)에 기존 typed API·Source 제어 인자·immutable JSON-domain 경계를 설명합니다.
 
 새22그룹196사례 + 기존38그룹651 = **집중 race60그룹847사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0, 멤버/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 기존 public Gophercloud testhelper·HTTP/fault/Connection fixture를 재사용했고 새 HTTP 서버/fault engine은0개입니다. 다른547 reviews·선택한 기존28계약의 테스트/API·source pins/fingerprints·catalog bytes를 보존하고 기존 설명은 legacy typed 범위로 한정했습니다. 새26계약으로 reviews551·contracts3,588·go_mapping282입니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하며 최종282 parity/progress/gofmt도 PASS했습니다.
 
@@ -232,11 +236,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 282 (8.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 284 (8.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,079 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 551 | 아직 개별 기록 없는 선언 2,811 |
-| 기록한 부분·전체 계약 | 3,588 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,077 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 552 | 아직 개별 기록 없는 선언 2,810 |
+| 기록한 부분·전체 계약 | 3,600 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -279,6 +283,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Glance owned ImageRecord whole/store + native Delete | 282 → 284 (+2) | 새28그룹195·집중144그룹1130·전체45 package gate·생성 drift0·외부 main2개 build PASS | `a011b3aa`·`233167a1`·`b04fa490`·`198c0443` push 완료 |
 | Glance owned MemberRecord Get/Add/Update/Remove | 279 → 282 (+3) | 조회 중복 집계 없음·새22그룹196·집중60그룹847·전체45 package gate·생성 drift0·외부 main2개 build PASS | `a993b5cf`·`48086df6`·`abf27b47`·`36cea3b1`·`4aa85ff4` push 완료 |
 
 완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
@@ -292,12 +297,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 208 / 2,292 | 9.1% | 169 | 1,914 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 210 / 2,292 | 9.2% | 168 | 1,913 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 282 / 3,362 | 8.4% | 268 | 2,811 | 1 |
+| 전체 | 284 / 3,362 | 8.4% | 267 | 2,810 | 1 |
 
 **핵심 서비스**
 
@@ -307,7 +312,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 46 / 120 | 34 | 40 | 0 |
+| Image / Glance | 48 / 120 | 33 | 39 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -433,7 +438,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
-| Glance owned ImageRecord Delete whole/store | pinned Proxy·Store·Resource7파일 AST/Source 검토 완료 | concrete 옵션·private raw identity·whole/store 요청 구현 중 | 기존 delete/Record/REST/Connection fixture 확장 중 | Python 비교·분기·독립 main 작성 중 | **1행 unresolved·전체282/3,362** | Source 완료; 구현·검증 진행 |
+| Glance owned ImageRecord Delete whole/store + native Delete | pinned Proxy/Store/Resource·native·whole user/store admin 검토 완료 | owned API·공통 strict identity·native ABI 보존/작은 commit push | 집중144그룹1130·전체45 package PASS; 생성 drift0 | Python/Go·native 가이드·main2개 외부 build PASS | **신규2행 go_mapping·284/3,362** | finite owned/native profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned MemberRecord Get/Add/Update/Remove | pinned proxy·Member7 Body/URI·policy 검토 완료 | guarded 옵션·fresh 요청·4개 Connection binding 완료/commit push | 집중60그룹847·전체45 package gate PASS; 생성 drift0 | Python 비교·owner/recipient·main2개 외부 build PASS | **신규3행 go_mapping·조회 중복 없음·282/3,362** | named immutable profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned ImageRecord update | pinned Proxy·raw component·commit·response 8개 Source 검토 완료 | **ID/Record·sticky dirty·no-op·wire/properties·공통 diff·baseline 갱신 완료** | 새25그룹165·집중73그룹540·전체45 package·재생성 drift0 PASS | Python 비교·독립 main2개 외부 local build PASS | **go_mapping1행·전체279/3,362**; R1/C1/S1 별도 추적 | 엔진 dc837814·API c7a79ea0·테스트8178fb38·가이드f768f498 push 완료; 판정 c068cace push 완료; 최종 metadata·원격 main2개·Go SHA/라이선스14개 일치 PASS |
 | Glance raw Body snapshot / native Update | pinned Source raw/dirty/alias/response·9종 patch·server 정책 검토 완료 | **raw current/original 기반 완료**; owned commit/diff는 위 최신 단위에서 완료 | native6그룹47+raw2그룹4·집중75그룹626·전체44 package·생성 drift0 PASS | Python 비교·native/설치 main2개 외부 local build PASS | **native go_mapping1행·당시 전체278/3,362**; 당시 Python update unresolved | 기반2f5b87a2·native b55ed8aa·문서3d901393·판정862eef0b push 완료; 원격 main2개·Go SHA/라이선스14개 일치; owned dirty/commit는 위 최신 단위에서 완료 |

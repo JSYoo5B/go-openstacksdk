@@ -4,9 +4,23 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned MemberRecord 조회·추가·수정·삭제](#glance-owned-memberrecord-조회추가수정삭제-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance owned ImageRecord 삭제와 native Delete](#glance-owned-imagerecord-삭제와-native-delete-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는282입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는284입니다.
+
+## Glance owned ImageRecord 삭제와 native Delete 완료
+
+2026-10-09 `python:image/v2/delete_image`의 whole/store named immutable JSON-domain profile과 `gophercloud:image/v2/images.Delete`의 별도 native 계약을 닫아 **282→284(+2)**, 핵심208→210/2,292·Glance46→48/120입니다. [owned Python/Go 비교](../image/image-record-delete.md)와 [native 가이드](../image/v2/images/delete.md)를 추가했습니다. 기본 전체 삭제는 user, 특정 store의 location 삭제는 admin인 같은 proxy를 한 번만 세며 기존 typed 삭제·조회 mapping을 다시 세지 않습니다.
+
+Whole은 SDK private current body를 현재 location의65필드 Resource로 투영하고 accepted response header ImportMethods만 갱신합니다. current/original/dirty Body와 이전 fetch Wire/Envelope/Header/StatusCode는 보존하며 DELETE body는 ACK에만 둡니다. Store는 image/store의 canonical ID만 사용하고 descriptor projection·Image response translation·discovery·fallback 없이 ACK만 반환합니다. actual200..399는 opaque Body로 읽고 accepted Read/Close/context/source 실패는 nil Record+partial ACK+cause로 보존하며 자동 replay하지 않습니다. default ignore_missing은 읽기·Close·guard가 성공한 최종 direct native404만 무시합니다. native Delete는 error-only·202/204·raw ID·native hook/body disposal을 유지하는 별도 mapping입니다.
+
+공통 strict raw 문자열 decoder는 기존 surrogate pairing 검사를 재사용합니다. Image/Member transport ID·Find passive comparison·pagination marker에서 lone escape가 U+FFFD로 바뀌는 것을 막고, Update supplied id를 equality 이전에도 검사합니다. SDK GET의 passive malformed raw ID는 보존하되 이를 새 타깃으로 사용하면 preflight 오류를 반환합니다. valid pair·실제/escaped U+FFFD·literal backslash-u는 정확히 유지합니다. 별도 serviceinfo store marker와 전체 JSON equality domain은 이 수정의 완료 범위가 아닙니다.
+
+새28그룹195사례 + 기존116그룹935 = **집중 race144그룹1130사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 삭제/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다.
+
+공개 Gophercloud testhelper·기존 taskCore/deleteCore/REST/Record/Connection fixture와 nativeUpdateClient/path를 재사용했습니다. native leaf의 작은 transport/body adapter 외에 새 HTTP 서버 engine은 없습니다. 다른550 reviews·legacy10계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 기존 설명은 legacy typed 범위로 한정했습니다. owned8/native4의 새12계약으로 reviews552·contracts3,600·go_mapping284·review unresolved267·unsupported1이며 catalog unresolved3,077에는 미검토2,810개가 포함됩니다.
+
+native 테스트 `a011b3aa`·공통 ID 수정 `233167a1`·owned API `b04fa490`·삭제/Connection 테스트 `198c0443`를 작은 단위로 commit/push했습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-delete-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`, Source/policy 감사와 별도 native source audit에 있습니다. 초기 집중 run은 최종 소스의 근거로 쓰지 않습니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하고 최종 parity/progress/gofmt를 확인합니다. 실제 인증·OpenStack/Python 호출 및 전체 SDK-R1/C1/S1 완료는 주장하지 않습니다.
 
 ## Glance owned MemberRecord 조회·추가·수정·삭제 완료
 
