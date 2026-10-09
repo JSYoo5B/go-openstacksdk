@@ -72,6 +72,17 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).StageImageRecord
+    _ = (*image.Service).StageImageRecord
+    _ = image.ImageRecordStageRequest{ID: "literal-image-id"}
+    _ = image.ImageRecordStageResult{}
+    _ = image.ImageRecordStageOpts{}
+    _ = image.WithImageRecordStageOpts(image.ImageRecordStageOpts{})
+    _ = image.WithImageRecordStageSize
+    _ = image.WithoutImageRecordStageSize
+    _ = image.WithImageRecordStageHeader
+    _ = image.WithImageRecordStageHeaders
+    _ = image.WithImageRecordStageSizeInference
     _ = (*sdk.Connection).UpdateImagePropertiesRecord
     _ = (*image.Service).UpdateImagePropertiesRecord
     _ = image.ImageRecordPropertiesRequest{ID: "literal-image-id"}
